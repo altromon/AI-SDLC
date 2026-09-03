@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-sdlc.org/schemas/architecture/system-component.schema.json",
+  "title": "NAF v4 / arc42 System Component Schema (Versionable)",
+  "type": "object",
+  "required": ["id", "type", "title", "status", "version", "part-of-service"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^SYS-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    },
+    "type": {
+      "type": "string",
+      "const": "system-component"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
+      "description": "Versión del componente de sistema (SemVer)."
+    },
+    "schema-version": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "status": {
+      "type": "string",
+      "enum": ["proposed", "accepted", "deprecated", "retired"]
+    },
+    "part-of-service": {
+      "type": "string",
+      "pattern": "^SRV-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    },
+    "technology": {
+      "type": "string"
+    },
+    "responsibilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "supersedes": {
+      "type": "string",
+      "pattern": "^SYS-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    },
+    "superseded-by": {
+      "type": "string",
+      "pattern": "^SYS-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    }
+  },
+  "additionalProperties": false
+}

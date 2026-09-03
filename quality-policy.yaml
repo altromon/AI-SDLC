@@ -1,0 +1,155 @@
+# ==============================================================================
+# AI-SDLC: Software Quality, Coding Rules & Release Gate Policy (Polyglot)
+# ==============================================================================
+# Versión: 1.0.0
+# Estado: Canónico
+# Propósito: Definición declarativa de reglas de código, métricas estándar
+#            (complejidad ciclomática, mantenibilidad) y umbrales de paso a release
+#            con soporte multiplataforma y multilenguaje.
+# ==============================================================================
+
+version: "1.0"
+project: "AI-SDLC Polyglot Quality Gate"
+enforcement_mode: "STRICT" # STRICT (bloqueo en CI/CD), PERMISSIVE (solo avisos)
+
+# ------------------------------------------------------------------------------
+# 0. Alcance del Análisis (Scope Multilenguaje)
+# ------------------------------------------------------------------------------
+scope:
+  target_directories:
+    - "src"
+    - "lib"
+    - "examples"
+    - "tests"
+  supported_extensions:
+    - ".ts"
+    - ".js"
+    - ".py"
+    - ".java"
+    - ".go"
+    - ".cs"
+    - ".rs"
+    - ".cpp"
+    - ".c"
+  exclude_patterns:
+    - "node_modules"
+    - "__pycache__"
+    - ".pytest_cache"
+    - "target"
+    - "bin"
+    - "obj"
+    - ".git"
+    - "reports"
+
+# ------------------------------------------------------------------------------
+# 1. Mapeo de Ecosistemas de Lenguaje (Language Toolchains)
+# ------------------------------------------------------------------------------
+language_toolchains:
+  typescript_javascript:
+    linters: ["ESLint", "Prettier"]
+    complexity_engine: ["built-in", "ESLint-complexity", "SonarQube"]
+    test_runner: ["Jest", "Vitest", "Cucumber.js"]
+    coverage_engine: ["v8", "Istanbul"]
+
+  python:
+    linters: ["Ruff", "Black", "Flake8"]
+    complexity_engine: ["built-in", "Radon", "Xenon"]
+    test_runner: ["PyTest", "Behave", "pytest-bdd"]
+    coverage_engine: ["Coverage.py"]
+
+  java_kotlin:
+    linters: ["Checkstyle", "SpotBugs", "Spotless"]
+    complexity_engine: ["built-in", "PMD", "SonarQube"]
+    test_runner: ["JUnit 5", "Cucumber-JVM"]
+    coverage_engine: ["JaCoCo"]
+
+  golang:
+    linters: ["golangci-lint", "staticcheck"]
+    complexity_engine: ["built-in", "gocyclo"]
+    test_runner: ["go test", "godog"]
+    coverage_engine: ["go test -coverprofile"]
+
+  csharp_dotnet:
+    linters: ["dotnet format", "Roslyn Analyzers"]
+    complexity_engine: ["built-in", "Microsoft.CodeAnalysis.Metrics"]
+    test_runner: ["xUnit", "Reqnroll", "SpecFlow"]
+    coverage_engine: ["Coverlet"]
+
+  rust:
+    linters: ["cargo clippy", "rustfmt"]
+    complexity_engine: ["built-in", "cargo-geiger"]
+    test_runner: ["cargo test", "cucumber-rs"]
+    coverage_engine: ["cargo-tarpaulin"]
+
+# ------------------------------------------------------------------------------
+# 2. Reglas de Código Transversales (Universal Coding Rules)
+# ------------------------------------------------------------------------------
+coding_rules:
+  standards:
+    - "Clean Code (Robert C. Martin)"
+    - "Strict Typing (Cero tipado dinámico inseguro: no-any / Object genérico)"
+    - "SonarQube Quality Profile (Standard Way)"
+  enforce_formatting: true
+  rules:
+    no_any: "ERROR"
+    no_unused_vars: "ERROR"
+    no_dead_code: "ERROR"
+    no_console_logs_in_prod: "ERROR"
+    require_explicit_return_types: "ERROR"
+    max_function_lines: 40
+
+# ------------------------------------------------------------------------------
+# 3. Métricas Estándar de Software y Umbrales de Liberación (Release Gates)
+# ------------------------------------------------------------------------------
+release_thresholds:
+  # Complejidad Ciclomática (McCabe Metric) por función/método en cualquier lenguaje
+  cyclomatic_complexity:
+    max_per_function: 10
+    warning_at: 8
+    action_on_breach: "BLOCK_MERGE"
+    description: "Ninguna función puede superar 10 caminos de ejecución independientes."
+
+  # Complejidad Cognitiva (Sonar Metric) por función/método
+  cognitive_complexity:
+    max_per_function: 15
+    warning_at: 12
+    action_on_breach: "BLOCK_MERGE"
+    description: "Mide el esfuerzo cognitivo para comprender el flujo de control."
+
+  # Índice de Mantenibilidad (SEI / Microsoft / ISO 25010) [Escala 0 - 100]
+  maintainability_index:
+    min_acceptable_score: 50.0 # Umbral mínimo de aprobación
+    target_score: 80.0
+    action_on_breach: "BLOCK_MERGE"
+    description: "Calculado en base al volumen Halstead, complejidad ciclomática y líneas de código."
+
+  # Duplicación de Código
+  code_duplication:
+    max_percentage: 3.0
+    action_on_breach: "BLOCK_MERGE"
+
+  # Cobertura de Pruebas Automatizadas
+  test_coverage:
+    min_line_coverage_percent: 85.0
+    min_branch_coverage_percent: 80.0
+    min_function_coverage_percent: 90.0
+    action_on_breach: "BLOCK_MERGE"
+
+  # Deuda Técnica y Severidad de Hallazgos
+  technical_debt:
+    max_debt_ratio_percent: 5.0
+    zero_tolerance_severities:
+      - "BLOCKER"
+      - "CRITICAL"
+    max_major_issues: 0
+
+# ------------------------------------------------------------------------------
+# 4. Guardrails de Calidad para Agentes de IA
+# ------------------------------------------------------------------------------
+agent_guardrails:
+  enforce_pre_commit_linter: true
+  prevent_suppression_comments: true
+  auto_refactor_on_high_complexity: true
+  prompt_complexity_warning: >
+    ALERTA DE COMPLEJIDAD: La función generada supera la complejidad ciclomática de 10.
+    El agente debe descomponer la función en métodos auxiliares cohesivos antes de presentar el PR.

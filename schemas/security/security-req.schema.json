@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-sdlc.org/schemas/security/security-req.schema.json",
+  "title": "Security Requirement Schema (Strict Test Validation Enforced)",
+  "type": "object",
+  "required": ["id", "type", "title", "status", "version", "security-domain", "mitigates-abuse-case"],
+  "anyOf": [
+    { "required": ["cucumber-feature-file"] },
+    { "required": ["verified-by-tests"] }
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^SEC-REQ-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    },
+    "type": {
+      "type": "string",
+      "const": "security-requirement"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
+      "description": "Versión semántica del requisito de seguridad (SemVer)."
+    },
+    "schema-version": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "retired"]
+    },
+    "security-domain": {
+      "type": "string",
+      "enum": ["authentication", "authorization", "cryptography", "input-validation", "audit-logging", "communication-security", "data-protection"]
+    },
+    "mitigates-abuse-case": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^ABUSE-[A-Z0-9]+(-[A-Z0-9]+)*$"
+      },
+      "description": "Trazabilidad a Producto/Seguridad: Caso de abuso o amenaza que este control neutraliza."
+    },
+    "implemented-by-services": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^SRV-[A-Z0-9]+(-[A-Z0-9]+)*$"
+      },
+      "description": "Trazabilidad a Arquitectura: Servicios donde se implementa el control de seguridad."
+    },
+    "enforced-in-enclave": {
+      "type": "string",
+      "pattern": "^SEC-ENC-[A-Z0-9]+(-[A-Z0-9]+)*$",
+      "description": "Trazabilidad a Arquitectura: Enclave de seguridad perimetral o interno."
+    },
+    "compliance-references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "acceptance-format": {
+      "type": "string",
+      "enum": ["gherkin", "declarative-prose"],
+      "description": "Formato de los criterios de mitigación."
+    },
+    "cucumber-tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^@[a-zA-Z0-9_-]+$"
+      }
+    },
+    "cucumber-feature-file": {
+      "type": "string",
+      "description": "Ruta de la suite Cucumber de pruebas negativas / mitigación."
+    },
+    "verified-by-tests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "Trazabilidad a Pruebas: Rutas de suites de pruebas negativas o scripts de mitigación."
+    },
+    "supersedes": {
+      "type": "string",
+      "pattern": "^SEC-REQ-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    },
+    "superseded-by": {
+      "type": "string",
+      "pattern": "^SEC-REQ-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    }
+  },
+  "additionalProperties": false
+}

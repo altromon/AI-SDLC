@@ -1,0 +1,99 @@
+# ==============================================================================
+# AI-SDLC: Open Source License Compliance & Governance Policy
+# ==============================================================================
+# Versión: 1.0.0
+# Estado: Canónico
+# Propósito: Reglas declarativas machine-readable para el escaneo de dependencias
+#            en CI/CD y guardrails de agentes de IA en selección de paquetes.
+# ==============================================================================
+
+version: "1.0"
+project: "AI-SDLC Standard Organization"
+default_action: "DENY"
+
+# ------------------------------------------------------------------------------
+# 1. Categorización de Licencias
+# ------------------------------------------------------------------------------
+categories:
+  # Categoría A: Permisivas (Libre uso comercial, sin restricciones virales)
+  permissive_free:
+    action: "ALLOW"
+    description: "Licencias de libre uso comercial. Solo requieren atribución."
+    spdx_identifiers:
+      - "MIT"
+      - "Apache-2.0"
+      - "BSD-2-Clause"
+      - "BSD-3-Clause"
+      - "ISC"
+      - "Unlicense"
+      - "CC0-1.0"
+      - "0BSD"
+      - "Zlib"
+
+  # Categoría B: Copyleft Débil (Uso condicionado a desacoplamiento arquitectónico)
+  weak_copyleft_conditional:
+    action: "REVIEW_REQUIRED"
+    description: "Permitidas únicamente si se consumen como dependencias dinámicas o servicios sin modificar su código."
+    architectural_condition: "DYNAMIC_LINKING_ONLY"
+    spdx_identifiers:
+      - "LGPL-2.1-only"
+      - "LGPL-2.1-or-later"
+      - "LGPL-3.0-only"
+      - "LGPL-3.0-or-later"
+      - "MPL-2.0"
+      - "EPL-2.0"
+      - "CDDL-1.0"
+
+  # Categoría C: Copyleft Fuerte / Viral (Prohibidas en código propietario o SaaS)
+  strong_copyleft_viral:
+    action: "DENY"
+    description: "Prohibidas por efecto viral que obliga a publicar el código fuente del producto."
+    exception_requires: "LEGAL_AND_CISO_APPROVAL"
+    spdx_identifiers:
+      - "GPL-2.0-only"
+      - "GPL-2.0-or-later"
+      - "GPL-3.0-only"
+      - "GPL-3.0-or-later"
+      - "AGPL-3.0-only"
+      - "AGPL-3.0-or-later"
+      - "EUPL-1.2"
+      - "OSL-3.0"
+
+  # Categoría D: Dual / Source-Available / Comercial de Pago
+  commercial_acquisition_required:
+    action: "COMMERCIAL_APPROVAL_REQUIRED"
+    description: "Código fuente disponible pero su uso comercial o en SaaS requiere adquisición de licencia de pago."
+    notification_tag: "NEEDS_COMMERCIAL_LICENSE"
+    spdx_identifiers:
+      - "SSPL-1.0"
+      - "BSL-1.1"
+      - "Elastic-2.0"
+      - "Redis-Source-Available-1.0"
+      - "CockroachDB-BSL"
+      - "Commons-Clause"
+
+# ------------------------------------------------------------------------------
+# 2. Guardrails para Agentes de IA
+# ------------------------------------------------------------------------------
+agent_guardrails:
+  enforce_pre_check: true
+  reject_unknown_licenses: true
+  auto_reject_categories:
+    - "strong_copyleft_viral"
+  on_commercial_detected:
+    action: "FLAG_PULL_REQUEST"
+    message: >
+      ALERTA DE LICENCIA COMERCIAL: La dependencia seleccionada requiere la adquisición
+      de una licencia de pago para su uso en este entorno. Se debe abrir una solicitud de
+      compra o proponer una alternativa con licencia permisiva (MIT/Apache-2.0).
+
+# ------------------------------------------------------------------------------
+# 3. Puertas Deterministas de CI/CD
+# ------------------------------------------------------------------------------
+ci_gates:
+  fail_on_denied: true
+  fail_on_missing_license: true
+  generate_sbom: true
+  sbom_format: "cyclonedx-json"
+  output_notices_file: "THIRD_PARTY_NOTICES.md"
+  allowed_depth: "TRANSITIVE" # Evalúa tanto directas como transitivas

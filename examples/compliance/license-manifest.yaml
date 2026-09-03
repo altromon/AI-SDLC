@@ -1,0 +1,43 @@
+# ==============================================================================
+# SentinelCore: Manifiesto de Cumplimiento de Licencias Evaluadas
+# ==============================================================================
+# Generado para: Ingesta Telemétrica y Conectividad
+# Verificado contra: /license-policy.yaml
+# ==============================================================================
+
+evaluated_dependencies:
+  - package: "ws"
+    version: "8.18.0"
+    spdx_license: "MIT"
+    category: "permissive_free"
+    status: "APPROVED"
+    usage: "Motor WebSocket de alto rendimiento para el gateway de ingesta."
+    commercial_payment_required: false
+
+  - package: "pino"
+    version: "9.3.0"
+    spdx_license: "MIT"
+    category: "permissive_free"
+    status: "APPROVED"
+    usage: "Logging estructurado de ultra-baja sobrecarga en JSON."
+    commercial_payment_required: false
+
+  - package: "kafkajs"
+    version: "2.2.4"
+    spdx_license: "Apache-2.0"
+    category: "permissive_free"
+    status: "APPROVED"
+    usage: "Cliente productor Kafka para reenvío de eventos a enclaves internos."
+    commercial_payment_required: false
+
+  - package: "redis-enterprise-telemetry-connector"
+    version: "1.2.0"
+    spdx_license: "SSPL-1.0"
+    category: "commercial_acquisition_required"
+    status: "REJECTED_ALTERNATIVE_FOUND"
+    usage: "Evaluado para caché en memoria de posiciones de drones."
+    commercial_payment_required: true
+    rejection_reason: >
+      Rechazado por el Tech Lead: La licencia SSPL requiere adquisición de licencia de pago
+      para nuestro modelo de servicio SaaS. Se sustituye por Valkey (BSD-3-Clause) sin coste
+      de licencia y de libre uso comercial.
