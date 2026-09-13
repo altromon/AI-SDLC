@@ -14,26 +14,72 @@
  * ==============================================================================
  */
 
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
-function parseFrontmatter(content) {
+export interface RequirementAuditItem {
+  id: string;
+  title: string;
+  file: string;
+  isTemplate: boolean;
+  method: string;
+  testRefs: string;
+  existingCount: number;
+  status: 'VERIFICADO_CON_PRUEBA' | 'FALLO_SIN_PRUEBA';
+}
+
+export interface TaskAuditItem {
+  id: string;
+  title: string;
+  file: string;
+  method: string;
+  commandOrCriteria: string;
+  status: 'VERIFICADO_CON_PRUEBA' | 'FALLO_SIN_PRUEBA';
+}
+
+export interface ParsedTaskItem {
+  id: string;
+  title?: string;
+  verification?: {
+    method?: string;
+    criteria?: string;
+  };
+}
+
+export interface GenericFrontmatter {
+  id?: string;
+  title?: string;
+  type?: string;
+  'cucumber-feature-file'?: string;
+  'verified-by-tests'?: string[];
+  'verifiable-by'?: string;
+  'acceptance-format'?: string;
+  tasks?: ParsedTaskItem[];
+  [key: string]: unknown;
+}
+
+export interface ParsedGenericDoc {
+  frontmatter: GenericFrontmatter;
+  body: string;
+}
+
+export function parseFrontmatter(content: string): ParsedGenericDoc {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return { frontmatter: {}, body: content };
 
   const lines = match[1].split('\n');
-  const frontmatter = { tasks: [] };
-  let currentKey = null;
-  let currentTask = null;
+  const frontmatter: GenericFrontmatter = { tasks: [] };
+  let currentKey: string | null = null;
+  let currentTask: ParsedTaskItem | null = null;
   let inVerification = false;
 
-  for (let line of lines) {
+  for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) continue;
 
     // Manejo de tareas en tasks.md
     if (trimmed.startsWith('- id:')) {
-      if (currentTask) frontmatter.tasks.push(currentTask);
+      if (currentTask && frontmatter.tasks) frontmatter.tasks.push(currentTask);
       currentTask = {
         id: trimmed.split(':')[1].replace(/['"]/g, '').trim(),
         verification: {}
@@ -48,8 +94,10 @@ function parseFrontmatter(content) {
       } else if (trimmed.startsWith('verification:')) {
         inVerification = true;
       } else if (inVerification && trimmed.startsWith('method:')) {
+        currentTask.verification = currentTask.verification || {};
         currentTask.verification.method = trimmed.split(':')[1].replace(/['"]/g, '').trim();
       } else if (inVerification && trimmed.startsWith('command-or-criteria:')) {
+        currentTask.verification = currentTask.verification || {};
         currentTask.verification.criteria = trimmed.split(':').slice(1).join(':').replace(/['"]/g, '').trim();
       } else if (!trimmed.startsWith('command-or-criteria:') && !trimmed.startsWith('method:') && inVerification) {
         inVerification = false;
@@ -60,15 +108,17 @@ function parseFrontmatter(content) {
     // Manejo de arrays en frontmatter general
     if (trimmed.startsWith('- ') && currentKey) {
       const item = trimmed.substring(2).trim().replace(/^["']|["']$/g, '');
-      if (!Array.isArray(frontmatter[currentKey])) {
-        frontmatter[currentKey] = [];
+      const existing = frontmatter[currentKey];
+      if (!Array.isArray(existing)) {
+        frontmatter[currentKey] = [item];
+      } else {
+        (existing as string[]).push(item);
       }
-      frontmatter[currentKey].push(item);
     } else {
       const parts = trimmed.split(':');
       if (parts.length >= 2) {
         currentKey = parts[0].trim();
-        let val = parts.slice(1).join(':').trim().replace(/^["']|["']$/g, '');
+        const val = parts.slice(1).join(':').trim().replace(/^["']|["']$/g, '');
         if (val === '' || val === '[]') {
           frontmatter[currentKey] = [];
         } else {
@@ -78,12 +128,12 @@ function parseFrontmatter(content) {
     }
   }
 
-  if (currentTask) frontmatter.tasks.push(currentTask);
+  if (currentTask && frontmatter.tasks) frontmatter.tasks.push(currentTask);
 
   return { frontmatter, body: content.substring(match[0].length) };
 }
 
-function walkDir(dir, fileList = []) {
+export function walkDir(dir: string, fileList: string[] = []): string[] {
   if (!fs.existsSync(dir)) return fileList;
   const files = fs.readdirSync(dir);
   for (const file of files) {
@@ -99,7 +149,7 @@ function walkDir(dir, fileList = []) {
   return fileList;
 }
 
-function main() {
+export function main(): void {
   console.log('================================================================');
   console.log('AI-SDLC: Auditoría de Cobertura de Pruebas (Requisitos & Tareas)');
   console.log('================================================================\n');
@@ -109,15 +159,15 @@ function main() {
 
   let auditErrors = 0;
 
-  const requirementAudits = [];
-  const taskAudits = [];
+  const requirementAudits: RequirementAuditItem[] = [];
+  const taskAudits: TaskAuditItem[] = [];
 
   // 1. Auditar Requisitos
   for (const file of allMdFiles) {
     try {
       const content = fs.readFileSync(file, 'utf-8');
       const { frontmatter } = parseFrontmatter(content);
-      const id = frontmatter.id;
+      const id = typeof frontmatter.id === 'string' ? frontmatter.id : undefined;
 
       if (!id) continue;
 
@@ -126,12 +176,12 @@ function main() {
                     id.startsWith('FR-') || id.startsWith('QR-') || id.startsWith('CON-') || id.startsWith('SEC-REQ-');
 
       if (isReq) {
-        const testRefs = [];
-        if (frontmatter['cucumber-feature-file']) {
+        const testRefs: string[] = [];
+        if (typeof frontmatter['cucumber-feature-file'] === 'string') {
           testRefs.push(frontmatter['cucumber-feature-file']);
         }
         if (Array.isArray(frontmatter['verified-by-tests'])) {
-          testRefs.push(...frontmatter['verified-by-tests']);
+          testRefs.push(...(frontmatter['verified-by-tests'] as string[]));
         }
 
         // Si es plantilla, comprobar que declara tests; si es instancia real, comprobar que existen en disco
@@ -143,18 +193,22 @@ function main() {
           auditErrors++;
         }
 
+        const method = typeof frontmatter['verifiable-by'] === 'string'
+          ? frontmatter['verifiable-by']
+          : (frontmatter['acceptance-format'] === 'gherkin' ? 'cucumber-bdd' : 'no-definido');
+
         requirementAudits.push({
           id,
-          title: frontmatter.title || 'Sin título',
+          title: typeof frontmatter.title === 'string' ? frontmatter.title : 'Sin título',
           file: path.relative(rootDir, file),
           isTemplate,
-          method: frontmatter['verifiable-by'] || (frontmatter['acceptance-format'] === 'gherkin' ? 'cucumber-bdd' : 'no-definido'),
+          method,
           testRefs: testRefs.join(', ') || 'NINGUNA',
           existingCount: existingFiles.length,
           status: isVerified ? 'VERIFICADO_CON_PRUEBA' : 'FALLO_SIN_PRUEBA'
         });
       }
-    } catch (e) {
+    } catch {
       // Ignorar archivos no parseables
     }
   }
@@ -168,8 +222,10 @@ function main() {
 
         if (Array.isArray(frontmatter.tasks) && frontmatter.tasks.length > 0) {
           for (const t of frontmatter.tasks) {
-            const hasCriteria = t.verification && t.verification.criteria && t.verification.criteria.length >= 5;
-            const hasMethod = t.verification && t.verification.method && t.verification.method.length > 0;
+            const criteria = t.verification?.criteria;
+            const method = t.verification?.method;
+            const hasCriteria = Boolean(criteria && criteria.length >= 5);
+            const hasMethod = Boolean(method && method.length > 0);
             const isVerified = hasCriteria && hasMethod;
 
             if (!isVerified) {
@@ -180,13 +236,13 @@ function main() {
               id: t.id,
               title: t.title || 'Sin título',
               file: path.relative(rootDir, file),
-              method: (t.verification && t.verification.method) || 'AUSENTE',
-              commandOrCriteria: (t.verification && t.verification.criteria) || 'AUSENTE',
+              method: method || 'AUSENTE',
+              commandOrCriteria: criteria || 'AUSENTE',
               status: isVerified ? 'VERIFICADO_CON_PRUEBA' : 'FALLO_SIN_PRUEBA'
             });
           }
         }
-      } catch (e) {
+      } catch {
         // Ignorar
       }
     }
@@ -216,7 +272,7 @@ function main() {
   fs.mkdirSync(reportsDir, { recursive: true });
   const reportPath = path.join(reportsDir, 'TEST_VERIFICATION_AUDIT.md');
 
-  const report = [
+  const report: string[] = [
     `# 🧪 Auditoría Integral de Cobertura de Pruebas (Requisitos & Tareas)`,
     ``,
     `> **Fecha de Auditoría:** ${new Date().toISOString()}`,
@@ -267,4 +323,6 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}

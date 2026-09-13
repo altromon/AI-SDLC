@@ -1,7 +1,7 @@
 # 📊 Informe Automático de Calidad de Software Multilenguaje (Polyglot Scorecard)
 
 > **Generado automáticamente a partir del código fuente.**
-> Fecha de Generación: **2026-09-03T14:47:43.243Z** | Modo de Política: **STRICT**
+> Fecha de Generación: **2026-09-13T17:53:16.544Z** | Modo de Política: **STRICT**
 > Ecosistemas Detectados: **TypeScript, Go, Python**
 
 ---

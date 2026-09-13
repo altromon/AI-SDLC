@@ -115,13 +115,13 @@ El framework incorpora la capacidad de **generar automáticamente el informe for
 ### A. Comando de Generación Automática
 ```bash
 # 1. Informe global del proyecto
-node scripts/generate-quality-report.js
+npx tsx scripts/generate-quality-report.ts
 
 # 2. Informe acotado a un incremento o cambio SDD específico
-node scripts/generate-quality-report.js --change chg-001-telemetry-ingestion --target src/telemetry
+npx tsx scripts/generate-quality-report.ts --change chg-001-telemetry-ingestion --target src/telemetry
 
 # 3. Informe con destino personalizado
-node scripts/generate-quality-report.js --target src/ --output reports/SPRINT_QUALITY.md
+npx tsx scripts/generate-quality-report.ts --target src/ --output reports/SPRINT_QUALITY.md
 ```
 
 ### B. Contenido del Informe Generado

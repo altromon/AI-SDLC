@@ -67,7 +67,7 @@ DIRECTRICES:
 - Aplica Test-Driven Development (TDD): genera las pruebas unitarias antes o en paralelo con la lógica del componente.
 - Si la tarea implementa un 'SEC-REQ-*', genera obligatoriamente la prueba de mitigación 'SEC-TEST-*'.
 - Antes de agregar cualquier librería externa, verifica que su licencia esté en la allowlist de license-policy.yaml.
-- Inmediatamente después de escribir o refactorizar código, ejecuta automáticamente `node scripts/generate-quality-report.js` y adjunta el informe `quality-report.md` al directorio del cambio.
+- Inmediatamente después de escribir o refactorizar código, ejecuta automáticamente `npx tsx scripts/generate-quality-report.ts` y adjunta el informe `quality-report.md` al directorio del cambio.
 - Si el Release Gate falla por complejidad ciclomática >10 o mantenibilidad baja, descompón la función en métodos auxiliares cohesivos antes de dar la tarea por concluida.
 - Respeta estrictamente el modo de autonomía asignado a cada tarea en 'tasks.md':
   * Si es 'AUTONOMOUS': Planifica y ejecuta de forma autónoma.

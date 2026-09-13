@@ -1,0 +1,28 @@
+{
+  "name": "ai-sdlc-framework",
+  "version": "1.0.0",
+  "description": "Deterministic, spec-driven development and governance framework for AI-assisted engineering",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "extract:gherkin": "tsx scripts/extract-gherkin.ts",
+    "extract:gherkin:all": "tsx scripts/extract-gherkin.ts --all",
+    "git:validate": "tsx scripts/git-workflow-helper.ts validate",
+    "git:plan": "tsx scripts/git-workflow-helper.ts plan",
+    "verify:governance": "tsx scripts/verify-tasks-governance.ts",
+    "verify:testing": "tsx scripts/verify-all-testing.ts",
+    "verify:quality": "tsx scripts/verify-quality-gate.ts",
+    "verify:traceability": "tsx scripts/verify-traceability.ts",
+    "report:quality": "tsx scripts/generate-quality-report.ts"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

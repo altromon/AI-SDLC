@@ -123,39 +123,40 @@ Ejecuta secuencialmente en tu terminal:
 
 ```bash
 # 1. Extraer los escenarios Gherkin BDD desde las especificaciones a archivos .feature
-node scripts/extract-gherkin.js --all
+npx tsx scripts/extract-gherkin.ts --all        # o: npm run extract:gherkin:all
 
 # 2. Planificar la jerarquía de ramas Git de 4 tiers para una versión y feature
-node scripts/git-workflow-helper.js plan --version v1.1.0 --feature CHG-001-telemetry-ingestion --tasks TSK-001,TSK-002
+npx tsx scripts/git-workflow-helper.ts plan --version v1.1.0 --feature CHG-001-telemetry-ingestion --tasks TSK-001,TSK-002
 
 # 3. Auditar el gobierno de tareas y modos de autonomía humana (AUTONOMOUS, HUMAN_REVIEW_PLAN, etc.)
-node scripts/verify-tasks-governance.js
+npx tsx scripts/verify-tasks-governance.ts      # o: npm run verify:governance
 
 # 4. Auditar que el 100% de requisitos y tareas cuentan con pruebas verificables en disco
-node scripts/verify-all-testing.js
+npx tsx scripts/verify-all-testing.ts          # o: npm run verify:testing
 
 # 5. Ejecutar el Release Gate de Calidad (Complejidad Ciclomática <= 10, Mantenibilidad >= 50)
-node scripts/verify-quality-gate.js
+npx tsx scripts/verify-quality-gate.ts         # o: npm run verify:quality
 
 # 6. Generar el informe de métricas de calidad multilenguaje (TypeScript, Go, Python, etc.)
-node scripts/generate-quality-report.js
+npx tsx scripts/generate-quality-report.ts     # o: npm run report:quality
 
 # 7. Auditar la Matriz de Trazabilidad 360° (Producto -> Arquitectura -> Pruebas)
-node scripts/verify-traceability.js
+npx tsx scripts/verify-traceability.ts         # o: npm run verify:traceability
 ```
 
 ### 3. Resumen Rápido de Herramientas CLI (Cheat Sheet)
 
-| Herramienta / Comando | Propósito | Salida Generada |
-|---|---|---|
-| `node scripts/extract-gherkin.js --all` | Sincroniza bloques Gherkin a `.feature` | `tests/features/*.feature` |
-| `node scripts/git-workflow-helper.js plan` | Planifica ramas jerárquicas (4 tiers) | Árbol visual en terminal |
-| `node scripts/git-workflow-helper.js validate <branch>` | Valida nomenclatura de rama | Veredicto Tier 1 a 4 |
-| `node scripts/verify-tasks-governance.js` | Audita riesgos y modos de autonomía | `reports/TASKS_GOVERNANCE_REPORT.md` |
-| `node scripts/verify-all-testing.js` | Audita cobertura de pruebas en specs y tasks | `reports/TEST_VERIFICATION_AUDIT.md` |
-| `node scripts/verify-quality-gate.js` | Release Gate: Complejidad y Mantenibilidad | Veredicto `PASS`/`FAIL` por función |
-| `node scripts/generate-quality-report.js` | Reporte formal de calidad de código | `reports/QUALITY_REPORT.md` |
-| `node scripts/verify-traceability.js` | Valida Trazabilidad 360° | `reports/TRACEABILITY_MATRIX.md` |
+| Herramienta / Comando | Comando npm | Propósito | Salida Generada |
+|---|---|---|---|
+| `npx tsx scripts/extract-gherkin.ts --all` | `npm run extract:gherkin:all` | Sincroniza bloques Gherkin a `.feature` | `tests/features/*.feature` |
+| `npx tsx scripts/git-workflow-helper.ts plan` | `npm run git:plan` | Planifica ramas jerárquicas (4 tiers) | Árbol visual en terminal |
+| `npx tsx scripts/git-workflow-helper.ts validate <branch>` | `npm run git:validate <branch>` | Valida nomenclatura de rama | Veredicto Tier 1 a 4 |
+| `npx tsx scripts/verify-tasks-governance.ts` | `npm run verify:governance` | Audita riesgos y modos de autonomía | `reports/TASKS_GOVERNANCE_REPORT.md` |
+| `npx tsx scripts/verify-all-testing.ts` | `npm run verify:testing` | Audita cobertura de pruebas en specs y tasks | `reports/TEST_VERIFICATION_AUDIT.md` |
+| `npx tsx scripts/verify-quality-gate.ts` | `npm run verify:quality` | Release Gate: Complejidad y Mantenibilidad | Veredicto `PASS`/`FAIL` por función |
+| `npx tsx scripts/generate-quality-report.ts` | `npm run report:quality` | Reporte formal de calidad de código | `reports/QUALITY_REPORT.md` |
+| `npx tsx scripts/verify-traceability.ts` | `npm run verify:traceability` | Valida Trazabilidad 360° | `reports/TRACEABILITY_MATRIX.md` |
+| `npx tsc --noEmit` | `npm run typecheck` | Auditoría de tipos estricta del proyecto | Verificación estática TypeScript |
 
 ---
 
@@ -217,7 +218,7 @@ Este tutorial exhaustivo describe cómo construir una nueva funcionalidad desde 
 3. **Sincronizar automáticamente con Cucumber**:
    Ejecuta el script extractor determinista:
    ```bash
-   node scripts/extract-gherkin.js --all
+   npx tsx scripts/extract-gherkin.ts --all
    ```
    *Efecto*: Extrae los bloques ````gherkin```` del Markdown y genera o actualiza los archivos `.feature` en `tests/features/`.
 
@@ -290,7 +291,7 @@ specs/changes/active/chg-001-telemetry-ingestion/
      assigned-to: "agent-developer"
      verification:
        method: "quality-gate"
-       command-or-criteria: "npx tsc --noEmit && node scripts/verify-quality-gate.js"
+       command-or-criteria: "npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts"
 
    - id: "TSK-002"
      title: "Implementación del Gateway WSS con Validación mTLS"
@@ -305,7 +306,7 @@ specs/changes/active/chg-001-telemetry-ingestion/
 
 2. **Auditar el Gobierno de Tareas**:
    ```bash
-   node scripts/verify-tasks-governance.js
+   npx tsx scripts/verify-tasks-governance.ts
    ```
    *Salida*: Genera `reports/TASKS_GOVERNANCE_REPORT.md` validando que no existan tareas sin verificación o con asignaciones de autonomía no conformes.
 
@@ -315,7 +316,7 @@ specs/changes/active/chg-001-telemetry-ingestion/
 
 1. **Planificar el árbol de ramas con el asistente CLI**:
    ```bash
-   node scripts/git-workflow-helper.js plan --version v1.1.0 --feature CHG-001-telemetry-ingestion --tasks TSK-001,TSK-002
+   npx tsx scripts/git-workflow-helper.ts plan --version v1.1.0 --feature CHG-001-telemetry-ingestion --tasks TSK-001,TSK-002
    ```
 
 2. **Crear las ramas en Git respetando la jerarquía**:
@@ -333,7 +334,7 @@ specs/changes/active/chg-001-telemetry-ingestion/
 
 3. **Validar la rama de trabajo**:
    ```bash
-   node scripts/git-workflow-helper.js validate task/CHG-001/TSK-001-dto-interfaces
+   npx tsx scripts/git-workflow-helper.ts validate task/CHG-001/TSK-001-dto-interfaces
    ```
 
 ---
@@ -346,7 +347,7 @@ specs/changes/active/chg-001-telemetry-ingestion/
    Se desarrollan las pruebas unitarias y de mitigación (`SEC-TEST-*`) en `tests/` antes o junto con la implementación en `src/`.
 3. **Auditar la Cobertura Total de Pruebas**:
    ```bash
-   node scripts/verify-all-testing.js
+   npx tsx scripts/verify-all-testing.ts
    ```
    *Salida*: Genera `reports/TEST_VERIFICATION_AUDIT.md`. Bloquea la entrega si algún requisito o tarea carece de pruebas reales.
 
@@ -362,11 +363,11 @@ Verifica que el código cumpla con los umbrales de `quality-policy.yaml`:
 
 1. **Evaluar el Quality Gate**:
    ```bash
-   node scripts/verify-quality-gate.js
+   npx tsx scripts/verify-quality-gate.ts
    ```
 2. **Generar Informe Formal de Calidad**:
    ```bash
-   node scripts/generate-quality-report.js
+   npx tsx scripts/generate-quality-report.ts
    ```
    *Salida*: Genera `reports/QUALITY_REPORT.md` analizando TypeScript, JavaScript, Python, Go, Java, C#, Rust, C/C++.
 
@@ -376,7 +377,7 @@ Verifica que el código cumpla con los umbrales de `quality-policy.yaml`:
 
 1. **Auditar Trazabilidad Completa**:
    ```bash
-   node scripts/verify-traceability.js
+   npx tsx scripts/verify-traceability.ts
    ```
    *Salida*: Genera `reports/TRACEABILITY_MATRIX.md` verificando que el 100% de los requisitos estén conectados a Producto, Arquitectura y Pruebas.
 

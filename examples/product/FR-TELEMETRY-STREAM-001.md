@@ -73,7 +73,7 @@ Feature: Ingesta Continua de Telemetría UAV
 ## 3. Integración con Cucumber
 Esta especificación se extrae automáticamente a `tests/features/fr-telemetry-stream-001.feature` y puede ejecutarse directamente mediante:
 ```bash
-node scripts/extract-gherkin.js examples/product/FR-TELEMETRY-STREAM-001.md
+npx tsx scripts/extract-gherkin.ts examples/product/FR-TELEMETRY-STREAM-001.md
 ```
 
 ---

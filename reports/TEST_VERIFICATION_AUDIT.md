@@ -1,6 +1,6 @@
 # 🧪 Auditoría Integral de Cobertura de Pruebas (Requisitos & Tareas)
 
-> **Fecha de Auditoría:** 2026-09-03T15:18:52.175Z
+> **Fecha de Auditoría:** 2026-09-13T17:53:15.122Z
 > **Veredicto General:** 100% VALIDADO CON PRUEBAS (APROBADO ✅)
 
 ---
@@ -21,11 +21,11 @@
 
 | ID Tarea | Título | Archivo Origen | Método | Comando / Criterio Objetivo | Estado |
 | :--- | :--- | :--- | :---: | :--- | :---: |
-| **`TSK-001`** | Definición de Tipos Cinemáticos e Interfaces de Telemetría | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | `quality-gate` | `npx tsc --noEmit && node scripts/verify-quality-gate.js` | ✅ VÁLIDO |
+| **`TSK-001`** | Definición de Tipos Cinemáticos e Interfaces de Telemetría | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | `quality-gate` | `npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts` | ✅ VÁLIDO |
 | **`TSK-002`** | Implementación del Gateway WSS con Validación mTLS (SRV-TELEMETRY-INGEST) | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | `automated-unit-test` | `npm test -- tests/unit/telemetry_gateway.spec.ts` | ✅ VÁLIDO |
 | **`TSK-003`** | Inyección de Claves de la CA de Producción y Certificados del HSM | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | `manual-inspection` | `Verificación de checksums de claves en enclave y auditoría de accesos HSM` | ✅ VÁLIDO |
 | **`TSK-004`** | Algoritmo de Fusión Multisensorial y Corrección Barométrica | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | `manual-inspection` | `Sesión de refinamiento con el equipo de aerodinámica` | ✅ VÁLIDO |
-| **`TSK-001`** | Definición de DTOs e Interfaces de Contrato | `templates\delivery\tasks.template.md` | `quality-gate` | `npx tsc --noEmit && node scripts/verify-quality-gate.js` | ✅ VÁLIDO |
+| **`TSK-001`** | Definición de DTOs e Interfaces de Contrato | `templates\delivery\tasks.template.md` | `quality-gate` | `npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts` | ✅ VÁLIDO |
 | **`TSK-002`** | Implementación de Lógica Central y Algoritmo de Negocio | `templates\delivery\tasks.template.md` | `automated-unit-test` | `npm test -- tests/unit/feature_core.spec.ts` | ✅ VÁLIDO |
 | **`TSK-003`** | Migración de Esquema de Base de Datos / Credenciales Críticas | `templates\delivery\tasks.template.md` | `manual-inspection` | `Revisión DBA + ejecución manual con script idempotente verificado` | ✅ VÁLIDO |
 

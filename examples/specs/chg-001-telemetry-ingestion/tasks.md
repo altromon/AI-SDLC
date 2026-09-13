@@ -19,7 +19,7 @@ tasks:
     autonomy-mode: "AUTONOMOUS"
     verification:
       method: "quality-gate"
-      command-or-criteria: "npx tsc --noEmit && node scripts/verify-quality-gate.js"
+      command-or-criteria: "npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts"
     assigned-to: "agent-developer"
     status: "COMPLETED"
 
@@ -79,7 +79,7 @@ superseded-by: null
 ### TSK-001: Definición de Tipos Cinemáticos
 - **Asignado a**: `agent-developer`
 - **Estado**: `COMPLETED` ✅
-- **Comando de Verificación**: `npx tsc --noEmit && node scripts/verify-quality-gate.js`
+- **Comando de Verificación**: `npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts`
 - **Evidencia**: Cero errores de tipado, complejidad ciclomática $\le 4$.
 
 ### TSK-002: Implementación del Gateway WSS con mTLS

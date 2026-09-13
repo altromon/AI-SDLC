@@ -11,21 +11,47 @@
  * ==============================================================================
  */
 
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
-const DEFAULT_EXTENSIONS = ['.ts', '.js', '.py', '.java', '.go', '.cs', '.rs', '.cpp', '.c'];
+export const DEFAULT_EXTENSIONS: readonly string[] = ['.ts', '.js', '.py', '.java', '.go', '.cs', '.rs', '.cpp', '.c'];
 
-function parseSimpleYaml(content) {
+export interface QualityPolicy {
+  max_cyclomatic: number;
+  max_cognitive: number;
+  min_maintainability: number;
+  max_function_lines: number;
+  enforce_mode: 'STRICT' | 'PERMISSIVE' | string;
+  target_directories: string[];
+  supported_extensions: string[];
+}
+
+export interface FunctionMetrics {
+  functionName: string;
+  filePath: string;
+  loc: number;
+  cyclomatic: number;
+  cognitive: number;
+  maintainability: number;
+  codeSmells: string[];
+}
+
+export interface AnalysisResult extends FunctionMetrics {
+  relPath: string;
+  status: 'PASS' | 'FAIL';
+  violations: string[];
+}
+
+export function parseSimpleYaml(content: string): QualityPolicy {
   const lines = content.split('\n');
-  const policy = {
+  const policy: QualityPolicy = {
     max_cyclomatic: 10,
     max_cognitive: 15,
     min_maintainability: 50.0,
     max_function_lines: 40,
     enforce_mode: 'STRICT',
     target_directories: ['src', 'lib', 'examples', 'tests'],
-    supported_extensions: DEFAULT_EXTENSIONS
+    supported_extensions: [...DEFAULT_EXTENSIONS]
   };
 
   let inScope = false;
@@ -83,7 +109,7 @@ function parseSimpleYaml(content) {
   return policy;
 }
 
-function calculateMetrics(fnBody, fnName, filePath) {
+export function calculateMetrics(fnBody: string, fnName: string, filePath: string): FunctionMetrics {
   const ext = path.extname(filePath).toLowerCase();
   const isPython = ext === '.py';
 
@@ -96,7 +122,7 @@ function calculateMetrics(fnBody, fnName, filePath) {
   const loc = Math.max(1, lines.length);
 
   let cyclomatic = 1;
-  let decisionRegex;
+  let decisionRegex: RegExp;
   if (isPython) {
     decisionRegex = /\b(if|elif|for|while|except)\b|\b(and|or)\b/g;
   } else if (ext === '.go') {
@@ -135,7 +161,7 @@ function calculateMetrics(fnBody, fnName, filePath) {
   const rawMI = 171 - (5.2 * Math.log(V)) - (0.23 * cyclomatic) - (16.2 * Math.log(loc));
   const normalizedMI = Math.max(0, Math.min(100, (rawMI * 100) / 171));
 
-  const codeSmells = [];
+  const codeSmells: string[] = [];
   if (['.ts', '.js'].includes(ext) && /\bany\b/.test(fnBody)) {
     codeSmells.push('Uso prohibido de "any"');
   }
@@ -157,11 +183,11 @@ function calculateMetrics(fnBody, fnName, filePath) {
   };
 }
 
-function extractFunctionsPython(content, filePath) {
-  const functions = [];
+export function extractFunctionsPython(content: string, filePath: string): FunctionMetrics[] {
+  const functions: FunctionMetrics[] = [];
   const lines = content.split('\n');
-  let currentFn = null;
-  let fnLines = [];
+  let currentFn: string | null = null;
+  let fnLines: string[] = [];
   let baseIndent = 0;
 
   for (let i = 0; i < lines.length; i++) {
@@ -198,19 +224,19 @@ function extractFunctionsPython(content, filePath) {
   return functions;
 }
 
-function extractFunctionsBraceLanguages(content, filePath) {
-  const functions = [];
+export function extractFunctionsBraceLanguages(content: string, filePath: string): FunctionMetrics[] {
+  const functions: FunctionMetrics[] = [];
   const lines = content.split('\n');
-  let currentFn = null;
+  let currentFn: string | null = null;
   let braceCount = 0;
-  let fnLines = [];
+  let fnLines: string[] = [];
 
   const ext = path.extname(filePath).toLowerCase();
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    let fnMatch = null;
+    let fnMatch: RegExpMatchArray | null = null;
     if (ext === '.go') {
       fnMatch = line.match(/func\s+(?:\([^)]*\)\s*)?([a-zA-Z0-9_$]+)\s*\(/);
     } else if (ext === '.rs') {
@@ -251,7 +277,7 @@ function extractFunctionsBraceLanguages(content, filePath) {
   return functions;
 }
 
-function extractFunctions(content, filePath) {
+export function extractFunctions(content: string, filePath: string): FunctionMetrics[] {
   const ext = path.extname(filePath).toLowerCase();
   if (ext === '.py') {
     return extractFunctionsPython(content, filePath);
@@ -259,15 +285,15 @@ function extractFunctions(content, filePath) {
   return extractFunctionsBraceLanguages(content, filePath);
 }
 
-function walkDir(dir, extensions = DEFAULT_EXTENSIONS) {
-  let results = [];
+export function walkDir(dir: string, extensions: readonly string[] = DEFAULT_EXTENSIONS): string[] {
+  let results: string[] = [];
   if (!fs.existsSync(dir)) return results;
   const list = fs.readdirSync(dir);
   for (const file of list) {
     const fullPath = path.join(dir, file);
     const stat = fs.statSync(fullPath);
     if (stat && stat.isDirectory()) {
-      if (!['node_modules', '__pycache__', '.pytest_cache', 'target', 'bin', 'obj', '.git', 'reports'].includes(file)) {
+      if (!['node_modules', '__pycache__', '.pytest_cache', 'target', 'bin', 'obj', '.git', 'reports', 'dist'].includes(file)) {
         results = results.concat(walkDir(fullPath, extensions));
       }
     } else {
@@ -280,7 +306,7 @@ function walkDir(dir, extensions = DEFAULT_EXTENSIONS) {
   return results;
 }
 
-function main() {
+export function main(): void {
   console.log('================================================================');
   console.log('AI-SDLC: Verificación de Quality Gate (Multilenguaje)');
   console.log('================================================================\n');
@@ -288,21 +314,21 @@ function main() {
   const rootDir = process.cwd();
   const policyFile = path.join(rootDir, 'quality-policy.yaml');
 
-  let policy = {
+  let policy: QualityPolicy = {
     max_cyclomatic: 10,
     max_cognitive: 15,
     min_maintainability: 50.0,
     max_function_lines: 40,
     enforce_mode: 'STRICT',
     target_directories: ['src', 'lib', 'examples', 'tests'],
-    supported_extensions: DEFAULT_EXTENSIONS
+    supported_extensions: [...DEFAULT_EXTENSIONS]
   };
 
   if (fs.existsSync(policyFile)) {
     policy = parseSimpleYaml(fs.readFileSync(policyFile, 'utf-8'));
   }
 
-  let sourceFiles = [];
+  let sourceFiles: string[] = [];
   for (const d of policy.target_directories) {
     const fullDir = path.join(rootDir, d);
     if (fs.existsSync(fullDir)) {
@@ -311,7 +337,7 @@ function main() {
   }
 
   let totalViolations = 0;
-  const analysisResults = [];
+  const analysisResults: AnalysisResult[] = [];
 
   for (const file of sourceFiles) {
     const metrics = extractFunctions(fs.readFileSync(file, 'utf-8'), file);
@@ -356,4 +382,6 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
