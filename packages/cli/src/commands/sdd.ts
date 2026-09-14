@@ -1,0 +1,195 @@
+/**
+ * CLI Handler: aisdlc sdd
+ * Commands for SDD Ecosystem Integration (OpenSpec & Spec Kit) and PDaC Handoff Sidecars
+ */
+
+import * as path from 'path';
+import pc from 'picocolors';
+import {
+  depositProductHandoffSidecar,
+  integrateSddChange,
+  ProductHandoff,
+  scanAllProductHandoffs,
+  SddFramework,
+} from '@ai-sdlc/core';
+
+export interface SddDepositCliOptions {
+  root?: string;
+  change: string;
+  framework: SddFramework;
+  title?: string;
+  requirements?: string;
+  useCases?: string;
+  silent?: boolean;
+}
+
+export function runSddDeposit(options: SddDepositCliOptions): boolean {
+  const rootDir = options.root || process.cwd();
+  const changeId = options.change;
+  const framework = options.framework || 'openspec';
+
+  if (!options.silent) {
+    console.log(
+      pc.bold(
+        pc.cyan(`\n📦 [AI-SDLC SDD] Depositando Sidecar PDaC Handoff para '${changeId}' (${framework})...`)
+      )
+    );
+  }
+
+  const reqList = options.requirements
+    ? options.requirements.split(',').map((r) => r.trim())
+    : ['FR-001'];
+  const ucList = options.useCases
+    ? options.useCases.split(',').map((u) => u.trim())
+    : ['UC-001'];
+
+  const handoff: ProductHandoff = {
+    id: `HOF-${changeId.toUpperCase()}`,
+    type: 'handoff',
+    title: options.title || `Handoff PDaC para ${changeId}`,
+    changeId,
+    version: '1.0.0',
+    createdAt: new Date().toISOString(),
+    subgraph: {
+      requirements: reqList,
+      useCases: ucList,
+    },
+  };
+
+  try {
+    const depositedPath = depositProductHandoffSidecar({
+      rootDir,
+      changeId,
+      framework,
+      handoff,
+    });
+
+    if (!options.silent) {
+      console.log(`  ${pc.green('✔')} Sidecar depositado con éxito: ${pc.bold(depositedPath)}`);
+      console.log(`  ID Handoff: ${pc.cyan(handoff.id)}`);
+      console.log(`  Requerimientos entregados: ${reqList.join(', ')}\n`);
+    }
+    return true;
+  } catch (err: any) {
+    if (!options.silent) {
+      console.error(pc.red(`  ✖ Error depositando sidecar: ${err?.message || err}\n`));
+    }
+    return false;
+  }
+}
+
+export interface SddVerifyCliOptions {
+  root?: string;
+  framework?: SddFramework;
+  silent?: boolean;
+}
+
+export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
+  const rootDir = options.root || process.cwd();
+  if (!options.silent) {
+    console.log(
+      pc.bold(
+        pc.cyan('\n🔍 [AI-SDLC SDD] Verificando Espacios de Trabajo SDD y Sidecars de Handoff (HOF-*)...')
+      )
+    );
+  }
+
+  const handoffsMap = scanAllProductHandoffs(rootDir);
+  const totalFound = handoffsMap.size;
+
+  if (!options.silent) {
+    console.log(`  Sidecars PDaC encontrados: ${pc.bold(String(totalFound))}`);
+  }
+
+  if (totalFound === 0) {
+    if (!options.silent) {
+      console.log(pc.yellow('  [AVISO] No se encontraron archivos de acompañamiento handoff.yaml en specs/ ni examples/specs/.'));
+    }
+    return true;
+  }
+
+  let validCount = 0;
+  let invalidCount = 0;
+
+  for (const [, { handoff, changeDir }] of handoffsMap.entries()) {
+    const relDir = path.relative(rootDir, changeDir);
+    const hasReqs = handoff.subgraph && Array.isArray(handoff.subgraph.requirements) && handoff.subgraph.requirements.length > 0;
+
+    if (handoff.id && handoff.id.startsWith('HOF-') && hasReqs) {
+      validCount++;
+      if (!options.silent) {
+        console.log(
+          `  ${pc.green('✔')} [${pc.bold(handoff.id)}] en ${relDir} (Requerimientos: ${handoff.subgraph.requirements.length})`
+        );
+      }
+    } else {
+      invalidCount++;
+      if (!options.silent) {
+        console.log(
+          `  ${pc.red('✖')} [${pc.bold(handoff.id || 'DESCONOCIDO')}] en ${relDir} - Esquema de handoff o subgrafo inválido.`
+        );
+      }
+    }
+  }
+
+  const isOk = invalidCount === 0;
+  if (!options.silent) {
+    console.log(
+      isOk
+        ? pc.green('\n✔ Integración SDD Conforme: Todos los sidecars son válidos.\n')
+        : pc.red('\n✖ Integración SDD Bloqueada: Se detectaron sidecars no conformes.\n')
+    );
+  }
+
+  return isOk;
+}
+
+export interface SddIntegrateCliOptions {
+  root?: string;
+  change: string;
+  author?: string;
+  autoArchive?: boolean;
+  silent?: boolean;
+}
+
+export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
+  const rootDir = options.root || process.cwd();
+  const changeId = options.change;
+
+  if (!options.silent) {
+    console.log(
+      pc.bold(
+        pc.cyan(`\n🔄 [AI-SDLC SDD] Integrando cambio '${changeId}' en la especificación canónica...`)
+      )
+    );
+  }
+
+  const result = integrateSddChange({
+    rootDir,
+    changeId,
+    author: options.author,
+    autoArchive: options.autoArchive,
+  });
+
+  if (!options.silent) {
+    if (result.success) {
+      console.log(`  ${pc.green('✔')} Cambio '${changeId}' procesado exitosamente:`);
+      console.log(`    - Tareas completadas:          ${pc.bold(String(result.completedTasks.length))}`);
+      console.log(`    - Requerimientos integrados:   ${pc.green(result.integratedRequirements.join(', ') || 'Ninguno')}`);
+      console.log(`    - Artefactos producto modif.:  ${pc.green(result.updatedProductArtifacts.join(', ') || 'Ninguno')}`);
+      console.log(`    - Arquitectura arc42 modif.:   ${pc.green(result.updatedArchitectureArtifacts.join(', ') || 'Ninguno')}`);
+      if (result.archived) {
+        console.log(`    - Archivado a:                 ${pc.cyan(result.archivedPath || 'specs/changes/completed')}`);
+      }
+      console.log(pc.green('\n✔ Integración en la especificación canónica COMPLETADA (EXIT 0)\n'));
+    } else {
+      console.log(pc.red(`\n✖ Fallo al integrar el cambio '${changeId}':`));
+      for (const err of result.errors) {
+        console.log(`    ${pc.red('✖')} ${err}`);
+      }
+      console.log(pc.red('\n✖ Integración BLOQUEADA (EXIT 1)\n'));
+    }
+  }
+
+  return result.success;
+}

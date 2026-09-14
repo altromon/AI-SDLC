@@ -157,6 +157,15 @@ pnpm run verify:licenses                      # o: npx aisdlc verify licenses
 
 # 8. Generar el informe formal de métricas de calidad multilenguaje
 pnpm run report:quality                       # o: npx aisdlc report quality
+
+# 9. Depositar sidecar PDaC (handoff.yaml) en el cambio activo
+npx aisdlc sdd deposit --framework openspec --change chg-001-telemetry-ingestion
+
+# 10. Auditar conformidad de sidecars y espacios SDD
+npx aisdlc sdd verify
+
+# 11. Integrar el cambio concluido a las especificaciones canónicas
+npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
 ```
 
 ### 3. Resumen de Comandos del CLI (`aisdlc`)
@@ -165,11 +174,14 @@ pnpm run report:quality                       # o: npx aisdlc report quality
 |---|---|---|---|
 | `npx aisdlc verify all` | `pnpm run verify:all` | Suite completa de CI/CD (6 Gates) | Dashboard consolidado con Exit 0/1 |
 | `npx aisdlc verify quality` | `pnpm run verify:quality` | Release Gate: Complejidad y Mantenibilidad | Veredicto `PASS`/`FAIL` por función |
-| `npx aisdlc verify traceability` | `pnpm run verify:traceability` | Valida Trazabilidad 360° | `reports/TRACEABILITY_MATRIX.md` |
+| `npx aisdlc verify traceability` | `pnpm run verify:traceability` | Valida Trazabilidad 360° (HOF-* -> arc42 -> BDD) | `reports/TRACEABILITY_MATRIX.md` |
 | `npx aisdlc verify governance` | `pnpm run verify:governance` | Audita riesgos y modos de autonomía | `reports/TASKS_GOVERNANCE_REPORT.md` |
 | `npx aisdlc verify testing` | `pnpm run verify:testing` | Audita cobertura de pruebas en specs y tasks | `reports/TEST_VERIFICATION_AUDIT.md` |
 | `npx aisdlc verify licenses` | `pnpm run verify:licenses` | Cumplimiento estricto de licencias OSS | `reports/LICENSE_COMPLIANCE_REPORT.md` |
 | `npx aisdlc verify pdac` | `npx aisdlc verify pdac` | Detección de deriva criptográfica SHA-256 | `reports/PDAC_INTEGRITY_REPORT.md` |
+| `npx aisdlc sdd deposit --framework <f> --change <id>` | - | Deposita sidecar `handoff.yaml` (HOF-*) | Archivo `handoff.yaml` en workspace |
+| `npx aisdlc sdd verify` | - | Audita conformidad de sidecars SDD | Veredicto de validación por workspace |
+| `npx aisdlc sdd integrate --change <id>` | - | Integra cambio completado a specs canónicas | Requisitos activos, arquitectura actualizada |
 | `npx aisdlc report quality` | `pnpm run report:quality` | Reporte formal políglota de calidad | `reports/QUALITY_REPORT.md` |
 | `npx aisdlc gherkin extract --all` | `pnpm run extract:gherkin:all` | Sincroniza bloques Gherkin a `.feature` | `tests/features/*.feature` |
 | `npx aisdlc git plan` | `pnpm run git:plan` | Planifica ramas jerárquicas (4 tiers) | Árbol visual en terminal |
@@ -189,11 +201,12 @@ Este tutorial exhaustivo describe cómo construir una nueva funcionalidad desde 
   [1. Producto & BDD]    ➔ Modelar UC/FR/BR y sincronizar specs Gherkin (.feature)
   [2. Threat Modeling]   ➔ Modelar ABUSE, requisitos SEC-REQ y enclaves Zero Trust
   [3. Licencias OSS]     ➔ Validar dependencias frente a license-policy.yaml
-  [4. SDD Change]        ➔ Crear proposal, spec, design y tasks con modos de autonomía
+  [4. SDD & Sidecars]    ➔ Crear spec-delta con sidecar handoff.yaml (HOF-*) vía OpenSpec/SpecKit
   [5. 4-Tier Branching]  ➔ Crear ramas git: main ➔ release ➔ feat ➔ task
   [6. Coder / Agent]     ➔ Implementar código con TDD e inyección quirúrgica de contexto
   [7. Quality Gate]      ➔ Validar Complejidad Ciclomática (<=10) y Mantenibilidad (>=50)
-  [8. Release & Merge]   ➔ Auditoría de pruebas, trazabilidad 360° y aprobación humana
+  [8. Trazabilidad 360°] ➔ Matriz PDaC (HOF-*) -> arc42 -> BDD y aprobación de PR
+  [9. Integración SDD]   ➔ Promover requerimientos a activos, enlazar arquitectura y archivar cambio
 ```
 
 ---
@@ -289,7 +302,8 @@ specs/changes/active/chg-001-telemetry-ingestion/
 ├── proposal.md   # Justificación, impacto y citación canónica (UC-*, FR-*, SEC-REQ-*)
 ├── spec.md       # Escenarios funcionales y de mitigación de ciberseguridad
 ├── design.md     # Interfaces, DTOs, endpoints y arquitectura arc42 / NAF v4
-└── tasks.md      # Plan secuencial de tareas atómicas gobernadas
+├── tasks.md      # Plan secuencial de tareas atómicas gobernadas
+└── handoff.yaml  # Sidecar formal PDaC (HOF-*) con el subgrafo del producto
 ```
 
 1. **Configurar Tareas con Modos de Autonomía**:
@@ -322,11 +336,18 @@ specs/changes/active/chg-001-telemetry-ingestion/
        command-or-criteria: "npm test -- tests/unit/telemetry_gateway.spec.ts"
    ```
 
-2. **Auditar el Gobierno de Tareas**:
+2. **Depositar el Sidecar de Handoff PDaC (OpenSpec / Spec Kit)**:
+   ```bash
+   npx aisdlc sdd deposit --framework openspec --change chg-001-telemetry-ingestion
+   ```
+   *Efecto*: Deposita `handoff.yaml` con ID `HOF-*` (ej. `HOF-001-TELEMETRY-INGESTION`), empaquetando inmutablemente los requerimientos, casos de uso y citaciones con digests SHA-256.
+
+3. **Auditar el Gobierno de Tareas y Conformidad SDD**:
    ```bash
    npx tsx scripts/verify-tasks-governance.ts
+   npx aisdlc sdd verify
    ```
-   *Salida*: Genera `reports/TASKS_GOVERNANCE_REPORT.md` validando que no existan tareas sin verificación o con asignaciones de autonomía no conformes.
+   *Salida*: Genera `reports/TASKS_GOVERNANCE_REPORT.md` validando que no existan tareas sin verificación o con asignaciones de autonomía no conformes, y certifica los sidecars depositados.
 
 ---
 
@@ -391,17 +412,36 @@ Verifica que el código cumpla con los umbrales de `quality-policy.yaml`:
 
 ---
 
-### Fase 8: Matriz de Trazabilidad 360° y Pull Request
+### Fase 8: Matriz de Trazabilidad 360° Automatizada y Pull Request
 
-1. **Auditar Trazabilidad Completa**:
+1. **Auditar Trazabilidad Completa sin Fragilidad Textual**:
    ```bash
-   npx tsx scripts/verify-traceability.ts
+   npx aisdlc verify traceability               # o: npx tsx scripts/verify-traceability.ts
    ```
-   *Salida*: Genera `reports/TRACEABILITY_MATRIX.md` verificando que el 100% de los requisitos estén conectados a Producto, Arquitectura y Pruebas.
+   *Salida*: Genera `reports/TRACEABILITY_MATRIX.md` verificando deterministamente la triangulación obligatoria:
+   - **Producto (Upstream)**: Handoff PDaC (`HOF-*`) con subgrafo de casos de uso (`UC-*`), reglas (`BR-*`) y casos de abuso (`ABUSE-*`).
+   - **Arquitectura (Midstream)**: Vistas arc42 / NAF v4 (`SRV-*`, `SYS-*`, `ADR-*`, `SEC-ENC-*`, `06_runtime_view.md`).
+   - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) y escenarios etiquetados correspondientes.
 
 2. **Pull Request y Aprobación Humana**:
    - Se abre el Pull Request de la tarea hacia la rama feature, y luego hacia la rama release.
    - **Intervención Humana Innegociable**: El Tech Lead humano inspecciona el diff y los informes generados en `reports/` antes de autorizar el merge final a producción.
+
+---
+
+### Fase 9: Integración Canónica Post-Implementación a la Línea Base
+
+Una vez concluida la implementación del cambio y verificado que todas las tareas en `tasks.md` están en estado `COMPLETED`:
+
+1. **Ejecutar la Integración Canónica**:
+   ```bash
+   npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
+   ```
+   *Efectos y Transformaciones Realizadas*:
+   - **Requerimientos de Producto**: Se promueven a estado `active` en `specs/product/` y se añade una entrada en su historial de revisiones referenciando el `changeId`.
+   - **Arquitectura**: Se actualizan los bloques de servicio en `specs/architecture/` enlazando los requerimientos recién satisfechos en `satisfies-requirements`.
+   - **Archivado Atómico**: El directorio del cambio se mueve de `specs/changes/active/<id>/` a `specs/changes/completed/<id>/`.
+   - **Propuesta**: Se actualiza `proposal.md` fijando `status: applied`.
 
 ---
 

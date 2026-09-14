@@ -76,6 +76,7 @@ export interface TraceabilityRow {
   id: string;
   title: string;
   type?: string;
+  hofId?: string;
   productTraces: string;
   productStatus: 'CONFORME' | 'HUÉRFANO';
   archTraces: string;
@@ -86,8 +87,10 @@ export interface TraceabilityRow {
 
 export interface TraceabilityOptions {
   rootDir?: string;
+  specsDir?: string;
   examplesDir?: string;
   testsDir?: string;
+  strictHandoff?: boolean;
 }
 
 export interface TraceabilityResult {
@@ -97,6 +100,95 @@ export interface TraceabilityResult {
   orphanCount: number;
   totalRequirements: number;
   reportMarkdown: string;
+}
+
+// --- PDaC Handoff & SDD Adapter Types ---
+export interface ProductHandoffSubgraph {
+  requirements: string[];
+  useCases?: string[];
+  businessRules?: string[];
+  securityRequirements?: string[];
+  abuseCases?: string[];
+  actors?: string[];
+  [key: string]: unknown;
+}
+
+export interface ProductHandoff {
+  id: string; // e.g. HOF-001-TELEMETRY-INGESTION
+  type: 'handoff' | 'product-handoff' | string;
+  title?: string;
+  changeId: string;
+  version?: string;
+  subgraph: ProductHandoffSubgraph;
+  citations?: {
+    id?: string;
+    targetId?: string;
+    expectedDigest?: string;
+    anchor?: string;
+    comment?: string;
+  }[];
+  createdAt?: string;
+  [key: string]: unknown;
+}
+
+export type SddFramework = 'openspec' | 'speckit';
+
+export interface SddWorkspaceInfo {
+  framework: SddFramework;
+  changeId: string;
+  changeDir: string;
+  proposalFile?: string;
+  specFile?: string;
+  designFile?: string;
+  tasksFile?: string;
+  sidecarFile?: string;
+  handoff?: ProductHandoff;
+}
+
+export interface SddDepositOptions {
+  rootDir?: string;
+  changeId: string;
+  framework: SddFramework;
+  handoff: ProductHandoff;
+  destinationDir?: string;
+}
+
+export interface SddValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+  workspace?: SddWorkspaceInfo;
+}
+
+export interface SddIntegrationOptions {
+  rootDir?: string;
+  changeId: string;
+  author?: string;
+  date?: string;
+  autoArchive?: boolean;
+}
+
+export interface SddIntegrationResult {
+  success: boolean;
+  changeId: string;
+  completedTasks: string[];
+  pendingTasks: string[];
+  integratedRequirements: string[];
+  updatedProductArtifacts: string[];
+  updatedArchitectureArtifacts: string[];
+  archived: boolean;
+  archivedPath?: string;
+  errors: string[];
+}
+
+export interface SddIntegrationAudit {
+  changeId: string;
+  status: 'FULLY_INTEGRATED' | 'PARTIALLY_INTEGRATED' | 'UNINTEGRATED';
+  completedTasksCount: number;
+  totalTasksCount: number;
+  integratedRequirements: string[];
+  missingRequirements: string[];
+  gaps: string[];
 }
 
 // --- Tasks Governance Types ---

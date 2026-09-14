@@ -125,3 +125,23 @@ flowchart TD
     J -->|Aprobada| K[Spec SDD actualizada a digest v2]
     K --> L[ESTADO: CURRENT]
 ```
+
+---
+
+## 7. Empaquetamiento de Citaciones en Sidecars de Handoff (`HOF-*`)
+
+Para desacoplar los entornos de trabajo de agentes de entrega (SDD) de la lectura de repositorios masivos, PDaC empaqueta el subgrafo y sus citaciones canónicas en un archivo de acompañamiento (*sidecar*) `handoff.yaml`:
+
+1. **Estructura Criptográfica del Sidecar**:
+   - Cada entrega recibe un identificador único de handoff (`HOF-*`).
+   - El archivo incluye la colección de citaciones canónicas:
+     ```yaml
+     id: "HOF-001-TELEMETRY-INGESTION"
+     citations:
+       - id: "FR-TELEMETRY-STREAM-001"
+         targetId: "FR-TELEMETRY-STREAM-001"
+         digest: "sha256:50b17b58fc305bfd87f66c5d6c7f3496b24702b084e5b05495b7f1f79e9f4994"
+     ```
+2. **Invarianza y Detección de Deriva**:
+   - Si un archivo canónico de la línea base es modificado en `main`, el verificador `aisdlc verify traceability` detecta la divergencia de hash frente al `handoff.yaml` activo, bloqueando la entrega hasta que se re-emita el handoff y se re-apruebe el cambio.
+

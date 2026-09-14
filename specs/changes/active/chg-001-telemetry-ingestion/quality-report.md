@@ -35,11 +35,11 @@
 
 | Archivo Fuente | Función / Método | SLOC | Ciclomática (CC) | Cognitiva | Mantenibilidad (0-100) | Veredicto | Observaciones |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| `src\telemetry\gateway.ts` | `constructor` | 3 | 1 | 0 | 81.9 | ✅ PASS | Conforme |
-| `src\telemetry\gateway.ts` | `verifyTlsPeer` | 6 | 4 | 3 | 68.8 | ✅ PASS | Conforme |
-| `src\telemetry\kinematics.ts` | `calculateHaversineDistanceKm` | 11 | 1 | 0 | 59.5 | ✅ PASS | Conforme |
-| `src\telemetry\kinematics.ts` | `degreesToRadians` | 3 | 1 | 0 | 78.7 | ✅ PASS | Conforme |
-| `src\telemetry\kinematics.ts` | `validateKinematics` | 2 | 1 | 0 | 85 | ✅ PASS | Conforme |
+| `src/telemetry/gateway.ts` | `constructor` | 3 | 1 | 0 | 81.9 | ✅ PASS | Conforme |
+| `src/telemetry/gateway.ts` | `verifyTlsPeer` | 6 | 4 | 3 | 68.8 | ✅ PASS | Conforme |
+| `src/telemetry/kinematics.ts` | `calculateHaversineDistanceKm` | 11 | 1 | 0 | 59.5 | ✅ PASS | Conforme |
+| `src/telemetry/kinematics.ts` | `degreesToRadians` | 3 | 1 | 0 | 78.7 | ✅ PASS | Conforme |
+| `src/telemetry/kinematics.ts` | `validateKinematics` | 2 | 1 | 0 | 85 | ✅ PASS | Conforme |
 
 ---
 

@@ -1,19 +1,17 @@
 # Matriz de Trazabilidad de Requerimientos 360° (RTM)
 
-*Fecha de Verificación: 2026-09-13T17:53:17.294Z*
+*Fecha de Verificación: 2026-09-14T13:57:11.864Z*
 *Estado General: 100% TRAZABLE (PASSED)*
 
-## 1. Cobertura de Extremo a Extremo
+## 1. Cobertura de Extremo a Extremo (PDaC Handoff ➔ arc42/NAF v4 ➔ BDD/Gherkin)
 
-| ID Requerimiento | Título | Producto (Upstream) | Arquitectura (Midstream) | Pruebas (Downstream) | Estado Global |
-| :--- | :--- | :--- | :--- | :--- | :---: |
-| **`FR-TELEMETRY-STREAM-001`** | Ingesta Continua de Tramas Telemétricas UAV | `UC-STREAM-TELEMETRY` | `SRV-TELEMETRY-INGEST` | `tests/features/fr-telemetry-stream-001.feature, tests/features/fr-telemetry-stream-001.feature` | ✅ CONFORME |
-| **`QR-LATENCY-REALTIME`** | Latencia de Procesamiento e Ingesta Sub-100ms | `UC-STREAM-TELEMETRY` | `SRV-TELEMETRY-INGEST` | `tests/benchmarks/latency_benchmark.spec.ts` | ✅ CONFORME |
-| **`SEC-REQ-MTLS-STREAM`** | Autenticación Criptográfica Mutua (mTLS) en Ingesta | `ABUSE-TELEMETRY-SPOOFING` | `SRV-TELEMETRY-INGEST, SEC-ENC-DMZ-INGEST` | `tests/features/security/sec-req-mtls-stream.feature, tests/features/security/sec-req-mtls-stream.feature` | ✅ CONFORME |
-| **`FR-FUNCIONALIDAD-001`** | Título Conciso del Requerimiento | `UC-ACCION-001` | `SRV-NOMBRE-001` | `tests/features/fr-funcionalidad-001.feature, tests/features/fr-funcionalidad-001.feature, tests/unit/controlador-funcionalidad.spec.ts` | ✅ CONFORME |
-| **`SEC-REQ-CONTROL-001`** | Título del Control de Seguridad de Mitigación | `ABUSE-NOMBRE-001` | `SRV-NOMBRE-001, SEC-ENC-DMZ-001` | `tests/features/security/sec-req-control-001.feature, tests/features/security/sec-req-control-001.feature, tests/security/tls-handshake-mitigation.spec.ts` | ✅ CONFORME |
+| ID Requerimiento | Handoff PDaC | Título | Producto (Upstream) | Arquitectura (Midstream) | Pruebas (Downstream) | Estado Global |
+| :--- | :--- | :--- | :--- | :--- | :--- | :---: |
+| **`FR-TELEMETRY-STREAM-001`** | `HOF-001-TELEMETRY-INGESTION` | Ingesta Continua de Tramas Telemétricas UAV | `UC-STREAM-TELEMETRY, BR-TELEMETRY-VALIDITY, ABUSE-TELEMETRY-SPOOFING` | `SRV-TELEMETRY-INGEST, 06_runtime_view.md, SRV-TELEMETRY-INGEST.md` | `tests/features/fr-telemetry-stream-001.feature` | ✅ CONFORME |
+| **`QR-LATENCY-REALTIME`** | `HOF-001-TELEMETRY-INGESTION` | Latencia de Procesamiento e Ingesta Sub-100ms | `UC-STREAM-TELEMETRY, BR-TELEMETRY-VALIDITY, ABUSE-TELEMETRY-SPOOFING` | `SRV-TELEMETRY-INGEST, 01_introduction_goals.md, ADR-001-WEBSOCKET-STACK.md, SRV-TELEMETRY-INGEST.md` | `tests/benchmarks/latency_benchmark.spec.ts` | ✅ CONFORME |
+| **`SEC-REQ-MTLS-STREAM`** | `HOF-001-TELEMETRY-INGESTION` | Autenticación Criptográfica Mutua (mTLS) en Ingesta | `ABUSE-TELEMETRY-SPOOFING, UC-STREAM-TELEMETRY, BR-TELEMETRY-VALIDITY` | `SRV-TELEMETRY-INGEST, SEC-ENC-DMZ-INGEST, 01_introduction_goals.md, 06_runtime_view.md, SRV-TELEMETRY-INGEST.md` | `tests/features/security/sec-req-mtls-stream.feature` | ✅ CONFORME |
 
-## 2. Criterios de Validación Cumplidos
-- **Producto**: Todo requerimiento nace de un Caso de Uso (`UC-*`), Regla (`BR-*`) o Caso de Abuso (`ABUSE-*`).
-- **Arquitectura**: Todo requerimiento está asignado a al menos un Servicio (`SRV-*`), Enclave (`SEC-ENC-*`) o Decisión (`ADR-*`).
-- **Pruebas**: Todo requerimiento cuenta con archivos `.feature` de Cucumber o suites de prueba automatizadas asociadas.
+## 2. Criterios de Validación Determinista
+- **Producto (Upstream)**: El requerimiento está emitido en un Handoff formal de PDaC (`HOF-*`) y deriva de un Caso de Uso (`UC-*`), Regla de Negocio (`BR-*`) o Caso de Abuso (`ABUSE-*`).
+- **Arquitectura (Midstream)**: El requerimiento está asignado a al menos un Servicio (`SRV-*`), Enclave (`SEC-ENC-*`), Decisión (`ADR-*`) o Vista de Ejecución arc42/NAF v4.
+- **Pruebas (Downstream)**: El requerimiento cuenta con escenarios ejecutables en suites BDD/Gherkin (`.feature`) con etiquetas correspondientes o tests automatizados verificados.
