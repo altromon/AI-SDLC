@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-sdlc.org/schemas/manuals/user-manual.schema.json",
+  "title": "AI-SDLC User Manual Schema",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "title",
+    "status",
+    "version",
+    "target-audience",
+    "allowed-roles",
+    "applies-to-version"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^MAN-USER-[A-Z0-9]+(-[A-Z0-9]+)*$",
+      "description": "Identificador inmutable del manual de usuario (ej. MAN-USER-SENTINELCORE)."
+    },
+    "type": {
+      "type": "string",
+      "const": "user-manual"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
+      "description": "Versión semántica del documento (SemVer)."
+    },
+    "schema-version": {
+      "type": "string",
+      "description": "Versión del esquema de la plantilla."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3,
+      "description": "Título descriptivo del manual de usuario."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "retired"]
+    },
+    "applies-to-version": {
+      "type": "string",
+      "description": "Versión o release del software al que aplica este manual (ej. v1.0.0)."
+    },
+    "target-audience": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "description": "Perfiles o roles de usuario a los que va dirigido el manual."
+    },
+    "allowed-roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "description": "Catálogo formal de roles autorizados para operar la aplicación (vinculados a ACT-*)."
+    },
+    "journeys-covered": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^JRN-[A-Z0-9]+(-[A-Z0-9]+)*$"
+      },
+      "description": "Identificadores de los journeys de producto (JRN-*) cubiertos en el manual."
+    },
+    "use-cases-covered": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^UC-[A-Z0-9]+(-[A-Z0-9]+)*$"
+      },
+      "description": "Identificadores de casos de uso (UC-*) implementados en los journeys."
+    },
+    "supersedes": {
+      "type": ["string", "null"],
+      "pattern": "^MAN-USER-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    },
+    "superseded-by": {
+      "type": ["string", "null"],
+      "pattern": "^MAN-USER-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    }
+  },
+  "additionalProperties": false
+}
