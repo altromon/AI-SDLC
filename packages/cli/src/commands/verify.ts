@@ -1,0 +1,245 @@
+/**
+ * CLI Handler: aisdlc verify
+ */
+
+import pc from 'picocolors';
+import {
+  verifyLicenses,
+  verifyPdacGraph,
+  verifyQualityGate,
+  verifyTasksGovernance,
+  verifyTestingCoverage,
+  verifyTraceability,
+} from '@ai-sdlc/core';
+
+export interface QualityVerifyOptions {
+  root?: string;
+  policy?: string;
+  silent?: boolean;
+  maxCyclomatic?: number | string;
+  maxCognitive?: number | string;
+  minMaintainability?: number | string;
+  maxLines?: number | string;
+  enforceMode?: 'STRICT' | 'PERMISSIVE' | string;
+}
+
+export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
+  const rootDir = options.root || process.cwd();
+  if (!options.silent) {
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Quality Gate (Complejidad y Mantenibilidad)...')));
+  }
+
+  const thresholds = {
+    max_cyclomatic: options.maxCyclomatic !== undefined ? Number(options.maxCyclomatic) : undefined,
+    max_cognitive: options.maxCognitive !== undefined ? Number(options.maxCognitive) : undefined,
+    min_maintainability: options.minMaintainability !== undefined ? Number(options.minMaintainability) : undefined,
+    max_function_lines: options.maxLines !== undefined ? Number(options.maxLines) : undefined,
+    enforce_mode: options.enforceMode,
+  };
+
+  const result = verifyQualityGate({ rootDir, policyPath: options.policy, thresholds });
+
+  if (!options.silent) {
+    console.log(
+      `  Umbrales activos:       CC <= ${result.policy.max_cyclomatic} | Cognitiva <= ${result.policy.max_cognitive} | MI >= ${result.policy.min_maintainability} | Líneas <= ${result.policy.max_function_lines} | Modo: ${result.policy.enforce_mode}`
+    );
+    console.log(`  Archivos analizados:    ${pc.bold(String(result.totalFiles))}`);
+    console.log(`  Funciones evaluadas:    ${pc.bold(String(result.totalFunctions))}`);
+    console.log(`  Funciones conformes:    ${pc.green(String(result.passCount))}`);
+    console.log(`  Funciones con fallos:   ${result.failCount > 0 ? pc.red(String(result.failCount)) : pc.green('0')}`);
+
+    if (result.failCount > 0) {
+      console.log(pc.red('\n  Infracciones detectadas:'));
+      for (const f of result.results.filter((r) => r.status === 'FAIL')) {
+        console.log(`    ${pc.red('✖')} ${pc.bold(f.relPath)} [${f.functionName}]: ${f.violations.join(', ')}`);
+      }
+    }
+  }
+
+  const isOk = result.success;
+  if (!options.silent) {
+    console.log(isOk ? pc.green('\n✔ Release Gate APROBADO\n') : pc.red('\n✖ Release Gate BLOQUEADO\n'));
+  }
+  return isOk;
+}
+
+export function runVerifyTraceability(options: { root?: string; silent?: boolean }): boolean {
+  const rootDir = options.root || process.cwd();
+  if (!options.silent) {
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Trazabilidad 360° (Producto -> Arquitectura -> Pruebas)...')));
+  }
+
+  const result = verifyTraceability({ rootDir });
+
+  if (!options.silent) {
+    console.log(`  Requerimientos totales: ${pc.bold(String(result.totalRequirements))}`);
+    console.log(`  Requerimientos conformes: ${pc.green(String(result.totalRequirements - result.orphanCount))}`);
+    console.log(`  Requerimientos huérfanos: ${result.orphanCount > 0 ? pc.red(String(result.orphanCount)) : pc.green('0')}`);
+
+    if (result.orphanCount > 0) {
+      console.log(pc.red('\n  Brechas de trazabilidad:'));
+      for (const o of result.orphans) {
+        console.log(`    ${pc.red('✖')} [${o.id}] Producto: ${o.productStatus}, Arquitectura: ${o.archStatus}, Pruebas: ${o.testStatus}`);
+      }
+    }
+  }
+
+  const isOk = result.success;
+  if (!options.silent) {
+    console.log(isOk ? pc.green('\n✔ Trazabilidad 360° CONFORME (100%)\n') : pc.red('\n✖ Trazabilidad BLOQUEADA\n'));
+  }
+  return isOk;
+}
+
+export function runVerifyGovernance(options: { root?: string; silent?: boolean }): boolean {
+  const rootDir = options.root || process.cwd();
+  if (!options.silent) {
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Gobierno de Tareas y Clasificación de Autonomía...')));
+  }
+
+  const result = verifyTasksGovernance({ rootDir });
+
+  if (!options.silent) {
+    console.log(`  Tareas totales auditadas: ${pc.bold(String(result.totalTasks))}`);
+    console.log(`  Tareas con verificación:  ${pc.green(String(result.verifiedCount))}`);
+    console.log(`  Tareas sin verificación:  ${result.unverifiedCount > 0 ? pc.red(String(result.unverifiedCount)) : pc.green('0')}`);
+    console.log(`  Distribución de autonomía:`);
+    console.log(`    🟢 AUTONOMOUS:         ${result.modeCounts['AUTONOMOUS'] || 0}`);
+    console.log(`    🟡 HUMAN_REVIEW_PLAN:   ${result.modeCounts['HUMAN_REVIEW_PLAN'] || 0}`);
+    console.log(`    🟠 AMBIGUOUS:           ${result.modeCounts['AMBIGUOUS'] || 0}`);
+    console.log(`    🔴 HIGH_RISK_MANUAL:    ${result.modeCounts['HIGH_RISK_MANUAL'] || 0}`);
+
+    if (result.violations.length > 0) {
+      console.log(pc.red('\n  Infracciones de gobierno:'));
+      for (const v of result.violations) {
+        console.log(`    ${pc.red('✖')} ${v}`);
+      }
+    }
+  }
+
+  const isOk = result.success;
+  if (!options.silent) {
+    console.log(isOk ? pc.green('\n✔ Gobierno de Tareas CONFORME\n') : pc.red('\n✖ Gobierno de Tareas BLOQUEADO\n'));
+  }
+  return isOk;
+}
+
+export function runVerifyTesting(options: { root?: string; silent?: boolean }): boolean {
+  const rootDir = options.root || process.cwd();
+  if (!options.silent) {
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Cobertura de Pruebas en Requisitos y Tareas...')));
+  }
+
+  const result = verifyTestingCoverage({ rootDir });
+
+  if (!options.silent) {
+    console.log(`  Requisitos verificados:   ${pc.green(`${result.passedRequirements}/${result.totalRequirements}`)}`);
+    console.log(`  Tareas verificadas:       ${pc.green(`${result.passedTasks}/${result.totalTasks}`)}`);
+
+    if (result.failedRequirements > 0 || result.failedTasks > 0) {
+      console.log(pc.red('\n  Elementos sin pruebas ejecutables:'));
+      for (const r of result.requirements.filter((r) => r.status !== 'VERIFICADO_CON_PRUEBA')) {
+        console.log(`    ${pc.red('✖')} [Requisito: ${r.id}] ${r.title} (${r.file})`);
+      }
+      for (const t of result.tasks.filter((t) => t.status !== 'VERIFICADO_CON_PRUEBA')) {
+        console.log(`    ${pc.red('✖')} [Tarea: ${t.id}] ${t.title} (${t.file})`);
+      }
+    }
+  }
+
+  const isOk = result.success;
+  if (!options.silent) {
+    console.log(isOk ? pc.green('\n✔ Cobertura de Pruebas CONFORME (100%)\n') : pc.red('\n✖ Cobertura de Pruebas INSUFICIENTE\n'));
+  }
+  return isOk;
+}
+
+export function runVerifyLicenses(options: { root?: string; policy?: string; manifest?: string; silent?: boolean }): boolean {
+  const rootDir = options.root || process.cwd();
+  if (!options.silent) {
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Cumplimiento de Licencias Open Source...')));
+  }
+
+  const result = verifyLicenses({ rootDir, policyPath: options.policy, manifestPath: options.manifest });
+
+  if (!options.silent) {
+    console.log(`  Dependencias evaluadas:   ${pc.bold(String(result.totalEvaluated))}`);
+    console.log(`  Dependencias conformes:   ${pc.green(String(result.permittedCount))}`);
+    console.log(`  Violaciones de licencia:  ${result.violations.length > 0 ? pc.red(String(result.violations.length)) : pc.green('0')}`);
+
+    if (result.violations.length > 0) {
+      console.log(pc.red('\n  Infracciones de licencia detectadas:'));
+      for (const v of result.violations) {
+        console.log(`    ${pc.red('✖')} [${v.category}] ${v.packageName} (${v.license}): ${v.reason}`);
+      }
+    }
+  }
+
+  const isOk = result.success;
+  if (!options.silent) {
+    console.log(isOk ? pc.green('\n✔ Gobernanza de Licencias OSS CONFORME\n') : pc.red('\n✖ Gobernanza de Licencias OSS BLOQUEADA\n'));
+  }
+  return isOk;
+}
+
+export function runVerifyPdac(options: { root?: string; silent?: boolean }): boolean {
+  const rootDir = options.root || process.cwd();
+  if (!options.silent) {
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Grafo PDaC y Deriva Criptográfica (SHA-256)...')));
+  }
+
+  const result = verifyPdacGraph({ rootDir });
+
+  if (!options.silent) {
+    console.log(`  Nodos PDaC en línea base: ${pc.bold(String(result.totalNodes))}`);
+    console.log(`  Citaciones evaluadas:     ${pc.bold(String(result.totalEdges))}`);
+    console.log(`  Derivas criptográficas:   ${result.drifts.length > 0 ? pc.red(String(result.drifts.length)) : pc.green('0')}`);
+
+    if (result.drifts.length > 0) {
+      console.log(pc.red('\n  Derivas detectadas (Estado: STALE):'));
+      for (const d of result.drifts) {
+        console.log(`    ${pc.red('✖')} En ${d.sourceFile} citando ${d.targetId}: digest desalineado.`);
+      }
+    }
+  }
+
+  const isOk = result.success;
+  if (!options.silent) {
+    console.log(isOk ? pc.green('\n✔ Grafo PDaC Libre de Deriva\n') : pc.red('\n✖ Deriva Criptográfica Detectada\n'));
+  }
+  return isOk;
+}
+
+export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
+  console.log(pc.bold(pc.magenta('================================================================')));
+  console.log(pc.bold(pc.magenta('          AI-SDLC: SUITE COMPLETA DE QUALITY GATES Y GOBIERNO    ')));
+  console.log(pc.bold(pc.magenta('================================================================')));
+
+  const root = options.root || process.cwd();
+  const okQuality = runVerifyQuality(options);
+  const okTrace = runVerifyTraceability({ root });
+  const okGov = runVerifyGovernance({ root });
+  const okTest = runVerifyTesting({ root });
+  const okLic = runVerifyLicenses({ root });
+  const okPdac = runVerifyPdac({ root });
+
+  const allPassed = okQuality && okTrace && okGov && okTest && okLic && okPdac;
+
+  console.log(pc.bold(pc.magenta('================================================================')));
+  console.log(pc.bold('RESUMEN DE EVALUACIÓN DE CI/CD:'));
+  console.log(`  1. Quality Gate (Complejidad/Mantenibilidad): ${okQuality ? pc.green('PASSED') : pc.red('FAILED')}`);
+  console.log(`  2. Trazabilidad 360° (RTM):                  ${okTrace ? pc.green('PASSED') : pc.red('FAILED')}`);
+  console.log(`  3. Gobierno y Modos de Autonomía:            ${okGov ? pc.green('PASSED') : pc.red('FAILED')}`);
+  console.log(`  4. Cobertura de Pruebas (Reqs & Tasks):      ${okTest ? pc.green('PASSED') : pc.red('FAILED')}`);
+  console.log(`  5. Licencias Open Source:                    ${okLic ? pc.green('PASSED') : pc.red('FAILED')}`);
+  console.log(`  6. PDaC & Deriva Criptográfica:              ${okPdac ? pc.green('PASSED') : pc.red('FAILED')}`);
+  console.log(pc.bold(pc.magenta('================================================================')));
+
+  if (allPassed) {
+    console.log(pc.bold(pc.green('\n✨ VEREDICTO FINAL: REPOSITORIO CONFORME CON EL ESTÁNDAR AI-SDLC (EXIT 0)\n')));
+    return true;
+  } else {
+    console.log(pc.bold(pc.red('\n⛔ VEREDICTO FINAL: BLOQUEO POR INFRACCIONES DETECTADAS (EXIT 1)\n')));
+    return false;
+  }
+}
