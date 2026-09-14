@@ -95,14 +95,16 @@ AI-SDLC/
 │   ├── security/                             # Schemas: threat-actor, abuse-case, security-req
 │   ├── compliance/                           # Schemas: license-policy, dependency-manifest
 │   ├── architecture/                         # Schemas: component, adr
-│   └── sdd/                                  # Schemas: tasks, handoff
+│   ├── sdd/                                  # Schemas: tasks, handoff
+│   └── manuals/                              # Schemas: user-manual, production-manual
 │
 ├── templates/                                # Plantillas estándar Markdown con YAML frontmatter
 │   ├── product/                              # Plantillas ACT, JRN, UC, BR, FR, QR, CON
 │   ├── security/                             # Plantillas THREAT, ABUSE, SEC-REQ, SEC-POL
 │   ├── compliance/                           # Plantillas CON-LIC, ADR-LIC, Solicitud de Compra
 │   ├── architecture/                         # Plantillas arc42 (01-12) enriquecidas con NAF v4
-│   └── sdd/                                  # Plantillas SDD (Proposal, Spec, Tasks, Handoff)
+│   ├── sdd/                                  # Plantillas SDD (Proposal, Spec, Tasks, Handoff)
+│   └── manuals/                              # Plantillas MAN-USER (Manual de Usuario), MAN-PROD (Manual de Producción)
 │
 └── examples/                                 # Caso de Estudio Realista: "SentinelCore" (SaaS Telemétrico Crítico)
     ├── product/                              # Modelo canónico de producto
@@ -110,6 +112,7 @@ AI-SDLC/
     ├── compliance/                           # Manifiesto de dependencias evaluadas
     ├── architecture/                         # Arquitectura arc42 + NAF v4 con enclaves
     ├── specs/                                # Especificación de entrega SDD con citaciones criptográficas
+    ├── manuals/                              # Manual de Usuario y de Producción del caso de estudio
     ├── src/                                  # Implementación del caso de estudio (TS, Go, Python)
     └── tests/                                # Pruebas unitarias, BDD y benchmarks del caso de estudio
 ```
