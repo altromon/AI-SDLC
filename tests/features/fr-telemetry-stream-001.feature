@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: examples\product\FR-TELEMETRY-STREAM-001.md
+# Origen: examples/product/FR-TELEMETRY-STREAM-001.md
 # ID Requerimiento: FR-TELEMETRY-STREAM-001
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

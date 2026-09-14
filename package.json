@@ -1,26 +1,34 @@
 {
-  "name": "ai-sdlc-framework",
+  "name": "ai-sdlc-monorepo",
   "version": "1.0.0",
   "description": "Deterministic, spec-driven development and governance framework for AI-assisted engineering",
   "private": true,
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "build": "tsc",
-    "extract:gherkin": "tsx scripts/extract-gherkin.ts",
-    "extract:gherkin:all": "tsx scripts/extract-gherkin.ts --all",
-    "git:validate": "tsx scripts/git-workflow-helper.ts validate",
-    "git:plan": "tsx scripts/git-workflow-helper.ts plan",
-    "verify:governance": "tsx scripts/verify-tasks-governance.ts",
-    "verify:testing": "tsx scripts/verify-all-testing.ts",
-    "verify:quality": "tsx scripts/verify-quality-gate.ts",
-    "verify:traceability": "tsx scripts/verify-traceability.ts",
-    "report:quality": "tsx scripts/generate-quality-report.ts"
+    "build": "pnpm --filter \"@ai-sdlc/*\" build",
+    "test": "vitest run",
+    "typecheck": "pnpm --filter \"@ai-sdlc/*\" typecheck",
+    "extract:gherkin": "tsx packages/cli/src/index.ts gherkin extract",
+    "extract:gherkin:all": "tsx packages/cli/src/index.ts gherkin extract --all",
+    "git:validate": "tsx packages/cli/src/index.ts git validate",
+    "git:plan": "tsx packages/cli/src/index.ts git plan",
+    "verify:governance": "tsx packages/cli/src/index.ts verify governance",
+    "verify:testing": "tsx packages/cli/src/index.ts verify testing",
+    "verify:quality": "tsx packages/cli/src/index.ts verify quality",
+    "verify:traceability": "tsx packages/cli/src/index.ts verify traceability",
+    "verify:licenses": "tsx packages/cli/src/index.ts verify licenses",
+    "verify:all": "tsx packages/cli/src/index.ts verify all",
+    "report:quality": "tsx packages/cli/src/index.ts report quality",
+    "changeset": "changeset"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
+    "@changesets/cli": "^2.27.12",
     "@types/node": "^22.10.1",
+    "eslint": "^9.16.0",
+    "prettier": "^3.4.2",
+    "tsup": "^8.3.6",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   },
   "engines": {
     "node": ">=18.0.0"

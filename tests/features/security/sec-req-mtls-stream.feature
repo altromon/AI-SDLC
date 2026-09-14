@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: examples\security\SEC-REQ-MTLS-STREAM.md
+# Origen: examples/security/SEC-REQ-MTLS-STREAM.md
 # ID Requerimiento: SEC-REQ-MTLS-STREAM
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

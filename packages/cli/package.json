@@ -1,0 +1,35 @@
+{
+  "name": "@ai-sdlc/cli",
+  "version": "1.0.0",
+  "description": "Command line interface for AI-SDLC quality gates, governance, and scaffolding",
+  "type": "module",
+  "bin": {
+    "aisdlc": "./bin/aisdlc.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ai-sdlc/core": "workspace:*",
+    "commander": "^13.1.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

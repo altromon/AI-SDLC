@@ -11,7 +11,7 @@ citations:
     digest: "sha256:5e5818cf2cc6d489f5d1b23cd4b61afac715cfc57a68fd44915b4adccd569cb8"
     comment: "Caso de uso que define la transmisión continua de telemetría a 10 Hz."
   - id: "FR-TELEMETRY-STREAM-001"
-    digest: "sha256:90abe4cb38ab485d09cad568d198e903a9e85e0f9fc99bd50c5a69bd974ec1ea"
+    digest: "sha256:ad9e72840757ec009a610093476ea485c57dbb7cacb515ea27e8c8c153352e27"
     comment: "Requerimiento funcional de ingesta con trazabilidad 360° y criterios Gherkin/Cucumber."
   - id: "SEC-REQ-MTLS-STREAM"
     digest: "sha256:57f0c2ad1059aafdb6b3c140c074abbe8ee6f6c61e9733c69454f1551ed3397d"

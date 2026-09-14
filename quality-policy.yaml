@@ -40,6 +40,8 @@ scope:
     - "obj"
     - ".git"
     - "reports"
+    - "dist"
+    - ".changeset"
 
 # ------------------------------------------------------------------------------
 # 1. Mapeo de Ecosistemas de Lenguaje (Language Toolchains)

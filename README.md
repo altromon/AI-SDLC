@@ -72,6 +72,10 @@ AI-SDLC/
 ├── README.md                                 # Esta guía
 ├── license-policy.yaml                       # Política declarativa de licencias permitidas/bloqueadas
 │
+├── packages/                                 # Monorepo Workspace (pnpm + Changesets)
+│   ├── core/                                 # @ai-sdlc/core: Motor de dominio, verificadores puros y reporters
+│   └── cli/                                  # @ai-sdlc/cli: CLI ejecutable binario (npx aisdlc)
+│
 ├── process/                                  # Especificación Normativa del Proceso
 │   ├── 00_principles_and_manifesto.md        # Manifiesto y principios fundamentales
 │   ├── 01_governance_and_roles.md            # Matriz RACI Persona-Agente y autorizaciones
@@ -115,48 +119,62 @@ Si deseas poner a prueba el framework de inmediato utilizando el caso de estudio
 
 ### 1. Prerrequisitos
 - **Node.js** (v18.0 o superior): `node -v`
+- **pnpm** (v9 o v10+): `pnpm -v`
 - **Git** (v2.30 o superior): `git --version`
 
-### 2. Flujo de Ejecución en 7 Pasos
+### 2. Flujo de Ejecución Rápida con el CLI `@ai-sdlc/cli`
 
-Ejecuta secuencialmente en tu terminal:
+Puedes ejecutar la suite completa de calidad y gobernanza en un único comando determinista:
+
+```bash
+# Ejecución consolidada de todos los Quality Gates en CI/CD
+pnpm run verify:all                           # o: npx aisdlc verify all
+```
+
+O ejecutar cada gate de forma granular:
 
 ```bash
 # 1. Extraer los escenarios Gherkin BDD desde las especificaciones a archivos .feature
-npx tsx scripts/extract-gherkin.ts --all        # o: npm run extract:gherkin:all
+pnpm run extract:gherkin:all                  # o: npx aisdlc gherkin extract --all
 
 # 2. Planificar la jerarquía de ramas Git de 4 tiers para una versión y feature
-npx tsx scripts/git-workflow-helper.ts plan --version v1.1.0 --feature CHG-001-telemetry-ingestion --tasks TSK-001,TSK-002
+pnpm run git:plan                             # o: npx aisdlc git plan --release v1.1.0 --feature CHG-001-telemetry
 
-# 3. Auditar el gobierno de tareas y modos de autonomía humana (AUTONOMOUS, HUMAN_REVIEW_PLAN, etc.)
-npx tsx scripts/verify-tasks-governance.ts      # o: npm run verify:governance
+# 3. Auditar el gobierno de tareas y modos de autonomía humana
+pnpm run verify:governance                    # o: npx aisdlc verify governance
 
 # 4. Auditar que el 100% de requisitos y tareas cuentan con pruebas verificables en disco
-npx tsx scripts/verify-all-testing.ts          # o: npm run verify:testing
+pnpm run verify:testing                       # o: npx aisdlc verify testing
 
 # 5. Ejecutar el Release Gate de Calidad (Complejidad Ciclomática <= 10, Mantenibilidad >= 50)
-npx tsx scripts/verify-quality-gate.ts         # o: npm run verify:quality
+pnpm run verify:quality                       # o: npx aisdlc verify quality
 
-# 6. Generar el informe de métricas de calidad multilenguaje (TypeScript, Go, Python, etc.)
-npx tsx scripts/generate-quality-report.ts     # o: npm run report:quality
+# 6. Auditar la Matriz de Trazabilidad 360° (Producto -> Arquitectura -> Pruebas)
+pnpm run verify:traceability                  # o: npx aisdlc verify traceability
 
-# 7. Auditar la Matriz de Trazabilidad 360° (Producto -> Arquitectura -> Pruebas)
-npx tsx scripts/verify-traceability.ts         # o: npm run verify:traceability
+# 7. Auditar la Gobernanza de Licencias Open Source
+pnpm run verify:licenses                      # o: npx aisdlc verify licenses
+
+# 8. Generar el informe formal de métricas de calidad multilenguaje
+pnpm run report:quality                       # o: npx aisdlc report quality
 ```
 
-### 3. Resumen Rápido de Herramientas CLI (Cheat Sheet)
+### 3. Resumen de Comandos del CLI (`aisdlc`)
 
-| Herramienta / Comando | Comando npm | Propósito | Salida Generada |
+| Herramienta / Comando CLI | Comando pnpm equivalente | Propósito | Salida Generada |
 |---|---|---|---|
-| `npx tsx scripts/extract-gherkin.ts --all` | `npm run extract:gherkin:all` | Sincroniza bloques Gherkin a `.feature` | `tests/features/*.feature` |
-| `npx tsx scripts/git-workflow-helper.ts plan` | `npm run git:plan` | Planifica ramas jerárquicas (4 tiers) | Árbol visual en terminal |
-| `npx tsx scripts/git-workflow-helper.ts validate <branch>` | `npm run git:validate <branch>` | Valida nomenclatura de rama | Veredicto Tier 1 a 4 |
-| `npx tsx scripts/verify-tasks-governance.ts` | `npm run verify:governance` | Audita riesgos y modos de autonomía | `reports/TASKS_GOVERNANCE_REPORT.md` |
-| `npx tsx scripts/verify-all-testing.ts` | `npm run verify:testing` | Audita cobertura de pruebas en specs y tasks | `reports/TEST_VERIFICATION_AUDIT.md` |
-| `npx tsx scripts/verify-quality-gate.ts` | `npm run verify:quality` | Release Gate: Complejidad y Mantenibilidad | Veredicto `PASS`/`FAIL` por función |
-| `npx tsx scripts/generate-quality-report.ts` | `npm run report:quality` | Reporte formal de calidad de código | `reports/QUALITY_REPORT.md` |
-| `npx tsx scripts/verify-traceability.ts` | `npm run verify:traceability` | Valida Trazabilidad 360° | `reports/TRACEABILITY_MATRIX.md` |
-| `npx tsc --noEmit` | `npm run typecheck` | Auditoría de tipos estricta del proyecto | Verificación estática TypeScript |
+| `npx aisdlc verify all` | `pnpm run verify:all` | Suite completa de CI/CD (6 Gates) | Dashboard consolidado con Exit 0/1 |
+| `npx aisdlc verify quality` | `pnpm run verify:quality` | Release Gate: Complejidad y Mantenibilidad | Veredicto `PASS`/`FAIL` por función |
+| `npx aisdlc verify traceability` | `pnpm run verify:traceability` | Valida Trazabilidad 360° | `reports/TRACEABILITY_MATRIX.md` |
+| `npx aisdlc verify governance` | `pnpm run verify:governance` | Audita riesgos y modos de autonomía | `reports/TASKS_GOVERNANCE_REPORT.md` |
+| `npx aisdlc verify testing` | `pnpm run verify:testing` | Audita cobertura de pruebas en specs y tasks | `reports/TEST_VERIFICATION_AUDIT.md` |
+| `npx aisdlc verify licenses` | `pnpm run verify:licenses` | Cumplimiento estricto de licencias OSS | `reports/LICENSE_COMPLIANCE_REPORT.md` |
+| `npx aisdlc verify pdac` | `npx aisdlc verify pdac` | Detección de deriva criptográfica SHA-256 | `reports/PDAC_INTEGRITY_REPORT.md` |
+| `npx aisdlc report quality` | `pnpm run report:quality` | Reporte formal políglota de calidad | `reports/QUALITY_REPORT.md` |
+| `npx aisdlc gherkin extract --all` | `pnpm run extract:gherkin:all` | Sincroniza bloques Gherkin a `.feature` | `tests/features/*.feature` |
+| `npx aisdlc git plan` | `pnpm run git:plan` | Planifica ramas jerárquicas (4 tiers) | Árbol visual en terminal |
+| `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | Valida nomenclatura de rama | Veredicto Tier 1 a 4 |
+| `npx aisdlc init [dir]` | - | Inicializa un nuevo repo con AI-SDLC | Estructura de carpetas y políticas |
 
 ---
 
