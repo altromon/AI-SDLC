@@ -137,5 +137,4 @@ Para transferir la definición de producto a la fase de implementación sin intr
 
 2. **Depósito como Archivos de Acompañamiento (*Sidecars*)**:
    - Mediante los adaptadores formales del AI-SDLC (`OpenSpecAdapter` y `SpecKitAdapter`), el handoff se deposita como un archivo `handoff.yaml` directamente en el espacio de trabajo del cambio (`specs/changes/active/<change-id>/` o `specs/<change-id>/`).
-   - El esquema formal [`schemas/delivery/handoff.schema.json`](file:///c:/Users/reypo/Documents/Workspace/AI-SDLC/schemas/delivery/handoff.schema.json) garantiza que ningún agente pueda corromper el contrato de entrega emitido por PDaC.
-
+   - El esquema formal [`schemas/sdd/handoff.schema.json`](file:///c:/Users/reypo/Documents/Workspace/AI-SDLC/schemas/sdd/handoff.schema.json) garantiza que ningún agente pueda corromper el contrato de entrega emitido por PDaC.

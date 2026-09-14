@@ -180,9 +180,10 @@ export function verifyPdacGraph(options: PdacGraphOptions = {}): PdacGraphResult
         });
       }
 
-      // Also collect citations from specs, delivery, and change directories (ignore templates/ and process/)
+      // Also collect citations from specs, sdd, delivery, and change directories (ignore templates/ and process/)
       const isDeliveryDoc =
         (relFile.startsWith('specs/') ||
+          relFile.startsWith('sdd/') ||
           relFile.startsWith('delivery/') ||
           relFile.startsWith('changes/') ||
           relFile.includes('/specs/') ||
