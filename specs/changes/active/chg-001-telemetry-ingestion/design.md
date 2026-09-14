@@ -11,10 +11,10 @@ enclave: "SEC-ENC-DMZ-INGEST"
 status: approved
 citations:
   - id: "FR-TELEMETRY-STREAM-001"
-    digest: "sha256:ad9e72840757ec009a610093476ea485c57dbb7cacb515ea27e8c8c153352e27"
+    digest: "sha256:cc642276f282fc911986b14beaa3e535d06d97e2f94978ce9fbc9329699e3bae"
     comment: "Requerimiento funcional de ingesta continua."
   - id: "SEC-REQ-MTLS-STREAM"
-    digest: "sha256:57f0c2ad1059aafdb6b3c140c074abbe8ee6f6c61e9733c69454f1551ed3397d"
+    digest: "sha256:77b27bf76db7846b7163b4b61d70fa0bac7e236be29092ebfeea3d664ffeb6ea"
     comment: "Autenticación mTLS obligatoria en enclave perimetral."
   - id: "SRV-TELEMETRY-INGEST"
     digest: "sha256:9be352c27673c5d705357083ae6f259ef23a61fcc77ea0b0033813850c09a9de"

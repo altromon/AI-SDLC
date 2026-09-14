@@ -12,21 +12,13 @@ category: functional # functional, quality, constraint
 derives-from:
   - UC-ACCION-001
 
-# 2. TRAZABILIDAD A ARQUITECTURA (Midstream)
-implemented-by-services:
-  - SRV-NOMBRE-001
-
-# 3. TRAZABILIDAD A PRUEBAS (Downstream)
+# 2. MÉTODO Y CRITERIOS DE ACEPTACIÓN
 verifiable-by: cucumber-bdd # cucumber-bdd, automated-unit-test, integration-test, performance-benchmark
 acceptance-format: gherkin # gherkin, declarative-prose
 cucumber-tags:
   - "@FR-FUNCIONALIDAD-001"
   - "@automated"
   - "@regression"
-cucumber-feature-file: "tests/features/fr-funcionalidad-001.feature"
-verified-by-tests:
-  - "tests/features/fr-funcionalidad-001.feature"
-  - "tests/unit/controlador-funcionalidad.spec.ts"
 
 supersedes: null
 superseded-by: null
@@ -39,13 +31,13 @@ El sistema DEBE [descripción inequívoca y atómica del comportamiento esperado
 
 ---
 
-## 2. Matriz de Trazabilidad del Requerimiento (RTM)
+## 2. Trazabilidad Ascendente (Upstream)
 
 | Dimensión | Enlace / Artefacto | Tipo de Relación | Estado |
 | :--- | :--- | :--- | :--- |
 | **Producto (Upstream)** | `UC-ACCION-001` | Derivado de Caso de Uso | Validado |
-| **Arquitectura (Midstream)** | `SRV-NOMBRE-001` | Implementado por Servicio NAF/arc42 | Asignado |
-| **Pruebas (Downstream)** | `tests/features/fr-funcionalidad-001.feature` | Verificado por Cucumber BDD | Automatizado |
+
+> *Nota: La trazabilidad hacia Arquitectura y Pruebas se mantiene de forma inversa; los servicios declaran `satisfies-requirements` y las suites de prueba etiquetan o citan este requerimiento.*
 
 ---
 

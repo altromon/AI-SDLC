@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * SentinelCore: Pruebas Unitarias del Gateway de Ingesta (FR-001 / SEC-REQ-001)
+ * SentinelCore: Pruebas Unitarias del Gateway de Ingesta (FR-TELEMETRY-STREAM-001 / SEC-REQ-MTLS-STREAM)
  * ==============================================================================
  */
 

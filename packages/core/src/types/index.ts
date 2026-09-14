@@ -65,10 +65,8 @@ export interface ArtifactFrontmatter {
   'satisfies-requirements'?: string[];
   'derives-from'?: string | string[];
   'mitigates-abuse-case'?: string | string[];
-  'implemented-by-services'?: string | string[];
   'enforced-in-enclave'?: string;
-  'cucumber-feature-file'?: string;
-  'verified-by-tests'?: string[];
+  'cucumber-tags'?: string[];
   [key: string]: unknown;
 }
 

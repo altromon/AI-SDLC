@@ -67,6 +67,13 @@ Para evitar inconsistencias y enlaces recíprocos rotos:
 - **Las vistas inversas siempre son derivadas y compiladas automáticamente:**
   - Ningún archivo de contexto escribe `owns-terms`; la herramienta compila qué términos pertenecen al contexto evaluando los `defined-in`.
   - Ningún actor escribe `participates-in-use-cases`; se compila a partir de los casos de uso.
+- **Trazabilidad Invertida hacia Requisitos (Dependency Inversion):**
+  - Ningún requisito (`FR-*`, `QR-*`, `SEC-REQ-*`) almacena punteros descendentes como servicios donde se implementa o rutas de archivos de prueba donde se verifica.
+  - Esto evita acoplar el producto abstracto al código concreto, previene conflictos de merge en Git y elimina falsas invalidaciones de los digests criptográficos SHA-256 de PDaC.
+  - Son los artefactos descendentes los que declaran la satisfacción hacia arriba:
+    - Los servicios de arquitectura (`SRV-*`) declaran `satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`.
+    - Las pruebas unitarias, de integración y escenarios BDD declaran etiquetas `@<REQ-ID>` o citaciones en sus cabeceras.
+  - El motor de calidad (`aisdlc verify traceability`) compila la **Matriz de Trazabilidad 360°** de forma determinista mediante resolución inversa (*Reverse Lookup*).
 
 ---
 

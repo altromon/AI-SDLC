@@ -8,17 +8,12 @@ schema-version: "1.0"
 category: functional
 derives-from:
   - UC-STREAM-TELEMETRY
-implemented-by-services:
-  - SRV-TELEMETRY-INGEST
 verifiable-by: cucumber-bdd
 acceptance-format: gherkin
 cucumber-tags:
   - "@FR-TELEMETRY-STREAM-001"
   - "@telemetry"
   - "@automated"
-cucumber-feature-file: "tests/features/fr-telemetry-stream-001.feature"
-verified-by-tests:
-  - "tests/features/fr-telemetry-stream-001.feature"
 supersedes: null
 superseded-by: null
 ---

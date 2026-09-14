@@ -145,3 +145,8 @@ Para desacoplar los entornos de trabajo de agentes de entrega (SDD) de la lectur
 2. **Invarianza y Detección de Deriva**:
    - Si un archivo canónico de la línea base es modificado en `main`, el verificador `aisdlc verify traceability` detecta la divergencia de hash frente al `handoff.yaml` activo, bloqueando la entrega hasta que se re-emita el handoff y se re-apruebe el cambio.
 
+3. **Inmunidad ante Deriva Falsa por Trazabilidad Invertida**:
+   - Al no almacenar punteros descendentes (servicios o rutas de tests) dentro de los requerimientos canónicos, los artefactos de producto y seguridad (`FR-*`, `QR-*`, `SEC-REQ-*`) permanecen inmutables ante refactorizaciones de código o reorganización de suites de prueba.
+   - Esto erradica falsas alarmas de deriva (*stale citations*) y garantiza que los digests SHA-256 de las citaciones PDaC sólo cambien cuando realmente evolucione la intención o especificación funcional del negocio.
+
+

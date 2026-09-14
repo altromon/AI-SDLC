@@ -220,18 +220,19 @@ Este tutorial exhaustivo describe cómo construir una nueva funcionalidad desde 
    ```
 
 2. **Completar Frontmatter y Escenarios de Aceptación**:
-   Todo requerimiento debe declarar a qué caso de uso (`UC-*`) pertenece y qué archivos de prueba ejecutables (`.feature`) tiene vinculados:
+   Todo requerimiento debe declarar a qué caso de uso (`UC-*`) pertenece y sus criterios de verificación:
    ```markdown
    ---
    id: "FR-TELEMETRY-STREAM-001"
    title: "Ingesta Continua de Telemetría de Vuelo"
    status: "approved"
-   part-of:
+   derives-from:
      - "UC-STREAM-TELEMETRY"
-   tests:
-     method: "cucumber-bdd"
-     linked-test-files:
-       - "tests/features/fr-telemetry-stream-001.feature"
+   verifiable-by: "gherkin-bdd"
+   acceptance-format: "gherkin"
+   cucumber-tags:
+     - "@FR-TELEMETRY-STREAM-001"
+     - "@automated"
    ---
 
    ### Criterios de Aceptación (Gherkin BDD)
@@ -251,7 +252,7 @@ Este tutorial exhaustivo describe cómo construir una nueva funcionalidad desde 
    ```bash
    npx tsx scripts/extract-gherkin.ts --all
    ```
-   *Efecto*: Extrae los bloques ````gherkin```` del Markdown y genera o actualiza los archivos `.feature` en `tests/features/`.
+   *Efecto*: Extrae los bloques ````gherkin```` del Markdown y genera o actualiza los archivos `.feature` en `tests/features/` según convención determinista.
 
 ---
 
@@ -269,14 +270,13 @@ Este tutorial exhaustivo describe cómo construir una nueva funcionalidad desde 
    ---
    id: "SEC-REQ-MTLS-STREAM"
    title: "Autenticación Mutua TLS Obligatoria para Ingesta"
+   status: "approved"
+   category: "authentication"
    mitigates:
      - "ABUSE-TELEMETRY-SPOOFING"
    enclaves:
      - "SEC-ENC-DMZ-INGEST"
-   tests:
-     method: "cucumber-bdd"
-     linked-test-files:
-       - "tests/features/security/sec-req-mtls-stream.feature"
+   verifiable-by: "unit-test"
    ---
    ```
 
@@ -426,6 +426,10 @@ Verifica que el código cumpla con los umbrales de `quality-policy.yaml`:
 2. **Pull Request y Aprobación Humana**:
    - Se abre el Pull Request de la tarea hacia la rama feature, y luego hacia la rama release.
    - **Intervención Humana Innegociable**: El Tech Lead humano inspecciona el diff y los informes generados en `reports/` antes de autorizar el merge final a producción.
+
+> [!TIP]
+> **Modelo de Trazabilidad Invertida (Inverted Traceability)**:
+> Los requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`) no acoplan rutas de implementación ni de tests descendentes. Son los servicios (`satisfies-requirements`) y las pruebas (`@<REQ-ID>` o citaciones en tests) los que referencian hacia arriba a los requerimientos. La herramienta compila la matriz 360° deterministamente mediante resolución inversa (*Reverse Lookup*), protegiendo la inmutabilidad y los hashes SHA-256 de las especificaciones canónicas de producto.
 
 ---
 

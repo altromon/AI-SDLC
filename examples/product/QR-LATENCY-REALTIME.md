@@ -11,14 +11,8 @@ category: quality
 derives-from:
   - UC-STREAM-TELEMETRY
 
-# 2. TRAZABILIDAD A ARQUITECTURA (Midstream)
-implemented-by-services:
-  - SRV-TELEMETRY-INGEST
-
-# 3. TRAZABILIDAD A PRUEBAS (Downstream)
+# 2. MÉTODO DE VERIFICACIÓN
 verifiable-by: performance-benchmark
-verified-by-tests:
-  - "tests/benchmarks/latency_benchmark.spec.ts"
 
 supersedes: null
 superseded-by: null
@@ -31,13 +25,11 @@ El 99.9% de los paquetes telemétricos (p99.9) recibidos en el gateway de ingest
 
 ---
 
-## 2. Matriz de Trazabilidad 360°
+## 2. Trazabilidad Ascendente (Upstream)
 
 | Dimensión | Artefacto / Archivo | Estado |
 | :--- | :--- | :--- |
 | **Producto** | `UC-STREAM-TELEMETRY` | Conforme |
-| **Arquitectura** | `SRV-TELEMETRY-INGEST` | Conforme |
-| **Pruebas** | `tests/benchmarks/latency_benchmark.spec.ts` | Benchmark Automatizado |
 
 ---
 

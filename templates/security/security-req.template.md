@@ -11,24 +11,17 @@ security-domain: authentication # authentication, authorization, cryptography, i
 mitigates-abuse-case:
   - ABUSE-NOMBRE-001
 
-# 2. TRAZABILIDAD A ARQUITECTURA (Midstream)
-implemented-by-services:
-  - SRV-NOMBRE-001
 enforced-in-enclave: SEC-ENC-DMZ-001
 compliance-references:
   - "OWASP-ASVS-V2.1"
   - "ISO-27001-A.9"
 
-# 3. TRAZABILIDAD A PRUEBAS (Downstream)
+# 2. MÉTODO Y CRITERIOS DE MITIGACIÓN
 acceptance-format: gherkin
 cucumber-tags:
   - "@SEC-REQ-CONTROL-001"
   - "@security"
   - "@mitigation"
-cucumber-feature-file: "tests/features/security/sec-req-control-001.feature"
-verified-by-tests:
-  - "tests/features/security/sec-req-control-001.feature"
-  - "tests/security/tls-handshake-mitigation.spec.ts"
 
 supersedes: null
 superseded-by: null
@@ -41,13 +34,13 @@ El sistema DEBE [descripción precisa del mecanismo de defensa criptográfico, d
 
 ---
 
-## 2. Matriz de Trazabilidad de Seguridad (RTM)
+## 2. Trazabilidad Ascendente (Upstream)
 
 | Dimensión | Enlace / Artefacto | Tipo de Relación | Estado |
 | :--- | :--- | :--- | :--- |
 | **Producto / Amenaza (Upstream)** | `ABUSE-NOMBRE-001` | Mitiga Caso de Abuso | Validado |
-| **Arquitectura (Midstream)** | `SRV-NOMBRE-001` / `SEC-ENC-DMZ-001` | Alojado en Enclave Perimetral | Diseñado |
-| **Pruebas (Downstream)** | `tests/features/security/sec-req-control-001.feature` | Verificado con Cucumber Negativo | Automatizado |
+
+> *Nota: La trazabilidad hacia Arquitectura y Pruebas se mantiene de forma inversa; los servicios declaran `satisfies-requirements` y las suites de prueba de seguridad etiquetan o citan este requerimiento.*
 
 ---
 

@@ -72,8 +72,9 @@ Para garantizar que ninguna amenaza quede sin mitigar:
    - Todo `ABUSE-*` debe estar vinculado a al menos un `SEC-REQ-*` mediante la relación `mitigated-by`.
 2. **Regla de Implementación**:
    - Toda especificación de entrega (`SPEC-*`) que implemente un servicio o componente debe citar los `SEC-REQ-*` aplicables.
-3. **Regla de Verificación (Threat-to-Test)**:
-   - Todo `SEC-REQ-*` implementado debe contar con al menos una prueba automatizada (`SEC-TEST-*`) que valide activamente el rechazo del ataque o el cumplimiento del control criptográfico.
+3. **Regla de Verificación (Threat-to-Test) y Trazabilidad Invertida**:
+   - Todo `SEC-REQ-*` implementado debe contar con al menos una prueba automatizada (`SEC-TEST-*`, `.spec.ts` o `.feature`) que valide activamente el rechazo del ataque o el cumplimiento del control criptográfico.
+   - Siguiendo el modelo de trazabilidad invertida, el archivo `SEC-REQ-*` no almacena rutas de pruebas; son los archivos de prueba los que etiquetan (`@SEC-REQ-*`) o citan el requisito en sus comentarios de cabecera, permitiendo la resolución inversa y preservando la inmutabilidad criptográfica de la especificación de seguridad.
 
 ---
 
