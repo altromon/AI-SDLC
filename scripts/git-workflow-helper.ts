@@ -10,20 +10,40 @@
  *   4. task/<PARENT-ID>/<TSK-ID>-<slug> (A partir de la feature o bug)
  *
  * Uso:
- *   node scripts/git-workflow-helper.js validate <nombre-rama>
- *   node scripts/git-workflow-helper.js plan --version v1.1.0 --feature CHG-001-telemetry --tasks TSK-001,TSK-002
+ *   npx tsx scripts/git-workflow-helper.ts validate <nombre-rama>
+ *   npx tsx scripts/git-workflow-helper.ts plan --version v1.1.0 --feature CHG-001-telemetry --tasks TSK-001,TSK-002
  * ==============================================================================
  */
 
-const BRANCH_PATTERNS = {
+export const BRANCH_PATTERNS = {
   MAIN: /^main$/,
   RELEASE: /^release\/v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$/,
   FEATURE: /^(feat|feature)\/(?:v[0-9]+\.[0-9]+\.[0-9]+\/)?([a-zA-Z0-9]+-[a-zA-Z0-9-]+)$/,
   BUG: /^(bug|fix)\/(?:v[0-9]+\.[0-9]+\.[0-9]+\/)?([a-zA-Z0-9]+-[a-zA-Z0-9-]+)$/,
   TASK: /^task\/([a-zA-Z0-9]+-[a-zA-Z0-9-]+)\/([a-zA-Z0-9]+-[a-zA-Z0-9-]+)$/
-};
+} as const;
 
-function classifyBranch(branchName) {
+export interface BranchValidationSuccess {
+  valid: true;
+  tier: 1 | 2 | 3 | 4;
+  tierName: string;
+  parentRequirement: string;
+  targetMerge: string;
+  id?: string;
+  parentId?: string;
+  taskId?: string;
+}
+
+export interface BranchValidationError {
+  valid: false;
+  tier: 0;
+  tierName: 'Inválido';
+  error: string;
+}
+
+export type BranchClassificationResult = BranchValidationSuccess | BranchValidationError;
+
+export function classifyBranch(branchName: string): BranchClassificationResult {
   if (BRANCH_PATTERNS.MAIN.test(branchName)) {
     return {
       valid: true,
@@ -89,7 +109,7 @@ function classifyBranch(branchName) {
   };
 }
 
-function printPlan(version, feature, tasksList) {
+export function printPlan(version: string, feature: string, tasksList: string): void {
   const vBranch = `release/${version}`;
   const fBranch = `feat/${feature}`;
 
@@ -113,13 +133,13 @@ function printPlan(version, feature, tasksList) {
   console.log(`  task/* ➔ [PR Tarea] ➔ ${fBranch} ➔ [PR Feature + Quality Gate] ➔ ${vBranch} ➔ [PR Release] ➔ main\n`);
 }
 
-function main() {
+export function main(): void {
   const args = process.argv.slice(2);
 
   if (args.length === 0 || args[0] === '--help') {
     console.log(`Uso:`);
-    console.log(`  node scripts/git-workflow-helper.js validate <nombre-rama>`);
-    console.log(`  node scripts/git-workflow-helper.js plan --version <vX.Y.Z> --feature <feat-slug> --tasks <TSK-1,TSK-2>`);
+    console.log(`  npx tsx scripts/git-workflow-helper.ts validate <nombre-rama>`);
+    console.log(`  npx tsx scripts/git-workflow-helper.ts plan --version <vX.Y.Z> --feature <feat-slug> --tasks <TSK-1,TSK-2>`);
     process.exit(0);
   }
 
@@ -164,4 +184,6 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}

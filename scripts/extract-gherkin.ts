@@ -7,28 +7,40 @@
  * y genera archivos .feature listos para su ejecución con Cucumber.js o Cucumber JVM.
  *
  * Uso:
- *   node scripts/extract-gherkin.js <archivo.md o directorio>
- *   node scripts/extract-gherkin.js examples/product/FR-TELEMETRY-STREAM-001.md
- *   node scripts/extract-gherkin.js --all
+ *   npx tsx scripts/extract-gherkin.ts <archivo.md o directorio>
+ *   npx tsx scripts/extract-gherkin.ts examples/product/FR-TELEMETRY-STREAM-001.md
+ *   npx tsx scripts/extract-gherkin.ts --all
  * ==============================================================================
  */
 
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
-function parseFrontmatter(content) {
+export interface MarkdownFrontmatter {
+  id?: string;
+  version?: string;
+  'cucumber-feature-file'?: string;
+  [key: string]: string | undefined;
+}
+
+export interface ParsedMarkdown {
+  frontmatter: MarkdownFrontmatter;
+  body: string;
+}
+
+export function parseFrontmatter(content: string): ParsedMarkdown {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return { frontmatter: {}, body: content };
 
   const yamlLines = match[1].split('\n');
-  const frontmatter = {};
+  const frontmatter: MarkdownFrontmatter = {};
 
   for (const line of yamlLines) {
     const parts = line.split(':');
     if (parts.length >= 2) {
       const key = parts[0].trim();
       let val = parts.slice(1).join(':').trim();
-      // Remove quotes if present
+      // Eliminar comillas envolventes si existen
       if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
         val = val.substring(1, val.length - 1);
       }
@@ -40,17 +52,17 @@ function parseFrontmatter(content) {
   return { frontmatter, body };
 }
 
-function extractGherkinBlock(body) {
+export function extractGherkinBlock(body: string): string[] {
   const gherkinRegex = /```gherkin\r?\n([\s\S]*?)\r?\n```/g;
-  const blocks = [];
-  let match;
+  const blocks: string[] = [];
+  let match: RegExpExecArray | null;
   while ((match = gherkinRegex.exec(body)) !== null) {
     blocks.push(match[1].trim());
   }
   return blocks;
 }
 
-function processFile(filePath, outDir = null) {
+export function processFile(filePath: string, outDir: string | null = null): boolean {
   if (!fs.existsSync(filePath)) {
     console.error(`[ERROR] Archivo no encontrado: ${filePath}`);
     return false;
@@ -95,7 +107,7 @@ function processFile(filePath, outDir = null) {
   return true;
 }
 
-function walkDir(dir, fileList = []) {
+export function walkDir(dir: string, fileList: string[] = []): string[] {
   const files = fs.readdirSync(dir);
   for (const file of files) {
     const fullPath = path.join(dir, file);
@@ -110,11 +122,11 @@ function walkDir(dir, fileList = []) {
   return fileList;
 }
 
-function main() {
+export function main(): void {
   const args = process.argv.slice(2);
 
   if (args.length === 0 || args[0] === '--help') {
-    console.log(`Uso: node scripts/extract-gherkin.js <ruta-archivo.md | directorio | --all>`);
+    console.log(`Uso: npx tsx scripts/extract-gherkin.ts <ruta-archivo.md | directorio | --all>`);
     process.exit(0);
   }
 
@@ -148,4 +160,6 @@ function main() {
   console.log(`\nProceso finalizado: ${count} archivo(s) .feature de Cucumber generados.`);
 }
 
-main();
+if (require.main === module) {
+  main();
+}

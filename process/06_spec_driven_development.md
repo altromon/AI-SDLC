@@ -44,8 +44,8 @@ specs/changes/active/chg-001-telemetry-stream/
      - `HUMAN_REVIEW_PLAN`: El agente elabora el plan y se detiene; requiere aprobación humana previa antes de codificar.
      - `AMBIGUOUS`: Tarea bloqueada por falta de requisitos o ambigüedad; requiere refinamiento previo con el usuario.
      - `HIGH_RISK_MANUAL`: Tarea de riesgo crítico (migraciones destructivas, credenciales); ejecución reservada exclusivamente a ingenieros humanos.
-  3. **Criterio de Verificación Concreto**: Comando determinista o prueba objetiva para dar la tarea por completada (`npm test`, `npx cucumber-js`, `verify-quality-gate.js`).
-- Auditado automáticamente por [`scripts/verify-tasks-governance.js`](file:///c:/Users/reypo/Documents/Workspace/AI-SDLC/scripts/verify-tasks-governance.js).
+  3. **Criterio de Verificación Concreto**: Comando determinista o prueba objetiva para dar la tarea por completada (`npm test`, `npx cucumber-js`, `npx tsx scripts/verify-quality-gate.ts`).
+- Auditado automáticamente por [`scripts/verify-tasks-governance.ts`](file:///c:/Users/reypo/Documents/Workspace/AI-SDLC/scripts/verify-tasks-governance.ts).
 
 ---
 
@@ -95,7 +95,7 @@ Para que los requerimientos no sean texto pasivo, el AI-SDLC adopta la sintaxis 
 1. **Especificación en Markdown**:
    - Cada requerimiento (`FR-*`, `QR-*`, `SEC-REQ-*`) incluye un bloque ````gherkin ... ```` con etiquetas (`@FR-001`, `@automated`, `@smoke`).
 2. **Extracción Automatizada**:
-   - Mediante el extractor determinista `node scripts/extract-gherkin.js <archivo|--all>`, el framework genera o sincroniza archivos `.feature` de Cucumber en `tests/features/`.
+   - Mediante el extractor determinista `npx tsx scripts/extract-gherkin.ts <archivo|--all>`, el framework genera o sincroniza archivos `.feature` de Cucumber en `tests/features/`.
 3. **Ejecución y Cierre de Ciclo**:
    - Los agentes desarrolladores y de QA generan los step definitions correspondientes en Cucumber.js / Cucumber-JVM.
    - El pipeline de CI/CD ejecuta `cucumber-js` como una puerta de paso obligatoria, garantizando que el software implementado satisface exactamente los escenarios definidos en el producto.

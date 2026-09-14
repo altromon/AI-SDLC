@@ -17,21 +17,71 @@
  * ==============================================================================
  */
 
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
-function parseSimpleYaml(content) {
+export type AutonomyMode = 'AUTONOMOUS' | 'HUMAN_REVIEW_PLAN' | 'AMBIGUOUS' | 'HIGH_RISK_MANUAL';
+
+export const VALID_AUTONOMY_MODES: readonly AutonomyMode[] = [
+  'AUTONOMOUS',
+  'HUMAN_REVIEW_PLAN',
+  'AMBIGUOUS',
+  'HIGH_RISK_MANUAL'
+] as const;
+
+export interface TaskVerification {
+  method?: string;
+  criteria?: string;
+}
+
+export interface TaskItem {
+  id: string;
+  title?: string;
+  complexity?: string;
+  riskLevel?: string;
+  autonomyMode?: string;
+  assignedTo?: string;
+  status?: string;
+  blockingReason?: string;
+  verification: TaskVerification;
+}
+
+export interface TasksFrontmatter {
+  tasks: TaskItem[];
+  [key: string]: unknown;
+}
+
+export interface ParsedTasksDoc {
+  frontmatter: TasksFrontmatter;
+  body: string;
+}
+
+export interface TaskSummary {
+  file: string;
+  id: string;
+  title: string;
+  complexity: string;
+  risk: string;
+  autonomyMode: string;
+  verification: string;
+  assignedTo: string;
+  status: string;
+  isConform: boolean;
+  violation: string | null;
+}
+
+export function parseSimpleYaml(content: string): ParsedTasksDoc {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!match) return { frontmatter: {}, body: content };
+  if (!match) return { frontmatter: { tasks: [] }, body: content };
 
   const yamlContent = match[1];
   const lines = yamlContent.split('\n');
-  const frontmatter = { tasks: [] };
+  const frontmatter: TasksFrontmatter = { tasks: [] };
 
-  let currentTask = null;
+  let currentTask: TaskItem | null = null;
   let inVerification = false;
 
-  for (let line of lines) {
+  for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) continue;
 
@@ -81,7 +131,7 @@ function parseSimpleYaml(content) {
   return { frontmatter, body: content.substring(match[0].length) };
 }
 
-function walkDir(dir, fileList = []) {
+export function walkDir(dir: string, fileList: string[] = []): string[] {
   if (!fs.existsSync(dir)) return fileList;
   const files = fs.readdirSync(dir);
   for (const file of files) {
@@ -97,7 +147,7 @@ function walkDir(dir, fileList = []) {
   return fileList;
 }
 
-function main() {
+export function main(): void {
   console.log('================================================================');
   console.log('AI-SDLC: Verificación de Desglose de Tareas y Modos de Autonomía');
   console.log('================================================================\n');
@@ -112,7 +162,7 @@ function main() {
 
   let totalTasks = 0;
   let violations = 0;
-  const taskSummaries = [];
+  const taskSummaries: TaskSummary[] = [];
 
   let countAutonomous = 0;
   let countHumanReviewPlan = 0;
@@ -132,12 +182,10 @@ function main() {
     for (const t of frontmatter.tasks) {
       totalTasks++;
 
-      const validModes = ['AUTONOMOUS', 'HUMAN_REVIEW_PLAN', 'AMBIGUOUS', 'HIGH_RISK_MANUAL'];
-      const isModeValid = validModes.includes(t.autonomyMode);
+      const isModeValid = VALID_AUTONOMY_MODES.includes(t.autonomyMode as AutonomyMode);
+      const hasVerification = Boolean(t.verification && t.verification.criteria && t.verification.criteria.length > 3);
 
-      const hasVerification = t.verification && t.verification.criteria && t.verification.criteria.length > 3;
-
-      let safetyViolation = null;
+      let safetyViolation: string | null = null;
       if (t.autonomyMode === 'HIGH_RISK_MANUAL' && t.assignedTo && t.assignedTo.startsWith('agent-') && t.assignedTo !== 'pair-human-agent') {
         safetyViolation = 'Tarea de ALTO RIESGO asignada a agente autónomo sin supervisor humano.';
       }
@@ -185,16 +233,16 @@ function main() {
   })));
 
   console.log(`\nDistribución de Gobierno y Autonomía:`);
-  console.log(`  🟢 AUTONOMOUS (Plan + Ejecución):       ${countAutonomous} (${Math.round((countAutonomous/totalTasks)*100 || 0)}%)`);
-  console.log(`  🟡 HUMAN_REVIEW_PLAN (Revisión Previa): ${countHumanReviewPlan} (${Math.round((countHumanReviewPlan/totalTasks)*100 || 0)}%)`);
-  console.log(`  🟠 AMBIGUOUS (Bloqueadas x Clarificar): ${countAmbiguous} (${Math.round((countAmbiguous/totalTasks)*100 || 0)}%)`);
-  console.log(`  🔴 HIGH_RISK_MANUAL (Ejecución Humana): ${countHighRiskManual} (${Math.round((countHighRiskManual/totalTasks)*100 || 0)}%)`);
+  console.log(`  🟢 AUTONOMOUS (Plan + Ejecución):       ${countAutonomous} (${Math.round((countAutonomous / totalTasks) * 100 || 0)}%)`);
+  console.log(`  🟡 HUMAN_REVIEW_PLAN (Revisión Previa): ${countHumanReviewPlan} (${Math.round((countHumanReviewPlan / totalTasks) * 100 || 0)}%)`);
+  console.log(`  🟠 AMBIGUOUS (Bloqueadas x Clarificar): ${countAmbiguous} (${Math.round((countAmbiguous / totalTasks) * 100 || 0)}%)`);
+  console.log(`  🔴 HIGH_RISK_MANUAL (Ejecución Humana): ${countHighRiskManual} (${Math.round((countHighRiskManual / totalTasks) * 100 || 0)}%)`);
 
   const reportsDir = path.join(rootDir, 'reports');
   fs.mkdirSync(reportsDir, { recursive: true });
   const reportPath = path.join(reportsDir, 'TASKS_GOVERNANCE_REPORT.md');
 
-  const reportContent = [
+  const reportContent: string[] = [
     `# 📋 Informe de Gobierno de Tareas y Clasificación de Autonomía Humana`,
     ``,
     `> **Fecha de Auditoría:** ${new Date().toISOString()}`,
@@ -206,10 +254,10 @@ function main() {
     ``,
     `| Modo de Autonomía | Semáforo | Cantidad | Porcentaje | Rol del Agente de IA | Intervención Humana Requerida |`,
     `| :--- | :---: | :---: | :---: | :--- | :--- |`,
-    `| **\`AUTONOMOUS\`** | 🟢 | **${countAutonomous}** | ${Math.round((countAutonomous/totalTasks)*100 || 0)}% | Planificación y codificación autónoma | Revisión asíncrona del PR final |`,
-    `| **\`HUMAN_REVIEW_PLAN\`** | 🟡 | **${countHumanReviewPlan}** | ${Math.round((countHumanReviewPlan/totalTasks)*100 || 0)}% | Elaboración del plan detallado | **Aprobación explícita del plan ANTES de codificar** |`,
-    `| **\`AMBIGUOUS\`** | 🟠 | **${countAmbiguous}** | ${Math.round((countAmbiguous/totalTasks)*100 || 0)}% | **DETENIDO**: Prohibido codificar | Refinamiento y aclaración con el Product Owner |`,
-    `| **\`HIGH_RISK_MANUAL\`** | 🔴 | **${countHighRiskManual}** | ${Math.round((countHighRiskManual/totalTasks)*100 || 0)}% | Solo asistencia o soporte en pair-programming | **Ejecución directa por ingenieros humanos** |`,
+    `| **\`AUTONOMOUS\`** | 🟢 | **${countAutonomous}** | ${Math.round((countAutonomous / totalTasks) * 100 || 0)}% | Planificación y codificación autónoma | Revisión asíncrona del PR final |`,
+    `| **\`HUMAN_REVIEW_PLAN\`** | 🟡 | **${countHumanReviewPlan}** | ${Math.round((countHumanReviewPlan / totalTasks) * 100 || 0)}% | Elaboración del plan detallado | **Aprobación explícita del plan ANTES de codificar** |`,
+    `| **\`AMBIGUOUS\`** | 🟠 | **${countAmbiguous}** | ${Math.round((countAmbiguous / totalTasks) * 100 || 0)}% | **DETENIDO**: Prohibido codificar | Refinamiento y aclaración con el Product Owner |`,
+    `| **\`HIGH_RISK_MANUAL\`** | 🔴 | **${countHighRiskManual}** | ${Math.round((countHighRiskManual / totalTasks) * 100 || 0)}% | Solo asistencia o soporte en pair-programming | **Ejecución directa por ingenieros humanos** |`,
     ``,
     `---`,
     ``,
@@ -244,4 +292,6 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}

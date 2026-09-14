@@ -14,16 +14,59 @@
  * ==============================================================================
  */
 
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
-function parseFrontmatter(content) {
+export interface ArtifactFrontmatter {
+  id?: string;
+  type?: string;
+  title?: string;
+  'satisfies-requirements'?: string[];
+  'derives-from'?: string | string[];
+  'mitigates-abuse-case'?: string | string[];
+  'implemented-by-services'?: string | string[];
+  'enforced-in-enclave'?: string;
+  'cucumber-feature-file'?: string;
+  'verified-by-tests'?: string[];
+  [key: string]: unknown;
+}
+
+export interface ParsedArtifactDoc {
+  frontmatter: ArtifactFrontmatter;
+  body: string;
+}
+
+export interface ArtifactEntry {
+  file: string;
+  type?: string;
+  title?: string;
+  frontmatter: ArtifactFrontmatter;
+}
+
+export interface ServiceEntry {
+  id: string;
+  satisfies: string[];
+}
+
+export interface TraceabilityRow {
+  id: string;
+  title: string;
+  type?: string;
+  productTraces: string;
+  productStatus: 'CONFORME' | 'HUÉRFANO';
+  archTraces: string;
+  archStatus: 'CONFORME' | 'HUÉRFANO';
+  testTraces: string;
+  testStatus: 'CONFORME' | 'HUÉRFANO';
+}
+
+export function parseFrontmatter(content: string): ParsedArtifactDoc {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return { frontmatter: {}, body: content };
 
   const yamlLines = match[1].split('\n');
-  const frontmatter = {};
-  let currentKey = null;
+  const frontmatter: ArtifactFrontmatter = {};
+  let currentKey: string | null = null;
 
   for (let line of yamlLines) {
     line = line.trim();
@@ -31,10 +74,12 @@ function parseFrontmatter(content) {
 
     if (line.startsWith('- ') && currentKey) {
       const item = line.substring(2).trim().replace(/^["']|["']$/g, '');
-      if (!Array.isArray(frontmatter[currentKey])) {
-        frontmatter[currentKey] = [];
+      const existing = frontmatter[currentKey];
+      if (!Array.isArray(existing)) {
+        frontmatter[currentKey] = [item];
+      } else {
+        (existing as string[]).push(item);
       }
-      frontmatter[currentKey].push(item);
     } else {
       const parts = line.split(':');
       if (parts.length >= 2) {
@@ -53,7 +98,7 @@ function parseFrontmatter(content) {
   return { frontmatter, body: content.substring(match[0].length) };
 }
 
-function walkDir(dir, fileList = []) {
+export function walkDir(dir: string, fileList: string[] = []): string[] {
   if (!fs.existsSync(dir)) return fileList;
   const files = fs.readdirSync(dir);
   for (const file of files) {
@@ -69,7 +114,7 @@ function walkDir(dir, fileList = []) {
   return fileList;
 }
 
-function main() {
+export function main(): void {
   console.log('================================================================');
   console.log('AI-SDLC: Verificación de Trazabilidad 360° (Producto -> Arquitectura -> Pruebas)');
   console.log('================================================================\n');
@@ -78,8 +123,8 @@ function main() {
   const allMdFiles = walkDir(rootDir);
 
   // 1. Indexar todos los artefactos por ID
-  const artifactMap = new Map();
-  const servicesList = [];
+  const artifactMap = new Map<string, ArtifactEntry>();
+  const servicesList: ServiceEntry[] = [];
 
   for (const file of allMdFiles) {
     try {
@@ -88,25 +133,25 @@ function main() {
       if (frontmatter.id) {
         artifactMap.set(frontmatter.id, {
           file,
-          type: frontmatter.type,
-          title: frontmatter.title,
+          type: typeof frontmatter.type === 'string' ? frontmatter.type : undefined,
+          title: typeof frontmatter.title === 'string' ? frontmatter.title : undefined,
           frontmatter
         });
 
         if (frontmatter.type === 'service') {
           servicesList.push({
             id: frontmatter.id,
-            satisfies: Array.isArray(frontmatter['satisfies-requirements']) ? frontmatter['satisfies-requirements'] : []
+            satisfies: Array.isArray(frontmatter['satisfies-requirements']) ? (frontmatter['satisfies-requirements'] as string[]) : []
           });
         }
       }
-    } catch (err) {
+    } catch {
       // Ignorar archivos no parseables
     }
   }
 
   // 2. Identificar requerimientos
-  const requirements = [];
+  const requirements: ArtifactEntry[] = [];
   for (const [id, data] of artifactMap.entries()) {
     if (data.type === 'requirement' || data.type === 'security-requirement' || id.startsWith('FR-') || id.startsWith('QR-') || id.startsWith('CON-') || id.startsWith('SEC-REQ-')) {
       requirements.push(data);
@@ -119,22 +164,22 @@ function main() {
   }
 
   let errors = 0;
-  const matrixRows = [];
+  const matrixRows: TraceabilityRow[] = [];
 
   for (const req of requirements) {
     const fm = req.frontmatter;
-    const reqId = fm.id;
+    const reqId = fm.id || '';
 
     // --- A. Trazabilidad a PRODUCTO (Upstream) ---
-    let productTraces = [];
+    const productTraces: string[] = [];
     if (Array.isArray(fm['derives-from'])) {
-      productTraces.push(...fm['derives-from']);
+      productTraces.push(...(fm['derives-from'] as string[]));
     } else if (typeof fm['derives-from'] === 'string') {
       productTraces.push(fm['derives-from']);
     }
 
     if (Array.isArray(fm['mitigates-abuse-case'])) {
-      productTraces.push(...fm['mitigates-abuse-case']);
+      productTraces.push(...(fm['mitigates-abuse-case'] as string[]));
     } else if (typeof fm['mitigates-abuse-case'] === 'string') {
       productTraces.push(fm['mitigates-abuse-case']);
     }
@@ -144,9 +189,9 @@ function main() {
     if (validProductTraces.length === 0) errors++;
 
     // --- B. Trazabilidad a ARQUITECTURA (Midstream) ---
-    let archTraces = [];
+    const archTraces: string[] = [];
     if (Array.isArray(fm['implemented-by-services'])) {
-      archTraces.push(...fm['implemented-by-services']);
+      archTraces.push(...(fm['implemented-by-services'] as string[]));
     } else if (typeof fm['implemented-by-services'] === 'string') {
       archTraces.push(fm['implemented-by-services']);
     }
@@ -158,7 +203,7 @@ function main() {
       }
     }
 
-    if (fm['enforced-in-enclave']) {
+    if (typeof fm['enforced-in-enclave'] === 'string') {
       archTraces.push(fm['enforced-in-enclave']);
     }
 
@@ -166,12 +211,12 @@ function main() {
     if (archTraces.length === 0) errors++;
 
     // --- C. Trazabilidad a PRUEBAS (Downstream) ---
-    let testTraces = [];
-    if (fm['cucumber-feature-file']) {
+    const testTraces: string[] = [];
+    if (typeof fm['cucumber-feature-file'] === 'string') {
       testTraces.push(fm['cucumber-feature-file']);
     }
     if (Array.isArray(fm['verified-by-tests'])) {
-      testTraces.push(...fm['verified-by-tests']);
+      testTraces.push(...(fm['verified-by-tests'] as string[]));
     }
 
     // Verificar si los archivos de prueba o .feature existen en disco
@@ -205,7 +250,7 @@ function main() {
   fs.mkdirSync(reportsDir, { recursive: true });
 
   const reportPath = path.join(reportsDir, 'TRACEABILITY_MATRIX.md');
-  const reportLines = [
+  const reportLines: string[] = [
     '# Matriz de Trazabilidad de Requerimientos 360° (RTM)',
     '',
     `*Fecha de Verificación: ${new Date().toISOString()}*`,
@@ -240,4 +285,6 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}

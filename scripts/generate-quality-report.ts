@@ -17,21 +17,55 @@
  * ==============================================================================
  */
 
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
-const DEFAULT_EXTENSIONS = ['.ts', '.js', '.py', '.java', '.go', '.cs', '.rs', '.cpp', '.c'];
+export const DEFAULT_EXTENSIONS: readonly string[] = ['.ts', '.js', '.py', '.java', '.go', '.cs', '.rs', '.cpp', '.c'];
 
-function parseSimpleYaml(content) {
+export type QualityRating = 'A' | 'B' | 'C' | 'D' | 'F';
+
+export type SupportedLanguage =
+  | 'TypeScript'
+  | 'JavaScript'
+  | 'Python'
+  | 'Java'
+  | 'Go'
+  | 'C#'
+  | 'Rust'
+  | 'C/C++'
+  | 'Desconocido';
+
+export interface QualityPolicy {
+  max_cyclomatic: number;
+  max_cognitive: number;
+  min_maintainability: number;
+  max_function_lines: number;
+  enforce_mode: 'STRICT' | 'PERMISSIVE' | string;
+  target_directories: string[];
+  supported_extensions: string[];
+}
+
+export interface DetailedFunctionMetrics {
+  functionName: string;
+  filePath: string;
+  language: SupportedLanguage;
+  loc: number;
+  cyclomatic: number;
+  cognitive: number;
+  maintainability: number;
+  codeSmells: string[];
+}
+
+export function parseSimpleYaml(content: string): QualityPolicy {
   const lines = content.split('\n');
-  const policy = {
+  const policy: QualityPolicy = {
     max_cyclomatic: 10,
     max_cognitive: 15,
     min_maintainability: 50.0,
     max_function_lines: 40,
     enforce_mode: 'STRICT',
     target_directories: ['src', 'lib', 'examples', 'tests'],
-    supported_extensions: DEFAULT_EXTENSIONS
+    supported_extensions: [...DEFAULT_EXTENSIONS]
   };
 
   let inScope = false;
@@ -89,7 +123,21 @@ function parseSimpleYaml(content) {
   return policy;
 }
 
-function calculateMetrics(fnBody, fnName, filePath) {
+export function detectLanguage(ext: string): SupportedLanguage {
+  switch (ext) {
+    case '.ts': case '.tsx': return 'TypeScript';
+    case '.js': case '.jsx': return 'JavaScript';
+    case '.py': return 'Python';
+    case '.java': return 'Java';
+    case '.go': return 'Go';
+    case '.cs': return 'C#';
+    case '.rs': return 'Rust';
+    case '.cpp': case '.c': return 'C/C++';
+    default: return 'Desconocido';
+  }
+}
+
+export function calculateMetrics(fnBody: string, fnName: string, filePath: string): DetailedFunctionMetrics {
   const ext = path.extname(filePath).toLowerCase();
   const isPython = ext === '.py';
 
@@ -103,7 +151,7 @@ function calculateMetrics(fnBody, fnName, filePath) {
 
   // 1. Complejidad Ciclomática (McCabe)
   let cyclomatic = 1;
-  let decisionRegex;
+  let decisionRegex: RegExp;
   if (isPython) {
     decisionRegex = /\b(if|elif|for|while|except)\b|\b(and|or)\b/g;
   } else if (ext === '.go') {
@@ -147,7 +195,7 @@ function calculateMetrics(fnBody, fnName, filePath) {
   const normalizedMI = Math.max(0, Math.min(100, (rawMI * 100) / 171));
 
   // 4. Reglas de Código Transversales
-  const codeSmells = [];
+  const codeSmells: string[] = [];
   if (['.ts', '.js'].includes(ext) && /\bany\b/.test(fnBody)) {
     codeSmells.push('Uso prohibido de "any"');
   }
@@ -170,25 +218,11 @@ function calculateMetrics(fnBody, fnName, filePath) {
   };
 }
 
-function detectLanguage(ext) {
-  switch (ext) {
-    case '.ts': case '.tsx': return 'TypeScript';
-    case '.js': case '.jsx': return 'JavaScript';
-    case '.py': return 'Python';
-    case '.java': return 'Java';
-    case '.go': return 'Go';
-    case '.cs': return 'C#';
-    case '.rs': return 'Rust';
-    case '.cpp': case '.c': return 'C/C++';
-    default: return 'Desconocido';
-  }
-}
-
-function extractFunctionsPython(content, filePath) {
-  const functions = [];
+export function extractFunctionsPython(content: string, filePath: string): DetailedFunctionMetrics[] {
+  const functions: DetailedFunctionMetrics[] = [];
   const lines = content.split('\n');
-  let currentFn = null;
-  let fnLines = [];
+  let currentFn: string | null = null;
+  let fnLines: string[] = [];
   let baseIndent = 0;
 
   for (let i = 0; i < lines.length; i++) {
@@ -226,12 +260,12 @@ function extractFunctionsPython(content, filePath) {
   return functions;
 }
 
-function extractFunctionsBraceLanguages(content, filePath) {
-  const functions = [];
+export function extractFunctionsBraceLanguages(content: string, filePath: string): DetailedFunctionMetrics[] {
+  const functions: DetailedFunctionMetrics[] = [];
   const lines = content.split('\n');
-  let currentFn = null;
+  let currentFn: string | null = null;
   let braceCount = 0;
-  let fnLines = [];
+  let fnLines: string[] = [];
 
   const ext = path.extname(filePath).toLowerCase();
 
@@ -239,7 +273,7 @@ function extractFunctionsBraceLanguages(content, filePath) {
     const line = lines[i];
 
     // Regex multilenguaje para Java, Go, Rust, C#, C/C++, JS/TS
-    let fnMatch = null;
+    let fnMatch: RegExpMatchArray | null = null;
     if (ext === '.go') {
       fnMatch = line.match(/func\s+(?:\([^)]*\)\s*)?([a-zA-Z0-9_$]+)\s*\(/);
     } else if (ext === '.rs') {
@@ -281,7 +315,7 @@ function extractFunctionsBraceLanguages(content, filePath) {
   return functions;
 }
 
-function extractFunctions(content, filePath) {
+export function extractFunctions(content: string, filePath: string): DetailedFunctionMetrics[] {
   const ext = path.extname(filePath).toLowerCase();
   if (ext === '.py') {
     return extractFunctionsPython(content, filePath);
@@ -289,15 +323,15 @@ function extractFunctions(content, filePath) {
   return extractFunctionsBraceLanguages(content, filePath);
 }
 
-function walkDir(dir, extensions = DEFAULT_EXTENSIONS) {
-  let results = [];
+export function walkDir(dir: string, extensions: readonly string[] = DEFAULT_EXTENSIONS): string[] {
+  let results: string[] = [];
   if (!fs.existsSync(dir)) return results;
   const list = fs.readdirSync(dir);
   for (const file of list) {
     const fullPath = path.join(dir, file);
     const stat = fs.statSync(fullPath);
     if (stat && stat.isDirectory()) {
-      if (!['node_modules', '__pycache__', '.pytest_cache', 'target', 'bin', 'obj', '.git', 'reports'].includes(file)) {
+      if (!['node_modules', '__pycache__', '.pytest_cache', 'target', 'bin', 'obj', '.git', 'reports', 'dist'].includes(file)) {
         results = results.concat(walkDir(fullPath, extensions));
       }
     } else {
@@ -310,7 +344,7 @@ function walkDir(dir, extensions = DEFAULT_EXTENSIONS) {
   return results;
 }
 
-function computeRating(avgMI, maxCyclo, totalSmells) {
+export function computeRating(avgMI: number, maxCyclo: number, totalSmells: number): QualityRating {
   if (maxCyclo <= 10 && avgMI >= 75 && totalSmells === 0) return 'A';
   if (maxCyclo <= 12 && avgMI >= 65 && totalSmells <= 1) return 'B';
   if (maxCyclo <= 15 && avgMI >= 50 && totalSmells <= 3) return 'C';
@@ -318,13 +352,13 @@ function computeRating(avgMI, maxCyclo, totalSmells) {
   return 'F';
 }
 
-function main() {
+export function main(): void {
   const args = process.argv.slice(2);
   const rootDir = process.cwd();
 
-  let targetArg = null;
-  let outputArg = null;
-  let changeArg = null;
+  let targetArg: string | null = null;
+  let outputArg: string | null = null;
+  let changeArg: string | null = null;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--target' && args[i + 1]) targetArg = args[++i];
@@ -337,28 +371,28 @@ function main() {
   console.log('================================================================\n');
 
   const policyFile = path.join(rootDir, 'quality-policy.yaml');
-  let policy = {
+  let policy: QualityPolicy = {
     max_cyclomatic: 10,
     max_cognitive: 15,
     min_maintainability: 50.0,
     max_function_lines: 40,
     enforce_mode: 'STRICT',
     target_directories: ['src', 'lib', 'examples', 'tests'],
-    supported_extensions: DEFAULT_EXTENSIONS
+    supported_extensions: [...DEFAULT_EXTENSIONS]
   };
 
   if (fs.existsSync(policyFile)) {
     policy = parseSimpleYaml(fs.readFileSync(policyFile, 'utf-8'));
   }
 
-  let scanTargets = [];
+  let scanTargets: string[] = [];
   if (targetArg) {
     scanTargets = [path.resolve(rootDir, targetArg)];
   } else {
     scanTargets = policy.target_directories.map(d => path.join(rootDir, d));
   }
 
-  let sourceFiles = [];
+  let sourceFiles: string[] = [];
   for (const t of scanTargets) {
     if (fs.existsSync(t)) {
       if (fs.statSync(t).isDirectory()) {
@@ -374,13 +408,13 @@ function main() {
     process.exit(0);
   }
 
-  const allFunctionMetrics = [];
+  const allFunctionMetrics: DetailedFunctionMetrics[] = [];
   let totalSmells = 0;
   let totalLoc = 0;
   let peakCyclomatic = 0;
   let sumCyclomatic = 0;
   let sumMaintainability = 0;
-  const languageSet = new Set();
+  const languageSet = new Set<string>();
 
   for (const file of sourceFiles) {
     const metrics = extractFunctions(fs.readFileSync(file, 'utf-8'), file);
@@ -417,7 +451,7 @@ function main() {
 
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
-  const report = [
+  const report: string[] = [
     `# 📊 Informe Automático de Calidad de Software Multilenguaje (Polyglot Scorecard)`,
     ``,
     `> **Generado automáticamente a partir del código fuente.**`,
@@ -482,7 +516,7 @@ function main() {
     report.push('> **Acciones requeridas para el desarrollador o agente de IA:**');
     report.push('> 1. Descomponer las funciones con complejidad ciclomática $>10$ en métodos auxiliares independientes.');
     report.push('> 2. Resolver los code smells y eliminar cualquier tipado débil o supresión de linter.');
-    report.push('> 3. Volver a ejecutar `node scripts/generate-quality-report.js` para regenerar este informe.');
+    report.push('> 3. Volver a ejecutar `npx tsx scripts/generate-quality-report.ts` para regenerar este informe.');
   }
 
   fs.writeFileSync(outputPath, report.join('\n'), 'utf-8');
@@ -490,4 +524,6 @@ function main() {
   console.log(`\nResumen: Lenguajes: [${Array.from(languageSet).join(', ')}] | Calificación: [Rating ${rating}] | Gate: [${releaseGatePassed ? 'PASSED ✅' : 'FAILED ❌'}] | SLOC: ${totalLoc}`);
 }
 
-main();
+if (require.main === module) {
+  main();
+}
