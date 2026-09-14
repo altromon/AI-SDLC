@@ -7,7 +7,7 @@ export function walkMdFiles(dir: string, fileList: string[] = []): string[] {
   for (const file of files) {
     const fullPath = path.join(dir, file);
     if (fs.statSync(fullPath).isDirectory()) {
-      if (!['node_modules', '.git', 'dist', '.changeset'].includes(file)) {
+      if (!['node_modules', '.git', 'dist', '.changeset', 'scratch', 'test-scaffold'].includes(file)) {
         walkMdFiles(fullPath, fileList);
       }
     } else if (file.endsWith('.md')) {

@@ -1,10 +1,14 @@
 ---
-id: SRV-TELEMETRY-INGEST
-type: service
-title: Servicio de Ingesta Telemétrica y Deserialización de Alta Frecuencia
+id: CMP-TELEMETRY-INGEST
+type: component
+title: Componente de Ingesta Telemétrica y Deserialización de Alta Frecuencia
 status: accepted
 version: "1.0.0"
 schema-version: "1.0"
+level: 2
+bounded-context: "Telemetry Ingestion"
+parent-component: null
+implementation-type: service
 implements-use-cases:
   - UC-STREAM-TELEMETRY
 satisfies-requirements:
@@ -23,7 +27,7 @@ supersedes: null
 superseded-by: null
 ---
 
-# SRV-TELEMETRY-INGEST: Servicio de Ingesta Telemétrica
+# CMP-TELEMETRY-INGEST: Componente de Ingesta Telemétrica
 
 ## 1. Responsabilidad y Límites
 Punto de entrada perimetral de alta concurrencia encargado de recibir conexiones WebSocket con mTLS de flotas de drones, validar firmas de certificados, deserializar payloads binarios Protobuf y verificar la regla cinemática `BR-TELEMETRY-VALIDITY`.
@@ -32,8 +36,8 @@ Punto de entrada perimetral de alta concurrencia encargado de recibir conexiones
 ```mermaid
 graph LR
     UAV[ACT-AUTONOMOUS-UAV] -->|mTLS TLS 1.3 / WSS| GW[Gateway TLS Terminator]
-    GW --> Parser[SYS-STREAM-PARSER: Deserializador]
-    Parser --> Validator[SYS-KINEMATICS-VALIDATOR: BR-TELEMETRY-VALIDITY]
+    GW --> Parser[CMP-STREAM-PARSER: Deserializador]
+    Parser --> Validator[CMP-KINEMATICS-VALIDATOR: BR-TELEMETRY-VALIDITY]
     Validator --> KafkaProducer[Productor Kafka: kafkajs]
     KafkaProducer -->|telemetry.normalized.v1| Broker[(Kafka Broker Interno)]
 ```
@@ -44,4 +48,4 @@ graph LR
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-03 | Carlos Mendoza (Lead) | Definición formal del servicio de ingesta telemétrica | CHG-ARCH-001 |
+| **1.0.0** | 2026-09-03 | Carlos Mendoza (Lead) | Definición formal del componente de ingesta telemétrica | CHG-ARCH-001 |

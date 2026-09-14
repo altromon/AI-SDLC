@@ -228,7 +228,7 @@ subgraph:
   requirements:
     - FR-INT-001
 citations:
-  - id: SRV-INT-001
+  - id: CMP-INT-001
 `
     );
 
@@ -251,15 +251,17 @@ version: "1.0.0"
 `
     );
 
-    // Create canonical architecture service
+    // Create canonical architecture component
     fs.writeFileSync(
-      path.join(archDir, 'SRV-INT-001.md'),
+      path.join(archDir, 'CMP-INT-001.md'),
       `---
-id: SRV-INT-001
-type: service
+id: CMP-INT-001
+type: component
+level: 1
+implementation-type: service
 satisfies-requirements: []
 ---
-# Service SRV-INT-001
+# Component CMP-INT-001
 
 ## Historial de Revisiones
 
@@ -278,7 +280,7 @@ satisfies-requirements: []
     expect(res.success).toBe(true);
     expect(res.integratedRequirements).toContain('FR-INT-001');
     expect(res.updatedProductArtifacts).toContain('FR-INT-001');
-    expect(res.updatedArchitectureArtifacts).toContain('SRV-INT-001');
+    expect(res.updatedArchitectureArtifacts).toContain('CMP-INT-001');
     expect(res.archived).toBe(true);
 
     // Verify product artifact updated
@@ -286,8 +288,8 @@ satisfies-requirements: []
     expect(updatedProduct).toContain('status: active');
     expect(updatedProduct).toContain('chg-completed');
 
-    // Verify architecture service updated
-    const updatedService = fs.readFileSync(path.join(archDir, 'SRV-INT-001.md'), 'utf-8');
+    // Verify architecture component updated
+    const updatedService = fs.readFileSync(path.join(archDir, 'CMP-INT-001.md'), 'utf-8');
     expect(updatedService).toContain('FR-INT-001');
     expect(updatedService).toContain('chg-completed');
 

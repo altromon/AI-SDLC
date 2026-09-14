@@ -9,8 +9,8 @@ deciders:
   - "Nombre del Arquitecto Lead"
   - "Nombre del Tech Lead"
 decision-date: "2026-09-03"
-affects-services:
-  - SRV-NOMBRE-001
+affects-components:
+  - CMP-NOMBRE-001
 supersedes: null
 superseded-by: null
 ---

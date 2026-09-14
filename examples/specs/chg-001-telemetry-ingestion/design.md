@@ -6,7 +6,7 @@ title: "Diseño Técnico: Gateway de Ingesta Telemétrica WSS con mTLS"
 version: "1.0.0"
 schema-version: "1.0"
 handoff: "HOF-001-TELEMETRY-INGESTION"
-architecture-service: "SRV-TELEMETRY-INGEST"
+architecture-component: "CMP-TELEMETRY-INGEST"
 enclave: "SEC-ENC-DMZ-INGEST"
 status: approved
 citations:
@@ -16,7 +16,7 @@ citations:
   - id: "SEC-REQ-MTLS-STREAM"
     digest: "sha256:77b27bf76db7846b7163b4b61d70fa0bac7e236be29092ebfeea3d664ffeb6ea"
     comment: "Autenticación mTLS obligatoria en enclave perimetral."
-  - id: "SRV-TELEMETRY-INGEST"
+  - id: "CMP-TELEMETRY-INGEST"
     digest: "sha256:9be352c27673c5d705357083ae6f259ef23a61fcc77ea0b0033813850c09a9de"
     comment: "Servicio de arquitectura Whitebox L2."
 ---
@@ -24,7 +24,7 @@ citations:
 # Diseño Técnico: CHG-001-TELEMETRY-INGESTION
 
 ## 1. Mapeo Arquitectónico y Enclave Zero Trust
-El componente se despliega en el enclave perimetral **`SEC-ENC-DMZ-INGEST`** y materializa el servicio **`SRV-TELEMETRY-INGEST`** (arc42 Sección 5 / NAF Services):
+El componente se despliega en el enclave perimetral **`SEC-ENC-DMZ-INGEST`** y materializa el servicio **`CMP-TELEMETRY-INGEST`** (arc42 Sección 5 / NAF Services):
 
 ```mermaid
 graph TD

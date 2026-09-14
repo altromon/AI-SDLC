@@ -62,6 +62,10 @@ export interface ArtifactFrontmatter {
   id?: string;
   type?: string;
   title?: string;
+  level?: number;
+  'bounded-context'?: string;
+  'parent-component'?: string;
+  'implementation-type'?: 'service' | 'dll' | 'function' | 'composite' | string;
   'satisfies-requirements'?: string[];
   'derives-from'?: string | string[];
   'mitigates-abuse-case'?: string | string[];

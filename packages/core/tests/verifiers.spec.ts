@@ -207,7 +207,7 @@ describe('Inverted Traceability Engine (No Downward Frontmatter)', () => {
     expect(fr).toBeDefined();
     expect(fr?.archStatus).toBe('CONFORME');
     expect(fr?.testStatus).toBe('CONFORME');
-    expect(fr?.archTraces).toContain('SRV-TELEMETRY-INGEST');
+    expect(fr?.archTraces).toContain('CMP-TELEMETRY-INGEST');
 
     const qr = result.rows.find((r) => r.id === 'QR-LATENCY-REALTIME');
     expect(qr).toBeDefined();
@@ -228,5 +228,16 @@ describe('Inverted Traceability Engine (No Downward Frontmatter)', () => {
     const qr = result.requirements.find((r) => r.id === 'QR-LATENCY-REALTIME');
     expect(qr).toBeDefined();
     expect(qr?.status).toBe('VERIFICADO_CON_PRUEBA');
+  });
+
+  it('should support multi-level architecture component hierarchy and implementation types', () => {
+    // Verify that components at different levels (service, dll, function) are parsed and resolved
+    const result = verifyTraceability({ rootDir: process.cwd() });
+    expect(result.success).toBe(true);
+
+    // Verify CMP-TELEMETRY-INGEST is detected as an architectural component
+    const fr = result.rows.find((r) => r.id === 'FR-TELEMETRY-STREAM-001');
+    expect(fr?.archStatus).toBe('CONFORME');
+    expect(fr?.archTraces).toContain('CMP-TELEMETRY-INGEST');
   });
 });

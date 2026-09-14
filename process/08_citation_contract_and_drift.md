@@ -86,7 +86,7 @@ citations:
 ```
 
 ### Componentes del Registro:
-1. **`id`**: Identificador inmutable y canónico del artefacto citado (ej. `FR-001`, `UC-002`, `SRV-INGESTION`, `SEC-REQ-003`).
+1. **`id`**: Identificador inmutable y canónico del artefacto citado (ej. `FR-001`, `UC-002`, `CMP-INGESTION`, `SEC-REQ-003`).
 2. **`digest`**: Hash criptográfico **SHA-256** calculado sobre el contenido UTF-8 canónico del artefacto (normalizado con saltos de línea LF).
 3. **`anchor` (Opcional)**: Ancla a un escenario específico dentro del artefacto (útil para pruebas concretas).
 4. **`comment`**: Explicación breve contextual del motivo de la citación.

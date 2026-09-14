@@ -11,9 +11,9 @@ citations:
   - id: "SEC-REQ-CONTROL-001"
     digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
     comment: "Requisito de seguridad obligatorio a implementar."
-  - id: "SRV-NOMBRE-001"
+  - id: "CMP-NOMBRE-001"
     digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
-    comment: "Servicio arquitectónico que aloja el cambio."
+    comment: "Componente arquitectónico que aloja el cambio."
 ---
 
 # Propuesta de Cambio: CHG-NOMBRE-001

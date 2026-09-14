@@ -38,11 +38,11 @@
       "type": "string",
       "format": "date"
     },
-    "affects-services": {
+    "affects-components": {
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^SRV-[A-Z0-9]+(-[A-Z0-9]+)*$"
+        "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$"
       }
     },
     "supersedes": {

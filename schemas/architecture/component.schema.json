@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-sdlc.org/schemas/architecture/component.schema.json",
+  "title": "NAF v4 / arc42 Architecture Component Schema (Multilevel)",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "title",
+    "status",
+    "version",
+    "level",
+    "implementation-type",
+    "implements-use-cases"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    },
+    "type": {
+      "type": "string",
+      "const": "component"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
+      "description": "Versión del componente de arquitectura (SemVer)."
+    },
+    "schema-version": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "status": {
+      "type": "string",
+      "enum": ["proposed", "accepted", "deprecated", "retired"]
+    },
+    "level": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Nivel jerárquico de arquitectura (1: Bounded Context / Sistema Raíz, 2: Subsistema / Contenedor, 3: Unidad Ejecutable / DLL / Función)."
+    },
+    "bounded-context": {
+      "type": "string",
+      "description": "Nombre del Bounded Context en Domain-Driven Design (DDD) al que pertenece el componente."
+    },
+    "parent-component": {
+      "type": "string",
+      "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$",
+      "description": "Identificador del componente padre (nulo si es Nivel 1)."
+    },
+    "implementation-type": {
+      "type": "string",
+      "enum": ["service", "dll", "function", "composite"],
+      "description": "Paradigma de implementación técnica: servicio distribuido (service), biblioteca dinámica/nativa (dll), módulo o función in-process (function), o agrupador lógico/Bounded Context (composite)."
+    },
+    "implements-use-cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^UC-[A-Z0-9]+(-[A-Z0-9]+)*$"
+      }
+    },
+    "satisfies-requirements": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(FR|QR|CON|SEC-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*$"
+      }
+    },
+    "hosted-in-enclave": {
+      "type": "string",
+      "pattern": "^SEC-ENC-[A-Z0-9]+(-[A-Z0-9]+)*$",
+      "description": "Enclave de seguridad donde reside el componente (opcional para DLLs o funciones in-process)."
+    },
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "protocol"],
+        "properties": {
+          "name": { "type": "string" },
+          "protocol": {
+            "type": "string",
+            "enum": [
+              "REST/HTTP",
+              "gRPC",
+              "WebSocket",
+              "Kafka",
+              "MQTT",
+              "C-ABI",
+              "Native-ABI",
+              "FFI",
+              "In-Process API",
+              "Function-Call",
+              "CLI",
+              "GUI",
+              "IPC"
+            ]
+          },
+          "contract-spec": { "type": "string" }
+        }
+      }
+    },
+    "supersedes": {
+      "type": "string",
+      "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    },
+    "superseded-by": {
+      "type": "string",
+      "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    }
+  },
+  "additionalProperties": false
+}

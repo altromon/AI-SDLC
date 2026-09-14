@@ -25,7 +25,7 @@ Cada sección de **arc42** se materializa en el repositorio como documentos Mark
  2. Restricciones de Arquitectura    Architecture Constraints CON-*, ACON-*, LIC-POL-*
  3. Contexto y Alcance               Operational Perspective  CTX-*, OIE-* (Info Exchange)
  4. Estrategia de Solución           Service & Resource Strat STRAT-*
- 5. Vista de Bloques (Building)      Services & Systems       SRV-*, SYS-* (Whitebox L1-L3)
+ 5. Vista de Bloques (Building)      Services & Systems       CMP-* (Whitebox L1-L3)
  6. Vista de Ejecución (Runtime)     Behaviour & Sequences    SEQ-*, FLW-*
  7. Vista de Despliegue              Resource / Deployment    RES-*, DEP-* (Nodos, Infra)
  8. Conceptos Transversales          Information & Security   DATA-*, SEC-ENC-*, SEC-POL-*
@@ -43,11 +43,34 @@ Cada sección de **arc42** se materializa en el repositorio como documentos Mark
 - Modela el límite del sistema respecto a actores externos y sistemas vecinos.
 - **Intercambios de Información Operativa (`OIE-*`)**: Define los mensajes, eventos o cargas útiles que cruzan la frontera del sistema.
 
-### Sección 5: Vista de Bloques de Construcción (NAF Services & Systems)
-- Descomposición jerárquica en cajas blancas (Whitebox):
-  - **Nivel 1 (Sistema General)**: Servicios principales del dominio (`SRV-*`).
-  - **Nivel 2 (Subcomponentes)**: Módulos internos de software y librerías (`SYS-*`).
-- **Regla de Trazabilidad**: Todo servicio `SRV-*` debe declarar en su frontmatter qué casos de uso de ProductShape implementa (`implements-use-cases: [UC-*]`), qué requerimientos funcionales, de calidad y de seguridad satisface (`satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`) y qué enclaves de seguridad habita (`hosted-in-enclave: SEC-ENC-*`).
+### Sección 5: Vista de Bloques de Construcción (NAF Services & Systems / arc42 Sec. 5)
+Modela la estructura interna del sistema mediante un **esquema único universal de componente (`CMP-*`)**, permitiendo una descomposición recursiva multinivel que se adapta a sistemas distribuidos, monolitos modulares y arquitecturas basadas en plugins o DLLs:
+
+#### Niveles de Arquitectura Recomendados:
+1. **Nivel 1: Sistema Raíz / Bounded Context (DDD)**:
+   - Delimita una frontera conceptual, lingüística y de dominio explícita (`bounded-context: "Nombre"`).
+   - Metadatos: `level: 1`, `parent-component: null`.
+   - Implementación: `implementation-type: composite` (para agrupar lógicamente subsistemas/contenedores sin código ejecutable propio) o `service` / `function` si el sistema es un ejecutable autónomo.
+2. **Nivel 2: Subsistemas / Módulos de Despliegue / Contenedores**:
+   - Define las unidades de despliegue o contenedores de ejecución del Bounded Context.
+   - Metadatos: `level: 2`, `parent-component: CMP-CONTEXT-ROOT`.
+   - Implementación:
+     - `service`: Microservicios, daemons en red o workers asíncronos con interfaces de red (`REST/HTTP`, `gRPC`, `WebSocket`, `Kafka`, `MQTT`, `IPC`).
+     - `dll`: Bibliotecas dinámicas principales o subsistemas compartidos.
+     - `function`: Módulos de aplicación de proceso único o monolitos.
+3. **Nivel 3: Unidades de Ejecución / Componentes Internos**:
+   - Descomposición de grano fino dentro de un contenedor o subsistema.
+   - Metadatos: `level: 3`, `parent-component: CMP-SUBSYSTEM-ROOT`.
+   - Implementación:
+     - `dll`: Plugins nativos o librerías de enlace dinámico (.dll, .so, .dylib) con contratos binarios (`C-ABI`, `Native-ABI`, `FFI`).
+     - `function`: Módulos de cálculo matemático, parsers o lógica de dominio pura con contratos in-process (`Function-Call`, `In-Process API`, `CLI`).
+4. **Nivel 4 (Opcional): Clases / Algoritmos Atómicos Críticos**:
+   - Reservado para componentes hipercríticos (criptografía, algoritmos cinemáticos de seguridad) donde funciones individuales requieren auditoría y trazabilidad RTM unitaria.
+
+#### Regla de Trazabilidad Multinivel:
+- Todo componente `CMP-*` declara qué casos de uso implementa (`implements-use-cases: [UC-*]`) y qué requerimientos funcionales, de calidad o de seguridad satisface (`satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`).
+- Si un requerimiento se satisface en un componente especializado de Nivel 3 (p. ej., una DLL o función), el motor de trazabilidad 360° resuelve la cobertura tanto a nivel del componente ejecutor como de su contexto padre (`parent-component`).
+- El campo `hosted-in-enclave: SEC-ENC-*` solo es obligatorio cuando el componente se despliega en un enclave de red físico o lógico segmentado. Para DLLs o funciones in-process, es opcional.
 
 ### Sección 6: Vista de Ejecución / Runtime (NAF Sequences & Behaviour)
 - Diagramas de secuencia y flujos de estados (modelados mediante sintaxis nativa de **Mermaid**).
@@ -80,8 +103,8 @@ docs/architecture/
 │   └── technical_context.md
 ├── 04_solution_strategy.md
 ├── 05_building_blocks/
-│   ├── level_1_whitebox.md              # Resumen del sistema
-│   └── services/                        # SRV-*.md y SYS-*.md
+│   ├── level_1_whitebox.md              # Resumen del sistema y Bounded Contexts
+│   └── components/                      # CMP-*.md (Servicios, DLLs, Funciones)
 ├── 06_runtime_view/                     # SEQ-*.md con diagramas Mermaid
 ├── 07_deployment_view/                  # DEP-*.md y RES-*.md
 ├── 08_cross_cutting/
@@ -100,12 +123,13 @@ docs/architecture/
 Para garantizar que los modelos arquitectónicos no diverjan del software ejecutado ni del producto:
 
 1. **Trazabilidad 360° Determinista e Invertida (Midstream)**:
-   - Bajo el modelo de trazabilidad invertida, los requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`) no contienen punteros a servicios. En su lugar, son los servicios (`SRV-*`) los que declaran explícitamente en `satisfies-requirements` qué requerimientos satisfacen.
-   - El verificador `aisdlc verify traceability` valida mediante resolución inversa que todo servicio (`SRV-*`), componente (`SYS-*`), decisión (`ADR-*`) y vista de ejecución (`06_runtime_view.md`) esté vinculado a los identificadores `HOF-*` de entrega y a sus pruebas asociadas, sin introducir acoplamiento descendente en el producto.
+   - Bajo el modelo de trazabilidad invertida, los requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`) no contienen punteros descendentes. En su lugar, son los componentes de arquitectura (`CMP-*`) los que declaran explícitamente en `satisfies-requirements` qué requerimientos satisfacen.
+   - El verificador `aisdlc verify traceability` valida mediante resolución inversa que todo componente (`CMP-*`), decisión (`ADR-*`) y vista de ejecución (`06_runtime_view.md`) esté vinculado a los identificadores `HOF-*` de entrega y a sus pruebas asociadas, sin introducir acoplamiento descendente en el producto.
+   - Si un requerimiento se satisface en un componente hijo de Nivel 3 (DLL o función), el motor resuelve la cobertura ascendente hacia el Bounded Context de Nivel 1 mediante `parent-component`.
    - Elimina la necesidad de inspección manual de documentos o diagramas desactualizados.
 
 2. **Integración Canónica Post-Implementación**:
    - Una vez que la entrega concluye con éxito y supera todos los tests, el comando `aisdlc sdd integrate --change <id>` actualiza automáticamente los bloques de arquitectura en `specs/architecture/`:
-     - Inserta los nuevos requerimientos implementados en la lista `satisfies-requirements` de cada servicio responsable.
+     - Inserta los nuevos requerimientos implementados en la lista `satisfies-requirements` de cada componente responsable.
      - Garantiza que la arquitectura refleje el estado real y verificado del sistema en producción.
 

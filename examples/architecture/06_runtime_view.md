@@ -10,7 +10,7 @@ sequenceDiagram
     actor Attacker as Atacante (ACT-THREAT-SPOOFER)
     actor Drone as Drone Legítimo (ACT-AUTONOMOUS-UAV)
     participant DMZ as Gateway mTLS (SEC-ENC-DMZ-INGEST)
-    participant Ingest as Servicio Ingesta (SRV-TELEMETRY-INGEST)
+    participant Ingest as Servicio Ingesta (CMP-TELEMETRY-INGEST)
     participant Bus as Kafka Broker Interno
 
     Note over Attacker,DMZ: Escenario de Abuso: Intento sin certificado de CA

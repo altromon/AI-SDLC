@@ -51,7 +51,7 @@ En la era de la ingeniería asistida por Inteligencia Artificial, la velocidad d
                             ▼ (Cita canónica)
  [5. ARQUITECTURA DE SISTEMAS] (arc42 + NAF v4)
   ├── Contexto y Estrategia (arc42 Sec. 1-4 + NAF Operational)
-  ├── Bloques y Servicios (arc42 Sec. 5 + NAF Services SRV-* & Systems SYS-*)
+  ├── Bloques y Componentes (arc42 Sec. 5 + NAF Services & Systems CMP-*)
   ├── Runtime y Despliegue (arc42 Sec. 6-7 + NAF Behaviour & Resources)
   └── Conceptos Transversales y ADRs (arc42 Sec. 8-9 + NAF Governance)
                             │
@@ -94,7 +94,7 @@ AI-SDLC/
 │   ├── product/                              # Schemas: actor, use-case, requirement, business-rule
 │   ├── security/                             # Schemas: threat-actor, abuse-case, security-req
 │   ├── compliance/                           # Schemas: license-policy, dependency-manifest
-│   └── architecture/                         # Schemas: service, system-component, adr
+│   └── architecture/                         # Schemas: component, adr
 │
 ├── templates/                                # Plantillas estándar Markdown con YAML frontmatter
 │   ├── product/                              # Plantillas ACT, JRN, UC, BR, FR, QR, CON
@@ -420,7 +420,7 @@ Verifica que el código cumpla con los umbrales de `quality-policy.yaml`:
    ```
    *Salida*: Genera `reports/TRACEABILITY_MATRIX.md` verificando deterministamente la triangulación obligatoria:
    - **Producto (Upstream)**: Handoff PDaC (`HOF-*`) con subgrafo de casos de uso (`UC-*`), reglas (`BR-*`) y casos de abuso (`ABUSE-*`).
-   - **Arquitectura (Midstream)**: Vistas arc42 / NAF v4 (`SRV-*`, `SYS-*`, `ADR-*`, `SEC-ENC-*`, `06_runtime_view.md`).
+   - **Arquitectura (Midstream)**: Vistas arc42 / NAF v4 (`CMP-*`, `ADR-*`, `SEC-ENC-*`, `06_runtime_view.md`).
    - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) y escenarios etiquetados correspondientes.
 
 2. **Pull Request y Aprobación Humana**:
@@ -429,7 +429,7 @@ Verifica que el código cumpla con los umbrales de `quality-policy.yaml`:
 
 > [!TIP]
 > **Modelo de Trazabilidad Invertida (Inverted Traceability)**:
-> Los requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`) no acoplan rutas de implementación ni de tests descendentes. Son los servicios (`satisfies-requirements`) y las pruebas (`@<REQ-ID>` o citaciones en tests) los que referencian hacia arriba a los requerimientos. La herramienta compila la matriz 360° deterministamente mediante resolución inversa (*Reverse Lookup*), protegiendo la inmutabilidad y los hashes SHA-256 de las especificaciones canónicas de producto.
+> Los requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`) no acoplan rutas de implementación ni de tests descendentes. Son los componentes (`satisfies-requirements`) y las pruebas (`@<REQ-ID>` o citaciones en tests) los que referencian hacia arriba a los requerimientos. La herramienta compila la matriz 360° deterministamente mediante resolución inversa (*Reverse Lookup*), protegiendo la inmutabilidad y los hashes SHA-256 de las especificaciones canónicas de producto.
 
 ---
 
@@ -443,7 +443,7 @@ Una vez concluida la implementación del cambio y verificado que todas las tarea
    ```
    *Efectos y Transformaciones Realizadas*:
    - **Requerimientos de Producto**: Se promueven a estado `active` en `specs/product/` y se añade una entrada en su historial de revisiones referenciando el `changeId`.
-   - **Arquitectura**: Se actualizan los bloques de servicio en `specs/architecture/` enlazando los requerimientos recién satisfechos en `satisfies-requirements`.
+   - **Arquitectura**: Se actualizan los bloques de componente en `specs/architecture/` enlazando los requerimientos recién satisfechos en `satisfies-requirements`.
    - **Archivado Atómico**: El directorio del cambio se mueve de `specs/changes/active/<id>/` a `specs/changes/completed/<id>/`.
    - **Propuesta**: Se actualiza `proposal.md` fijando `status: applied`.
 
@@ -458,8 +458,8 @@ Una vez concluida la implementación del cambio y verificado que todas las tarea
    - Modela actores maliciosos (`ACT-THREAT-*`) y casos de abuso (`ABUSE-*`).
    - Define requisitos de seguridad (`SEC-REQ-*`) y restricciones Zero Trust antes de diseñar la solución técnica.
 3. **Modelar la Arquitectura arc42 / NAF v4**:
-   - Modela los límites de contexto, servicios (`SRV-*`), componentes (`SYS-*`) y enclaves de red (`SEC-ENC-*`).
-   - Cada servicio debe citar los casos de uso que implementa.
+   - Modela los límites de contexto, componentes (`CMP-*`) y enclaves de red (`SEC-ENC-*`).
+   - Cada componente debe citar los casos de uso que implementa.
 4. **Verificar Cumplimiento de Licencias**:
    - Consulta `license-policy.yaml`. Si se necesita una librería comercial o dual, tramita la solicitud formal (`ADR-LIC-*`).
 5. **Revisión y Aprobación Humana**:

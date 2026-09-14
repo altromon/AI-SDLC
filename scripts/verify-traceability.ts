@@ -6,7 +6,7 @@
  * Comprueba que TODO requerimiento (Funcional, Calidad, Seguridad) cuente con
  * cobertura completa entre:
  *   1. PRODUCTO (Upstream: Handoff PDaC HOF-*, UC-*, BR-*, ABUSE-*)
- *   2. ARQUITECTURA (Midstream: arc42 / NAF v4, SRV-*, SYS-*, ADR-*, SEC-ENC-*)
+ *   2. ARQUITECTURA (Midstream: arc42 / NAF v4, CMP-*, ADR-*, SEC-ENC-*)
  *   3. PRUEBAS (Downstream: .feature Cucumber con tags y escenarios verificados)
  *
  * Emite exit code 0 si la trazabilidad es del 100%, o exit code 1 si hay huérfanos.

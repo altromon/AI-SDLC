@@ -9,8 +9,8 @@ deciders:
   - "Carlos Mendoza (Lead Architect)"
   - "Laura Ibáñez (SecOps Lead)"
 decision-date: "2026-09-03"
-affects-services:
-  - SRV-TELEMETRY-INGEST
+affects-components:
+  - CMP-TELEMETRY-INGEST
 supersedes: null
 superseded-by: null
 ---
@@ -18,7 +18,7 @@ superseded-by: null
 # ADR-001: Selección de la Pila WebSocket para Ingesta Telemétrica
 
 ## 1. Contexto y Problema
-El servicio `SRV-TELEMETRY-INGEST` debe procesar 10.000 drones simultáneos transmitiendo a 10 Hz (100.000 mensajes/segundo) con latencia <50ms (`QR-LATENCY-REALTIME`). La solución debe admitir terminación mTLS y cumplir rigurosamente con la política de licencias `license-policy.yaml`.
+El servicio `CMP-TELEMETRY-INGEST` debe procesar 10.000 drones simultáneos transmitiendo a 10 Hz (100.000 mensajes/segundo) con latencia <50ms (`QR-LATENCY-REALTIME`). La solución debe admitir terminación mTLS y cumplir rigurosamente con la política de licencias `license-policy.yaml`.
 
 ## 2. Opciones Evaluadas
 1. **Opción 1: Node.js + `ws`**: Motor maduro, licencia MIT (libre uso), soporte nativo mTLS.

@@ -2,7 +2,7 @@
  * AI-SDLC: Automated 360° Traceability Engine (RTM Validator)
  * Verifies complete coverage across:
  *   1. PDaC Handoff (HOF-*) & Product Subgraph (Upstream: UC-*, BR-*, ABUSE-*)
- *   2. arc42 / NAF v4 Architecture Views (Midstream: SRV-*, SYS-*, ADR-*, SEC-ENC-*)
+ *   2. arc42 / NAF v4 Architecture Views (Midstream: CMP-*, ADR-*, SEC-ENC-*)
  *   3. BDD / Gherkin Executable Tests (Downstream: .feature files & scenario tags)
  */
 
@@ -27,8 +27,12 @@ interface ArtifactEntry {
   rawBody: string;
 }
 
-interface ServiceEntry {
+interface ComponentEntry {
   id: string;
+  level?: number;
+  parentComponent?: string;
+  boundedContext?: string;
+  implementationType?: string;
   satisfies: string[];
 }
 
@@ -89,7 +93,7 @@ export function generateTraceabilityReportMarkdown(rows: TraceabilityRow[], erro
     '- **Producto (Upstream)**: El requerimiento está emitido en un Handoff formal de PDaC (`HOF-*`) y deriva de un Caso de Uso (`UC-*`), Regla de Negocio (`BR-*`) o Caso de Abuso (`ABUSE-*`).'
   );
   reportLines.push(
-    '- **Arquitectura (Midstream)**: El requerimiento está asignado a al menos un Servicio (`SRV-*`), Enclave (`SEC-ENC-*`), Decisión (`ADR-*`) o Vista de Ejecución arc42/NAF v4.'
+    '- **Arquitectura (Midstream)**: El requerimiento está asignado a al menos un Componente (`CMP-*`), Enclave (`SEC-ENC-*`), Decisión (`ADR-*`) o Vista de Ejecución arc42/NAF v4.'
   );
   reportLines.push(
     '- **Pruebas (Downstream)**: El requerimiento cuenta con escenarios ejecutables en suites BDD/Gherkin (`.feature`) con etiquetas correspondientes o tests automatizados verificados.'
@@ -104,7 +108,7 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
 
   // 1. Index all markdown artifacts
   const artifactMap = new Map<string, ArtifactEntry>();
-  const servicesList: ServiceEntry[] = [];
+  const componentsList: ComponentEntry[] = [];
   const architectureViews: { file: string; content: string }[] = [];
 
   for (const file of allMdFiles) {
@@ -122,7 +126,7 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
           rawBody: body,
         });
 
-        if (frontmatter.type === 'service' || String(frontmatter.id).startsWith('SRV-')) {
+        if (frontmatter.type === 'component' || String(frontmatter.id).startsWith('CMP-')) {
           const satisfies: string[] = [];
           if (Array.isArray(frontmatter['satisfies-requirements'])) {
             satisfies.push(...(frontmatter['satisfies-requirements'] as string[]));
@@ -130,7 +134,23 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
           if (Array.isArray(frontmatter['satisfies'])) {
             satisfies.push(...(frontmatter['satisfies'] as string[]));
           }
-          servicesList.push({ id: String(frontmatter.id), satisfies });
+          componentsList.push({
+            id: String(frontmatter.id),
+            level: typeof frontmatter.level === 'number' ? frontmatter.level : undefined,
+            parentComponent:
+              typeof frontmatter['parent-component'] === 'string'
+                ? frontmatter['parent-component']
+                : undefined,
+            boundedContext:
+              typeof frontmatter['bounded-context'] === 'string'
+                ? frontmatter['bounded-context']
+                : undefined,
+            implementationType:
+              typeof frontmatter['implementation-type'] === 'string'
+                ? frontmatter['implementation-type']
+                : undefined,
+            satisfies,
+          });
         }
       }
 
@@ -328,10 +348,13 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     // --- B. MIDSTREAM: ARCHITECTURE TRACEABILITY (arc42 / NAF v4 - Reverse Lookup) ---
     const archTraces: string[] = [];
 
-    // Service reverse mapping (services declaring satisfies-requirements / satisfies)
-    for (const srv of servicesList) {
-      if (srv.satisfies.includes(reqId)) {
-        if (!archTraces.includes(srv.id)) archTraces.push(srv.id);
+    // Component reverse mapping (components declaring satisfies-requirements / satisfies)
+    for (const cmp of componentsList) {
+      if (cmp.satisfies.includes(reqId)) {
+        if (!archTraces.includes(cmp.id)) archTraces.push(cmp.id);
+        if (cmp.parentComponent && !archTraces.includes(cmp.parentComponent)) {
+          archTraces.push(cmp.parentComponent);
+        }
       }
     }
 
