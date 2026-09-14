@@ -24,7 +24,7 @@ tasks:
     status: "COMPLETED"
 
   - id: "TSK-002"
-    title: "Implementación del Gateway WSS con Validación mTLS (SRV-TELEMETRY-INGEST)"
+    title: "Implementación del Gateway WSS con Validación mTLS (CMP-TELEMETRY-INGEST)"
     complexity: "MEDIUM"
     risk-level: "MEDIUM"
     autonomy-mode: "HUMAN_REVIEW_PLAN"

@@ -261,45 +261,44 @@ export function integrateSddChange(options: SddIntegrationOptions): SddIntegrati
     }
   }
 
-  // 7. Integrate Architecture Services & Views (arc42 / NAF v4)
+  // 7. Integrate Architecture Components & Views (arc42 / NAF v4)
   // Identify cited architecture components in handoff or proposal
-  const citedServices: string[] = [];
+  const citedComponents: string[] = [];
   if (handoff.citations) {
     for (const c of handoff.citations) {
       const citeId = (c as any).targetId || (c as any).id;
       if (
         citeId &&
-        (citeId.startsWith('SRV-') ||
-          citeId.startsWith('SYS-') ||
+        (citeId.startsWith('CMP-') ||
           citeId.startsWith('SEC-ENC-') ||
           citeId.startsWith('ADR-'))
       ) {
-        citedServices.push(citeId);
+        citedComponents.push(citeId);
       }
     }
   }
 
-  // If no services cited directly in citations, search canonical services that implement target requirements
+  // If no components cited directly in citations, search canonical components that implement target requirements
   for (const [artId, art] of canonicalArtifacts.entries()) {
-    if (artId.startsWith('SRV-') && art.frontmatter) {
+    if (artId.startsWith('CMP-') && art.frontmatter) {
       const satisfies = Array.isArray(art.frontmatter['satisfies-requirements'])
         ? (art.frontmatter['satisfies-requirements'] as string[])
         : [];
       if (targetReqs.some((r) => satisfies.includes(r))) {
-        if (!citedServices.includes(artId)) citedServices.push(artId);
+        if (!citedComponents.includes(artId)) citedComponents.push(artId);
       }
     }
   }
 
-  for (const srvId of citedServices) {
-    const canonical = canonicalArtifacts.get(srvId);
+  for (const cmpId of citedComponents) {
+    const canonical = canonicalArtifacts.get(cmpId);
     if (canonical) {
       try {
         const fm = canonical.frontmatter;
         let modified = false;
 
         // Ensure satisfies-requirements includes target requirements
-        if (srvId.startsWith('SRV-')) {
+        if (cmpId.startsWith('CMP-')) {
           const existingSatisfies = Array.isArray(fm['satisfies-requirements'])
             ? [...fm['satisfies-requirements']]
             : [];
@@ -323,10 +322,10 @@ export function integrateSddChange(options: SddIntegrationOptions): SddIntegrati
         if (updatedBody !== canonical.body || modified) {
           const yamlHeader = `---\n${yaml.dump(fm, { indent: 2, lineWidth: -1 }).trim()}\n---\n`;
           fs.writeFileSync(canonical.file, yamlHeader + updatedBody, 'utf-8');
-          updatedArchitectureArtifacts.push(srvId);
+          updatedArchitectureArtifacts.push(cmpId);
         }
       } catch (err: any) {
-        errors.push(`Error actualizando componente de arquitectura '${srvId}': ${err.message}`);
+        errors.push(`Error actualizando componente de arquitectura '${cmpId}': ${err.message}`);
       }
     }
   }

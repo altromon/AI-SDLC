@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * SentinelCore: Gateway de Ingesta Telemétrica WSS (SRV-TELEMETRY-INGEST)
+ * SentinelCore: Gateway de Ingesta Telemétrica WSS (CMP-TELEMETRY-INGEST)
  * ==============================================================================
  * Gestiona conexiones WebSocket con autenticación mTLS obligatoria (TLS 1.3).
  * Deserializa tramas y delega la validación cinemática antes de publicar en Kafka.

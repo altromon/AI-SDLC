@@ -1,6 +1,6 @@
 # 📋 Informe de Gobierno de Tareas y Clasificación de Autonomía Humana
 
-> **Fecha de Auditoría:** 2026-09-13T17:53:14.368Z
+> **Fecha de Auditoría:** 2026-09-14T18:54:54.933Z
 > **Veredicto General:** CONFORME (0 Violaciones de Gobierno)
 
 ---
@@ -9,10 +9,10 @@
 
 | Modo de Autonomía | Semáforo | Cantidad | Porcentaje | Rol del Agente de IA | Intervención Humana Requerida |
 | :--- | :---: | :---: | :---: | :--- | :--- |
-| **`AUTONOMOUS`** | 🟢 | **2** | 29% | Planificación y codificación autónoma | Revisión asíncrona del PR final |
-| **`HUMAN_REVIEW_PLAN`** | 🟡 | **2** | 29% | Elaboración del plan detallado | **Aprobación explícita del plan ANTES de codificar** |
-| **`AMBIGUOUS`** | 🟠 | **1** | 14% | **DETENIDO**: Prohibido codificar | Refinamiento y aclaración con el Product Owner |
-| **`HIGH_RISK_MANUAL`** | 🔴 | **2** | 29% | Solo asistencia o soporte en pair-programming | **Ejecución directa por ingenieros humanos** |
+| **`AUTONOMOUS`** | 🟢 | **3** | 27% | Planificación y codificación autónoma | Revisión asíncrona del PR final |
+| **`HUMAN_REVIEW_PLAN`** | 🟡 | **3** | 27% | Elaboración del plan detallado | **Aprobación explícita del plan ANTES de codificar** |
+| **`AMBIGUOUS`** | 🟠 | **2** | 18% | **DETENIDO**: Prohibido codificar | Refinamiento y aclaración con el Product Owner |
+| **`HIGH_RISK_MANUAL`** | 🔴 | **3** | 27% | Solo asistencia o soporte en pair-programming | **Ejecución directa por ingenieros humanos** |
 
 ---
 
@@ -21,9 +21,13 @@
 | ID Tarea | Archivo Origen | Título | Riesgo | Autonomía | Criterio de Verificación Concreto | Asignado a | Estado |
 | :--- | :--- | :--- | :---: | :---: | :--- | :--- | :---: |
 | **`TSK-001`** | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | Definición de Tipos Cinemáticos e Interfaces de Telemetría | `LOW` | `AUTONOMOUS` | `npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts` | `agent-developer` | ✅ OK |
-| **`TSK-002`** | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | Implementación del Gateway WSS con Validación mTLS (SRV-TELEMETRY-INGEST) | `MEDIUM` | `HUMAN_REVIEW_PLAN` | `npm test -- tests/unit/telemetry_gateway.spec.ts` | `agent-developer` | ✅ OK |
+| **`TSK-002`** | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | Implementación del Gateway WSS con Validación mTLS (CMP-TELEMETRY-INGEST) | `MEDIUM` | `HUMAN_REVIEW_PLAN` | `npm test -- tests/unit/telemetry_gateway.spec.ts` | `agent-developer` | ✅ OK |
 | **`TSK-003`** | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | Inyección de Claves de la CA de Producción y Certificados del HSM | `CRITICAL` | `HIGH_RISK_MANUAL` | `Verificación de checksums de claves en enclave y auditoría de accesos HSM` | `human-engineer` | ✅ OK |
 | **`TSK-004`** | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | Algoritmo de Fusión Multisensorial y Corrección Barométrica | `MEDIUM` | `AMBIGUOUS` | `Sesión de refinamiento con el equipo de aerodinámica` | `human-architect` | ✅ OK |
+| **`TSK-001`** | `specs\changes\active\chg-001-telemetry-ingestion\tasks.md` | Definición de Tipos Cinemáticos e Interfaces de Telemetría | `LOW` | `AUTONOMOUS` | `npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts` | `agent-developer` | ✅ OK |
+| **`TSK-002`** | `specs\changes\active\chg-001-telemetry-ingestion\tasks.md` | Implementación del Gateway WSS con Validación mTLS (CMP-TELEMETRY-INGEST) | `MEDIUM` | `HUMAN_REVIEW_PLAN` | `npm test -- tests/unit/telemetry_gateway.spec.ts` | `agent-developer` | ✅ OK |
+| **`TSK-003`** | `specs\changes\active\chg-001-telemetry-ingestion\tasks.md` | Inyección de Claves de la CA de Producción y Certificados del HSM | `CRITICAL` | `HIGH_RISK_MANUAL` | `Verificación de checksums de claves en enclave y auditoría de accesos HSM` | `human-engineer` | ✅ OK |
+| **`TSK-004`** | `specs\changes\active\chg-001-telemetry-ingestion\tasks.md` | Algoritmo de Fusión Multisensorial y Corrección Barométrica | `MEDIUM` | `AMBIGUOUS` | `Sesión de refinamiento con el equipo de aerodinámica` | `human-architect` | ✅ OK |
 | **`TSK-001`** | `templates\delivery\tasks.template.md` | Definición de DTOs e Interfaces de Contrato | `LOW` | `AUTONOMOUS` | `npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts` | `agent-developer` | ✅ OK |
 | **`TSK-002`** | `templates\delivery\tasks.template.md` | Implementación de Lógica Central y Algoritmo de Negocio | `MEDIUM` | `HUMAN_REVIEW_PLAN` | `npm test -- tests/unit/feature_core.spec.ts` | `agent-developer` | ✅ OK |
 | **`TSK-003`** | `templates\delivery\tasks.template.md` | Migración de Esquema de Base de Datos / Credenciales Críticas | `CRITICAL` | `HIGH_RISK_MANUAL` | `Revisión DBA + ejecución manual con script idempotente verificado` | `human-engineer` | ✅ OK |
