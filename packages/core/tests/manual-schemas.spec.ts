@@ -59,6 +59,8 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
     const content = fs.readFileSync(templatePath, 'utf-8');
     expect(content).toContain('Roles de Usuario');
     expect(content).toContain('Matriz de Permisos');
+    expect(content).toContain('Matriz de Compatibilidad de Versiones y Plataformas de Usuario');
+    expect(content).toContain('Compatibilidad Cliente-Servidor');
     expect(content).toContain('Roles Autorizados');
     expect(content).toContain('Instalación, Acceso y Configuración');
     expect(content).toContain('Catálogo de Mensajes');
@@ -77,6 +79,9 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
 
     const content = fs.readFileSync(templatePath, 'utf-8');
     expect(content).toContain('Regeneración Determinista de Releases');
+    expect(content).toContain('Matriz de Compatibilidad de Versiones, Infraestructura y Migración');
+    expect(content).toContain('Soporte $N-1$');
+    expect(content).toContain('Rutas de Actualización y Marcha Atrás');
     expect(content).toContain('Herramientas de Compilación');
     expect(content).toContain('Librerías, Dependencias y Grafo de Vértices');
     expect(content).toContain('Arquitectura y Pipelines de CI/CD');
@@ -100,6 +105,8 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
     const content = fs.readFileSync(examplePath, 'utf-8');
     expect(content).toContain('ACT-DRONE-OPERATOR');
     expect(content).toContain('ACT-AUTONOMOUS-UAV');
+    expect(content).toContain('Matriz de Compatibilidad de Versiones y Plataformas de Usuario');
+    expect(content).toContain('Compatibilidad de Firmware UAV');
     expect(content).toContain('JRN-UAV-SURVEILLANCE');
     expect(content).toContain('UC-STREAM-TELEMETRY');
     expect(content).toContain('BR-TELEMETRY-VALIDITY');
@@ -121,6 +128,8 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
     const content = fs.readFileSync(examplePath, 'utf-8');
     expect(content).toContain('CMP-TELEMETRY-INGEST');
     expect(content).toContain('SEC-ENC-DMZ-INGEST');
+    expect(content).toContain('Matriz de Compatibilidad de Versiones, Infraestructura y Migración');
+    expect(content).toContain('TEL-SCHEMA-v1.0');
     expect(content).toContain('Reproducible Builds');
     expect(content).toContain('pnpm-lock.yaml');
     expect(content).toContain('CycloneDX');

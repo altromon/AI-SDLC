@@ -89,9 +89,48 @@ Para evitar discrepancias en la generación de binarios o paquetes, se exige el 
 
 ---
 
-## 2. Arquitectura y Pipelines de CI/CD
+## 2. Matriz de Compatibilidad de Versiones, Infraestructura y Migración
 
-### 2.1 Modelo de Ramas Jerárquico y Triggers de Integración
+Esta sección define los límites de interoperabilidad técnica entre la versión del release y el ecosistema de despliegue, garantizando transiciones seguras sin interrupción de servicio (*Zero-Downtime*).
+
+### 2.1 Compatibilidad con Plataformas y Runtimes de Ejecución
+
+| Componente de Infraestructura | Rango de Versiones Homologadas | Versión Recomendada | Estado de Soporte |
+| :--- | :--- | :--- | :---: |
+| **Clúster Kubernetes (K8s)** | `>= 1.28` y `<= 1.31` | `1.30.2` | ✅ Certificado |
+| **Container Runtime (CRI)** | containerd `>= 1.7` / CRI-O `>= 1.28` | containerd `1.7.15` | ✅ Certificado |
+| **Sistema Operativo Base (Host)** | Ubuntu 22.04 LTS / RHEL 9.2+ | Ubuntu 22.04 LTS (Kernel 6.x) | ✅ Homologado |
+| **Runtime de Lenguaje (Producción)** | Node.js `>= 20.x` y `<= 22.x` | `v22.12.0 LTS` | ✅ Hermético |
+
+### 2.2 Compatibilidad de Esquemas de Datos y Migraciones (Soporte $N-1$)
+
+Para posibilitar despliegues continuos tipo *Canary* o *Blue-Green* sin pérdida de transacciones:
+
+| Versión del Release | Versión de Esquema DB | Compatible con Código $N-1$ | Estado de Migración de Esquema |
+| :---: | :---: | :---: | :--- |
+| **`v1.0.0`** (Actual) | `SCHEMA-v1.0` | ✅ Sí (soporta código `v0.9.x`) | Migración aditiva no destructiva (sin renombre de columnas). |
+| **`v0.9.x`** | `SCHEMA-v0.9` | ✅ Línea base previa | Totalmente compatible durante el periodo de drenado Canary. |
+
+### 2.3 Interoperabilidad entre Componentes de Arquitectura (`CMP-*`)
+
+| Componente Dependiente | Componente Consumido | Versiones Mínimas Compatibles | Protocolo / Contrato Vinculante |
+| :--- | :--- | :---: | :--- |
+| `CMP-NOMBRE-001` (Gateway) | `CMP-NOMBRE-002` (Backend) | `>= v1.0.0` | gRPC / Protobuf v3 (`contract_spec.proto`) |
+| `CMP-NOMBRE-001` (Gateway) | Bus de Mensajería / Kafka | `>= 3.5.0` | Protocolo Kafka v2 con TLS mTLS |
+
+### 2.4 Rutas de Actualización y Marcha Atrás Homologadas (Upgrade & Rollback Paths)
+
+| Versión Origen | Salto Directo a `v1.0.0` | Requiere Migración Intermedia | Procedimiento de Rollback Directo |
+| :---: | :---: | :---: | :---: |
+| **`v0.9.1`** | ✅ Permitido | ❌ No requerida | `kubectl rollout undo` sin pérdida de datos. |
+| **`v0.9.0`** | ✅ Permitido | ❌ No requerida | `kubectl rollout undo` sin pérdida de datos. |
+| **`< v0.9.0`** | ❌ Bloqueado | ✅ Obligatorio actualizar a `v0.9.1` primero | Requiere restauración desde snapshot de backup. |
+
+---
+
+## 3. Arquitectura y Pipelines de CI/CD
+
+### 3.1 Modelo de Ramas Jerárquico y Triggers de Integración
 
 Conforme al estándar de 4 tiers de AI-SDLC:
 
@@ -140,9 +179,9 @@ flowchart LR
 
 ---
 
-## 3. Estrategia y Procedimiento de Despliegue a Producción
+## 4. Estrategia y Procedimiento de Despliegue a Producción
 
-### 3.1 Requisitos Previos de Infraestructura y Enclaves de Red
+### 4.1 Requisitos Previos de Infraestructura y Enclaves de Red
 
 - **Enclave de Destino**: `SEC-ENC-DMZ-001` (Segmentación estricta sin acceso directo a internet saliente no controlado).
 - **Puertos de Red Habilitados**:
@@ -152,13 +191,13 @@ flowchart LR
   - Certificados TLS de servidor y CA raíz de clientes montados mediante secreto inmutable en `/etc/pki/tls/`.
   - Prohibido embeber claves criptográficas en variables de entorno o imágenes.
 
-### 3.2 Estrategia de Rollout
+### 4.2 Estrategia de Rollout
 
 Se utiliza la estrategia **Canary con análisis progresivo de métricas de telemetría**:
 1. El 10% del tráfico se enruta a la nueva versión durante 15 minutos.
 2. Si la tasa de error 5xx es `<= 0.01%` y la latencia p99 es `<= 50ms`, se promociona al 100%.
 
-### 3.3 Procedimiento de Despliegue Paso a Paso
+### 4.3 Procedimiento de Despliegue Paso a Paso
 
 1. **Paso 1: Pre-despliegue y Snapshot de Estado**
    ```bash
@@ -180,7 +219,7 @@ Se utiliza la estrategia **Canary con análisis progresivo de métricas de telem
    pnpm test:example
    ```
 
-### 3.4 Plan de Marcha Atrás (Rollback Inmediato)
+### 4.4 Plan de Marcha Atrás (Rollback Inmediato)
 
 - **Criterios Objetivos de Activación de Rollback**:
   - Tasa de fallos en handshake mTLS `> 1.0%`.
@@ -194,11 +233,11 @@ Se utiliza la estrategia **Canary con análisis progresivo de métricas de telem
 
 ---
 
-## 4. Resolución de Errores Probables y Troubleshooting (Runbooks)
+## 5. Resolución de Errores Probables y Troubleshooting (Runbooks)
 
 Esta sección documenta los fallos más frecuentes en runtime y despliegue, junto con su diagnóstico y procedimiento de mitigación inmediata.
 
-### 4.1 Matriz de Incidencias Frecuentes y Soluciones
+### 5.1 Matriz de Incidencias Frecuentes y Soluciones
 
 #### Incidencia 1: Inconsistencia o Drift en Vértices de Dependencias (Build Failure)
 - **Síntoma**: El comando `pnpm install --frozen-lockfile` falla en CI con error `ERR_PNPM_LOCKFILE_OUTDATED`.
@@ -258,7 +297,7 @@ Esta sección documenta los fallos más frecuentes en runtime y despliegue, junt
 
 ---
 
-### 4.2 Protocolo de Escalado y Gestión de Incidentes Críticos
+### 5.2 Protocolo de Escalado y Gestión de Incidentes Críticos
 
 | Nivel de Severidad | Criterio de Impacto | Tiempo Máximo de Respuesta | Roles Involucrados |
 | :--- | :--- | :---: | :--- |
@@ -268,7 +307,7 @@ Esta sección documenta los fallos más frecuentes en runtime y despliegue, junt
 
 ---
 
-## 5. Historial de Revisiones y Control de Versiones
+## 6. Historial de Revisiones y Control de Versiones
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |

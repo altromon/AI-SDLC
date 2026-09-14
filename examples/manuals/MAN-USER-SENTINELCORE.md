@@ -56,9 +56,37 @@ SentinelCore opera bajo el principio de menor privilegio dentro de enclaves de r
 
 ---
 
-## 3. Instalación, Acceso y Configuración de la Aplicación
+## 3. Matriz de Compatibilidad de Versiones y Plataformas de Usuario
 
-### 3.1 Canales de Acceso
+Esta matriz establece la interoperabilidad entre el release `v1.0.0` de SentinelCore y las flotas de UAVs, estaciones de control terrestre (GCS) y navegadores homologados:
+
+### 3.1 Compatibilidad de Firmware UAV y Protocolo Telemétrico
+
+| Serie / Modelo UAV | Versión de Firmware Soportada | Protocolo Telemétrico | Estado de Certificación |
+| :--- | :--- | :---: | :---: |
+| **UAV Raven-X (Ala Fija)** | `>= v2.4.0` | WSS + Protobuf v3 (`telemetry.proto`) | ✅ Homologado |
+| **UAV Spectre-4 (Cuadricóptero)** | `>= v1.8.2` | WSS + JSON Estructurado mTLS | ✅ Homologado |
+| **Flota Legacy (Serie Vulture)** | `< v1.5.0` | TCP Raw no cifrado | ❌ Bloqueado por `SEC-REQ-MTLS-STREAM` |
+
+### 3.2 Consolas Terrenas y Estaciones de Control (GCS)
+
+| Plataforma / Entorno GCS | Versiones Homologadas | Nivel de Soporte | Notas de Despliegue |
+| :--- | :--- | :---: | :--- |
+| **Consola Web (Chrome / Chromium)** | Versión `>= 120` | Primario | Renderizado 3D acelerado por WebGL 2.0. |
+| **Consola Web (Firefox ESR)** | Versión `>= 115` | Primario | Compatible con autenticación mediante tarjeta inteligente CAC/PIV. |
+| **Sentinel CLI Client** | Versión `>= 1.0.0` | Oficial | Herramienta CLI multiplataforma para diagnóstico de enlace. |
+
+### 3.3 Retrocompatibilidad de Archivos de Configuración (`sentinel-client.yaml`)
+
+| Formato de Configuración | Versión de Origen | Compatibilidad con v1.0.0 | Comportamiento |
+| :--- | :---: | :---: | :--- |
+| **`sentinel-client.yaml`** | `v0.9.x` | ✅ 100% Compatible | Parámetros de buffer y reintento adoptan valores por defecto seguros. |
+
+---
+
+## 4. Instalación, Acceso y Configuración de la Aplicación
+
+### 4.1 Canales de Acceso
 
 - **Consola del Operador**: Interfaz Web accesible en `https://sentinel.internal/console`.
 - **Canal de Telemetría para UAVs**: Endpoint WebSocket Seguro (WSS) en `wss://ingest.sentinel.internal:8443/telemetry`.
@@ -73,7 +101,7 @@ SentinelCore opera bajo el principio de menor privilegio dentro de enclaves de r
 | `SENTINEL_BURST_INTERVAL_MS`| Entero | `100` | No | Frecuencia de emisión de ráfagas (por defecto 100ms). |
 | `SENTINEL_MAX_RETRIES` | Entero | `5` | No | Intentos máximos de reconexión con backoff exponencial. |
 
-### 3.3 Archivo de Configuración de Estación Terrena (`sentinel-client.yaml`)
+### 4.3 Archivo de Configuración de Estación Terrena (`sentinel-client.yaml`)
 
 ```yaml
 version: "1.0"
@@ -96,9 +124,9 @@ telemetry:
 
 ---
 
-## 4. Guía de Ejecución de Journeys (`JRN-*`)
+## 5. Guía de Ejecución de Journeys (`JRN-*`)
 
-### 4.1 `JRN-UAV-SURVEILLANCE`: Vigilancia y Monitoreo Telemétrico Continuo de Flota UAV
+### 5.1 `JRN-UAV-SURVEILLANCE`: Vigilancia y Monitoreo Telemétrico Continuo de Flota UAV
 
 - **Caso de Uso Central**: `UC-STREAM-TELEMETRY`
 - **Requerimientos Satisfechos**: `FR-TELEMETRY-STREAM-001`, `QR-LATENCY-REALTIME`, `SEC-REQ-MTLS-STREAM`
@@ -141,7 +169,7 @@ telemetry:
 
 ---
 
-## 5. Catálogo de Mensajes del Sistema y Códigos de Respuesta
+## 6. Catálogo de Mensajes del Sistema y Códigos de Respuesta
 
 | Código | Severidad | Mensaje Literal Emitido | Disparador / Contexto | Significado para el Operador | Acción Correctiva Recomendada |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -156,7 +184,7 @@ telemetry:
 
 ---
 
-## 6. Preguntas Frecuentes (FAQ) y Soporte
+## 7. Preguntas Frecuentes (FAQ) y Soporte
 
 - **¿Qué ocurre si el UAV pierde la conexión WSS durante la misión?**  
   El UAV almacena localmente en su buffer circular las últimas 50 ráfagas (5 segundos) y las transmite en ráfaga ordenada tras reconectar.
@@ -165,7 +193,7 @@ telemetry:
 
 ---
 
-## 7. Historial de Revisiones
+## 8. Historial de Revisiones
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |

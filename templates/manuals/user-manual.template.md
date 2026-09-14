@@ -54,15 +54,45 @@ Esta sección define formalmente los roles autorizados para acceder y operar la 
 
 ---
 
-## 3. Instalación, Acceso y Configuración de la Aplicación
+## 3. Matriz de Compatibilidad de Versiones y Plataformas de Usuario
 
-### 3.1 Canales de Acceso y Requisitos Previos
+Esta sección especifica la compatibilidad cruzada entre la versión actual de la aplicación y los entornos, clientes y formatos de usuario.
+
+### 3.1 Compatibilidad Cliente-Servidor (APIs y SDKs)
+
+| Versión de Aplicación (Backend) | Versión Compatible de CLI | Versión Compatible de SDK | Estado de Compatibilidad | Notas de Migración |
+| :---: | :---: | :---: | :---: | :--- |
+| **`v1.0.0`** (Actual) | `>= v1.0.0` | `>= v1.0.0` | ✅ Totalmente Soportado | Versión canónica activa. |
+| **`v1.0.0`** (Actual) | `v0.9.x` | `v0.9.x` | ⚠️ Modo Degradado | Requiere actualización antes del siguiente minor. |
+| **`v1.0.0`** (Actual) | `< v0.9.0` | `< v0.9.0` | ❌ Incompatible / Obsoleto | Endpoints antiguos retirados. |
+
+### 3.2 Navegadores y Plataformas Cliente Homologadas
+
+| Plataforma / Entorno | Versiones Mínimas Soportadas | Nivel de Soporte | Restricciones Conocidas |
+| :--- | :--- | :---: | :--- |
+| **Google Chrome / Chromium** | Versión `>= 120` | Tier 1 (Oficial) | Rendimiento óptimo en WebSockets y WebGL. |
+| **Mozilla Firefox** | Versión `>= 115 ESR` | Tier 1 (Oficial) | Soporte completo para certificados cliente. |
+| **Safari / WebKit** | Versión `>= 17.0` | Tier 2 (Funcional) | Requiere habilitación explícita de mTLS en macOS Keychain. |
+| **Terminal / CLI (Linux / macOS / Windows)** | Node.js `>= 18` o Bash `>= 5.0` | Tier 1 (Oficial) | Soporte completo en PowerShell 7+ y bash. |
+
+### 3.3 Compatibilidad de Archivos de Configuración y Formatos de Datos
+
+| Formato / Artefacto | Versión Origen Soportada | Conversión Automática | Acción Requerida por el Usuario |
+| :--- | :---: | :---: | :--- |
+| **`config.yaml`** | `v0.9.x` | ✅ Sí | Ninguna. La aplicación migra claves deprecated en inicio. |
+| **Perfiles de Exportación (`.json`)** | `v0.9.x` | ✅ Sí | Compatibilidad 100% retroactiva. |
+
+---
+
+## 4. Instalación, Acceso y Configuración de la Aplicación
+
+### 4.1 Canales de Acceso y Requisitos Previos
 
 - **Interfaz Web / Portal**: URL de acceso (ej. `https://app.sistema.internal`).
 - **Línea de Comandos (CLI)**: Binario ejecutable o paquete (ej. `npx sistema-cli` o `./sistema-client`).
 - **Navegadores o Plataformas Soportadas**: Chrome >= 120, Firefox >= 120, Linux/macOS/Windows terminal.
 
-### 3.2 Configuración del Cliente y Variables de Entorno
+### 4.2 Configuración del Cliente y Variables de Entorno
 
 La aplicación permite parametrizar su comportamiento mediante variables de entorno o archivos de configuración local:
 
@@ -98,11 +128,11 @@ ui:
 
 ---
 
-## 4. Guía Paso a Paso de Ejecución de Journeys (`JRN-*`)
+## 5. Guía Paso a Paso de Ejecución de Journeys (`JRN-*`)
 
 Cada subsección documenta un Journey de extremo a extremo, indicando los roles facultados para su ejecución, las condiciones de partida y el procedimiento operativo paso a paso.
 
-### 4.1 `JRN-JOURNEY-001`: Nombre del Journey de Usuario
+### 5.1 `JRN-JOURNEY-001`: Nombre del Journey de Usuario
 
 - **Caso de Uso Vinculado**: `UC-ACCION-001`
 - **Actor Principal**: `ACT-ROL-USUARIO-001`
@@ -137,7 +167,7 @@ Cada subsección documenta un Journey de extremo a extremo, indicando los roles 
 
 ---
 
-## 5. Catálogo de Mensajes del Sistema y Códigos de Respuesta
+## 6. Catálogo de Mensajes del Sistema y Códigos de Respuesta
 
 Matriz estructurada con los mensajes informativos, de advertencia y de error más importantes que emite la aplicación durante su ciclo operativo:
 
@@ -154,7 +184,7 @@ Matriz estructurada con los mensajes informativos, de advertencia y de error má
 
 ---
 
-## 6. Preguntas Frecuentes (FAQ) y Soporte
+## 7. Preguntas Frecuentes (FAQ) y Soporte
 
 - **¿Qué debo hacer si pierdo la conectividad mientras ejecuto un Journey?**  
   La aplicación cuenta con mecanismos de idempotencia. Una vez restablecida la red, verifique el estado del recurso antes de reintentar para evitar transacciones duplicadas.
@@ -163,7 +193,7 @@ Matriz estructurada con los mensajes informativos, de advertencia y de error má
 
 ---
 
-## 7. Historial de Revisiones y Control de Versiones
+## 8. Historial de Revisiones y Control de Versiones
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |

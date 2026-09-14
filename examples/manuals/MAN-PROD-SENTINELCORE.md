@@ -82,9 +82,46 @@ Este manual define el procedimiento estandarizado para reproducir, compilar, aud
 
 ---
 
-## 2. Arquitectura y Pipelines de CI/CD
+## 2. Matriz de Compatibilidad de Versiones, Infraestructura y Migración
 
-### 2.1 Modelo de Ramas Jerárquico de 4 Tiers
+Esta sección define las matrices de soporte e interoperabilidad operativa para el despliegue del release `v1.0.0` de SentinelCore:
+
+### 2.1 Compatibilidad de Infraestructura y Enclaves DMZ
+
+| Componente de Infraestructura | Versión Mínima Requerida | Versión Homologada en Producción | Función / Restricción |
+| :--- | :--- | :--- | :--- |
+| **Clúster Kubernetes (EKS / Baremetal)** | `>= 1.28.0` | `1.30.2` | Soporte para `NetworkPolicy` estricto en enclave `SEC-ENC-DMZ-INGEST`. |
+| **Malla de Servicio / mTLS Ingress** | Istio `>= 1.20` o Envoy `>= 1.28` | Envoy `1.29.4` | Terminación TLS 1.3 con validación de cliente x509. |
+| **Módulo Criptográfico / HSM** | PKCS#11 v2.40 / Vault `>= 1.15` | Thales Luna HSM / Vault 1.16 | Custodia de CA raíz y emisión de certificados intermedios. |
+| **Runtime Node.js** | `>= 22.0.0` | `v22.12.0 LTS` | Motor de ejecución de `CMP-TELEMETRY-INGEST`. |
+
+### 2.2 Compatibilidad de Datos Telemétricos y Esquema (Soporte $N-1$)
+
+| Versión del Release | Esquema de Telemetría | Compatibilidad con Tráfico $N-1$ | Notas Operativas |
+| :---: | :---: | :---: | :--- |
+| **`v1.0.0`** (Actual) | `TEL-SCHEMA-v1.0` | ✅ Sí (soporta ráfagas de `v0.9.x`) | Despliegue seguro sin interrupción de telemetría de drones en vuelo. |
+| **`v0.9.x`** | `TEL-SCHEMA-v0.9` | ✅ Totalmente procesable | Campos adicionales de `v1.0` son opcionales durante la transición. |
+
+### 2.3 Interoperabilidad entre Componentes de Arquitectura (`CMP-*`)
+
+| Componente Origen | Componente Destino | Versión Mínima | Contrato Vinculante |
+| :--- | :--- | :---: | :--- |
+| `CMP-TELEMETRY-INGEST` | Bus de Eventos Kafka | `>= 3.5.0` | Tópico `telemetry.uav.validated` |
+| `CMP-TELEMETRY-INGEST` | Base de Datos Geospacial | TimescaleDB `>= 2.13` | Particionado por día y compresión a 100ms |
+
+### 2.4 Rutas de Actualización y Marcha Atrás Homologadas
+
+| Versión Origen | Salto Directo a `v1.0.0` | Requiere Migración Intermedia | Rollback Soportado |
+| :---: | :---: | :---: | :---: |
+| **`v0.9.2`** | ✅ Sí | ❌ No | `kubectl rollout undo` en `< 60s` |
+| **`v0.9.0`** | ✅ Sí | ❌ No | `kubectl rollout undo` en `< 60s` |
+| **`< v0.9.0`** | ❌ No | ✅ Migración intermedia a `v0.9.2` | Requiere backup en frío de base de datos |
+
+---
+
+## 3. Arquitectura y Pipelines de CI/CD
+
+### 3.1 Modelo de Ramas Jerárquico de 4 Tiers
 
 ```
 TIER 1: main (Línea base estable de producción)
@@ -129,9 +166,9 @@ flowchart TD
 
 ---
 
-## 3. Estrategia y Procedimiento de Despliegue a Producción
+## 4. Estrategia y Procedimiento de Despliegue a Producción
 
-### 3.1 Requisitos de Infraestructura y Enclaves
+### 4.1 Requisitos de Infraestructura y Enclaves
 
 - **Componente Desplegado**: `CMP-TELEMETRY-INGEST` (Gateway WSS mTLS).
 - **Enclave de Red**: `SEC-ENC-DMZ-INGEST` (Zona desmilitarizada protegida con firewalls de inspección profunda).
@@ -143,14 +180,14 @@ flowchart TD
   - Claves privadas montadas en memoria volátil desde Vault / HSM.
   - CA raíz de flota inyectada en `/etc/sentinel/ca.crt`.
 
-### 3.2 Estrategia de Rollout
+### 4.2 Estrategia de Rollout
 
 Se aplica **Canary Deployment** con control de tráfico por peso:
 1. Despliegue del 5% del tráfico al canary durante 10 minutos.
 2. Monitoreo continuo de tasa de errores de handshake mTLS y latencia.
 3. Si la latencia p95 permanece `< 250ms` (`QR-LATENCY-REALTIME`) y los errores 5xx son `< 0.05%`, se promueve al 100%.
 
-### 3.3 Procedimiento de Despliegue Paso a Paso
+### 4.3 Procedimiento de Despliegue Paso a Paso
 
 1. **Paso 1: Verificación de Secretos en Enclave**
    ```bash
@@ -175,7 +212,7 @@ Se aplica **Canary Deployment** con control de tráfico por peso:
    pnpm test:example
    ```
 
-### 3.4 Procedimiento de Rollback Inmediato
+### 4.4 Procedimiento de Rollback Inmediato
 
 - **Disparadores Automáticos**:
   - Fallo de handshake TLS en > 0.5% de las conexiones entrantes.
@@ -188,9 +225,9 @@ Se aplica **Canary Deployment** con control de tráfico por peso:
 
 ---
 
-## 4. Resolución de Errores Probables y Troubleshooting (Runbooks)
+## 5. Resolución de Errores Probables y Troubleshooting (Runbooks)
 
-### 4.1 Matriz de Incidentes en Producción
+### 5.1 Matriz de Incidentes en Producción
 
 #### Incidencia 1: Fallo Masivo de Handshake mTLS tras Rotación de Certificados
 - **Síntoma**: Los UAVs reciben `ECONNRESET` y los logs registran `SSL alert number 48: unknown CA`.
@@ -246,7 +283,7 @@ Se aplica **Canary Deployment** con control de tráfico por peso:
 
 ---
 
-### 4.2 Procedimiento de Escalado
+### 5.2 Procedimiento de Escalado
 
 | Severidad | SLA de Respuesta | Equipo Responsable |
 | :--- | :---: | :--- |
@@ -256,7 +293,7 @@ Se aplica **Canary Deployment** con control de tráfico por peso:
 
 ---
 
-## 5. Historial de Revisiones
+## 6. Historial de Revisiones
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
