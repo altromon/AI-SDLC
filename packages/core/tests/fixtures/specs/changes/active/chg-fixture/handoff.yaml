@@ -1,0 +1,9 @@
+id: HOF-FIXTURE-001
+type: handoff
+changeId: chg-fixture
+title: Handoff de Prueba Fixture
+subgraph:
+  requirements:
+    - FR-FIXTURE-001
+    - QR-FIXTURE-001
+

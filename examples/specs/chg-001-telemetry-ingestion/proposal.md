@@ -24,7 +24,7 @@ citations:
     digest: "sha256:037ee80babaf32b81ec5b4ca7a98dcb2f92fa5d8db3e6d67ebf1a09d0d3c2c83"
     comment: "Requerimiento de calidad para latencia de ingesta sub-100ms."
   - id: "CMP-TELEMETRY-INGEST"
-    digest: "sha256:9be352c27673c5d705357083ae6f259ef23a61fcc77ea0b0033813850c09a9de"
+    digest: "sha256:47392488b8bacab46e832c3d68b130e3115f49d87f7830e663933ea53072fcc6"
     comment: "Servicio arquitectónico que implementa el gateway."
 ---
 

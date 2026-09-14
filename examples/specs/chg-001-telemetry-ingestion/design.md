@@ -17,7 +17,7 @@ citations:
     digest: "sha256:77b27bf76db7846b7163b4b61d70fa0bac7e236be29092ebfeea3d664ffeb6ea"
     comment: "Autenticación mTLS obligatoria en enclave perimetral."
   - id: "CMP-TELEMETRY-INGEST"
-    digest: "sha256:9be352c27673c5d705357083ae6f259ef23a61fcc77ea0b0033813850c09a9de"
+    digest: "sha256:47392488b8bacab46e832c3d68b130e3115f49d87f7830e663933ea53072fcc6"
     comment: "Servicio de arquitectura Whitebox L2."
 ---
 

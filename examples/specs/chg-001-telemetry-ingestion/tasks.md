@@ -30,7 +30,7 @@ tasks:
     autonomy-mode: "HUMAN_REVIEW_PLAN"
     verification:
       method: "automated-unit-test"
-      command-or-criteria: "npm test -- tests/unit/telemetry_gateway.spec.ts"
+      command-or-criteria: "npm run test:example -- examples/tests/unit/telemetry_gateway.spec.ts"
     assigned-to: "agent-developer"
     status: "COMPLETED"
 

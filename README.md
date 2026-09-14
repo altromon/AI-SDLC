@@ -108,7 +108,9 @@ AI-SDLC/
     ├── security/                             # Modelado de amenazas y mitigaciones
     ├── compliance/                           # Manifiesto de dependencias evaluadas
     ├── architecture/                         # Arquitectura arc42 + NAF v4 con enclaves
-    └── specs/                                # Especificación de entrega SDD con citaciones criptográficas
+    ├── specs/                                # Especificación de entrega SDD con citaciones criptográficas
+    ├── src/                                  # Implementación del caso de estudio (TS, Go, Python)
+    └── tests/                                # Pruebas unitarias, BDD y benchmarks del caso de estudio
 ```
 
 ---

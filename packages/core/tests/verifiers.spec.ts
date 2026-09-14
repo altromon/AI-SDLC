@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import {
   calculateMetrics,
@@ -11,6 +12,8 @@ import {
   verifyTestingCoverage,
   verifyTraceability,
 } from '../src/index.js';
+
+const fixturesDir = path.join(__dirname, 'fixtures');
 
 describe('Quality Gate Core Engine', () => {
   it('should parse quality policy defaults and custom thresholds', () => {
@@ -198,46 +201,46 @@ Feature: Telemetry Streaming
 
 describe('Inverted Traceability Engine (No Downward Frontmatter)', () => {
   it('should verify 360 traceability via reverse-lookup without downward fields in requirements', () => {
-    const result = verifyTraceability({ rootDir: process.cwd() });
+    const result = verifyTraceability({ rootDir: fixturesDir });
     expect(result.totalRequirements).toBeGreaterThan(0);
     expect(result.orphanCount).toBe(0);
     expect(result.success).toBe(true);
 
-    const fr = result.rows.find((r) => r.id === 'FR-TELEMETRY-STREAM-001');
+    const fr = result.rows.find((r) => r.id === 'FR-FIXTURE-001');
     expect(fr).toBeDefined();
     expect(fr?.archStatus).toBe('CONFORME');
     expect(fr?.testStatus).toBe('CONFORME');
-    expect(fr?.archTraces).toContain('CMP-TELEMETRY-INGEST');
+    expect(fr?.archTraces).toContain('CMP-FIXTURE-01');
 
-    const qr = result.rows.find((r) => r.id === 'QR-LATENCY-REALTIME');
+    const qr = result.rows.find((r) => r.id === 'QR-FIXTURE-001');
     expect(qr).toBeDefined();
     expect(qr?.archStatus).toBe('CONFORME');
     expect(qr?.testStatus).toBe('CONFORME');
   });
 
   it('should audit testing coverage via reverse-lookup without downward fields in requirements', () => {
-    const result = verifyTestingCoverage({ rootDir: process.cwd() });
+    const result = verifyTestingCoverage({ rootDir: fixturesDir });
     expect(result.totalRequirements).toBeGreaterThan(0);
     expect(result.failedRequirements).toBe(0);
     expect(result.success).toBe(true);
 
-    const fr = result.requirements.find((r) => r.id === 'FR-TELEMETRY-STREAM-001');
+    const fr = result.requirements.find((r) => r.id === 'FR-FIXTURE-001');
     expect(fr).toBeDefined();
     expect(fr?.status).toBe('VERIFICADO_CON_PRUEBA');
 
-    const qr = result.requirements.find((r) => r.id === 'QR-LATENCY-REALTIME');
+    const qr = result.requirements.find((r) => r.id === 'QR-FIXTURE-001');
     expect(qr).toBeDefined();
     expect(qr?.status).toBe('VERIFICADO_CON_PRUEBA');
   });
 
   it('should support multi-level architecture component hierarchy and implementation types', () => {
     // Verify that components at different levels (service, dll, function) are parsed and resolved
-    const result = verifyTraceability({ rootDir: process.cwd() });
+    const result = verifyTraceability({ rootDir: fixturesDir });
     expect(result.success).toBe(true);
 
-    // Verify CMP-TELEMETRY-INGEST is detected as an architectural component
-    const fr = result.rows.find((r) => r.id === 'FR-TELEMETRY-STREAM-001');
+    // Verify CMP-FIXTURE-01 is detected as an architectural component
+    const fr = result.rows.find((r) => r.id === 'FR-FIXTURE-001');
     expect(fr?.archStatus).toBe('CONFORME');
-    expect(fr?.archTraces).toContain('CMP-TELEMETRY-INGEST');
+    expect(fr?.archTraces).toContain('CMP-FIXTURE-01');
   });
 });
