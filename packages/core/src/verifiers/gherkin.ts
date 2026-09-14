@@ -76,12 +76,14 @@ export function extractGherkinFeatures(
       }
     }
   } else {
-    // Default search in product, security, and specs directories
+    // Default search in standard product, security, and specs directories, with examples fallback
     const searchDirs = [
+      path.join(rootDir, 'product'),
+      path.join(rootDir, 'security'),
+      path.join(rootDir, 'specs'),
       path.join(rootDir, 'examples', 'product'),
       path.join(rootDir, 'examples', 'security'),
       path.join(rootDir, 'examples', 'specs'),
-      path.join(rootDir, 'specs'),
     ];
     for (const d of searchDirs) {
       if (fs.existsSync(d)) {

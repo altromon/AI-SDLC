@@ -211,35 +211,39 @@ export function runVerifyPdac(options: { root?: string; silent?: boolean }): boo
 }
 
 export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
-  console.log(pc.bold(pc.magenta('================================================================')));
-  console.log(pc.bold(pc.magenta('          AI-SDLC: SUITE COMPLETA DE QUALITY GATES Y GOBIERNO    ')));
-  console.log(pc.bold(pc.magenta('================================================================')));
+  if (!options.silent) {
+    console.log(pc.bold(pc.magenta('================================================================')));
+    console.log(pc.bold(pc.magenta('          AI-SDLC: SUITE COMPLETA DE QUALITY GATES Y GOBIERNO    ')));
+    console.log(pc.bold(pc.magenta('================================================================')));
+  }
 
   const root = options.root || process.cwd();
   const okQuality = runVerifyQuality(options);
-  const okTrace = runVerifyTraceability({ root });
-  const okGov = runVerifyGovernance({ root });
-  const okTest = runVerifyTesting({ root });
-  const okLic = runVerifyLicenses({ root });
-  const okPdac = runVerifyPdac({ root });
+  const okTrace = runVerifyTraceability({ root, silent: options.silent });
+  const okGov = runVerifyGovernance({ root, silent: options.silent });
+  const okTest = runVerifyTesting({ root, silent: options.silent });
+  const okLic = runVerifyLicenses({ root, silent: options.silent });
+  const okPdac = runVerifyPdac({ root, silent: options.silent });
 
   const allPassed = okQuality && okTrace && okGov && okTest && okLic && okPdac;
 
-  console.log(pc.bold(pc.magenta('================================================================')));
-  console.log(pc.bold('RESUMEN DE EVALUACIÓN DE CI/CD:'));
-  console.log(`  1. Quality Gate (Complejidad/Mantenibilidad): ${okQuality ? pc.green('PASSED') : pc.red('FAILED')}`);
-  console.log(`  2. Trazabilidad 360° (RTM):                  ${okTrace ? pc.green('PASSED') : pc.red('FAILED')}`);
-  console.log(`  3. Gobierno y Modos de Autonomía:            ${okGov ? pc.green('PASSED') : pc.red('FAILED')}`);
-  console.log(`  4. Cobertura de Pruebas (Reqs & Tasks):      ${okTest ? pc.green('PASSED') : pc.red('FAILED')}`);
-  console.log(`  5. Licencias Open Source:                    ${okLic ? pc.green('PASSED') : pc.red('FAILED')}`);
-  console.log(`  6. PDaC & Deriva Criptográfica:              ${okPdac ? pc.green('PASSED') : pc.red('FAILED')}`);
-  console.log(pc.bold(pc.magenta('================================================================')));
+  if (!options.silent) {
+    console.log(pc.bold(pc.magenta('================================================================')));
+    console.log(pc.bold('RESUMEN DE EVALUACIÓN DE CI/CD:'));
+    console.log(`  1. Quality Gate (Complejidad/Mantenibilidad): ${okQuality ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  2. Trazabilidad 360° (RTM):                  ${okTrace ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  3. Gobierno y Modos de Autonomía:            ${okGov ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  4. Cobertura de Pruebas (Reqs & Tasks):      ${okTest ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  5. Licencias Open Source:                    ${okLic ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  6. PDaC & Deriva Criptográfica:              ${okPdac ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(pc.bold(pc.magenta('================================================================')));
 
-  if (allPassed) {
-    console.log(pc.bold(pc.green('\n✨ VEREDICTO FINAL: REPOSITORIO CONFORME CON EL ESTÁNDAR AI-SDLC (EXIT 0)\n')));
-    return true;
-  } else {
-    console.log(pc.bold(pc.red('\n⛔ VEREDICTO FINAL: BLOQUEO POR INFRACCIONES DETECTADAS (EXIT 1)\n')));
-    return false;
+    if (allPassed) {
+      console.log(pc.bold(pc.green('\n✨ VEREDICTO FINAL: REPOSITORIO CONFORME CON EL ESTÁNDAR AI-SDLC (EXIT 0)\n')));
+    } else {
+      console.log(pc.bold(pc.red('\n⛔ VEREDICTO FINAL: BLOQUEO POR INFRACCIONES DETECTADAS (EXIT 1)\n')));
+    }
   }
+
+  return allPassed;
 }

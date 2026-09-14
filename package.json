@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "build": "pnpm --filter \"@ai-sdlc/*\" build",
-    "test": "vitest run",
+    "test": "vitest run packages",
+    "test:example": "vitest run examples",
+    "test:all": "vitest run",
     "typecheck": "pnpm --filter \"@ai-sdlc/*\" typecheck",
     "extract:gherkin": "tsx packages/cli/src/index.ts gherkin extract",
     "extract:gherkin:all": "tsx packages/cli/src/index.ts gherkin extract --all",

@@ -180,9 +180,13 @@ export function verifyPdacGraph(options: PdacGraphOptions = {}): PdacGraphResult
         });
       }
 
-      // Also collect citations from specs and delivery directories (ignore templates/ and process/)
+      // Also collect citations from specs, delivery, and change directories (ignore templates/ and process/)
       const isDeliveryDoc =
-        (relFile.startsWith('examples/specs/') || relFile.startsWith('specs/')) &&
+        (relFile.startsWith('specs/') ||
+          relFile.startsWith('delivery/') ||
+          relFile.startsWith('changes/') ||
+          relFile.includes('/specs/') ||
+          relFile.startsWith('examples/specs/')) &&
         !relFile.includes('.template.');
       if (isDeliveryDoc) {
         const fileCitations = extractCitations(content, relFile);

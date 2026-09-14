@@ -117,24 +117,26 @@ describe('SDD Formal Ecosystem Adapters (OpenSpec & Spec Kit)', () => {
 });
 
 describe('Automated 360° Traceability Engine (PDaC HOF-* ➔ arc42 ➔ BDD)', () => {
+  const fixturesDir = path.join(__dirname, 'fixtures');
+
   it('should verify complete 360° traceability against repository canonical artifacts', () => {
-    const result = verifyTraceability({ rootDir: process.cwd() });
+    const result = verifyTraceability({ rootDir: fixturesDir });
 
     expect(result.success).toBe(true);
     expect(result.orphanCount).toBe(0);
-    expect(result.totalRequirements).toBeGreaterThanOrEqual(3);
+    expect(result.totalRequirements).toBeGreaterThanOrEqual(1);
 
-    // Check that HOF-001-TELEMETRY-INGESTION is linked
-    const telemetryReq = result.rows.find((r) => r.id === 'FR-TELEMETRY-STREAM-001');
+    // Check that HOF-FIXTURE-001 is linked
+    const telemetryReq = result.rows.find((r) => r.id === 'FR-FIXTURE-001');
     expect(telemetryReq).toBeDefined();
-    expect(telemetryReq?.hofId).toBe('HOF-001-TELEMETRY-INGESTION');
+    expect(telemetryReq?.hofId).toBe('HOF-FIXTURE-001');
     expect(telemetryReq?.productStatus).toBe('CONFORME');
     expect(telemetryReq?.archStatus).toBe('CONFORME');
     expect(telemetryReq?.testStatus).toBe('CONFORME');
 
     // Check report markdown output
     expect(result.reportMarkdown).toContain('Matriz de Trazabilidad de Requerimientos 360°');
-    expect(result.reportMarkdown).toContain('FR-TELEMETRY-STREAM-001');
+    expect(result.reportMarkdown).toContain('FR-FIXTURE-001');
     expect(result.reportMarkdown).toContain('100% TRAZABLE');
   });
 });

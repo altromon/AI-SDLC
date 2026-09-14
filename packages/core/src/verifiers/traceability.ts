@@ -214,7 +214,7 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     for (const e of entries) {
       const fullPath = path.join(dir, e.name);
       if (e.isDirectory()) {
-        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist') {
+        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist' && e.name !== 'scratch' && e.name !== 'fixtures') {
           scanFeatureFiles(fullPath);
         }
       } else if (e.name.endsWith('.feature')) {
@@ -240,7 +240,7 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     for (const e of entries) {
       const fullPath = path.join(dir, e.name);
       if (e.isDirectory()) {
-        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist') {
+        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist' && e.name !== 'scratch' && e.name !== 'fixtures') {
           scanCodeTestFiles(fullPath);
         }
       } else if (

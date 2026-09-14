@@ -138,9 +138,15 @@ export function verifyLicenses(options: LicenseVerificationOptions = {}): Licens
     policy = parseLicensePolicy('');
   }
 
-  const manifestFile =
-    options.manifestPath ||
-    path.join(rootDir, 'examples', 'compliance', 'license-manifest.yaml');
+  let manifestFile = options.manifestPath;
+  if (!manifestFile) {
+    const candidatePaths = [
+      path.join(rootDir, 'compliance', 'license-manifest.yaml'),
+      path.join(rootDir, 'license-manifest.yaml'),
+      path.join(rootDir, 'examples', 'compliance', 'license-manifest.yaml'),
+    ];
+    manifestFile = candidatePaths.find((p) => fs.existsSync(p)) || candidatePaths[0];
+  }
 
   const dependencies: ManifestDependency[] = [];
   if (fs.existsSync(manifestFile)) {
