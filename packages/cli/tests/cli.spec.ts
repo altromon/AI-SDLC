@@ -1,6 +1,9 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import { runGitPlan, runGitValidate } from '../src/commands/git.js';
 import { runInit } from '../src/commands/init.js';
+import { runSddDeposit, runSddIntegrate, runSddVerify } from '../src/commands/sdd.js';
 import {
   runVerifyGovernance,
   runVerifyLicenses,
@@ -74,5 +77,36 @@ describe('@ai-sdlc/cli Command Suite', () => {
   it('should execute pdac drift verification', () => {
     const passed = runVerifyPdac({ silent: true });
     expect(typeof passed).toBe('boolean');
+  });
+
+  it('should verify SDD workspaces and HOF-* sidecars via CLI', () => {
+    const passed = runSddVerify({ silent: true });
+    expect(passed).toBe(true);
+  });
+
+  it('should deposit SDD HOF-* sidecar via CLI', () => {
+    const passed = runSddDeposit({
+      change: 'chg-cli-deposit-test',
+      framework: 'openspec',
+      silent: true,
+      requirements: 'FR-TEST-01',
+      useCases: 'UC-TEST-01',
+    });
+    expect(passed).toBe(true);
+
+    // Clean up created test folder
+    const createdDir = path.join(process.cwd(), 'specs', 'changes', 'active', 'chg-cli-deposit-test');
+    if (fs.existsSync(createdDir)) {
+      fs.rmSync(createdDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should handle SDD integrate command via CLI', () => {
+    // Non-existent change returns false gracefully
+    const resMissing = runSddIntegrate({
+      change: 'chg-non-existent-999',
+      silent: true,
+    });
+    expect(resMissing).toBe(false);
   });
 });

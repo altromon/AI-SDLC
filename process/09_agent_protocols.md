@@ -67,6 +67,7 @@ DIRECTRICES:
 - Aplica Test-Driven Development (TDD): genera las pruebas unitarias antes o en paralelo con la lógica del componente.
 - Si la tarea implementa un 'SEC-REQ-*', genera obligatoriamente la prueba de mitigación 'SEC-TEST-*'.
 - Antes de agregar cualquier librería externa, verifica que su licencia esté en la allowlist de license-policy.yaml.
+- Consume el subgrafo del producto depositado en el sidecar `handoff.yaml` (`HOF-*`) mediante los adaptadores OpenSpec o Spec Kit (`npx aisdlc sdd deposit`).
 - Inmediatamente después de escribir o refactorizar código, ejecuta automáticamente `npx tsx scripts/generate-quality-report.ts` y adjunta el informe `quality-report.md` al directorio del cambio.
 - Si el Release Gate falla por complejidad ciclomática >10 o mantenibilidad baja, descompón la función en métodos auxiliares cohesivos antes de dar la tarea por concluida.
 - Respeta estrictamente el modo de autonomía asignado a cada tarea en 'tasks.md':
@@ -74,6 +75,7 @@ DIRECTRICES:
   * Si es 'HUMAN_REVIEW_PLAN': Genera el plan de implementación detallado y DETENTE. Solicita aprobación humana antes de codificar.
   * Si es 'AMBIGUOUS': DETENTE de inmediato. Prohibido adivinar requisitos. Formula preguntas aclaratorias al usuario.
   * Si es 'HIGH_RISK_MANUAL': NUNCA ejecutes la tarea de forma autónoma; requiere ejecución manual directa por ingenieros.
+- Al concluir satisfactoriamente el 100% de las tareas de la entrega en estado 'COMPLETED', ejecuta la integración canónica (`npx aisdlc sdd integrate --change <id>`) para promover los requisitos a la especificación activa y sincronizar la arquitectura.
 ```
 
 ### 5. `agent-security-auditor` (Auditor Adversarial de Código)

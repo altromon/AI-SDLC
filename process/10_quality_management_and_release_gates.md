@@ -63,6 +63,11 @@ El framework evalúa cuantitativamente todo el código fuente frente a cuatro m�
  5. COBERTURA DE PRUEBAS AUTOMATIZADAS
     ├── Línea: Mínimo 85.0% | Ramas (Branch): Mínimo 80.0%.
     └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+
+ 6. MATRIZ DE TRAZABILIDAD 360° (RTM DETERMINISTA)
+    ├── Definición: Cobertura total entre paquetes PDaC (HOF-*), arc42/NAF v4 y suites BDD (.feature).
+    ├── Umbral Obligatorio: 100% de requerimientos conformes sin dependencias huérfanas ni deriva.
+    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
 ```
 
 ---
@@ -73,13 +78,13 @@ El paso de una versión a producción (o el merge de un PR hacia `main`) se some
 
 ```mermaid
 flowchart TD
-    A[Pull Request de Código / Candidato a Release] --> B[Pipeline CI/CD: Ejecución de Linters]
+    A[Pull Request de Código / Candidato a Release] --> B[Pipeline CI/CD: Linters y Tipado Estricto]
     B -->|Errores de estilo / Any| X[FALLO: Corrección Requerida]
 
-    B -->|Pass| C[Ejecución de Tests y Medición de Cobertura]
+    B -->|Pass| C[Ejecución de Tests y Cobertura >= 85%]
     C -->|Cobertura < 85%| X
 
-    C -->|Pass| D[Análisis de Complejidad y Mantenibilidad: verify-quality-gate.js]
+    C -->|Pass| D[Análisis de Complejidad y Mantenibilidad]
     D --> E{Evaluación contra quality-policy.yaml}
 
     E -->|Complejidad Ciclomática > 10| F[RECHAZO: Función Demasiado Compleja]
@@ -90,7 +95,9 @@ flowchart TD
     G --> X
     H --> X
 
-    E -->|100% de Métricas en Rango| I[QUALITY GATE PASSED ✅]
+    E -->|Métricas OK| T[Verificación de Trazabilidad 360° aisdlc verify traceability]
+    T -->|Requisitos huérfanos / Sin tests BDD| X
+    T -->|Trazabilidad 100% Conforme| I[QUALITY GATE PASSED ✅]
     I --> J[Revisión Humana Tech Lead]
     J --> K[Liberación Autorizada para Producción]
 ```

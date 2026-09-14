@@ -9,6 +9,7 @@ import { runGherkinExtract } from './commands/gherkin.js';
 import { runGitPlan, runGitValidate } from './commands/git.js';
 import { runInit } from './commands/init.js';
 import { runReportQuality } from './commands/report.js';
+import { runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
   runVerifyAll,
   runVerifyGovernance,
@@ -190,6 +191,59 @@ gitCommand
   .action((opts) => {
     runGitPlan({ version: opts.release, feature: opts.feature, tasks: opts.tasks });
     process.exit(0);
+  });
+
+// --- sdd command suite ---
+const sddCommand = program
+  .command('sdd')
+  .description('Herramientas de integración con ecosistemas SDD (OpenSpec y Spec Kit)');
+
+sddCommand
+  .command('deposit')
+  .description('Deposita un subgrafo de producto como archivo de acompañamiento (sidecar handoff.yaml)')
+  .requiredOption('-c, --change <id>', 'Identificador del cambio (ej. chg-001-telemetry)')
+  .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit', 'openspec')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('-t, --title <title>', 'Título del handoff PDaC')
+  .option('--requirements <reqs>', 'Lista de IDs de requerimientos separados por comas')
+  .option('--use-cases <ucs>', 'Lista de IDs de casos de uso separados por comas')
+  .action((opts) => {
+    const passed = runSddDeposit({
+      root: opts.root,
+      change: opts.change,
+      framework: opts.framework,
+      title: opts.title,
+      requirements: opts.requirements,
+      useCases: opts.useCases,
+    });
+    process.exit(passed ? 0 : 1);
+  });
+
+sddCommand
+  .command('verify')
+  .description('Valida la conformidad de los archivos de acompañamiento handoff.yaml (HOF-*) en los cambios')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit')
+  .action((opts) => {
+    const passed = runSddVerify({ root: opts.root, framework: opts.framework });
+    process.exit(passed ? 0 : 1);
+  });
+
+sddCommand
+  .command('integrate')
+  .description('Integra y sincroniza los cambios SDD implementados en la especificación canónica (producto, requisitos y arquitectura)')
+  .requiredOption('-c, --change <id>', 'Identificador del cambio (ej. chg-001-telemetry)')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('-a, --author <author>', 'Nombre del autor o agente que realiza la integración')
+  .option('--no-archive', 'No archivar el cambio a specs/changes/completed tras la integración')
+  .action((opts) => {
+    const passed = runSddIntegrate({
+      root: opts.root,
+      change: opts.change,
+      author: opts.author,
+      autoArchive: opts.archive !== false,
+    });
+    process.exit(passed ? 0 : 1);
   });
 
 // --- init command ---

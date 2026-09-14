@@ -99,3 +99,33 @@ Para que los requerimientos no sean texto pasivo, el AI-SDLC adopta la sintaxis 
 3. **Ejecución y Cierre de Ciclo**:
    - Los agentes desarrolladores y de QA generan los step definitions correspondientes en Cucumber.js / Cucumber-JVM.
    - El pipeline de CI/CD ejecuta `cucumber-js` como una puerta de paso obligatoria, garantizando que el software implementado satisface exactamente los escenarios definidos en el producto.
+
+---
+
+## 6. Adaptadores Formales para Ecosistemas SDD (OpenSpec y Spec Kit)
+
+AI-SDLC estructura su carpeta `specs/` conectándola con herramientas reconocidas de Spec-Driven Development (OpenSpec y GitHub Spec Kit), depositando el subgrafo del producto como archivos de acompañamiento (*sidecars*) dentro del espacio de trabajo del cambio:
+
+1. **Integración con OpenSpec y Spec Kit**:
+   - Utiliza adaptadores formales (`OpenSpecAdapter` y `SpecKitAdapter`, compatibles conceptualmente con `@prodshape/integration-openspec` y `@prodshape/integration-speckit`) para depositar `handoff.yaml` dentro de `specs/changes/active/<change-id>/` o `specs/<change-id>/`.
+   - Cada archivo `handoff.yaml` encapsula el subgrafo inmutable de entrega emitido por PDaC, con prefijo `HOF-*` (ej. `HOF-001-TELEMETRY-INGESTION`), declarando requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`), casos de uso (`UC-*`), reglas de negocio (`BR-*`) y citaciones con digests SHA-256.
+
+2. **Trazabilidad 360° Automatizada sin Fragilidad Textual**:
+   - El verificador `aisdlc verify traceability` y `scripts/verify-traceability.ts` erradica análisis textuales frágiles basados en heurísticas de cadenas, comprobando rigurosamente la cobertura completa en tres dimensiones:
+     - **Producto (Upstream)**: Todo requerimiento proviene formalmente de un paquete `HOF-*` emitido por el handoff de PDaC y enlazado a casos de uso (`UC-*`), reglas (`BR-*`) o abusos (`ABUSE-*`).
+     - **Arquitectura (Midstream)**: Vistas de arquitectura arc42 / NAF v4 (`SRV-*`, `SYS-*`, `ADR-*`, `SEC-ENC-*`, `06_runtime_view.md`).
+     - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) con escenarios etiquetados con `@<reqId>` o `@<hofId>`.
+
+3. **Integración Canónica Post-Implementación**:
+   - Una vez concluida la implementación del cambio y verificado que todas las tareas en `tasks.md` están `COMPLETED`:
+     - Los requerimientos asociados en `specs/product/` se promueven a estado `active` y se les añade entrada en el historial de revisiones referenciando el `changeId`.
+     - Las especificaciones de arquitectura en `specs/architecture/` actualizan sus mapas de dependencias y servicios que satisfacen los requerimientos.
+     - El directorio del cambio se archiva de forma atómica a `specs/changes/completed/<change-id>/`.
+     - Si existe una propuesta de especificación (`proposal.md`), su estado se actualiza a `applied`.
+
+4. **Comandos CLI Operativos**:
+   - `npx aisdlc sdd deposit --framework <openspec|speckit> --change <id>`: Deposita el sidecar `handoff.yaml` en el cambio activo.
+   - `npx aisdlc sdd verify`: Audita la conformidad de todos los espacios de trabajo y sidecars de handoff.
+   - `npx aisdlc sdd integrate --change <id>`: Integra y promueve el cambio completado a las especificaciones canónicas.
+   - `npx aisdlc verify traceability`: Ejecuta la matriz de trazabilidad 360° determinista.
+

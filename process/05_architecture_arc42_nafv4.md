@@ -92,3 +92,19 @@ docs/architecture/
 ├── 11_risks_and_technical_debt.md       # RSK-*.md
 └── 12_glossary.md                       # Enlace canónico a TERM-* y BC-*
 ```
+
+---
+
+## 5. Trazabilidad 360° e Integración Canónica Post-Implementación
+
+Para garantizar que los modelos arquitectónicos no diverjan del software ejecutado ni del producto:
+
+1. **Trazabilidad 360° Determinista (Midstream)**:
+   - El verificador `aisdlc verify traceability` valida que todo servicio (`SRV-*`), componente (`SYS-*`), decisión (`ADR-*`) y vista de ejecución (`06_runtime_view.md`) esté explícitamente vinculado a los identificadores `HOF-*` de entrega y a sus pruebas BDD asociadas.
+   - Elimina la necesidad de inspección manual de documentos o diagramas desactualizados.
+
+2. **Integración Canónica Post-Implementación**:
+   - Una vez que la entrega concluye con éxito y supera todos los tests, el comando `aisdlc sdd integrate --change <id>` actualiza automáticamente los bloques de arquitectura en `specs/architecture/`:
+     - Inserta los nuevos requerimientos implementados en la lista `satisfies-requirements` de cada servicio responsable.
+     - Garantiza que la arquitectura refleje el estado real y verificado del sistema en producción.
+
