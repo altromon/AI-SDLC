@@ -36,7 +36,7 @@ specs/changes/active/chg-001-telemetry-stream/
 - Firma de interfaces, modelos de datos, manejo de errores, endpoints y selección de librerías permitidas por `license-policy.yaml`.
 
 ### 4. `tasks.md`
-- Desglose estructurado de **tareas atómicas y 100% verificables** validadas por `schemas/delivery/tasks.schema.json`.
+- Desglose estructurado de **tareas atómicas y 100% verificables** validadas por `schemas/sdd/tasks.schema.json`.
 - Cada tarea declara obligatoriamente:
   1. **Nivel de Complejidad y Riesgo**: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`.
   2. **Modo de Autonomía Humana**:

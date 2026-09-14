@@ -151,11 +151,12 @@ export function runInit(targetDir: string = '.', options: { dryRun?: boolean } =
     'schemas/security',
     'schemas/compliance',
     'schemas/architecture',
+    'schemas/sdd',
     'templates/product',
     'templates/security',
     'templates/compliance',
     'templates/architecture',
-    'templates/delivery',
+    'templates/sdd',
     'specs',
     'reports',
     'tests/features',
@@ -174,7 +175,7 @@ export function runInit(targetDir: string = '.', options: { dryRun?: boolean } =
   const filesToWrite: { relPath: string; content: string }[] = [
     { relPath: 'quality-policy.yaml', content: STARTER_QUALITY_POLICY },
     { relPath: 'license-policy.yaml', content: STARTER_LICENSE_POLICY },
-    { relPath: 'templates/delivery/tasks.template.md', content: STARTER_TASK_TEMPLATE },
+    { relPath: 'templates/sdd/tasks.template.md', content: STARTER_TASK_TEMPLATE },
     { relPath: 'templates/product/requirement.template.md', content: STARTER_REQUIREMENT_TEMPLATE },
   ];
 

@@ -1,6 +1,6 @@
 # 🧪 Auditoría Integral de Cobertura de Pruebas (Requisitos & Tareas)
 
-> **Fecha de Auditoría:** 2026-09-14T18:54:53.407Z
+> **Fecha de Auditoría:** 2026-09-14T21:40:09.095Z
 > **Veredicto General:** 100% VALIDADO CON PRUEBAS (APROBADO ✅)
 
 ---
@@ -9,9 +9,11 @@
 
 | ID Requisito | Título | Método Declarado | Archivos de Prueba Vinculados | Estado |
 | :--- | :--- | :---: | :--- | :---: |
-| **`FR-TELEMETRY-STREAM-001`** | Ingesta Continua de Tramas Telemétricas UAV | `cucumber-bdd` | `packages/core/tests/sdd-adapters.spec.ts, packages/core/tests/verifiers.spec.ts, tests/features/fr-telemetry-stream-001.feature, tests/unit/telemetry_gateway.spec.ts` | ✅ VÁLIDO |
-| **`QR-LATENCY-REALTIME`** | Latencia de Procesamiento e Ingesta Sub-100ms | `performance-benchmark` | `packages/core/tests/verifiers.spec.ts, tests/benchmarks/latency_benchmark.spec.ts` | ✅ VÁLIDO |
-| **`SEC-REQ-MTLS-STREAM`** | Autenticación Criptográfica Mutua (mTLS) en Ingesta | `cucumber-bdd` | `tests/features/security/sec-req-mtls-stream.feature, tests/unit/telemetry_gateway.spec.ts` | ✅ VÁLIDO |
+| **`FR-TELEMETRY-STREAM-001`** | Ingesta Continua de Tramas Telemétricas UAV | `cucumber-bdd` | `examples/tests/features/fr-telemetry-stream-001.feature, examples/tests/unit/telemetry_gateway.spec.ts` | ✅ VÁLIDO |
+| **`QR-LATENCY-REALTIME`** | Latencia de Procesamiento e Ingesta Sub-100ms | `performance-benchmark` | `examples/tests/benchmarks/latency_benchmark.spec.ts` | ✅ VÁLIDO |
+| **`SEC-REQ-MTLS-STREAM`** | Autenticación Criptográfica Mutua (mTLS) en Ingesta | `cucumber-bdd` | `examples/tests/features/security/sec-req-mtls-stream.feature, examples/tests/unit/telemetry_gateway.spec.ts` | ✅ VÁLIDO |
+| **`FR-FIXTURE-001`** | Ingesta Funcional Fixture | `cucumber-bdd` | `packages/core/tests/fixtures/tests/features/sample.feature, packages/core/tests/sdd-adapters.spec.ts, packages/core/tests/verifiers.spec.ts` | ✅ VÁLIDO |
+| **`QR-FIXTURE-001`** | Latencia Fixture | `automated-unit-test` | `packages/core/tests/fixtures/tests/unit/sample.spec.ts, packages/core/tests/verifiers.spec.ts` | ✅ VÁLIDO |
 | **`FR-FUNCIONALIDAD-001`** | Título Conciso del Requerimiento | `cucumber-bdd # cucumber-bdd, automated-unit-test, integration-test, performance-benchmark` | `NINGUNA DETECTADA` | ✅ VÁLIDO |
 | **`SEC-REQ-CONTROL-001`** | Título del Control de Seguridad de Mitigación | `automated-unit-test` | `NINGUNA DETECTADA` | ✅ VÁLIDO |
 
@@ -22,16 +24,13 @@
 | ID Tarea | Título | Archivo Origen | Método | Comando / Criterio Objetivo | Estado |
 | :--- | :--- | :--- | :---: | :--- | :---: |
 | **`TSK-001`** | Definición de Tipos Cinemáticos e Interfaces de Telemetría | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | `quality-gate` | `npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts` | ✅ VÁLIDO |
-| **`TSK-002`** | Implementación del Gateway WSS con Validación mTLS (CMP-TELEMETRY-INGEST) | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | `automated-unit-test` | `npm test -- tests/unit/telemetry_gateway.spec.ts` | ✅ VÁLIDO |
+| **`TSK-002`** | Implementación del Gateway WSS con Validación mTLS (CMP-TELEMETRY-INGEST) | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | `automated-unit-test` | `npm run test:example -- examples/tests/unit/telemetry_gateway.spec.ts` | ✅ VÁLIDO |
 | **`TSK-003`** | Inyección de Claves de la CA de Producción y Certificados del HSM | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | `manual-inspection` | `Verificación de checksums de claves en enclave y auditoría de accesos HSM` | ✅ VÁLIDO |
 | **`TSK-004`** | Algoritmo de Fusión Multisensorial y Corrección Barométrica | `examples\specs\chg-001-telemetry-ingestion\tasks.md` | `manual-inspection` | `Sesión de refinamiento con el equipo de aerodinámica` | ✅ VÁLIDO |
-| **`TSK-001`** | Definición de Tipos Cinemáticos e Interfaces de Telemetría | `specs\changes\active\chg-001-telemetry-ingestion\tasks.md` | `quality-gate` | `npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts` | ✅ VÁLIDO |
-| **`TSK-002`** | Implementación del Gateway WSS con Validación mTLS (CMP-TELEMETRY-INGEST) | `specs\changes\active\chg-001-telemetry-ingestion\tasks.md` | `automated-unit-test` | `npm test -- tests/unit/telemetry_gateway.spec.ts` | ✅ VÁLIDO |
-| **`TSK-003`** | Inyección de Claves de la CA de Producción y Certificados del HSM | `specs\changes\active\chg-001-telemetry-ingestion\tasks.md` | `manual-inspection` | `Verificación de checksums de claves en enclave y auditoría de accesos HSM` | ✅ VÁLIDO |
-| **`TSK-004`** | Algoritmo de Fusión Multisensorial y Corrección Barométrica | `specs\changes\active\chg-001-telemetry-ingestion\tasks.md` | `manual-inspection` | `Sesión de refinamiento con el equipo de aerodinámica` | ✅ VÁLIDO |
-| **`TSK-001`** | Definición de DTOs e Interfaces de Contrato | `templates\delivery\tasks.template.md` | `quality-gate` | `npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts` | ✅ VÁLIDO |
-| **`TSK-002`** | Implementación de Lógica Central y Algoritmo de Negocio | `templates\delivery\tasks.template.md` | `automated-unit-test` | `npm test -- tests/unit/feature_core.spec.ts` | ✅ VÁLIDO |
-| **`TSK-003`** | Migración de Esquema de Base de Datos / Credenciales Críticas | `templates\delivery\tasks.template.md` | `manual-inspection` | `Revisión DBA + ejecución manual con script idempotente verificado` | ✅ VÁLIDO |
+| **`TSK-FIX-01`** | Implementación Fixture | `packages\core\tests\fixtures\specs\changes\active\chg-fixture\tasks.md` | `automated-unit-test` | `npm test -- sample.spec.ts` | ✅ VÁLIDO |
+| **`TSK-001`** | Definición de DTOs e Interfaces de Contrato | `templates\sdd\tasks.template.md` | `quality-gate` | `npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts` | ✅ VÁLIDO |
+| **`TSK-002`** | Implementación de Lógica Central y Algoritmo de Negocio | `templates\sdd\tasks.template.md` | `automated-unit-test` | `npm test -- tests/unit/feature_core.spec.ts` | ✅ VÁLIDO |
+| **`TSK-003`** | Migración de Esquema de Base de Datos / Credenciales Críticas | `templates\sdd\tasks.template.md` | `manual-inspection` | `Revisión DBA + ejecución manual con script idempotente verificado` | ✅ VÁLIDO |
 
 ---
 

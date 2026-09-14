@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-sdlc.org/schemas/delivery/handoff.schema.json",
+  "$id": "https://ai-sdlc.org/schemas/sdd/handoff.schema.json",
   "title": "PDaC Product Handoff Sidecar Schema (HOF-*)",
   "type": "object",
   "required": ["id", "type", "changeId", "subgraph"],

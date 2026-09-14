@@ -94,14 +94,15 @@ AI-SDLC/
 │   ├── product/                              # Schemas: actor, use-case, requirement, business-rule
 │   ├── security/                             # Schemas: threat-actor, abuse-case, security-req
 │   ├── compliance/                           # Schemas: license-policy, dependency-manifest
-│   └── architecture/                         # Schemas: component, adr
+│   ├── architecture/                         # Schemas: component, adr
+│   └── sdd/                                  # Schemas: tasks, handoff
 │
 ├── templates/                                # Plantillas estándar Markdown con YAML frontmatter
 │   ├── product/                              # Plantillas ACT, JRN, UC, BR, FR, QR, CON
 │   ├── security/                             # Plantillas THREAT, ABUSE, SEC-REQ, SEC-POL
 │   ├── compliance/                           # Plantillas CON-LIC, ADR-LIC, Solicitud de Compra
 │   ├── architecture/                         # Plantillas arc42 (01-12) enriquecidas con NAF v4
-│   └── delivery/                             # Plantillas SDD (Proposal, Spec, Tasks)
+│   └── sdd/                                  # Plantillas SDD (Proposal, Spec, Tasks, Handoff)
 │
 └── examples/                                 # Caso de Estudio Realista: "SentinelCore" (SaaS Telemétrico Crítico)
     ├── product/                              # Modelo canónico de producto
