@@ -8,8 +8,6 @@ schema-version: "1.0"
 security-domain: authentication
 mitigates-abuse-case:
   - ABUSE-TELEMETRY-SPOOFING
-implemented-by-services:
-  - SRV-TELEMETRY-INGEST
 enforced-in-enclave: SEC-ENC-DMZ-INGEST
 compliance-references:
   - "NIST-SP-800-207-ZeroTrust"
@@ -18,9 +16,6 @@ cucumber-tags:
   - "@SEC-REQ-MTLS-STREAM"
   - "@security"
   - "@mtls"
-cucumber-feature-file: "tests/features/security/sec-req-mtls-stream.feature"
-verified-by-tests:
-  - "tests/features/security/sec-req-mtls-stream.feature"
 supersedes: null
 superseded-by: null
 ---

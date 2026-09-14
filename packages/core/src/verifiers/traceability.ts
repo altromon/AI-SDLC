@@ -184,8 +184,9 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     }
   }
 
-  // 3. Scan BDD / Gherkin feature files
+  // 3. Scan Downstream Tests (BDD / Gherkin .feature & Code-level tests)
   const featureTagMap = new Map<string, string[]>(); // reqId -> featureFiles[]
+  const codeTestMap = new Map<string, string[]>(); // reqId -> testFiles[]
 
   function scanFeatureFiles(dir: string) {
     if (!fs.existsSync(dir)) return;
@@ -193,7 +194,7 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     for (const e of entries) {
       const fullPath = path.join(dir, e.name);
       if (e.isDirectory()) {
-        if (e.name !== 'node_modules' && e.name !== '.git') {
+        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist') {
           scanFeatureFiles(fullPath);
         }
       } else if (e.name.endsWith('.feature')) {
@@ -213,7 +214,48 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     }
   }
 
+  function scanCodeTestFiles(dir: string) {
+    if (!fs.existsSync(dir)) return;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const e of entries) {
+      const fullPath = path.join(dir, e.name);
+      if (e.isDirectory()) {
+        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist') {
+          scanCodeTestFiles(fullPath);
+        }
+      } else if (
+        e.name.endsWith('.spec.ts') ||
+        e.name.endsWith('.spec.js') ||
+        e.name.endsWith('.test.ts') ||
+        e.name.endsWith('.test.js') ||
+        e.name.endsWith('_test.py') ||
+        e.name.endsWith('_test.go')
+      ) {
+        try {
+          const content = fs.readFileSync(fullPath, 'utf-8');
+          const relTest = path.relative(rootDir, fullPath).replace(/\\/g, '/');
+          for (const [artId] of artifactMap.entries()) {
+            if (
+              (artId.startsWith('FR-') ||
+                artId.startsWith('QR-') ||
+                artId.startsWith('SEC-REQ-') ||
+                artId.startsWith('CON-')) &&
+              content.includes(artId)
+            ) {
+              const existing = codeTestMap.get(artId) || [];
+              if (!existing.includes(relTest)) existing.push(relTest);
+              codeTestMap.set(artId, existing);
+            }
+          }
+        } catch {
+          // Ignore read error
+        }
+      }
+    }
+  }
+
   scanFeatureFiles(rootDir);
+  scanCodeTestFiles(rootDir);
 
   // 4. Identify all requirements to verify (excluding templates and process docs)
   const requirements: ArtifactEntry[] = [];
@@ -283,16 +325,10 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     const productStatus: 'CONFORME' | 'HUÉRFANO' = isProductConforme ? 'CONFORME' : 'HUÉRFANO';
     if (!isProductConforme) errorCount++;
 
-    // --- B. MIDSTREAM: ARCHITECTURE TRACEABILITY (arc42 / NAF v4) ---
+    // --- B. MIDSTREAM: ARCHITECTURE TRACEABILITY (arc42 / NAF v4 - Reverse Lookup) ---
     const archTraces: string[] = [];
 
-    if (Array.isArray(fm['implemented-by-services'])) {
-      archTraces.push(...(fm['implemented-by-services'] as string[]));
-    } else if (typeof fm['implemented-by-services'] === 'string') {
-      archTraces.push(fm['implemented-by-services']);
-    }
-
-    // Service reverse mapping
+    // Service reverse mapping (services declaring satisfies-requirements / satisfies)
     for (const srv of servicesList) {
       if (srv.satisfies.includes(reqId)) {
         if (!archTraces.includes(srv.id)) archTraces.push(srv.id);
@@ -315,10 +351,10 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     const archStatus: 'CONFORME' | 'HUÉRFANO' = uniqueArchTraces.length > 0 ? 'CONFORME' : 'HUÉRFANO';
     if (uniqueArchTraces.length === 0) errorCount++;
 
-    // --- C. DOWNSTREAM: TEST TRACEABILITY (BDD / Gherkin .feature) ---
+    // --- C. DOWNSTREAM: TEST TRACEABILITY (BDD / Gherkin & Code Tests - Reverse Lookup) ---
     const testTraces: string[] = [];
 
-    // Tagged .feature files
+    // Tagged .feature files (reverse lookup)
     const matchingFeatures = featureTagMap.get(reqId) || [];
     testTraces.push(...matchingFeatures);
 
@@ -327,21 +363,9 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
       testTraces.push(...handoffFeatures);
     }
 
-    // Frontmatter feature and test file references
-    if (typeof fm['cucumber-feature-file'] === 'string') {
-      const featPath = fm['cucumber-feature-file'];
-      if (fs.existsSync(path.resolve(rootDir, featPath))) {
-        if (!testTraces.includes(featPath)) testTraces.push(featPath);
-      }
-    }
-
-    if (Array.isArray(fm['verified-by-tests'])) {
-      for (const t of fm['verified-by-tests'] as string[]) {
-        if (fs.existsSync(path.resolve(rootDir, t))) {
-          if (!testTraces.includes(t)) testTraces.push(t);
-        }
-      }
-    }
+    // Code-based test files (reverse lookup)
+    const matchingCodeTests = codeTestMap.get(reqId) || [];
+    testTraces.push(...matchingCodeTests);
 
     const uniqueTestTraces = Array.from(new Set(testTraces));
     const testStatus: 'CONFORME' | 'HUÉRFANO' = uniqueTestTraces.length > 0 ? 'CONFORME' : 'HUÉRFANO';

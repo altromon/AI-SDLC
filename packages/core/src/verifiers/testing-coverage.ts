@@ -159,9 +159,73 @@ export function generateTestingCoverageReportMarkdown(
   return reportLines.join('\n');
 }
 
+export function scanAllTestArtifacts(rootDir: string): Map<string, string[]> {
+  const reqToTestsMap = new Map<string, string[]>();
+
+  function walk(dir: string) {
+    if (!fs.existsSync(dir)) return;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const e of entries) {
+      const fullPath = path.join(dir, e.name);
+      if (e.isDirectory()) {
+        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist') {
+          walk(fullPath);
+        }
+      } else {
+        const isFeature = e.name.endsWith('.feature');
+        const isCodeTest =
+          e.name.endsWith('.spec.ts') ||
+          e.name.endsWith('.spec.js') ||
+          e.name.endsWith('.test.ts') ||
+          e.name.endsWith('.test.js') ||
+          e.name.endsWith('_test.py') ||
+          e.name.endsWith('_test.go');
+
+        if (isFeature || isCodeTest) {
+          try {
+            const content = fs.readFileSync(fullPath, 'utf-8');
+            const relTest = path.relative(rootDir, fullPath).replace(/\\/g, '/');
+
+            if (isFeature) {
+              const lines = content.split('\n');
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('@')) {
+                  const tags = trimmed.split(/\s+/).filter((t) => t.startsWith('@'));
+                  for (const t of tags) {
+                    const reqId = t.substring(1);
+                    const existing = reqToTestsMap.get(reqId) || [];
+                    if (!existing.includes(relTest)) existing.push(relTest);
+                    reqToTestsMap.set(reqId, existing);
+                  }
+                }
+              }
+            }
+
+            const idMatches = content.match(/\b(FR|QR|CON|SEC-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*\b/g);
+            if (idMatches) {
+              for (const reqId of idMatches) {
+                const existing = reqToTestsMap.get(reqId) || [];
+                if (!existing.includes(relTest)) existing.push(relTest);
+                reqToTestsMap.set(reqId, existing);
+              }
+            }
+          } catch {
+            // Ignore read errors
+          }
+        }
+      }
+    }
+  }
+
+  walk(rootDir);
+  return reqToTestsMap;
+}
+
 export function verifyTestingCoverage(options: TestingCoverageOptions = {}): TestingCoverageResult {
   const rootDir = options.rootDir || process.cwd();
   const allMdFiles = walkMdFiles(rootDir);
+  const reqToTestsMap = scanAllTestArtifacts(rootDir);
 
   const reqAudit: RequirementAuditItem[] = [];
   const taskAudit: TaskAuditItem[] = [];
@@ -186,16 +250,8 @@ export function verifyTestingCoverage(options: TestingCoverageOptions = {}): Tes
         id.startsWith('SEC-REQ-');
 
       if (isRequirement) {
-        const testRefs: string[] = [];
-        if (typeof frontmatter['cucumber-feature-file'] === 'string') {
-          testRefs.push(frontmatter['cucumber-feature-file']);
-        }
-        if (Array.isArray(frontmatter['verified-by-tests'])) {
-          testRefs.push(...(frontmatter['verified-by-tests'] as string[]));
-        }
-
-        const existingTests = testRefs.filter((t) => fs.existsSync(path.resolve(rootDir, t)));
-        const isVerified = isTemplate || existingTests.length > 0 || testRefs.length > 0;
+        const matchingTests = reqToTestsMap.get(id) || [];
+        const isVerified = isTemplate || matchingTests.length > 0;
 
         if (!isVerified) reqErrors++;
 
@@ -204,9 +260,11 @@ export function verifyTestingCoverage(options: TestingCoverageOptions = {}): Tes
           title: frontmatter.title || 'Sin título',
           file: relPath,
           isTemplate,
-          method: frontmatter['verifiable-by'] || (frontmatter['cucumber-feature-file'] ? 'BDD_CUCUMBER' : 'UNIT_TEST'),
-          testRefs: testRefs.join(', ') || 'NINGUNA DECLARADA',
-          existingCount: existingTests.length,
+          method:
+            (frontmatter['verifiable-by'] as string) ||
+            (matchingTests.some((t) => t.endsWith('.feature')) ? 'BDD_CUCUMBER' : 'TEST_EXECUTION'),
+          testRefs: matchingTests.join(', ') || 'NINGUNA DETECTADA',
+          existingCount: matchingTests.length,
           status: isVerified ? 'VERIFICADO_CON_PRUEBA' : 'FALLO_SIN_PRUEBA',
         });
       }

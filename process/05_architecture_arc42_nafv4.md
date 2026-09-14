@@ -47,7 +47,7 @@ Cada sección de **arc42** se materializa en el repositorio como documentos Mark
 - Descomposición jerárquica en cajas blancas (Whitebox):
   - **Nivel 1 (Sistema General)**: Servicios principales del dominio (`SRV-*`).
   - **Nivel 2 (Subcomponentes)**: Módulos internos de software y librerías (`SYS-*`).
-- **Regla de Trazabilidad**: Todo servicio `SRV-*` debe declarar en su frontmatter qué casos de uso de ProductShape implementa (`implements-use-cases: [UC-*]`) y qué enclaves de seguridad habita (`hosted-in-enclave: SEC-ENC-*`).
+- **Regla de Trazabilidad**: Todo servicio `SRV-*` debe declarar en su frontmatter qué casos de uso de ProductShape implementa (`implements-use-cases: [UC-*]`), qué requerimientos funcionales, de calidad y de seguridad satisface (`satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`) y qué enclaves de seguridad habita (`hosted-in-enclave: SEC-ENC-*`).
 
 ### Sección 6: Vista de Ejecución / Runtime (NAF Sequences & Behaviour)
 - Diagramas de secuencia y flujos de estados (modelados mediante sintaxis nativa de **Mermaid**).
@@ -99,8 +99,9 @@ docs/architecture/
 
 Para garantizar que los modelos arquitectónicos no diverjan del software ejecutado ni del producto:
 
-1. **Trazabilidad 360° Determinista (Midstream)**:
-   - El verificador `aisdlc verify traceability` valida que todo servicio (`SRV-*`), componente (`SYS-*`), decisión (`ADR-*`) y vista de ejecución (`06_runtime_view.md`) esté explícitamente vinculado a los identificadores `HOF-*` de entrega y a sus pruebas BDD asociadas.
+1. **Trazabilidad 360° Determinista e Invertida (Midstream)**:
+   - Bajo el modelo de trazabilidad invertida, los requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`) no contienen punteros a servicios. En su lugar, son los servicios (`SRV-*`) los que declaran explícitamente en `satisfies-requirements` qué requerimientos satisfacen.
+   - El verificador `aisdlc verify traceability` valida mediante resolución inversa que todo servicio (`SRV-*`), componente (`SYS-*`), decisión (`ADR-*`) y vista de ejecución (`06_runtime_view.md`) esté vinculado a los identificadores `HOF-*` de entrega y a sus pruebas asociadas, sin introducir acoplamiento descendente en el producto.
    - Elimina la necesidad de inspección manual de documentos o diagramas desactualizados.
 
 2. **Integración Canónica Post-Implementación**:

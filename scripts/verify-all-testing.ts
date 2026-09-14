@@ -149,6 +149,69 @@ export function walkDir(dir: string, fileList: string[] = []): string[] {
   return fileList;
 }
 
+export function scanTestArtifacts(rootDir: string): Map<string, string[]> {
+  const reqToTestsMap = new Map<string, string[]>();
+
+  function walk(dir: string) {
+    if (!fs.existsSync(dir)) return;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const e of entries) {
+      const fullPath = path.join(dir, e.name);
+      if (e.isDirectory()) {
+        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist') {
+          walk(fullPath);
+        }
+      } else {
+        const isFeature = e.name.endsWith('.feature');
+        const isCodeTest =
+          e.name.endsWith('.spec.ts') ||
+          e.name.endsWith('.spec.js') ||
+          e.name.endsWith('.test.ts') ||
+          e.name.endsWith('.test.js') ||
+          e.name.endsWith('_test.py') ||
+          e.name.endsWith('_test.go');
+
+        if (isFeature || isCodeTest) {
+          try {
+            const content = fs.readFileSync(fullPath, 'utf-8');
+            const relTest = path.relative(rootDir, fullPath).replace(/\\/g, '/');
+
+            if (isFeature) {
+              const lines = content.split('\n');
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('@')) {
+                  const tags = trimmed.split(/\s+/).filter((t) => t.startsWith('@'));
+                  for (const t of tags) {
+                    const reqId = t.substring(1);
+                    const existing = reqToTestsMap.get(reqId) || [];
+                    if (!existing.includes(relTest)) existing.push(relTest);
+                    reqToTestsMap.set(reqId, existing);
+                  }
+                }
+              }
+            }
+
+            const idMatches = content.match(/\b(FR|QR|CON|SEC-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*\b/g);
+            if (idMatches) {
+              for (const reqId of idMatches) {
+                const existing = reqToTestsMap.get(reqId) || [];
+                if (!existing.includes(relTest)) existing.push(relTest);
+                reqToTestsMap.set(reqId, existing);
+              }
+            }
+          } catch {
+            // Ignore
+          }
+        }
+      }
+    }
+  }
+
+  walk(rootDir);
+  return reqToTestsMap;
+}
+
 export function main(): void {
   console.log('================================================================');
   console.log('AI-SDLC: Auditoría de Cobertura de Pruebas (Requisitos & Tareas)');
@@ -156,6 +219,7 @@ export function main(): void {
 
   const rootDir = process.cwd();
   const allMdFiles = walkDir(rootDir);
+  const reqToTestsMap = scanTestArtifacts(rootDir);
 
   let auditErrors = 0;
 
@@ -176,18 +240,9 @@ export function main(): void {
                     id.startsWith('FR-') || id.startsWith('QR-') || id.startsWith('CON-') || id.startsWith('SEC-REQ-');
 
       if (isReq) {
-        const testRefs: string[] = [];
-        if (typeof frontmatter['cucumber-feature-file'] === 'string') {
-          testRefs.push(frontmatter['cucumber-feature-file']);
-        }
-        if (Array.isArray(frontmatter['verified-by-tests'])) {
-          testRefs.push(...(frontmatter['verified-by-tests'] as string[]));
-        }
-
-        // Si es plantilla, comprobar que declara tests; si es instancia real, comprobar que existen en disco
+        const matchingTests = reqToTestsMap.get(id) || [];
         const isTemplate = file.includes('templates');
-        const existingFiles = testRefs.filter(t => fs.existsSync(path.resolve(rootDir, t)));
-        const isVerified = isTemplate ? (testRefs.length > 0) : (testRefs.length > 0 && existingFiles.length > 0);
+        const isVerified = isTemplate || matchingTests.length > 0;
 
         if (!isVerified) {
           auditErrors++;
@@ -195,7 +250,7 @@ export function main(): void {
 
         const method = typeof frontmatter['verifiable-by'] === 'string'
           ? frontmatter['verifiable-by']
-          : (frontmatter['acceptance-format'] === 'gherkin' ? 'cucumber-bdd' : 'no-definido');
+          : (matchingTests.some((t) => t.endsWith('.feature')) ? 'cucumber-bdd' : 'automated-unit-test');
 
         requirementAudits.push({
           id,
@@ -203,8 +258,8 @@ export function main(): void {
           file: path.relative(rootDir, file),
           isTemplate,
           method,
-          testRefs: testRefs.join(', ') || 'NINGUNA',
-          existingCount: existingFiles.length,
+          testRefs: matchingTests.join(', ') || 'NINGUNA DETECTADA',
+          existingCount: matchingTests.length,
           status: isVerified ? 'VERIFICADO_CON_PRUEBA' : 'FALLO_SIN_PRUEBA'
         });
       }

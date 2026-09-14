@@ -41,12 +41,14 @@ Todo Pull Request propuesto por un desarrollador humano o por un agente debe sup
   └─► Verifica que los archivos frontmatter respeten los esquemas canónicos.
 
  [PUERTA 7: AUDITORÍA DE PRUEBAS EN REQUISITOS Y TAREAS] (verify-all-testing.js)
-  └─► Comprueba que el 100% de los requisitos tengan tests físicos en disco (.feature, .spec)
-      y que el 100% de las tareas tengan comando determinista de verificación.
+  └─► Comprueba mediante resolución inversa que el 100% de los requisitos cuenten con pruebas
+      físicas en disco (.feature etiquetadas o .spec citando los IDs) y que el 100% de las
+      tareas tengan comando determinista de verificación.
 
  [PUERTA 8: MATRIZ DE TRAZABILIDAD 360° DETERMINISTA] (aisdlc verify traceability)
   └─► Comprueba la triangulación inquebrantable entre los paquetes de handoff PDaC (HOF-*),
-      las vistas de arquitectura arc42 / NAF v4 y los escenarios BDD/Gherkin (.feature).
+      las vistas de arquitectura arc42 / NAF v4 (satisfies-requirements) y los escenarios BDD/Gherkin
+      y tests mediante el modelo de trazabilidad invertida (Reverse Lookup).
 ```
 
 ---

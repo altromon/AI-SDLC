@@ -121,11 +121,13 @@ type: "requirement"
 title: "Funcionalidad de Ejemplo"
 status: "active"
 version: "1.0.0"
+category: "functional"
 derives-from:
   - "UC-SAMPLE-USECASE"
-cucumber-feature-file: "tests/features/fr-sample-001.feature"
-verified-by-tests:
-  - "tests/unit/sample.spec.ts"
+verifiable-by: "cucumber-bdd"
+acceptance-format: "gherkin"
+cucumber-tags:
+  - "@FR-SAMPLE-001"
 ---
 
 # Requerimiento: Funcionalidad de Ejemplo

@@ -103,7 +103,16 @@ export function extractGherkinFeatures(
 
       if (!targetPath) {
         const baseDir = path.join(rootDir, 'tests', 'features');
-        targetPath = path.join(baseDir, `${id.toLowerCase()}.feature`);
+        const candidateSecurity = path.join(baseDir, 'security', `${id.toLowerCase()}.feature`);
+        const candidateRoot = path.join(baseDir, `${id.toLowerCase()}.feature`);
+        if (fs.existsSync(candidateSecurity)) {
+          targetPath = candidateSecurity;
+        } else if (fs.existsSync(candidateRoot)) {
+          targetPath = candidateRoot;
+        } else {
+          const subDir = filePath.includes('security') ? 'security' : '';
+          targetPath = path.join(baseDir, subDir, `${id.toLowerCase()}.feature`);
+        }
       } else if (!path.isAbsolute(targetPath)) {
         targetPath = path.join(rootDir, targetPath);
       }

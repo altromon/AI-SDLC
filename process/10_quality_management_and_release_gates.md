@@ -64,8 +64,10 @@ El framework evalúa cuantitativamente todo el código fuente frente a cuatro m�
     ├── Línea: Mínimo 85.0% | Ramas (Branch): Mínimo 80.0%.
     └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
 
- 6. MATRIZ DE TRAZABILIDAD 360° (RTM DETERMINISTA)
-    ├── Definición: Cobertura total entre paquetes PDaC (HOF-*), arc42/NAF v4 y suites BDD (.feature).
+ 6. MATRIZ DE TRAZABILIDAD 360° (RTM DETERMINISTA MEDIANTE RESOLUCIÓN INVERSA)
+    ├── Definición: Cobertura total compilada por reverse lookup entre paquetes PDaC (HOF-*),
+    │   arquitectura arc42/NAF v4 (satisfies-requirements) y suites de tests (.feature y .spec).
+    ├── Principio: Inversión de Dependencias (los requisitos no almacenan enlaces descendentes).
     ├── Umbral Obligatorio: 100% de requerimientos conformes sin dependencias huérfanas ni deriva.
     └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
 ```
@@ -101,6 +103,11 @@ flowchart TD
     I --> J[Revisión Humana Tech Lead]
     J --> K[Liberación Autorizada para Producción]
 ```
+
+> [!NOTE]
+> **Modelo de Trazabilidad Invertida en el Release Gate**:
+> Para evitar acoplamiento frágil y colisiones en Git, los requisitos de producto (`FR-*`, `QR-*`, `SEC-REQ-*`) no declaran qué servicios los implementan ni qué archivos de prueba los ejecutan. El paso de verificación `aisdlc verify traceability` inspecciona los bloques de arquitectura (`satisfies-requirements`) y escanea las suites de prueba (`.feature` y `.spec.*`) para construir inversamente la RTM completa. Si un requisito no es satisfecho por ningún servicio o carece de pruebas asociadas, el Release Gate bloquea el pipeline de forma determinista.
+
 
 ---
 

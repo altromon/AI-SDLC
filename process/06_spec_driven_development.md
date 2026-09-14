@@ -94,8 +94,8 @@ Para que los requerimientos no sean texto pasivo, el AI-SDLC adopta la sintaxis 
 
 1. **Especificación en Markdown**:
    - Cada requerimiento (`FR-*`, `QR-*`, `SEC-REQ-*`) incluye un bloque ````gherkin ... ```` con etiquetas (`@FR-001`, `@automated`, `@smoke`).
-2. **Extracción Automatizada**:
-   - Mediante el extractor determinista `npx tsx scripts/extract-gherkin.ts <archivo|--all>`, el framework genera o sincroniza archivos `.feature` de Cucumber en `tests/features/`.
+2. **Extracción Automatizada por Convención**:
+   - Mediante el extractor determinista `npx tsx scripts/extract-gherkin.ts <archivo|--all>`, el framework genera o sincroniza archivos `.feature` de Cucumber en `tests/features/` siguiendo convenciones de subcarpeta (ej. `tests/features/product/<id>.feature`), sin requerir rutas físicas acopladas dentro del requerimiento Markdown.
 3. **Ejecución y Cierre de Ciclo**:
    - Los agentes desarrolladores y de QA generan los step definitions correspondientes en Cucumber.js / Cucumber-JVM.
    - El pipeline de CI/CD ejecuta `cucumber-js` como una puerta de paso obligatoria, garantizando que el software implementado satisface exactamente los escenarios definidos en el producto.
@@ -110,11 +110,12 @@ AI-SDLC estructura su carpeta `specs/` conectándola con herramientas reconocida
    - Utiliza adaptadores formales (`OpenSpecAdapter` y `SpecKitAdapter`, compatibles conceptualmente con `@prodshape/integration-openspec` y `@prodshape/integration-speckit`) para depositar `handoff.yaml` dentro de `specs/changes/active/<change-id>/` o `specs/<change-id>/`.
    - Cada archivo `handoff.yaml` encapsula el subgrafo inmutable de entrega emitido por PDaC, con prefijo `HOF-*` (ej. `HOF-001-TELEMETRY-INGESTION`), declarando requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`), casos de uso (`UC-*`), reglas de negocio (`BR-*`) y citaciones con digests SHA-256.
 
-2. **Trazabilidad 360° Automatizada sin Fragilidad Textual**:
-   - El verificador `aisdlc verify traceability` y `scripts/verify-traceability.ts` erradica análisis textuales frágiles basados en heurísticas de cadenas, comprobando rigurosamente la cobertura completa en tres dimensiones:
-     - **Producto (Upstream)**: Todo requerimiento proviene formalmente de un paquete `HOF-*` emitido por el handoff de PDaC y enlazado a casos de uso (`UC-*`), reglas (`BR-*`) o abusos (`ABUSE-*`).
-     - **Arquitectura (Midstream)**: Vistas de arquitectura arc42 / NAF v4 (`SRV-*`, `SYS-*`, `ADR-*`, `SEC-ENC-*`, `06_runtime_view.md`).
-     - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) con escenarios etiquetados con `@<reqId>` o `@<hofId>`.
+2. **Trazabilidad 360° Automatizada mediante Resolución Inversa (Inverted Traceability)**:
+   - El verificador `aisdlc verify traceability` y `scripts/verify-traceability.ts` erradica análisis textuales frágiles basados en heurísticas de cadenas y desacopla los requerimientos de la implementación concreta. Comprueba rigurosamente la cobertura completa en tres dimensiones mediante resolución inversa (*Reverse Lookup*):
+     - **Producto (Upstream)**: Todo requerimiento declara sus dependencias ascendentes (`derives-from: [UC-*]`, `mitigates: [ABUSE-*]`) y proviene formalmente de un paquete `HOF-*` emitido por el handoff de PDaC.
+     - **Arquitectura (Midstream)**: Vistas de arquitectura arc42 / NAF v4 donde los servicios (`SRV-*`) declaran explícitamente `satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`.
+     - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) con escenarios etiquetados con `@<reqId>` y suites de código (`.spec.*`, benchmarks) que citan los identificadores de requerimiento.
+   - Ningún requerimiento almacena punteros hacia abajo, blindando la especificación canónica contra derivas criptográficas de hash SHA-256 cuando se modifican o reorganizan tests y servicios.
 
 3. **Integración Canónica Post-Implementación**:
    - Una vez concluida la implementación del cambio y verificado que todas las tareas en `tasks.md` están `COMPLETED`:

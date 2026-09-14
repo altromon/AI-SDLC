@@ -8,6 +8,8 @@ import {
   parseLicensePolicy,
   parseQualityPolicy,
   parseTasksDoc,
+  verifyTestingCoverage,
+  verifyTraceability,
 } from '../src/index.js';
 
 describe('Quality Gate Core Engine', () => {
@@ -191,5 +193,40 @@ Feature: Telemetry Streaming
     const blocks = extractGherkinBlock(md);
     expect(blocks.length).toBe(1);
     expect(blocks[0]).toContain('Feature: Telemetry Streaming');
+  });
+});
+
+describe('Inverted Traceability Engine (No Downward Frontmatter)', () => {
+  it('should verify 360 traceability via reverse-lookup without downward fields in requirements', () => {
+    const result = verifyTraceability({ rootDir: process.cwd() });
+    expect(result.totalRequirements).toBeGreaterThan(0);
+    expect(result.orphanCount).toBe(0);
+    expect(result.success).toBe(true);
+
+    const fr = result.rows.find((r) => r.id === 'FR-TELEMETRY-STREAM-001');
+    expect(fr).toBeDefined();
+    expect(fr?.archStatus).toBe('CONFORME');
+    expect(fr?.testStatus).toBe('CONFORME');
+    expect(fr?.archTraces).toContain('SRV-TELEMETRY-INGEST');
+
+    const qr = result.rows.find((r) => r.id === 'QR-LATENCY-REALTIME');
+    expect(qr).toBeDefined();
+    expect(qr?.archStatus).toBe('CONFORME');
+    expect(qr?.testStatus).toBe('CONFORME');
+  });
+
+  it('should audit testing coverage via reverse-lookup without downward fields in requirements', () => {
+    const result = verifyTestingCoverage({ rootDir: process.cwd() });
+    expect(result.totalRequirements).toBeGreaterThan(0);
+    expect(result.failedRequirements).toBe(0);
+    expect(result.success).toBe(true);
+
+    const fr = result.requirements.find((r) => r.id === 'FR-TELEMETRY-STREAM-001');
+    expect(fr).toBeDefined();
+    expect(fr?.status).toBe('VERIFICADO_CON_PRUEBA');
+
+    const qr = result.requirements.find((r) => r.id === 'QR-LATENCY-REALTIME');
+    expect(qr).toBeDefined();
+    expect(qr?.status).toBe('VERIFICADO_CON_PRUEBA');
   });
 });
