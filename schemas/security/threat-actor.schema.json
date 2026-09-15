@@ -44,11 +44,11 @@
       }
     },
     "supersedes": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^ACT-THREAT-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^ACT-THREAT-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

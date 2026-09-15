@@ -38,12 +38,12 @@
       "type": "string"
     },
     "supersedes": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^ACT-[A-Z0-9]+(-[A-Z0-9]+)*$",
       "description": "Identificador del actor al que sustituye esta versión o artefacto."
     },
     "superseded-by": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^ACT-[A-Z0-9]+(-[A-Z0-9]+)*$",
       "description": "Identificador del nuevo actor que reemplaza a este cuando pasa a deprecated/retired."
     }

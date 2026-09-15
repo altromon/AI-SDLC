@@ -11,6 +11,7 @@ export * from './verifiers/testing-coverage.js';
 export * from './verifiers/gherkin.js';
 export * from './verifiers/licenses.js';
 export * from './verifiers/pdac-graph.js';
+export * from './verifiers/schemas.js';
 export * from './reporters/quality-report.js';
 export * from './git/workflow.js';
 export * from './adapters/sdd/index.js';

@@ -16,6 +16,7 @@ import {
   runVerifyLicenses,
   runVerifyPdac,
   runVerifyQuality,
+  runVerifySchemas,
   runVerifyTesting,
   runVerifyTraceability,
 } from './commands/verify.js';
@@ -122,6 +123,16 @@ verifyCommand
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
   .action((opts) => {
     const passed = runVerifyPdac({ root: opts.root });
+    process.exit(passed ? 0 : 1);
+  });
+
+verifyCommand
+  .command('schemas')
+  .description('Verifica la conformidad de los artefactos Markdown frente a sus esquemas JSON canónicos (Draft 2020-12)')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('-p, --path <path>', 'Ruta al archivo o directorio objetivo')
+  .action((opts) => {
+    const passed = runVerifySchemas({ root: opts.root, path: opts.path });
     process.exit(passed ? 0 : 1);
   });
 

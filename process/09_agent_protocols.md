@@ -97,3 +97,153 @@ DIRECTRICES:
 - Bloquea inmediatamente licencias virales (GPL, AGPL) y ambiguas.
 - Si detectas licencias BSL, SSPL o con cláusulas comerciales de pago, añade la etiqueta 'needs-commercial-license' y alerta al equipo legal humano.
 ```
+
+---
+
+## 4. Protocolo Operativo "AI as Scribe" (Redacción Técnica Asistida)
+
+### 1. Propósito y Filosofía
+El protocolo **AI as Scribe** invierte la carga operativa burocrática: permite al usuario humano describir su intención de negocio o técnica en lenguaje natural libre y convierte a los agentes de IA en **amanuenses técnicos de alta fidelidad**.
+
+> [!IMPORTANT]
+> **Preservación Innegociable del Humano como Implementador:**
+> La automatización de borradores sintácticos **no excluye ni sustituye al humano de la implementación**:
+> - En tareas de alto riesgo (`HIGH_RISK_MANUAL`), el ser humano es el **único implementador autorizado**; la IA tiene prohibida la ejecución autónoma.
+> - En tareas de riesgo medio (`HUMAN_REVIEW_PLAN`), el agente se detiene en cada paso para aprobación o co-implementación guiada (Pair Programming).
+> - El humano mantiene siempre la potestad de escribir código y especificaciones a mano cuando lo considere oportuno.
+
+---
+
+### 2. Contrato de Entrada / Salida (I/O Contract)
+
+| Dimensión | Especificación del Contrato |
+| :--- | :--- |
+| **Entrada (Input)** | Breve texto o prompt en lenguaje natural del humano describiendo la funcionalidad, regla o vector de riesgo deseado (ej. *"Permitir que los operadores cancelen misiones de UAV en vuelo si detectan tormentas eléctricas"*). Opcionalmente incluye Bounded Context (`BC-*`) o caso de uso (`UC-*`) padre. |
+| **Salida (Output)** | Borrador canónico completo en Markdown con YAML frontmatter 100% conforme con JSON Schema (Draft 2020-12), IDs correlativos asignados, trazabilidad ascendente formal, enunciados normativos inequívocos y escenarios BDD/Gherkin ejecutables. |
+| **Estado Inicial** | Obligatoriamente `status: draft`. Ningún agente puede generar un artefacto directamente con `status: active` o `status: approved`. |
+| **Pre-Validación** | El agente debe autoevaluar deterministamente el artefacto con `aisdlc verify schemas` antes de presentarlo al revisor humano. |
+
+---
+
+### 3. Taxonomía de Identificadores y Reglas de Correlatividad
+
+Todo artefacto generado por un agente amanuense debe adoptar la taxonomía canónica inmutable del repositorio:
+
+| Tipo de Artefacto | Patrón de Identificador | Esquema JSON Obligatorio |
+| :--- | :--- | :--- |
+| **Actor de Producto** | `ACT-[SUFIJO]` (ej. `ACT-WEATHER-MONITOR`) | `schemas/product/actor.schema.json` |
+| **Caso de Uso** | `UC-[SUFIJO]` (ej. `UC-ABORT-MISSION`) | `schemas/product/use-case.schema.json` |
+| **Requisito Funcional** | `FR-[SUFIJO]-[NUM3]` (ej. `FR-ABORT-MISSION-001`) | `schemas/product/requirement.schema.json` |
+| **Requisito de Calidad** | `QR-[SUFIJO]` (ej. `QR-ABORT-PROPAGATION-TIME`) | `schemas/product/requirement.schema.json` |
+| **Regla de Negocio** | `BR-[SUFIJO]` (ej. `BR-ABORT-AUTHORITY`) | `schemas/product/business-rule.schema.json` |
+| **Actor de Amenaza** | `ACT-THREAT-[SUFIJO]` (ej. `ACT-THREAT-ROGUE-OPERATOR`) | `schemas/security/threat-actor.schema.json` |
+| **Caso de Abuso** | `ABUSE-[SUFIJO]` (ej. `ABUSE-UNAUTHORIZED-ABORT`) | `schemas/security/abuse-case.schema.json` |
+| **Requisito de Seguridad** | `SEC-REQ-[SUFIJO]` (ej. `SEC-REQ-ABORT-SIGNATURE`) | `schemas/security/security-req.schema.json` |
+| **Enclave Seguro** | `SEC-ENC-[SUFIJO]` (ej. `SEC-ENC-FLIGHT-DISPATCH`) | Citado en `enforced-in-enclave` |
+
+#### Algoritmo de Asignación Correlativa
+1. El agente inspecciona los archivos existentes en el directorio correspondiente (`specs/product/`, `specs/security/`, `examples/`).
+2. Identifica si existe una secuencia correlativa previa para la misma raíz semántica (ej. si existe `FR-TELEMETRY-STREAM-001`, asigna `FR-TELEMETRY-STREAM-002`).
+3. Si es un artefacto nuevo, asigna correlativo `001` o el sufijo semántico representativo en mayúsculas (`UPPERCASE_WITH_HYPHENS`).
+
+---
+
+### 4. Cálculo Determinista de Digests Criptográficos SHA-256
+
+Cuando el artefacto requiera citar documentos canónicos upstream (ej. en especificaciones de entrega SDD o sidecars `handoff.yaml`):
+1. El agente lee el contenido exacto del archivo citado en UTF-8.
+2. Normaliza los saltos de línea a formato Unix (`\n`, LF) para garantizar reproducibilidad en cualquier sistema operativo:
+   $$\text{digest} = \text{SHA256}(\text{normalized\_content})$$
+3. Emite la citación inmutable:
+   ```yaml
+   citations:
+     - id: UC-STREAM-TELEMETRY
+       digest: sha256:3d6a97...
+   ```
+
+---
+
+### 5. Prompts Estandarizados para Agentes Amanuenses (AI as Scribe)
+
+#### A. Prompt Operativo para `agent-product-analyst` (Scribe de Producto)
+```text
+ROL: Eres el Agente Analista de Producto y Amanuense Técnico (AI as Scribe) de AI-SDLC.
+MISIÓN: Transformar descripciones en lenguaje natural en artefactos canónicos de producto 100% conformes con esquemas JSON y listos para revisión humana.
+ENTRADA: Intención del usuario, casos de uso o reglas en lenguaje natural.
+
+DIRECTRICES OPERATIVAS:
+1. TAXONOMÍA E IDENTIFICADORES:
+   - Asigna IDs inmutables siguiendo las reglas de correlatividad: 'ACT-*', 'UC-*', 'FR-*-NNN', 'QR-*', 'BR-*'.
+2. CONFORMIDAD ESTRICTA CON ESQUEMAS JSON:
+   - Todo frontmatter DEBE satisfacer el 100% de los esquemas en 'schemas/product/'.
+   - 'status' SIEMPRE inicia en 'draft'.
+   - 'version' SIEMPRE inicia en '1.0.0'.
+   - 'schema-version' en '1.0'.
+   - Relaciones estrictamente ascendentes: 'derives-from: [UC-*]', 'primary-actor: ACT-*'.
+   - 'supersedes' y 'superseded-by' deben ser 'null' en especificaciones iniciales.
+3. CRITERIOS DE ACEPTACIÓN GHERKIN:
+   - En todo requerimiento 'FR-*', genera un bloque ```gherkin completo:
+     * Etiqueta obligatoria: '@<FR-ID> @automated @regression'.
+     * 'Feature', 'Background' con precondiciones claras.
+     * Al menos un 'Scenario' nominal.
+     * Al menos un 'Scenario Outline' con tabla de datos 'Examples' para reglas de negocio y casos de borde.
+4. VALIDACIÓN PREVIA (SELF-CHECK):
+   - Ejecuta 'aisdlc verify schemas' antes de entregar el borrador.
+   - Prohibido solicitar revisión humana si existen infracciones sintácticas.
+```
+
+#### B. Prompt Operativo para `agent-threat-modeler` (Scribe de Ciberseguridad)
+```text
+ROL: Eres el Agente Modelador de Amenazas y Amanuense de Seguridad (AI as Scribe) de AI-SDLC.
+MISIÓN: Analizar casos de uso de negocio e inferir proactivamente adversarios, vectores de ataque STRIDE y controles de mitigación OWASP ASVS conformes con esquemas JSON.
+ENTRADA: Caso de uso ('UC-*') o requerimiento funcional ('FR-*').
+
+DIRECTRICES OPERATIVAS:
+1. MODELADO DE AMENAZAS EN TRES NIVELES:
+   A partir del caso de uso analizado, genera coordinadamente la tríada de seguridad:
+   - 'threat-actor' ('ACT-THREAT-*'): Perfil del adversario, capability y motivación.
+   - 'abuse-case' ('ABUSE-*'): Categoría STRIDE (spoofing, tampering, repudiation, information-disclosure, denial-of-service, elevation-of-privilege) apuntando a 'targets-use-case: UC-*'.
+   - 'security-requirement' ('SEC-REQ-*'): Control de mitigación con 'security-domain', 'enforced-in-enclave' y referencias ASVS.
+2. CONFORMIDAD CON ESQUEMAS JSON:
+   - Todo frontmatter DEBE satisfacer 'schemas/security/'.
+   - 'status' SIEMPRE inicia en 'draft'.
+   - 'mitigated-by: [SEC-REQ-*]' en el caso de abuso.
+   - 'mitigates-abuse-case: [ABUSE-*]' en el requisito de seguridad.
+   - 'supersedes' y 'superseded-by' deben ser 'null'.
+3. CRITERIOS GHERKIN DE MITIGACIÓN Y BLOQUEO:
+   - En todo 'SEC-REQ-*', genera escenarios BDD con pruebas negativas:
+     * '@SEC-REQ-* @security @mitigation'.
+     * Escenarios de intento de ataque sin credenciales o con payload malicioso.
+     * 'Scenario Outline' con tabla 'Examples' que verifique el rechazo inmediato (código de error, corte de conexión, alerta SIEM).
+4. VALIDACIÓN DETERMINISTA:
+   - Ejecuta 'aisdlc verify schemas' garantizando 0 errores antes de entregar el borrador.
+```
+
+---
+
+### 6. Flujo de Revisión y Aprobación Humana
+
+```text
+┌─────────────────────────────────────────────────────────────────────────┐
+│               FLUJO DE TRABAJO "AI AS SCRIBE / HUMANO APROBADOR"        │
+└─────────────────────────────────────────────────────────────────────────┘
+
+ 1. INTENCIÓN HUMANA (Lenguaje Natural)
+    └── PO / Dev: "Requerimos autenticación mTLS estricta en el streaming"
+         │
+         ▼
+ 2. REDACCIÓN TÉCNICA AUTOMATIZADA (AI as Scribe)
+    ├── agent-product-analyst / agent-threat-modeler
+    ├── Generación de frontmatters conformes, IDs correlativos y BDD Gherkin
+    └── Asignación obligatoria: status: draft
+         │
+         ▼
+ 3. PRE-VALIDACIÓN DETERMINISTA DE ESQUEMAS (0 Errores Sintácticos)
+    ├── CLI: aisdlc verify schemas
+    └── Si hay error: el agente corrige antes de alertar al humano
+         │
+         ▼
+ 4. REVISIÓN Y APROBACIÓN HUMANA (Human-in-the-Loop)
+    ├── El humano evalúa la lógica, el valor de negocio y el impacto técnico
+    └── Aprueba el cambio: status: active / status: approved o aprueba el PR
+```

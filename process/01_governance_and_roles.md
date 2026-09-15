@@ -48,24 +48,59 @@ El framework AI-SDLC organiza a las personas y a los agentes de IA dentro de un 
 > - **C (Consulted)**: Quien aporta información y contexto.
 > - **I (Informed)**: Quien recibe la notificación del resultado.
 
-| Fase / Actividad | PO (Humano) | Arquitecto (Humano) | SecOps (Humano) | Legal (Humano) | Tech Lead (Humano) | Agente IA Especializado | Guardrail / Regla Determinista |
+| **Fase / Actividad** | PO (Humano) | Arquitecto (Humano) | SecOps (Humano) | Legal (Humano) | Tech Lead / Dev (Humano) | Agente IA Especializado | Guardrail / Regla Determinista |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Exploración de Producto** | A | C | C | I | C | R (Analista) | IA nunca inventa decisiones no consensuadas |
+| **Exploración y Redacción PDaC (Scribe)** | A | C | C | I | C | R (Analista Scribe) | IA redacta borrador conforme; no aprueba |
 | **Aprobación de Product Change** | **A** | C | C | I | I | - | **Prohibido para agentes (Solo humano)** |
-| **Modelado de Amenazas** | C | C | A | I | C | R (Threat Modeler) | Mapeo obligatorio a taxonomía STRIDE/ASVS |
+| **Modelado de Amenazas (Scribe)** | C | C | A | I | C | R (Threat Modeler Scribe) | Inferencia STRIDE/ASVS; validación de esquemas |
 | **Diseño Arquitectónico (arc42/NAF)** | I | **A** | C | I | C | R (Arquitecto) | Bloques deben citar casos de uso `UC-*` válidos |
 | **Aprobación de ADRs** | C | **A** | C | I | C | - | **Solo humanos aprueban decisiones técnicas** |
 | **Evaluación de Licencias OSS** | I | C | I | **A** | C | R (Compliance) | Detección automática en `license-policy.yaml` |
 | **Compra de Licencia Comercial** | I | I | I | **A** | C | - | **Agentes no firman contratos ni pagan licencias** |
 | **Elaboración de Spec SDD** | I | C | C | I | A | R (Desarrollador) | Citación criptográfica obligatoria (`id + digest`) y sidecar `handoff.yaml` |
 | **Generación de Código & Tests** | I | I | I | I | A | R (Coder / QA) | Linter y compilación estricta sin errores |
+| **Tareas de Alto Riesgo (`HIGH_RISK_MANUAL`)** | I | A | A | I | **R (Ejecutor Humano Exclusivo)** | - | **Bloqueada para IA. Solo implementación humana** |
+| **Tareas Interactivas (`HUMAN_REVIEW_PLAN`)** | I | C | C | I | **A (Aprobador Paso a Paso)** | R (Planificador / Co-implementador) | El agente se detiene en cada paso; el humano aprueba |
 | **Auditoría de Vulnerabilidades** | I | I | A | I | C | R (Security Auditor) | SAST determinista + Agente adversarial |
 | **Integración Canónica SDD** | C | C | I | I | **A** | R (Desarrollador / CLI) | Todas las tareas en `tasks.md` deben estar `COMPLETED` |
 | **Merge del Pull Request** | I | I | I | I | **A** | - | **Prohibido auto-merge por IA (Bloqueado por CI)** |
 
 ---
 
-## 4. Protocolo de Traspaso (Hand-off) y Contratos de Trabajo
+## 4. Modelo Operativo "AI as Scribe, Humano como Revisor, Aprobador e Implementador Crítico"
+
+### A. Inversión de Carga Operativa Mecánica (The Scribe Paradigm)
+Tradicionalmente, la redacción de especificaciones de producto y modelos de seguridad impone una severa fricción burocrática sobre los equipos de ingeniería: copiar plantillas Markdown (`templates/product/`, `templates/security/`), recordar taxonomías de IDs (`ACT-*`, `UC-*`, `FR-*`, `SEC-REQ-*`), estructurar frontmatters YAML con tipado estricto y redactar a mano escenarios ejecutables BDD/Gherkin con matrices `Examples`.
+
+El modelo **AI as Scribe** invierte esta carga operativa:
+1. **Intención en Lenguaje Natural**: El Product Owner, Tech Lead o SecOps describe la necesidad funcional o técnica en un prompt simple o descripción breve.
+2. **Redacción Técnica Automatizada (AI as Scribe)**:
+   - Los agentes especializados (`agent-product-analyst` y `agent-threat-modeler`) actúan como amanuenses técnicos:
+     * Asignan automáticamente IDs correlativos inmutables libres de colisiones.
+     * Completan el frontmatter YAML exacto conforme con el esquema JSON canónico (Draft 2020-12), marcándolo inicialmente con `status: draft`.
+     * Redactan el enunciado normativo y los criterios de aceptación en Gherkin ejecutable (`Feature`, `Background`, `Scenario`, `Scenario Outline` con tabla de datos `Examples`).
+     * Calculan los digests criptográficos SHA-256 para las citaciones de artefactos ascendentes (Upstream).
+3. **Auto-Validación Determinista Inmediata**:
+   - Antes de presentar el borrador al humano, el agente ejecuta internamente `aisdlc verify schemas`. Si detecta cualquier violación de esquema o tipo, autocorrige la sintaxis de forma inmediata, garantizando **0 fallos sintácticos** al llegar a la revisión humana.
+4. **Revisión y Aprobación Exclusiva Humana**:
+   - El humano no pierde tiempo maquetando YAML ni depurando sintaxis; inspecciona el borrador evaluando exclusivamente el valor de negocio, la viabilidad técnica y la suficiencia de las mitigaciones.
+   - Una vez conforme, el humano cambia el estado a `status: approved` / `status: active` o aprueba el Pull Request correspondiente.
+
+### B. Preservación Innegociable del Humano como Implementador
+La automatización de borradores mecánicos **no desplaza ni sustituye al ser humano como implementador**. En AI-SDLC, el rol del humano como implementador activo es innegociable a través de tres pilares de gobernanza:
+
+1. **Tareas de Alto Riesgo (`HIGH_RISK_MANUAL`) - Implementación Exclusivamente Humana**:
+   - En tareas críticas donde un error puede comprometer la seguridad, integridad o continuidad del negocio (migraciones de datos en producción, manipulación de secretos o claves maestras criptográficas, aprovisionamiento de infraestructura productiva, código de seguridad del núcleo), **está estrictamente prohibida la ejecución autónoma por IA**.
+   - Estas tareas son **ejecutadas única y directamente por ingenieros humanos**. La IA puede actuar como asistente de consulta o verificador de soporte, pero las modificaciones las realiza el humano.
+2. **Pair-Programming Guiado Paso a Paso (`HUMAN_REVIEW_PLAN`)**:
+   - En tareas de riesgo medio o con impacto arquitectónico, el agente de IA **debe detenerse** tras formular el plan de acción detallado.
+   - El humano aprueba cada paso de manera interactiva o co-implementa junto con el agente, pudiendo asumir el control del teclado en cualquier momento para modificar el código o los artefactos.
+3. **Soberanía y Autoría Directa de la Ingeniería**:
+   - Cualquier ingeniero humano tiene siempre el derecho y la libertad de crear, editar o refactorizar directamente cualquier archivo de producto, arquitectura o código fuente sin intermediación de agentes. El framework AI-SDLC valida deterministamente el resultado mediante `aisdlc verify all`, garantizando la misma calidad y trazabilidad con independencia del autor.
+
+---
+
+## 5. Protocolo de Traspaso (Hand-off) y Contratos de Trabajo
 
 Para evitar pérdidas de contexto o asunciones no válidas:
 
@@ -83,7 +118,7 @@ Para evitar pérdidas de contexto o asunciones no válidas:
 
 ---
 
-## 5. Matriz de Clasificación de Tareas y Modos de Autonomía Humana
+## 6. Matriz de Clasificación de Tareas y Modos de Autonomía Humana
 
 Toda feature o cambio de software se descompone en un plan de tareas atómicas (`tasks.md`) donde **cada tarea debe ser verificable y poseer una clasificación explícita de riesgo y autonomía**:
 

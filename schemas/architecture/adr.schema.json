@@ -46,11 +46,11 @@
       }
     },
     "supersedes": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^ADR-[0-9]{3,4}(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^ADR-[0-9]{3,4}(-[A-Z0-9]+)*$"
     }
   },

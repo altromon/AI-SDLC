@@ -18,6 +18,8 @@
     "verify:quality": "tsx packages/cli/src/index.ts verify quality",
     "verify:traceability": "tsx packages/cli/src/index.ts verify traceability",
     "verify:licenses": "tsx packages/cli/src/index.ts verify licenses",
+    "verify:pdac": "tsx packages/cli/src/index.ts verify pdac",
+    "verify:schemas": "tsx packages/cli/src/index.ts verify schemas",
     "verify:all": "tsx packages/cli/src/index.ts verify all",
     "report:quality": "tsx packages/cli/src/index.ts report quality",
     "report:requirements": "tsx scripts/export-active-requirements.ts",

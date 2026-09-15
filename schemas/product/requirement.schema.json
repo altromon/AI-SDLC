@@ -41,7 +41,7 @@
         "pattern": "^(UC|BR|CON|CAP|GOAL)-[A-Z0-9]+(-[A-Z0-9]+)*$"
       },
       "description": "Trazabilidad a Producto: Casos de Uso, Reglas, Restricciones o Capacidades origen."
-
+    },
     "verifiable-by": {
       "type": "string",
       "enum": ["cucumber-bdd", "automated-unit-test", "integration-test", "performance-benchmark", "security-audit", "inspection"],
@@ -61,11 +61,11 @@
       "description": "Etiquetas de Cucumber para filtrado y ejecución de pruebas BDD."
     },
     "supersedes": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^(FR|QR|CON)-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^(FR|QR|CON)-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

@@ -45,11 +45,11 @@
       }
     },
     "supersedes": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^BR-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^BR-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

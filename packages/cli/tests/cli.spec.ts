@@ -5,10 +5,12 @@ import { runGitPlan, runGitValidate } from '../src/commands/git.js';
 import { runInit } from '../src/commands/init.js';
 import { runSddDeposit, runSddIntegrate, runSddVerify } from '../src/commands/sdd.js';
 import {
+  runVerifyAll,
   runVerifyGovernance,
   runVerifyLicenses,
   runVerifyPdac,
   runVerifyQuality,
+  runVerifySchemas,
   runVerifyTesting,
   runVerifyTraceability,
 } from '../src/commands/verify.js';
@@ -108,5 +110,15 @@ describe('@ai-sdlc/cli Command Suite', () => {
       silent: true,
     });
     expect(resMissing).toBe(false);
+  });
+
+  it('should verify artifact schemas via CLI command', () => {
+    const passed = runVerifySchemas({ silent: true });
+    expect(passed).toBe(true);
+  });
+
+  it('should verify all quality gates including schemas via CLI', () => {
+    const passed = runVerifyAll({ silent: true });
+    expect(passed).toBe(true);
   });
 });
