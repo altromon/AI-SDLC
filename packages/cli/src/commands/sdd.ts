@@ -9,9 +9,11 @@ import {
   depositProductHandoffSidecar,
   integrateSddChange,
   ProductHandoff,
+  scaffoldSddChange,
   scanAllProductHandoffs,
   SddFramework,
 } from '@ai-sdlc/core';
+
 
 export interface SddDepositCliOptions {
   root?: string;
@@ -188,6 +190,64 @@ export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
         console.log(`    ${pc.red('✖')} ${err}`);
       }
       console.log(pc.red('\n✖ Integración BLOQUEADA (EXIT 1)\n'));
+    }
+  }
+
+  return result.success;
+}
+
+export interface ChangeNewCliOptions {
+  root?: string;
+  name: string;
+  from?: string | string[];
+  id?: string;
+  framework?: SddFramework;
+  author?: string;
+  silent?: boolean;
+}
+
+export function runChangeNew(options: ChangeNewCliOptions): boolean {
+  const rootDir = options.root || process.cwd();
+  const name = options.name;
+  const framework = options.framework || 'openspec';
+
+  if (!options.silent) {
+    console.log(
+      pc.bold(
+        pc.cyan(`\n📦 [AI-SDLC SDD] Creando andamiaje de nuevo cambio SDD '${name}' (${framework})...`)
+      )
+    );
+  }
+
+  const result = scaffoldSddChange({
+    rootDir,
+    name,
+    changeId: options.id,
+    from: options.from,
+    framework,
+    author: options.author,
+    silent: options.silent,
+  });
+
+  if (!options.silent) {
+    if (result.success) {
+      console.log(`  ${pc.green('✔')} Directorio del cambio: ${pc.bold(result.changeDir)}`);
+      console.log(`  ${pc.green('✔')} ID de Cambio SDD:     ${pc.cyan(result.canonicalId)} (${result.changeId})`);
+      if (result.productArtifactCreated) {
+        console.log(`  ${pc.green('✔')} Artefacto de producto:  ${pc.bold(result.productArtifactCreated)} (status: draft)`);
+      }
+      console.log(`  ${pc.green('✔')} Artefactos citados:    ${result.citedArtifacts.length}`);
+      for (const cite of result.citedArtifacts) {
+        console.log(`    - [${pc.cyan(cite.id)}] ${cite.digest.substring(0, 19)}... (${cite.title || 'Sin título'})`);
+      }
+      console.log(`  ${pc.green('✔')} Archivos generados:    ${result.createdFiles.length}`);
+      console.log(pc.green('\n✔ Cambio SDD inicializado y validado exitosamente.\n'));
+    } else {
+      console.log(pc.red(`\n✖ Fallo al crear el cambio SDD '${name}':`));
+      for (const err of result.errors) {
+        console.log(`    ${pc.red('✖')} ${err}`);
+      }
+      console.log(pc.red('\n✖ Creación de cambio BLOQUEADA\n'));
     }
   }
 

@@ -108,7 +108,7 @@ Para evitar pérdidas de contexto o asunciones no válidas:
    - El arquitecto (humano o agente) solo puede consumir artefactos de producto que hayan sido aprobados y fusionados en la rama principal (`docs/product/model/`). No se modela arquitectura sobre borradores no aprobados.
 2. **De Definición de Producto a Ecosistemas SDD (Handoff PDaC Formal y Sidecars)**:
    - El producto emite formalmente un subgrafo de entrega inmutable con identificador `HOF-*` (casos de uso, requerimientos, reglas de negocio y citaciones SHA-256).
-   - Los adaptadores formales de ecosistemas SDD (OpenSpec y GitHub Spec Kit) depositan este subgrafo como un archivo de acompañamiento `handoff.yaml` dentro del espacio del cambio (`specs/changes/active/<id>/` o `specs/<id>/`).
+   - Los adaptadores formales de ecosistemas SDD (OpenSpec y GitHub Spec Kit) o el generador de cambios (`aisdlc change new`) depositan este subgrafo como un archivo de acompañamiento `handoff.yaml` dentro del espacio del cambio (`specs/changes/active/<id>/` o `specs/<id>/`).
 3. **De Arquitectura a Especificación SDD**:
    - Cada entrega SDD debe referenciar un subconjunto acotado de requerimientos (`FR-*`, `SEC-REQ-*`), bloques de arquitectura (`SRV-*`, `SYS-*`) y suites BDD (`.feature`).
 4. **Integración Canónica Post-Implementación**:

@@ -274,9 +274,14 @@ export function resolveSchemaForArtifact(
   }
 
   const relSchemaPath = TYPE_TO_SCHEMA_MAP[type];
-  const fullSchemaPath = path.join(rootDir, relSchemaPath);
+  let fullSchemaPath = path.join(rootDir, relSchemaPath);
   if (!fs.existsSync(fullSchemaPath)) {
-    return null;
+    const fallbackPath = path.join(process.cwd(), relSchemaPath);
+    if (fs.existsSync(fallbackPath)) {
+      fullSchemaPath = fallbackPath;
+    } else {
+      return null;
+    }
   }
 
   try {
@@ -298,22 +303,35 @@ export function validateArtifactSchema(
 
   if (typeof schemaOrType === 'string') {
     if (schemaOrType.endsWith('.json')) {
-      const fullPath = path.isAbsolute(schemaOrType)
+      let fullPath = path.isAbsolute(schemaOrType)
         ? schemaOrType
         : path.join(rootDir, schemaOrType);
+      if (!fs.existsSync(fullPath)) {
+        const fallbackPath = path.join(process.cwd(), schemaOrType);
+        if (fs.existsSync(fallbackPath)) {
+          fullPath = fallbackPath;
+        }
+      }
       if (fs.existsSync(fullPath)) {
         schema = JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
         schemaId = schemaOrType;
       }
     } else if (TYPE_TO_SCHEMA_MAP[schemaOrType]) {
       const relPath = TYPE_TO_SCHEMA_MAP[schemaOrType];
-      const fullPath = path.join(rootDir, relPath);
+      let fullPath = path.join(rootDir, relPath);
+      if (!fs.existsSync(fullPath)) {
+        const fallbackPath = path.join(process.cwd(), relPath);
+        if (fs.existsSync(fallbackPath)) {
+          fullPath = fallbackPath;
+        }
+      }
       if (fs.existsSync(fullPath)) {
         schema = JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
         schemaId = relPath;
       }
     }
-  } else {
+  }
+ else {
     schema = schemaOrType;
     schemaId = (schema as { $id?: string }).$id;
   }
