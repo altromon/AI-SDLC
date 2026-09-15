@@ -20,7 +20,13 @@ El framework AI-SDLC organiza a las personas y a los agentes de IA dentro de un 
 4. **Legal / IP & Compliance Officer**:
    - Valida el uso de licencias de terceros, aprueba la adquisición de licencias comerciales o excepciones de copyleft.
 5. **Tech Lead / Senior Developer**:
-   - Revisa el código generado por los agentes en los Pull Requests, evalúa la estrategia de pruebas y realiza el `merge` final.
+   - Revisa el código generado por los agentes en los Pull Requests utilizando obligatoriamente la plantilla institucional (`.github/PULL_REQUEST_TEMPLATE.md`).
+   - Evalúa la **Matriz de Ejecución del Plan y Estado de Pruebas (`X` vs `O`)**:
+     - Exige la inclusión de **todos y cada uno** de los puntos identificados para implementar en la entrega.
+     - Aplica el **criterio de bloqueo inmediato**: rechaza cualquier PR que contenga ítems planificados omitidos o ítems marcados con `[O]` (Problema / Bloqueo) que carezcan de justificación obligatoria (causa raíz, impacto, mitigación y referencia a issue de seguimiento o `ADR-TECH-DEBT-*`).
+   - Audita exhaustivamente el **Mapa de Puntos Débiles (Weak Points Hotspots)**:
+     - Inspecciona los "Hotspots de Complejidad" para garantizar el cumplimiento estricto de `quality-policy.yaml`.
+     - Evalúa de forma crítica las "Asunciones de la IA" para erradicar alucinaciones, heurísticas arbitrarias o atajos técnicos antes de autorizar el merge final.
 
 ### B. Roles de Agentes de IA (Especializados por Persona)
 1. **Agente Analista de Producto (`agent-product-analyst`)**:
@@ -63,6 +69,7 @@ El framework AI-SDLC organiza a las personas y a los agentes de IA dentro de un 
 | **Tareas Interactivas (`HUMAN_REVIEW_PLAN`)** | I | C | C | I | **A (Aprobador Paso a Paso)** | R (Planificador / Co-implementador) | El agente se detiene en cada paso; el humano aprueba |
 | **Auditoría de Vulnerabilidades** | I | I | A | I | C | R (Security Auditor) | SAST determinista + Agente adversarial |
 | **Integración Canónica SDD** | C | C | I | I | **A** | R (Desarrollador / CLI) | Todas las tareas en `tasks.md` deben estar `COMPLETED` |
+| **Revisión de PR y Balance del Plan (`X`/`O`)** | I | C | C | I | **A (Garante y Aprobador)** | R (Declara matriz, puntos débiles y asunciones) | Obligatoria inclusión de todos y cada uno de los puntos; justificación de todo `[O]` |
 | **Merge del Pull Request** | I | I | I | I | **A** | - | **Prohibido auto-merge por IA (Bloqueado por CI)** |
 
 ---
@@ -156,3 +163,38 @@ Toda feature o cambio de software se descompone en un plan de tareas atómicas (
 | **HIGH** | HIGH | Cero (Especificada) | **`HUMAN_REVIEW_PLAN`** 🟡 | Requiere aprobación formal del Tech Lead o Arquitecto. |
 | **CUALQUIERA** | CUALQUIERA | Alta / Dudas | **`AMBIGUOUS`** 🟠 | **Bloqueada**. Requiere sesión de refinamiento con el usuario. |
 | **CRITICAL** | CUALQUIERA | CUALQUIERA | **`HIGH_RISK_MANUAL`** 🔴 | **Bloqueada para IA**. Solo intervención manual de ingenieros. |
+
+---
+
+## 7. Protocolo de Revisión y Gobernanza de Pull Requests (Balance `X`/`O` y Puntos Débiles)
+
+El Pull Request representa la última frontera de control y garantía antes de integrar código en ramas estables. Con el objetivo de erradicar la deuda técnica oculta y las alucinaciones silenciosas en el código generado por IA, se formaliza la gobernanza basada en `.github/PULL_REQUEST_TEMPLATE.md`:
+
+### A. Obligaciones del Proponente (Agente de IA o Ingeniero)
+1. **Exhaustividad Total Innegociable en la Matriz de Ejecución**:
+   - Se deben transcribir e incluir en la tabla **todos y cada uno de los puntos identificados para implementar** en el plan de entrega (procedentes de `tasks.md`, de la especificación SDD o de los criterios de aceptación del issue).
+   - Queda terminantemente prohibido agrupar tareas en descripciones genéricas o presentar listados parciales/selectivos.
+2. **Convención Determinista de Marcado (`[X]` vs `[O]`)**:
+   - **`[X]` (Completado y Probado)**: Solo aplicable si el ítem está 100% implementado y respaldado por pruebas automatizadas verificables en disco (`tests/` o `.feature`) con resultado verde sin fallos.
+   - **`[O]` (Problema / Bloqueo)**: Si existió cualquier dificultad, limitación técnica, test diferido o bloqueo, se debe marcar con `[O]` y es **obligatoria su justificación completa**:
+     - Causa raíz técnica o limitación encontrada.
+     - Impacto real sobre el incremento o la arquitectura.
+     - Mitigación inmediata o justificación de por qué se pospone.
+     - Referencia formal al issue de seguimiento (GitHub Issue o `ADR-TECH-DEBT-*`).
+3. **Mapeo Explícito de Puntos Débiles**:
+   - Identificar funciones que rozan los límites de complejidad de `quality-policy.yaml` (Hotspots de Complejidad).
+   - Listar casos límite no cubiertos por pruebas unitarias automatizadas (Casos Límite y Puntos Ciegos).
+   - Explicitar todas las asunciones no triviales asumidas por la IA durante la implementación (Asunciones de la IA).
+
+### B. Criterios de Bloqueo y Aprobación para el Tech Lead (Human Gatekeeper)
+El Tech Lead actúa como árbitro decisorio y garante humano de la integridad de la solución:
+1. **Criterios de Bloqueo Mandatorio Inmediato**:
+   - **Omisión de ítems planificados**: Si la tabla no lista todos y cada uno de los puntos del plan original.
+   - **Ítems `[O]` no justificados**: Si existe cualquier ítem `[O]` sin su justificación técnica cuádruple (causa, impacto, mitigación y enlace de seguimiento).
+   - **Hotspots de Complejidad no mitigados**: Si alguna función viola los umbrales de `quality-policy.yaml` (CC $\le 10$, Cognitiva $\le 15$, LOC $\le 40$, MI $\ge 50$).
+   - **Asunciones de la IA no convalidadas**: Si se detectan heurísticas o fallbacks asumidos por el agente que no corresponden con la visión de arquitectura o producto.
+2. **Criterios de Aprobación**:
+   - La totalidad de puntos planificados están presentes en la matriz con estado `[X]` (o `[O]` justificados y aceptados formalmente mediante `ADR-TECH-DEBT-*`).
+   - El checklist determinista de pre-vuelo pasa al 100% (`pnpm run verify:all` y `pnpm run typecheck`).
+   - El plan de contingencia, observabilidad y procedimiento de rollback están adecuadamente definidos.
+
