@@ -137,4 +137,38 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
     expect(content).toContain('Handshake mTLS');
     expect(content).toContain('Rollback');
   });
+
+  it('should validate safety-requirement JSON Schema definition', () => {
+    const safetySchemaPath = path.join(repoRoot, 'schemas/safety/safety-req.schema.json');
+    expect(fs.existsSync(safetySchemaPath)).toBe(true);
+    const raw = fs.readFileSync(safetySchemaPath, 'utf-8');
+    const schema = JSON.parse(raw);
+
+    expect(schema.$schema).toBe('https://json-schema.org/draft/2020-12/schema');
+    expect(schema.required).toContain('id');
+    expect(schema.required).toContain('type');
+    expect(schema.required).toContain('safety-domain');
+    expect(schema.required).toContain('safety-integrity-level');
+    expect(schema.required).toContain('mitigates-hazard');
+    expect(schema.required).toContain('fail-safe-action');
+  });
+
+  it('should validate safety-requirement template frontmatter and structure', () => {
+    const templatePath = path.join(repoRoot, 'templates/safety/safety-req.template.md');
+    expect(fs.existsSync(templatePath)).toBe(true);
+
+    const fm = extractFrontmatter(templatePath);
+    expect(fm.type).toBe('safety-requirement');
+    expect(String(fm.id)).toMatch(/^SAF-REQ-[A-Z0-9]+(-[A-Z0-9]+)*$/);
+    expect(fm['safety-domain']).toBe('flight-control');
+    expect(fm['safety-integrity-level']).toBe('DAL-B');
+    expect(Array.isArray(fm['mitigates-hazard'])).toBe(true);
+    expect(fm['fail-safe-action']).toBe('SAFE_STATE_ACTION');
+    expect(fm['fault-tolerance-time-ms']).toBe(100);
+
+    const content = fs.readFileSync(templatePath, 'utf-8');
+    expect(content).toContain('Enunciado Normativo de Seguridad Operacional');
+    expect(content).toContain('Matriz de Mitigación de Peligros y Tolerancia a Fallos');
+    expect(content).toContain('@safety @failsafe');
+  });
 });

@@ -20,6 +20,7 @@
     "verify:licenses": "tsx packages/cli/src/index.ts verify licenses",
     "verify:all": "tsx packages/cli/src/index.ts verify all",
     "report:quality": "tsx packages/cli/src/index.ts report quality",
+    "report:requirements": "tsx scripts/export-active-requirements.ts",
     "changeset": "changeset"
   },
   "devDependencies": {
