@@ -113,9 +113,9 @@ Cada nivel de integración cuenta con criterios de validación crecientes:
 
 | Nivel de Merge | Origen ➔ Destino | Requisitos Obligatorios para Autorizar Merge |
 | :--- | :--- | :--- |
-| **Paso 1 (Tarea)** | `task/*` ➔ `feat/*` / `bug/*` | 1. Cumplimiento del comando de verificación declarado en `tasks.md`.<br>2. Pruebas unitarias de la tarea pasando al 100%.<br>3. Cero errores de sintaxis y linter. |
-| **Paso 2 (Feature)** | `feat/*` / `bug/*` ➔ `release/*` | 1. Todas las tareas de `tasks.md` en estado `COMPLETED`.<br>2. Ejecución exitosa de escenarios BDD Cucumber (`.feature`).<br>3. Quality Gate superado (`verify-quality-gate.js`): CC $\le 10$, MI $\ge 50$.<br>4. Auditoría de licencias aprobada (`license-policy.yaml`).<br>5. Revisión humana aprobada del Tech Lead. |
-| **Paso 3 (Release)** | `release/*` ➔ `main` | 1. Matriz de trazabilidad 360° al 100% (`verify-traceability.js`).<br>2. Informe de calidad consolidado generado (`generate-quality-report.js`).<br>3. Generación y firma de SBOM CycloneDX/SPDX.<br>4. Aprobación final formal de Product Owner y Release Manager. |
+| **Paso 1 (Tarea)** | `task/*` ➔ `feat/*` / `bug/*` | 1. Cumplimiento del comando de verificación declarado en `tasks.md`.<br>2. Pruebas unitarias de la tarea pasando al 100%.<br>3. Cero errores de sintaxis y linter (`pnpm run typecheck`).<br>4. Pull Request documentado con `.github/PULL_REQUEST_TEMPLATE.md`. |
+| **Paso 2 (Feature)** | `feat/*` / `bug/*` ➔ `release/*` | 1. Plantilla institucional `.github/PULL_REQUEST_TEMPLATE.md` cumplimentada exhaustivamente.<br>2. Matriz de Ejecución del Plan (`X` vs `O`) aprobada por el Tech Lead (todos los ítems incluidos; cero `[O]` no justificados).<br>3. Todas las tareas de `tasks.md` en estado `COMPLETED`.<br>4. Ejecución exitosa de escenarios BDD Cucumber (`.feature`).<br>5. Quality Gate superado (`verify:quality`): CC $\le 10$, MI $\ge 50$.<br>6. Auditoría de licencias aprobada (`verify:licenses`).<br>7. Revisión y aprobación humana mandataria del Tech Lead. |
+| **Paso 3 (Release)** | `release/*` ➔ `main` | 1. Pull Request institucional `.github/PULL_REQUEST_TEMPLATE.md` con checklist de pre-vuelo 100% verificado.<br>2. Matriz de trazabilidad 360° al 100% (`verify:traceability`).<br>3. Informe de calidad consolidado generado (`report:quality`).<br>4. Generación y firma de SBOM CycloneDX/SPDX.<br>5. Aprobación final formal de Product Owner y Release Manager. |
 
 ---
 
