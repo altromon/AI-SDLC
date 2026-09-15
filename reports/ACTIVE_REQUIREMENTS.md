@@ -6,10 +6,11 @@
 
 ## Resumen Ejecutivo de Requerimientos en Producción
 
-| Tipo de Requerimiento | Cantidad | Prefijos Canónicos | Marco Metodológico |
+| Capa / Tipo de Requerimiento | Cantidad | Prefijos Canónicos | Marco Metodológico |
 | :--- | :---: | :--- | :--- |
 | **Funcionales** | 1 | `FR-*` | Product Definition as Code (PDaC) |
 | **Ciberseguridad** | 1 | `SEC-REQ-*` | Security-by-Design & Zero Trust |
+| **Seguridad Operacional (Safety)** | 0 | `SAF-REQ-*`, `SAF-*` | Functional Safety & Hazard Analysis (STPA / FMEA) |
 | **Arquitectura y Calidad** | 3 | `QR-*`, `CON-*`, `CMP-*`, `ADR-*` | arc42 / NAF v4 Building Blocks |
 
 ---
@@ -19,10 +20,10 @@
 Representan las capacidades y comportamientos del software derivados de los Casos de Uso (`UC-*`).
 
 | ID Requerimiento | Título | Versión | Deriva de (UC) | Método Verificación | Etiquetas BDD |
-| :--- | :--- | :---: | :--- | :--- | :--- |
+| :--- | :--- | :--- | :--- | :--- | :--- |
 | **`FR-TELEMETRY-STREAM-001`** | Ingesta Continua de Tramas Telemétricas UAV | `1.0.0` | `UC-STREAM-TELEMETRY` | `cucumber-bdd` | `@FR-TELEMETRY-STREAM-001 @telemetry @automated` |
 
-### Detalle Normativo de Requerimientos Funcionales
+### Detalle Normativo
 
 #### [FR-TELEMETRY-STREAM-001] Ingesta Continua de Tramas Telemétricas UAV
 - **Archivo Canónico:** [`examples/product/FR-TELEMETRY-STREAM-001.md`](file:///C:/Users/reypo/Documents/Workspace/AI-SDLC/examples/product/FR-TELEMETRY-STREAM-001.md)
@@ -34,13 +35,13 @@ Representan las capacidades y comportamientos del software derivados de los Caso
 
 ## 2. Requerimientos de Ciberseguridad (Security Requirements)
 
-Representan los controles técnicos y mitigaciones formales frente a Casos de Abuso (`ABUSE-*`) y actores de amenaza (`ACT-THREAT-*`).
+Representan los controles técnicos y defensas frente a Casos de Abuso (`ABUSE-*`) y actores maliciosos (`ACT-THREAT-*`).
 
 | ID Requerimiento | Título | Dominio de Seguridad | Mitiga Caso Abuso | Enclave Asignado | Estándar / Cumplimiento |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`SEC-REQ-MTLS-STREAM`** | Autenticación Criptográfica Mutua (mTLS) en Ingesta | `authentication` | `ABUSE-TELEMETRY-SPOOFING` | `SEC-ENC-DMZ-INGEST` | `NIST-SP-800-207-ZeroTrust` |
 
-### Detalle de Controles Técnicos de Seguridad
+### Detalle Normativo
 
 #### [SEC-REQ-MTLS-STREAM] Autenticación Criptográfica Mutua (mTLS) en Ingesta
 - **Archivo Canónico:** [`examples/security/SEC-REQ-MTLS-STREAM.md`](file:///C:/Users/reypo/Documents/Workspace/AI-SDLC/examples/security/SEC-REQ-MTLS-STREAM.md)
@@ -50,17 +51,25 @@ Representan los controles técnicos y mitigaciones formales frente a Casos de Ab
 
 ---
 
-## 3. Requerimientos y Componentes de Arquitectura (Architecture arc42 / NAF v4)
+## 3. Requerimientos de Seguridad Operacional y Funcional (Safety Requirements)
+
+Mitigan peligros y accidentes operacionales no intencionados (`HAZ-*`) garantizando estados seguros (Fail-Safe) bajo estándares como DO-178C, IEC 61508 o ISO 26262.
+
+*No hay requerimientos en esta capa con estado activo.*
+
+---
+
+## 4. Requerimientos y Componentes de Arquitectura (Architecture arc42 / NAF v4)
 
 Comprende requerimientos de calidad (`QR-*`), restricciones técnicas (`CON-*`), componentes aceptados (`CMP-*`) y decisiones arquitectónicas (`ADR-*`).
 
 | ID Artefacto | Tipo | Título | Nivel / Categoría | Satisface Requerimientos | Interfaces / Decisión |
-| :--- | :--- | :--- | :---: | :--- | :--- |
+| :--- | :--- | :--- | :--- | :--- | :--- |
 | **`ADR-001-WEBSOCKET-STACK`** | Decisión (ADR) | Selección de la Pila WebSocket y Motor de Concurrencia para Ingesta | `N/A` | `N/A` | Status: accepted |
 | **`CMP-TELEMETRY-INGEST`** | Componente arc42 | Componente de Ingesta Telemétrica y Deserialización de Alta Frecuencia | `Nivel 2` | `FR-TELEMETRY-STREAM-001, QR-LATENCY-REALTIME, SEC-REQ-MTLS-STREAM` | Drone WSS Telemetry Endpoint (WebSocket); Internal Kafka Telemetry Stream (Kafka) |
 | **`QR-LATENCY-REALTIME`** | Requisito de Calidad | Latencia de Procesamiento e Ingesta Sub-100ms | `quality` | `N/A` | N/A |
 
-### Detalle Normativo de Arquitectura y Calidad
+### Detalle Normativo
 
 #### [ADR-001-WEBSOCKET-STACK] Selección de la Pila WebSocket y Motor de Concurrencia para Ingesta
 - **Archivo Canónico:** [`examples/architecture/09_decisions/ADR-001-WEBSOCKET-STACK.md`](file:///C:/Users/reypo/Documents/Workspace/AI-SDLC/examples/architecture/09_decisions/ADR-001-WEBSOCKET-STACK.md)
