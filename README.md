@@ -106,6 +106,8 @@ AI-SDLC/
 │   ├── sdd/                                  # Plantillas SDD (Proposal, Spec, Tasks, Handoff)
 │   └── manuals/                              # Plantillas MAN-USER (Manual de Usuario), MAN-PROD (Manual de Producción)
 │
+├── reports/                                  # Informes formales autogenerados (RTM 360°, Calidad, Requerimientos Activos)
+│
 └── examples/                                 # Caso de Estudio Realista: "SentinelCore" (SaaS Telemétrico Crítico)
     ├── product/                              # Modelo canónico de producto
     ├── security/                             # Modelado de amenazas y mitigaciones
@@ -164,13 +166,16 @@ pnpm run verify:licenses                      # o: npx aisdlc verify licenses
 # 8. Generar el informe formal de métricas de calidad multilenguaje
 pnpm run report:quality                       # o: npx aisdlc report quality
 
-# 9. Depositar sidecar PDaC (handoff.yaml) en el cambio activo
+# 9. Generar el catálogo de requerimientos activos por tipo (Funcional, Seguridad, Arquitectura)
+pnpm run report:requirements                  # o: npx tsx scripts/export-active-requirements.ts
+
+# 10. Depositar sidecar PDaC (handoff.yaml) en el cambio activo
 npx aisdlc sdd deposit --framework openspec --change chg-001-telemetry-ingestion
 
-# 10. Auditar conformidad de sidecars y espacios SDD
+# 11. Auditar conformidad de sidecars y espacios SDD
 npx aisdlc sdd verify
 
-# 11. Integrar el cambio concluido a las especificaciones canónicas
+# 12. Integrar el cambio concluido a las especificaciones canónicas
 npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
 ```
 
@@ -189,6 +194,7 @@ npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
 | `npx aisdlc sdd verify` | - | Audita conformidad de sidecars SDD | Veredicto de validación por workspace |
 | `npx aisdlc sdd integrate --change <id>` | - | Integra cambio completado a specs canónicas | Requisitos activos, arquitectura actualizada |
 | `npx aisdlc report quality` | `pnpm run report:quality` | Reporte formal políglota de calidad | `reports/QUALITY_REPORT.md` |
+| `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | Catálogo de requerimientos activos por tipo | `reports/ACTIVE_REQUIREMENTS.md` |
 | `npx aisdlc gherkin extract --all` | `pnpm run extract:gherkin:all` | Sincroniza bloques Gherkin a `.feature` | `tests/features/*.feature` |
 | `npx aisdlc git plan` | `pnpm run git:plan` | Planifica ramas jerárquicas (4 tiers) | Árbol visual en terminal |
 | `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | Valida nomenclatura de rama | Veredicto Tier 1 a 4 |
