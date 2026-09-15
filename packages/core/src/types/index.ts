@@ -183,6 +183,28 @@ export interface SddIntegrationResult {
   errors: string[];
 }
 
+export interface SddChangeScaffoldOptions {
+  rootDir?: string;
+  name: string;
+  changeId?: string;
+  from?: string | string[];
+  framework?: SddFramework;
+  author?: string;
+  silent?: boolean;
+}
+
+export interface SddChangeScaffoldResult {
+  success: boolean;
+  changeId: string;
+  canonicalId: string;
+  changeDir: string;
+  createdFiles: string[];
+  productArtifactCreated?: string;
+  citedArtifacts: Array<{ id: string; digest: string; title?: string; comment?: string }>;
+  errors: string[];
+}
+
+
 export interface SddIntegrationAudit {
   changeId: string;
   status: 'FULLY_INTEGRATED' | 'PARTIALLY_INTEGRATED' | 'UNINTEGRATED';

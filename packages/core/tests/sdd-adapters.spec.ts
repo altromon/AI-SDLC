@@ -3,16 +3,20 @@ import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import {
   depositProductHandoffSidecar,
+  getNextCorrelativeNumber,
   getSddAdapter,
+  integrateSddChange,
   loadProductHandoffSidecar,
   OpenSpecAdapter,
   ProductHandoff,
+  scaffoldSddChange,
   scanAllProductHandoffs,
+  slugify,
   SpecKitAdapter,
-  verifyTraceability,
-  integrateSddChange,
   verifySddIntegration,
+  verifyTraceability,
 } from '../src/index.js';
+
 
 describe('SDD Formal Ecosystem Adapters (OpenSpec & Spec Kit)', () => {
   const tmpTestDir = path.join(process.cwd(), 'scratch', 'test-sdd-adapters');
@@ -306,4 +310,83 @@ satisfies-requirements: []
     const auditRes = verifySddIntegration({ rootDir: process.cwd() });
     expect(auditRes.audits.length).toBeGreaterThanOrEqual(1);
   });
+
+  it('should normalize slugs and calculate next correlative number', () => {
+    expect(slugify('Reintento resiliente de telemetría')).toBe('reintento-resiliente-de-telemetria');
+    expect(slugify('  ¡Feature Especial (v2.0)!  ')).toBe('feature-especial-v2-0');
+    expect(getNextCorrelativeNumber(process.cwd())).toBeGreaterThanOrEqual(2);
+  });
+
+  it('should scaffold greenfield SDD change and dual-scaffold product draft requirement (Option A)', () => {
+    const tmpScaffoldDir = path.join(process.cwd(), 'scratch', 'test-sdd-scaffold-greenfield');
+    if (fs.existsSync(tmpScaffoldDir)) {
+      fs.rmSync(tmpScaffoldDir, { recursive: true, force: true });
+    }
+
+    const res = scaffoldSddChange({
+      rootDir: tmpScaffoldDir,
+      name: 'Módulo de Facturación Automática',
+      framework: 'openspec',
+      silent: true,
+    });
+
+    expect(res.success).toBe(true);
+    expect(res.changeId).toBe('chg-001-modulo-de-facturacion-automatica');
+    expect(res.canonicalId).toBe('CHG-001-MODULO-DE-FACTURACION-AUTOMATICA');
+    expect(res.productArtifactCreated).toBeDefined();
+    expect(fs.existsSync(res.productArtifactCreated!)).toBe(true);
+
+    // Verify product artifact content has status draft and real digest
+    const productContent = fs.readFileSync(res.productArtifactCreated!, 'utf-8');
+    expect(productContent).toContain('status: draft');
+    expect(productContent).toContain('FR-001-MODULO-DE-FACTURACION-AUTOMATICA-001');
+
+    // Verify 4 SDD files + handoff.yaml created
+    expect(fs.existsSync(path.join(res.changeDir, 'proposal.md'))).toBe(true);
+    expect(fs.existsSync(path.join(res.changeDir, 'spec.md'))).toBe(true);
+    expect(fs.existsSync(path.join(res.changeDir, 'design.md'))).toBe(true);
+    expect(fs.existsSync(path.join(res.changeDir, 'tasks.md'))).toBe(true);
+    expect(fs.existsSync(path.join(res.changeDir, 'handoff.yaml'))).toBe(true);
+
+    // Verify sidecar handoff
+    const handoff = loadProductHandoffSidecar(res.changeDir);
+    expect(handoff).not.toBeNull();
+    expect(handoff?.id).toBe('HOF-CHG-001-MODULO-DE-FACTURACION-AUTOMATICA');
+    expect(handoff?.citations?.[0]?.digest).toMatch(/^sha256:[a-f0-9]{64}$/);
+    expect(handoff?.citations?.[0]?.digest).not.toContain('00000000000000000000000000000000');
+
+    // Clean up
+    fs.rmSync(tmpScaffoldDir, { recursive: true, force: true });
+  });
+
+  it('should scaffold SDD change citing existing canonical artifact with --from', () => {
+    const testChangeDir = path.join(process.cwd(), 'specs', 'changes', 'active', 'chg-test-from-cli');
+    if (fs.existsSync(testChangeDir)) {
+      fs.rmSync(testChangeDir, { recursive: true, force: true });
+    }
+
+    const res = scaffoldSddChange({
+      rootDir: process.cwd(),
+      name: 'Reintento resiliente de telemetría',
+      changeId: 'chg-test-from-cli',
+      from: 'UC-STREAM-TELEMETRY',
+      framework: 'openspec',
+      silent: true,
+    });
+
+
+    expect(res.success).toBe(true);
+    expect(res.citedArtifacts.some((c) => c.id === 'UC-STREAM-TELEMETRY')).toBe(true);
+    expect(res.citedArtifacts.some((c) => c.id === 'FR-TELEMETRY-STREAM-001')).toBe(true);
+
+    const handoff = loadProductHandoffSidecar(res.changeDir);
+    expect(handoff?.subgraph.requirements).toContain('FR-TELEMETRY-STREAM-001');
+    expect(handoff?.subgraph.useCases).toContain('UC-STREAM-TELEMETRY');
+
+    // Clean up created change folder
+    if (fs.existsSync(res.changeDir)) {
+      fs.rmSync(res.changeDir, { recursive: true, force: true });
+    }
+  });
 });
+

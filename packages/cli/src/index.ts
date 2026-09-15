@@ -9,7 +9,7 @@ import { runGherkinExtract } from './commands/gherkin.js';
 import { runGitPlan, runGitValidate } from './commands/git.js';
 import { runInit } from './commands/init.js';
 import { runReportQuality } from './commands/report.js';
-import { runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
+import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
   runVerifyAll,
   runVerifyGovernance,
@@ -204,10 +204,55 @@ gitCommand
     process.exit(0);
   });
 
+// --- change command suite ---
+const changeCommand = program
+  .command('change')
+  .description('Gestión del ciclo de vida y andamiaje de cambios SDD');
+
+changeCommand
+  .command('new <name>')
+  .description('Crea el andamiaje completo de un nuevo cambio SDD (proposal, spec, design, tasks, handoff.yaml)')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('--from <ids...>', 'Identificador o lista de identificadores a citar (UC-*, FR-*, etc.)')
+  .option('--id <changeId>', 'Identificador explícito para el cambio (ej. chg-002-mi-cambio)')
+  .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit', 'openspec')
+  .option('-a, --author <author>', 'Nombre del autor o agente desarrollador')
+  .action((name, opts) => {
+    const passed = runChangeNew({
+      root: opts.root,
+      name,
+      from: opts.from,
+      id: opts.id,
+      framework: opts.framework,
+      author: opts.author,
+    });
+    process.exit(passed ? 0 : 1);
+  });
+
 // --- sdd command suite ---
 const sddCommand = program
   .command('sdd')
   .description('Herramientas de integración con ecosistemas SDD (OpenSpec y Spec Kit)');
+
+sddCommand
+  .command('new <name>')
+  .description('Alias de `aisdlc change new`: crea el andamiaje completo de un nuevo cambio SDD')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('--from <ids...>', 'Identificador o lista de identificadores a citar (UC-*, FR-*, etc.)')
+  .option('--id <changeId>', 'Identificador explícito para el cambio (ej. chg-002-mi-cambio)')
+  .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit', 'openspec')
+  .option('-a, --author <author>', 'Nombre del autor o agente desarrollador')
+  .action((name, opts) => {
+    const passed = runChangeNew({
+      root: opts.root,
+      name,
+      from: opts.from,
+      id: opts.id,
+      framework: opts.framework,
+      author: opts.author,
+    });
+    process.exit(passed ? 0 : 1);
+  });
 
 sddCommand
   .command('deposit')

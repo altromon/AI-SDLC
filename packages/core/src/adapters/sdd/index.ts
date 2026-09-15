@@ -13,6 +13,7 @@ export * from './types.js';
 export * from './openspec.js';
 export * from './speckit.js';
 export * from './integration.js';
+export * from './scaffold.js';
 
 export function getSddAdapter(framework: SddFramework): SddAdapter {
   switch (framework) {
