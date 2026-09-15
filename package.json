@@ -23,6 +23,7 @@
     "verify:all": "tsx packages/cli/src/index.ts verify all",
     "report:quality": "tsx packages/cli/src/index.ts report quality",
     "report:requirements": "tsx scripts/export-active-requirements.ts",
+    "change:new": "tsx packages/cli/src/index.ts change new",
     "changeset": "changeset"
   },
   "devDependencies": {

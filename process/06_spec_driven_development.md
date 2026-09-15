@@ -13,15 +13,24 @@ El incremento SDD **hereda y cita** la línea base canónica (Producto, Arquitec
 
 ## 2. Anatomía de un Incremento SDD (Spec-Delta)
 
-Cada cambio de entrega se organiza en un directorio aislado (`specs/changes/active/<change-id>/`) con cuatro documentos canónicos:
+Cada cambio de entrega se organiza en un directorio aislado (`specs/changes/active/<change-id>/`) con cuatro documentos canónicos y su archivo de acompañamiento (*sidecar*):
 
 ```
 specs/changes/active/chg-001-telemetry-stream/
 ├── proposal.md       # Motivación, alcance del incremento y enlaces canónicos
 ├── spec.md           # Requisitos de la entrega y escenarios de prueba
 ├── design.md         # Decisiones de bajo nivel, APIs y estructuras de datos
-└── tasks.md          # Lista secuencial de tareas atómicas para agentes
+├── tasks.md          # Lista secuencial de tareas atómicas para agentes
+└── handoff.yaml      # Sidecar canónico PDaC (HOF-*) con subgrafo y citaciones SHA-256
 ```
+
+> **Andamiaje Automatizado (Scaffolding):**
+> En lugar de crear carpetas y copiar plantillas manualmente, el comando compuesto:
+> ```bash
+> npx aisdlc change new "<Nombre>" [--from <ID>]
+> ```
+> (o su alias `npx aisdlc sdd new ...`) genera deterministamente la estructura completa, calcula el correlativo incremental (`chg-XXX-...`), resuelve o crea los requerimientos citados calculando sus hashes SHA-256 reales, y deposita el sidecar `handoff.yaml` validado contra sus esquemas JSON.
+
 
 ### 1. `proposal.md`
 - Justificación del cambio, valor aportado y análisis de impacto.
@@ -125,8 +134,11 @@ AI-SDLC estructura su carpeta `specs/` conectándola con herramientas reconocida
      - Si existe una propuesta de especificación (`proposal.md`), su estado se actualiza a `applied`.
 
 4. **Comandos CLI Operativos**:
+   - `npx aisdlc change new "<nombre>" [--from <id>]`: Genera el andamiaje completo de un nuevo cambio SDD con las 4 plantillas y el sidecar `handoff.yaml`.
+   - `npx aisdlc sdd new "<nombre>"`: Alias conveniente de `change new`.
    - `npx aisdlc sdd deposit --framework <openspec|speckit> --change <id>`: Deposita el sidecar `handoff.yaml` en el cambio activo.
    - `npx aisdlc sdd verify`: Audita la conformidad de todos los espacios de trabajo y sidecars de handoff.
    - `npx aisdlc sdd integrate --change <id>`: Integra y promueve el cambio completado a las especificaciones canónicas.
    - `npx aisdlc verify traceability`: Ejecuta la matriz de trazabilidad 360° determinista.
+
 

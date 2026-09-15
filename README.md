@@ -103,7 +103,7 @@ AI-SDLC/
 │   ├── security/                             # Plantillas THREAT, ABUSE, SEC-REQ, SEC-POL
 │   ├── compliance/                           # Plantillas CON-LIC, ADR-LIC, Solicitud de Compra
 │   ├── architecture/                         # Plantillas arc42 (01-12) enriquecidas con NAF v4
-│   ├── sdd/                                  # Plantillas SDD (Proposal, Spec, Tasks, Handoff)
+│   ├── sdd/                                  # Plantillas SDD (Proposal, Spec, Design, Tasks, Handoff)
 │   └── manuals/                              # Plantillas MAN-USER (Manual de Usuario), MAN-PROD (Manual de Producción)
 │
 ├── reports/                                  # Informes formales autogenerados (RTM 360°, Calidad, Requerimientos Activos)
@@ -169,13 +169,16 @@ pnpm run report:quality                       # o: npx aisdlc report quality
 # 9. Generar el catálogo de requerimientos activos por tipo (Funcional, Seguridad, Arquitectura)
 pnpm run report:requirements                  # o: npx tsx scripts/export-active-requirements.ts
 
-# 10. Depositar sidecar PDaC (handoff.yaml) en el cambio activo
+# 10. Crear el andamiaje determinista de un nuevo cambio SDD (scaffolding + sidecar HOF-*)
+npx aisdlc change new "Reintento resiliente de telemetría" --from UC-STREAM-TELEMETRY
+
+# 11. Depositar sidecar PDaC (handoff.yaml) manualmente (opcional si no se usó change new)
 npx aisdlc sdd deposit --framework openspec --change chg-001-telemetry-ingestion
 
-# 11. Auditar conformidad de sidecars y espacios SDD
+# 12. Auditar conformidad de sidecars y espacios SDD
 npx aisdlc sdd verify
 
-# 12. Integrar el cambio concluido a las especificaciones canónicas
+# 13. Integrar el cambio concluido a las especificaciones canónicas
 npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
 ```
 
@@ -183,13 +186,16 @@ npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
 
 | Herramienta / Comando CLI | Comando pnpm equivalente | Propósito | Salida Generada |
 |---|---|---|---|
-| `npx aisdlc verify all` | `pnpm run verify:all` | Suite completa de CI/CD (6 Gates) | Dashboard consolidado con Exit 0/1 |
+| `npx aisdlc verify all` | `pnpm run verify:all` | Suite completa de CI/CD (7 Gates) | Dashboard consolidado con Exit 0/1 |
 | `npx aisdlc verify quality` | `pnpm run verify:quality` | Release Gate: Complejidad y Mantenibilidad | Veredicto `PASS`/`FAIL` por función |
 | `npx aisdlc verify traceability` | `pnpm run verify:traceability` | Valida Trazabilidad 360° (HOF-* -> arc42 -> BDD) | `reports/TRACEABILITY_MATRIX.md` |
 | `npx aisdlc verify governance` | `pnpm run verify:governance` | Audita riesgos y modos de autonomía | `reports/TASKS_GOVERNANCE_REPORT.md` |
 | `npx aisdlc verify testing` | `pnpm run verify:testing` | Audita cobertura de pruebas en specs y tasks | `reports/TEST_VERIFICATION_AUDIT.md` |
 | `npx aisdlc verify licenses` | `pnpm run verify:licenses` | Cumplimiento estricto de licencias OSS | `reports/LICENSE_COMPLIANCE_REPORT.md` |
 | `npx aisdlc verify pdac` | `npx aisdlc verify pdac` | Detección de deriva criptográfica SHA-256 | `reports/PDAC_INTEGRITY_REPORT.md` |
+| `npx aisdlc verify schemas` | `pnpm run verify:schemas` | Validación de artefactos contra esquemas JSON | Veredicto por artefacto evaluado |
+| `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | Scaffolding completo de cambio SDD y sidecar HOF-* | Estructura en `specs/changes/active/` |
+| `npx aisdlc sdd new <name>` | - | Alias de `change new`: scaffolding de cambio SDD | Estructura en `specs/changes/active/` |
 | `npx aisdlc sdd deposit --framework <f> --change <id>` | - | Deposita sidecar `handoff.yaml` (HOF-*) | Archivo `handoff.yaml` en workspace |
 | `npx aisdlc sdd verify` | - | Audita conformidad de sidecars SDD | Veredicto de validación por workspace |
 | `npx aisdlc sdd integrate --change <id>` | - | Integra cambio completado a specs canónicas | Requisitos activos, arquitectura actualizada |
@@ -199,6 +205,7 @@ npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
 | `npx aisdlc git plan` | `pnpm run git:plan` | Planifica ramas jerárquicas (4 tiers) | Árbol visual en terminal |
 | `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | Valida nomenclatura de rama | Veredicto Tier 1 a 4 |
 | `npx aisdlc init [dir]` | - | Inicializa un nuevo repo con AI-SDLC | Estructura de carpetas y políticas |
+
 
 ---
 
@@ -308,7 +315,14 @@ Antes de incorporar cualquier librería de terceros (Node, Python, Go, etc.):
 
 ### Fase 4: Especificación de Entrega SDD y Modos de Autonomía
 
-Para cada incremento o entrega se crea un paquete aislado bajo `specs/changes/active/<change-id>/`:
+Para cada incremento o entrega se crea un paquete aislado bajo `specs/changes/active/<change-id>/`. Puedes generarlo automáticamente mediante el comando de andamiaje:
+
+```bash
+# Andamiaje automático de cambio SDD (4 plantillas + sidecar HOF-*)
+npx aisdlc change new "Ingesta de Telemetría" --from UC-STREAM-TELEMETRY
+```
+
+Estructura generada:
 ```text
 specs/changes/active/chg-001-telemetry-ingestion/
 ├── proposal.md   # Justificación, impacto y citación canónica (UC-*, FR-*, SEC-REQ-*)
