@@ -60,11 +60,11 @@
       "pattern": "^BC-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "supersedes": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^UC-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^UC-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

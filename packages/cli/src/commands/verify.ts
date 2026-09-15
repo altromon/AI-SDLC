@@ -4,6 +4,7 @@
 
 import pc from 'picocolors';
 import {
+  verifyArtifactsSchemas,
   verifyLicenses,
   verifyPdacGraph,
   verifyQualityGate,
@@ -210,6 +211,34 @@ export function runVerifyPdac(options: { root?: string; silent?: boolean }): boo
   return isOk;
 }
 
+export function runVerifySchemas(options: { root?: string; path?: string; silent?: boolean }): boolean {
+  const rootDir = options.root || process.cwd();
+  if (!options.silent) {
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Conformidad con Esquemas JSON (Draft 2020-12)...')));
+  }
+
+  const result = verifyArtifactsSchemas({ rootDir, targetPath: options.path });
+
+  if (!options.silent) {
+    console.log(`  Artefactos evaluados:    ${pc.bold(String(result.totalEvaluated))}`);
+    console.log(`  Artefactos conformes:    ${pc.green(String(result.validCount))}`);
+    console.log(`  Infracciones de esquema: ${result.invalidCount > 0 ? pc.red(String(result.invalidCount)) : pc.green('0')}`);
+
+    if (result.violations.length > 0) {
+      console.log(pc.red('\n  Infracciones detectadas frente a esquemas JSON:'));
+      for (const v of result.violations) {
+        console.log(`    ${pc.red('✖')} [${v.id || v.filePath}] (${v.schemaId || 'esquema'}): ${v.message}`);
+      }
+    }
+  }
+
+  const isOk = result.success;
+  if (!options.silent) {
+    console.log(isOk ? pc.green('\n✔ Esquemas de Artefactos CONFORME (100%)\n') : pc.red('\n✖ Esquemas de Artefactos BLOQUEADO\n'));
+  }
+  return isOk;
+}
+
 export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
   if (!options.silent) {
     console.log(pc.bold(pc.magenta('================================================================')));
@@ -224,8 +253,9 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
   const okTest = runVerifyTesting({ root, silent: options.silent });
   const okLic = runVerifyLicenses({ root, silent: options.silent });
   const okPdac = runVerifyPdac({ root, silent: options.silent });
+  const okSchemas = runVerifySchemas({ root, silent: options.silent });
 
-  const allPassed = okQuality && okTrace && okGov && okTest && okLic && okPdac;
+  const allPassed = okQuality && okTrace && okGov && okTest && okLic && okPdac && okSchemas;
 
   if (!options.silent) {
     console.log(pc.bold(pc.magenta('================================================================')));
@@ -236,6 +266,7 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
     console.log(`  4. Cobertura de Pruebas (Reqs & Tasks):      ${okTest ? pc.green('PASSED') : pc.red('FAILED')}`);
     console.log(`  5. Licencias Open Source:                    ${okLic ? pc.green('PASSED') : pc.red('FAILED')}`);
     console.log(`  6. PDaC & Deriva Criptográfica:              ${okPdac ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  7. Esquemas JSON de Artefactos:              ${okSchemas ? pc.green('PASSED') : pc.red('FAILED')}`);
     console.log(pc.bold(pc.magenta('================================================================')));
 
     if (allPassed) {

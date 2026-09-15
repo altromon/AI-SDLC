@@ -48,7 +48,7 @@
       "description": "Nombre del Bounded Context en Domain-Driven Design (DDD) al que pertenece el componente."
     },
     "parent-component": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$",
       "description": "Identificador del componente padre (nulo si es Nivel 1)."
     },
@@ -107,11 +107,11 @@
       }
     },
     "supersedes": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

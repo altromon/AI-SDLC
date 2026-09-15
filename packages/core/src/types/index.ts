@@ -412,3 +412,37 @@ export interface BranchHierarchyPlan {
   tasks: string[];
   planText: string;
 }
+
+// --- Artifact Schema Validation Types ---
+export interface ArtifactSchemaOptions {
+  rootDir?: string;
+  targetPath?: string;
+  schemaDir?: string;
+}
+
+export interface ArtifactSchemaViolation {
+  filePath: string;
+  id?: string;
+  type?: string;
+  schemaId?: string;
+  property?: string;
+  message: string;
+}
+
+export interface ArtifactValidationResult {
+  valid: boolean;
+  filePath: string;
+  id?: string;
+  type?: string;
+  schemaId?: string;
+  errors: string[];
+}
+
+export interface ArtifactSchemaResult {
+  success: boolean;
+  totalEvaluated: number;
+  validCount: number;
+  invalidCount: number;
+  violations: ArtifactSchemaViolation[];
+  results: ArtifactValidationResult[];
+}
