@@ -157,3 +157,28 @@ El motor escanea los metadatos YAML de la especificación canónica, filtrando a
 1. **Requerimientos Funcionales (`FR-*`)**: Título, versión, trazabilidad a casos de uso (`derives-from`), método de verificación, etiquetas Cucumber BDD y enunciado normativo.
 2. **Requerimientos de Ciberseguridad (`SEC-REQ-*`)**: Dominio de seguridad, mitigación de casos de abuso (`mitigates-abuse-case`), enclave asignado, marcos normativos (ej. NIST Zero Trust) y controles técnicos.
 3. **Requerimientos y Componentes de Arquitectura (`QR-*`, `CON-*`, `CMP-*`, `ADR-*`)**: Atributos de calidad, restricciones técnicas, componentes arc42/NAF v4 y decisiones aceptadas.
+
+---
+
+## 8. Responsabilidad Única (SRP), Evolución In-Place y Control de Duplicados
+
+### A. Principio de Responsabilidad Única (SRP) en Requisitos
+Un Caso de Uso (`UC-*`) describe una meta o flujo de negocio completo de un actor. Por diseño metodológico, **un único Caso de Uso se descompone legítimamente en múltiples requerimientos atómicos y especializados**:
+- Requerimientos funcionales discretos (`FR-*`).
+- Requerimientos de calidad (`QR-*`).
+- Requerimientos de ciberseguridad (`SEC-REQ-*`).
+
+Compartir un `UC-*` en el campo `derives-from` es la norma de diseño y **no constituye duplicidad**.
+
+### B. Evolución In-Place vs. Sustitución (`supersedes`)
+Para evitar la rotura de referencias en el grafo de arquitectura y suites de pruebas:
+1. **Evolución In-Place (Recomendada)**: Si una capacidad evoluciona, se conserva el `id` inmutable (`FR-TELEMETRY-STREAM-001`), se incrementa la versión SemVer (`version: 1.1.0`) y se registra el cambio en la tabla de historial. Todos los enlaces existentes (`CMP-*`, `UC-*`, `@FR-...`) se mantienen estables.
+2. **Sustitución Formal (`supersedes`)**: Se reserva exclusivamente para cuando un requisito nuevo reemplaza o revoca conceptualmente a uno obsoleto que pasa a estado `deprecated` o `retired`.
+
+### C. Verificador Determinista de Duplicados (Shift-Left Pre-Flight Gate)
+Antes de iniciar la codificación, el comando:
+```bash
+pnpm run verify:duplicates
+# o: npx aisdlc verify duplicates
+```
+Audita el repositorio para bloquear (`exit 1`) colisiones de IDs en archivos distintos, textos normativos idénticos (copia-pega), títulos con $\ge 85\%$ de redundancia léxica o colisión total de etiquetas BDD Cucumber, previniendo el desperdicio de recursos antes de escribir código.

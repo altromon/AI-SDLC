@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-09-16 16:05:52 UTC` | *Módulos y Manuales Integrados:* `15`  
+> *Fecha de Compilación:* `2026-09-16 19:36:17 UTC` | *Módulos y Manuales Integrados:* `15`  
 
 ---
 
@@ -44,6 +44,7 @@
   - [5. Estructura de Carpetas de Producto en el Repositorio](#cap-02-product-definition-5-estructura-de-carpetas-de-producto-en-el-repositorio)
   - [6. Paquetes de Handoff Formal hacia SDD (`HOF-*` Sidecars)](#cap-02-product-definition-6-paquetes-de-handoff-formal-hacia-sdd-hof--sidecars)
   - [7. Extracción y Catálogo Consolidado de Requerimientos Activos](#cap-02-product-definition-7-extraccion-y-catalogo-consolidado-de-requerimientos-activos)
+  - [8. Responsabilidad Única (SRP), Evolución In-Place y Control de Duplicados](#cap-02-product-definition-8-responsabilidad-unica-srp-evolucion-in-place-y-control-de-duplicados)
 
 - [**03. Ciberseguridad Shift-Left: Security-by-Design as Code**](#cap-03-security-by-design) *(Fuente: `process/03_security_by_design.md`)*
   - [1. Visión y Enfoque Shift-Left](#cap-03-security-by-design-1-vision-y-enfoque-shift-left)
@@ -519,9 +520,15 @@ Para implementar la funcionalidad, genera el paquete del cambio SDD de forma aut
 3. **Auditar el Gobierno de Tareas y Conformidad SDD**:
    ```bash
    pnpm run verify:governance                    # o: npx aisdlc verify governance
-   npx aisdlc sdd verify                         # Audita sidecars HOF-* y espacios SDD
+   npx aisdlc sdd verify                         # Audita sidecars HOF-*, espacios SDD y colisiones pre-vuelo
    ```
    *Salida*: Genera `reports/TASKS_GOVERNANCE_REPORT.md` validando que no existan tareas sin verificación o asignaciones indebidas.
+
+4. **Compuerta Pre-Implementación de Duplicados (Shift-Left Pre-Flight Gate)**:
+   ```bash
+   pnpm run verify:duplicates                    # o: npx aisdlc verify duplicates
+   ```
+   *Efecto*: Audita que los nuevos requisitos no colisionen en ID, textos normativos idénticos, títulos redundantes ($\ge 85\%$) ni pruebas BDD con la línea base activa. Respeta el Principio de Responsabilidad Única (SRP) permitiendo múltiples requisitos atómicos por Caso de Uso (`UC-*`) y admite evolución *in-place*. Bloquea el proceso antes de gastar recursos de computación y tokens en código.
 
 ---
 
@@ -606,11 +613,13 @@ Verifica que el código cumpla con los umbrales de calidad definidos en `quality
    - **Arquitectura (Midstream)**: Vistas arc42 / NAF v4 (`CMP-*`, `ADR-*`, `SEC-ENC-*`).
    - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) y pruebas unitarias correspondientes.
 
-2. **Ejecución Consolidada de la Suite de CI/CD**:
+2. **Ejecución Consolidada de la Suite de CI/CD (8 Quality Gates)**:
    ```bash
    pnpm run verify:all
    # o: npx aisdlc verify all
    ```
+   *Compuertas evaluadas*: 1) Quality Gate de Complejidad, 2) Trazabilidad 360° (RTM), 3) Gobierno de Tareas, 4) Cobertura de Pruebas, 5) Licencias Open Source, 6) PDaC & Deriva Criptográfica SHA-256, 7) Esquemas JSON, 8) Verificación de Duplicados (Shift-Left Gate).
+
 
 3. **Pull Request y Aprobación Humana**:
    - Se abre el Pull Request de la tarea hacia la rama feature, y luego hacia la rama release.
@@ -1195,6 +1204,33 @@ El motor escanea los metadatos YAML de la especificación canónica, filtrando a
 
 ---
 
+<a id="cap-02-product-definition-8-responsabilidad-unica-srp-evolucion-in-place-y-control-de-duplicados"></a>
+
+## 8. Responsabilidad Única (SRP), Evolución In-Place y Control de Duplicados
+
+### A. Principio de Responsabilidad Única (SRP) en Requisitos
+Un Caso de Uso (`UC-*`) describe una meta o flujo de negocio completo de un actor. Por diseño metodológico, **un único Caso de Uso se descompone legítimamente en múltiples requerimientos atómicos y especializados**:
+- Requerimientos funcionales discretos (`FR-*`).
+- Requerimientos de calidad (`QR-*`).
+- Requerimientos de ciberseguridad (`SEC-REQ-*`).
+
+Compartir un `UC-*` en el campo `derives-from` es la norma de diseño y **no constituye duplicidad**.
+
+### B. Evolución In-Place vs. Sustitución (`supersedes`)
+Para evitar la rotura de referencias en el grafo de arquitectura y suites de pruebas:
+1. **Evolución In-Place (Recomendada)**: Si una capacidad evoluciona, se conserva el `id` inmutable (`FR-TELEMETRY-STREAM-001`), se incrementa la versión SemVer (`version: 1.1.0`) y se registra el cambio en la tabla de historial. Todos los enlaces existentes (`CMP-*`, `UC-*`, `@FR-...`) se mantienen estables.
+2. **Sustitución Formal (`supersedes`)**: Se reserva exclusivamente para cuando un requisito nuevo reemplaza o revoca conceptualmente a uno obsoleto que pasa a estado `deprecated` o `retired`.
+
+### C. Verificador Determinista de Duplicados (Shift-Left Pre-Flight Gate)
+Antes de iniciar la codificación, el comando:
+```bash
+pnpm run verify:duplicates
+# o: npx aisdlc verify duplicates
+```
+Audita el repositorio para bloquear (`exit 1`) colisiones de IDs en archivos distintos, textos normativos idénticos (copia-pega), títulos con $\ge 85\%$ de redundancia léxica o colisión total de etiquetas BDD Cucumber, previniendo el desperdicio de recursos antes de escribir código.
+
+---
+
 <a id="cap-03-security-by-design"></a>
 
 > 📂 **Módulo 5 de 15 [Parte II: Especificación Normativa del Framework]:** `process/03_security_by_design.md`
@@ -1732,7 +1768,8 @@ AI-SDLC estructura su carpeta `specs/` conectándola con herramientas reconocida
    - `npx aisdlc change new "<nombre>" [--from <id>]`: Genera el andamiaje completo de un nuevo cambio SDD con las 4 plantillas y el sidecar `handoff.yaml`.
    - `npx aisdlc sdd new "<nombre>"`: Alias conveniente de `change new`.
    - `npx aisdlc sdd deposit --framework <openspec|speckit> --change <id>`: Deposita el sidecar `handoff.yaml` en el cambio activo.
-   - `npx aisdlc sdd verify`: Audita la conformidad de todos los espacios de trabajo y sidecars de handoff.
+   - `npx aisdlc sdd verify`: Audita la conformidad de todos los espacios de trabajo y sidecars de handoff, ejecutando la compuerta pre-vuelo de duplicados.
+   - `npx aisdlc verify duplicates`: Audita colisiones de IDs, textos normativos idénticos, títulos redundantes y solapamientos BDD.
    - `npx aisdlc sdd integrate [--change <id>] [--auto]`: Integra y promueve el cambio completado a las especificaciones canónicas (soporta resolución manual o automática).
    - `npx aisdlc verify traceability`: Ejecuta la matriz de trazabilidad 360° determinista.
 
@@ -2086,6 +2123,7 @@ DIRECTRICES:
 - Aplica Test-Driven Development (TDD): genera las pruebas unitarias antes o en paralelo con la lógica del componente.
 - Si la tarea implementa un 'SEC-REQ-*' o 'FR-*', genera obligatoriamente la prueba correspondiente y etiqueta los escenarios BDD con '@<ID>' o cita el ID en los comentarios de cabecera del test para habilitar la trazabilidad inversa.
 - Antes de agregar cualquier librería externa, verifica que su licencia esté en la allowlist de license-policy.yaml.
+- Antes de escribir la primera línea de código en 'src/', ejecuta 'npx aisdlc sdd verify' (o 'npx aisdlc verify duplicates'). Si detectas requisitos duplicados o colisiones frente a la línea base, DETENTE inmediatamente y solicita aclaración para evitar desperdicio de recursos.
 - Inicia o consume cambios SDD mediante `npx aisdlc change new <nombre>` (o su alias `sdd new`), y accede al subgrafo del producto depositado en el sidecar `handoff.yaml` (`HOF-*`) mediante los adaptadores OpenSpec o Spec Kit (`npx aisdlc sdd deposit`).
 - Inmediatamente después de escribir o refactorizar código, ejecuta automáticamente `npx tsx scripts/generate-quality-report.ts` y adjunta el informe `quality-report.md` al directorio del cambio.
 - Si el Release Gate falla por complejidad ciclomática >10 o mantenibilidad baja, descompón la función en métodos auxiliares cohesivos antes de dar la tarea por concluida.
