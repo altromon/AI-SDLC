@@ -298,7 +298,11 @@ sddCommand
 sddCommand
   .command('integrate')
   .description('Integra y sincroniza los cambios SDD implementados en la especificación canónica (producto, requisitos y arquitectura)')
-  .requiredOption('-c, --change <id>', 'Identificador del cambio (ej. chg-001-telemetry)')
+  .option('-c, --change <id>', 'Identificador del cambio (ej. chg-001-telemetry)')
+  .option('--auto', 'Detecta automáticamente el cambio activo a integrar en base a la rama, PR o diff')
+  .option('--head-ref <ref>', 'Rama origen para la resolución automática')
+  .option('--pr-title <title>', 'Título del Pull Request para la resolución automática')
+  .option('--pr-body <body>', 'Cuerpo del Pull Request para la resolución automática')
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
   .option('-a, --author <author>', 'Nombre del autor o agente que realiza la integración')
   .option('--no-archive', 'No archivar el cambio a specs/changes/completed tras la integración')
@@ -306,6 +310,10 @@ sddCommand
     const passed = runSddIntegrate({
       root: opts.root,
       change: opts.change,
+      auto: opts.auto,
+      headRef: opts.headRef,
+      prTitle: opts.prTitle,
+      prBody: opts.prBody,
       author: opts.author,
       autoArchive: opts.archive !== false,
     });

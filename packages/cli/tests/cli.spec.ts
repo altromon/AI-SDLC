@@ -110,6 +110,14 @@ describe('@ai-sdlc/cli Command Suite', () => {
       silent: true,
     });
     expect(resMissing).toBe(false);
+
+    // Auto flag returns false gracefully when no matching change exists
+    const resAuto = runSddIntegrate({
+      auto: true,
+      headRef: 'feature/no-such-change',
+      silent: true,
+    });
+    expect(resAuto).toBe(false);
   });
 
   it('should verify artifact schemas via CLI command', () => {

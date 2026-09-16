@@ -7,6 +7,7 @@ import * as path from 'path';
 import pc from 'picocolors';
 import {
   depositProductHandoffSidecar,
+  detectActiveChangeForIntegration,
   integrateSddChange,
   ProductHandoff,
   scaffoldSddChange,
@@ -148,7 +149,11 @@ export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
 
 export interface SddIntegrateCliOptions {
   root?: string;
-  change: string;
+  change?: string;
+  auto?: boolean;
+  headRef?: string;
+  prTitle?: string;
+  prBody?: string;
   author?: string;
   autoArchive?: boolean;
   silent?: boolean;
@@ -156,7 +161,52 @@ export interface SddIntegrateCliOptions {
 
 export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
   const rootDir = options.root || process.cwd();
-  const changeId = options.change;
+  let changeId = options.change;
+
+  if (!changeId && options.auto) {
+    const detection = detectActiveChangeForIntegration({
+      rootDir,
+      headRef: options.headRef,
+      prTitle: options.prTitle,
+      prBody: options.prBody,
+    });
+
+    if (!detection.detected || !detection.changeId) {
+      if (!options.silent) {
+        console.log(pc.yellow('\nℹ [AI-SDLC SDD] No se detectó ningún cambio SDD activo para integrar:'));
+        for (const r of detection.reasons) {
+          console.log(`    - ${r}`);
+        }
+        console.log('');
+      }
+      return false;
+    }
+
+    if (!detection.allTasksCompleted) {
+      if (!options.silent) {
+        console.log(
+          pc.red(
+            `\n✖ [AI-SDLC SDD] El cambio detectado '${detection.changeId}' tiene tareas pendientes (${detection.completedTasksCount}/${detection.totalTasksCount} completadas). Todas las tareas deben estar en estado COMPLETED.\n`
+          )
+        );
+      }
+      return false;
+    }
+
+    changeId = detection.changeId;
+    if (!options.silent) {
+      console.log(
+        pc.cyan(`  ✔ Cambio SDD detectado automáticamente: ${pc.bold(changeId)} (vía ${detection.source})`)
+      );
+    }
+  }
+
+  if (!changeId) {
+    if (!options.silent) {
+      console.error(pc.red('\n✖ Debe especificar el identificador del cambio (--change <id>) o la opción --auto.\n'));
+    }
+    return false;
+  }
 
   if (!options.silent) {
     console.log(

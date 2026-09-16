@@ -126,19 +126,25 @@ AI-SDLC estructura su carpeta `specs/` conectándola con herramientas reconocida
      - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) con escenarios etiquetados con `@<reqId>` y suites de código (`.spec.*`, benchmarks) que citan los identificadores de requerimiento.
    - Ningún requerimiento almacena punteros hacia abajo, blindando la especificación canónica contra derivas criptográficas de hash SHA-256 cuando se modifican o reorganizan tests y servicios.
 
-3. **Integración Canónica Post-Implementación**:
+3. **Integración Canónica Post-Implementación y Automatización en CI/CD**:
    - Una vez concluida la implementación del cambio y verificado que todas las tareas en `tasks.md` están `COMPLETED`:
      - Los requerimientos asociados en `specs/product/` se promueven a estado `active` y se les añade entrada en el historial de revisiones referenciando el `changeId`.
-     - Las especificaciones de arquitectura en `specs/architecture/` actualizan sus mapas de dependencias y servicios que satisfacen los requerimientos.
+     - Las especificaciones de arquitectura en `specs/architecture/` actualizan sus mapas de dependencias y servicios que satisfacen los requerimientos (`satisfies-requirements`).
      - El directorio del cambio se archiva de forma atómica a `specs/changes/completed/<change-id>/`.
      - Si existe una propuesta de especificación (`proposal.md`), su estado se actualiza a `applied`.
+   - **Automatización Desatendida en CI/CD (`.github/workflows/sdd-integrate-on-merge.yml`)**:
+     - Para evitar desalineaciones por omisión humana previa al merge, el framework traslada la responsabilidad de la integración canónica al pipeline de CI/CD tras la fusión del Pull Request hacia `main` o ramas de versión `release/*`.
+     - **Motor de Detección Automática**: Correlaciona deterministamente el cambio activo analizando en orden jerárquico: la rama origen del PR (`headRef`), el título y cuerpo del PR (`CHG-*`), los archivos modificados bajo `specs/changes/active/`, o la existencia de un único cambio activo con tareas completadas.
+     - **Seguridad y Trazabilidad Git**: Se ejecuta mediante GitHub Actions con permisos de mínimos privilegios (`contents: write`). El bot (`github-actions[bot]`) realiza commit y push automatizado con formato convencional `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
+     - **Experiencia de Desarrollo**: Los ingenieros y agentes no necesitan ejecutar manualmente `sdd integrate` antes de abrir el PR; una vez fusionado el PR, basta con ejecutar `git pull` en la copia local para obtener el catálogo canónico actualizado.
 
 4. **Comandos CLI Operativos**:
    - `npx aisdlc change new "<nombre>" [--from <id>]`: Genera el andamiaje completo de un nuevo cambio SDD con las 4 plantillas y el sidecar `handoff.yaml`.
    - `npx aisdlc sdd new "<nombre>"`: Alias conveniente de `change new`.
    - `npx aisdlc sdd deposit --framework <openspec|speckit> --change <id>`: Deposita el sidecar `handoff.yaml` en el cambio activo.
    - `npx aisdlc sdd verify`: Audita la conformidad de todos los espacios de trabajo y sidecars de handoff.
-   - `npx aisdlc sdd integrate --change <id>`: Integra y promueve el cambio completado a las especificaciones canónicas.
+   - `npx aisdlc sdd integrate [--change <id>] [--auto]`: Integra y promueve el cambio completado a las especificaciones canónicas (soporta resolución manual o automática).
    - `npx aisdlc verify traceability`: Ejecuta la matriz de trazabilidad 360° determinista.
+
 
 

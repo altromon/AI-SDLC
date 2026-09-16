@@ -205,6 +205,25 @@ export interface SddChangeScaffoldResult {
 }
 
 
+export interface ChangeDetectionOptions {
+  rootDir?: string;
+  headRef?: string;
+  prTitle?: string;
+  prBody?: string;
+  changedFiles?: string[];
+}
+
+export interface ChangeDetectionResult {
+  detected: boolean;
+  changeId?: string;
+  source?: 'branch' | 'title' | 'body' | 'files' | 'single_active_completed';
+  changeDir?: string;
+  allTasksCompleted?: boolean;
+  completedTasksCount?: number;
+  totalTasksCount?: number;
+  reasons: string[];
+}
+
 export interface SddIntegrationAudit {
   changeId: string;
   status: 'FULLY_INTEGRATED' | 'PARTIALLY_INTEGRATED' | 'UNINTEGRATED';
