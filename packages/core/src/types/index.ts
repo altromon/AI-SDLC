@@ -371,6 +371,13 @@ export interface GherkinExtractionResult {
   totalScenarios: number;
 }
 
+export interface GherkinSyncCheckResult {
+  inSync: boolean;
+  outOfSyncFiles: string[];
+  missingFiles: string[];
+  totalFeatures: number;
+}
+
 // --- License Compliance Types ---
 export interface LicensePolicy {
   version: string;
@@ -435,6 +442,46 @@ export interface PdacGraphResult {
   totalEdges: number;
   drifts: PdacDrift[];
   reportMarkdown: string;
+}
+
+export interface PdacSyncOptions {
+  rootDir?: string;
+  targetPath?: string;
+}
+
+export interface PdacSyncDetail {
+  sourceFile: string;
+  targetId: string;
+  previousDigest: string;
+  newDigest: string;
+}
+
+export interface PdacSyncResult {
+  success: boolean;
+  syncedCount: number;
+  updatedFiles: string[];
+  details: PdacSyncDetail[];
+}
+
+export interface PreflightGateSummary {
+  name: string;
+  status: 'PASSED' | 'FAILED' | 'FIXED' | 'WARNING';
+  message: string;
+  remediation?: string;
+}
+
+export interface PreflightCheckOptions {
+  root?: string;
+  fix?: boolean;
+  silent?: boolean;
+}
+
+export interface PreflightCheckResult {
+  success: boolean;
+  autoFixExecuted: boolean;
+  gherkinSynced: number;
+  digestsSynced: number;
+  gates: PreflightGateSummary[];
 }
 
 // --- Quality Report Types ---

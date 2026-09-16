@@ -173,6 +173,31 @@ Las compuertas de liberación no imponen la misma fricción burocrática a todos
     └── Acción: RECHAZO AUTOMÁTICO DE CI/CD (EXIT 1) con exigencia de reclasificación.
 ```
 
+### 4.3 Comando Unificado de Pre-Vuelo con Auto-Fix (`aisdlc check --fix`)
+
+Para evitar rechazos mecánicos en los pipelines de CI/CD por fallos menores de sincronización (escenarios Gherkin modificados en Markdown pero no extraídos a `.feature`, o desfases menores en digests criptográficos tras ajustes de formato), los ingenieros y agentes de IA deben ejecutar el comando unificado de pre-vuelo antes de abrir o actualizar una Pull Request:
+
+```bash
+npx aisdlc check --fix
+```
+
+#### Fases de Ejecución:
+1. **Sincronización Automática Previa (No Destructiva)**:
+   - **Extracción BDD**: Detecta si los bloques ` ```gherkin ` en especificaciones de producto o seguridad difieren de los archivos `.feature` en disco y los sincroniza automáticamente.
+   - **Sincronización Anti-Deriva PDaC**: Sincroniza los digests criptográficos SHA-256 de las citaciones canónicas (`citations: - id: ... digest: ...`) si el contenido destino existe y está actualizado.
+2. **Ejecución Consolidada de Quality Gates**:
+   - Corre deterministamente todos los verificadores maestros del framework:
+     - Calidad de código (CC $\le 10$, MI $\ge 50$, LOC $\le 40$).
+     - Trazabilidad 360° RTM inversa (cero requerimientos huérfanos).
+     - Gobernanza y modos de autonomía en tareas (`tasks.md`).
+     - Cobertura de pruebas en requisitos y tareas.
+     - Licencias Open Source conformes con `license-policy.yaml`.
+     - Integridad PDaC libre de deriva de digests.
+     - Conformidad con esquemas JSON formales (Draft 2020-12).
+3. **Dashboard Accionable en Terminal**:
+   - Vuelca un resumen visual estructurado indicando el estado de cada compuerta (`PASSED`, `AUTO-FIXED`, `FAILED`).
+   - En caso de errores bloqueantes no subsanables automáticamente, detalla la causa exacta y el comando de remediación, devolviendo código de salida determinista (0 en éxito, 1 si existen infracciones).
+
 ---
 
 ## 5. Política de Excepciones y Gestión de Deuda Técnica

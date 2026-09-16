@@ -22,8 +22,11 @@
     "verify:pdac": "tsx packages/cli/src/index.ts verify pdac",
     "verify:schemas": "tsx packages/cli/src/index.ts verify schemas",
     "verify:all": "tsx packages/cli/src/index.ts verify all",
+    "check": "tsx packages/cli/src/index.ts check",
+    "check:fix": "tsx packages/cli/src/index.ts check --fix",
     "report:quality": "tsx packages/cli/src/index.ts report quality",
     "report:requirements": "tsx scripts/export-active-requirements.ts",
+    "report:docs": "tsx scripts/bundle-documentation.ts",
     "change:new": "tsx packages/cli/src/index.ts change new",
     "changeset": "changeset"
   },

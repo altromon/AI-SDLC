@@ -8,6 +8,7 @@ import {
   ExtractedFeature,
   GherkinExtractionOptions,
   GherkinExtractionResult,
+  GherkinSyncCheckResult,
 } from '../types/index.js';
 import { walkMdFiles } from '../utils/fs.js';
 
@@ -54,7 +55,70 @@ export function extractGherkinBlock(body: string): string[] {
   return blocks;
 }
 
+export function resolveTargetFiles(rootDir: string, targetPath?: string): string[] {
+  if (targetPath) {
+    const fullTarget = path.isAbsolute(targetPath) ? targetPath : path.join(rootDir, targetPath);
+    if (!fs.existsSync(fullTarget)) return [];
+    return fs.statSync(fullTarget).isDirectory() ? walkMdFiles(fullTarget) : [fullTarget];
+  }
+  const searchDirs = [
+    path.join(rootDir, 'product'),
+    path.join(rootDir, 'security'),
+    path.join(rootDir, 'specs'),
+    path.join(rootDir, 'examples', 'product'),
+    path.join(rootDir, 'examples', 'security'),
+    path.join(rootDir, 'examples', 'specs'),
+  ];
+  return searchDirs.filter((d) => fs.existsSync(d)).flatMap((d) => walkMdFiles(d));
+}
 
+export function resolveFeatureFilePath(
+  rootDir: string,
+  filePath: string,
+  id: string,
+  customTarget?: string
+): string {
+  if (customTarget) {
+    return path.isAbsolute(customTarget) ? customTarget : path.join(rootDir, customTarget);
+  }
+  const baseDir = path.join(rootDir, 'tests', 'features');
+  const candidateSecurity = path.join(baseDir, 'security', `${id.toLowerCase()}.feature`);
+  const candidateRoot = path.join(baseDir, `${id.toLowerCase()}.feature`);
+  if (fs.existsSync(candidateSecurity)) return candidateSecurity;
+  if (fs.existsSync(candidateRoot)) return candidateRoot;
+  const subDir = filePath.includes('security') ? 'security' : '';
+  return path.join(baseDir, subDir, `${id.toLowerCase()}.feature`);
+}
+
+export function buildFeatureFileContent(
+  rootDir: string,
+  filePath: string,
+  id: string,
+  version: string | undefined,
+  gherkinBlocks: string[]
+): string {
+  const banner = [
+    `# ==============================================================================`,
+    `# AUTO-GENERADO POR AI-SDLC (Cucumber Integration)`,
+    `# Origen: ${path.relative(rootDir, filePath).replace(/\\/g, '/')}`,
+    `# ID Requerimiento: ${id}`,
+    `# Versión: ${version || '1.0.0'}`,
+    `# NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.`,
+    `# ==============================================================================`,
+    '',
+    '',
+  ].join('\n');
+  return banner + gherkinBlocks.join('\n\n') + '\n';
+}
+
+function countScenarios(gherkinBlocks: string[]): number {
+  let count = 0;
+  for (const block of gherkinBlocks) {
+    const matches = block.match(/\b(Scenario|Escenario|Scenario Outline|Esquema del escenario):/g);
+    if (matches) count += matches.length;
+  }
+  return count;
+}
 
 export function extractGherkinFeatures(
   options: GherkinExtractionOptions = {}
@@ -62,88 +126,24 @@ export function extractGherkinFeatures(
   const rootDir = options.rootDir || process.cwd();
   const features: ExtractedFeature[] = [];
   let totalScenarios = 0;
-
-  const targetFiles: string[] = [];
-  if (options.targetPath) {
-    const fullTarget = path.isAbsolute(options.targetPath)
-      ? options.targetPath
-      : path.join(rootDir, options.targetPath);
-    if (fs.existsSync(fullTarget)) {
-      if (fs.statSync(fullTarget).isDirectory()) {
-        targetFiles.push(...walkMdFiles(fullTarget));
-      } else {
-        targetFiles.push(fullTarget);
-      }
-    }
-  } else {
-    // Default search in standard product, security, and specs directories, with examples fallback
-    const searchDirs = [
-      path.join(rootDir, 'product'),
-      path.join(rootDir, 'security'),
-      path.join(rootDir, 'specs'),
-      path.join(rootDir, 'examples', 'product'),
-      path.join(rootDir, 'examples', 'security'),
-      path.join(rootDir, 'examples', 'specs'),
-    ];
-    for (const d of searchDirs) {
-      if (fs.existsSync(d)) {
-        targetFiles.push(...walkMdFiles(d));
-      }
-    }
-  }
+  const targetFiles = resolveTargetFiles(rootDir, options.targetPath);
 
   for (const filePath of targetFiles) {
     try {
       const content = fs.readFileSync(filePath, 'utf-8');
       const { frontmatter, body } = parseMarkdownFrontmatter(content);
       const gherkinBlocks = extractGherkinBlock(body);
-
       if (gherkinBlocks.length === 0) continue;
 
       const id = frontmatter.id || path.basename(filePath, path.extname(filePath));
-      let targetPath = frontmatter['cucumber-feature-file'];
-
-      if (!targetPath) {
-        const baseDir = path.join(rootDir, 'tests', 'features');
-        const candidateSecurity = path.join(baseDir, 'security', `${id.toLowerCase()}.feature`);
-        const candidateRoot = path.join(baseDir, `${id.toLowerCase()}.feature`);
-        if (fs.existsSync(candidateSecurity)) {
-          targetPath = candidateSecurity;
-        } else if (fs.existsSync(candidateRoot)) {
-          targetPath = candidateRoot;
-        } else {
-          const subDir = filePath.includes('security') ? 'security' : '';
-          targetPath = path.join(baseDir, subDir, `${id.toLowerCase()}.feature`);
-        }
-      } else if (!path.isAbsolute(targetPath)) {
-        targetPath = path.join(rootDir, targetPath);
-      }
-
+      const targetPath = resolveFeatureFilePath(rootDir, filePath, id, frontmatter['cucumber-feature-file']);
       fs.mkdirSync(path.dirname(targetPath), { recursive: true });
 
-      const banner = [
-        `# ==============================================================================`,
-        `# AUTO-GENERADO POR AI-SDLC (Cucumber Integration)`,
-        `# Origen: ${path.relative(rootDir, filePath).replace(/\\/g, '/')}`,
-        `# ID Requerimiento: ${id}`,
-        `# Versión: ${frontmatter.version || '1.0.0'}`,
-        `# NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.`,
-        `# ==============================================================================`,
-        '',
-        '',
-      ].join('\n');
+      const fullContent = buildFeatureFileContent(rootDir, filePath, id, frontmatter.version, gherkinBlocks);
+      fs.writeFileSync(targetPath, fullContent, 'utf-8');
 
-      const fullFeatureContent = banner + gherkinBlocks.join('\n\n') + '\n';
-      fs.writeFileSync(targetPath, fullFeatureContent, 'utf-8');
-
-      // Count scenarios
-      let scenarioCount = 0;
-      for (const block of gherkinBlocks) {
-        const matches = block.match(/\b(Scenario|Escenario|Scenario Outline|Esquema del escenario):/g);
-        if (matches) scenarioCount += matches.length;
-      }
+      const scenarioCount = countScenarios(gherkinBlocks);
       totalScenarios += scenarioCount;
-
       features.push({
         sourceFile: path.relative(rootDir, filePath).replace(/\\/g, '/'),
         outputFile: path.relative(rootDir, targetPath).replace(/\\/g, '/'),
@@ -155,9 +155,49 @@ export function extractGherkinFeatures(
     }
   }
 
+  return { success: true, features, totalScenarios };
+}
+
+export function checkGherkinInSync(
+  options: GherkinExtractionOptions = {}
+): GherkinSyncCheckResult {
+  const rootDir = options.rootDir || process.cwd();
+  const targetFiles = resolveTargetFiles(rootDir, options.targetPath);
+  const outOfSyncFiles: string[] = [];
+  const missingFiles: string[] = [];
+  let totalFeatures = 0;
+
+  for (const filePath of targetFiles) {
+    try {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const { frontmatter, body } = parseMarkdownFrontmatter(content);
+      const gherkinBlocks = extractGherkinBlock(body);
+      if (gherkinBlocks.length === 0) continue;
+
+      totalFeatures++;
+      const id = frontmatter.id || path.basename(filePath, path.extname(filePath));
+      const targetPath = resolveFeatureFilePath(rootDir, filePath, id, frontmatter['cucumber-feature-file']);
+      const relTarget = path.relative(rootDir, targetPath).replace(/\\/g, '/');
+
+      if (!fs.existsSync(targetPath)) {
+        missingFiles.push(relTarget);
+        continue;
+      }
+
+      const expectedContent = buildFeatureFileContent(rootDir, filePath, id, frontmatter.version, gherkinBlocks);
+      const actualContent = fs.readFileSync(targetPath, 'utf-8');
+      if (actualContent.replace(/\r\n/g, '\n') !== expectedContent.replace(/\r\n/g, '\n')) {
+        outOfSyncFiles.push(relTarget);
+      }
+    } catch {
+      // Ignore unparseable files
+    }
+  }
+
   return {
-    success: true,
-    features,
-    totalScenarios,
+    inSync: missingFiles.length === 0 && outOfSyncFiles.length === 0,
+    outOfSyncFiles,
+    missingFiles,
+    totalFeatures,
   };
 }
