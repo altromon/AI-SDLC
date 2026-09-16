@@ -104,10 +104,12 @@ Para que los requerimientos no sean texto pasivo, el AI-SDLC adopta la sintaxis 
 1. **Especificación en Markdown**:
    - Cada requerimiento (`FR-*`, `QR-*`, `SEC-REQ-*`) incluye un bloque ````gherkin ... ```` con etiquetas (`@FR-001`, `@automated`, `@smoke`).
 2. **Extracción Automatizada por Convención**:
-   - Mediante el extractor determinista `npx tsx scripts/extract-gherkin.ts <archivo|--all>`, el framework genera o sincroniza archivos `.feature` de Cucumber en `tests/features/` siguiendo convenciones de subcarpeta (ej. `tests/features/product/<id>.feature`), sin requerir rutas físicas acopladas dentro del requerimiento Markdown.
+   - Mediante el extractor determinista `npx aisdlc gherkin extract --all` o el comando unificado de pre-vuelo `npx aisdlc check --fix`, el framework genera o sincroniza archivos `.feature` de Cucumber en `tests/features/` siguiendo convenciones de subcarpeta (ej. `tests/features/product/<id>.feature`), sin requerir rutas físicas acopladas dentro del requerimiento Markdown.
 3. **Ejecución y Cierre de Ciclo**:
    - Los agentes desarrolladores y de QA generan los step definitions correspondientes en Cucumber.js / Cucumber-JVM.
    - El pipeline de CI/CD ejecuta `cucumber-js` como una puerta de paso obligatoria, garantizando que el software implementado satisface exactamente los escenarios definidos en el producto.
+4. **Verificación Pre-Vuelo Obligatoria (`aisdlc check --fix`)**:
+   - Antes de abrir un Pull Request, el desarrollador o agente ejecuta `npx aisdlc check --fix` para extraer automáticamente los escenarios desfasados, sincronizar digests de citaciones PDaC y verificar el paso de todos los Quality Gates en un único dashboard de consola.
 
 ---
 

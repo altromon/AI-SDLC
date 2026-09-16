@@ -10,6 +10,9 @@ import {
   PdacGraphOptions,
   PdacGraphResult,
   PdacNode,
+  PdacSyncDetail,
+  PdacSyncOptions,
+  PdacSyncResult,
 } from '../types/index.js';
 import { walkMdFiles } from '../utils/fs.js';
 
@@ -230,5 +233,155 @@ export function verifyPdacGraph(options: PdacGraphOptions = {}): PdacGraphResult
     totalEdges: allCitations.length,
     drifts,
     reportMarkdown,
+  };
+}
+
+export function updateCitationsInContent(
+  content: string,
+  baselineMap: Map<string, PdacNode>,
+  sourceFile: string,
+  details: PdacSyncDetail[]
+): { updatedContent: string; changed: boolean } {
+  const lines = content.split(/\r?\n/);
+  let changed = false;
+  let inCitations = false;
+  let currentTarget: string | null = null;
+  const newLines: string[] = [];
+
+  for (const rawLine of lines) {
+    const trimmed = rawLine.trim();
+
+    if (trimmed.startsWith('citations:')) {
+      inCitations = true;
+      newLines.push(rawLine);
+      continue;
+    }
+
+    if (inCitations) {
+      if (
+        trimmed.endsWith(':') &&
+        !trimmed.startsWith('- ') &&
+        !trimmed.startsWith('id:') &&
+        !trimmed.startsWith('digest:') &&
+        !trimmed.startsWith('anchor:') &&
+        !trimmed.startsWith('comment:')
+      ) {
+        inCitations = false;
+        currentTarget = null;
+        newLines.push(rawLine);
+        continue;
+      }
+
+      if (trimmed.startsWith('- id:')) {
+        currentTarget = trimmed.split(':')[1].replace(/['"]/g, '').trim();
+        newLines.push(rawLine);
+        continue;
+      }
+
+      if (currentTarget && trimmed.startsWith('digest:')) {
+        const targetNode = baselineMap.get(currentTarget);
+        if (targetNode) {
+          let currentDig = trimmed.split(':').slice(1).join(':').replace(/['"]/g, '').trim();
+          const hadShaPrefix = currentDig.startsWith('sha256:');
+          if (hadShaPrefix) currentDig = currentDig.substring(7);
+          const hasQuotes = trimmed.includes('"') || trimmed.includes("'");
+
+          if (currentDig !== targetNode.digest) {
+            const indent = rawLine.match(/^\s*/)?.[0] || '    ';
+            const prefix = hadShaPrefix ? 'sha256:' : '';
+            const val = `${prefix}${targetNode.digest}`;
+            const newLine = hasQuotes ? `${indent}digest: "${val}"` : `${indent}digest: ${val}`;
+            newLines.push(newLine);
+            changed = true;
+            details.push({
+              sourceFile,
+              targetId: currentTarget,
+              previousDigest: currentDig,
+              newDigest: targetNode.digest,
+            });
+            continue;
+          }
+        }
+      }
+    }
+
+    newLines.push(rawLine);
+  }
+
+  const eol = content.includes('\r\n') ? '\r\n' : '\n';
+  return { updatedContent: newLines.join(eol), changed };
+}
+
+export function syncPdacDigests(options: PdacSyncOptions = {}): PdacSyncResult {
+  const rootDir = options.rootDir || process.cwd();
+  const allMdFiles = walkMdFiles(rootDir);
+  const baselineMap = new Map<string, PdacNode>();
+
+  for (const file of allMdFiles) {
+    try {
+      const content = fs.readFileSync(file, 'utf-8');
+      const { id, type, title } = parseFrontmatterId(content);
+      if (id) {
+        const digest = computeCanonicalSha256(content);
+        const relFile = path.relative(rootDir, file).replace(/\\/g, '/');
+        baselineMap.set(id, {
+          id,
+          type: type || 'artifact',
+          filePath: relFile,
+          title,
+          digest,
+          rawContent: content,
+          citations: [],
+        });
+      }
+    } catch {
+      // Ignore unparseable files
+    }
+  }
+
+  const details: PdacSyncDetail[] = [];
+  const updatedFiles: string[] = [];
+  const candidateFiles: string[] = [];
+
+  if (options.targetPath) {
+    const fullTarget = path.isAbsolute(options.targetPath) ? options.targetPath : path.join(rootDir, options.targetPath);
+    if (fs.existsSync(fullTarget)) {
+      if (fs.statSync(fullTarget).isDirectory()) candidateFiles.push(...walkMdFiles(fullTarget));
+      else candidateFiles.push(fullTarget);
+    }
+  } else {
+    for (const file of allMdFiles) {
+      const relFile = path.relative(rootDir, file).replace(/\\/g, '/');
+      const isDeliveryDoc =
+        (relFile.startsWith('specs/') ||
+          relFile.startsWith('sdd/') ||
+          relFile.startsWith('delivery/') ||
+          relFile.startsWith('changes/') ||
+          relFile.includes('/specs/') ||
+          relFile.startsWith('examples/specs/')) &&
+        !relFile.includes('.template.');
+      if (isDeliveryDoc) candidateFiles.push(file);
+    }
+  }
+
+  for (const file of candidateFiles) {
+    try {
+      const content = fs.readFileSync(file, 'utf-8');
+      const relFile = path.relative(rootDir, file).replace(/\\/g, '/');
+      const { updatedContent, changed } = updateCitationsInContent(content, baselineMap, relFile, details);
+      if (changed) {
+        fs.writeFileSync(file, updatedContent, 'utf-8');
+        updatedFiles.push(relFile);
+      }
+    } catch {
+      // Ignore unreadable or unwritable files
+    }
+  }
+
+  return {
+    success: true,
+    syncedCount: details.length,
+    updatedFiles,
+    details,
   };
 }

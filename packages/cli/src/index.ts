@@ -5,6 +5,7 @@
 
 import { Command } from 'commander';
 import pc from 'picocolors';
+import { runCheck } from './commands/check.js';
 import { runGherkinExtract } from './commands/gherkin.js';
 import { runGitCheckout, runGitPlan, runGitValidate } from './commands/git.js';
 import { runInit } from './commands/init.js';
@@ -28,6 +29,20 @@ program
   .name('aisdlc')
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
   .version('1.0.0');
+
+// --- check command (unified pre-flight with auto-fix) ---
+program
+  .command('check')
+  .description('Comando unificado de pre-vuelo: valida Quality Gates con auto-fix no destructivo opcional')
+  .option('--fix', 'Sincroniza automáticamente escenarios Gherkin (.feature) y digests criptográficos de citaciones PDaC')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .action((opts) => {
+    const passed = runCheck({
+      fix: opts.fix,
+      root: opts.root,
+    });
+    process.exit(passed ? 0 : 1);
+  });
 
 // --- verify command suite ---
 const verifyCommand = program

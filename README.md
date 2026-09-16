@@ -132,9 +132,12 @@ Si deseas poner a prueba el framework de inmediato utilizando el caso de estudio
 
 ### 2. Flujo de Ejecución Rápida con el CLI `@ai-sdlc/cli`
 
-Puedes ejecutar la suite completa de calidad y gobernanza en un único comando determinista:
+Puedes ejecutar la verificación de pre-vuelo con auto-fix determinista o la suite completa de calidad y gobernanza:
 
 ```bash
+# Pre-vuelo unificado con auto-fix no destructivo (Gherkin + digests PDaC + Quality Gates)
+pnpm run check:fix                            # o: npx aisdlc check --fix
+
 # Ejecución consolidada de todos los Quality Gates en CI/CD
 pnpm run verify:all                           # o: npx aisdlc verify all
 ```
@@ -172,16 +175,19 @@ pnpm run report:quality                       # o: npx aisdlc report quality
 # 9. Generar el catálogo de requerimientos activos por tipo (Funcional, Seguridad, Arquitectura)
 pnpm run report:requirements                  # o: npx tsx scripts/export-active-requirements.ts
 
-# 10. Crear el andamiaje determinista de un nuevo cambio SDD (scaffolding + sidecar HOF-*)
+# 10. Compilar toda la documentación y manuales en un único documento maestro con TOC interactiva
+pnpm run report:docs                          # o: npx tsx scripts/bundle-documentation.ts
+
+# 11. Crear el andamiaje determinista de un nuevo cambio SDD (scaffolding + sidecar HOF-*)
 npx aisdlc change new "Reintento resiliente de telemetría" --from UC-STREAM-TELEMETRY
 
-# 11. Depositar sidecar PDaC (handoff.yaml) manualmente (opcional si no se usó change new)
+# 12. Depositar sidecar PDaC (handoff.yaml) manualmente (opcional si no se usó change new)
 npx aisdlc sdd deposit --framework openspec --change chg-001-telemetry-ingestion
 
-# 12. Auditar conformidad de sidecars y espacios SDD
+# 13. Auditar conformidad de sidecars y espacios SDD
 npx aisdlc sdd verify
 
-# 13. Integrar el cambio concluido a las especificaciones canónicas
+# 14. Integrar el cambio concluido a las especificaciones canónicas
 npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
 ```
 
@@ -189,6 +195,7 @@ npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
 
 | Herramienta / Comando CLI | Comando pnpm equivalente | Propósito | Salida Generada |
 |---|---|---|---|
+| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | Pre-vuelo unificado: Quality Gates con auto-fix opcional | Dashboard accionable con Exit 0/1 |
 | `npx aisdlc verify all` | `pnpm run verify:all` | Suite completa de CI/CD (7 Gates) | Dashboard consolidado con Exit 0/1 |
 | `npx aisdlc verify quality` | `pnpm run verify:quality` | Release Gate: Complejidad y Mantenibilidad | Veredicto `PASS`/`FAIL` por función |
 | `npx aisdlc verify traceability` | `pnpm run verify:traceability` | Valida Trazabilidad 360° (HOF-* -> arc42 -> BDD) | `reports/TRACEABILITY_MATRIX.md` |
@@ -204,6 +211,7 @@ npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
 | `npx aisdlc sdd integrate [--change <id>] [--auto]` | - | Integra cambio completado a specs canónicas (manual o auto) | Requisitos activos, arquitectura actualizada |
 | `npx aisdlc report quality` | `pnpm run report:quality` | Reporte formal políglota de calidad | `reports/QUALITY_REPORT.md` |
 | `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | Catálogo de requerimientos activos por tipo | `reports/ACTIVE_REQUIREMENTS.md` |
+| `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | Compila toda la documentación y manuales en un único documento maestro con TOC | `reports/AI_SDLC_SPECIFICATION_FULL.md` |
 | `npx aisdlc gherkin extract --all` | `pnpm run extract:gherkin:all` | Sincroniza bloques Gherkin a `.feature` | `tests/features/*.feature` |
 | `npx aisdlc git plan` | `pnpm run git:plan` | Planifica ramas jerárquicas (4 tiers) | Árbol visual en terminal |
 | `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | Valida nomenclatura de rama | Veredicto Tier 1 a 4 |
