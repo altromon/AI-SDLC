@@ -74,6 +74,40 @@ El framework evalúa cuantitativamente todo el código fuente frente a cuatro m�
 
 ---
 
+## 3.1 Motor de Análisis Estático Basado en AST Real (Polyglot AST Engine)
+
+Para garantizar mediciones de complejidad y mantenibilidad de máxima precisión sin falsos positivos, **AI-SDLC** abandona las expresiones regulares y el conteo ingenuo de llaves `{ }`, adoptando una arquitectura de **Árbol de Sintaxis Abstracta (AST) Real**:
+
+```text
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│              ARQUITECTURA DEL MOTOR DE ANÁLISIS ESTÁTICO (AST REAL)                │
+└───────────────────────────────────────────────────────────────────────────────────┘
+   Código Fuente Multilenguaje (.ts, .tsx, .js, .jsx, .py, .go, .rs, .java, .cs, .c)
+                                       │
+                    ┌──────────────────┴──────────────────┐
+                    ▼                                     ▼
+      [TypeScript / TSX / JS Engine]           [Polyglot Token-Aware Scanner]
+          Powered by ts-morph                  (Go, Rust, Java, C#, C/C++, Python)
+  ├── AST Nodes: Functions, Methods, Classes   ├── Lexer de estados: comillas, raw strings
+  ├── Conteo CC por nodos condicionales reales ├── Aislamiento total de comentarios (//, /*, #)
+  ├── Cognitiva por niveles de anidamiento     ├── Delimitación exacta de bloques sin colisión
+  └── Smells: any semántico (SyntaxKind.Any)   └── Métricas estandarizadas (CC, Cog, LOC, MI)
+                    │                                     │
+                    └──────────────────┬──────────────────┘
+                                       ▼
+                       [Quality Gate Determinista (STRICT)]
+                        CC <= 10 | Cog <= 15 | MI >= 50
+```
+
+### Ventajas Técnicas y Eliminación de Falsos Positivos:
+1. **Componentes TSX/JSX Modernos**: Delimitación exacta de componentes funcionales y handlers de eventos sin interferencia de etiquetas JSX o props complejas (ej. `style={{ backgroundColor: 'red' }}`).
+2. **Template Literals con Interpolación Anidada**: Soporte nativo para expresiones multilínea como `${{ key: val }}`, donde las llaves internas eran erróneamente interpretadas por analizadores regex.
+3. **Closures y Funciones Anidadas**: Las funciones internas y callbacks no corrompen el conteo de líneas ni el cálculo de complejidad de la función contenedora.
+4. **Resiliencia Políglota**: En lenguajes como Go, Rust, Java y C#, los caracteres `{` o `}` presentes en literales de texto (ej. JSON embebido o raw strings `r#"..."#`) o comentarios nunca incrementan el balanceador de bloques.
+5. **Detección Tipada de `any`**: Mediante `SyntaxKind.AnyKeyword`, se detecta el uso prohibido de `any` en TypeScript sin generar falsas alarmas sobre nombres de variables legítimos como `company` o textos descriptivos.
+
+---
+
 ## 4. El Mecanismo del Release Gate (Restricciones a la Liberación)
 
 El paso de una versión a producción (o el merge de un PR hacia `main`) se somete a la siguiente máquina de estados determinista:

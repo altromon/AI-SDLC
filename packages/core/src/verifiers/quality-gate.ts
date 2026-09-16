@@ -1,5 +1,6 @@
 /**
  * AI-SDLC: Deterministic Quality Gate Engine (Polyglot Support)
+ * Uses modern AST static analysis with zero legacy heuristics.
  */
 
 import * as fs from 'fs';
@@ -13,10 +14,14 @@ import {
   QualityPolicy,
   QualityThresholds,
 } from '../types/index.js';
+import { extractFunctionsTypeScriptAst } from './ast/typescript-ast.js';
+import { extractFunctionsPolyglot } from './ast/polyglot-scanner.js';
 
 export const DEFAULT_EXTENSIONS: readonly string[] = [
   '.ts',
+  '.tsx',
   '.js',
+  '.jsx',
   '.py',
   '.java',
   '.go',
@@ -39,8 +44,10 @@ export const DEFAULT_EXCLUDES: readonly string[] = [
   '.changeset',
 ];
 
-export function parseQualityPolicy(content: string, overrides?: QualityThresholds): QualityPolicy {
-  const policy: QualityPolicy = {
+const TS_JS_EXTENSIONS: readonly string[] = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
+
+export function createDefaultQualityPolicy(): QualityPolicy {
+  return {
     max_cyclomatic: 10,
     max_cognitive: 15,
     min_maintainability: 50.0,
@@ -50,292 +57,121 @@ export function parseQualityPolicy(content: string, overrides?: QualityThreshold
     supported_extensions: [...DEFAULT_EXTENSIONS],
     exclude_patterns: [...DEFAULT_EXCLUDES],
   };
+}
 
+function applyDocScope(policy: QualityPolicy, doc: Record<string, unknown>): void {
+  if (typeof doc.enforcement_mode === 'string') policy.enforce_mode = doc.enforcement_mode;
+  if (!doc.scope || typeof doc.scope !== 'object') return;
+  const scope = doc.scope as Record<string, unknown>;
+
+  if (Array.isArray(scope.target_directories)) {
+    policy.target_directories = scope.target_directories.map(String);
+  }
+  if (Array.isArray(scope.supported_extensions)) {
+    policy.supported_extensions = scope.supported_extensions.map(String);
+  }
+  if (Array.isArray(scope.exclude_patterns)) {
+    for (const pat of scope.exclude_patterns) {
+      const p = String(pat);
+      if (!policy.exclude_patterns.includes(p)) policy.exclude_patterns.push(p);
+    }
+  }
+}
+
+function applyDocThresholds(policy: QualityPolicy, doc: Record<string, unknown>): void {
+  const sections = [doc.release_thresholds, doc.thresholds].filter(
+    (s): s is Record<string, unknown> => Boolean(s && typeof s === 'object')
+  );
+
+  for (const s of sections) {
+    const cc = (s.cyclomatic_complexity as Record<string, unknown>)?.max_per_function;
+    const cog = (s.cognitive_complexity as Record<string, unknown>)?.max_per_function;
+    const mi = (s.maintainability_index as Record<string, unknown>)?.min_acceptable_score;
+    const loc = (s.function_length as Record<string, unknown>)?.max_function_lines;
+
+    if (cc !== undefined) policy.max_cyclomatic = Number(cc);
+    if (cog !== undefined) policy.max_cognitive = Number(cog);
+    if (mi !== undefined) policy.min_maintainability = Number(mi);
+    if (loc !== undefined) policy.max_function_lines = Number(loc);
+  }
+
+  const codingRules = doc.coding_rules as Record<string, unknown> | undefined;
+  const rules = codingRules?.rules as Record<string, unknown> | undefined;
+  if (rules?.max_function_lines !== undefined) {
+    policy.max_function_lines = Number(rules.max_function_lines);
+  }
+}
+
+function applyEnvThresholds(policy: QualityPolicy): void {
+  if (typeof process === 'undefined' || !process.env) return;
+  const env = process.env;
+
+  if (env.AI_SDLC_MAX_CYCLOMATIC) policy.max_cyclomatic = parseInt(env.AI_SDLC_MAX_CYCLOMATIC, 10);
+  if (env.AI_SDLC_MAX_COGNITIVE) policy.max_cognitive = parseInt(env.AI_SDLC_MAX_COGNITIVE, 10);
+  if (env.AI_SDLC_MIN_MAINTAINABILITY) policy.min_maintainability = parseFloat(env.AI_SDLC_MIN_MAINTAINABILITY);
+  if (env.AI_SDLC_MAX_FUNCTION_LINES) policy.max_function_lines = parseInt(env.AI_SDLC_MAX_FUNCTION_LINES, 10);
+  if (env.AI_SDLC_ENFORCE_MODE) policy.enforce_mode = env.AI_SDLC_ENFORCE_MODE;
+}
+
+function applyOptionOverrides(policy: QualityPolicy, overrides?: QualityThresholds): void {
+  if (!overrides) return;
+  if (overrides.max_cyclomatic !== undefined) policy.max_cyclomatic = Number(overrides.max_cyclomatic);
+  if (overrides.max_cognitive !== undefined) policy.max_cognitive = Number(overrides.max_cognitive);
+  if (overrides.min_maintainability !== undefined) policy.min_maintainability = Number(overrides.min_maintainability);
+  if (overrides.max_function_lines !== undefined) policy.max_function_lines = Number(overrides.max_function_lines);
+  if (overrides.enforce_mode !== undefined) policy.enforce_mode = overrides.enforce_mode;
+}
+
+export function parseQualityPolicy(content: string, overrides?: QualityThresholds): QualityPolicy {
+  const policy = createDefaultQualityPolicy();
   try {
-    const doc = yaml.load(content) as Record<string, any>;
+    const doc = yaml.load(content);
     if (doc && typeof doc === 'object') {
-      if (typeof doc.enforcement_mode === 'string') {
-        policy.enforce_mode = doc.enforcement_mode;
-      }
-      if (doc.scope && typeof doc.scope === 'object') {
-        if (Array.isArray(doc.scope.target_directories)) {
-          policy.target_directories = doc.scope.target_directories.map(String);
-        }
-        if (Array.isArray(doc.scope.supported_extensions)) {
-          policy.supported_extensions = doc.scope.supported_extensions.map(String);
-        }
-        if (Array.isArray(doc.scope.exclude_patterns)) {
-          for (const pat of doc.scope.exclude_patterns) {
-            const p = String(pat);
-            if (!policy.exclude_patterns.includes(p)) {
-              policy.exclude_patterns.push(p);
-            }
-          }
-        }
-      }
-
-      // Check release_thresholds
-      if (doc.release_thresholds && typeof doc.release_thresholds === 'object') {
-        const rt = doc.release_thresholds;
-        if (rt.cyclomatic_complexity?.max_per_function !== undefined) {
-          policy.max_cyclomatic = Number(rt.cyclomatic_complexity.max_per_function);
-        }
-        if (rt.cognitive_complexity?.max_per_function !== undefined) {
-          policy.max_cognitive = Number(rt.cognitive_complexity.max_per_function);
-        }
-        if (rt.maintainability_index?.min_acceptable_score !== undefined) {
-          policy.min_maintainability = Number(rt.maintainability_index.min_acceptable_score);
-        }
-      }
-
-      // Check thresholds (alternative simple structure)
-      if (doc.thresholds && typeof doc.thresholds === 'object') {
-        const th = doc.thresholds;
-        if (th.cyclomatic_complexity?.max_per_function !== undefined) {
-          policy.max_cyclomatic = Number(th.cyclomatic_complexity.max_per_function);
-        }
-        if (th.cognitive_complexity?.max_per_function !== undefined) {
-          policy.max_cognitive = Number(th.cognitive_complexity.max_per_function);
-        }
-        if (th.maintainability_index?.min_acceptable_score !== undefined) {
-          policy.min_maintainability = Number(th.maintainability_index.min_acceptable_score);
-        }
-        if (th.function_length?.max_function_lines !== undefined) {
-          policy.max_function_lines = Number(th.function_length.max_function_lines);
-        }
-      }
-
-      // Check coding_rules.rules.max_function_lines
-      if (doc.coding_rules?.rules?.max_function_lines !== undefined) {
-        policy.max_function_lines = Number(doc.coding_rules.rules.max_function_lines);
-      }
-
-      // Direct properties
-      if (doc.max_cyclomatic !== undefined) policy.max_cyclomatic = Number(doc.max_cyclomatic);
-      if (doc.max_per_function !== undefined) policy.max_cyclomatic = Number(doc.max_per_function);
-      if (doc.max_cognitive !== undefined) policy.max_cognitive = Number(doc.max_cognitive);
-      if (doc.min_maintainability !== undefined) policy.min_maintainability = Number(doc.min_maintainability);
-      if (doc.min_acceptable_score !== undefined) policy.min_maintainability = Number(doc.min_acceptable_score);
-      if (doc.max_function_lines !== undefined) policy.max_function_lines = Number(doc.max_function_lines);
+      const record = doc as Record<string, unknown>;
+      applyDocScope(policy, record);
+      applyDocThresholds(policy, record);
+      if (record.max_per_function !== undefined) policy.max_cyclomatic = Number(record.max_per_function);
+      if (record.min_acceptable_score !== undefined) policy.min_maintainability = Number(record.min_acceptable_score);
+      if (record.max_function_lines !== undefined) policy.max_function_lines = Number(record.max_function_lines);
     }
   } catch {
-    // If yaml parsing fails, keep defaults
+    // Keep defaults on YAML error
   }
-
-  // 1. Environment Variable Overrides
-  if (typeof process !== 'undefined' && process.env) {
-    if (process.env.AI_SDLC_MAX_CYCLOMATIC) {
-      const val = parseInt(process.env.AI_SDLC_MAX_CYCLOMATIC, 10);
-      if (!isNaN(val)) policy.max_cyclomatic = val;
-    }
-    if (process.env.AI_SDLC_MAX_COGNITIVE) {
-      const val = parseInt(process.env.AI_SDLC_MAX_COGNITIVE, 10);
-      if (!isNaN(val)) policy.max_cognitive = val;
-    }
-    if (process.env.AI_SDLC_MIN_MAINTAINABILITY) {
-      const val = parseFloat(process.env.AI_SDLC_MIN_MAINTAINABILITY);
-      if (!isNaN(val)) policy.min_maintainability = val;
-    }
-    if (process.env.AI_SDLC_MAX_FUNCTION_LINES) {
-      const val = parseInt(process.env.AI_SDLC_MAX_FUNCTION_LINES, 10);
-      if (!isNaN(val)) policy.max_function_lines = val;
-    }
-    if (process.env.AI_SDLC_ENFORCE_MODE) {
-      policy.enforce_mode = process.env.AI_SDLC_ENFORCE_MODE;
-    }
-  }
-
-  // 2. Programmatic / CLI Options Overrides
-  if (overrides) {
-    if (overrides.max_cyclomatic !== undefined) policy.max_cyclomatic = Number(overrides.max_cyclomatic);
-    if (overrides.max_cognitive !== undefined) policy.max_cognitive = Number(overrides.max_cognitive);
-    if (overrides.min_maintainability !== undefined) policy.min_maintainability = Number(overrides.min_maintainability);
-    if (overrides.max_function_lines !== undefined) policy.max_function_lines = Number(overrides.max_function_lines);
-    if (overrides.enforce_mode !== undefined) policy.enforce_mode = overrides.enforce_mode;
-  }
-
+  applyEnvThresholds(policy);
+  applyOptionOverrides(policy, overrides);
   return policy;
-}
-
-export function calculateMetrics(fnBody: string, fnName: string, filePath: string): FunctionMetrics {
-  const ext = path.extname(filePath).toLowerCase();
-  const isPython = ext === '.py';
-
-  const lines = fnBody
-    .split('\n')
-    .map((l) => l.trim())
-    .filter((l) => {
-      if (l.length === 0) return false;
-      if (isPython) return !l.startsWith('#');
-      return !l.startsWith('//') && !l.startsWith('/*') && !l.startsWith('*');
-    });
-
-  const loc = Math.max(1, lines.length);
-
-  let cyclomatic = 1;
-  let decisionRegex: RegExp;
-  if (isPython) {
-    decisionRegex = /\b(if|elif|for|while|except)\b|\b(and|or)\b/g;
-  } else if (ext === '.go') {
-    decisionRegex = /\b(if|for|case|select)\b|&&|\|\|/g;
-  } else if (ext === '.rs') {
-    decisionRegex = /\b(if|for|while|match)\b|&&|\|\||\?/g;
-  } else {
-    decisionRegex = /\b(if|else\s+if|for|while|catch|case)\b|\?|&&|\|\|/g;
-  }
-
-  const matches = fnBody.match(decisionRegex);
-  if (matches) cyclomatic += matches.length;
-
-  let cognitive = 0;
-  let nesting = 0;
-  for (const line of lines) {
-    if (isPython) {
-      const indent = line.length - line.trimStart().length;
-      if (/\b(if|elif|for|while|except)\b/.test(line)) {
-        cognitive += 1 + Math.floor(indent / 4);
-      }
-    } else {
-      if (line.includes('{')) nesting++;
-      if (line.includes('}')) nesting = Math.max(0, nesting - 1);
-      if (/\b(if|for|while|catch|match|select)\b/.test(line)) {
-        cognitive += 1 + nesting;
-      }
-    }
-  }
-
-  const tokens = fnBody.split(/[\s,;().{}[\]=+\-*/<>!&|:]+/).filter((t) => t.length > 0);
-  const N = tokens.length || 1;
-  const n = new Set(tokens).size || 1;
-  const V = Math.max(1, N * Math.log2(Math.max(2, n)));
-
-  const rawMI = 171 - 5.2 * Math.log(V) - 0.23 * cyclomatic - 16.2 * Math.log(loc);
-  const normalizedMI = Math.max(0, Math.min(100, (rawMI * 100) / 171));
-
-  const codeSmells: string[] = [];
-  if (['.ts', '.js'].includes(ext) && /\bany\b/.test(fnBody)) {
-    codeSmells.push('Uso prohibido de "any"');
-  }
-  if (/\/\/\s*@ts-ignore|\/\/\s*eslint-disable|#\s*noqa|#\s*type:\s*ignore|@SuppressWarnings/.test(fnBody)) {
-    codeSmells.push('Supresión no autorizada de linter');
-  }
-  if (loc > 40) {
-    codeSmells.push(`Función extensa (${loc} líneas > límite 40)`);
-  }
-
-  return {
-    functionName: fnName,
-    filePath,
-    loc,
-    cyclomatic,
-    cognitive,
-    maintainability: Math.round(normalizedMI * 10) / 10,
-    codeSmells,
-  };
-}
-
-export function extractFunctionsPython(content: string, filePath: string): FunctionMetrics[] {
-  const functions: FunctionMetrics[] = [];
-  const lines = content.split('\n');
-  let currentFn: string | null = null;
-  let fnLines: string[] = [];
-  let baseIndent = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    const rawLine = lines[i];
-    const match = rawLine.match(/^(\s*)(?:async\s+)?def\s+([a-zA-Z0-9_$]+)\s*\(/);
-
-    if (match) {
-      if (currentFn && fnLines.length > 0) {
-        functions.push(calculateMetrics(fnLines.join('\n'), currentFn, filePath));
-      }
-      currentFn = match[2];
-      baseIndent = match[1].length;
-      fnLines = [rawLine];
-    } else if (currentFn) {
-      const lineIndent = rawLine.length - rawLine.trimStart().length;
-      if (rawLine.trim().length === 0 || lineIndent > baseIndent) {
-        fnLines.push(rawLine);
-      } else {
-        functions.push(calculateMetrics(fnLines.join('\n'), currentFn, filePath));
-        currentFn = null;
-        fnLines = [];
-      }
-    }
-  }
-
-  if (currentFn && fnLines.length > 0) {
-    functions.push(calculateMetrics(fnLines.join('\n'), currentFn, filePath));
-  }
-
-  if (functions.length === 0) {
-    functions.push(calculateMetrics(content, 'module_scope', filePath));
-  }
-
-  return functions;
-}
-
-export function extractFunctionsBraceLanguages(content: string, filePath: string): FunctionMetrics[] {
-  const functions: FunctionMetrics[] = [];
-  const lines = content.split('\n');
-  let currentFn: string | null = null;
-  let braceCount = 0;
-  let fnLines: string[] = [];
-
-  const ext = path.extname(filePath).toLowerCase();
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    let fnMatch: RegExpMatchArray | null = null;
-    if (ext === '.go') {
-      fnMatch = line.match(/func\s+(?:\([^)]*\)\s*)?([a-zA-Z0-9_$]+)\s*\(/);
-    } else if (ext === '.rs') {
-      fnMatch = line.match(/(?:pub\s+)?(?:async\s+)?fn\s+([a-zA-Z0-9_$]+)\s*\(/);
-    } else {
-      fnMatch = line.match(
-        /(?:(?:public|private|protected|static|async|export|fn)\s+)*(?:function\s+([a-zA-Z0-9_$]+)|(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>|([a-zA-Z0-9_$]+)\s*\([^)]*\)\s*(?::\s*[^{]+\s*)?\{|(?:it|test)\s*\(\s*['"]([^'"]+)['"])/
-      );
-    }
-
-    const keywordExclusions = ['if', 'for', 'while', 'switch', 'catch', 'select', 'match'];
-    if (!currentFn && fnMatch) {
-      const candidate = fnMatch[1] || fnMatch[2] || fnMatch[3] || fnMatch[4];
-      if (candidate && !keywordExclusions.includes(candidate)) {
-        currentFn = candidate;
-        braceCount = 0;
-        fnLines = [];
-      }
-    }
-
-    if (currentFn) {
-      fnLines.push(line);
-      for (const char of line) {
-        if (char === '{') braceCount++;
-        if (char === '}') braceCount--;
-      }
-
-      if (braceCount === 0 && fnLines.length > 1) {
-        functions.push(calculateMetrics(fnLines.join('\n'), currentFn, filePath));
-        currentFn = null;
-        fnLines = [];
-      }
-    }
-  }
-
-  if (functions.length === 0) {
-    functions.push(calculateMetrics(content, 'main_module', filePath));
-  }
-
-  return functions;
 }
 
 export function extractFunctions(content: string, filePath: string): FunctionMetrics[] {
   const ext = path.extname(filePath).toLowerCase();
-  if (ext === '.py') {
-    return extractFunctionsPython(content, filePath);
+  return TS_JS_EXTENSIONS.includes(ext)
+    ? extractFunctionsTypeScriptAst(content, filePath)
+    : extractFunctionsPolyglot(content, filePath);
+}
+
+export function extractFunctionsBraceLanguages(content: string, filePath: string): FunctionMetrics[] {
+  return extractFunctions(content, filePath);
+}
+
+export function extractFunctionsPython(content: string, filePath: string): FunctionMetrics[] {
+  return extractFunctionsPolyglot(content, filePath);
+}
+
+export function calculateMetrics(fnBody: string, fnName: string, filePath: string): FunctionMetrics {
+  const functions = extractFunctions(fnBody, filePath);
+  if (functions.length > 0) {
+    const matched = functions.find((f) => f.functionName === fnName) || functions[0];
+    return { ...matched, functionName: fnName };
   }
-  return extractFunctionsBraceLanguages(content, filePath);
+  return {
+    functionName: fnName,
+    filePath,
+    loc: 1,
+    cyclomatic: 1,
+    cognitive: 0,
+    maintainability: 100,
+    codeSmells: [],
+  };
 }
 
 export function walkDir(
@@ -363,93 +199,77 @@ export function walkDir(
   return results;
 }
 
-export function verifyQualityGate(options: QualityGateOptions = {}): QualityGateResult {
-  const rootDir = options.rootDir || process.cwd();
+function resolvePolicy(rootDir: string, options: QualityGateOptions): QualityPolicy {
   const policyFile = options.policyPath || path.join(rootDir, 'quality-policy.yaml');
-
-  let policy: QualityPolicy;
   if (options.policy) {
-    policy = { ...options.policy };
-    if (options.thresholds) {
-      if (options.thresholds.max_cyclomatic !== undefined) policy.max_cyclomatic = options.thresholds.max_cyclomatic;
-      if (options.thresholds.max_cognitive !== undefined) policy.max_cognitive = options.thresholds.max_cognitive;
-      if (options.thresholds.min_maintainability !== undefined) policy.min_maintainability = options.thresholds.min_maintainability;
-      if (options.thresholds.max_function_lines !== undefined) policy.max_function_lines = options.thresholds.max_function_lines;
-      if (options.thresholds.enforce_mode !== undefined) policy.enforce_mode = options.thresholds.enforce_mode;
-    }
-  } else if (fs.existsSync(policyFile)) {
-    policy = parseQualityPolicy(fs.readFileSync(policyFile, 'utf-8'), options.thresholds);
-  } else {
-    policy = parseQualityPolicy('', options.thresholds);
+    const policy = { ...options.policy };
+    applyOptionOverrides(policy, options.thresholds);
+    return policy;
   }
+  if (fs.existsSync(policyFile)) {
+    return parseQualityPolicy(fs.readFileSync(policyFile, 'utf-8'), options.thresholds);
+  }
+  return parseQualityPolicy('', options.thresholds);
+}
 
-  const allFiles: string[] = [];
+function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
+  const files: string[] = [];
   for (const targetDir of policy.target_directories) {
-    const fullTargetDir = path.join(rootDir, targetDir);
-    if (fs.existsSync(fullTargetDir)) {
-      allFiles.push(...walkDir(fullTargetDir, policy.supported_extensions, policy.exclude_patterns));
+    const fullDir = path.join(rootDir, targetDir);
+    if (fs.existsSync(fullDir)) {
+      files.push(...walkDir(fullDir, policy.supported_extensions, policy.exclude_patterns));
     }
   }
+  return files;
+}
 
-  const results: AnalysisResult[] = [];
-  let passCount = 0;
-  let failCount = 0;
-  let violationsCount = 0;
-
-  for (const file of allFiles) {
-    try {
-      const content = fs.readFileSync(file, 'utf-8');
-      const fns = extractFunctions(content, file);
-
-      for (const fn of fns) {
-        const violations: string[] = [];
-        if (fn.cyclomatic > policy.max_cyclomatic) {
-          violations.push(
-            `Complejidad Ciclomática ${fn.cyclomatic} excede umbral de ${policy.max_cyclomatic}`
-          );
-        }
-        if (fn.cognitive > policy.max_cognitive) {
-          violations.push(
-            `Complejidad Cognitiva ${fn.cognitive} excede umbral de ${policy.max_cognitive}`
-          );
-        }
-        if (fn.maintainability < policy.min_maintainability) {
-          violations.push(
-            `Índice de Mantenibilidad ${fn.maintainability} inferior al mínimo de ${policy.min_maintainability}`
-          );
-        }
-        if (fn.loc > policy.max_function_lines) {
-          violations.push(`Líneas de función ${fn.loc} excede el máximo de ${policy.max_function_lines}`);
-        }
-        if (fn.codeSmells.length > 0) {
-          violations.push(...fn.codeSmells);
-        }
-
-        const isPass = violations.length === 0;
-        if (isPass) {
-          passCount++;
-        } else {
-          failCount++;
-          violationsCount += violations.length;
-        }
-
-        results.push({
-          ...fn,
-          relPath: path.relative(rootDir, file).replace(/\\/g, '/'),
-          status: isPass ? 'PASS' : 'FAIL',
-          violations,
-        });
-      }
-    } catch {
-      // Ignore unparseable files gracefully
-    }
+function evaluateViolations(fn: FunctionMetrics, policy: QualityPolicy): string[] {
+  const violations: string[] = [];
+  if (fn.cyclomatic > policy.max_cyclomatic) {
+    violations.push(`Complejidad Ciclomática ${fn.cyclomatic} excede umbral de ${policy.max_cyclomatic}`);
   }
+  if (fn.cognitive > policy.max_cognitive) {
+    violations.push(`Complejidad Cognitiva ${fn.cognitive} excede umbral de ${policy.max_cognitive}`);
+  }
+  if (fn.maintainability < policy.min_maintainability) {
+    violations.push(`Índice de Mantenibilidad ${fn.maintainability} inferior al mínimo de ${policy.min_maintainability}`);
+  }
+  if (fn.loc > policy.max_function_lines) {
+    violations.push(`Líneas de función ${fn.loc} excede el máximo de ${policy.max_function_lines}`);
+  }
+  if (fn.codeSmells.length > 0) {
+    violations.push(...fn.codeSmells);
+  }
+  return violations;
+}
 
+function evaluateFileQuality(file: string, rootDir: string, policy: QualityPolicy): AnalysisResult[] {
+  const content = fs.readFileSync(file, 'utf-8');
+  const fns = extractFunctions(content, file);
+  return fns.map((fn) => {
+    const violations = evaluateViolations(fn, policy);
+    return {
+      ...fn,
+      relPath: path.relative(rootDir, file).replace(/\\/g, '/'),
+      status: violations.length === 0 ? 'PASS' : 'FAIL',
+      violations,
+    };
+  });
+}
+
+function buildQualityGateResult(
+  results: AnalysisResult[],
+  totalFiles: number,
+  policy: QualityPolicy
+): QualityGateResult {
+  const failCount = results.filter((r) => r.status === 'FAIL').length;
+  const passCount = results.length - failCount;
+  const violationsCount = results.reduce((acc, r) => acc + r.violations.length, 0);
   const success = policy.enforce_mode === 'STRICT' ? failCount === 0 : true;
 
   return {
     success,
-    totalFiles: allFiles.length,
+    totalFiles,
     totalFunctions: results.length,
     passCount,
     failCount,
@@ -457,4 +277,21 @@ export function verifyQualityGate(options: QualityGateOptions = {}): QualityGate
     results,
     policy,
   };
+}
+
+export function verifyQualityGate(options: QualityGateOptions = {}): QualityGateResult {
+  const rootDir = options.rootDir || process.cwd();
+  const policy = resolvePolicy(rootDir, options);
+  const allFiles = collectFilesToScan(rootDir, policy);
+  const results: AnalysisResult[] = [];
+
+  for (const file of allFiles) {
+    try {
+      results.push(...evaluateFileQuality(file, rootDir, policy));
+    } catch {
+      // Gracefully ignore unparseable files
+    }
+  }
+
+  return buildQualityGateResult(results, allFiles.length, policy);
 }
