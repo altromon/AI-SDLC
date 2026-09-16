@@ -13,6 +13,7 @@ import { runReportQuality } from './commands/report.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
   runVerifyAll,
+  runVerifyDuplicates,
   runVerifyFriction,
   runVerifyGovernance,
   runVerifyLicenses,
@@ -149,6 +150,16 @@ verifyCommand
   .option('-p, --path <path>', 'Ruta al archivo o directorio objetivo')
   .action((opts) => {
     const passed = runVerifySchemas({ root: opts.root, path: opts.path });
+    process.exit(passed ? 0 : 1);
+  });
+
+verifyCommand
+  .command('duplicates')
+  .description('Audita requisitos duplicados, colisiones de IDs, redundancia léxica y solapamientos BDD')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('-s, --similarity <number>', 'Umbral de similitud léxica para títulos (0.0 a 1.0)', '0.85')
+  .action((opts) => {
+    const passed = runVerifyDuplicates({ root: opts.root, similarity: opts.similarity });
     process.exit(passed ? 0 : 1);
   });
 

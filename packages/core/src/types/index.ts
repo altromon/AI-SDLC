@@ -588,3 +588,41 @@ export interface GitCheckoutTaskResult {
   availableTasks?: Array<{ id: string; title: string; changeId: string }>;
 }
 
+// --- Duplicate Requirements Verifier Types ---
+export type DuplicateSeverity = 'ERROR' | 'WARNING';
+
+export type DuplicateIssueType =
+  | 'ID_COLLISION'
+  | 'EXACT_CONTENT'
+  | 'TITLE_SIMILARITY'
+  | 'BDD_TAG_COLLISION'
+  | 'SHARED_BUSINESS_RULE';
+
+export interface DuplicateIssue {
+  type: DuplicateIssueType;
+  severity: DuplicateSeverity;
+  id: string;
+  file: string;
+  conflictingId?: string;
+  conflictingFile?: string;
+  message: string;
+  similarityScore?: number;
+}
+
+export interface DuplicateVerifierOptions {
+  rootDir?: string;
+  specsDir?: string;
+  examplesDir?: string;
+  titleSimilarityThreshold?: number; // default: 0.85
+  allowWarnings?: boolean;
+}
+
+export interface DuplicateVerifierResult {
+  success: boolean;
+  totalRequirements: number;
+  errorCount: number;
+  warningCount: number;
+  issues: DuplicateIssue[];
+  reportMarkdown?: string;
+}
+

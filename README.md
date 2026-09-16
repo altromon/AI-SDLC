@@ -121,329 +121,324 @@ AI-SDLC/
 
 ---
 
-## ⚡ Tutorial 1: Inicio Rápido en 5 Minutos (Quickstart)
+## ⚡ Tutorial 1: Creación Rápida de una Funcionalidad (Quickstart en 5 Minutos)
 
-Si deseas poner a prueba el framework de inmediato utilizando el caso de estudio preconfigurado (**SentinelCore**), sigue este flujo rápido de 7 comandos:
+Este flujo acelerado describe cómo crear, implementar, verificar e integrar una nueva funcionalidad desde cero utilizando exclusivamente los **comandos simplificados** del CLI (`aisdlc` o scripts de `pnpm`).
 
 ### 1. Prerrequisitos
 - **Node.js** (v18.0 o superior): `node -v`
 - **pnpm** (v9 o v10+): `pnpm -v`
 - **Git** (v2.30 o superior): `git --version`
 
-### 2. Flujo de Ejecución Rápida con el CLI `@ai-sdlc/cli`
-
-Puedes ejecutar la verificación de pre-vuelo con auto-fix determinista o la suite completa de calidad y gobernanza:
+### 2. Flujo Rápido en 6 Pasos con Comandos Simplificados
 
 ```bash
-# Pre-vuelo unificado con auto-fix no destructivo (Gherkin + digests PDaC + Quality Gates)
-pnpm run check:fix                            # o: npx aisdlc check --fix
+# 1. Crear el andamiaje del cambio SDD y su sidecar PDaC (handoff.yaml) automáticamente
+pnpm run change:new "Notificaciones de Alerta en Tiempo Real" --from UC-STREAM-TELEMETRY
+# o vía npx: npx aisdlc change new "Notificaciones de Alerta en Tiempo Real" --from UC-STREAM-TELEMETRY
 
-# Ejecución consolidada de todos los Quality Gates en CI/CD
-pnpm run verify:all                           # o: npx aisdlc verify all
+# 2. Navegar y crear automáticamente la rama de tarea en la jerarquía de 4 tiers de Git
+pnpm run git:checkout TSK-001
+# o vía npx: npx aisdlc git checkout TSK-001
+
+# 3. Implementar la funcionalidad y sus pruebas (TDD) en src/ y tests/
+#    (El desarrollador o agente implementa código y tests unitarios / BDD)
+
+# 4. Pre-vuelo determinista con auto-fix (sincroniza Gherkin a .feature y digests SHA-256)
+pnpm run check:fix
+# o vía npx: npx aisdlc check --fix
+
+# 5. Ejecutar la suite consolidada de CI/CD (7 Gates de calidad y gobernanza)
+pnpm run verify:all
+# o vía npx: npx aisdlc verify all
+
+# 6. Integrar el cambio a la línea base canónica (promoción de requisitos y arquitectura)
+npx aisdlc sdd integrate --auto
+# o especificando el ID: npx aisdlc sdd integrate --change chg-002-notificaciones-de-alerta-en-tiempo-real
 ```
 
-O ejecutar cada gate de forma granular:
+> [!TIP]
+> **Integración Desatendida en CI/CD**: En flujos con Pull Request, el paso 6 (`sdd integrate`) se ejecuta automáticamente al fusionar el PR mediante el workflow de GitHub Actions [`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml).
 
-```bash
-# 1. Extraer los escenarios Gherkin BDD desde las especificaciones a archivos .feature
-pnpm run extract:gherkin:all                  # o: npx aisdlc gherkin extract --all
+### 3. Resumen de Comandos Simplificados del CLI (`aisdlc`)
 
-# 2. Planificar la jerarquía de ramas Git de 4 tiers para una versión y feature
-pnpm run git:plan                             # o: npx aisdlc git plan --release v1.1.0 --feature CHG-001-telemetry
-
-# 3. Navegar y crear automáticamente ramas en cascada para una tarea (Tier 1 a 4)
-pnpm run git:checkout TSK-001                 # o: npx aisdlc git checkout TSK-001
-
-# 4. Auditar el gobierno de tareas y modos de autonomía humana
-pnpm run verify:governance                    # o: npx aisdlc verify governance
-
-# 4. Auditar que el 100% de requisitos y tareas cuentan con pruebas verificables en disco
-pnpm run verify:testing                       # o: npx aisdlc verify testing
-
-# 5. Ejecutar el Release Gate de Calidad (Complejidad Ciclomática <= 10, Mantenibilidad >= 50)
-pnpm run verify:quality                       # o: npx aisdlc verify quality
-
-# 6. Auditar la Matriz de Trazabilidad 360° (Producto -> Arquitectura -> Pruebas)
-pnpm run verify:traceability                  # o: npx aisdlc verify traceability
-
-# 7. Auditar la Gobernanza de Licencias Open Source
-pnpm run verify:licenses                      # o: npx aisdlc verify licenses
-
-# 8. Generar el informe formal de métricas de calidad multilenguaje
-pnpm run report:quality                       # o: npx aisdlc report quality
-
-# 9. Generar el catálogo de requerimientos activos por tipo (Funcional, Seguridad, Arquitectura)
-pnpm run report:requirements                  # o: npx tsx scripts/export-active-requirements.ts
-
-# 10. Compilar toda la documentación y manuales en un único documento maestro con TOC interactiva
-pnpm run report:docs                          # o: npx tsx scripts/bundle-documentation.ts
-
-# 11. Crear el andamiaje determinista de un nuevo cambio SDD (scaffolding + sidecar HOF-*)
-npx aisdlc change new "Reintento resiliente de telemetría" --from UC-STREAM-TELEMETRY
-
-# 12. Depositar sidecar PDaC (handoff.yaml) manualmente (opcional si no se usó change new)
-npx aisdlc sdd deposit --framework openspec --change chg-001-telemetry-ingestion
-
-# 13. Auditar conformidad de sidecars y espacios SDD
-npx aisdlc sdd verify
-
-# 14. Integrar el cambio concluido a las especificaciones canónicas
-npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
-```
-
-### 3. Resumen de Comandos del CLI (`aisdlc`)
-
-| Herramienta / Comando CLI | Comando pnpm equivalente | Propósito | Salida Generada |
+| Herramienta / Comando CLI | Comando pnpm equivalente | Fase del Ciclo de Vida | Salida / Acción Realizada |
 |---|---|---|---|
-| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | Pre-vuelo unificado: Quality Gates con auto-fix opcional | Dashboard accionable con Exit 0/1 |
-| `npx aisdlc verify all` | `pnpm run verify:all` | Suite completa de CI/CD (7 Gates) | Dashboard consolidado con Exit 0/1 |
-| `npx aisdlc verify quality` | `pnpm run verify:quality` | Release Gate: Complejidad y Mantenibilidad | Veredicto `PASS`/`FAIL` por función |
-| `npx aisdlc verify traceability` | `pnpm run verify:traceability` | Valida Trazabilidad 360° (HOF-* -> arc42 -> BDD) | `reports/TRACEABILITY_MATRIX.md` |
-| `npx aisdlc verify governance` | `pnpm run verify:governance` | Audita riesgos y modos de autonomía | `reports/TASKS_GOVERNANCE_REPORT.md` |
-| `npx aisdlc verify testing` | `pnpm run verify:testing` | Audita cobertura de pruebas en specs y tasks | `reports/TEST_VERIFICATION_AUDIT.md` |
-| `npx aisdlc verify licenses` | `pnpm run verify:licenses` | Cumplimiento estricto de licencias OSS | `reports/LICENSE_COMPLIANCE_REPORT.md` |
-| `npx aisdlc verify pdac` | `npx aisdlc verify pdac` | Detección de deriva criptográfica SHA-256 | `reports/PDAC_INTEGRITY_REPORT.md` |
-| `npx aisdlc verify schemas` | `pnpm run verify:schemas` | Validación de artefactos contra esquemas JSON | Veredicto por artefacto evaluado |
-| `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | Scaffolding completo de cambio SDD y sidecar HOF-* | Estructura en `specs/changes/active/` |
-| `npx aisdlc sdd new <name>` | - | Alias de `change new`: scaffolding de cambio SDD | Estructura en `specs/changes/active/` |
-| `npx aisdlc sdd deposit --framework <f> --change <id>` | - | Deposita sidecar `handoff.yaml` (HOF-*) | Archivo `handoff.yaml` en workspace |
-| `npx aisdlc sdd verify` | - | Audita conformidad de sidecars SDD | Veredicto de validación por workspace |
-| `npx aisdlc sdd integrate [--change <id>] [--auto]` | - | Integra cambio completado a specs canónicas (manual o auto) | Requisitos activos, arquitectura actualizada |
-| `npx aisdlc report quality` | `pnpm run report:quality` | Reporte formal políglota de calidad | `reports/QUALITY_REPORT.md` |
-| `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | Catálogo de requerimientos activos por tipo | `reports/ACTIVE_REQUIREMENTS.md` |
-| `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | Compila toda la documentación y manuales en un único documento maestro con TOC | `reports/AI_SDLC_SPECIFICATION_FULL.md` |
-| `npx aisdlc gherkin extract --all` | `pnpm run extract:gherkin:all` | Sincroniza bloques Gherkin a `.feature` | `tests/features/*.feature` |
-| `npx aisdlc git plan` | `pnpm run git:plan` | Planifica ramas jerárquicas (4 tiers) | Árbol visual en terminal |
-| `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | Valida nomenclatura de rama | Veredicto Tier 1 a 4 |
-| `npx aisdlc init [dir]` | - | Inicializa un nuevo repo con AI-SDLC | Estructura de carpetas y políticas |
+| `npx aisdlc change new <nombre>` | `pnpm run change:new -- <nombre>` | **Andamiaje SDD** | Genera `proposal.md`, `spec.md`, `design.md`, `tasks.md` y sidecar `handoff.yaml` (`HOF-*`) con digests SHA-256 |
+| `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Gestión Git 4-Tiers** | Resuelve versión y crea en cascada: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
+| `npx aisdlc git plan` | `pnpm run git:plan` | **Planificación Git** | Renderiza el árbol visual de jerarquía de ramas antes de trabajar |
+| `npx aisdlc git validate <rama>` | `pnpm run git:validate <rama>` | **Gobierno Git** | Valida la nomenclatura estricta de cualquier rama según su Tier (1 a 4) |
+| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Pre-vuelo Unificado** | Sincroniza bloques Gherkin a `.feature`, actualiza digests SHA-256 PDaC y verifica Quality Gates |
+| `npx aisdlc verify all` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 7 Quality Gates (Calidad, Trazabilidad 360°, Tareas, Tests, Licencias, PDaC, Schemas) |
+| `npx aisdlc verify quality` | `pnpm run verify:quality` | **Release Gate de Código** | Evalúa Complejidad Ciclomática ($\le 10$), Cognitiva ($\le 15$) y Mantenibilidad ($\ge 50$) |
+| `npx aisdlc verify traceability` | `pnpm run verify:traceability` | **Matriz 360° RTM** | Valida triangulación obligatoria: Producto (`HOF-*`) ➔ Arquitectura (`CMP-*`) ➔ Tests (`.feature`) |
+| `npx aisdlc verify governance` | `pnpm run verify:governance` | **Gobierno de Tareas** | Audita modos de autonomía (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `HIGH_RISK_MANUAL`, `AMBIGUOUS`) |
+| `npx aisdlc verify testing` | `pnpm run verify:testing` | **Auditoría de Tests** | Comprueba que el 100% de requerimientos y tareas cuentan con pruebas verificables en disco |
+| `npx aisdlc verify licenses` | `pnpm run verify:licenses` | **Gobernanza IP / OSS** | Audita dependencias frente a `license-policy.yaml` (bloquea virales y condiciona comerciales) |
+| `npx aisdlc verify pdac` | `pnpm run verify:pdac` | **Integridad Criptográfica**| Detecta derivas (*drift*) en el grafo PDaC comparando hashes SHA-256 |
+| `npx aisdlc verify schemas` | `pnpm run verify:schemas` | **Conformidad Estructural** | Valida artefactos Markdown frente a esquemas JSON canónicos (Draft 2020-12) |
+| `npx aisdlc sdd verify` | - | **Conformidad SDD** | Audita que los cambios activos cumplan la especificación y contengan sidecars válidos |
+| `npx aisdlc sdd integrate [--auto]` | - | **Promoción a Baseline** | Promueve requerimientos a `active`, enlaza arquitectura, marca propuesta `applied` y archiva el cambio |
+| `npx aisdlc report quality` | `pnpm run report:quality` | **Reporting Formal** | Genera informe detallado de métricas en `reports/QUALITY_REPORT.md` |
+| `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Catálogo de Producto** | Genera catálogo consolidado de requerimientos en `reports/ACTIVE_REQUIREMENTS.md` |
+| `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | **Dossier Maestro** | Compila documentación y manuales con TOC interactiva en `reports/AI_SDLC_SPECIFICATION_FULL.md` |
+| `npx aisdlc init [dir]` | - | **Inicialización** | Inicializa un nuevo repo con la arquitectura de carpetas, esquemas y políticas AI-SDLC |
 
 
 ---
 
 ## 📖 Tutorial 2: Flujo Detallado Paso a Paso (End-to-End Deep Dive)
 
-Este tutorial exhaustivo describe cómo construir una nueva funcionalidad desde cero utilizando todas las fases, plantillas y controles deterministas de **AI-SDLC**.
+Este tutorial exhaustivo describe cómo construir una nueva funcionalidad desde cero utilizando todas las fases, plantillas y controles deterministas de **AI-SDLC**, aprovechando los **comandos simplificados** del CLI para agilizar cada etapa con cero derivas y máxima trazabilidad.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                          FLUJO OPERATIVO COMPLETO EN AI-SDLC                           │
+│               FLUJO DETALLADO DE CREACIÓN DE UNA NUEVA FUNCIONALIDAD                   │
 └────────────────────────────────────────────────────────────────────────────────────────┘
-  [1. Producto & BDD]    ➔ Modelar UC/FR/BR y sincronizar specs Gherkin (.feature)
+  [1. Producto & BDD]    ➔ Modelar UC/FR/BR y sincronizar Gherkin (.feature) vía `check:fix`
   [2. Threat Modeling]   ➔ Modelar ABUSE, requisitos SEC-REQ y enclaves Zero Trust
-  [3. Licencias OSS]     ➔ Validar dependencias frente a license-policy.yaml
-  [4. SDD & Sidecars]    ➔ Crear spec-delta con sidecar handoff.yaml (HOF-*) vía OpenSpec/SpecKit
-  [5. 4-Tier Branching]  ➔ Crear ramas git: main ➔ release ➔ feat ➔ task
-  [6. Coder / Agent]     ➔ Implementar código con TDD e inyección quirúrgica de contexto
-  [7. Quality Gate]      ➔ Validar Complejidad Ciclomática (<=10) y Mantenibilidad (>=50)
-  [8. Trazabilidad 360°] ➔ Matriz PDaC (HOF-*) -> arc42 -> BDD y aprobación de PR
-  [9. Integración SDD]   ➔ Promover requerimientos a activos, enlazar arquitectura y archivar cambio
+  [3. Licencias OSS]     ➔ Validar dependencias con `verify:licenses` y license-policy.yaml
+  [4. Andamiaje SDD]     ➔ Scaffolding automatizado con `change:new` y sidecar HOF-*
+  [5. 4-Tier Branching]  ➔ Crear ramas en cascada: main ➔ release ➔ feat ➔ task con `git checkout`
+  [6. Coder / Agent]     ➔ Implementación TDD e inyección quirúrgica de contexto
+  [7. Pre-vuelo & Calidad]➔ `check:fix` para sincronizar digests y `verify:quality` para métricas
+  [8. Trazabilidad 360°] ➔ Matriz RTM (`verify:traceability`), suite completa (`verify:all`) y PR
+  [9. Integración SDD]   ➔ `sdd integrate --auto` para promover a baseline y archivar el cambio
 ```
 
 ---
 
 ### Fase 1: Definición Canónica de Producto y Criterios Gherkin (BDD)
 
-1. **Crear el Requerimiento Funcional**:
-   Copia una plantilla desde `templates/product/` a tu directorio de producto (o consulta el ejemplo canónico en `examples/product/`):
-   ```bash
-   cp templates/product/requirement.template.md examples/product/FR-TELEMETRY-STREAM-001.md
-   ```
+Toda nueva funcionalidad parte de una necesidad de negocio canónica:
 
-2. **Completar Frontmatter y Escenarios de Aceptación**:
-   Todo requerimiento debe declarar a qué caso de uso (`UC-*`) pertenece y sus criterios de verificación:
+1. **Definir o Derivar el Requerimiento Funcional**:
+   Puedes crear el archivo en `specs/product/` utilizando la plantilla de `templates/product/requirement.template.md` (o dejar que el comando de andamiaje `aisdlc change new` de la Fase 4 lo genere automáticamente como borrador si se trata de un desarrollo *greenfield*):
    ```markdown
    ---
-   id: "FR-TELEMETRY-STREAM-001"
-   title: "Ingesta Continua de Telemetría de Vuelo"
-   status: "approved"
+   id: "FR-002-ALERT-NOTIFICATIONS-001"
+   type: "requirement"
+   title: "Notificaciones de Alerta en Tiempo Real"
+   status: "draft"
+   version: "1.0.0"
+   schema-version: "1.0"
+   category: "functional"
    derives-from:
      - "UC-STREAM-TELEMETRY"
-   verifiable-by: "gherkin-bdd"
+   verifiable-by: "cucumber-bdd"
    acceptance-format: "gherkin"
    cucumber-tags:
-     - "@FR-TELEMETRY-STREAM-001"
+     - "@FR-002-ALERT-NOTIFICATIONS-001"
      - "@automated"
    ---
 
-   ### Criterios de Aceptación (Gherkin BDD)
+   # FR-002-ALERT-NOTIFICATIONS-001: Notificaciones de Alerta en Tiempo Real
+
+   ## 1. Enunciado Normativo
+   El sistema DEBE emitir alertas en tiempo real con latencia inferior a 500ms ante anomalías telemétricas detectadas.
+
+   ---
+
+   ## 2. Criterios de Aceptación (Gherkin BDD)
+
    ```gherkin
-   @FR-TELEMETRY-STREAM-001 @automated
-   Feature: Ingesta Continua de Telemetría
-     Scenario: Ingesta exitosa de paquete de telemetría válido
-       Given un dron autenticado con sesión mTLS activa
-       When envía una trama de telemetría con coordenadas y velocidad válidas
-       Then el sistema valida la cinemática del paquete
-       And confirma la persistencia con código HTTP 200
+   @FR-002-ALERT-NOTIFICATIONS-001 @automated
+   Feature: Notificaciones de Alerta en Tiempo Real
+     Scenario: Disparo de alerta ante desviación crítica de altitud
+       Given un dron transmitiendo telemetría con altitud fuera del límite seguro
+       When el motor de telemetría procesa la trama de datos
+       Then se genera una notificación de severidad CRITICAL
+       And la alerta se entrega a los suscriptores en menos de 500 ms
    ```
    ```
 
-3. **Sincronizar automáticamente con Cucumber**:
-   Ejecuta el script extractor determinista:
+2. **Sincronización Automática con Cucumber (.feature)**:
+   En lugar de copiar o extraer manualmente los escenarios, ejecuta el comando simplificado de pre-vuelo:
    ```bash
-   npx tsx scripts/extract-gherkin.ts --all
+   pnpm run check:fix
+   # o específicamente: pnpm run extract:gherkin:all (npx aisdlc gherkin extract --all)
    ```
-   *Efecto*: Extrae los bloques ````gherkin```` del Markdown y genera o actualiza los archivos `.feature` en `tests/features/` según convención determinista.
+   *Efecto*: Escanea los documentos de producto, extrae los bloques ````gherkin```` y genera o actualiza de forma determinista los archivos `.feature` en `tests/features/`.
+
+3. **Validación Estructural de Esquemas**:
+   ```bash
+   pnpm run verify:schemas
+   # o: npx aisdlc verify schemas --path specs/product
+   ```
+   *Efecto*: Valida que el frontmatter YAML y el contenido cumplan con el esquema JSON canónico de producto (Draft 2020-12).
 
 ---
 
 ### Fase 2: Ciberseguridad Shift-Left y Modelado de Amenazas
 
 1. **Modelar Amenazas con STRIDE / ASVS**:
-   Copia las plantillas desde `templates/security/`:
-   - `templates/security/threat-actor.template.md` (ej. `ACT-THREAT-SPOOFER.md`)
-   - `templates/security/abuse-case.template.md` (ej. `ABUSE-TELEMETRY-SPOOFING.md`)
-   - `templates/security/security-req.template.md` (ej. `SEC-REQ-MTLS-STREAM.md`)
+   Identifica los vectores de ataque y casos de abuso utilizando las plantillas de `templates/security/`:
+   - Actor malicioso: `templates/security/threat-actor.template.md` (ej. `specs/security/ACT-THREAT-INJECTOR.md`)
+   - Caso de abuso: `templates/security/abuse-case.template.md` (ej. `specs/security/ABUSE-ALERT-INJECTION.md`)
+   - Requisito de seguridad: `templates/security/security-req.template.md` (ej. `specs/security/SEC-REQ-ALERT-HMAC.md`)
 
 2. **Vincular Mitigaciones a Enclaves Zero Trust**:
-   Enlaza la mitigación del caso de abuso y asigna el enclave de seguridad correspondiente:
    ```markdown
    ---
-   id: "SEC-REQ-MTLS-STREAM"
-   title: "Autenticación Mutua TLS Obligatoria para Ingesta"
+   id: "SEC-REQ-ALERT-HMAC"
+   title: "Firma HMAC Obligatoria para Mensajes de Alerta"
    status: "approved"
-   category: "authentication"
+   category: "integrity"
    mitigates:
-     - "ABUSE-TELEMETRY-SPOOFING"
+     - "ABUSE-ALERT-INJECTION"
    enclaves:
      - "SEC-ENC-DMZ-INGEST"
    verifiable-by: "unit-test"
    ---
    ```
 
+3. **Validar Conformidad de Artefactos de Seguridad**:
+   ```bash
+   npx aisdlc verify schemas --path specs/security
+   ```
+
 ---
 
 ### Fase 3: Gobernanza de Licencias Open Source (IP & Legal as Code)
 
-Antes de incorporar cualquier librería de terceros (Node, Python, Go, etc.):
+Antes de incorporar cualquier dependencia o paquete de terceros:
 1. **Consultar `license-policy.yaml`**:
-   - 🟢 **Permisivas (Aprobadas)**: `MIT`, `Apache-2.0`, `BSD-3-Clause`, `ISC` (uso libre comercial).
-   - 🟡 **Copyleft Débil (Condicionadas)**: `LGPL-3.0`, `MPL-2.0` (solo consumo dinámico sin modificación).
-   - 🔴 **Virales (Prohibidas)**: `GPL-2.0`, `GPL-3.0`, `AGPL-3.0` (prohibidas en software propietario o SaaS).
-   - ⚠️ **Comerciales / Duales (Pago Obligatorio)**: `BSL-1.1`, `SSPL-1.0` (requieren aprobación formal de compra con `templates/compliance/commercial-acquisition-request.template.md`).
-2. **Guardrails para Agentes de IA**: Si un agente propone una librería incompatible o de pago comercial, debe detenerse de inmediato y sugerir una alternativa permisiva.
+   - 🟢 **Permisivas (Aprobadas)**: `MIT`, `Apache-2.0`, `BSD-3-Clause`, `ISC` (uso libre en cualquier capa).
+   - 🟡 **Copyleft Débil (Condicionadas)**: `LGPL-3.0`, `MPL-2.0` (solo consumo como librería dinámica, sin modificaciones internas).
+   - 🔴 **Virales (Prohibidas)**: `GPL-2.0`, `GPL-3.0`, `AGPL-3.0` (bloqueadas para proteger la propiedad intelectual del código propietario y SaaS).
+   - ⚠️ **Comerciales / Duales (Pago Requerido)**: `BSL-1.1`, `SSPL-1.0` (requieren aprobación y formulario formal en `templates/compliance/commercial-acquisition-request.template.md`).
+
+2. **Auditar Licencias con el Comando Simplificado**:
+   ```bash
+   pnpm run verify:licenses
+   # o: npx aisdlc verify licenses
+   ```
+   *Efecto*: Bloquea la entrega si detecta librerías no autorizadas y genera `reports/LICENSE_COMPLIANCE_REPORT.md`.
 
 ---
 
-### Fase 4: Especificación de Entrega SDD y Modos de Autonomía
+### Fase 4: Andamiaje de Entrega SDD y Gobernanza de Autonomía
 
-Para cada incremento o entrega se crea un paquete aislado bajo `specs/changes/active/<change-id>/`. Puedes generarlo automáticamente mediante el comando de andamiaje:
+Para implementar la funcionalidad, genera el paquete del cambio SDD de forma automatizada en un único comando:
 
-```bash
-# Andamiaje automático de cambio SDD (4 plantillas + sidecar HOF-*)
-npx aisdlc change new "Ingesta de Telemetría" --from UC-STREAM-TELEMETRY
-```
+1. **Crear el Cambio con el Comando Simplificado**:
+   ```bash
+   pnpm run change:new "Notificaciones de Alerta en Tiempo Real" --from UC-STREAM-TELEMETRY
+   # o: npx aisdlc change new "Notificaciones de Alerta en Tiempo Real" --from UC-STREAM-TELEMETRY --profile standard
+   ```
+   *Efecto Determinista*:
+   - Crea el directorio del cambio en `specs/changes/active/chg-002-notificaciones-de-alerta-en-tiempo-real/`.
+   - Genera el cuarteto SDD preconfigurado:
+     - `proposal.md`: Justificación, impacto y citaciones inmutables con hashes SHA-256.
+     - `spec.md`: Escenarios funcionales y de mitigación de seguridad.
+     - `design.md`: DTOs, interfaces, endpoints y arquitectura arc42 / NAF v4.
+     - `tasks.md`: Plan de tareas atómicas gobernadas y verificables.
+   - Genera y deposita automáticamente el sidecar PDaC formal `handoff.yaml` (`HOF-002-NOTIFICACIONES-DE-ALERTA-EN-TIEMPO-REAL`) con los hashes SHA-256 de los artefactos citados.
+   - *(Si no se proporciona `--from`, el comando crea automáticamente un requerimiento borrador `FR-*-001.md` en `specs/product/`)*.
 
-Estructura generada:
-```text
-specs/changes/active/chg-001-telemetry-ingestion/
-├── proposal.md   # Justificación, impacto y citación canónica (UC-*, FR-*, SEC-REQ-*)
-├── spec.md       # Escenarios funcionales y de mitigación de ciberseguridad
-├── design.md     # Interfaces, DTOs, endpoints y arquitectura arc42 / NAF v4
-├── tasks.md      # Plan secuencial de tareas atómicas gobernadas
-└── handoff.yaml  # Sidecar formal PDaC (HOF-*) con el subgrafo del producto
-```
-
-1. **Configurar Tareas con Modos de Autonomía**:
-   En `tasks.md`, clasifica cada tarea según su nivel de riesgo y modo de autonomía humana:
-   - `AUTONOMOUS`: Plan y ejecución autónoma por el agente (tareas de bajo riesgo).
-   - `HUMAN_REVIEW_PLAN`: El agente formula el plan y se detiene; requiere aprobación humana antes de codificar.
-   - `AMBIGUOUS`: Tarea bloqueada por ambigüedad; requiere refinamiento previo con el usuario.
-   - `HIGH_RISK_MANUAL`: Tarea crítica (credenciales, migraciones destructivas); reservada exclusivamente a humanos.
+2. **Configurar Tareas y Modos de Autonomía en `tasks.md`**:
+   Cada tarea define su nivel de riesgo y modo de supervisión humana:
+   - `AUTONOMOUS`: Tarea de bajo riesgo; el agente planifica e implementa de forma autónoma.
+   - `HUMAN_REVIEW_PLAN`: Tarea de riesgo medio; el agente propone el diseño y espera confirmación antes de codificar.
+   - `HIGH_RISK_MANUAL`: Tarea crítica (credenciales, migraciones destructivas); reservada a humanos.
+   - `AMBIGUOUS`: Tarea bloqueada por ambigüedad de requisitos; requiere refinamiento previo.
 
    *Ejemplo en `tasks.md`:*
    ```yaml
    - id: "TSK-001"
-     title: "Definición de DTOs e Interfaces de Telemetría"
+     title: "Definición de DTOs e Interfaces de Alerta"
      complexity: "LOW"
      risk-level: "LOW"
      autonomy-mode: "AUTONOMOUS"
      assigned-to: "agent-developer"
      verification:
        method: "quality-gate"
-       command-or-criteria: "npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts"
+       command-or-criteria: "pnpm run verify:quality"
 
    - id: "TSK-002"
-     title: "Implementación del Gateway WSS con Validación mTLS"
+     title: "Implementación del Motor de Alerta y Firma HMAC"
      complexity: "MEDIUM"
      risk-level: "MEDIUM"
      autonomy-mode: "HUMAN_REVIEW_PLAN"
      assigned-to: "agent-developer"
      verification:
        method: "automated-unit-test"
-       command-or-criteria: "npm test -- tests/unit/telemetry_gateway.spec.ts"
+       command-or-criteria: "pnpm test -- tests/unit/alert_engine.spec.ts"
    ```
-
-2. **Depositar el Sidecar de Handoff PDaC (OpenSpec / Spec Kit)**:
-   ```bash
-   npx aisdlc sdd deposit --framework openspec --change chg-001-telemetry-ingestion
-   ```
-   *Efecto*: Deposita `handoff.yaml` con ID `HOF-*` (ej. `HOF-001-TELEMETRY-INGESTION`), empaquetando inmutablemente los requerimientos, casos de uso y citaciones con digests SHA-256.
 
 3. **Auditar el Gobierno de Tareas y Conformidad SDD**:
    ```bash
-   npx tsx scripts/verify-tasks-governance.ts
-   npx aisdlc sdd verify
+   pnpm run verify:governance                    # o: npx aisdlc verify governance
+   npx aisdlc sdd verify                         # Audita sidecars HOF-* y espacios SDD
    ```
-   *Salida*: Genera `reports/TASKS_GOVERNANCE_REPORT.md` validando que no existan tareas sin verificación o con asignaciones de autonomía no conformes, y certifica los sidecars depositados.
+   *Salida*: Genera `reports/TASKS_GOVERNANCE_REPORT.md` validando que no existan tareas sin verificación o asignaciones indebidas.
 
 ---
 
-### Fase 5: Gestión de Ramas Git (Modelo Jerárquico de 4 Tiers)
+### Fase 5: Gestión Automatizada de Ramas Git (Modelo de 4 Tiers)
 
-1. **Navegación y creación automática en cascada por tarea (Recomendado)**:
+1. **Navegación y Creación en Cascada por Tarea (Comando Simplificado Recomendado)**:
    ```bash
-   # Detecta el cambio activo, la versión y crea en cascada las ramas release, feat y task
-   npx aisdlc git checkout TSK-001
+   pnpm run git:checkout TSK-001
+   # o: npx aisdlc git checkout TSK-001
    ```
-   *El comando inspecciona `specs/changes/active/*/tasks.md`, resuelve la jerarquía de 4 tiers (`main` -> `release/vX.Y.Z` -> `feat/CHG-*` -> `task/CHG-*/TSK-*`), crea en cascada las ramas intermedias inexistentes y sitúa al desarrollador o agente directamente en su rama de trabajo.*
+   *Qué hace el CLI bajo el capó*:
+   - Localiza `TSK-001` dentro de `specs/changes/active/*/tasks.md`.
+   - Resuelve la versión de release asociada y construye la jerarquía estricta de 4 tiers:
+     `Tier 1: main` ➔ `Tier 2: release/vX.Y.Z` ➔ `Tier 3: feat/CHG-XXX` ➔ `Tier 4: task/CHG-XXX/TSK-001-...`
+   - Crea en cascada las ramas intermedias que no existan y sitúa la sesión de trabajo directamente en la rama de la tarea.
 
-2. **Planificación y creación manual alternativa**:
+2. **Herramientas de Planificación y Validación de Ramas**:
    ```bash
-   # Planificar jerarquía de ramas
-   npx aisdlc git plan --release v1.1.0 --feature CHG-001-telemetry-ingestion --tasks TSK-001,TSK-002
+   # Visualizar la jerarquía de ramas antes de iniciar
+   pnpm run git:plan                             # o: npx aisdlc git plan --release v1.2.0 --feature CHG-002-alerting --tasks TSK-001,TSK-002
 
-   # O crear manualmente en secuencia:
-   git checkout main && git checkout -b release/v1.1.0
-   git checkout -b feat/CHG-001-telemetry-ingestion release/v1.1.0
-   git checkout -b task/CHG-001/TSK-001-dto-interfaces feat/CHG-001-telemetry-ingestion
-   ```
-
-3. **Validar la nomenclatura de cualquier rama de trabajo**:
-   ```bash
-   npx aisdlc git validate task/CHG-001/TSK-001-dto-interfaces
+   # Validar la nomenclatura de cualquier rama activa
+   pnpm run git:validate task/CHG-002/TSK-001-alert-dto # o: npx aisdlc git validate <rama>
    ```
 
 ---
 
-### Fase 6: Implementación con Agentes de IA y Auditoría de Pruebas
+### Fase 6: Implementación con TDD y Auditoría de Pruebas
 
 1. **Inyección Quirúrgica de Contexto**:
-   El agente programador (`agent-developer`) solo recibe `spec.md`, `design.md` y `license-policy.yaml`. Cero alucinaciones por contaminación de contexto.
+   El desarrollador o agente de IA (`agent-developer`) solo debe recibir como contexto `spec.md`, `design.md` y `license-policy.yaml`. Esto evita distracciones y alucinaciones.
 2. **Test-Driven Development (TDD)**:
    Se desarrollan las pruebas unitarias y de mitigación (`SEC-TEST-*`) en `tests/` antes o junto con la implementación en `src/`.
 3. **Auditar la Cobertura Total de Pruebas**:
    ```bash
-   npx tsx scripts/verify-all-testing.ts
+   pnpm run verify:testing
+   # o: npx aisdlc verify testing
    ```
-   *Salida*: Genera `reports/TEST_VERIFICATION_AUDIT.md`. Bloquea la entrega si algún requisito o tarea carece de pruebas reales.
+   *Salida*: Genera `reports/TEST_VERIFICATION_AUDIT.md`. Bloquea la entrega si algún requisito o tarea carece de pruebas verificables en disco.
 
 ---
 
-### Fase 7: Release Gate de Calidad Multilenguaje (Polyglot Quality Gate)
+### Fase 7: Release Gate de Calidad Multilenguaje y Pre-Vuelo
 
-Verifica que el código cumpla con los umbrales de `quality-policy.yaml`:
+Verifica que el código cumpla con los umbrales de calidad definidos en `quality-policy.yaml`:
 - **Complejidad Ciclomática (McCabe)**: $\le 10$ por función.
 - **Complejidad Cognitiva**: $\le 15$ por función.
 - **Índice de Mantenibilidad (SEI MI)**: $\ge 50.0$ (Objetivo: $>65.0$).
 - **Longitud Máxima de Función**: $\le 40$ líneas.
 
-1. **Evaluar el Quality Gate**:
+1. **Ejecutar Pre-Vuelo con Auto-Fix**:
    ```bash
-   npx tsx scripts/verify-quality-gate.ts
+   pnpm run check:fix
+   # o: npx aisdlc check --fix
    ```
-2. **Generar Informe Formal de Calidad**:
+   *Efecto*: Sincroniza escenarios Gherkin, recalcula digests PDaC SHA-256 de las citaciones y verifica los gates de calidad.
+
+2. **Evaluar el Release Gate de Calidad**:
    ```bash
-   npx tsx scripts/generate-quality-report.ts
+   pnpm run verify:quality
+   # o: npx aisdlc verify quality
+   ```
+
+3. **Generar Informe Formal de Calidad**:
+   ```bash
+   pnpm run report:quality
+   # o: npx aisdlc report quality
    ```
    *Salida*: Genera `reports/QUALITY_REPORT.md` analizando TypeScript, JavaScript, Python, Go, Java, C#, Rust, C/C++.
 
@@ -451,18 +446,25 @@ Verifica que el código cumpla con los umbrales de `quality-policy.yaml`:
 
 ### Fase 8: Matriz de Trazabilidad 360° Automatizada y Pull Request
 
-1. **Auditar Trazabilidad Completa sin Fragilidad Textual**:
+1. **Auditar Trazabilidad 360° sin Fragilidad Textual**:
    ```bash
-   npx aisdlc verify traceability               # o: npx tsx scripts/verify-traceability.ts
+   pnpm run verify:traceability
+   # o: npx aisdlc verify traceability
    ```
    *Salida*: Genera `reports/TRACEABILITY_MATRIX.md` verificando deterministamente la triangulación obligatoria:
    - **Producto (Upstream)**: Handoff PDaC (`HOF-*`) con subgrafo de casos de uso (`UC-*`), reglas (`BR-*`) y casos de abuso (`ABUSE-*`).
-   - **Arquitectura (Midstream)**: Vistas arc42 / NAF v4 (`CMP-*`, `ADR-*`, `SEC-ENC-*`, `06_runtime_view.md`).
-   - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) y escenarios etiquetados correspondientes.
+   - **Arquitectura (Midstream)**: Vistas arc42 / NAF v4 (`CMP-*`, `ADR-*`, `SEC-ENC-*`).
+   - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) y pruebas unitarias correspondientes.
 
-2. **Pull Request y Aprobación Humana**:
+2. **Ejecución Consolidada de la Suite de CI/CD**:
+   ```bash
+   pnpm run verify:all
+   # o: npx aisdlc verify all
+   ```
+
+3. **Pull Request y Aprobación Humana**:
    - Se abre el Pull Request de la tarea hacia la rama feature, y luego hacia la rama release.
-   - **Intervención Humana Innegociable**: El Tech Lead humano inspecciona el diff y los informes generados en `reports/` antes de autorizar el merge final a producción.
+   - **Intervención Humana Innegociable**: El Tech Lead humano inspecciona el diff y los informes autogenerados en `reports/` antes de autorizar el merge final a producción.
 
 > [!TIP]
 > **Modelo de Trazabilidad Invertida (Inverted Traceability)**:
@@ -479,16 +481,17 @@ Una vez concluida la implementación del cambio y verificado que todas las tarea
    - Detecta deterministamente el cambio activo asociado a la rama o commit del PR, ejecuta la integración canónica de forma segura y realiza commit y push automatizado con mensaje `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
    - **Para el desarrollador**: solo es necesario ejecutar `git pull` en su rama local para ver los cambios reflejados.
 
-2. **Ejecución Local / Manual**:
+2. **Ejecución Local / Manual (Comando Simplificado)**:
    ```bash
-   # Integración indicando el ID explícito del cambio:
-   npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
-
-   # O resolución automática del cambio activo completado:
+   # Detección y resolución automática del cambio activo completado:
    npx aisdlc sdd integrate --auto
+
+   # O indicando explícitamente el ID del cambio:
+   npx aisdlc sdd integrate --change chg-002-notificaciones-de-alerta-en-tiempo-real
    ```
-   *Efectos y Transformaciones Realizadas*:
-   - **Requerimientos de Producto**: Se promueven a estado `active` en `specs/product/` y se añade una entrada en su historial de revisiones referenciando el `changeId`.
+
+   *Efectos y Transformaciones Deterministas*:
+   - **Requerimientos de Producto**: Se promueven automáticamente a estado `active` en `specs/product/` y se añade una entrada en su historial de revisiones referenciando el `changeId`.
    - **Arquitectura**: Se actualizan los bloques de componente en `specs/architecture/` enlazando los requerimientos recién satisfechos en `satisfies-requirements`.
    - **Archivado Atómico**: El directorio del cambio se mueve de `specs/changes/active/<id>/` a `specs/changes/completed/<id>/`.
    - **Propuesta**: Se actualiza `proposal.md` fijando `status: applied`.

@@ -21,6 +21,7 @@
     "verify:licenses": "tsx packages/cli/src/index.ts verify licenses",
     "verify:pdac": "tsx packages/cli/src/index.ts verify pdac",
     "verify:schemas": "tsx packages/cli/src/index.ts verify schemas",
+    "verify:duplicates": "tsx packages/cli/src/index.ts verify duplicates",
     "verify:all": "tsx packages/cli/src/index.ts verify all",
     "check": "tsx packages/cli/src/index.ts check",
     "check:fix": "tsx packages/cli/src/index.ts check --fix",

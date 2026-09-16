@@ -4,6 +4,7 @@
 
 import pc from 'picocolors';
 import {
+  verifyArtifactDuplicates,
   verifyArtifactsSchemas,
   verifyLicenses,
   verifyPdacGraph,
@@ -287,6 +288,63 @@ export function runVerifyFriction(options: FrictionVerifyOptions = {}): boolean 
   return isOk;
 }
 
+export interface DuplicatesVerifyOptions {
+  root?: string;
+  similarity?: number | string;
+  silent?: boolean;
+}
+
+export function runVerifyDuplicates(options: DuplicatesVerifyOptions = {}): boolean {
+  const rootDir = options.root || process.cwd();
+  const similarityThreshold =
+    options.similarity !== undefined ? Number(options.similarity) : undefined;
+
+  if (!options.silent) {
+    console.log(
+      pc.bold(
+        pc.cyan(
+          '\n🔍 [AI-SDLC] Verificando Requisitos Duplicados y Redundancia (Shift-Left Pre-Flight)...'
+        )
+      )
+    );
+  }
+
+  const result = verifyArtifactDuplicates({
+    rootDir,
+    titleSimilarityThreshold: similarityThreshold,
+  });
+
+  if (!options.silent) {
+    console.log(`  Requisitos evaluados:    ${pc.bold(String(result.totalRequirements))}`);
+    console.log(
+      `  Errores de duplicidad:   ${result.errorCount > 0 ? pc.red(String(result.errorCount)) : pc.green('0')}`
+    );
+    console.log(
+      `  Advertencias:            ${result.warningCount > 0 ? pc.yellow(String(result.warningCount)) : pc.green('0')}`
+    );
+
+    if (result.issues.length > 0) {
+      console.log(pc.red('\n  Incidencias detectadas:'));
+      for (const issue of result.issues) {
+        const icon = issue.severity === 'ERROR' ? pc.red('✖') : pc.yellow('⚠');
+        const badge =
+          issue.severity === 'ERROR' ? pc.red(`[${issue.type}]`) : pc.yellow(`[${issue.type}]`);
+        console.log(`    ${icon} ${badge} [${issue.id}] en ${issue.file}: ${issue.message}`);
+      }
+    }
+  }
+
+  const isOk = result.success;
+  if (!options.silent) {
+    console.log(
+      isOk
+        ? pc.green('\n✔ Verificación de Duplicados CONFORME (0 Colisiones)\n')
+        : pc.red('\n✖ Verificación de Duplicados BLOQUEADA (Colisiones Detectadas)\n')
+    );
+  }
+  return isOk;
+}
+
 export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
   if (!options.silent) {
     console.log(pc.bold(pc.magenta('================================================================')));
@@ -302,8 +360,17 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
   const okLic = runVerifyLicenses({ root, silent: options.silent });
   const okPdac = runVerifyPdac({ root, silent: options.silent });
   const okSchemas = runVerifySchemas({ root, silent: options.silent });
+  const okDuplicates = runVerifyDuplicates({ root, silent: options.silent });
 
-  const allPassed = okQuality && okTrace && okGov && okTest && okLic && okPdac && okSchemas;
+  const allPassed =
+    okQuality &&
+    okTrace &&
+    okGov &&
+    okTest &&
+    okLic &&
+    okPdac &&
+    okSchemas &&
+    okDuplicates;
 
   if (!options.silent) {
     console.log(pc.bold(pc.magenta('================================================================')));
@@ -315,6 +382,7 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
     console.log(`  5. Licencias Open Source:                    ${okLic ? pc.green('PASSED') : pc.red('FAILED')}`);
     console.log(`  6. PDaC & Deriva Criptográfica:              ${okPdac ? pc.green('PASSED') : pc.red('FAILED')}`);
     console.log(`  7. Esquemas JSON de Artefactos:              ${okSchemas ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  8. Requisitos Duplicados (Shift-Left Gate):   ${okDuplicates ? pc.green('PASSED') : pc.red('FAILED')}`);
     console.log(pc.bold(pc.magenta('================================================================')));
 
     if (allPassed) {
@@ -326,3 +394,4 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
 
   return allPassed;
 }
+
