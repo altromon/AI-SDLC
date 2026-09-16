@@ -6,7 +6,7 @@
 import { Command } from 'commander';
 import pc from 'picocolors';
 import { runGherkinExtract } from './commands/gherkin.js';
-import { runGitPlan, runGitValidate } from './commands/git.js';
+import { runGitCheckout, runGitPlan, runGitValidate } from './commands/git.js';
 import { runInit } from './commands/init.js';
 import { runReportQuality } from './commands/report.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
@@ -203,6 +203,16 @@ gitCommand
     runGitPlan({ version: opts.release, feature: opts.feature, tasks: opts.tasks });
     process.exit(0);
   });
+
+gitCommand
+  .command('checkout <task>')
+  .description('Navega y crea automáticamente ramas en cascada de 4 tiers para una tarea')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .action((task, opts) => {
+    const passed = runGitCheckout(task, { root: opts.root });
+    process.exit(passed ? 0 : 1);
+  });
+
 
 // --- change command suite ---
 const changeCommand = program

@@ -14,5 +14,6 @@ export * from './verifiers/pdac-graph.js';
 export * from './verifiers/schemas.js';
 export * from './reporters/quality-report.js';
 export * from './git/workflow.js';
+export * from './git/checkout.js';
 export * from './adapters/sdd/index.js';
 export * from './utils/fs.js';

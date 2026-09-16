@@ -148,7 +148,10 @@ pnpm run extract:gherkin:all                  # o: npx aisdlc gherkin extract --
 # 2. Planificar la jerarquía de ramas Git de 4 tiers para una versión y feature
 pnpm run git:plan                             # o: npx aisdlc git plan --release v1.1.0 --feature CHG-001-telemetry
 
-# 3. Auditar el gobierno de tareas y modos de autonomía humana
+# 3. Navegar y crear automáticamente ramas en cascada para una tarea (Tier 1 a 4)
+pnpm run git:checkout TSK-001                 # o: npx aisdlc git checkout TSK-001
+
+# 4. Auditar el gobierno de tareas y modos de autonomía humana
 pnpm run verify:governance                    # o: npx aisdlc verify governance
 
 # 4. Auditar que el 100% de requisitos y tareas cuentan con pruebas verificables en disco
@@ -379,27 +382,27 @@ specs/changes/active/chg-001-telemetry-ingestion/
 
 ### Fase 5: Gestión de Ramas Git (Modelo Jerárquico de 4 Tiers)
 
-1. **Planificar el árbol de ramas con el asistente CLI**:
+1. **Navegación y creación automática en cascada por tarea (Recomendado)**:
    ```bash
-   npx tsx scripts/git-workflow-helper.ts plan --version v1.1.0 --feature CHG-001-telemetry-ingestion --tasks TSK-001,TSK-002
+   # Detecta el cambio activo, la versión y crea en cascada las ramas release, feat y task
+   npx aisdlc git checkout TSK-001
    ```
+   *El comando inspecciona `specs/changes/active/*/tasks.md`, resuelve la jerarquía de 4 tiers (`main` -> `release/vX.Y.Z` -> `feat/CHG-*` -> `task/CHG-*/TSK-*`), crea en cascada las ramas intermedias inexistentes y sitúa al desarrollador o agente directamente en su rama de trabajo.*
 
-2. **Crear las ramas en Git respetando la jerarquía**:
+2. **Planificación y creación manual alternativa**:
    ```bash
-   # Tier 1 -> Tier 2: Rama de versión desde main
-   git checkout main
-   git checkout -b release/v1.1.0
+   # Planificar jerarquía de ramas
+   npx aisdlc git plan --release v1.1.0 --feature CHG-001-telemetry-ingestion --tasks TSK-001,TSK-002
 
-   # Tier 2 -> Tier 3: Rama de feature desde release
+   # O crear manualmente en secuencia:
+   git checkout main && git checkout -b release/v1.1.0
    git checkout -b feat/CHG-001-telemetry-ingestion release/v1.1.0
-
-   # Tier 3 -> Tier 4: Rama de tarea atómica desde feature
    git checkout -b task/CHG-001/TSK-001-dto-interfaces feat/CHG-001-telemetry-ingestion
    ```
 
-3. **Validar la rama de trabajo**:
+3. **Validar la nomenclatura de cualquier rama de trabajo**:
    ```bash
-   npx tsx scripts/git-workflow-helper.ts validate task/CHG-001/TSK-001-dto-interfaces
+   npx aisdlc git validate task/CHG-001/TSK-001-dto-interfaces
    ```
 
 ---
