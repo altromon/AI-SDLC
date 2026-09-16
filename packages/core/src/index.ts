@@ -12,6 +12,7 @@ export * from './verifiers/gherkin.js';
 export * from './verifiers/licenses.js';
 export * from './verifiers/pdac-graph.js';
 export * from './verifiers/schemas.js';
+export * from './verifiers/progressive-friction.js';
 export * from './reporters/quality-report.js';
 export * from './git/workflow.js';
 export * from './git/checkout.js';

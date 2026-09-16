@@ -135,10 +135,14 @@ export interface ProductHandoff {
 
 export type SddFramework = 'openspec' | 'speckit';
 
+export type ChangeProfile = 'patch' | 'standard' | 'critical';
+export const VALID_CHANGE_PROFILES: readonly ChangeProfile[] = ['patch', 'standard', 'critical'] as const;
+
 export interface SddWorkspaceInfo {
   framework: SddFramework;
   changeId: string;
   changeDir: string;
+  profile?: ChangeProfile;
   proposalFile?: string;
   specFile?: string;
   designFile?: string;
@@ -187,9 +191,11 @@ export interface SddChangeScaffoldOptions {
   rootDir?: string;
   name: string;
   changeId?: string;
+  id?: string;
   from?: string | string[];
   framework?: SddFramework;
   author?: string;
+  profile?: ChangeProfile;
   silent?: boolean;
 }
 
@@ -197,11 +203,32 @@ export interface SddChangeScaffoldResult {
   success: boolean;
   changeId: string;
   canonicalId: string;
+  profile: ChangeProfile;
   changeDir: string;
   createdFiles: string[];
   productArtifactCreated?: string;
   citedArtifacts: Array<{ id: string; digest: string; title?: string; comment?: string }>;
   errors: string[];
+}
+
+// --- Progressive Friction & Anti-Bypass Types ---
+export interface ProgressiveFrictionOptions {
+  rootDir?: string;
+  changeId?: string;
+  changeDir?: string;
+  diffFiles?: string[];
+  modifiedFiles?: string[];
+}
+
+export interface ProgressiveFrictionResult {
+  success: boolean;
+  profile: ChangeProfile;
+  bypassed: boolean;
+  violations: string[];
+  bypassedRules: string[];
+  evaluatedFiles: string[];
+  errors: string[];
+  reportMarkdown?: string;
 }
 
 

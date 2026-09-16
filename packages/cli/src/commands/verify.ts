@@ -7,6 +7,7 @@ import {
   verifyArtifactsSchemas,
   verifyLicenses,
   verifyPdacGraph,
+  verifyProgressiveFriction,
   verifyQualityGate,
   verifyTasksGovernance,
   verifyTestingCoverage,
@@ -235,6 +236,53 @@ export function runVerifySchemas(options: { root?: string; path?: string; silent
   const isOk = result.success;
   if (!options.silent) {
     console.log(isOk ? pc.green('\n✔ Esquemas de Artefactos CONFORME (100%)\n') : pc.red('\n✖ Esquemas de Artefactos BLOQUEADO\n'));
+  }
+  return isOk;
+}
+
+export interface FrictionVerifyOptions {
+  root?: string;
+  change?: string;
+  diffFiles?: string[];
+  silent?: boolean;
+}
+
+export function runVerifyFriction(options: FrictionVerifyOptions = {}): boolean {
+  const rootDir = options.root || process.cwd();
+  if (!options.silent) {
+    console.log(pc.bold(pc.cyan('\n🛡️  [AI-SDLC] Verificando Fricción Progresiva y Anti-Bypass Guardrails...')));
+  }
+
+  const result = verifyProgressiveFriction({
+    rootDir,
+    changeId: options.change,
+    diffFiles: options.diffFiles,
+  });
+
+  if (!options.silent) {
+    console.log(`  Perfil detectado:        ${pc.magenta(result.profile)}`);
+    console.log(`  Archivos evaluados:      ${pc.bold(String(result.evaluatedFiles.length))}`);
+    if (result.bypassedRules.length > 0) {
+      console.log(pc.red('\n  Infracciones Anti-Bypass detectadas:'));
+      for (const rule of result.bypassedRules) {
+        console.log(`    ${pc.red('✖')} ${rule}`);
+      }
+    }
+    if (result.errors.length > 0) {
+      console.log(pc.red('\n  Errores de validación de perfil:'));
+      for (const err of result.errors) {
+        console.log(`    ${pc.red('✖')} ${err}`);
+      }
+    }
+  }
+
+  const isOk = result.success;
+  if (!options.silent) {
+    console.log(
+      isOk
+        ? pc.green('\n✔ Fricción Progresiva CONFORME (EXIT 0)\n')
+        : pc.red('\n✖ Fricción Progresiva BLOQUEADO (EXIT 1)\n')
+    );
   }
   return isOk;
 }

@@ -12,6 +12,7 @@ export const BRANCH_PATTERNS = {
   RELEASE: /^release\/v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$/,
   FEATURE: /^(feat|feature)\/(?:v[0-9]+\.[0-9]+\.[0-9]+\/)?([a-zA-Z0-9]+-[a-zA-Z0-9-]+)$/,
   BUG: /^(bug|fix)\/(?:v[0-9]+\.[0-9]+\.[0-9]+\/)?([a-zA-Z0-9]+-[a-zA-Z0-9-]+)$/,
+  PATCH: /^(patch)\/(?:v[0-9]+\.[0-9]+\.[0-9]+\/)?([a-zA-Z0-9]+-[a-zA-Z0-9-]+)$/,
   TASK: /^task\/([a-zA-Z0-9]+-[a-zA-Z0-9-]+)\/([a-zA-Z0-9]+-[a-zA-Z0-9-]+)$/,
 } as const;
 
@@ -60,6 +61,18 @@ export function classifyBranch(branchName: string): BranchClassificationResult {
     };
   }
 
+  const patchMatch = branchName.match(BRANCH_PATTERNS.PATCH);
+  if (patchMatch) {
+    return {
+      valid: true,
+      tier: 3,
+      tierName: 'Patch (Parche Rápido)',
+      id: patchMatch[2],
+      parentRequirement: 'Debe originarse desde una rama release/vX.Y.Z activa o main según criticidad',
+      targetMerge: 'release/vX.Y.Z o main',
+    };
+  }
+
   const taskMatch = branchName.match(BRANCH_PATTERNS.TASK);
   if (taskMatch) {
     return {
@@ -68,8 +81,8 @@ export function classifyBranch(branchName: string): BranchClassificationResult {
       tierName: 'Task (Tarea Atómica)',
       parentId: taskMatch[1],
       taskId: taskMatch[2],
-      parentRequirement: `Debe originarse desde la rama de feature o bug: feat/${taskMatch[1]} o bug/${taskMatch[1]}`,
-      targetMerge: `feat/${taskMatch[1]} o bug/${taskMatch[1]}`,
+      parentRequirement: `Debe originarse desde la rama de feature, bug o patch: feat/${taskMatch[1]}, bug/${taskMatch[1]} o patch/${taskMatch[1]}`,
+      targetMerge: `feat/${taskMatch[1]}, bug/${taskMatch[1]} o patch/${taskMatch[1]}`,
     };
   }
 

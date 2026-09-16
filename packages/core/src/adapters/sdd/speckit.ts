@@ -7,7 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
-import { ProductHandoff, SddValidationResult, SddWorkspaceInfo } from '../../types/index.js';
+import { ChangeProfile, ProductHandoff, SddValidationResult, SddWorkspaceInfo } from '../../types/index.js';
 import { SddAdapter } from './types.js';
 
 export class SpecKitAdapter implements SddAdapter {
@@ -90,7 +90,7 @@ export class SpecKitAdapter implements SddAdapter {
       const fullPath = path.join(changeWorkspaceDir, file);
       if (fs.existsSync(fullPath)) {
         try {
-          const raw = fs.readFileSync(fullPath, 'utf-8');
+          const raw = fs.readFileSync(fullPath, 'utf-8').replace(/^\uFEFF/, '');
           const parsed = file.endsWith('.json') ? JSON.parse(raw) : (yaml.load(raw) as any);
           if (parsed && typeof parsed === 'object' && parsed.id && String(parsed.id).startsWith('HOF-')) {
             return parsed as ProductHandoff;
@@ -122,34 +122,60 @@ export class SpecKitAdapter implements SddAdapter {
     const planFile = path.join(changeWorkspaceDir, 'plan.md');
     const tasksFile = path.join(changeWorkspaceDir, 'tasks.md');
 
+    let profile: ChangeProfile = 'standard';
+    if (fs.existsSync(specFile)) {
+      try {
+        const rawSpec = fs.readFileSync(specFile, 'utf-8').replace(/^\uFEFF/, '');
+        const match = rawSpec.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+        if (match) {
+          const parsedFm = yaml.load(match[1]) as any;
+          if (parsedFm && parsedFm.profile && ['patch', 'standard', 'critical'].includes(parsedFm.profile)) {
+            profile = parsedFm.profile as ChangeProfile;
+          }
+        }
+      } catch {
+        // ignore parse error
+      }
+    }
+
     if (!fs.existsSync(specFile)) {
       errors.push(`Falta el archivo de especificación obligatorio 'spec.md' en ${changeWorkspaceDir}.`);
     }
-    if (!fs.existsSync(tasksFile)) {
-      errors.push(`Falta el archivo de tareas obligatorio 'tasks.md' en ${changeWorkspaceDir}.`);
-    }
-    if (!fs.existsSync(planFile)) {
-      warnings.push(`Se recomienda incluir 'plan.md' en el espacio de trabajo Spec Kit.`);
-    }
 
-    const handoff = this.loadSidecar(changeWorkspaceDir);
     let sidecarFile: string | undefined;
+    let handoff: ProductHandoff | null = null;
 
-    if (!handoff) {
-      errors.push(
-        `Falta el archivo de acompañamiento (sidecar) 'handoff.yaml' con identificador 'HOF-*' en ${changeWorkspaceDir}.`
-      );
-    } else {
-      if (!handoff.subgraph || !Array.isArray(handoff.subgraph.requirements)) {
-        errors.push(`El sidecar '${handoff.id}' no define un subgrafo de requerimientos válido.`);
+    if (profile === 'patch') {
+      handoff = this.loadSidecar(changeWorkspaceDir);
+      if (handoff) {
+        sidecarFile = path.join(changeWorkspaceDir, 'handoff.yaml');
       }
-      sidecarFile = path.join(changeWorkspaceDir, 'handoff.yaml');
+    } else {
+      if (!fs.existsSync(tasksFile)) {
+        errors.push(`Falta el archivo de tareas obligatorio 'tasks.md' en ${changeWorkspaceDir}.`);
+      }
+      if (!fs.existsSync(planFile)) {
+        warnings.push(`Se recomienda incluir 'plan.md' en el espacio de trabajo Spec Kit.`);
+      }
+
+      handoff = this.loadSidecar(changeWorkspaceDir);
+      if (!handoff) {
+        errors.push(
+          `Falta el archivo de acompañamiento (sidecar) 'handoff.yaml' con identificador 'HOF-*' en ${changeWorkspaceDir}.`
+        );
+      } else {
+        if (!handoff.subgraph || !Array.isArray(handoff.subgraph.requirements)) {
+          errors.push(`El sidecar '${handoff.id}' no define un subgrafo de requerimientos válido.`);
+        }
+        sidecarFile = path.join(changeWorkspaceDir, 'handoff.yaml');
+      }
     }
 
     const workspace: SddWorkspaceInfo = {
       framework: this.framework,
       changeId,
       changeDir: changeWorkspaceDir,
+      profile,
       specFile: fs.existsSync(specFile) ? specFile : undefined,
       designFile: fs.existsSync(planFile) ? planFile : undefined,
       tasksFile: fs.existsSync(tasksFile) ? tasksFile : undefined,

@@ -42,18 +42,17 @@ Para gobernar el desarrollo colaborativo entre humanos y agentes de IA con máxi
 
 ---
 
-### Tier 3: Rama de Feature o Bug (`feat/...` o `bug/...`)
-- **Propósito**: Desarrolla una funcionalidad (`feature`) o resuelve un defecto (`bug`) específico asignado a la versión.
-- **Origen**: Se bifurca **obligatoriamente a partir de la rama de versión abierta** a la que pertenece (ej. a partir de `release/v1.1.0`).
+### Tier 3: Rama de Feature, Bug o Parche (`feat/...`, `bug/...`, `patch/...`, `fix/...`)
+- **Propósito**: Desarrolla una funcionalidad (`feature`), resuelve un defecto (`bug`) o aplica un parche menor (`patch`/`fix`).
+- **Origen**: Se bifurca a partir de la rama de versión abierta (`release/vX.Y.Z`) o directamente desde la rama base correspondiente.
 - **Nomenclatura Estándar**:
   - Features: `feat/<VERSION>/<FEAT-ID>-<slug>` o `feat/<FEAT-ID>-<slug>`
     - Ejemplos: `feat/CHG-001-telemetry-ingestion`, `feat/v1.1.0/FEAT-002-collision-detector`
-  - Bugs: `bug/<VERSION>/<BUG-ID>-<slug>` o `bug/<BUG-ID>-<slug>`
-    - Ejemplos: `bug/BUG-042-timestamp-drift`, `bug/v1.1.0/BUG-015-memory-leak`
-- **Ciclo de Vida**:
-  - Contiene la especificación de entrega SDD (`proposal.md`, `spec.md`, `design.md`, `tasks.md`).
-  - Recibe los merges de las tareas atómicas que componen la feature.
-  - Se fusiona de vuelta a la rama de versión mediante Pull Request con Quality Gate aprobado.
+  - Bugs / Parches: `bug/<BUG-ID>-<slug>`, `fix/<BUG-ID>-<slug>` o `patch/<PATCH-ID>-<slug>`
+    - Ejemplos: `bug/BUG-042-timestamp-drift`, `patch/PATCH-002-linter-fix`, `fix/CHG-003-typo`
+- **Ciclo de Vida y Fricción Progresiva**:
+  - **Perfil Standard / Critical**: Contiene el andamiaje SDD completo (`proposal.md`, `spec.md`, `design.md`, `tasks.md`). Recibe merges desde ramas Tier 4 (`task/*`) y se fusiona hacia la versión con Quality Gate completo.
+  - **Perfil Patch (Flujo Simplificado)**: Contiene únicamente `spec.md` condensado. **Exento de ramas Tier 4 (`task/*`)**: los ingenieros y agentes de IA pueden trabajar directamente sobre la rama `patch/*` o `fix/*` y abrir el Pull Request directo.
 
 ---
 
@@ -122,8 +121,9 @@ Cada nivel de integración cuenta con criterios de validación crecientes:
 ## 5. Guardrails y Reglas para Agentes de IA
 
 1. **Aislamiento Estricto de Ramas**:
-   - Los agentes de codificación (`agent-developer`) **solo pueden operar y realizar commits dentro de ramas `task/*`**.
-   - Queda terminantemente bloqueado que un agente realice commits directos sobre `feat/*`, `release/*` o `main`.
+   - En cambios `standard` y `critical`, los agentes de codificación (`agent-developer`) **solo pueden operar y realizar commits dentro de ramas `task/*`**.
+   - En cambios con `profile: patch` (flujo simplificado), el agente está formalmente autorizado a operar y comitear directamente en la rama `patch/*` o `fix/*`, quedando exento de crear ramas Tier 4.
+   - Queda terminantemente bloqueado que un agente realice commits directos sobre `release/*` o `main`.
 2. **Creación Automática y Verificación de Origen**:
    - Antes de crear una rama de tarea, el agente debe verificar que la rama base sea la rama de feature correspondiente.
    - Antes de crear una rama de feature, debe validarse que se derive de la rama de release activa.

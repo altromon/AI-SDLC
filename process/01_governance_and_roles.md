@@ -166,7 +166,53 @@ Toda feature o cambio de software se descompone en un plan de tareas atómicas (
 
 ---
 
-## 7. Protocolo de Revisión y Gobernanza de Pull Requests (Balance `X`/`O` y Puntos Débiles)
+## 7. Modelo de Fricción Progresiva (Progressive Friction Governance)
+
+Para optimizar la agilidad del desarrollo y erradicar la fatiga de proceso en correcciones menores sin degradar los controles en componentes críticos, el framework AI-SDLC formaliza el **Modelo de Fricción Progresiva**.
+
+### A. Matriz de Perfiles de Cambio (Change Profiles)
+
+El nivel de ceremonia documental, modelado formal de seguridad y ramificación Git se adapta dinámicamente según el perfil de cambio:
+
+| Perfil | Nivel de Riesgo Típico | Artefactos Mínimos Exigidos | Modelado STRIDE / Seguridad | Jerarquía Git Permitida | Aprobación Humana Requerida |
+| :--- | :---: | :--- | :--- | :--- | :--- |
+| **`patch`** (Baja Fricción) | `LOW` | Únicamente `spec.md` condensado con bloque `verification` | **Exento** si no altera enclaves `SEC-ENC-*` ni interfaces externas | Rama directa `fix/<slug>` o `patch/<slug>` (Sin Tier 4 `task/*`) | Tech Lead único (revisión de PR y test verde) |
+| **`standard`** (Fricción Nominal) | `MEDIUM` / `HIGH` | Andamiaje SDD completo (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.yaml`) | Exigido para endpoints o lógica de negocio nueva | Modelo estándar de 4 tiers (`main` $\rightarrow$ `release` $\rightarrow$ `feat/bug` $\rightarrow$ `task`) | Tech Lead formal |
+| **`critical`** (Alta Fricción) | `CRITICAL` | Andamiaje SDD completo + `ADR-*` de arquitectura + Checklist Zero Trust | **Obligatorio e ineludible** (Amenazas, vectores de abuso y mitigación) | Modelo estricto de 4 tiers con protección máxima | **Doble aprobación humana**: Tech Lead + Lead Architect / SecOps |
+
+### B. Fuente de Verdad Canónica en Frontmatter
+
+La clasificación del nivel de fricción reside **de forma obligatoria en el frontmatter YAML de `spec.md`**:
+```yaml
+---
+id: SPEC-PATCH-002-LINTER-FIX
+type: delivery-spec
+change-id: PATCH-002-LINTER-FIX
+title: "Corrección de advertencias de linter"
+profile: patch # <-- Fuente de verdad canónica: 'patch' | 'standard' | 'critical'
+status: approved
+verification:
+  method: automated-unit-test
+  command: pnpm test
+---
+```
+
+> **Flexibilidad en Nomenclatura de Carpetas e IDs:**  
+> A nivel de sistema de archivos e identificadores de cambio se admiten tanto prefijos tradicionales (`chg-XXX-<slug>` / `CHG-XXX`) como prefijos explícitos de parche (`patch-XXX-<slug>` / `PATCH-XXX`). El tooling y los verificadores deterministas consultan prioritariamente el atributo `profile` del frontmatter para validar los requisitos mínimos aplicables.
+
+### C. Guardrail Determinista Anti-Bypass (Prevención de Evasión de Gobernanza)
+
+Queda terminantemente prohibido utilizar el perfil `patch` como atajo para evadir controles arquitectónicos o de seguridad. Si un cambio declara `profile: patch` pero modifica:
+1. Esquemas JSON canónicos (`schemas/`).
+2. Enclaves o actores de ciberseguridad (`examples/security/`, `SEC-ENC-*`, certificados/secretos).
+3. Políticas maestras organizacionales (`quality-policy.yaml`, `license-policy.yaml`).
+4. Scripts o infraestructura crítica de despliegue.
+
+El comando de verificación determinista (`aisdlc verify`) **bloqueará inmediatamente el pipeline (EXIT 1)** exigiendo reclasificar el cambio como `standard` o `critical`.
+
+---
+
+## 8. Protocolo de Revisión y Gobernanza de Pull Requests (Balance `X`/`O` y Puntos Débiles)
 
 El Pull Request representa la última frontera de control y garantía antes de integrar código en ramas estables. Con el objetivo de erradicar la deuda técnica oculta y las alucinaciones silenciosas en el código generado por IA, se formaliza la gobernanza basada en `.github/PULL_REQUEST_TEMPLATE.md`:
 

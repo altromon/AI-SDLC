@@ -12,6 +12,7 @@ import { runReportQuality } from './commands/report.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
   runVerifyAll,
+  runVerifyFriction,
   runVerifyGovernance,
   runVerifyLicenses,
   runVerifyPdac,
@@ -136,6 +137,15 @@ verifyCommand
     process.exit(passed ? 0 : 1);
   });
 
+verifyCommand
+  .command('friction [change]')
+  .description('Verifica la fricción progresiva y las protecciones Anti-Bypass para parches rápidos')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .action((change, opts) => {
+    const passed = runVerifyFriction({ root: opts.root, change });
+    process.exit(passed ? 0 : 1);
+  });
+
 // --- report command suite ---
 const reportCommand = program
   .command('report')
@@ -225,6 +235,7 @@ changeCommand
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
   .option('--from <ids...>', 'Identificador o lista de identificadores a citar (UC-*, FR-*, etc.)')
   .option('--id <changeId>', 'Identificador explícito para el cambio (ej. chg-002-mi-cambio)')
+  .option('-p, --profile <profile>', 'Perfil de riesgo del cambio: patch, standard o critical', 'standard')
   .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit', 'openspec')
   .option('-a, --author <author>', 'Nombre del autor o agente desarrollador')
   .action((name, opts) => {
@@ -233,6 +244,7 @@ changeCommand
       name,
       from: opts.from,
       id: opts.id,
+      profile: opts.profile,
       framework: opts.framework,
       author: opts.author,
     });
@@ -250,6 +262,7 @@ sddCommand
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
   .option('--from <ids...>', 'Identificador o lista de identificadores a citar (UC-*, FR-*, etc.)')
   .option('--id <changeId>', 'Identificador explícito para el cambio (ej. chg-002-mi-cambio)')
+  .option('-p, --profile <profile>', 'Perfil de riesgo del cambio: patch, standard o critical', 'standard')
   .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit', 'openspec')
   .option('-a, --author <author>', 'Nombre del autor o agente desarrollador')
   .action((name, opts) => {
@@ -258,6 +271,7 @@ sddCommand
       name,
       from: opts.from,
       id: opts.id,
+      profile: opts.profile,
       framework: opts.framework,
       author: opts.author,
     });
