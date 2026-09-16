@@ -8,6 +8,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
 import {
+  ChangeDetectionOptions,
+  ChangeDetectionResult,
   ProductHandoff,
   SddIntegrationAudit,
   SddIntegrationOptions,
@@ -483,3 +485,88 @@ export function verifySddIntegration(options: { rootDir?: string } = {}): {
     errors,
   };
 }
+
+function matchesFolderOrPrefix(folder: string, candidate: string): boolean {
+  const fLower = folder.toLowerCase();
+  const cLower = candidate.toLowerCase();
+  if (fLower === cLower || cLower.includes(fLower)) return true;
+  const fPrefix = fLower.match(/^([a-z0-9]+-[0-9]+)/);
+  const cPrefix = cLower.match(/([a-z0-9]+-[0-9]+)/);
+  return Boolean(fPrefix && cPrefix && fPrefix[1] === cPrefix[1]);
+}
+
+function resolveMatchFromMetadata(
+  activeFolders: string[],
+  options: ChangeDetectionOptions
+): { changeId?: string; source?: ChangeDetectionResult['source']; reason?: string } {
+  if (options.headRef) {
+    const found = activeFolders.find((f) => matchesFolderOrPrefix(f, options.headRef!));
+    if (found) return { changeId: found, source: 'branch', reason: `Coincidencia por rama origen '${options.headRef}'.` };
+  }
+  if (options.changedFiles && options.changedFiles.length > 0) {
+    for (const file of options.changedFiles) {
+      const match = file.replace(/\\/g, '/').match(/specs\/changes\/active\/([^/]+)/);
+      if (match && activeFolders.includes(match[1])) {
+        return { changeId: match[1], source: 'files', reason: `Coincidencia por archivo modificado '${file}'.` };
+      }
+    }
+  }
+  if (options.prTitle) {
+    const found = activeFolders.find((f) => matchesFolderOrPrefix(f, options.prTitle!));
+    if (found) return { changeId: found, source: 'title', reason: `Coincidencia por título del PR '${options.prTitle}'.` };
+  }
+  if (options.prBody) {
+    const found = activeFolders.find((f) => matchesFolderOrPrefix(f, options.prBody!));
+    if (found) return { changeId: found, source: 'body', reason: `Coincidencia por mención en cuerpo del PR.` };
+  }
+  if (activeFolders.length === 1) {
+    return { changeId: activeFolders[0], source: 'single_active_completed', reason: `Único cambio activo disponible '${activeFolders[0]}'.` };
+  }
+  return {};
+}
+
+/**
+ * Detect which active SDD change should be integrated in a CI/CD pipeline
+ * upon PR merge to main or release branches.
+ */
+export function detectActiveChangeForIntegration(
+  options: ChangeDetectionOptions = {}
+): ChangeDetectionResult {
+  const rootDir = options.rootDir || process.cwd();
+  const activeParent = path.join(rootDir, 'specs', 'changes', 'active');
+  if (!fs.existsSync(activeParent)) {
+    return { detected: false, reasons: [`No existe el directorio de cambios activos en '${activeParent}'.`] };
+  }
+
+  const entries = fs.readdirSync(activeParent, { withFileTypes: true });
+  const activeFolders = entries.filter((e) => e.isDirectory()).map((e) => e.name);
+  if (activeFolders.length === 0) {
+    return { detected: false, reasons: ['No se encontraron carpetas de cambios activos en specs/changes/active/.'] };
+  }
+
+  const match = resolveMatchFromMetadata(activeFolders, options);
+  if (!match.changeId) {
+    return {
+      detected: false,
+      reasons: [`No se correlacionó ningún cambio activo (${activeFolders.join(', ')}) con los metadatos suministrados.`],
+    };
+  }
+
+  const changeDir = path.join(activeParent, match.changeId);
+  const tasksFile = path.join(changeDir, 'tasks.md');
+  const tasks = fs.existsSync(tasksFile) ? parseTasksFromContent(fs.readFileSync(tasksFile, 'utf-8')) : [];
+  const completed = tasks.filter((t) => t.status === 'COMPLETED');
+  const allCompleted = tasks.length > 0 && completed.length === tasks.length;
+
+  return {
+    detected: true,
+    changeId: match.changeId,
+    source: match.source,
+    changeDir,
+    allTasksCompleted: allCompleted,
+    completedTasksCount: completed.length,
+    totalTasksCount: tasks.length,
+    reasons: match.reason ? [match.reason] : [],
+  };
+}
+

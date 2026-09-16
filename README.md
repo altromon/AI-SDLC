@@ -201,7 +201,7 @@ npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
 | `npx aisdlc sdd new <name>` | - | Alias de `change new`: scaffolding de cambio SDD | Estructura en `specs/changes/active/` |
 | `npx aisdlc sdd deposit --framework <f> --change <id>` | - | Deposita sidecar `handoff.yaml` (HOF-*) | Archivo `handoff.yaml` en workspace |
 | `npx aisdlc sdd verify` | - | Audita conformidad de sidecars SDD | Veredicto de validación por workspace |
-| `npx aisdlc sdd integrate --change <id>` | - | Integra cambio completado a specs canónicas | Requisitos activos, arquitectura actualizada |
+| `npx aisdlc sdd integrate [--change <id>] [--auto]` | - | Integra cambio completado a specs canónicas (manual o auto) | Requisitos activos, arquitectura actualizada |
 | `npx aisdlc report quality` | `pnpm run report:quality` | Reporte formal políglota de calidad | `reports/QUALITY_REPORT.md` |
 | `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | Catálogo de requerimientos activos por tipo | `reports/ACTIVE_REQUIREMENTS.md` |
 | `npx aisdlc gherkin extract --all` | `pnpm run extract:gherkin:all` | Sincroniza bloques Gherkin a `.feature` | `tests/features/*.feature` |
@@ -466,9 +466,18 @@ Verifica que el código cumpla con los umbrales de `quality-policy.yaml`:
 
 Una vez concluida la implementación del cambio y verificado que todas las tareas en `tasks.md` están en estado `COMPLETED`:
 
-1. **Ejecutar la Integración Canónica**:
+1. **Automatización Desatendida en CI/CD (Recomendado)**:
+   - Al fusionar (*merge*) el Pull Request hacia `main` o ramas `release/*`, el workflow de GitHub Actions [`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml) se ejecuta automáticamente.
+   - Detecta deterministamente el cambio activo asociado a la rama o commit del PR, ejecuta la integración canónica de forma segura y realiza commit y push automatizado con mensaje `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
+   - **Para el desarrollador**: solo es necesario ejecutar `git pull` en su rama local para ver los cambios reflejados.
+
+2. **Ejecución Local / Manual**:
    ```bash
+   # Integración indicando el ID explícito del cambio:
    npx aisdlc sdd integrate --change chg-001-telemetry-ingestion
+
+   # O resolución automática del cambio activo completado:
+   npx aisdlc sdd integrate --auto
    ```
    *Efectos y Transformaciones Realizadas*:
    - **Requerimientos de Producto**: Se promueven a estado `active` en `specs/product/` y se añade una entrada en su historial de revisiones referenciando el `changeId`.
