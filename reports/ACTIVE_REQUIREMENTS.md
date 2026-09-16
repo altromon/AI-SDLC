@@ -1,6 +1,6 @@
 # Catálogo Consolidado de Requerimientos Activos (AI-SDLC)
 
-> **Línea Base Canónica Generada el:** 2026-09-15  
+> **Línea Base Canónica Generada el:** 2026-09-16  
 > **Estado de Requerimientos:** `active` / `accepted`  
 > **Total Requerimientos Activos:** 5
 

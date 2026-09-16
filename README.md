@@ -369,9 +369,15 @@ Para implementar la funcionalidad, genera el paquete del cambio SDD de forma aut
 3. **Auditar el Gobierno de Tareas y Conformidad SDD**:
    ```bash
    pnpm run verify:governance                    # o: npx aisdlc verify governance
-   npx aisdlc sdd verify                         # Audita sidecars HOF-* y espacios SDD
+   npx aisdlc sdd verify                         # Audita sidecars HOF-*, espacios SDD y colisiones pre-vuelo
    ```
    *Salida*: Genera `reports/TASKS_GOVERNANCE_REPORT.md` validando que no existan tareas sin verificación o asignaciones indebidas.
+
+4. **Compuerta Pre-Implementación de Duplicados (Shift-Left Pre-Flight Gate)**:
+   ```bash
+   pnpm run verify:duplicates                    # o: npx aisdlc verify duplicates
+   ```
+   *Efecto*: Audita que los nuevos requisitos no colisionen en ID, textos normativos idénticos, títulos redundantes ($\ge 85\%$) ni pruebas BDD con la línea base activa. Respeta el Principio de Responsabilidad Única (SRP) permitiendo múltiples requisitos atómicos por Caso de Uso (`UC-*`) y admite evolución *in-place*. Bloquea el proceso antes de gastar recursos de computación y tokens en código.
 
 ---
 
@@ -456,11 +462,13 @@ Verifica que el código cumpla con los umbrales de calidad definidos en `quality
    - **Arquitectura (Midstream)**: Vistas arc42 / NAF v4 (`CMP-*`, `ADR-*`, `SEC-ENC-*`).
    - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) y pruebas unitarias correspondientes.
 
-2. **Ejecución Consolidada de la Suite de CI/CD**:
+2. **Ejecución Consolidada de la Suite de CI/CD (8 Quality Gates)**:
    ```bash
    pnpm run verify:all
    # o: npx aisdlc verify all
    ```
+   *Compuertas evaluadas*: 1) Quality Gate de Complejidad, 2) Trazabilidad 360° (RTM), 3) Gobierno de Tareas, 4) Cobertura de Pruebas, 5) Licencias Open Source, 6) PDaC & Deriva Criptográfica SHA-256, 7) Esquemas JSON, 8) Verificación de Duplicados (Shift-Left Gate).
+
 
 3. **Pull Request y Aprobación Humana**:
    - Se abre el Pull Request de la tarea hacia la rama feature, y luego hacia la rama release.
