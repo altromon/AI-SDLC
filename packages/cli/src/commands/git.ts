@@ -3,7 +3,11 @@
  */
 
 import pc from 'picocolors';
-import { classifyBranch, generateBranchHierarchyPlan } from '@ai-sdlc/core';
+import {
+  classifyBranch,
+  generateBranchHierarchyPlan,
+  checkoutTaskBranch,
+} from '@ai-sdlc/core';
 
 export function runGitValidate(branchName: string): boolean {
   if (!branchName) {
@@ -39,3 +43,44 @@ export function runGitPlan(options: { version?: string; feature?: string; tasks?
   console.log(pc.cyan('\n' + plan.planText));
   return true;
 }
+
+export function runGitCheckout(taskId: string, options: { root?: string } = {}): boolean {
+  if (!taskId) {
+    console.error(pc.red('\n[ERROR] Debe especificar el identificador de la tarea a navegar (ej. TSK-001).\n'));
+    return false;
+  }
+
+  const rootDir = options.root || process.cwd();
+  console.log(pc.cyan(`\n🚀 [AI-SDLC Git] Navegando y preparando ramas para la tarea '${pc.bold(taskId)}'...`));
+
+  const result = checkoutTaskBranch(taskId, { rootDir });
+
+  if (!result.success) {
+    console.error(pc.red(`\n✖ [ERROR] ${result.error}`));
+    if (result.availableTasks && result.availableTasks.length > 0) {
+      console.log(pc.yellow('\nTareas disponibles en cambios activos:'));
+      for (const t of result.availableTasks) {
+        console.log(`  - [${pc.cyan(t.changeId)}] ${pc.bold(t.id)}${t.title ? `: ${t.title}` : ''}`);
+      }
+    }
+    console.log();
+    return false;
+  }
+
+  console.log(`  - Cambio detectado:  ${pc.bold(result.changeId || 'N/A')}`);
+  console.log(`  - Rama Release:      ${pc.green(result.releaseBranch || '')} (Tier 2)`);
+  console.log(`  - Rama Feature:      ${pc.green(result.featureBranch || '')} (Tier 3)`);
+  console.log(`  - Rama Task:         ${pc.green(result.taskBranch || '')} (Tier 4)`);
+
+  if (result.createdBranches && result.createdBranches.length > 0) {
+    console.log(pc.green(`\n✔ Ramas creadas en cascada:`));
+    for (const b of result.createdBranches) {
+      console.log(`  ├── ${pc.bold(b)}`);
+    }
+  }
+
+  console.log(pc.green(`\n✔ [CHECKOUT] Cambio a la rama de trabajo exitoso:`));
+  console.log(`  👉 ${pc.bold(pc.cyan(result.switchedBranch || result.taskBranch || ''))}\n`);
+  return true;
+}
+

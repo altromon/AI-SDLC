@@ -468,3 +468,30 @@ export interface ArtifactSchemaResult {
   violations: ArtifactSchemaViolation[];
   results: ArtifactValidationResult[];
 }
+
+// --- Git Task Checkout Types ---
+export interface ActiveTaskMatch {
+  taskId: string;
+  taskTitle: string;
+  changeId: string;
+  changeDir: string;
+  version: string;
+}
+
+export interface GitCheckoutTaskOptions {
+  rootDir?: string;
+}
+
+export interface GitCheckoutTaskResult {
+  success: boolean;
+  taskId: string;
+  changeId?: string;
+  releaseBranch?: string;
+  featureBranch?: string;
+  taskBranch?: string;
+  createdBranches: string[];
+  switchedBranch?: string;
+  error?: string;
+  availableTasks?: Array<{ id: string; title: string; changeId: string }>;
+}
+

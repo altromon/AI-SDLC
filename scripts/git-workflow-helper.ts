@@ -12,8 +12,11 @@
  * Uso:
  *   npx tsx scripts/git-workflow-helper.ts validate <nombre-rama>
  *   npx tsx scripts/git-workflow-helper.ts plan --version v1.1.0 --feature CHG-001-telemetry --tasks TSK-001,TSK-002
+ *   npx tsx scripts/git-workflow-helper.ts checkout <task-id>
  * ==============================================================================
  */
+
+import { checkoutTaskBranch } from '../packages/core/src/git/checkout.js';
 
 export const BRANCH_PATTERNS = {
   MAIN: /^main$/,
@@ -180,6 +183,40 @@ export function main(): void {
     }
 
     printPlan(version, feature, tasks);
+    process.exit(0);
+  }
+
+  if (args[0] === 'checkout') {
+    const task = args[1];
+    if (!task) {
+      console.error('[ERROR] Debe especificar el identificador de la tarea a navegar (ej. TSK-001).');
+      process.exit(1);
+    }
+
+    console.log(`\n[AI-SDLC Git] Navegando a tarea: ${task}...`);
+    const result = checkoutTaskBranch(task);
+    if (!result.success) {
+      console.error(`[ERROR] ${result.error}`);
+      if (result.availableTasks && result.availableTasks.length > 0) {
+        console.log('\nTareas disponibles en cambios activos:');
+        for (const t of result.availableTasks) {
+          console.log(`  - [${t.changeId}] ${t.id}${t.title ? `: ${t.title}` : ''}`);
+        }
+      }
+      process.exit(1);
+    }
+
+    console.log(`  - Cambio:        ${result.changeId}`);
+    console.log(`  - Rama Release:  ${result.releaseBranch}`);
+    console.log(`  - Rama Feature:  ${result.featureBranch}`);
+    console.log(`  - Rama Task:     ${result.taskBranch}`);
+    if (result.createdBranches.length > 0) {
+      console.log(`\nRamas creadas en cascada:`);
+      for (const b of result.createdBranches) {
+        console.log(`  ├── ${b}`);
+      }
+    }
+    console.log(`\n[CHECKOUT] Rama activa: ${result.switchedBranch}\n`);
     process.exit(0);
   }
 }
