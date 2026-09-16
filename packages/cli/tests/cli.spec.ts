@@ -6,6 +6,7 @@ import { runInit } from '../src/commands/init.js';
 import { runSddDeposit, runSddIntegrate, runSddVerify } from '../src/commands/sdd.js';
 import {
   runVerifyAll,
+  runVerifyDuplicates,
   runVerifyGovernance,
   runVerifyLicenses,
   runVerifyPdac,
@@ -79,6 +80,11 @@ describe('@ai-sdlc/cli Command Suite', () => {
   it('should execute pdac drift verification', () => {
     const passed = runVerifyPdac({ silent: true });
     expect(typeof passed).toBe('boolean');
+  });
+
+  it('should execute duplicate requirements verification via CLI', () => {
+    const passed = runVerifyDuplicates({ silent: true });
+    expect(passed).toBe(true);
   });
 
   it('should verify SDD workspaces and HOF-* sidecars via CLI', () => {

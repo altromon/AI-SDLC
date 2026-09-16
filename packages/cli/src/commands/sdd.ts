@@ -14,6 +14,7 @@ import {
   scaffoldSddChange,
   scanAllProductHandoffs,
   SddFramework,
+  verifyArtifactDuplicates,
 } from '@ai-sdlc/core';
 
 
@@ -85,6 +86,7 @@ export function runSddDeposit(options: SddDepositCliOptions): boolean {
 export interface SddVerifyCliOptions {
   root?: string;
   framework?: SddFramework;
+  checkDuplicates?: boolean;
   silent?: boolean;
 }
 
@@ -105,43 +107,59 @@ export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
     console.log(`  Sidecars PDaC encontrados: ${pc.bold(String(totalFound))}`);
   }
 
+  let validCount = 0;
+  let invalidCount = 0;
+
   if (totalFound === 0) {
     if (!options.silent) {
       console.log(pc.yellow('  [AVISO] No se encontraron archivos de acompañamiento handoff.yaml en specs/ ni examples/specs/.'));
     }
-    return true;
-  }
+  } else {
+    for (const [, { handoff, changeDir }] of handoffsMap.entries()) {
+      const relDir = path.relative(rootDir, changeDir);
+      const hasReqs = handoff.subgraph && Array.isArray(handoff.subgraph.requirements) && handoff.subgraph.requirements.length > 0;
 
-  let validCount = 0;
-  let invalidCount = 0;
-
-  for (const [, { handoff, changeDir }] of handoffsMap.entries()) {
-    const relDir = path.relative(rootDir, changeDir);
-    const hasReqs = handoff.subgraph && Array.isArray(handoff.subgraph.requirements) && handoff.subgraph.requirements.length > 0;
-
-    if (handoff.id && handoff.id.startsWith('HOF-') && hasReqs) {
-      validCount++;
-      if (!options.silent) {
-        console.log(
-          `  ${pc.green('✔')} [${pc.bold(handoff.id)}] en ${relDir} (Requerimientos: ${handoff.subgraph.requirements.length})`
-        );
-      }
-    } else {
-      invalidCount++;
-      if (!options.silent) {
-        console.log(
-          `  ${pc.red('✖')} [${pc.bold(handoff.id || 'DESCONOCIDO')}] en ${relDir} - Esquema de handoff o subgrafo inválido.`
-        );
+      if (handoff.id && handoff.id.startsWith('HOF-') && hasReqs) {
+        validCount++;
+        if (!options.silent) {
+          console.log(
+            `  ${pc.green('✔')} [${pc.bold(handoff.id)}] en ${relDir} (Requerimientos: ${handoff.subgraph.requirements.length})`
+          );
+        }
+      } else {
+        invalidCount++;
+        if (!options.silent) {
+          console.log(
+            `  ${pc.red('✖')} [${pc.bold(handoff.id || 'DESCONOCIDO')}] en ${relDir} - Esquema de handoff o subgrafo inválido.`
+          );
+        }
       }
     }
   }
 
-  const isOk = invalidCount === 0;
+  // Pre-Implementation Shift-Left: Verify requirements uniqueness and redundancy
+  let duplicateErrors = 0;
+  if (options.checkDuplicates !== false) {
+    const dupResult = verifyArtifactDuplicates({ rootDir });
+    duplicateErrors = dupResult.errorCount;
+    if (duplicateErrors > 0 && !options.silent) {
+      console.log(
+        pc.red(
+          `\n  ✖ [Shift-Left Gate] Se detectaron ${duplicateErrors} colisiones/duplicados de requisitos en el espacio de trabajo:`
+        )
+      );
+      for (const issue of dupResult.issues.filter((i) => i.severity === 'ERROR')) {
+        console.log(`    ${pc.red('✖')} [${issue.type}] ${issue.id} en ${issue.file}: ${issue.message}`);
+      }
+    }
+  }
+
+  const isOk = invalidCount === 0 && duplicateErrors === 0;
   if (!options.silent) {
     console.log(
       isOk
-        ? pc.green('\n✔ Integración SDD Conforme: Todos los sidecars son válidos.\n')
-        : pc.red('\n✖ Integración SDD Bloqueada: Se detectaron sidecars no conformes.\n')
+        ? pc.green('\n✔ Integración SDD Conforme: Todos los sidecars y requisitos son válidos.\n')
+        : pc.red('\n✖ Integración SDD Bloqueada: Se detectaron sidecars no conformes o requisitos duplicados.\n')
     );
   }
 
