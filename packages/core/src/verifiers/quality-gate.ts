@@ -13,10 +13,14 @@ import {
   QualityPolicy,
   QualityThresholds,
 } from '../types/index.js';
+import { extractFunctionsTypeScriptAst } from './ast/typescript-ast.js';
+import { extractFunctionsPolyglot } from './ast/polyglot-scanner.js';
 
 export const DEFAULT_EXTENSIONS: readonly string[] = [
   '.ts',
+  '.tsx',
   '.js',
+  '.jsx',
   '.py',
   '.java',
   '.go',
@@ -234,108 +238,26 @@ export function calculateMetrics(fnBody: string, fnName: string, filePath: strin
   };
 }
 
+const TS_JS_EXTENSIONS: readonly string[] = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
+
 export function extractFunctionsPython(content: string, filePath: string): FunctionMetrics[] {
-  const functions: FunctionMetrics[] = [];
-  const lines = content.split('\n');
-  let currentFn: string | null = null;
-  let fnLines: string[] = [];
-  let baseIndent = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    const rawLine = lines[i];
-    const match = rawLine.match(/^(\s*)(?:async\s+)?def\s+([a-zA-Z0-9_$]+)\s*\(/);
-
-    if (match) {
-      if (currentFn && fnLines.length > 0) {
-        functions.push(calculateMetrics(fnLines.join('\n'), currentFn, filePath));
-      }
-      currentFn = match[2];
-      baseIndent = match[1].length;
-      fnLines = [rawLine];
-    } else if (currentFn) {
-      const lineIndent = rawLine.length - rawLine.trimStart().length;
-      if (rawLine.trim().length === 0 || lineIndent > baseIndent) {
-        fnLines.push(rawLine);
-      } else {
-        functions.push(calculateMetrics(fnLines.join('\n'), currentFn, filePath));
-        currentFn = null;
-        fnLines = [];
-      }
-    }
-  }
-
-  if (currentFn && fnLines.length > 0) {
-    functions.push(calculateMetrics(fnLines.join('\n'), currentFn, filePath));
-  }
-
-  if (functions.length === 0) {
-    functions.push(calculateMetrics(content, 'module_scope', filePath));
-  }
-
-  return functions;
+  return extractFunctionsPolyglot(content, filePath);
 }
 
 export function extractFunctionsBraceLanguages(content: string, filePath: string): FunctionMetrics[] {
-  const functions: FunctionMetrics[] = [];
-  const lines = content.split('\n');
-  let currentFn: string | null = null;
-  let braceCount = 0;
-  let fnLines: string[] = [];
-
   const ext = path.extname(filePath).toLowerCase();
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    let fnMatch: RegExpMatchArray | null = null;
-    if (ext === '.go') {
-      fnMatch = line.match(/func\s+(?:\([^)]*\)\s*)?([a-zA-Z0-9_$]+)\s*\(/);
-    } else if (ext === '.rs') {
-      fnMatch = line.match(/(?:pub\s+)?(?:async\s+)?fn\s+([a-zA-Z0-9_$]+)\s*\(/);
-    } else {
-      fnMatch = line.match(
-        /(?:(?:public|private|protected|static|async|export|fn)\s+)*(?:function\s+([a-zA-Z0-9_$]+)|(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>|([a-zA-Z0-9_$]+)\s*\([^)]*\)\s*(?::\s*[^{]+\s*)?\{|(?:it|test)\s*\(\s*['"]([^'"]+)['"])/
-      );
-    }
-
-    const keywordExclusions = ['if', 'for', 'while', 'switch', 'catch', 'select', 'match'];
-    if (!currentFn && fnMatch) {
-      const candidate = fnMatch[1] || fnMatch[2] || fnMatch[3] || fnMatch[4];
-      if (candidate && !keywordExclusions.includes(candidate)) {
-        currentFn = candidate;
-        braceCount = 0;
-        fnLines = [];
-      }
-    }
-
-    if (currentFn) {
-      fnLines.push(line);
-      for (const char of line) {
-        if (char === '{') braceCount++;
-        if (char === '}') braceCount--;
-      }
-
-      if (braceCount === 0 && fnLines.length > 1) {
-        functions.push(calculateMetrics(fnLines.join('\n'), currentFn, filePath));
-        currentFn = null;
-        fnLines = [];
-      }
-    }
+  if (TS_JS_EXTENSIONS.includes(ext)) {
+    return extractFunctionsTypeScriptAst(content, filePath);
   }
-
-  if (functions.length === 0) {
-    functions.push(calculateMetrics(content, 'main_module', filePath));
-  }
-
-  return functions;
+  return extractFunctionsPolyglot(content, filePath);
 }
 
 export function extractFunctions(content: string, filePath: string): FunctionMetrics[] {
   const ext = path.extname(filePath).toLowerCase();
-  if (ext === '.py') {
-    return extractFunctionsPython(content, filePath);
+  if (TS_JS_EXTENSIONS.includes(ext)) {
+    return extractFunctionsTypeScriptAst(content, filePath);
   }
-  return extractFunctionsBraceLanguages(content, filePath);
+  return extractFunctionsPolyglot(content, filePath);
 }
 
 export function walkDir(

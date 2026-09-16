@@ -506,6 +506,46 @@ Una vez concluida la implementación del cambio y verificado que todas las tarea
 
 ---
 
+## 🔬 Tutorial 3: Análisis Estático con AST Real y Soporte Multilenguaje
+
+AI-SDLC incluye un motor de análisis estático basado en **Árbol de Sintaxis Abstracta (AST) Real** para medir con precisión matemática la Complejidad Ciclomática (McCabe), Complejidad Cognitiva (SonarQube), Líneas de Código (LOC) e Índice de Mantenibilidad (MI), erradicando por completo los falsos positivos derivados de expresiones regulares heurísticas o conteo ingenuo de llaves.
+
+### 1. Arquitectura Multilenguaje Híbrida
+
+- **TypeScript, JavaScript, TSX y JSX**: Analizados mediante [`ts-morph`](https://github.com/dsherret/ts-morph) (licencia MIT) directamente sobre el AST en memoria.
+  - Reconoce con precisión componentes React funcionales, callbacks, closures, getters/setters y constructores.
+  - Inmune a plantillas con llaves anidadas `${{ a: 1 }}`, atributos JSX (`style={{ ... }}`) y comentarios.
+  - Detecta el uso prohibido de `any` semántico (`SyntaxKind.AnyKeyword`) sin falsos positivos en variables como `company`.
+- **Go, Rust, Java, C#, C, C++ y Python**: Analizados mediante un escáner léxico token-aware determinista.
+  - Aísla comentarios de línea (`//`, `#`) y bloque (`/* ... */`, `""" ... """`).
+  - Protege cadenas de texto, caracteres escapados y raw strings (ej. `r#"..."#` en Rust o backticks en Go).
+
+### 2. Ejemplos Prácticos de Referencia en el Repositorio
+
+El directorio [`examples/ast-analysis/`](examples/ast-analysis/) contiene casos de prueba y módulos representativos en cada lenguaje:
+- [`examples/ast-analysis/component.tsx`](examples/ast-analysis/component.tsx): Componente TSX con hooks, closures y templates anidados.
+- [`examples/ast-analysis/gateway.go`](examples/ast-analysis/gateway.go): Módulo Go con JSON embebido y comentarios con llaves.
+- [`examples/ast-analysis/pipeline.rs`](examples/ast-analysis/pipeline.rs): Módulo Rust con raw strings JSON y pattern matching.
+- [`examples/ast-analysis/analytics.py`](examples/ast-analysis/analytics.py): Módulo Python con docstrings multilínea conteniendo llaves.
+- [`examples/ast-analysis/OrderService.cs`](examples/ast-analysis/OrderService.cs): Servicio C# con interpolación de strings.
+- [`examples/ast-analysis/TelemetryHandler.java`](examples/ast-analysis/TelemetryHandler.java): Clase Java con métodos y try-with-resources.
+
+### 3. Comandos de Verificación de Calidad
+
+Para evaluar la calidad de todo el código del repositorio frente a `quality-policy.yaml`:
+
+```bash
+# Ejecutar verificación de calidad aislada
+pnpm run verify:quality
+# o mediante npx:
+npx aisdlc verify quality
+
+# Ejecutar el pre-vuelo consolidado que incluye la compuerta de calidad AST
+pnpm run check
+```
+
+---
+
 ## 🚀 Guía Rápida para Equipos Humanos
 
 1. **Definir la Intención del Producto**:
