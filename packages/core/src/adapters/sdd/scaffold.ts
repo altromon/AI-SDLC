@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
 import {
+  ChangeProfile,
   ProductHandoff,
   SddChangeScaffoldOptions,
   SddChangeScaffoldResult,
@@ -44,7 +45,7 @@ export function getNextCorrelativeNumber(rootDir: string): number {
       const entries = fs.readdirSync(dir, { withFileTypes: true });
       for (const e of entries) {
         if (!e.isDirectory()) continue;
-        const match = e.name.match(/^(?:chg|CHG)-(\d+)/i);
+        const match = e.name.match(/^(?:chg|CHG|patch|PATCH)-(\d+)/i);
         if (match) {
           const num = parseInt(match[1], 10);
           if (!isNaN(num) && num > maxNum) {
@@ -64,6 +65,7 @@ export function scaffoldSddChange(options: SddChangeScaffoldOptions): SddChangeS
   const rootDir = options.rootDir || process.cwd();
   const framework = options.framework || 'openspec';
   const author = options.author || 'agent-developer / human-dev';
+  const profile: ChangeProfile = options.profile || 'standard';
   const dateStr = new Date().toISOString().split('T')[0];
   const name = options.name.trim();
 
@@ -75,6 +77,7 @@ export function scaffoldSddChange(options: SddChangeScaffoldOptions): SddChangeS
       success: false,
       changeId: '',
       canonicalId: '',
+      profile,
       changeDir: '',
       createdFiles: [],
       citedArtifacts: [],
@@ -87,11 +90,12 @@ export function scaffoldSddChange(options: SddChangeScaffoldOptions): SddChangeS
   let canonicalId: string;
   let padNum = '001';
 
-  if (options.changeId) {
-    const rawId = options.changeId.trim();
+  const targetChangeId = options.changeId || options.id;
+  if (targetChangeId) {
+    const rawId = targetChangeId.trim();
     slug = slugify(rawId);
     canonicalId = rawId.toUpperCase();
-    const match = rawId.match(/^(?:chg|CHG)-(\d+)/i);
+    const match = rawId.match(/^(?:chg|CHG|patch|PATCH)-(\d+)/i);
     if (match) {
       padNum = match[1];
     }
@@ -99,8 +103,9 @@ export function scaffoldSddChange(options: SddChangeScaffoldOptions): SddChangeS
     const nextNum = getNextCorrelativeNumber(rootDir);
     padNum = String(nextNum).padStart(3, '0');
     const nameSlug = slugify(name);
-    slug = `chg-${padNum}-${nameSlug}`;
-    canonicalId = `CHG-${padNum}-${nameSlug.toUpperCase()}`;
+    const prefix = profile === 'patch' ? 'patch' : 'chg';
+    slug = `${prefix}-${padNum}-${nameSlug}`;
+    canonicalId = `${prefix.toUpperCase()}-${padNum}-${nameSlug.toUpperCase()}`;
   }
 
   // 2. Determine target change workspace folder
@@ -114,6 +119,7 @@ export function scaffoldSddChange(options: SddChangeScaffoldOptions): SddChangeS
         success: false,
         changeId: slug,
         canonicalId,
+        profile,
         changeDir,
         createdFiles: [],
         citedArtifacts: [],
@@ -165,6 +171,73 @@ export function scaffoldSddChange(options: SddChangeScaffoldOptions): SddChangeS
   const subUseCases: string[] = [];
   const subSecReqs: string[] = [];
   const subRules: string[] = [];
+
+  // Patch profile shortcut: only spec.md with profile: patch is created
+  if (profile === 'patch') {
+    for (const id of inputFromIds) {
+      const existing = artifactMap.get(id);
+      if (existing) {
+        citedArtifacts.push({
+          id: existing.id,
+          digest: `sha256:${existing.digest}`,
+          title: existing.title,
+          comment: `Citación de ${existing.frontmatter?.type || 'artefacto'} (${existing.title || existing.id})`,
+        });
+      }
+    }
+
+    const citationsSection =
+      citedArtifacts.length > 0
+        ? `citations:\n${yaml
+            .dump(
+              citedArtifacts.map((c) => ({ id: c.id, digest: c.digest, comment: c.comment })),
+              { indent: 2, lineWidth: -1 }
+            )
+            .trim()
+            .split('\n')
+            .map((l) => `  ${l}`)
+            .join('\n')}\n`
+        : '';
+
+    const specPath = path.join(changeDir, 'spec.md');
+    const specContent = `---
+id: SPEC-${canonicalId}
+type: delivery-spec
+change-id: ${canonicalId}
+profile: patch
+${citationsSection}verification:
+  method: automated-test
+  command: pnpm test
+---
+
+# Especificación de Entrega (Parche Rápido): ${canonicalId}
+
+## 1. Alcance y Justificación del Parche
+${name}
+
+## 2. Verificación Automatizada
+- **Comando**: \`pnpm test\`
+- **Criterio**: Todas las pruebas unitarias y de regresión deben ejecutarse y pasar satisfactoriamente.
+`;
+    fs.writeFileSync(specPath, specContent, 'utf-8');
+    createdFiles.push(specPath);
+
+    const wsValidation = adapter.validateWorkspace(changeDir);
+    if (!wsValidation.valid) {
+      errors.push(...wsValidation.errors);
+    }
+
+    return {
+      success: errors.length === 0,
+      changeId: slug,
+      canonicalId,
+      profile,
+      changeDir,
+      createdFiles,
+      citedArtifacts,
+      errors,
+    };
+  }
 
   // 4. Handle Option A: Greenfield feature or explicit citations
   if (inputFromIds.length === 0) {
@@ -380,7 +453,14 @@ ${name}
 
   // 7. Generate spec.md
   const specPath = path.join(changeDir, 'spec.md');
-  const specContent = `# Especificación de Entrega: ${canonicalId}
+  const specContent = `---
+id: SPEC-${canonicalId}
+type: delivery-spec
+change-id: ${canonicalId}
+profile: ${profile}
+---
+
+# Especificación de Entrega: ${canonicalId}
 
 ## 1. Escenarios de Comportamiento Funcional
 
@@ -588,6 +668,7 @@ ${yaml.dump(tasksFm, { indent: 2, lineWidth: -1 }).trim()}
     success: errors.length === 0,
     changeId: slug,
     canonicalId,
+    profile,
     changeDir,
     createdFiles,
     productArtifactCreated,

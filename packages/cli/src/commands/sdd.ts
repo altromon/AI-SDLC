@@ -6,6 +6,7 @@
 import * as path from 'path';
 import pc from 'picocolors';
 import {
+  ChangeProfile,
   depositProductHandoffSidecar,
   detectActiveChangeForIntegration,
   integrateSddChange,
@@ -251,6 +252,7 @@ export interface ChangeNewCliOptions {
   name: string;
   from?: string | string[];
   id?: string;
+  profile?: ChangeProfile;
   framework?: SddFramework;
   author?: string;
   silent?: boolean;
@@ -273,6 +275,7 @@ export function runChangeNew(options: ChangeNewCliOptions): boolean {
     rootDir,
     name,
     changeId: options.id,
+    profile: options.profile,
     from: options.from,
     framework,
     author: options.author,
@@ -283,6 +286,7 @@ export function runChangeNew(options: ChangeNewCliOptions): boolean {
     if (result.success) {
       console.log(`  ${pc.green('✔')} Directorio del cambio: ${pc.bold(result.changeDir)}`);
       console.log(`  ${pc.green('✔')} ID de Cambio SDD:     ${pc.cyan(result.canonicalId)} (${result.changeId})`);
+      console.log(`  ${pc.green('✔')} Perfil de riesgo:      ${pc.magenta(result.profile || 'standard')}`);
       if (result.productArtifactCreated) {
         console.log(`  ${pc.green('✔')} Artefacto de producto:  ${pc.bold(result.productArtifactCreated)} (status: draft)`);
       }

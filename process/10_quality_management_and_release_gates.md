@@ -126,6 +126,53 @@ Para que una versión candidata sea autorizada para su paso a producción por el
    - **Estrategia y Procedimiento de Despliegue**: Enclaves de red (`SEC-ENC-*`), secretos/certificados mTLS, verificación de salud y plan de rollback inmediato.
    - **Runbooks de Errores Probables**: Diagnóstico y mitigación paso a paso de fallos típicos en producción (mTLS, fugas OOM, desconexiones, límites de red).
 
+### 4.2 Puertas de Calidad Adaptativas por Perfil de Riesgo (Progressive Friction Gates)
+
+Las compuertas de liberación no imponen la misma fricción burocrática a todos los cambios; evalúan los artefactos y exigencias en función del campo `profile` declarado en el frontmatter de `spec.md`:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│             PUERTAS DE CALIDAD POR PERFIL DE FRICCIÓN                  │
+└────────────────────────────────────────────────────────────────────────┘
+
+ 1. PERFIL PATCH (Baja Fricción / Hotfixes & Refactors Cosméticos)
+    ├── Frontmatter: profile: patch en spec.md
+    ├── Gates Obligatorios:
+    │   • Linters y Tipado Estricto (cero errores / cero any).
+    │   • Ejecución exitosa del comando de verificación declarado en spec.md.
+    │   • Guardrail Determinista Anti-Patch Bypass (100% libre de rutas protegidas).
+    └── Exenciones Formales:
+        • Exento de RTM 360° inversa (no requiere handoff.yaml).
+        • Exento de modelado STRIDE formal.
+        • Exento de actualización de manuales MAN-USER-* y MAN-PROD-*.
+
+ 2. PERFIL STANDARD (Fricción Nominal / Casos de Uso Estándar)
+    ├── Frontmatter: profile: standard en spec.md
+    └── Gates Obligatorios:
+        • Suite completa CI/CD: Linters, tipado y tests unitarios.
+        • Calidad de código: CC <= 10, MI >= 50, Duplicación <= 3%, Cobertura >= 85%.
+        • RTM 360° Conforme (reverse lookup entre HOF-*, arc42 y .feature).
+        • Todas las tareas de tasks.md en estado COMPLETED.
+
+ 3. PERFIL CRITICAL (Alta Fricción / Criptografía, Secretos y Enclaves)
+    ├── Frontmatter: profile: critical en spec.md
+    └── Gates Obligatorios:
+        • Todas las compuertas del Perfil Standard al 100%.
+        • Modelado formal de amenazas STRIDE / OWASP ASVS aprobado.
+        • Registro de Decisión Arquitectónica (ADR-*) formalmente aprobado.
+        • Verificación de enclaves Zero Trust (SEC-ENC-*).
+        • Doble aprobación humana en PR (Tech Lead + SecOps/Arquitecto).
+
+ 4. GUARDRAIL DETERMINISTA ANTI-PATCH BYPASS
+    ├── Disparador: Cambio declarado con profile: patch en su spec.md.
+    ├── Condición de Fallo Inmediato: Si el diff incluye modificaciones en:
+    │   • schemas/**
+    │   • quality-policy.yaml o license-policy.yaml
+    │   • examples/security/** o enclaves SEC-ENC-*
+    │   • Migraciones de base de datos o almacenamiento persistente
+    └── Acción: RECHAZO AUTOMÁTICO DE CI/CD (EXIT 1) con exigencia de reclasificación.
+```
+
 ---
 
 ## 5. Política de Excepciones y Gestión de Deuda Técnica
