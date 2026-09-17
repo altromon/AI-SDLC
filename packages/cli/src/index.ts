@@ -125,12 +125,26 @@ verifyCommand
 
 verifyCommand
   .command('licenses')
-  .description('Verifica el cumplimiento de licencias OSS frente a license-policy.yaml')
+  .description('Verifica el cumplimiento de licencias OSS frente a license-policy.yaml (SCA dinámico y SBOM)')
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
   .option('-p, --policy <path>', 'Ruta a license-policy.yaml')
   .option('-m, --manifest <path>', 'Ruta a license-manifest.yaml')
+  .option('--no-dynamic', 'Desactiva el escaneo dinámico y exige archivo de manifiesto estático')
+  .option('--sbom [path]', 'Genera archivo SBOM en formato estándar CycloneDX 1.5 JSON')
+  .option('--notices [path]', 'Genera archivo de avisos y atribuciones legales THIRD_PARTY_NOTICES.md')
+  .option('--tool <tool>', 'Herramienta SCA: native, trivy, syft', 'native')
+  .option('--depth <depth>', 'Profundidad de análisis: direct o transitive', 'transitive')
   .action((opts) => {
-    const passed = runVerifyLicenses({ root: opts.root, policy: opts.policy, manifest: opts.manifest });
+    const passed = runVerifyLicenses({
+      root: opts.root,
+      policy: opts.policy,
+      manifest: opts.manifest,
+      dynamic: opts.dynamic,
+      tool: opts.tool,
+      depth: opts.depth,
+      sbom: opts.sbom,
+      notices: opts.notices,
+    });
     process.exit(passed ? 0 : 1);
   });
 

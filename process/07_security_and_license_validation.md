@@ -24,10 +24,10 @@ Todo Pull Request propuesto por un desarrollador humano o por un agente debe sup
   └─► Comprueba que los hashes SHA-256 de los requerimientos citados coincidan.
       Si un requisito cambió en la línea base, la citación da 'stale' (Fallo).
 
- [PUERTA 3: AUDITORÍA DE LICENCIAS Y GENERACIÓN SBOM] (license-scanner / syft)
-  └─► Valida el árbol completo de dependencias contra license-policy.yaml.
+ [PUERTA 3: AUDITORÍA DE LICENCIAS Y GENERACIÓN SBOM] (aisdlc verify licenses / Trivy / Syft)
+  └─► Escaneo dinámico nativo de node_modules y lockfiles contra license-policy.yaml.
       Falla si hay licencias virales (AGPL) o duales/comerciales no aprobadas.
-      Genera SBOM en formato CycloneDX (JSON) y actualiza THIRD_PARTY_NOTICES.md.
+      Genera automáticamente SBOM en formato estándar CycloneDX 1.5 JSON y THIRD_PARTY_NOTICES.md.
 
  [PUERTA 4: SAST & ANÁLISIS ESTÁTICO DE CÓDIGO] (Semgrep / SonarQube)
   └─► Detección de vulnerabilidades OWASP Top 10, CWEs e inyecciones.

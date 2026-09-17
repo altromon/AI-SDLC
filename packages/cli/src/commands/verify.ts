@@ -157,18 +157,52 @@ export function runVerifyTesting(options: { root?: string; silent?: boolean }): 
   return isOk;
 }
 
-export function runVerifyLicenses(options: { root?: string; policy?: string; manifest?: string; silent?: boolean }): boolean {
+export interface LicenseVerifyOptions {
+  root?: string;
+  policy?: string;
+  manifest?: string;
+  dynamic?: boolean;
+  tool?: 'native' | 'license-checker' | 'trivy' | 'syft';
+  depth?: 'direct' | 'transitive';
+  sbom?: boolean | string;
+  notices?: boolean | string;
+  silent?: boolean;
+}
+
+export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
   if (!options.silent) {
-    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Cumplimiento de Licencias Open Source...')));
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Cumplimiento de Licencias Open Source (SCA)...')));
   }
 
-  const result = verifyLicenses({ rootDir, policyPath: options.policy, manifestPath: options.manifest });
+  const sbomPath = typeof options.sbom === 'string' ? options.sbom : undefined;
+  const generateSbom = options.sbom !== undefined ? Boolean(options.sbom) : undefined;
+  const noticesPath = typeof options.notices === 'string' ? options.notices : undefined;
+  const generateNotices = options.notices !== undefined ? Boolean(options.notices) : undefined;
+
+  const result = verifyLicenses({
+    rootDir,
+    policyPath: options.policy,
+    manifestPath: options.manifest,
+    dynamic: options.dynamic,
+    tool: options.tool,
+    depth: options.depth,
+    generateSbom,
+    sbomPath,
+    generateNotices,
+    noticesPath,
+  });
 
   if (!options.silent) {
     console.log(`  Dependencias evaluadas:   ${pc.bold(String(result.totalEvaluated))}`);
     console.log(`  Dependencias conformes:   ${pc.green(String(result.permittedCount))}`);
     console.log(`  Violaciones de licencia:  ${result.violations.length > 0 ? pc.red(String(result.violations.length)) : pc.green('0')}`);
+    if (result.sbomPath) {
+      console.log(`  SBOM CycloneDX generado:  ${pc.cyan(result.sbomPath)}`);
+    }
+    if (result.noticesPath) {
+      console.log(`  Avisos legales generados: ${pc.cyan(result.noticesPath)}`);
+    }
 
     if (result.violations.length > 0) {
       console.log(pc.red('\n  Infracciones de licencia detectadas:'));

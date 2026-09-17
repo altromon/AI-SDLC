@@ -29,6 +29,10 @@ categories:
       - "CC0-1.0"
       - "0BSD"
       - "Zlib"
+      - "BlueOak-1.0.0"
+      - "Python-2.0"
+      - "CC-BY-3.0"
+      - "CC-BY-4.0"
 
   # Categoría B: Copyleft Débil (Uso condicionado a desacoplamiento arquitectónico)
   weak_copyleft_conditional:

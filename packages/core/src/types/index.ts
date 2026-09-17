@@ -395,10 +395,65 @@ export interface LicenseViolation {
   category: 'BLOCKED' | 'RESTRICTED' | 'UNRECOGNIZED';
 }
 
+export type ScaTool = 'native' | 'license-checker' | 'trivy' | 'syft';
+
+export interface ScannedDependency {
+  name: string;
+  version: string;
+  spdxLicense: string;
+  purl?: string;
+  path?: string;
+  licenseFile?: string;
+  repository?: string;
+  author?: string;
+  isDirect?: boolean;
+}
+
+export interface CycloneDxLicense {
+  license: {
+    id?: string;
+    name?: string;
+  };
+}
+
+export interface CycloneDxComponent {
+  type: 'library' | 'application' | 'framework';
+  name: string;
+  version: string;
+  purl?: string;
+  author?: string;
+  licenses?: CycloneDxLicense[];
+}
+
+export interface CycloneDxBom {
+  bomFormat: 'CycloneDX';
+  specVersion: '1.5';
+  version: number;
+  serialNumber: string;
+  metadata: {
+    timestamp: string;
+    tools: Array<{ vendor: string; name: string; version: string }>;
+    component: {
+      type: string;
+      name: string;
+      version: string;
+    };
+  };
+  components: CycloneDxComponent[];
+}
+
 export interface LicenseVerificationOptions {
   rootDir?: string;
   policyPath?: string;
   manifestPath?: string;
+  dynamic?: boolean;
+  tool?: ScaTool;
+  depth?: 'direct' | 'transitive';
+  generateSbom?: boolean;
+  sbomPath?: string;
+  generateNotices?: boolean;
+  noticesPath?: string;
+  productionOnly?: boolean;
 }
 
 export interface LicenseVerificationResult {
@@ -407,6 +462,9 @@ export interface LicenseVerificationResult {
   permittedCount: number;
   violations: LicenseViolation[];
   reportMarkdown: string;
+  sbomPath?: string;
+  noticesPath?: string;
+  scannedDependencies?: ScannedDependency[];
 }
 
 // --- PDaC Graph & Cryptographic Drift Types ---

@@ -169,12 +169,12 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc git plan` | `pnpm run git:plan` | **Planificación Git** | Renderiza el árbol visual de jerarquía de ramas antes de trabajar |
 | `npx aisdlc git validate <rama>` | `pnpm run git:validate <rama>` | **Gobierno Git** | Valida la nomenclatura estricta de cualquier rama según su Tier (1 a 4) |
 | `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Pre-vuelo Unificado** | Sincroniza bloques Gherkin a `.feature`, actualiza digests SHA-256 PDaC y verifica Quality Gates |
-| `npx aisdlc verify all` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 7 Quality Gates (Calidad, Trazabilidad 360°, Tareas, Tests, Licencias, PDaC, Schemas) |
+| `npx aisdlc verify all` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 8 Quality Gates (Calidad AST, Trazabilidad 360°, Tareas, Tests, Licencias/SCA, PDaC, Schemas, Duplicados) |
 | `npx aisdlc verify quality` | `pnpm run verify:quality` | **Release Gate de Código** | Evalúa Complejidad Ciclomática ($\le 10$), Cognitiva ($\le 15$) y Mantenibilidad ($\ge 50$) |
 | `npx aisdlc verify traceability` | `pnpm run verify:traceability` | **Matriz 360° RTM** | Valida triangulación obligatoria: Producto (`HOF-*`) ➔ Arquitectura (`CMP-*`) ➔ Tests (`.feature`) |
 | `npx aisdlc verify governance` | `pnpm run verify:governance` | **Gobierno de Tareas** | Audita modos de autonomía (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `HIGH_RISK_MANUAL`, `AMBIGUOUS`) |
 | `npx aisdlc verify testing` | `pnpm run verify:testing` | **Auditoría de Tests** | Comprueba que el 100% de requerimientos y tareas cuentan con pruebas verificables en disco |
-| `npx aisdlc verify licenses` | `pnpm run verify:licenses` | **Gobernanza IP / OSS** | Audita dependencias frente a `license-policy.yaml` (bloquea virales y condiciona comerciales) |
+| `npx aisdlc verify licenses [opciones]` | `pnpm run verify:licenses` | **Gobernanza IP / OSS y SCA** | Escaneo dinámico de dependencias y generación de SBOM CycloneDX 1.5 y avisos de terceros (`THIRD_PARTY_NOTICES.md`) frente a `license-policy.yaml` |
 | `npx aisdlc verify pdac` | `pnpm run verify:pdac` | **Integridad Criptográfica**| Detecta derivas (*drift*) en el grafo PDaC comparando hashes SHA-256 |
 | `npx aisdlc verify schemas` | `pnpm run verify:schemas` | **Conformidad Estructural** | Valida artefactos Markdown frente a esquemas JSON canónicos (Draft 2020-12) |
 | `npx aisdlc sdd verify` | - | **Conformidad SDD** | Audita que los cambios activos cumplan la especificación y contengan sidecars válidos |
@@ -308,12 +308,20 @@ Antes de incorporar cualquier dependencia o paquete de terceros:
    - 🔴 **Virales (Prohibidas)**: `GPL-2.0`, `GPL-3.0`, `AGPL-3.0` (bloqueadas para proteger la propiedad intelectual del código propietario y SaaS).
    - ⚠️ **Comerciales / Duales (Pago Requerido)**: `BSL-1.1`, `SSPL-1.0` (requieren aprobación y formulario formal en `templates/compliance/commercial-acquisition-request.template.md`).
 
-2. **Auditar Licencias con el Comando Simplificado**:
+2. **Auditar Licencias y Composición de Software (SCA) con el Comando Simplificado**:
    ```bash
    pnpm run verify:licenses
    # o: npx aisdlc verify licenses
+   
+   # Opcional: Generar SBOM CycloneDX 1.5 y Notices de Atribución en un solo paso
+   npx aisdlc verify licenses --sbom reports/sbom.cdx.json --notices THIRD_PARTY_NOTICES.md
    ```
-   *Efecto*: Bloquea la entrega si detecta librerías no autorizadas y genera `reports/LICENSE_COMPLIANCE_REPORT.md`.
+   *Efecto*:
+   - Ejecuta un escaneo dinámico determinista sobre los paquetes reales instalados en `node_modules` y `.pnpm` (o mediante `--tool trivy` / `--tool syft` si están instalados).
+   - Bloquea la entrega si detecta licencias prohibidas o comerciales no homologadas.
+   - Genera `reports/LICENSE_COMPLIANCE_REPORT.md` con el estado formal del Quality Gate.
+   - Si se solicita `--sbom`, exporta el inventario estándar en formato CycloneDX 1.5 JSON.
+   - Si se solicita `--notices`, consolida las atribuciones legales y textos de copyright en Markdown.
 
 ---
 
@@ -543,6 +551,49 @@ npx aisdlc verify quality
 # Ejecutar el pre-vuelo consolidado que incluye la compuerta de calidad AST
 pnpm run check
 ```
+
+---
+
+## 🛡️ Tutorial 4: Escaneo Dinámico de Licencias y Generación de SBOM (SCA)
+
+AI-SDLC incluye un motor de análisis de composición de software (SCA) y gobernanza de licencias dinámico con capacidad de introspección directa sobre el árbol instalado de dependencias (`node_modules` / `.pnpm`), generación de SBOM estándar **CycloneDX 1.5** y consolidación automática de atribuciones legales (`THIRD_PARTY_NOTICES.md`).
+
+### 1. Modos de Escaneo: Nativo Zero-Install y Conectores de Terceros
+
+- **Escaneo Dinámico Nativo (Por Defecto)**:
+  - Inspecciona deterministamente las dependencias reales instaladas en disco (`node_modules` y carpetas de monorepos pnpm), resolviendo paquetes físicos y enlaces simbólicos.
+  - Extrae metadatos precisos de `package.json`, resuelve expresiones compuestas (`AND` / `OR`) y detecta ficheros de licencia físicos (`LICENSE`, `COPYING`, `NOTICE`) para incorporar los textos completos de atribución.
+  - No requiere la instalación de binarios externos ni herramientas adicionales.
+- **Conectores Opcionales Bring-Your-Own-Tool (`--tool`)**:
+  - Si el entorno dispone de herramientas corporativas como **Trivy** (`--tool trivy`) o **Syft** (`--tool syft`), AI-SDLC se conecta a sus salidas JSON/CycloneDX nativas.
+  - Implementa *graceful fallback*: si el binario especificado no se encuentra en el sistema, retrocede automáticamente al escáner nativo sin romper el pipeline.
+
+### 2. Comandos y Generación de Entregables de Compliance
+
+```bash
+# Verificación estándar de licencias dinámicas frente a license-policy.yaml
+pnpm run verify:licenses
+# o mediante npx:
+npx aisdlc verify licenses
+
+# Generar SBOM en formato CycloneDX 1.5 JSON para auditorías o inventario
+npx aisdlc verify licenses --sbom reports/sbom.cdx.json
+
+# Generar el dossier legal consolidado de atribución THIRD_PARTY_NOTICES.md
+npx aisdlc verify licenses --notices THIRD_PARTY_NOTICES.md
+
+# Generar simultáneamente SBOM y Notices limitando el escaneo a dependencias directas
+npx aisdlc verify licenses --sbom reports/sbom.cdx.json --notices THIRD_PARTY_NOTICES.md --depth direct
+
+# Integrar con Trivy o Syft en runners corporativos de CI/CD
+npx aisdlc verify licenses --tool trivy --sbom reports/trivy-sbom.cdx.json
+```
+
+### 3. Salidas y Artefactos Producidos
+
+- **`reports/LICENSE_COMPLIANCE_REPORT.md`**: Informe formal con desglose por categoría (Permisivas, Copyleft, Comerciales, Prohibidas), dependencias analizadas y estado del Quality Gate.
+- **`reports/sbom.cdx.json`**: Software Bill of Materials (CycloneDX 1.5) con metadatos completos de componentes, hashes y licencias SPDX.
+- **`THIRD_PARTY_NOTICES.md`**: Archivo de atribución legal que agrupa paquetes por licencia y reproduce los textos íntegros de copyright requeridos por licencias MIT, Apache-2.0, BSD, etc.
 
 ---
 
