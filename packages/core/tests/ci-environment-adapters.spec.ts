@@ -5,10 +5,9 @@ import * as os from 'os';
 import {
   resolveCiEnvironment,
   emitCiOutput,
-  runCiIntegration,
-} from '../../../scripts/sdd-integrate-ci.js';
+} from '../src/index.js';
 
-describe('Multi-Platform CI/CD Environment Adapters & SDD Integration', () => {
+describe('Multi-Platform CI/CD Environment Adapters', () => {
   let tempDir: string;
 
   beforeEach(() => {
@@ -152,20 +151,6 @@ describe('Multi-Platform CI/CD Environment Adapters & SDD Integration', () => {
       const content = fs.readFileSync(dotenvFile, 'utf-8');
       expect(content).toContain('INTEGRATED=true\n');
       expect(content).toContain('CHANGE_ID=chg-022-test\n');
-    });
-  });
-
-  describe('runCiIntegration execution safety', () => {
-    it('should safely exit with code 0 when no active changes exist', () => {
-      const exitCode = runCiIntegration({
-        rootDir: tempDir,
-        env: {
-          GITLAB_CI: 'true',
-          CI_MERGE_REQUEST_SOURCE_BRANCH_NAME: 'feat/non-existent',
-        },
-      });
-
-      expect(exitCode).toBe(0);
     });
   });
 });

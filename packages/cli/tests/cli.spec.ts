@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { runGitPlan, runGitValidate } from '../src/commands/git.js';
 import { runInit } from '../src/commands/init.js';
 import { runSddDeposit, runSddIntegrate, runSddVerify } from '../src/commands/sdd.js';
+import { runCiIntegration } from '../../../scripts/sdd-integrate-ci.js';
 import {
   runVerifyAll,
   runVerifyDuplicates,
@@ -72,6 +73,22 @@ describe('@ai-sdlc/cli Command Suite', () => {
       expect(fs.existsSync(path.join(githubTarget, '.github', 'workflows', 'sdd-integrate-on-merge.yml'))).toBe(true);
     } finally {
       fs.rmSync(tempInitDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should run runCiIntegration safely when no active change exists', () => {
+    const tempDir = fs.mkdtempSync(path.join(process.cwd(), 'temp-ci-run-test-'));
+    try {
+      const exitCode = runCiIntegration({
+        rootDir: tempDir,
+        env: {
+          GITLAB_CI: 'true',
+          CI_MERGE_REQUEST_SOURCE_BRANCH_NAME: 'feat/non-existent',
+        },
+      });
+      expect(exitCode).toBe(0);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
     }
   });
 
