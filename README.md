@@ -169,6 +169,9 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Gestión Git 4-Tiers** | Resuelve versión y crea en cascada: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
 | `npx aisdlc git plan` | `pnpm run git:plan` | **Planificación Git** | Renderiza el árbol visual de jerarquía de ramas antes de trabajar |
 | `npx aisdlc git validate <rama>` | `pnpm run git:validate <rama>` | **Gobierno Git** | Valida la nomenclatura estricta de cualquier rama según su Tier (1 a 4) |
+| `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Telemetría Git** | Instala el hook `prepare-commit-msg` para inyección automática de trailers en commits |
+| `npx aisdlc kpi pr [opciones]` | `pnpm run kpi:pr` | **Métricas Pull Request** | Calcula y genera la tabla Markdown agregada de KPIs (tiempo, tokens, autoría) para el PR |
+| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Consolidado de Release** | Computa DIR por modelo/humano, densidad de defectos y coste de re-trabajo (`RELEASE_KPIS_<release>.md`) |
 | `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Pre-vuelo Unificado** | Sincroniza bloques Gherkin a `.feature`, actualiza digests SHA-256 PDaC, audita seguridad y verifica Quality Gates |
 | `npx aisdlc verify all` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 9 Quality Gates (Calidad AST, Trazabilidad 360°, Gobierno, Tests, Licencias/SCA, PDaC, Schemas, Duplicados, Seguridad) |
 | `npx aisdlc verify security [opciones]` | `pnpm run verify:security` | **Seguridad Shift-Left (Gate 9)** | Verificación unificada de secretos (Gitleaks) y SAST determinista (OWASP Top 10) |

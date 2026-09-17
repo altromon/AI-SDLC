@@ -7,8 +7,9 @@ import { Command } from 'commander';
 import pc from 'picocolors';
 import { runCheck } from './commands/check.js';
 import { runGherkinExtract } from './commands/gherkin.js';
-import { runGitCheckout, runGitPlan, runGitValidate } from './commands/git.js';
+import { runGitCheckout, runGitHookInstall, runGitPlan, runGitValidate } from './commands/git.js';
 import { runInit } from './commands/init.js';
+import { runKpiPr, runKpiRelease } from './commands/kpi.js';
 import { runReportQuality } from './commands/report.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
@@ -323,6 +324,61 @@ gitCommand
     process.exit(passed ? 0 : 1);
   });
 
+const gitHookCommand = gitCommand
+  .command('hook')
+  .description('Gestión e instalación de Git Hooks automatizados de AI-SDLC');
+
+gitHookCommand
+  .command('install')
+  .description('Instala el hook prepare-commit-msg para inyección automática de trailers en commits')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .action((opts) => {
+    const passed = runGitHookInstall({ root: opts.root });
+    process.exit(passed ? 0 : 1);
+  });
+
+// --- kpi command suite ---
+const kpiCommand = program
+  .command('kpi')
+  .description('Herramientas de agregación de métricas, telemetría y KPIs (PR y Release)');
+
+kpiCommand
+  .command('pr')
+  .description('Calcula y genera la tabla Markdown agregada de KPIs para un Pull Request')
+  .option('-b, --base <branch>', 'Rama base de comparación', 'main')
+  .option('-h, --head <branch>', 'Rama origen o HEAD', 'HEAD')
+  .option('-u, --update-file <path>', 'Archivo donde inyectar el bloque de KPIs (ej. .github/PULL_REQUEST_TEMPLATE.md)')
+  .option('--json', 'Imprime la salida en formato JSON estructurado')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .action((opts) => {
+    const passed = runKpiPr({
+      base: opts.base,
+      head: opts.head,
+      updateFile: opts.updateFile,
+      json: opts.json,
+      root: opts.root,
+    });
+    process.exit(passed ? 0 : 1);
+  });
+
+kpiCommand
+  .command('release')
+  .description('Consolida los KPIs de la release, DIR por modelo/humano y costes de re-trabajo')
+  .requiredOption('--release <branch>', 'Rama de la release a auditar (ej. release/v1.1.0)')
+  .option('-b, --base <branch>', 'Rama base estable (ej. main)', 'main')
+  .option('-o, --output <dir>', 'Directorio de salida para los informes (por defecto reports/releases/)')
+  .option('--json', 'Imprime la salida en formato JSON estructurado')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .action((opts) => {
+    const passed = runKpiRelease({
+      release: opts.release,
+      base: opts.base,
+      output: opts.output,
+      json: opts.json,
+      root: opts.root,
+    });
+    process.exit(passed ? 0 : 1);
+  });
 
 // --- change command suite ---
 const changeCommand = program

@@ -7,6 +7,7 @@ import {
   classifyBranch,
   generateBranchHierarchyPlan,
   checkoutTaskBranch,
+  installGitHooks,
 } from '@ai-sdlc/core';
 
 export function runGitValidate(branchName: string): boolean {
@@ -82,5 +83,19 @@ export function runGitCheckout(taskId: string, options: { root?: string } = {}):
   console.log(pc.green(`\n✔ [CHECKOUT] Cambio a la rama de trabajo exitoso:`));
   console.log(`  👉 ${pc.bold(pc.cyan(result.switchedBranch || result.taskBranch || ''))}\n`);
   return true;
+}
+
+export function runGitHookInstall(options: { root?: string } = {}): boolean {
+  const rootDir = options.root || process.cwd();
+  console.log(pc.cyan(`\n🔧 [AI-SDLC Git] Instalando hook determinista para commit trailers...`));
+  const result = installGitHooks(rootDir);
+  if (result.success) {
+    console.log(pc.green(`✔ [CONFORME] Git Hook instalado exitosamente en:`));
+    console.log(`  👉 ${pc.bold(result.hookPath || '.git/hooks/prepare-commit-msg')}\n`);
+    return true;
+  } else {
+    console.error(pc.red(`\n✖ [ERROR] ${result.error}\n`));
+    return false;
+  }
 }
 
