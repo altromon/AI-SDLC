@@ -1,0 +1,80 @@
+name: SDD Canonical Integration on Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+      - 'release/**'
+  workflow_dispatch:
+    inputs:
+      change_id:
+        description: 'ID del cambio SDD a integrar manualmente (ej. chg-001-telemetry)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: sdd-integrate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  integrate-sdd:
+    name: SDD Canonical Integration
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref || github.ref_name }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm approve-builds --all
+
+      - name: Build Packages
+        run: pnpm run build
+
+      - name: Detect and Integrate SDD Change
+        id: integrate
+        env:
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          MANUAL_CHANGE_ID: ${{ github.event.inputs.change_id }}
+        run: |
+          npx tsx scripts/sdd-integrate-ci.ts
+
+      - name: Commit and Push Canonical Baseline Changes
+        if: steps.integrate.outputs.integrated == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            CHANGE_ID="${{ steps.integrate.outputs.change_id }}"
+            git commit -m "chore(sdd): integrate ${CHANGE_ID} into canonical baseline [skip ci]"
+            git push
+            echo "✔ Integración canónica commiteada y sincronizada en el repositorio."
+          else
+            echo "ℹ No se generaron modificaciones pendientes en el working tree."
+          fi

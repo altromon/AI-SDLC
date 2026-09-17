@@ -36,6 +36,45 @@ describe('@ai-sdlc/cli Command Suite', () => {
     expect(runInit('test-scaffold', { dryRun: true })).toBe(true);
   });
 
+  it('should support multi-CI flags in dry-run and validate providers', () => {
+    expect(runInit('test-scaffold', { dryRun: true, ci: 'gitlab' })).toBe(true);
+    expect(runInit('test-scaffold', { dryRun: true, ci: 'azure' })).toBe(true);
+    expect(runInit('test-scaffold', { dryRun: true, ci: 'bitbucket' })).toBe(true);
+    expect(runInit('test-scaffold', { dryRun: true, ci: 'github' })).toBe(true);
+    expect(runInit('test-scaffold', { dryRun: true, ci: 'invalid-provider' })).toBe(false);
+  });
+
+  it('should deposit expected CI configuration files upon real init execution', () => {
+    const tempInitDir = fs.mkdtempSync(path.join(process.cwd(), 'temp-init-test-'));
+    try {
+      // Test GitLab CI scaffolding
+      const gitlabTarget = path.join(tempInitDir, 'gitlab-proj');
+      expect(runInit(gitlabTarget, { ci: 'gitlab' })).toBe(true);
+      expect(fs.existsSync(path.join(gitlabTarget, '.gitlab-ci.yml'))).toBe(true);
+      expect(fs.existsSync(path.join(gitlabTarget, 'templates', 'ci', '.gitlab-ci.yml'))).toBe(true);
+      expect(fs.existsSync(path.join(gitlabTarget, 'templates', 'ci', 'azure-pipelines.yml'))).toBe(true);
+      expect(fs.existsSync(path.join(gitlabTarget, 'templates', 'ci', 'bitbucket-pipelines.yml'))).toBe(true);
+
+      // Test Azure DevOps scaffolding
+      const azureTarget = path.join(tempInitDir, 'azure-proj');
+      expect(runInit(azureTarget, { ci: 'azure' })).toBe(true);
+      expect(fs.existsSync(path.join(azureTarget, 'azure-pipelines.yml'))).toBe(true);
+
+      // Test Bitbucket Pipelines scaffolding
+      const bitbucketTarget = path.join(tempInitDir, 'bitbucket-proj');
+      expect(runInit(bitbucketTarget, { ci: 'bitbucket' })).toBe(true);
+      expect(fs.existsSync(path.join(bitbucketTarget, 'bitbucket-pipelines.yml'))).toBe(true);
+
+      // Test GitHub Actions scaffolding
+      const githubTarget = path.join(tempInitDir, 'github-proj');
+      expect(runInit(githubTarget, { ci: 'github' })).toBe(true);
+      expect(fs.existsSync(path.join(githubTarget, '.github', 'workflows', 'ci.yml'))).toBe(true);
+      expect(fs.existsSync(path.join(githubTarget, '.github', 'workflows', 'sdd-integrate-on-merge.yml'))).toBe(true);
+    } finally {
+      fs.rmSync(tempInitDir, { recursive: true, force: true });
+    }
+  });
+
   it('should execute quality gate verification with default options', () => {
     const passed = runVerifyQuality({ silent: true });
     expect(typeof passed).toBe('boolean');

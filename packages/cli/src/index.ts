@@ -439,9 +439,10 @@ program
   .command('init [directory]')
   .description('Inicializa un nuevo repositorio con las directrices, esquemas y políticas de AI-SDLC')
   .option('-d, --dry-run', 'Simula la creación de archivos y directorios sin escribir en disco')
+  .option('--ci <provider>', 'Proveedor de CI/CD para generar pipeline (github, gitlab, azure, bitbucket)')
   .action((directory, opts) => {
-    runInit(directory, { dryRun: opts.dryRun });
-    process.exit(0);
+    const passed = runInit(directory, { dryRun: opts.dryRun, ci: opts.ci });
+    process.exit(passed ? 0 : 1);
   });
 
 // Handle unknown commands gracefully
