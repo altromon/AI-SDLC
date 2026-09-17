@@ -28,5 +28,7 @@ export * from './git/agent-detector.js';
 export * from './git/hook-installer.js';
 export * from './reporters/pr-kpis.js';
 export * from './reporters/release-kpis.js';
+export * from './reporters/cytoscape-bundle.js';
+export * from './reporters/dashboard.js';
 export * from './adapters/sdd/index.js';
 export * from './utils/fs.js';

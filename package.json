@@ -33,6 +33,7 @@
     "check": "tsx packages/cli/src/index.ts check",
     "check:fix": "tsx packages/cli/src/index.ts check --fix",
     "report:quality": "tsx packages/cli/src/index.ts report quality",
+    "report:dashboard": "tsx packages/cli/src/index.ts report dashboard",
     "report:requirements": "tsx scripts/export-active-requirements.ts",
     "report:docs": "tsx scripts/bundle-documentation.ts",
     "change:new": "tsx packages/cli/src/index.ts change new",

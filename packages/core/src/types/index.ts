@@ -774,4 +774,77 @@ export interface PromptInjectionFinding {
   message: string;
 }
 
+// --- Interactive Web Dashboard & Cytoscape Graph Types ---
+export type GraphNodeLayer = 'product' | 'requirement' | 'architecture' | 'test';
+export type GraphNodeStatus = 'CONFORME' | 'HUÉRFANO' | 'DRIFT' | 'REVIEW';
+
+export interface CytoscapeNodeData {
+  id: string;
+  label: string;
+  title: string;
+  type: string;
+  layer: GraphNodeLayer;
+  status: GraphNodeStatus;
+  filePath?: string;
+  digest?: string;
+  details?: Record<string, unknown>;
+  upstream?: string[];
+  downstream?: string[];
+}
+
+export interface CytoscapeEdgeData {
+  id: string;
+  source: string;
+  target: string;
+  label?: string;
+  relation: string;
+  status?: GraphNodeStatus;
+}
+
+export interface CytoscapeElement {
+  group: 'nodes' | 'edges';
+  data: CytoscapeNodeData | CytoscapeEdgeData;
+  classes?: string;
+}
+
+export interface DashboardHistoricalKpi {
+  id: string;
+  label: string;
+  timestamp: string;
+  kloc: number;
+  commits: number;
+  bugs: number;
+  defectDensity: number;
+  reworkPercent: number;
+  costUsd: number;
+}
+
+export interface DashboardOptions {
+  rootDir?: string;
+  outputPath?: string;
+  title?: string;
+  includeHistoricalKpis?: boolean;
+}
+
+export interface DashboardResult {
+  outputPath: string;
+  totalNodes: number;
+  totalEdges: number;
+  conformingCount: number;
+  issueCount: number;
+  nodesByLayer: Record<GraphNodeLayer, number>;
+  metrics: {
+    totalFiles: number;
+    totalFunctions: number;
+    avgMaintainability: number;
+    avgCyclomatic: number;
+    qualityVerdict: 'PASS' | 'FAIL';
+    autonomyDistribution: Record<string, number>;
+    traceabilityRatio: number;
+    bddCoverageRatio: number;
+  };
+  html: string;
+}
+
+
 

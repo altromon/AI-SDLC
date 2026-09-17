@@ -80,24 +80,33 @@ export function parseTasksDoc(content: string): { frontmatter: TasksFrontmatter;
 }
 
 export function walkTaskFiles(dir: string, fileList: string[] = []): string[] {
-  if (!fs.existsSync(dir)) return fileList;
-  const files = fs.readdirSync(dir);
-  for (const file of files) {
-    const fullPath = path.join(dir, file);
-    if (fs.statSync(fullPath).isDirectory()) {
-      if (!['node_modules', '.git', 'dist', '.changeset', 'scratch', 'test-scaffold'].includes(file)) {
-        walkTaskFiles(fullPath, fileList);
+  try {
+    if (!fs.existsSync(dir)) return fileList;
+    const files = fs.readdirSync(dir);
+    for (const file of files) {
+      const fullPath = path.join(dir, file);
+      try {
+        if (fs.statSync(fullPath).isDirectory()) {
+          if (!['node_modules', '.git', 'dist', '.changeset', 'scratch', 'test-scaffold'].includes(file)) {
+            walkTaskFiles(fullPath, fileList);
+          }
+        } else if (
+          file.toLowerCase() === 'tasks.md' ||
+          file.endsWith('.tasks.md') ||
+          file.toLowerCase() === 'tasks.template.md'
+        ) {
+          fileList.push(fullPath);
+        }
+      } catch {
+        // Ignore files unlinked concurrently
       }
-    } else if (
-      file.toLowerCase() === 'tasks.md' ||
-      file.endsWith('.tasks.md') ||
-      file.toLowerCase() === 'tasks.template.md'
-    ) {
-      fileList.push(fullPath);
     }
+  } catch {
+    // Ignore directories removed concurrently
   }
   return fileList;
 }
+
 
 export function generateGovernanceReportMarkdown(
   summaries: TaskSummary[],

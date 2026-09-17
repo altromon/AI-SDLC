@@ -2,9 +2,9 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:5bc4852b-6f32-4944-9ffd-a8bb37d535b6",
+  "serialNumber": "urn:uuid:83c9d62d-9e84-4b4a-9736-4040a7d88c6f",
   "metadata": {
-    "timestamp": "2026-09-17T13:54:56.587Z",
+    "timestamp": "2026-09-17T15:34:09.923Z",
     "tools": [
       {
         "vendor": "AI-SDLC",
@@ -2020,6 +2020,19 @@
       "version": "3.0.0",
       "purl": "pkg:npm/cssesc@3.0.0",
       "author": "Mathias Bynens",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "cytoscape",
+      "version": "3.34.3",
+      "purl": "pkg:npm/cytoscape@3.34.3",
       "licenses": [
         {
           "license": {

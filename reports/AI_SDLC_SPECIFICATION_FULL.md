@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-09-17 13:18:02 UTC` | *Módulos y Manuales Integrados:* `15`  
+> *Fecha de Compilación:* `2026-09-17 15:34:13 UTC` | *Módulos y Manuales Integrados:* `15`  
 
 ---
 
@@ -19,6 +19,7 @@
   - [🔬 Tutorial 3: Análisis Estático con AST Real y Soporte Multilenguaje](#doc-readme-tutorial-3-analisis-estatico-con-ast-real-y-soporte-multilenguaje)
   - [🛡️ Tutorial 4: Escaneo Dinámico de Licencias y Generación de SBOM (SCA)](#doc-readme-tutorial-4-escaneo-dinamico-de-licencias-y-generacion-de-sbom-sca)
   - [🔐 Tutorial 5: Detección Determinista de Secretos y Seguridad Shift-Left (Gitleaks & SAST)](#doc-readme-tutorial-5-deteccion-determinista-de-secretos-y-seguridad-shift-left-gitleaks-sast)
+  - [🌐 Tutorial 6: Dashboard Web Interactivo y Visualizador de Grafos (Cytoscape.js)](#doc-readme-tutorial-6-dashboard-web-interactivo-y-visualizador-de-grafos-cytoscapejs)
   - [🚀 Guía Rápida para Equipos Humanos](#doc-readme-guia-rapida-para-equipos-humanos)
   - [🤖 Guía Operativa para Agentes de IA](#doc-readme-guia-operativa-para-agentes-de-ia)
   - [📜 Licencia](#doc-readme-licencia)
@@ -111,6 +112,7 @@
   - [6. Generación Automática del Informe de Calidad (Quality Scorecard as Code)](#cap-10-quality-management-and-release-gates-6-generacion-automatica-del-informe-de-calidad-quality-scorecard-as-code)
   - [7. Arquitectura de Calidad Multilenguaje (Polyglot Support)](#cap-10-quality-management-and-release-gates-7-arquitectura-de-calidad-multilenguaje-polyglot-support)
   - [7. Telemetría de Commits, Agregación de KPIs y Coste de Calidad (Rework & DIR)](#cap-10-quality-management-and-release-gates-7-telemetria-de-commits-agregacion-de-kpis-y-coste-de-calidad-rework-dir)
+  - [8. Dashboard Web Interactivo y Visualizador de Grafos PDaC / RTM (Cytoscape.js)](#cap-10-quality-management-and-release-gates-8-dashboard-web-interactivo-y-visualizador-de-grafos-pdac-rtm-cytoscapejs)
 
 - [**11. Modelo de Ramas Git Jerárquico (4-Tier Git Branching Model)**](#cap-11-git-branching-and-lifecycle) *(Fuente: `process/11_git_branching_and_lifecycle.md`)*
   - [1. Principios del Modelo de Ramificación](#cap-11-git-branching-and-lifecycle-1-principios-del-modelo-de-ramificacion)
@@ -855,9 +857,50 @@ pnpm run check
 
 ---
 
+<a id="doc-readme-tutorial-6-dashboard-web-interactivo-y-visualizador-de-grafos-cytoscapejs"></a>
+
+## 🌐 Tutorial 6: Dashboard Web Interactivo y Visualizador de Grafos (Cytoscape.js)
+
+AI-SDLC incluye un generador de dashboard web interactivo y visualizador de redes de dependencias (`reports/dashboard.html`) basado en **Cytoscape.js (MIT)**, diseñado para Product Owners, CISOs, directores de ingeniería y auditores.
+
+### 1. Características Principales
+- **Visualizador de Red PDaC / RTM**:
+  - Navegación multinivel por 4 capas: Producto (Upstream), Requerimientos, Arquitectura (Midstream) y Pruebas BDD (Downstream).
+  - Semáforo de conformidad determinista: Nodos verdes (conformes) vs. nodos rojos (huérfanos o con deriva de digest SHA-256).
+  - **Resaltado de Camino Crítico**: Al pulsar en cualquier requerimiento o nodo, se ilumina toda su cadena de impacto upstream y downstream.
+  - Filtros en vivo por capa y por estado de salud, búsqueda con auto-foco y layouts intercambiables (jerárquico, COSE, concéntrico).
+- **Matriz de Trazabilidad 360° en Tabla**:
+  - Búsqueda en tiempo real con salto interactivo directo hacia el grafo.
+- **Métricas de Calidad & Gobernanza de Autonomía**:
+  - Indicadores ejecutivos (Mantenibilidad SEI MI, CC promedio, veredicto de Release Gate).
+  - Desglose de tareas por modo de autonomía (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
+- **Telemetría y KPIs con Histórico**:
+  - Métricas de la rama activa (commits, líneas añadidas/eliminadas, tiempo de desarrollo activo, consumo de tokens y coste computacional en USD).
+  - Registro histórico consolidado de releases desde `reports/releases/*.kpis.json` para monitorizar KLoC, bugs, DIR y costes a lo largo del tiempo.
+- **Cero Infraestructura Externa (100% Offline)**:
+  - Todo el código JavaScript de Cytoscape.js y los estilos están incrustados en un único archivo HTML autocontenido. Se abre localmente con doble clic o se publica en GitHub/GitLab Pages sin requerir servidores locales ni conexión a internet.
+
+### 2. Comandos CLI
+
+```bash
+# 1. Generar el dashboard en reports/dashboard.html
+npx aisdlc report dashboard
+# o vía script pnpm:
+pnpm run report:dashboard
+
+# 2. Generar y abrir automáticamente en el navegador web
+npx aisdlc report dashboard --open
+
+# 3. Personalizar ruta de salida y título del dashboard
+npx aisdlc report dashboard --output docs/dashboard.html --title "SentinelCore Mission Control"
+```
+
+---
+
 <a id="doc-readme-guia-rapida-para-equipos-humanos"></a>
 
 ## 🚀 Guía Rápida para Equipos Humanos
+
 
 1. **Definir la Intención del Producto**:
    - Usa plantillas en `templates/product/` para modelar Actores (`ACT-*`), Casos de Uso (`UC-*`) y Reglas de Negocio (`BR-*`).
@@ -3020,6 +3063,44 @@ Active-Time-Seconds: 420
 - **Ratio de Re-trabajo en Tokens**: $\%\text{Tokens}_{\text{rework}} = \frac{\sum \text{Tokens}_{\text{bugs}}}{\text{Tokens}_{\text{total\_release}}} \times 100$.
 
 Estas métricas son puramente observacionales y analíticas, proporcionando a los líderes de ingeniería visibilidad sobre qué modelos LLM son más fiables y cuál es el impacto real de los defectos en el presupuesto del proyecto.
+
+---
+
+<a id="cap-10-quality-management-and-release-gates-8-dashboard-web-interactivo-y-visualizador-de-grafos-pdac-rtm-cytoscapejs"></a>
+
+## 8. Dashboard Web Interactivo y Visualizador de Grafos PDaC / RTM (Cytoscape.js)
+
+Para stakeholders no técnicos (Product Owners, CISOs, auditores y directores de ingeniería), explorar la red completa de dependencias de producto (`Actores ➔ Casos de Uso ➔ Reglas de Negocio ➔ Requisitos ➔ Componentes arc42 ➔ Tests BDD`) en documentos Markdown estáticos genera fricción cognitiva.
+
+El comando CLI `npx aisdlc report dashboard` compila la totalidad del grafo PDaC, la matriz RTM 360°, las métricas de calidad y la telemetría histórica de KPIs en un artefacto HTML autocontenido (`reports/dashboard.html`):
+
+```bash
+# Generar el dashboard en reports/dashboard.html
+npx aisdlc report dashboard
+
+# Generar y abrir inmediatamente en el navegador predeterminado
+npx aisdlc report dashboard --open
+
+# Personalizar ruta de destino y título
+npx aisdlc report dashboard --output dist/governance.html --title "SentinelCore Enterprise SDLC"
+```
+
+### Características Principales del Dashboard:
+1. **Visualizador de Red con Cytoscape.js (MIT)**:
+   - Capas semánticas diferenciadas por geometría y color: Producto (rombos cian), Requisitos (rectángulos verdes/rojos), Arquitectura (hexágonos índigo) y Pruebas (elipses esmeralda).
+   - Coloreado determinista de estado: 🟢 Verde para nodos conformes sin derivas; 🔴 Rojo para requisitos huérfanos o con deriva criptográfica SHA-256 (`DRIFT`).
+   - Controles de navegación: Zoom, encuadre centrado, layouts intercambiables (jerárquico por capas, COSE, concéntrico, circular).
+   - **Resaltado de Camino Crítico**: Al hacer clic sobre cualquier nodo, se iluminan sus dependencias upstream y downstream, atenuando el resto del grafo.
+2. **Matriz de Trazabilidad 360° Interactiva**:
+   - Tabla con filtrado en tiempo real por texto o estado, con enlace bidireccional que enfoca y centra el nodo seleccionado en el grafo.
+3. **Métricas de Calidad y Gobernanza**:
+   - Tarjetas de resumen ejecutivo (Release Gate PASS/FAIL, Mantenibilidad SEI MI, Complejidad Ciclomática, Cobertura BDD).
+   - Desglose de distribución de modos de autonomía de tareas (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
+4. **Telemetría Activa e Histórico de KPIs**:
+   - Métricas de la rama activa (commits, líneas añadidas/eliminadas, tiempo de desarrollo activo, consumo de tokens y coste computacional en USD).
+   - Tabla y tendencias históricas consolidadas procedentes de `reports/releases/*.kpis.json` para análisis de KLoC, bugs, DIR y re-trabajo a lo largo de los sprints.
+5. **Cero Infraestructura Externa (100% Offline)**:
+   - El archivo generado incrusta todos los scripts y estilos necesarios, permitiendo su apertura directa con doble clic local (`file:///...`) o su publicación estática en GitHub Pages / GitLab Pages sin necesidad de backend.
 
 ---
 
