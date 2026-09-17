@@ -4,7 +4,14 @@
  * Detects, validates, and integrates SDD increments into the canonical baseline.
  */
 
-import pc from 'picocolors';
+const pc = {
+  bold: (s: string | number) => `\x1b[1m${s}\x1b[22m`,
+  cyan: (s: string | number) => `\x1b[36m${s}\x1b[39m`,
+  yellow: (s: string | number) => `\x1b[33m${s}\x1b[39m`,
+  red: (s: string | number) => `\x1b[31m${s}\x1b[39m`,
+  green: (s: string | number) => `\x1b[32m${s}\x1b[39m`,
+  gray: (s: string | number) => `\x1b[90m${s}\x1b[39m`,
+};
 import {
   detectActiveChangeForIntegration,
   integrateSddChange,
