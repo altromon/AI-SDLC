@@ -76,6 +76,52 @@ describe('@ai-sdlc/cli Command Suite', () => {
     }
   });
 
+  it('should automatically install git hooks when .git exists upon init', () => {
+    const tempInitDir = fs.mkdtempSync(path.join(process.cwd(), 'temp-init-hooks-'));
+    try {
+      const gitDir = path.join(tempInitDir, '.git');
+      fs.mkdirSync(gitDir, { recursive: true });
+
+      const res = runInit(tempInitDir);
+      expect(res).toBe(true);
+
+      const hookPath = path.join(gitDir, 'hooks', 'prepare-commit-msg');
+      expect(fs.existsSync(hookPath)).toBe(true);
+      const content = fs.readFileSync(hookPath, 'utf-8');
+      expect(content).toContain('AI-SDLC: Automated Commit Trailers Injection Hook');
+    } finally {
+      fs.rmSync(tempInitDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should not install git hook in dry-run mode', () => {
+    const tempInitDir = fs.mkdtempSync(path.join(process.cwd(), 'temp-init-dryrun-'));
+    try {
+      const gitDir = path.join(tempInitDir, '.git');
+      fs.mkdirSync(gitDir, { recursive: true });
+
+      const res = runInit(tempInitDir, { dryRun: true });
+      expect(res).toBe(true);
+
+      const hookPath = path.join(gitDir, 'hooks', 'prepare-commit-msg');
+      expect(fs.existsSync(hookPath)).toBe(false);
+    } finally {
+      fs.rmSync(tempInitDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should succeed when .git does not exist during init', () => {
+    const tempInitDir = fs.mkdtempSync(path.join(process.cwd(), 'temp-init-nogit-'));
+    try {
+      const res = runInit(tempInitDir);
+      expect(res).toBe(true);
+      expect(fs.existsSync(path.join(tempInitDir, 'quality-policy.yaml'))).toBe(true);
+      expect(fs.existsSync(path.join(tempInitDir, '.git'))).toBe(false);
+    } finally {
+      fs.rmSync(tempInitDir, { recursive: true, force: true });
+    }
+  });
+
   it('should run runCiIntegration safely when no active change exists', () => {
     const tempDir = fs.mkdtempSync(path.join(process.cwd(), 'temp-ci-run-test-'));
     try {
