@@ -2,6 +2,7 @@
   "name": "@ai-sdlc/core",
   "version": "1.0.0",
   "description": "Deterministic domain verification, compliance, and reporting engine for AI-SDLC",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

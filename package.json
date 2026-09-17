@@ -2,6 +2,7 @@
   "name": "ai-sdlc-monorepo",
   "version": "1.0.0",
   "description": "Deterministic, spec-driven development and governance framework for AI-assisted engineering",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "build": "pnpm --filter \"@ai-sdlc/*\" build",
