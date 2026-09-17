@@ -41,24 +41,21 @@ PROMPT_TOKENS=0
 COMPLETION_TOKENS=0
 ACTIVE_TIME_SEC=0
 
-if [ -n "$AI_MODEL" ] || [ -n "$AI_AGENT_NAME" ] || [ -n "$ANTIGRAVITY_AGENT_ID" ] || [ -f "$TELEMETRY_FILE" ]; then
-  AUTHOR_TYPE="agent"
-  if [ -n "$AI_MODEL" ]; then
-    AI_MODEL_NAME="$AI_MODEL"
-  elif [ -n "$AI_AGENT_NAME" ]; then
-    AI_MODEL_NAME="$AI_AGENT_NAME"
-  fi
-fi
+# Execute universal IDE-agnostic author detection engine
+DETECTED=$(node packages/cli/bin/aisdlc.js git detect-author 2>/dev/null || npx aisdlc git detect-author 2>/dev/null || node -e "try { const { detectAuthorIdentity } = require('@ai-sdlc/core'); const id = detectAuthorIdentity(); console.log([id.authorType, id.model, id.promptTokens, id.completionTokens, id.activeTimeSeconds].join('|')); } catch {}" 2>/dev/null || echo "")
 
-if [ -f "$TELEMETRY_FILE" ]; then
-  AUTHOR_TYPE="agent"
-  PARSED_MODEL=$(node -e "try { const d = JSON.parse(fs.readFileSync('$TELEMETRY_FILE')); console.log(d.model || ''); } catch { console.log(''); }" 2>/dev/null)
-  if [ -n "$PARSED_MODEL" ]; then
-    AI_MODEL_NAME="$PARSED_MODEL"
+if [ -n "$DETECTED" ]; then
+  IFS='|' read -r DET_AUTHOR DET_MODEL DET_PROMPT DET_COMPL DET_TIME <<< "$DETECTED"
+  AUTHOR_TYPE="\${DET_AUTHOR:-\$AUTHOR_TYPE}"
+  AI_MODEL_NAME="\${DET_MODEL:-\$AI_MODEL_NAME}"
+  PROMPT_TOKENS="\${DET_PROMPT:-\$PROMPT_TOKENS}"
+  COMPLETION_TOKENS="\${DET_COMPL:-\$COMPLETION_TOKENS}"
+  ACTIVE_TIME_SEC="\${DET_TIME:-\$ACTIVE_TIME_SEC}"
+else
+  if [ -n "$AI_MODEL" ] || [ -n "$AI_AGENT_NAME" ] || [ -n "$ANTIGRAVITY_AGENT_ID" ] || [ -n "$CLAUDE_CODE" ] || [ -n "$CURSOR_AGENT" ] || [ -n "$WINDSURF_AGENT" ] || [ -n "$AIDER_MODEL" ] || [ -f "$TELEMETRY_FILE" ]; then
+    AUTHOR_TYPE="agent"
+    AI_MODEL_NAME="\${AI_MODEL:-\${AI_AGENT_NAME:-\${AIDER_MODEL:-agent-developer}}}"
   fi
-  PROMPT_TOKENS=$(node -e "try { const d = JSON.parse(fs.readFileSync('$TELEMETRY_FILE')); console.log(d.promptTokens || 0); } catch { console.log(0); }" 2>/dev/null)
-  COMPLETION_TOKENS=$(node -e "try { const d = JSON.parse(fs.readFileSync('$TELEMETRY_FILE')); console.log(d.completionTokens || 0); } catch { console.log(0); }" 2>/dev/null)
-  ACTIVE_TIME_SEC=$(node -e "try { const d = JSON.parse(fs.readFileSync('$TELEMETRY_FILE')); console.log(d.activeTimeSeconds || 0); } catch { console.log(0); }" 2>/dev/null)
 fi
 
 # Check if trailers are already present in the commit message

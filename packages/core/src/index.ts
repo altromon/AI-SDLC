@@ -24,6 +24,7 @@ export * from './reporters/quality-report.js';
 export * from './git/workflow.js';
 export * from './git/checkout.js';
 export * from './git/trailers.js';
+export * from './git/agent-detector.js';
 export * from './git/hook-installer.js';
 export * from './reporters/pr-kpis.js';
 export * from './reporters/release-kpis.js';

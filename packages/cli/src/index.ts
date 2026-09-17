@@ -7,7 +7,13 @@ import { Command } from 'commander';
 import pc from 'picocolors';
 import { runCheck } from './commands/check.js';
 import { runGherkinExtract } from './commands/gherkin.js';
-import { runGitCheckout, runGitHookInstall, runGitPlan, runGitValidate } from './commands/git.js';
+import {
+  runGitCheckout,
+  runGitDetectAuthor,
+  runGitHookInstall,
+  runGitPlan,
+  runGitValidate,
+} from './commands/git.js';
 import { runInit } from './commands/init.js';
 import { runKpiPr, runKpiRelease } from './commands/kpi.js';
 import { runReportQuality } from './commands/report.js';
@@ -334,6 +340,16 @@ gitHookCommand
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
   .action((opts) => {
     const passed = runGitHookInstall({ root: opts.root });
+    process.exit(passed ? 0 : 1);
+  });
+
+gitCommand
+  .command('detect-author')
+  .description('Detecta de forma universal e independiente de IDE si el autor es humano o agente')
+  .option('--json', 'Salida en formato JSON estructurado')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .action((opts) => {
+    const passed = runGitDetectAuthor({ root: opts.root, json: opts.json });
     process.exit(passed ? 0 : 1);
   });
 

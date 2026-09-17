@@ -8,6 +8,7 @@ import {
   generateBranchHierarchyPlan,
   checkoutTaskBranch,
   installGitHooks,
+  detectAuthorIdentity,
 } from '@ai-sdlc/core';
 
 export function runGitValidate(branchName: string): boolean {
@@ -97,5 +98,16 @@ export function runGitHookInstall(options: { root?: string } = {}): boolean {
     console.error(pc.red(`\n✖ [ERROR] ${result.error}\n`));
     return false;
   }
+}
+
+export function runGitDetectAuthor(options: { root?: string; json?: boolean } = {}): boolean {
+  const rootDir = options.root || process.cwd();
+  const identity = detectAuthorIdentity({ cwd: rootDir });
+  if (options.json) {
+    console.log(JSON.stringify(identity, null, 2));
+  } else {
+    console.log(`${identity.authorType}|${identity.model}|${identity.promptTokens}|${identity.completionTokens}|${identity.activeTimeSeconds}`);
+  }
+  return true;
 }
 
