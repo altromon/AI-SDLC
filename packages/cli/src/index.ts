@@ -70,6 +70,7 @@ verifyCommand
   .option('-M, --min-maintainability <number>', 'Umbral mínimo de Mantenibilidad (0-100)')
   .option('-L, --max-lines <number>', 'Umbral máximo de líneas por función')
   .option('-m, --mode <mode>', 'Modo de cumplimiento: STRICT o PERMISSIVE')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((opts) => {
     const passed = runVerifyAll({
       root: opts.root,
@@ -79,6 +80,7 @@ verifyCommand
       minMaintainability: opts.minMaintainability,
       maxLines: opts.maxLines,
       enforceMode: opts.mode,
+      json: opts.json,
     });
     process.exit(passed ? 0 : 1);
   });
@@ -93,6 +95,7 @@ verifyCommand
   .option('-M, --min-maintainability <number>', 'Umbral mínimo de Mantenibilidad (0-100)')
   .option('-L, --max-lines <number>', 'Umbral máximo de líneas por función')
   .option('-m, --mode <mode>', 'Modo de cumplimiento: STRICT o PERMISSIVE')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((opts) => {
     const passed = runVerifyQuality({
       root: opts.root,
@@ -102,6 +105,7 @@ verifyCommand
       minMaintainability: opts.minMaintainability,
       maxLines: opts.maxLines,
       enforceMode: opts.mode,
+      json: opts.json,
     });
     process.exit(passed ? 0 : 1);
   });
@@ -110,8 +114,9 @@ verifyCommand
   .command('traceability')
   .description('Audita la Matriz de Trazabilidad 360° (Producto -> Arquitectura -> Pruebas)')
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((opts) => {
-    const passed = runVerifyTraceability({ root: opts.root });
+    const passed = runVerifyTraceability({ root: opts.root, json: opts.json });
     process.exit(passed ? 0 : 1);
   });
 
@@ -119,8 +124,9 @@ verifyCommand
   .command('governance')
   .description('Audita el gobierno de tareas y modos de autonomía humana (AUTONOMOUS, HUMAN_REVIEW_PLAN, etc.)')
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((opts) => {
-    const passed = runVerifyGovernance({ root: opts.root });
+    const passed = runVerifyGovernance({ root: opts.root, json: opts.json });
     process.exit(passed ? 0 : 1);
   });
 
@@ -128,8 +134,9 @@ verifyCommand
   .command('testing')
   .description('Audita que el 100% de requisitos y tareas cuentan con pruebas verificables')
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((opts) => {
-    const passed = runVerifyTesting({ root: opts.root });
+    const passed = runVerifyTesting({ root: opts.root, json: opts.json });
     process.exit(passed ? 0 : 1);
   });
 
@@ -144,6 +151,7 @@ verifyCommand
   .option('--notices [path]', 'Genera archivo de avisos y atribuciones legales THIRD_PARTY_NOTICES.md')
   .option('--tool <tool>', 'Herramienta SCA: native, trivy, syft', 'native')
   .option('--depth <depth>', 'Profundidad de análisis: direct o transitive', 'transitive')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((opts) => {
     const passed = runVerifyLicenses({
       root: opts.root,
@@ -154,6 +162,7 @@ verifyCommand
       depth: opts.depth,
       sbom: opts.sbom,
       notices: opts.notices,
+      json: opts.json,
     });
     process.exit(passed ? 0 : 1);
   });
@@ -162,8 +171,9 @@ verifyCommand
   .command('pdac')
   .description('Verifica el grafo PDaC y evalúa derivas criptográficas de citaciones SHA-256')
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((opts) => {
-    const passed = runVerifyPdac({ root: opts.root });
+    const passed = runVerifyPdac({ root: opts.root, json: opts.json });
     process.exit(passed ? 0 : 1);
   });
 
@@ -172,8 +182,9 @@ verifyCommand
   .description('Verifica la conformidad de los artefactos Markdown frente a sus esquemas JSON canónicos (Draft 2020-12)')
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
   .option('-p, --path <path>', 'Ruta al archivo o directorio objetivo')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((opts) => {
-    const passed = runVerifySchemas({ root: opts.root, path: opts.path });
+    const passed = runVerifySchemas({ root: opts.root, path: opts.path, json: opts.json });
     process.exit(passed ? 0 : 1);
   });
 
@@ -182,8 +193,9 @@ verifyCommand
   .description('Audita requisitos duplicados, colisiones de IDs, redundancia léxica y solapamientos BDD')
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
   .option('-s, --similarity <number>', 'Umbral de similitud léxica para títulos (0.0 a 1.0)', '0.85')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((opts) => {
-    const passed = runVerifyDuplicates({ root: opts.root, similarity: opts.similarity });
+    const passed = runVerifyDuplicates({ root: opts.root, similarity: opts.similarity, json: opts.json });
     process.exit(passed ? 0 : 1);
   });
 
@@ -197,6 +209,7 @@ verifyCommand
   .option('-s, --semgrep', 'Delega en el CLI de Semgrep si está instalado')
   .option('-e, --entropy <number>', 'Umbral mínimo de entropía de Shannon (0.0 a 8.0)', '4.3')
   .option('-m, --min-severity <level>', 'Severidad mínima para fallo SAST: CRITICAL, HIGH, MEDIUM', 'HIGH')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((opts) => {
     const passed = runVerifySecurity({
       root: opts.root,
@@ -206,6 +219,7 @@ verifyCommand
       semgrep: opts.semgrep,
       entropy: opts.entropy,
       minSeverity: opts.minSeverity,
+      json: opts.json,
     });
     process.exit(passed ? 0 : 4);
   });
@@ -218,6 +232,7 @@ verifyCommand
   .option('-b, --base <branch>', 'Rama base para el cálculo del diff git (por defecto: origin/main o HEAD)')
   .option('-g, --gitleaks', 'Delega o contrasta con el binario nativo de Gitleaks si está disponible')
   .option('-e, --entropy <number>', 'Umbral mínimo de entropía de Shannon (0.0 a 8.0)', '4.3')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((opts) => {
     const passed = runVerifySecrets({
       root: opts.root,
@@ -225,6 +240,7 @@ verifyCommand
       base: opts.base,
       gitleaks: opts.gitleaks,
       entropy: opts.entropy,
+      json: opts.json,
     });
     process.exit(passed ? 0 : 4);
   });
@@ -235,11 +251,13 @@ verifyCommand
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
   .option('-s, --semgrep', 'Delega en el CLI de Semgrep si está instalado')
   .option('-m, --min-severity <level>', 'Severidad mínima para fallo: CRITICAL, HIGH, MEDIUM', 'HIGH')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((opts) => {
     const passed = runVerifySast({
       root: opts.root,
       semgrep: opts.semgrep,
       minSeverity: opts.minSeverity,
+      json: opts.json,
     });
     process.exit(passed ? 0 : 1);
   });
@@ -248,8 +266,9 @@ verifyCommand
   .command('friction [change]')
   .description('Verifica la fricción progresiva y las protecciones Anti-Bypass para parches rápidos')
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
   .action((change, opts) => {
-    const passed = runVerifyFriction({ root: opts.root, change });
+    const passed = runVerifyFriction({ root: opts.root, change, json: opts.json });
     process.exit(passed ? 0 : 1);
   });
 
