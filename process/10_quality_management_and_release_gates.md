@@ -315,3 +315,51 @@ El archivo de configuración permite orquestar linters y motores de cobertura es
 
 ### C. El Estándar Universal SARIF (Static Analysis Results Interchange Format)
 Para integraciones complejas en grandes organizaciones, el AI-SDLC adopta el estándar **SARIF (JSON OASIS)**. Cualquier analizador de cualquier lenguaje (Roslyn, Clang-Tidy, ESLint, Bandit, Flake8) puede volcar sus diagnósticos a formato SARIF, siendo consolidado de forma transparente por el pipeline de release.
+
+---
+
+## 7. Telemetría de Commits, Agregación de KPIs y Coste de Calidad (Rework & DIR)
+
+Para gobernar el desarrollo simétrico personas-agentes con trazabilidad económica y técnica real, el framework implementa un sistema determinista y automatizado de **Telemetría en Tres Niveles**:
+
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│             TELEMETRÍA DETERMINISTA Y CONTROL DE CALIDAD               │
+└────────────────────────────────────────────────────────────────────────┘
+
+ 1. NIVEL COMMIT (Inyección Cero-Fricción vía Git Hook)
+    ├── Hook: .git/hooks/prepare-commit-msg (instalado con `aisdlc git hook install`)
+    ├── Detección de Autoría: Humano vs. Agente (modelo LLM)
+    └── Trailers inmutables: Task-ID, Parent-Ref, Tokens (Prompt/Completion), Active-Time
+
+ 2. NIVEL PULL REQUEST (Agregación Automática)
+    ├── Comando: `aisdlc kpi pr` (y workflow GitHub Actions pr-kpi-summary.yml)
+    ├── Agrupación: Desglose de commits, líneas (+/-), tiempo y tokens por autor/modelo
+    └── Inyección: Sección 8 en PULL_REQUEST_TEMPLATE.md delimitada por marcadores
+
+ 3. NIVEL RELEASE (Informe Consolidado de Calidad y Defectos)
+    ├── Comando: `aisdlc kpi release --release <branch>`
+    ├── Defect Injection Rate (DIR): Bugs confirmados por KLoC por modelo y humano
+    ├── Ratios de Re-trabajo (Cost of Quality): % tiempo y % tokens dedicados a bugs
+    └── Artefactos canónicos: reports/releases/RELEASE_KPIS_<release>.md y .json
+```
+
+### A. Git Trailers Estandarizados
+En cada commit se inyectan trailers sin intervención manual:
+```git
+Task-ID: TSK-002
+Parent-Ref: CHG-001
+Author-Type: agent              # agent | human
+AI-Model: claude-3-7-sonnet     # modelo LLM o n/a para humanos
+Prompt-Tokens: 14500
+Completion-Tokens: 1850
+Active-Time-Seconds: 420
+```
+
+### B. Métricas de Re-trabajo y Observabilidad
+- **Defect Injection Rate (DIR)**: $\text{DIR} = \frac{\text{Bugs Introducidos}}{\text{KLoC generadas por el autor/modelo}}$.
+- **Ratio de Re-trabajo en Tiempo**: $\%T_{\text{rework}} = \frac{\sum T_{\text{bugs}}}{T_{\text{total\_release}}} \times 100$.
+- **Ratio de Re-trabajo en Tokens**: $\%\text{Tokens}_{\text{rework}} = \frac{\sum \text{Tokens}_{\text{bugs}}}{\text{Tokens}_{\text{total\_release}}} \times 100$.
+
+Estas métricas son puramente observacionales y analíticas, proporcionando a los líderes de ingeniería visibilidad sobre qué modelos LLM son más fiables y cuál es el impacto real de los defectos en el presupuesto del proyecto.
+

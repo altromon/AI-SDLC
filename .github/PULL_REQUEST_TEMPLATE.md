@@ -90,3 +90,19 @@
 
 - **Métricas y Alarmas de Observabilidad**: <!-- ¿Qué métricas (latencia p99, tasa de error 5xx, memoria) o logs deben vigilarse tras el despliegue? -->
 - **Procedimiento de Rollback**: <!-- Comando o procedimiento exacto para revertir el cambio sin impacto colateral (ej. git revert -m 1 <sha>) -->
+
+---
+
+## 8. 📊 AI-SDLC: Resumen Agregado de KPIs
+
+<!-- AI-SDLC-KPI-SUMMARY-START -->
+| Métrica | Humano | Total PR |
+| :--- | :---: | :---: |
+| **Commits Realizados** | - | **-** |
+| **Líneas Añadidas / Modif.** | - | **-** |
+| **Tiempo Activo de Desarrollo** | - | **-** |
+| **Tokens Consumidos (In+Out)** | - | **-** |
+| **Coste Estimado (€/$)** | — (Mano de obra) | **-** |
+
+> *Este bloque se actualiza automáticamente mediante `aisdlc kpi pr` o el workflow de CI.*
+<!-- AI-SDLC-KPI-SUMMARY-END -->

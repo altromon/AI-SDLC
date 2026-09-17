@@ -5,6 +5,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import pc from 'picocolors';
+import { installGitHooks } from '@ai-sdlc/core';
 
 const STARTER_QUALITY_POLICY = `# ==============================================================================
 # AI-SDLC: Software Quality, Coding Rules & Release Gate Policy
@@ -503,6 +504,26 @@ jobs:
 const VALID_CI_PROVIDERS = ['github', 'gitlab', 'azure', 'bitbucket'] as const;
 export type SupportedCiProvider = (typeof VALID_CI_PROVIDERS)[number];
 
+function setupGitHooks(destDir: string, dryRun?: boolean): void {
+  const gitDir = path.join(destDir, '.git');
+  if (dryRun) {
+    console.log(`  ${pc.blue('DRY-RUN')} Instalar Git Hook: .git/hooks/prepare-commit-msg`);
+    return;
+  }
+
+  if (fs.existsSync(gitDir)) {
+    const result = installGitHooks(destDir);
+    if (result.success) {
+      console.log(`  ${pc.green('✔')} Git Hook instalado: ${pc.bold('prepare-commit-msg')}`);
+    } else {
+      console.log(`  ${pc.yellow('⚠')} No se pudo instalar el Git Hook: ${result.error}`);
+    }
+  } else {
+    console.log(`  ${pc.yellow('ℹ')} Repositorio Git no detectado en el destino.`);
+    console.log(`    ${pc.gray("Ejecuta 'git init' y luego 'aisdlc git hook install' para activar los hooks de commit.")}`);
+  }
+}
+
 export function runInit(
   targetDir: string = '.',
   options: { dryRun?: boolean; ci?: string } = {}
@@ -599,6 +620,8 @@ export function runInit(
   if (ciProvider) {
     console.log(pc.cyan(`\n  ✔ Configuración de CI/CD generada para proveedor: ${pc.bold(ciProvider)}`));
   }
+
+  setupGitHooks(destDir, options.dryRun);
 
   console.log(pc.green('\n✔ Repositorio configurado con políticas y plantillas AI-SDLC.\n'));
   return true;

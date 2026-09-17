@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-09-17 08:58:14 UTC` | *Módulos y Manuales Integrados:* `15`  
+> *Fecha de Compilación:* `2026-09-17 13:18:02 UTC` | *Módulos y Manuales Integrados:* `15`  
 
 ---
 
@@ -110,6 +110,7 @@
   - [5. Política de Excepciones y Gestión de Deuda Técnica](#cap-10-quality-management-and-release-gates-5-politica-de-excepciones-y-gestion-de-deuda-tecnica)
   - [6. Generación Automática del Informe de Calidad (Quality Scorecard as Code)](#cap-10-quality-management-and-release-gates-6-generacion-automatica-del-informe-de-calidad-quality-scorecard-as-code)
   - [7. Arquitectura de Calidad Multilenguaje (Polyglot Support)](#cap-10-quality-management-and-release-gates-7-arquitectura-de-calidad-multilenguaje-polyglot-support)
+  - [7. Telemetría de Commits, Agregación de KPIs y Coste de Calidad (Rework & DIR)](#cap-10-quality-management-and-release-gates-7-telemetria-de-commits-agregacion-de-kpis-y-coste-de-calidad-rework-dir)
 
 - [**11. Modelo de Ramas Git Jerárquico (4-Tier Git Branching Model)**](#cap-11-git-branching-and-lifecycle) *(Fuente: `process/11_git_branching_and_lifecycle.md`)*
   - [1. Principios del Modelo de Ramificación](#cap-11-git-branching-and-lifecycle-1-principios-del-modelo-de-ramificacion)
@@ -325,6 +326,9 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Gestión Git 4-Tiers** | Resuelve versión y crea en cascada: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
 | `npx aisdlc git plan` | `pnpm run git:plan` | **Planificación Git** | Renderiza el árbol visual de jerarquía de ramas antes de trabajar |
 | `npx aisdlc git validate <rama>` | `pnpm run git:validate <rama>` | **Gobierno Git** | Valida la nomenclatura estricta de cualquier rama según su Tier (1 a 4) |
+| `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Telemetría Git** | Instala el hook `prepare-commit-msg` para inyección automática de trailers en commits |
+| `npx aisdlc kpi pr [opciones]` | `pnpm run kpi:pr` | **Métricas Pull Request** | Calcula y genera la tabla Markdown agregada de KPIs (tiempo, tokens, autoría) para el PR |
+| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Consolidado de Release** | Computa DIR por modelo/humano, densidad de defectos y coste de re-trabajo (`RELEASE_KPIS_<release>.md`) |
 | `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Pre-vuelo Unificado** | Sincroniza bloques Gherkin a `.feature`, actualiza digests SHA-256 PDaC, audita seguridad y verifica Quality Gates |
 | `npx aisdlc verify all` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 9 Quality Gates (Calidad AST, Trazabilidad 360°, Gobierno, Tests, Licencias/SCA, PDaC, Schemas, Duplicados, Seguridad) |
 | `npx aisdlc verify security [opciones]` | `pnpm run verify:security` | **Seguridad Shift-Left (Gate 9)** | Verificación unificada de secretos (Gitleaks) y SAST determinista (OWASP Top 10) |
@@ -2967,6 +2971,55 @@ El archivo de configuración permite orquestar linters y motores de cobertura es
 
 ### C. El Estándar Universal SARIF (Static Analysis Results Interchange Format)
 Para integraciones complejas en grandes organizaciones, el AI-SDLC adopta el estándar **SARIF (JSON OASIS)**. Cualquier analizador de cualquier lenguaje (Roslyn, Clang-Tidy, ESLint, Bandit, Flake8) puede volcar sus diagnósticos a formato SARIF, siendo consolidado de forma transparente por el pipeline de release.
+
+---
+
+<a id="cap-10-quality-management-and-release-gates-7-telemetria-de-commits-agregacion-de-kpis-y-coste-de-calidad-rework-dir"></a>
+
+## 7. Telemetría de Commits, Agregación de KPIs y Coste de Calidad (Rework & DIR)
+
+Para gobernar el desarrollo simétrico personas-agentes con trazabilidad económica y técnica real, el framework implementa un sistema determinista y automatizado de **Telemetría en Tres Niveles**:
+
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│             TELEMETRÍA DETERMINISTA Y CONTROL DE CALIDAD               │
+└────────────────────────────────────────────────────────────────────────┘
+
+ 1. NIVEL COMMIT (Inyección Cero-Fricción vía Git Hook)
+    ├── Hook: .git/hooks/prepare-commit-msg (instalado con `aisdlc git hook install`)
+    ├── Detección de Autoría: Humano vs. Agente (modelo LLM)
+    └── Trailers inmutables: Task-ID, Parent-Ref, Tokens (Prompt/Completion), Active-Time
+
+ 2. NIVEL PULL REQUEST (Agregación Automática)
+    ├── Comando: `aisdlc kpi pr` (y workflow GitHub Actions pr-kpi-summary.yml)
+    ├── Agrupación: Desglose de commits, líneas (+/-), tiempo y tokens por autor/modelo
+    └── Inyección: Sección 8 en PULL_REQUEST_TEMPLATE.md delimitada por marcadores
+
+ 3. NIVEL RELEASE (Informe Consolidado de Calidad y Defectos)
+    ├── Comando: `aisdlc kpi release --release <branch>`
+    ├── Defect Injection Rate (DIR): Bugs confirmados por KLoC por modelo y humano
+    ├── Ratios de Re-trabajo (Cost of Quality): % tiempo y % tokens dedicados a bugs
+    └── Artefactos canónicos: reports/releases/RELEASE_KPIS_<release>.md y .json
+```
+
+### A. Git Trailers Estandarizados
+En cada commit se inyectan trailers sin intervención manual:
+```git
+Task-ID: TSK-002
+Parent-Ref: CHG-001
+Author-Type: agent              # agent | human
+AI-Model: claude-3-7-sonnet     # modelo LLM o n/a para humanos
+Prompt-Tokens: 14500
+Completion-Tokens: 1850
+Active-Time-Seconds: 420
+```
+
+### B. Métricas de Re-trabajo y Observabilidad
+- **Defect Injection Rate (DIR)**: $\text{DIR} = \frac{\text{Bugs Introducidos}}{\text{KLoC generadas por el autor/modelo}}$.
+- **Ratio de Re-trabajo en Tiempo**: $\%T_{\text{rework}} = \frac{\sum T_{\text{bugs}}}{T_{\text{total\_release}}} \times 100$.
+- **Ratio de Re-trabajo en Tokens**: $\%\text{Tokens}_{\text{rework}} = \frac{\sum \text{Tokens}_{\text{bugs}}}{\text{Tokens}_{\text{total\_release}}} \times 100$.
+
+Estas métricas son puramente observacionales y analíticas, proporcionando a los líderes de ingeniería visibilidad sobre qué modelos LLM son más fiables y cuál es el impacto real de los defectos en el presupuesto del proyecto.
 
 ---
 
