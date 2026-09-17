@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-09-17 05:49:58 UTC` | *Módulos y Manuales Integrados:* `15`  
+> *Fecha de Compilación:* `2026-09-17 07:10:19 UTC` | *Módulos y Manuales Integrados:* `15`  
 
 ---
 
@@ -18,6 +18,7 @@
   - [📖 Tutorial 2: Flujo Detallado Paso a Paso (End-to-End Deep Dive)](#doc-readme-tutorial-2-flujo-detallado-paso-a-paso-end-to-end-deep-dive)
   - [🔬 Tutorial 3: Análisis Estático con AST Real y Soporte Multilenguaje](#doc-readme-tutorial-3-analisis-estatico-con-ast-real-y-soporte-multilenguaje)
   - [🛡️ Tutorial 4: Escaneo Dinámico de Licencias y Generación de SBOM (SCA)](#doc-readme-tutorial-4-escaneo-dinamico-de-licencias-y-generacion-de-sbom-sca)
+  - [🔐 Tutorial 5: Detección Determinista de Secretos y Seguridad Shift-Left (Gitleaks & SAST)](#doc-readme-tutorial-5-deteccion-determinista-de-secretos-y-seguridad-shift-left-gitleaks-sast)
   - [🚀 Guía Rápida para Equipos Humanos](#doc-readme-guia-rapida-para-equipos-humanos)
   - [🤖 Guía Operativa para Agentes de IA](#doc-readme-guia-operativa-para-agentes-de-ia)
   - [📜 Licencia](#doc-readme-licencia)
@@ -79,9 +80,10 @@
 
 - [**07. Validación Determinista: Ciberseguridad, Licencias y Puertas de Calidad en CI/CD**](#cap-07-security-and-license-validation) *(Fuente: `process/07_security_and_license_validation.md`)*
   - [1. El Principio de Verificación Multinivel](#cap-07-security-and-license-validation-1-el-principio-de-verificacion-multinivel)
-  - [2. Las 8 Puertas Deterministas de CI/CD (Pipeline Gates)](#cap-07-security-and-license-validation-2-las-8-puertas-deterministas-de-cicd-pipeline-gates)
-  - [3. La Capa de Auditoría Adversarial por Agentes de IA (`sec:audit`)](#cap-07-security-and-license-validation-3-la-capa-de-auditoria-adversarial-por-agentes-de-ia-secaudit)
-  - [4. Códigos de Salida Estandarizados (Exit Codes)](#cap-07-security-and-license-validation-4-codigos-de-salida-estandarizados-exit-codes)
+  - [2. Las 9 Puertas Deterministas de CI/CD (Pipeline Gates)](#cap-07-security-and-license-validation-2-las-9-puertas-deterministas-de-cicd-pipeline-gates)
+  - [3. Especificación Detallada de Seguridad Shift-Left](#cap-07-security-and-license-validation-3-especificacion-detallada-de-seguridad-shift-left)
+  - [4. La Capa de Auditoría Adversarial por Agentes de IA (`sec:audit`)](#cap-07-security-and-license-validation-4-la-capa-de-auditoria-adversarial-por-agentes-de-ia-secaudit)
+  - [5. Códigos de Salida Estandarizados (Exit Codes)](#cap-07-security-and-license-validation-5-codigos-de-salida-estandarizados-exit-codes)
 
 - [**08. Contrato de Citación Criptográfica, Versionado Semántico y Detección de Deriva**](#cap-08-citation-contract-and-drift) *(Fuente: `process/08_citation_contract_and_drift.md`)*
   - [1. El Modelo de Doble Versionado (Dual-Versioning Architecture)](#cap-08-citation-contract-and-drift-1-el-modelo-de-doble-versionado-dual-versioning-architecture)
@@ -301,7 +303,7 @@ pnpm run git:checkout TSK-001
 pnpm run check:fix
 # o vía npx: npx aisdlc check --fix
 
-# 5. Ejecutar la suite consolidada de CI/CD (7 Gates de calidad y gobernanza)
+# 5. Ejecutar la suite consolidada de CI/CD (9 Gates de calidad y gobernanza)
 pnpm run verify:all
 # o vía npx: npx aisdlc verify all
 
@@ -321,8 +323,11 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Gestión Git 4-Tiers** | Resuelve versión y crea en cascada: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
 | `npx aisdlc git plan` | `pnpm run git:plan` | **Planificación Git** | Renderiza el árbol visual de jerarquía de ramas antes de trabajar |
 | `npx aisdlc git validate <rama>` | `pnpm run git:validate <rama>` | **Gobierno Git** | Valida la nomenclatura estricta de cualquier rama según su Tier (1 a 4) |
-| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Pre-vuelo Unificado** | Sincroniza bloques Gherkin a `.feature`, actualiza digests SHA-256 PDaC y verifica Quality Gates |
-| `npx aisdlc verify all` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 8 Quality Gates (Calidad AST, Trazabilidad 360°, Tareas, Tests, Licencias/SCA, PDaC, Schemas, Duplicados) |
+| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Pre-vuelo Unificado** | Sincroniza bloques Gherkin a `.feature`, actualiza digests SHA-256 PDaC, audita seguridad y verifica Quality Gates |
+| `npx aisdlc verify all` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 9 Quality Gates (Calidad AST, Trazabilidad 360°, Gobierno, Tests, Licencias/SCA, PDaC, Schemas, Duplicados, Seguridad) |
+| `npx aisdlc verify security [opciones]` | `pnpm run verify:security` | **Seguridad Shift-Left (Gate 9)** | Verificación unificada de secretos (Gitleaks) y SAST determinista (OWASP Top 10) |
+| `npx aisdlc verify secrets [opciones]` | `pnpm run verify:secrets` | **Escaneo de Secretos** | Detección determinista de credenciales, llaves API, tokens y alta entropía (Shannon) con soporte git diff y delegación Gitleaks |
+| `npx aisdlc verify sast [opciones]` | `pnpm run verify:sast` | **Seguridad SAST** | Detección determinista de patrones vulnerables generados por IA (SQLi, command injection, eval, SSRF, path traversal) y Semgrep |
 | `npx aisdlc verify quality` | `pnpm run verify:quality` | **Release Gate de Código** | Evalúa Complejidad Ciclomática ($\le 10$), Cognitiva ($\le 15$) y Mantenibilidad ($\ge 50$) |
 | `npx aisdlc verify traceability` | `pnpm run verify:traceability` | **Matriz 360° RTM** | Valida triangulación obligatoria: Producto (`HOF-*`) ➔ Arquitectura (`CMP-*`) ➔ Tests (`.feature`) |
 | `npx aisdlc verify governance` | `pnpm run verify:governance` | **Gobierno de Tareas** | Audita modos de autonomía (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `HIGH_RISK_MANUAL`, `AMBIGUOUS`) |
@@ -625,12 +630,12 @@ Verifica que el código cumpla con los umbrales de calidad definidos en `quality
    - **Arquitectura (Midstream)**: Vistas arc42 / NAF v4 (`CMP-*`, `ADR-*`, `SEC-ENC-*`).
    - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) y pruebas unitarias correspondientes.
 
-2. **Ejecución Consolidada de la Suite de CI/CD (8 Quality Gates)**:
+2. **Ejecución Consolidada de la Suite de CI/CD (9 Quality Gates)**:
    ```bash
    pnpm run verify:all
    # o: npx aisdlc verify all
    ```
-   *Compuertas evaluadas*: 1) Quality Gate de Complejidad, 2) Trazabilidad 360° (RTM), 3) Gobierno de Tareas, 4) Cobertura de Pruebas, 5) Licencias Open Source, 6) PDaC & Deriva Criptográfica SHA-256, 7) Esquemas JSON, 8) Verificación de Duplicados (Shift-Left Gate).
+   *Compuertas evaluadas*: 1) Quality Gate (Complejidad y Calidad AST), 2) Trazabilidad 360° (RTM), 3) Gobierno de Tareas y Autonomía, 4) Cobertura de Pruebas (Reqs & Tasks), 5) Licencias Open Source y SCA, 6) PDaC & Deriva Criptográfica SHA-256, 7) Esquemas JSON de Artefactos, 8) Verificación de Duplicados (Shift-Left Gate), 9) Seguridad Shift-Left (Detección de Secretos Gitleaks & SAST).
 
 
 3. **Pull Request y Aprobación Humana**:
@@ -753,6 +758,86 @@ npx aisdlc verify licenses --tool trivy --sbom reports/trivy-sbom.cdx.json
 - **`reports/LICENSE_COMPLIANCE_REPORT.md`**: Informe formal con desglose por categoría (Permisivas, Copyleft, Comerciales, Prohibidas), dependencias analizadas y estado del Quality Gate.
 - **`reports/sbom.cdx.json`**: Software Bill of Materials (CycloneDX 1.5) con metadatos completos de componentes, hashes y licencias SPDX.
 - **`THIRD_PARTY_NOTICES.md`**: Archivo de atribución legal que agrupa paquetes por licencia y reproduce los textos íntegros de copyright requeridos por licencias MIT, Apache-2.0, BSD, etc.
+
+---
+
+<a id="doc-readme-tutorial-5-deteccion-determinista-de-secretos-y-seguridad-shift-left-gitleaks-sast"></a>
+
+## 🔐 Tutorial 5: Detección Determinista de Secretos y Seguridad Shift-Left (Gitleaks & SAST)
+
+AI-SDLC implementa una defensa en profundidad determinista para erradicar la exposición involuntaria de credenciales y la introducción de patrones de vulnerabilidad comunes en código sintetizado por modelos de lenguaje (LLMs).
+
+### 1. Gate 9: Detección Determinista de Secretos (`verify secrets`)
+
+El escaneo de secretos inspecciona el repositorio en busca de credenciales, llaves API, tokens de autenticación o certificados embebidos antes de que alcancen el repositorio remoto o el entorno de producción.
+
+#### Características Principales:
+- **Motor Híbrido Zero-Dependencies**:
+  - Reglas deterministas para Claves Privadas (RSA, EC, DSA, OpenSSH), tokens de GitHub (`ghp_`, `gho_`, etc.), AWS Access Keys (`AKIA...`), Google API Keys (`AIza...`), Slack API tokens (`xox[baprs]-...`), Stripe API keys (`sk_live_...`, `rk_live_...`), OpenAI API keys (`sk-...`), JSON Web Tokens (`eyJ...`) y asignaciones genéricas de tokens.
+  - Análisis de **Entropía de Shannon** para identificar cadenas aleatorias de alta entropía ($\ge 4.5$ por defecto) comúnmente empleadas en claves y contraseñas.
+- **Escaneo Incremental Git Diff**:
+  - Mediante el flag `--diff`, analiza únicamente las modificaciones en el área de trabajo o *staging* de Git, reduciendo el tiempo de escaneo a milisegundos en tareas y commits diarios.
+  - El flag opcional `--base <rama>` permite comparar contra la rama de destino (ej. `origin/main` o `release/v1.0.0`) en pipelines de Pull Request.
+- **Delegación en Gitleaks (`--gitleaks`)**:
+  - Si el binario oficial de `gitleaks` está instalado localmente o en el runner de CI/CD, el CLI puede delegar el escaneo en Gitleaks para máxima cobertura.
+  - Implementa *graceful fallback*: si `gitleaks` no está presente, retrocede transparentemente al motor determinista interno.
+- **Enmascaramiento Estricto de Seguridad**:
+  - Los secretos nunca se vuelcan en texto claro en la consola ni en los artefactos generados. Todas las salidas se anonimizan (`AKIA****************`).
+- **Supresiones Controladas**:
+  - Cuando un valor similar a un secreto es un identificador legítimo o un mock seguro de test, se puede suprimir el hallazgo añadiendo el comentario en línea:
+    ```typescript
+    const testPlaceholder = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // ai-sdlc:allow-secret
+    ```
+- **Código de Salida 4**:
+  - Cualquier violación detectada finaliza con **exit code 4**, bloqueando de inmediato el pipeline de integración continua.
+
+### 2. Análisis Estático de Vulnerabilidades SAST (`verify sast`)
+
+Los asistentes de IA generativa pueden sintetizar soluciones sintácticamente elegantes pero intrínsecamente vulnerables. El motor SAST shift-left evalúa el código frente a los 5 patrones de riesgo más críticos de OWASP:
+1. **SQL Injection (CWE-89)**: Concatenación directa o interpolación en sentencias SQL (`SELECT ... + userInput`).
+2. **Command Injection (CWE-78)**: Llamadas al sistema operativo (`exec`, `execSync`, `spawn`) con interpolación de cadenas sin parametrización.
+3. **Dynamic Code Evaluation (CWE-95)**: Uso de `eval(...)` o `new Function(...)` con variables no confiables.
+4. **Server-Side Request Forgery - SSRF (CWE-918)**: Solicitudes HTTP salientes (`fetch`, `axios`, `http.get`) donde la URL o dominio se construye con entradas del usuario.
+5. **Path Traversal (CWE-22)**: Acceso a archivos (`fs.readFile`, `fs.open`) con interpolación directa sin resolución o *jail* de ruta.
+
+Opcionalmente, `--semgrep` permite delegar la ejecución en el motor corporativo de Semgrep si está presente en el entorno.
+
+### 3. Comandos Prácticos de Seguridad
+
+```bash
+# 1. Escaneo completo de secretos en el árbol de trabajo
+pnpm run verify:secrets
+# o vía npx:
+npx aisdlc verify secrets
+
+# 2. Escaneo ultra-rápido sobre el diff local de Git (ideal para pre-commit hooks)
+npx aisdlc verify secrets --diff
+
+# 3. Escaneo de diff frente a una rama base en CI (Pull Request)
+npx aisdlc verify secrets --diff --base origin/main
+
+# 4. Ajuste de sensibilidad de entropía de Shannon (ej. 5.0 para menor sensibilidad)
+npx aisdlc verify secrets --entropy 5.0
+
+# 5. Escaneo de secretos delegando en el binario oficial de Gitleaks
+npx aisdlc verify secrets --gitleaks
+
+# 6. Escaneo estático SAST shift-left de vulnerabilidades generadas por IA
+pnpm run verify:sast
+# o vía npx:
+npx aisdlc verify sast
+
+# 7. Escaneo SAST con delegación opcional en Semgrep
+npx aisdlc verify sast --semgrep
+
+# 8. Pre-vuelo consolidado (incluye Gate 9 de secretos)
+pnpm run check
+```
+
+### 4. Salidas y Reportes Generados
+
+- **`reports/SECRET_SCAN_REPORT.md`**: Informe formal de auditoría de secretos con regla infringida, severidad, fichero, línea y token enmascarado.
+- **`reports/SAST_REPORT.md`**: Informe formal de vulnerabilidades SAST con tipo de fallo, severidad, fichero, línea y fragmento de código de muestra.
 
 ---
 
@@ -1983,56 +2068,84 @@ En un flujo de desarrollo con agentes de IA, el código puede generarse a gran v
 
 ---
 
-<a id="cap-07-security-and-license-validation-2-las-8-puertas-deterministas-de-cicd-pipeline-gates"></a>
+<a id="cap-07-security-and-license-validation-2-las-9-puertas-deterministas-de-cicd-pipeline-gates"></a>
 
-## 2. Las 8 Puertas Deterministas de CI/CD (Pipeline Gates)
+## 2. Las 9 Puertas Deterministas de CI/CD (Pipeline Gates)
 
-Todo Pull Request propuesto por un desarrollador humano o por un agente debe superar de forma obligatoria las siguientes 8 puertas automáticas:
+Todo Pull Request propuesto por un desarrollador humano o por un agente debe superar de forma obligatoria las siguientes 9 puertas automáticas:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   PIPELINE DETERMINISTA DE CI/CD                       │
+│                   PIPELINE DETERMINISTA DE CI/CD (9 GATES)             │
 └────────────────────────────────────────────────────────────────────────┘
 
- [PUERTA 1: ESCANEO DE SECRETOS] (gitleaks / trufflehog)
-  └─► Bloqueo si se detectan tokens, claves privadas, contraseñas o certs.
+ [GATE 1: RELEASE GATE DE CÓDIGO Y CALIDAD AST] (aisdlc verify quality)
+  └─► Mide Complejidad Ciclomática (<=10), Cognitiva (<=15) y Mantenibilidad (>=50) con AST real.
 
- [PUERTA 2: VERIFICACIÓN DE CITACIONES Y DERIVA] (prodshape verify)
-  └─► Comprueba que los hashes SHA-256 de los requerimientos citados coincidan.
-      Si un requisito cambió en la línea base, la citación da 'stale' (Fallo).
-
- [PUERTA 3: AUDITORÍA DE LICENCIAS Y GENERACIÓN SBOM] (aisdlc verify licenses / Trivy / Syft)
-  └─► Escaneo dinámico nativo de node_modules y lockfiles contra license-policy.yaml.
-      Falla si hay licencias virales (AGPL) o duales/comerciales no aprobadas.
-      Genera automáticamente SBOM en formato estándar CycloneDX 1.5 JSON y THIRD_PARTY_NOTICES.md.
-
- [PUERTA 4: SAST & ANÁLISIS ESTÁTICO DE CÓDIGO] (Semgrep / SonarQube)
-  └─► Detección de vulnerabilidades OWASP Top 10, CWEs e inyecciones.
-      Falla ante cualquier vulnerabilidad de severidad Alta o Crítica.
-
- [PUERTA 5: SUITE DE PRUEBAS UNITARIAS Y DE MITIGACIÓN] (Test Runner)
-  └─► Cobertura mínima obligatoria (ej. 85%).
-      Ejecución de todas las pruebas de abuso y seguridad (SEC-TEST-*).
-
- [PUERTA 6: VALIDACIÓN DE ESQUEMAS Y GRAFO] (JSON Schema Validator)
-  └─► Verifica que los archivos frontmatter respeten los esquemas canónicos.
-
- [PUERTA 7: AUDITORÍA DE PRUEBAS EN REQUISITOS Y TAREAS] (verify-all-testing.js)
-  └─► Comprueba mediante resolución inversa que el 100% de los requisitos cuenten con pruebas
-      físicas en disco (.feature etiquetadas o .spec citando los IDs) y que el 100% de las
-      tareas tengan comando determinista de verificación.
-
- [PUERTA 8: MATRIZ DE TRAZABILIDAD 360° DETERMINISTA] (aisdlc verify traceability)
+ [GATE 2: MATRIZ DE TRAZABILIDAD 360° DETERMINISTA] (aisdlc verify traceability)
   └─► Comprueba la triangulación inquebrantable entre los paquetes de handoff PDaC (HOF-*),
-      las vistas de arquitectura arc42 / NAF v4 (satisfies-requirements) y los escenarios BDD/Gherkin
-      y tests mediante el modelo de trazabilidad invertida (Reverse Lookup).
+      las vistas de arquitectura arc42 / NAF v4 (CMP-*) y los escenarios BDD/Gherkin y tests.
+
+ [GATE 3: GOBIERNO DE TAREAS Y AUTONOMÍA] (aisdlc verify governance)
+  └─► Audita modos de autonomía (AUTONOMOUS, HUMAN_REVIEW_PLAN, HIGH_RISK_MANUAL) y verificación.
+
+ [GATE 4: AUDITORÍA DE PRUEBAS EN REQUISITOS Y TAREAS] (aisdlc verify testing)
+  └─► Comprueba mediante resolución inversa que el 100% de los requisitos cuenten con pruebas
+      físicas en disco (.feature etiquetadas o .spec citando los IDs) y comandos de verificación.
+
+ [GATE 5: AUDITORÍA DE LICENCIAS OSS Y GENERACIÓN SBOM] (aisdlc verify licenses)
+  └─► Escaneo dinámico nativo de dependencias instaladas frente a license-policy.yaml.
+      Falla si hay licencias virales (AGPL) o comerciales no aprobadas. Genera SBOM CycloneDX 1.5.
+
+ [GATE 6: INTEGRIDAD CRIPTOGRÁFICA Y DERIVA PDAC] (aisdlc verify pdac)
+  └─► Comprueba que los hashes SHA-256 de los requerimientos citados en handoffs coincidan.
+
+ [GATE 7: VALIDACIÓN DE ESQUEMAS Y GRAFO] (aisdlc verify schemas)
+  └─► Verifica que los archivos frontmatter respeten los esquemas canónicos JSON (Draft 2020-12).
+
+ [GATE 8: PRE-FLIGHT DE DUPLICADOS Y COLISIONES] (aisdlc verify duplicates)
+  └─► Audita que los nuevos requisitos no colisionen en ID, textos normativos idénticos ni títulos.
+
+ [GATE 9: SEGURIDAD SHIFT-LEFT: SECRETOS Y SAST] (aisdlc verify security)
+  └─► Cero tolerancia a credenciales, llaves API o tokens (Gitleaks Gate) y detección determinista
+      de vulnerabilidades OWASP generadas por IA (SQLi, exec, eval, SSRF, path traversal).
 ```
 
 ---
 
-<a id="cap-07-security-and-license-validation-3-la-capa-de-auditoria-adversarial-por-agentes-de-ia-secaudit"></a>
+<a id="cap-07-security-and-license-validation-3-especificacion-detallada-de-seguridad-shift-left"></a>
 
-## 3. La Capa de Auditoría Adversarial por Agentes de IA (`sec:audit`)
+## 3. Especificación Detallada de Seguridad Shift-Left
+
+### 3.1 Gate 9: Detección Determinista de Secretos (`aisdlc verify secrets`)
+
+El escaneo de secretos previene la fuga involuntaria de credenciales en el código fuente:
+- **Ámbito de Escaneo Flexible**: Permite escanear todo el árbol de trabajo o únicamente el diff incremental de Git (`--diff`, opcionalmente contra una rama base con `--base <rama>`).
+- **Motor Híbrido Zero-Dependencies**:
+  - Reglas deterministas para Claves Privadas RSA/EC/OpenSSH, tokens de GitHub, AWS Access Keys, OpenAI API Keys, Google API Keys, Slack Tokens, Stripe Keys, Bearer JWTs y asignaciones genéricas de tokens.
+  - Filtro heurístico de **Entropía de Shannon** para identificar cadenas con aleatoriedad sospechosa (umbral por defecto $\ge 4.5$).
+- **Integración con Gitleaks (`--gitleaks`)**: Delegación opcional en el binario oficial de `gitleaks` si está disponible en el entorno o en el CI runner.
+- **Enmascaramiento Seguro**: Los secretos nunca se imprimen en claro ni en consola ni en informes (`AKIA...` ➔ `AKIA***************`).
+- **Supresión Justificada**: Se permite ignorar falsos positivos específicos mediante el comentario en línea `// ai-sdlc:allow-secret`.
+- **Salida Formal**: Genera el informe `reports/SECRET_SCAN_REPORT.md` y emite **código de salida 4** en caso de infracciones.
+
+### 3.2 Análisis Estático de Vulnerabilidades SAST (`aisdlc verify sast`)
+
+Para erradicar patrones de código vulnerable comunes en código sintetizado por modelos de lenguaje (LLMs):
+- **Patrones Detectados**:
+  - *SQL Injection*: Concatenación directa de cadenas en consultas SQL sin sentencias parametrizadas.
+  - *Command Injection*: Ejecución de comandos del sistema operativo (`exec`, `execSync`, `spawn` con shell activo) con interpolación de variables.
+  - *Dynamic Code Evaluation*: Uso inseguro de `eval(...)` o constructores `new Function(...)`.
+  - *Server-Side Request Forgery (SSRF)*: Peticiones HTTP salientes donde la URL objetivo se construye directamente con entradas no sanitizadas.
+  - *Path Traversal*: Operaciones de sistema de archivos construidas mediante concatenación de rutas sin normalización ni comprobación de límites.
+- **Conector Opcional Semgrep (`--semgrep`)**: Ejecuta reglas corporativas de Semgrep sobre el repositorio si está disponible.
+- **Salida Formal**: Genera `reports/SAST_REPORT.md` y emite código de salida 1 en caso de vulnerabilidades detectadas.
+
+---
+
+<a id="cap-07-security-and-license-validation-4-la-capa-de-auditoria-adversarial-por-agentes-de-ia-secaudit"></a>
+
+## 4. La Capa de Auditoría Adversarial por Agentes de IA (`sec:audit`)
 
 Las herramientas estáticas tradicionales (SAST) son excelentes detectando patrones sintácticos conocidos (como una inyección SQL simple), pero fallan al detectar **fallos de lógica de negocio**, **escalados horizontales de privilegios** o **vectores de prompt injection**.
 
@@ -2047,9 +2160,9 @@ Para cubrir este vacío, el pipeline invoca al **Agente Auditor de Seguridad (`a
 
 ---
 
-<a id="cap-07-security-and-license-validation-4-codigos-de-salida-estandarizados-exit-codes"></a>
+<a id="cap-07-security-and-license-validation-5-codigos-de-salida-estandarizados-exit-codes"></a>
 
-## 4. Códigos de Salida Estandarizados (Exit Codes)
+## 5. Códigos de Salida Estandarizados (Exit Codes)
 
 Toda herramienta y script de validación del proceso debe emitir los siguientes códigos de salida:
 
@@ -2059,7 +2172,7 @@ Toda herramienta y script de validación del proceso debe emitir los siguientes 
 | **1** | **Fallo Estructural / Pruebas** | Fallo en tests unitarios, errores sintácticos o vulnerabilidad crítica SAST. |
 | **2** | **Deriva de Citación (Stale)** | Un requerimiento o arquitectura canónica cambió. Se debe actualizar la spec. |
 | **3** | **Bloqueo Legal / Licencias** | Dependencia no permitida o requiere adquisición de licencia comercial. |
-| **4** | **Secreto Expuesto** | Credencial o certificado detectado en el historial de commits. |
+| **4** | **Secreto Expuesto** | Credencial o certificado detectado por `verify secrets` en el repositorio o diff. |
 
 ---
 

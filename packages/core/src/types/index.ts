@@ -684,3 +684,85 @@ export interface DuplicateVerifierResult {
   reportMarkdown?: string;
 }
 
+// --- Secret Scanning & Gitleaks Types ---
+export type SecretFindingType =
+  | 'PRIVATE_KEY'
+  | 'AWS_CREDENTIAL'
+  | 'GITHUB_TOKEN'
+  | 'SLACK_TOKEN'
+  | 'GOOGLE_API_KEY'
+  | 'OPENAI_API_KEY'
+  | 'STRIPE_API_KEY'
+  | 'JWT_TOKEN'
+  | 'GENERIC_HIGH_ENTROPY_SECRET'
+  | 'GITLEAKS_FINDING';
+
+export interface SecretViolation {
+  filePath: string;
+  relPath: string;
+  lineNumber: number;
+  type: SecretFindingType;
+  maskedMatch: string;
+  ruleId: string;
+  entropy?: number;
+  message: string;
+}
+
+export interface SecretVerifierOptions {
+  rootDir?: string;
+  diff?: boolean;
+  baseBranch?: string;
+  entropyThreshold?: number; // default: 4.3
+  gitleaks?: boolean;
+  excludePatterns?: string[];
+  ignoreSecrets?: string[];
+}
+
+export interface SecretVerifierResult {
+  success: boolean;
+  totalFilesScanned: number;
+  findingsCount: number;
+  findings: SecretViolation[];
+  scannedWithGitleaks: boolean;
+  reportMarkdown?: string;
+}
+
+// --- SAST (Static Application Security Testing) Types ---
+export type SastSeverity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+
+export type SastFindingType =
+  | 'SQL_INJECTION'
+  | 'COMMAND_INJECTION'
+  | 'SSRF'
+  | 'PATH_TRAVERSAL'
+  | 'UNSAFE_EVAL'
+  | 'PROMPT_INJECTION_RISK'
+  | 'SEMGREP_FINDING';
+
+export interface SastViolation {
+  filePath: string;
+  relPath: string;
+  lineNumber: number;
+  ruleId: string;
+  type: SastFindingType;
+  severity: SastSeverity;
+  snippet: string;
+  message: string;
+}
+
+export interface SastVerifierOptions {
+  rootDir?: string;
+  semgrep?: boolean;
+  targetDirectories?: string[];
+  minSeverity?: SastSeverity;
+}
+
+export interface SastVerifierResult {
+  success: boolean;
+  totalFilesScanned: number;
+  violationsCount: number;
+  violations: SastViolation[];
+  reportMarkdown?: string;
+}
+
+

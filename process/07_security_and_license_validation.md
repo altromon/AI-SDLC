@@ -8,52 +8,78 @@ En un flujo de desarrollo con agentes de IA, el código puede generarse a gran v
 
 ---
 
-## 2. Las 8 Puertas Deterministas de CI/CD (Pipeline Gates)
+## 2. Las 9 Puertas Deterministas de CI/CD (Pipeline Gates)
 
-Todo Pull Request propuesto por un desarrollador humano o por un agente debe superar de forma obligatoria las siguientes 8 puertas automáticas:
+Todo Pull Request propuesto por un desarrollador humano o por un agente debe superar de forma obligatoria las siguientes 9 puertas automáticas:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   PIPELINE DETERMINISTA DE CI/CD                       │
+│                   PIPELINE DETERMINISTA DE CI/CD (9 GATES)             │
 └────────────────────────────────────────────────────────────────────────┘
 
- [PUERTA 1: ESCANEO DE SECRETOS] (gitleaks / trufflehog)
-  └─► Bloqueo si se detectan tokens, claves privadas, contraseñas o certs.
+ [GATE 1: RELEASE GATE DE CÓDIGO Y CALIDAD AST] (aisdlc verify quality)
+  └─► Mide Complejidad Ciclomática (<=10), Cognitiva (<=15) y Mantenibilidad (>=50) con AST real.
 
- [PUERTA 2: VERIFICACIÓN DE CITACIONES Y DERIVA] (prodshape verify)
-  └─► Comprueba que los hashes SHA-256 de los requerimientos citados coincidan.
-      Si un requisito cambió en la línea base, la citación da 'stale' (Fallo).
-
- [PUERTA 3: AUDITORÍA DE LICENCIAS Y GENERACIÓN SBOM] (aisdlc verify licenses / Trivy / Syft)
-  └─► Escaneo dinámico nativo de node_modules y lockfiles contra license-policy.yaml.
-      Falla si hay licencias virales (AGPL) o duales/comerciales no aprobadas.
-      Genera automáticamente SBOM en formato estándar CycloneDX 1.5 JSON y THIRD_PARTY_NOTICES.md.
-
- [PUERTA 4: SAST & ANÁLISIS ESTÁTICO DE CÓDIGO] (Semgrep / SonarQube)
-  └─► Detección de vulnerabilidades OWASP Top 10, CWEs e inyecciones.
-      Falla ante cualquier vulnerabilidad de severidad Alta o Crítica.
-
- [PUERTA 5: SUITE DE PRUEBAS UNITARIAS Y DE MITIGACIÓN] (Test Runner)
-  └─► Cobertura mínima obligatoria (ej. 85%).
-      Ejecución de todas las pruebas de abuso y seguridad (SEC-TEST-*).
-
- [PUERTA 6: VALIDACIÓN DE ESQUEMAS Y GRAFO] (JSON Schema Validator)
-  └─► Verifica que los archivos frontmatter respeten los esquemas canónicos.
-
- [PUERTA 7: AUDITORÍA DE PRUEBAS EN REQUISITOS Y TAREAS] (verify-all-testing.js)
-  └─► Comprueba mediante resolución inversa que el 100% de los requisitos cuenten con pruebas
-      físicas en disco (.feature etiquetadas o .spec citando los IDs) y que el 100% de las
-      tareas tengan comando determinista de verificación.
-
- [PUERTA 8: MATRIZ DE TRAZABILIDAD 360° DETERMINISTA] (aisdlc verify traceability)
+ [GATE 2: MATRIZ DE TRAZABILIDAD 360° DETERMINISTA] (aisdlc verify traceability)
   └─► Comprueba la triangulación inquebrantable entre los paquetes de handoff PDaC (HOF-*),
-      las vistas de arquitectura arc42 / NAF v4 (satisfies-requirements) y los escenarios BDD/Gherkin
-      y tests mediante el modelo de trazabilidad invertida (Reverse Lookup).
+      las vistas de arquitectura arc42 / NAF v4 (CMP-*) y los escenarios BDD/Gherkin y tests.
+
+ [GATE 3: GOBIERNO DE TAREAS Y AUTONOMÍA] (aisdlc verify governance)
+  └─► Audita modos de autonomía (AUTONOMOUS, HUMAN_REVIEW_PLAN, HIGH_RISK_MANUAL) y verificación.
+
+ [GATE 4: AUDITORÍA DE PRUEBAS EN REQUISITOS Y TAREAS] (aisdlc verify testing)
+  └─► Comprueba mediante resolución inversa que el 100% de los requisitos cuenten con pruebas
+      físicas en disco (.feature etiquetadas o .spec citando los IDs) y comandos de verificación.
+
+ [GATE 5: AUDITORÍA DE LICENCIAS OSS Y GENERACIÓN SBOM] (aisdlc verify licenses)
+  └─► Escaneo dinámico nativo de dependencias instaladas frente a license-policy.yaml.
+      Falla si hay licencias virales (AGPL) o comerciales no aprobadas. Genera SBOM CycloneDX 1.5.
+
+ [GATE 6: INTEGRIDAD CRIPTOGRÁFICA Y DERIVA PDAC] (aisdlc verify pdac)
+  └─► Comprueba que los hashes SHA-256 de los requerimientos citados en handoffs coincidan.
+
+ [GATE 7: VALIDACIÓN DE ESQUEMAS Y GRAFO] (aisdlc verify schemas)
+  └─► Verifica que los archivos frontmatter respeten los esquemas canónicos JSON (Draft 2020-12).
+
+ [GATE 8: PRE-FLIGHT DE DUPLICADOS Y COLISIONES] (aisdlc verify duplicates)
+  └─► Audita que los nuevos requisitos no colisionen en ID, textos normativos idénticos ni títulos.
+
+ [GATE 9: SEGURIDAD SHIFT-LEFT: SECRETOS Y SAST] (aisdlc verify security)
+  └─► Cero tolerancia a credenciales, llaves API o tokens (Gitleaks Gate) y detección determinista
+      de vulnerabilidades OWASP generadas por IA (SQLi, exec, eval, SSRF, path traversal).
 ```
 
 ---
 
-## 3. La Capa de Auditoría Adversarial por Agentes de IA (`sec:audit`)
+## 3. Especificación Detallada de Seguridad Shift-Left
+
+### 3.1 Gate 9: Detección Determinista de Secretos (`aisdlc verify secrets`)
+
+El escaneo de secretos previene la fuga involuntaria de credenciales en el código fuente:
+- **Ámbito de Escaneo Flexible**: Permite escanear todo el árbol de trabajo o únicamente el diff incremental de Git (`--diff`, opcionalmente contra una rama base con `--base <rama>`).
+- **Motor Híbrido Zero-Dependencies**:
+  - Reglas deterministas para Claves Privadas RSA/EC/OpenSSH, tokens de GitHub, AWS Access Keys, OpenAI API Keys, Google API Keys, Slack Tokens, Stripe Keys, Bearer JWTs y asignaciones genéricas de tokens.
+  - Filtro heurístico de **Entropía de Shannon** para identificar cadenas con aleatoriedad sospechosa (umbral por defecto $\ge 4.5$).
+- **Integración con Gitleaks (`--gitleaks`)**: Delegación opcional en el binario oficial de `gitleaks` si está disponible en el entorno o en el CI runner.
+- **Enmascaramiento Seguro**: Los secretos nunca se imprimen en claro ni en consola ni en informes (`AKIA...` ➔ `AKIA***************`).
+- **Supresión Justificada**: Se permite ignorar falsos positivos específicos mediante el comentario en línea `// ai-sdlc:allow-secret`.
+- **Salida Formal**: Genera el informe `reports/SECRET_SCAN_REPORT.md` y emite **código de salida 4** en caso de infracciones.
+
+### 3.2 Análisis Estático de Vulnerabilidades SAST (`aisdlc verify sast`)
+
+Para erradicar patrones de código vulnerable comunes en código sintetizado por modelos de lenguaje (LLMs):
+- **Patrones Detectados**:
+  - *SQL Injection*: Concatenación directa de cadenas en consultas SQL sin sentencias parametrizadas.
+  - *Command Injection*: Ejecución de comandos del sistema operativo (`exec`, `execSync`, `spawn` con shell activo) con interpolación de variables.
+  - *Dynamic Code Evaluation*: Uso inseguro de `eval(...)` o constructores `new Function(...)`.
+  - *Server-Side Request Forgery (SSRF)*: Peticiones HTTP salientes donde la URL objetivo se construye directamente con entradas no sanitizadas.
+  - *Path Traversal*: Operaciones de sistema de archivos construidas mediante concatenación de rutas sin normalización ni comprobación de límites.
+- **Conector Opcional Semgrep (`--semgrep`)**: Ejecuta reglas corporativas de Semgrep sobre el repositorio si está disponible.
+- **Salida Formal**: Genera `reports/SAST_REPORT.md` y emite código de salida 1 en caso de vulnerabilidades detectadas.
+
+---
+
+## 4. La Capa de Auditoría Adversarial por Agentes de IA (`sec:audit`)
 
 Las herramientas estáticas tradicionales (SAST) son excelentes detectando patrones sintácticos conocidos (como una inyección SQL simple), pero fallan al detectar **fallos de lógica de negocio**, **escalados horizontales de privilegios** o **vectores de prompt injection**.
 
@@ -68,7 +94,7 @@ Para cubrir este vacío, el pipeline invoca al **Agente Auditor de Seguridad (`a
 
 ---
 
-## 4. Códigos de Salida Estandarizados (Exit Codes)
+## 5. Códigos de Salida Estandarizados (Exit Codes)
 
 Toda herramienta y script de validación del proceso debe emitir los siguientes códigos de salida:
 
@@ -78,4 +104,4 @@ Toda herramienta y script de validación del proceso debe emitir los siguientes 
 | **1** | **Fallo Estructural / Pruebas** | Fallo en tests unitarios, errores sintácticos o vulnerabilidad crítica SAST. |
 | **2** | **Deriva de Citación (Stale)** | Un requerimiento o arquitectura canónica cambió. Se debe actualizar la spec. |
 | **3** | **Bloqueo Legal / Licencias** | Dependencia no permitida o requiere adquisición de licencia comercial. |
-| **4** | **Secreto Expuesto** | Credencial o certificado detectado en el historial de commits. |
+| **4** | **Secreto Expuesto** | Credencial o certificado detectado por `verify secrets` en el repositorio o diff. |
