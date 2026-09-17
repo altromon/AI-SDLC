@@ -53,10 +53,18 @@ describe('@ai-sdlc/cli verify licenses command suite', () => {
   });
 
   it('should support direct dependency scanning depth', () => {
-    const passed = runVerifyLicenses({
-      depth: 'direct',
-      silent: true,
-    });
-    expect(passed).toBe(true);
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-cli-depth-'));
+    try {
+      const customNoticesPath = path.join(tmpDir, 'NOTICES_DEPTH.md');
+      const passed = runVerifyLicenses({
+        depth: 'direct',
+        notices: customNoticesPath,
+        silent: true,
+      });
+      expect(passed).toBe(true);
+      expect(fs.existsSync(customNoticesPath)).toBe(true);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 });

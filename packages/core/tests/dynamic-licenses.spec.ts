@@ -8,6 +8,7 @@ import {
   generateCycloneDxSbom,
   generateThirdPartyNotices,
   parseLicensePolicy,
+  resolveLicenseFromFile,
   scanWithNativeFs,
   verifyLicenses,
   writeCycloneDxSbom,
@@ -266,6 +267,39 @@ categories:
       expect(result.violations.length).toBe(1);
       expect(result.violations[0].packageName).toBe('viral-pkg');
       expect(result.violations[0].category).toBe('BLOCKED');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should support .NET ecosystem licenses in policy and file inference (MS-PL, MS-RL, MS-LPL, MS-LRL)', () => {
+    const rootPolicyPath = path.resolve(__dirname, '../../../license-policy.yaml');
+    if (fs.existsSync(rootPolicyPath)) {
+      const rootPolicy = parseLicensePolicy(fs.readFileSync(rootPolicyPath, 'utf-8'));
+      expect(rootPolicy.permitted).toContain('MS-PL');
+      expect(rootPolicy.restricted).toContain('MS-RL');
+      expect(rootPolicy.restricted).toContain('MS-LPL');
+      expect(rootPolicy.restricted).toContain('MS-LRL');
+
+      const msPlDep = { name: 'DotNetZip', version: '1.16.0', spdxLicense: 'MS-PL' };
+      const msPlViolation = evaluateSingleDependency(msPlDep, rootPolicy);
+      expect(msPlViolation).toBeNull();
+
+      const msRlDep = { name: 'ReciprocalDotNetLib', version: '2.0.0', spdxLicense: 'MS-RL' };
+      const msRlViolation = evaluateSingleDependency(msRlDep, rootPolicy);
+      expect(msRlViolation).not.toBeNull();
+      expect(msRlViolation?.category).toBe('RESTRICTED');
+    }
+
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-dotnet-lic-'));
+    try {
+      const msPlFile = path.join(tmpDir, 'LICENSE-MS-PL.txt');
+      fs.writeFileSync(msPlFile, 'Microsoft Public License (MS-PL)\nThis license governs use of the accompanying software.');
+      expect(resolveLicenseFromFile(msPlFile)).toBe('MS-PL');
+
+      const msRlFile = path.join(tmpDir, 'LICENSE-MS-RL.txt');
+      fs.writeFileSync(msRlFile, 'Microsoft Reciprocal License (MS-RL)\nThis license governs use of the accompanying software.');
+      expect(resolveLicenseFromFile(msRlFile)).toBe('MS-RL');
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }

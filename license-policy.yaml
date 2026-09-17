@@ -33,6 +33,7 @@ categories:
       - "Python-2.0"
       - "CC-BY-3.0"
       - "CC-BY-4.0"
+      - "MS-PL"
 
   # Categoría B: Copyleft Débil (Uso condicionado a desacoplamiento arquitectónico)
   weak_copyleft_conditional:
@@ -47,6 +48,9 @@ categories:
       - "MPL-2.0"
       - "EPL-2.0"
       - "CDDL-1.0"
+      - "MS-RL"
+      - "MS-LPL"
+      - "MS-LRL"
 
   # Categoría C: Copyleft Fuerte / Viral (Prohibidas en código propietario o SaaS)
   strong_copyleft_viral:

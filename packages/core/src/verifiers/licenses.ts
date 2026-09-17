@@ -70,6 +70,7 @@ const DEFAULT_PERMITTED = [
   'Python-2.0',
   'CC-BY-3.0',
   'CC-BY-4.0',
+  'MS-PL',
 ];
 
 const DEFAULT_RESTRICTED = [
@@ -80,6 +81,9 @@ const DEFAULT_RESTRICTED = [
   'MPL-2.0',
   'EPL-2.0',
   'CDDL-1.0',
+  'MS-RL',
+  'MS-LPL',
+  'MS-LRL',
   'SSPL-1.0',
   'BSL-1.1',
   'Elastic-2.0',

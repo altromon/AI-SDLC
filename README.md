@@ -303,8 +303,8 @@ Toda nueva funcionalidad parte de una necesidad de negocio canónica:
 
 Antes de incorporar cualquier dependencia o paquete de terceros:
 1. **Consultar `license-policy.yaml`**:
-   - 🟢 **Permisivas (Aprobadas)**: `MIT`, `Apache-2.0`, `BSD-3-Clause`, `ISC` (uso libre en cualquier capa).
-   - 🟡 **Copyleft Débil (Condicionadas)**: `LGPL-3.0`, `MPL-2.0` (solo consumo como librería dinámica, sin modificaciones internas).
+   - 🟢 **Permisivas (Aprobadas)**: `MIT`, `Apache-2.0`, `BSD-3-Clause`, `ISC`, `MS-PL` (uso libre en cualquier capa).
+   - 🟡 **Copyleft Débil (Condicionadas)**: `LGPL-3.0`, `MPL-2.0`, `MS-RL` (solo consumo como librería dinámica, sin modificaciones internas).
    - 🔴 **Virales (Prohibidas)**: `GPL-2.0`, `GPL-3.0`, `AGPL-3.0` (bloqueadas para proteger la propiedad intelectual del código propietario y SaaS).
    - ⚠️ **Comerciales / Duales (Pago Requerido)**: `BSL-1.1`, `SSPL-1.0` (requieren aprobación y formulario formal en `templates/compliance/commercial-acquisition-request.template.md`).
 

@@ -87,6 +87,12 @@ export function resolveLicenseFromFile(licenseFilePath?: string): string | undef
     if (text.includes('ISC License')) {
       return 'ISC';
     }
+    if (text.includes('Microsoft Public License') || text.includes('MS-PL')) {
+      return 'MS-PL';
+    }
+    if (text.includes('Microsoft Reciprocal License') || text.includes('MS-RL')) {
+      return 'MS-RL';
+    }
   } catch {
     // Ignore read error
   }

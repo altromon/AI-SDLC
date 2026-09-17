@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-09-17 05:42:59 UTC` | *Módulos y Manuales Integrados:* `15`  
+> *Fecha de Compilación:* `2026-09-17 05:49:58 UTC` | *Módulos y Manuales Integrados:* `15`  
 
 ---
 
@@ -458,8 +458,8 @@ Toda nueva funcionalidad parte de una necesidad de negocio canónica:
 
 Antes de incorporar cualquier dependencia o paquete de terceros:
 1. **Consultar `license-policy.yaml`**:
-   - 🟢 **Permisivas (Aprobadas)**: `MIT`, `Apache-2.0`, `BSD-3-Clause`, `ISC` (uso libre en cualquier capa).
-   - 🟡 **Copyleft Débil (Condicionadas)**: `LGPL-3.0`, `MPL-2.0` (solo consumo como librería dinámica, sin modificaciones internas).
+   - 🟢 **Permisivas (Aprobadas)**: `MIT`, `Apache-2.0`, `BSD-3-Clause`, `ISC`, `MS-PL` (uso libre en cualquier capa).
+   - 🟡 **Copyleft Débil (Condicionadas)**: `LGPL-3.0`, `MPL-2.0`, `MS-RL` (solo consumo como librería dinámica, sin modificaciones internas).
    - 🔴 **Virales (Prohibidas)**: `GPL-2.0`, `GPL-3.0`, `AGPL-3.0` (bloqueadas para proteger la propiedad intelectual del código propietario y SaaS).
    - ⚠️ **Comerciales / Duales (Pago Requerido)**: `BSL-1.1`, `SSPL-1.0` (requieren aprobación y formulario formal en `templates/compliance/commercial-acquisition-request.template.md`).
 
@@ -1467,11 +1467,11 @@ Toda dependencia directa o transitiva se clasifica dentro de una de las siguient
 └────────────────────────────────────────────────────────────────────────┘
 
  [CATEGORÍA A: PERMISIVAS (LIBRE USO COMERCIAL)] ──► ALLOWLIST
-  │ Ejemplos: MIT, Apache-2.0, BSD-2/3, ISC, Unlicense, CC0
+  │ Ejemplos: MIT, Apache-2.0, BSD-2/3, ISC, Unlicense, CC0, MS-PL (.NET)
   └─► Permiten uso comercial, modificación y cierre de código. Solo exigen atribución.
 
  [CATEGORÍA B: COPYLEFT DÉBIL (USO CONDICIONADO)] ──► CONDITIONAL REVIEW
-  │ Ejemplos: LGPL-2.1/3.0, MPL-2.0, EPL-2.0, CDDL
+  │ Ejemplos: LGPL-2.1/3.0, MPL-2.0, EPL-2.0, CDDL, MS-RL (.NET), MS-LPL, MS-LRL
   └─► Permitidas solo si se consumen como librería externa dinámica o módulo separado.
 
  [CATEGORÍA C: COPYLEFT FUERTE / VIRAL] ────────────► DENYLIST

@@ -21,11 +21,11 @@ Toda dependencia directa o transitiva se clasifica dentro de una de las siguient
 └────────────────────────────────────────────────────────────────────────┘
 
  [CATEGORÍA A: PERMISIVAS (LIBRE USO COMERCIAL)] ──► ALLOWLIST
-  │ Ejemplos: MIT, Apache-2.0, BSD-2/3, ISC, Unlicense, CC0
+  │ Ejemplos: MIT, Apache-2.0, BSD-2/3, ISC, Unlicense, CC0, MS-PL (.NET)
   └─► Permiten uso comercial, modificación y cierre de código. Solo exigen atribución.
 
  [CATEGORÍA B: COPYLEFT DÉBIL (USO CONDICIONADO)] ──► CONDITIONAL REVIEW
-  │ Ejemplos: LGPL-2.1/3.0, MPL-2.0, EPL-2.0, CDDL
+  │ Ejemplos: LGPL-2.1/3.0, MPL-2.0, EPL-2.0, CDDL, MS-RL (.NET), MS-LPL, MS-LRL
   └─► Permitidas solo si se consumen como librería externa dinámica o módulo separado.
 
  [CATEGORÍA C: COPYLEFT FUERTE / VIRAL] ────────────► DENYLIST
