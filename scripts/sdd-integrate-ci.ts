@@ -1,48 +1,57 @@
 /**
  * AI-SDLC: CI/CD Post-Merge Automated SDD Integration Script
- * Invoked by GitHub Actions workflow (.github/workflows/sdd-integrate-on-merge.yml)
- * to detect, validate, and integrate SDD increments into the canonical baseline.
+ * Multi-provider support for GitHub Actions, GitLab CI, Azure DevOps and Bitbucket Pipelines.
+ * Detects, validates, and integrates SDD increments into the canonical baseline.
  */
 
-import * as fs from 'fs';
-import pc from 'picocolors';
+const pc = {
+  bold: (s: string | number) => `\x1b[1m${s}\x1b[22m`,
+  cyan: (s: string | number) => `\x1b[36m${s}\x1b[39m`,
+  yellow: (s: string | number) => `\x1b[33m${s}\x1b[39m`,
+  red: (s: string | number) => `\x1b[31m${s}\x1b[39m`,
+  green: (s: string | number) => `\x1b[32m${s}\x1b[39m`,
+  gray: (s: string | number) => `\x1b[90m${s}\x1b[39m`,
+};
 import {
   detectActiveChangeForIntegration,
   integrateSddChange,
+  resolveCiEnvironment,
+  emitCiOutput,
+  type CiProvider,
+  type ResolvedCiEnv,
 } from '../packages/core/src/index.js';
 
-function setGithubOutput(key: string, value: string): void {
-  const outputFile = process.env.GITHUB_OUTPUT;
-  if (outputFile && fs.existsSync(outputFile)) {
-    fs.appendFileSync(outputFile, `${key}=${value}\n`, 'utf-8');
-  }
-}
+export { resolveCiEnvironment, emitCiOutput, type CiProvider, type ResolvedCiEnv };
 
-export function runCiIntegration(): number {
+export function runCiIntegration(
+  options: { rootDir?: string; env?: NodeJS.ProcessEnv } = {}
+): number {
+  const env = options.env || process.env;
+  const rootDir = options.rootDir || process.cwd();
+
+  const ciEnv = resolveCiEnvironment(env);
+
   console.log(
     pc.bold(
-      pc.cyan('\n🚀 [AI-SDLC CI/CD] Ejecutando detección e integración canónica post-merge...')
+      pc.cyan(
+        `\n🚀 [AI-SDLC CI/CD] Ejecutando detección e integración canónica post-merge [${ciEnv.provider.toUpperCase()}]...`
+      )
     )
   );
 
-  const manualChangeId = process.env.MANUAL_CHANGE_ID?.trim();
-  const headRef = process.env.PR_HEAD_REF?.trim();
-  const prTitle = process.env.PR_TITLE?.trim();
-  const prBody = process.env.PR_BODY?.trim();
-
-  let targetChangeId: string | undefined = manualChangeId || undefined;
+  let targetChangeId: string | undefined = ciEnv.manualChangeId;
 
   if (!targetChangeId) {
     const detection = detectActiveChangeForIntegration({
-      rootDir: process.cwd(),
-      headRef,
-      prTitle,
-      prBody,
+      rootDir,
+      headRef: ciEnv.headRef,
+      prTitle: ciEnv.prTitle,
+      prBody: ciEnv.prBody,
     });
 
     if (!detection.detected || !detection.changeId) {
       console.log(
-        pc.yellow('\nℹ [AI-SDLC CI/CD] No se detectó ningún cambio SDD activo asociado al PR.')
+        pc.yellow('\nℹ [AI-SDLC CI/CD] No se detectó ningún cambio SDD activo asociado al PR/MR.')
       );
       for (const r of detection.reasons) {
         console.log(`    - ${r}`);
@@ -50,7 +59,7 @@ export function runCiIntegration(): number {
       console.log(
         pc.gray('ℹ Omitiendo integración canónica de forma segura (sin fallos).\n')
       );
-      setGithubOutput('integrated', 'false');
+      emitCiOutput('integrated', 'false', env);
       return 0;
     }
 
@@ -61,15 +70,19 @@ export function runCiIntegration(): number {
         )
       );
       console.error(
-        pc.red('✖ Todas las tareas en tasks.md deben estar en estado COMPLETED antes de consolidar en la especificación canónica.\n')
+        pc.red(
+          '✖ Todas las tareas en tasks.md deben estar en estado COMPLETED antes de consolidar en la especificación canónica.\n'
+        )
       );
-      setGithubOutput('integrated', 'false');
+      emitCiOutput('integrated', 'false', env);
       return 1;
     }
 
     targetChangeId = detection.changeId;
     console.log(
-      pc.green(`✔ Cambio SDD detectado automáticamente: ${pc.bold(targetChangeId)} (vía ${detection.source})`)
+      pc.green(
+        `✔ Cambio SDD detectado automáticamente: ${pc.bold(targetChangeId)} (vía ${detection.source})`
+      )
     );
   } else {
     console.log(
@@ -78,9 +91,9 @@ export function runCiIntegration(): number {
   }
 
   const result = integrateSddChange({
-    rootDir: process.cwd(),
+    rootDir,
     changeId: targetChangeId,
-    author: 'GitHub Actions CI (Automated SDD Integration)',
+    author: ciEnv.author,
     autoArchive: true,
   });
 
@@ -90,21 +103,31 @@ export function runCiIntegration(): number {
       console.error(`    ${pc.red('✖')} ${err}`);
     }
     console.error(pc.red('\n✖ Integración canónica fallida.\n'));
-    setGithubOutput('integrated', 'false');
+    emitCiOutput('integrated', 'false', env);
     return 1;
   }
 
-  console.log(pc.green(`\n✔ Cambio '${targetChangeId}' integrado con éxito en la especificación canónica:`));
-  console.log(`  - Requerimientos integrados:  ${pc.green(result.integratedRequirements.join(', ') || 'Ninguno')}`);
-  console.log(`  - Artefactos actualizados:    ${pc.green(result.updatedProductArtifacts.join(', ') || 'Ninguno')}`);
-  console.log(`  - Arquitectura actualizada:   ${pc.green(result.updatedArchitectureArtifacts.join(', ') || 'Ninguno')}`);
+  console.log(
+    pc.green(`\n✔ Cambio '${targetChangeId}' integrado con éxito en la especificación canónica:`)
+  );
+  console.log(
+    `  - Requerimientos integrados:  ${pc.green(result.integratedRequirements.join(', ') || 'Ninguno')}`
+  );
+  console.log(
+    `  - Artefactos actualizados:    ${pc.green(result.updatedProductArtifacts.join(', ') || 'Ninguno')}`
+  );
+  console.log(
+    `  - Arquitectura actualizada:   ${pc.green(result.updatedArchitectureArtifacts.join(', ') || 'Ninguno')}`
+  );
   if (result.archived) {
-    console.log(`  - Archivado a:                ${pc.cyan(result.archivedPath || 'specs/changes/completed')}`);
+    console.log(
+      `  - Archivado a:                ${pc.cyan(result.archivedPath || 'specs/changes/completed')}`
+    );
   }
   console.log('');
 
-  setGithubOutput('integrated', 'true');
-  setGithubOutput('change_id', targetChangeId);
+  emitCiOutput('integrated', 'true', env);
+  emitCiOutput('change_id', targetChangeId, env);
   return 0;
 }
 

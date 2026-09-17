@@ -104,7 +104,8 @@ AI-SDLC/
 │   ├── compliance/                           # Plantillas CON-LIC, ADR-LIC, Solicitud de Compra
 │   ├── architecture/                         # Plantillas arc42 (01-12) enriquecidas con NAF v4
 │   ├── sdd/                                  # Plantillas SDD (Proposal, Spec, Design, Tasks, Handoff)
-│   └── manuals/                              # Plantillas MAN-USER (Manual de Usuario), MAN-PROD (Manual de Producción)
+│   ├── manuals/                              # Plantillas MAN-USER (Manual de Usuario), MAN-PROD (Manual de Producción)
+│   └── ci/                                   # Plantillas de CI/CD (GitLab CI, Azure DevOps, Bitbucket, GitHub Actions)
 │
 ├── reports/                                  # Informes formales autogenerados (RTM 360°, Calidad, Requerimientos Activos)
 │
@@ -158,7 +159,7 @@ npx aisdlc sdd integrate --auto
 ```
 
 > [!TIP]
-> **Integración Desatendida en CI/CD**: En flujos con Pull Request, el paso 6 (`sdd integrate`) se ejecuta automáticamente al fusionar el PR mediante el workflow de GitHub Actions [`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml).
+> **Integración Desatendida en CI/CD Multi-Plataforma**: En flujos con Pull Request o Merge Request, el paso 6 (`sdd integrate`) se ejecuta automáticamente al fusionar el PR/MR mediante los pipelines configurados para GitHub Actions ([`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml)), GitLab CI (`.gitlab-ci.yml`), Azure DevOps (`azure-pipelines.yml`) o Bitbucket Pipelines (`bitbucket-pipelines.yml`).
 
 ### 3. Resumen de Comandos Simplificados del CLI (`aisdlc`)
 
@@ -185,7 +186,7 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc report quality` | `pnpm run report:quality` | **Reporting Formal** | Genera informe detallado de métricas en `reports/QUALITY_REPORT.md` |
 | `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Catálogo de Producto** | Genera catálogo consolidado de requerimientos en `reports/ACTIVE_REQUIREMENTS.md` |
 | `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | **Dossier Maestro** | Compila documentación y manuales con TOC interactiva en `reports/AI_SDLC_SPECIFICATION_FULL.md` |
-| `npx aisdlc init [dir]` | - | **Inicialización** | Inicializa un nuevo repo con la arquitectura de carpetas, esquemas y políticas AI-SDLC |
+| `npx aisdlc init [dir] [--ci <provider>]` | - | **Inicialización** | Inicializa un nuevo repo con carpetas, esquemas, políticas y pipeline CI/CD (`github`, `gitlab`, `azure`, `bitbucket`) |
 
 
 ---

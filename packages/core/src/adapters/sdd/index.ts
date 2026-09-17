@@ -14,6 +14,7 @@ export * from './openspec.js';
 export * from './speckit.js';
 export * from './integration.js';
 export * from './scaffold.js';
+export * from './ci.js';
 
 export function getSddAdapter(framework: SddFramework): SddAdapter {
   switch (framework) {

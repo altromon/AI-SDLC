@@ -1,0 +1,65 @@
+# ==============================================================================
+# AI-SDLC: Bitbucket Pipelines Template
+# Verificación continua de Quality Gates y promoción canónica de cambios SDD
+# ==============================================================================
+
+image: node:20
+
+definitions:
+  caches:
+    pnpm: $BITBUCKET_CLONE_DIR/.pnpm-store
+  steps:
+    - step: &build-and-verify
+        name: Quality Gates & Verification
+        caches:
+          - pnpm
+        script:
+          - corepack enable
+          - corepack prepare pnpm@10 --activate
+          - pnpm config set store-dir $BITBUCKET_CLONE_DIR/.pnpm-store
+          - pnpm install --frozen-lockfile
+          - pnpm approve-builds --all
+          - pnpm run build
+          - node packages/cli/bin/aisdlc.js check
+          - pnpm test
+          - node packages/cli/bin/aisdlc.js verify all
+
+    - step: &sdd-integrate
+        name: SDD Canonical Integration
+        caches:
+          - pnpm
+        script:
+          - corepack enable
+          - corepack prepare pnpm@10 --activate
+          - pnpm config set store-dir $BITBUCKET_CLONE_DIR/.pnpm-store
+          - pnpm install --frozen-lockfile
+          - pnpm approve-builds --all
+          - pnpm run build
+          - npx tsx scripts/sdd-integrate-ci.ts
+          - |
+            if [ -f sdd-integrate.env ]; then
+              source sdd-integrate.env
+            fi
+            if [ "$INTEGRATED" = "true" ]; then
+              git config user.name "bitbucket-pipelines[bot]"
+              git config user.email "pipelines[bot]@bitbucket.org"
+              git add -A
+              if ! git diff --cached --quiet; then
+                git commit -m "chore(sdd): integrate ${CHANGE_ID} into canonical baseline [skip ci]"
+                git push origin HEAD:$BITBUCKET_BRANCH
+                echo "✔ Integración canónica sincronizada en Bitbucket."
+              fi
+            fi
+
+pipelines:
+  pull-requests:
+    '**':
+      - step: *build-and-verify
+
+  branches:
+    main:
+      - step: *build-and-verify
+      - step: *sdd-integrate
+    'release/*':
+      - step: *build-and-verify
+      - step: *sdd-integrate

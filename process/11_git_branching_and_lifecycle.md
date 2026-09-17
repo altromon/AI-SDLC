@@ -150,3 +150,36 @@ npx aisdlc git checkout <task-id>
 4. **Checkout Inmediato**: Ejecuta el cambio automático de rama (`git checkout`), dejando al desarrollador o agente de IA directamente en su rama atómica de trabajo Tier 4.
 5. **Manejo de Errores**: Si la tarea no se encuentra en ningún cambio activo, emite un diagnóstico claro y enumera las tareas disponibles con sus respectivos cambios activos.
 
+---
+
+## 7. Integración Continua Multi-Plataforma (Multi-CI Ecosystem)
+
+El framework AI-SDLC es formalmente agnóstico al proveedor de CI/CD, garantizando paridad estricta de ejecución de Quality Gates y promoción automatizada post-merge en entornos corporativos heterogéneos:
+
+### Proveedores Soportados y Variables de Entorno Canónicas
+
+| Proveedor CI/CD | Variables de Rama / Head Ref | Variables de Pull / Merge Request | Emisión de Outputs | Plantilla Canónica |
+| :--- | :--- | :--- | :--- | :--- |
+| **GitHub Actions** | `PR_HEAD_REF`, `GITHUB_HEAD_REF`, `GITHUB_REF_NAME` | `PR_TITLE`, `PR_BODY`, `PR_NUMBER` | `$GITHUB_OUTPUT` | `templates/ci/github-workflows/` |
+| **GitLab CI/CD** | `CI_MERGE_REQUEST_SOURCE_BRANCH_NAME`, `CI_COMMIT_REF_NAME`, `CI_COMMIT_BRANCH` | `CI_MERGE_REQUEST_TITLE`, `CI_MERGE_REQUEST_DESCRIPTION`, `CI_MERGE_REQUEST_IID` | `sdd-integrate.env` / `$GITLAB_ENV` | `templates/ci/.gitlab-ci.yml` |
+| **Azure DevOps Pipelines** | `SYSTEM_PULLREQUEST_SOURCEBRANCH`, `BUILD_SOURCEBRANCH`, `BUILD_SOURCEBRANCHNAME` | `SYSTEM_PULLREQUEST_PULLREQUESTTITLE`, `SYSTEM_PULLREQUEST_PULLREQUESTID` | `##vso[task.setvariable]` | `templates/ci/azure-pipelines.yml` |
+| **Bitbucket Pipelines** | `BITBUCKET_BRANCH`, `BITBUCKET_PR_DESTINATION_BRANCH` | `BITBUCKET_PR_ID` | `sdd-integrate.env` / `$CI_OUTPUT_FILE` | `templates/ci/bitbucket-pipelines.yml` |
+
+### Flujo de Ejecución en Pipelines
+
+1. **Pre-vuelo y Quality Gates (PR / MR / Branch)**:
+   - Toda propuesta de cambio ejecuta `npx aisdlc check` y `npx aisdlc verify all`.
+   - Bloqueo determinista ante violaciones de complejidad ciclomática, trazabilidad huérfana, secretos detectados o licencias prohibidas.
+2. **Promoción e Integración Canónica Post-Merge (`sdd-integrate-ci.ts`)**:
+   - Al consolidar un Pull Request o Merge Request hacia `main` o ramas `release/vX.Y.Z`, el runner invoca `npx tsx scripts/sdd-integrate-ci.ts`.
+   - El script detecta de manera agnóstica el cambio SDD activo basándose en las variables del proveedor, verifica que todas las tareas en `tasks.md` estén `COMPLETED`, consolida los requerimientos y componentes canónicos, y archiva el cambio a `specs/changes/completed/`.
+3. **Andamiaje Rápido con el CLI**:
+   ```bash
+   # Inicializar proyecto con pipeline específico
+   npx aisdlc init --ci gitlab
+   npx aisdlc init --ci azure
+   npx aisdlc init --ci bitbucket
+   npx aisdlc init --ci github
+   ```
+
+

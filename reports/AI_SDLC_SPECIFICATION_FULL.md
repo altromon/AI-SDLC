@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-09-17 08:31:20 UTC` | *Módulos y Manuales Integrados:* `15`  
+> *Fecha de Compilación:* `2026-09-17 08:58:14 UTC` | *Módulos y Manuales Integrados:* `15`  
 
 ---
 
@@ -118,6 +118,7 @@
   - [4. Puertas de Calidad y Criterios de Merge por Nivel (PR Gates)](#cap-11-git-branching-and-lifecycle-4-puertas-de-calidad-y-criterios-de-merge-por-nivel-pr-gates)
   - [5. Guardrails y Reglas para Agentes de IA](#cap-11-git-branching-and-lifecycle-5-guardrails-y-reglas-para-agentes-de-ia)
   - [6. Automatización de Ramas con el CLI (`aisdlc git checkout`)](#cap-11-git-branching-and-lifecycle-6-automatizacion-de-ramas-con-el-cli-aisdlc-git-checkout)
+  - [7. Integración Continua Multi-Plataforma (Multi-CI Ecosystem)](#cap-11-git-branching-and-lifecycle-7-integracion-continua-multi-plataforma-multi-ci-ecosystem)
 
 ### 📖 Parte III: Manuales As-Code del Sistema
 
@@ -257,7 +258,8 @@ AI-SDLC/
 │   ├── compliance/                           # Plantillas CON-LIC, ADR-LIC, Solicitud de Compra
 │   ├── architecture/                         # Plantillas arc42 (01-12) enriquecidas con NAF v4
 │   ├── sdd/                                  # Plantillas SDD (Proposal, Spec, Design, Tasks, Handoff)
-│   └── manuals/                              # Plantillas MAN-USER (Manual de Usuario), MAN-PROD (Manual de Producción)
+│   ├── manuals/                              # Plantillas MAN-USER (Manual de Usuario), MAN-PROD (Manual de Producción)
+│   └── ci/                                   # Plantillas de CI/CD (GitLab CI, Azure DevOps, Bitbucket, GitHub Actions)
 │
 ├── reports/                                  # Informes formales autogenerados (RTM 360°, Calidad, Requerimientos Activos)
 │
@@ -313,7 +315,7 @@ npx aisdlc sdd integrate --auto
 ```
 
 > [!TIP]
-> **Integración Desatendida en CI/CD**: En flujos con Pull Request, el paso 6 (`sdd integrate`) se ejecuta automáticamente al fusionar el PR mediante el workflow de GitHub Actions [`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml).
+> **Integración Desatendida en CI/CD Multi-Plataforma**: En flujos con Pull Request o Merge Request, el paso 6 (`sdd integrate`) se ejecuta automáticamente al fusionar el PR/MR mediante los pipelines configurados para GitHub Actions ([`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml)), GitLab CI (`.gitlab-ci.yml`), Azure DevOps (`azure-pipelines.yml`) o Bitbucket Pipelines (`bitbucket-pipelines.yml`).
 
 ### 3. Resumen de Comandos Simplificados del CLI (`aisdlc`)
 
@@ -340,7 +342,7 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc report quality` | `pnpm run report:quality` | **Reporting Formal** | Genera informe detallado de métricas en `reports/QUALITY_REPORT.md` |
 | `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Catálogo de Producto** | Genera catálogo consolidado de requerimientos en `reports/ACTIVE_REQUIREMENTS.md` |
 | `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | **Dossier Maestro** | Compila documentación y manuales con TOC interactiva en `reports/AI_SDLC_SPECIFICATION_FULL.md` |
-| `npx aisdlc init [dir]` | - | **Inicialización** | Inicializa un nuevo repo con la arquitectura de carpetas, esquemas y políticas AI-SDLC |
+| `npx aisdlc init [dir] [--ci <provider>]` | - | **Inicialización** | Inicializa un nuevo repo con carpetas, esquemas, políticas y pipeline CI/CD (`github`, `gitlab`, `azure`, `bitbucket`) |
 
 
 ---
@@ -3135,6 +3137,40 @@ npx aisdlc git checkout <task-id>
    - Si la rama de tarea atómica `task/<PARENT-ID>/<TSK-ID>-<slug>` (Tier 4) no existe, se crea a partir de la rama de feature (Tier 3).
 4. **Checkout Inmediato**: Ejecuta el cambio automático de rama (`git checkout`), dejando al desarrollador o agente de IA directamente en su rama atómica de trabajo Tier 4.
 5. **Manejo de Errores**: Si la tarea no se encuentra en ningún cambio activo, emite un diagnóstico claro y enumera las tareas disponibles con sus respectivos cambios activos.
+
+---
+
+<a id="cap-11-git-branching-and-lifecycle-7-integracion-continua-multi-plataforma-multi-ci-ecosystem"></a>
+
+## 7. Integración Continua Multi-Plataforma (Multi-CI Ecosystem)
+
+El framework AI-SDLC es formalmente agnóstico al proveedor de CI/CD, garantizando paridad estricta de ejecución de Quality Gates y promoción automatizada post-merge en entornos corporativos heterogéneos:
+
+### Proveedores Soportados y Variables de Entorno Canónicas
+
+| Proveedor CI/CD | Variables de Rama / Head Ref | Variables de Pull / Merge Request | Emisión de Outputs | Plantilla Canónica |
+| :--- | :--- | :--- | :--- | :--- |
+| **GitHub Actions** | `PR_HEAD_REF`, `GITHUB_HEAD_REF`, `GITHUB_REF_NAME` | `PR_TITLE`, `PR_BODY`, `PR_NUMBER` | `$GITHUB_OUTPUT` | `templates/ci/github-workflows/` |
+| **GitLab CI/CD** | `CI_MERGE_REQUEST_SOURCE_BRANCH_NAME`, `CI_COMMIT_REF_NAME`, `CI_COMMIT_BRANCH` | `CI_MERGE_REQUEST_TITLE`, `CI_MERGE_REQUEST_DESCRIPTION`, `CI_MERGE_REQUEST_IID` | `sdd-integrate.env` / `$GITLAB_ENV` | `templates/ci/.gitlab-ci.yml` |
+| **Azure DevOps Pipelines** | `SYSTEM_PULLREQUEST_SOURCEBRANCH`, `BUILD_SOURCEBRANCH`, `BUILD_SOURCEBRANCHNAME` | `SYSTEM_PULLREQUEST_PULLREQUESTTITLE`, `SYSTEM_PULLREQUEST_PULLREQUESTID` | `##vso[task.setvariable]` | `templates/ci/azure-pipelines.yml` |
+| **Bitbucket Pipelines** | `BITBUCKET_BRANCH`, `BITBUCKET_PR_DESTINATION_BRANCH` | `BITBUCKET_PR_ID` | `sdd-integrate.env` / `$CI_OUTPUT_FILE` | `templates/ci/bitbucket-pipelines.yml` |
+
+### Flujo de Ejecución en Pipelines
+
+1. **Pre-vuelo y Quality Gates (PR / MR / Branch)**:
+   - Toda propuesta de cambio ejecuta `npx aisdlc check` y `npx aisdlc verify all`.
+   - Bloqueo determinista ante violaciones de complejidad ciclomática, trazabilidad huérfana, secretos detectados o licencias prohibidas.
+2. **Promoción e Integración Canónica Post-Merge (`sdd-integrate-ci.ts`)**:
+   - Al consolidar un Pull Request o Merge Request hacia `main` o ramas `release/vX.Y.Z`, el runner invoca `npx tsx scripts/sdd-integrate-ci.ts`.
+   - El script detecta de manera agnóstica el cambio SDD activo basándose en las variables del proveedor, verifica que todas las tareas en `tasks.md` estén `COMPLETED`, consolida los requerimientos y componentes canónicos, y archiva el cambio a `specs/changes/completed/`.
+3. **Andamiaje Rápido con el CLI**:
+   ```bash
+   # Inicializar proyecto con pipeline específico
+   npx aisdlc init --ci gitlab
+   npx aisdlc init --ci azure
+   npx aisdlc init --ci bitbucket
+   npx aisdlc init --ci github
+   ```
 
 ---
 
