@@ -201,7 +201,13 @@ export function verifyTasksGovernance(options: GovernanceOptions = {}): Governan
   };
 
   for (const file of taskFiles) {
-    const content = fs.readFileSync(file, 'utf-8');
+    if (!fs.existsSync(file)) continue;
+    let content: string;
+    try {
+      content = fs.readFileSync(file, 'utf-8');
+    } catch {
+      continue;
+    }
     const { frontmatter } = parseTasksDoc(content);
 
     if (!frontmatter.tasks || frontmatter.tasks.length === 0) {

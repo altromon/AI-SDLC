@@ -148,7 +148,7 @@ pnpm run git:checkout TSK-001
 pnpm run check:fix
 # o vía npx: npx aisdlc check --fix
 
-# 5. Ejecutar la suite consolidada de CI/CD (7 Gates de calidad y gobernanza)
+# 5. Ejecutar la suite consolidada de CI/CD (9 Gates de calidad y gobernanza)
 pnpm run verify:all
 # o vía npx: npx aisdlc verify all
 
@@ -168,8 +168,11 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Gestión Git 4-Tiers** | Resuelve versión y crea en cascada: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
 | `npx aisdlc git plan` | `pnpm run git:plan` | **Planificación Git** | Renderiza el árbol visual de jerarquía de ramas antes de trabajar |
 | `npx aisdlc git validate <rama>` | `pnpm run git:validate <rama>` | **Gobierno Git** | Valida la nomenclatura estricta de cualquier rama según su Tier (1 a 4) |
-| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Pre-vuelo Unificado** | Sincroniza bloques Gherkin a `.feature`, actualiza digests SHA-256 PDaC y verifica Quality Gates |
-| `npx aisdlc verify all` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 8 Quality Gates (Calidad AST, Trazabilidad 360°, Tareas, Tests, Licencias/SCA, PDaC, Schemas, Duplicados) |
+| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Pre-vuelo Unificado** | Sincroniza bloques Gherkin a `.feature`, actualiza digests SHA-256 PDaC, audita seguridad y verifica Quality Gates |
+| `npx aisdlc verify all` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 9 Quality Gates (Calidad AST, Trazabilidad 360°, Gobierno, Tests, Licencias/SCA, PDaC, Schemas, Duplicados, Seguridad) |
+| `npx aisdlc verify security [opciones]` | `pnpm run verify:security` | **Seguridad Shift-Left (Gate 9)** | Verificación unificada de secretos (Gitleaks) y SAST determinista (OWASP Top 10) |
+| `npx aisdlc verify secrets [opciones]` | `pnpm run verify:secrets` | **Escaneo de Secretos** | Detección determinista de credenciales, llaves API, tokens y alta entropía (Shannon) con soporte git diff y delegación Gitleaks |
+| `npx aisdlc verify sast [opciones]` | `pnpm run verify:sast` | **Seguridad SAST** | Detección determinista de patrones vulnerables generados por IA (SQLi, command injection, eval, SSRF, path traversal) y Semgrep |
 | `npx aisdlc verify quality` | `pnpm run verify:quality` | **Release Gate de Código** | Evalúa Complejidad Ciclomática ($\le 10$), Cognitiva ($\le 15$) y Mantenibilidad ($\ge 50$) |
 | `npx aisdlc verify traceability` | `pnpm run verify:traceability` | **Matriz 360° RTM** | Valida triangulación obligatoria: Producto (`HOF-*`) ➔ Arquitectura (`CMP-*`) ➔ Tests (`.feature`) |
 | `npx aisdlc verify governance` | `pnpm run verify:governance` | **Gobierno de Tareas** | Audita modos de autonomía (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `HIGH_RISK_MANUAL`, `AMBIGUOUS`) |
@@ -470,12 +473,12 @@ Verifica que el código cumpla con los umbrales de calidad definidos en `quality
    - **Arquitectura (Midstream)**: Vistas arc42 / NAF v4 (`CMP-*`, `ADR-*`, `SEC-ENC-*`).
    - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) y pruebas unitarias correspondientes.
 
-2. **Ejecución Consolidada de la Suite de CI/CD (8 Quality Gates)**:
+2. **Ejecución Consolidada de la Suite de CI/CD (9 Quality Gates)**:
    ```bash
    pnpm run verify:all
    # o: npx aisdlc verify all
    ```
-   *Compuertas evaluadas*: 1) Quality Gate de Complejidad, 2) Trazabilidad 360° (RTM), 3) Gobierno de Tareas, 4) Cobertura de Pruebas, 5) Licencias Open Source, 6) PDaC & Deriva Criptográfica SHA-256, 7) Esquemas JSON, 8) Verificación de Duplicados (Shift-Left Gate).
+   *Compuertas evaluadas*: 1) Quality Gate (Complejidad y Calidad AST), 2) Trazabilidad 360° (RTM), 3) Gobierno de Tareas y Autonomía, 4) Cobertura de Pruebas (Reqs & Tasks), 5) Licencias Open Source y SCA, 6) PDaC & Deriva Criptográfica SHA-256, 7) Esquemas JSON de Artefactos, 8) Verificación de Duplicados (Shift-Left Gate), 9) Seguridad Shift-Left (Detección de Secretos Gitleaks & SAST).
 
 
 3. **Pull Request y Aprobación Humana**:
@@ -594,6 +597,92 @@ npx aisdlc verify licenses --tool trivy --sbom reports/trivy-sbom.cdx.json
 - **`reports/LICENSE_COMPLIANCE_REPORT.md`**: Informe formal con desglose por categoría (Permisivas, Copyleft, Comerciales, Prohibidas), dependencias analizadas y estado del Quality Gate.
 - **`reports/sbom.cdx.json`**: Software Bill of Materials (CycloneDX 1.5) con metadatos completos de componentes, hashes y licencias SPDX.
 - **`THIRD_PARTY_NOTICES.md`**: Archivo de atribución legal que agrupa paquetes por licencia y reproduce los textos íntegros de copyright requeridos por licencias MIT, Apache-2.0, BSD, etc.
+
+---
+
+## 🔐 Tutorial 5: Detección Determinista de Secretos y Seguridad Shift-Left (Gitleaks & SAST)
+
+AI-SDLC implementa una defensa en profundidad determinista para erradicar la exposición involuntaria de credenciales y la introducción de patrones de vulnerabilidad comunes en código sintetizado por modelos de lenguaje (LLMs).
+
+### 1. Gate 9: Detección Determinista de Secretos (`verify secrets`)
+
+El escaneo de secretos inspecciona el repositorio en busca de credenciales, llaves API, tokens de autenticación o certificados embebidos antes de que alcancen el repositorio remoto o el entorno de producción.
+
+#### Características Principales:
+- **Motor Híbrido Zero-Dependencies**:
+  - Reglas deterministas para Claves Privadas (RSA, EC, DSA, OpenSSH), tokens de GitHub (`ghp_`, `gho_`, etc.), AWS Access Keys (`AKIA...`), Google API Keys (`AIza...`), Slack API tokens (`xox[baprs]-...`), Stripe API keys (`sk_live_...`, `rk_live_...`), OpenAI API keys (`sk-...`), JSON Web Tokens (`eyJ...`) y asignaciones genéricas de tokens.
+  - Análisis de **Entropía de Shannon** para identificar cadenas aleatorias de alta entropía ($\ge 4.5$ por defecto) comúnmente empleadas en claves y contraseñas.
+- **Escaneo Incremental Git Diff**:
+  - Mediante el flag `--diff`, analiza únicamente las modificaciones en el área de trabajo o *staging* de Git, reduciendo el tiempo de escaneo a milisegundos en tareas y commits diarios.
+  - El flag opcional `--base <rama>` permite comparar contra la rama de destino (ej. `origin/main` o `release/v1.0.0`) en pipelines de Pull Request.
+- **Delegación en Gitleaks (`--gitleaks`)**:
+  - Si el binario oficial de `gitleaks` está instalado localmente o en el runner de CI/CD, el CLI puede delegar el escaneo en Gitleaks para máxima cobertura.
+  - Implementa *graceful fallback*: si `gitleaks` no está presente, retrocede transparentemente al motor determinista interno.
+- **Enmascaramiento Estricto de Seguridad**:
+  - Los secretos nunca se vuelcan en texto claro en la consola ni en los artefactos generados. Todas las salidas se anonimizan (`AKIA****************`).
+- **Supresiones Controladas**:
+  - Cuando un valor similar a un secreto es un identificador legítimo o un mock seguro de test, se puede suprimir el hallazgo añadiendo el comentario en línea:
+    ```typescript
+    const testPlaceholder = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // ai-sdlc:allow-secret
+    ```
+- **Código de Salida 4**:
+  - Cualquier violación detectada finaliza con **exit code 4**, bloqueando de inmediato el pipeline de integración continua.
+
+### 2. Análisis Estático de Vulnerabilidades SAST y Prompt Injection (`verify sast`)
+
+Los asistentes de IA generativa pueden sintetizar soluciones sintácticamente elegantes pero intrínsecamente vulnerables. El motor SAST shift-left evalúa el código frente a los patrones de riesgo más críticos de OWASP y OWASP Top 10 for LLMs:
+1. **SQL Injection (CWE-89)**: Concatenación directa o interpolación en sentencias SQL (`SELECT ... + userInput`).
+2. **Command Injection (CWE-78)**: Llamadas al sistema operativo (`exec`, `execSync`, `spawn`) con interpolación de cadenas sin parametrización.
+3. **Dynamic Code Evaluation (CWE-95)**: Uso de `eval(...)` o `new Function(...)` con variables no confiables.
+4. **Server-Side Request Forgery - SSRF (CWE-918)**: Solicitudes HTTP salientes (`fetch`, `axios`, `http.get`) donde la URL o dominio se construye con entradas del usuario.
+5. **Path Traversal (CWE-22)**: Acceso a archivos (`fs.readFile`, `fs.open`) con interpolación directa sin resolución o *jail* de ruta.
+6. **Prompt Injection Inseguro (OWASP LLM01 / CWE-1427)**:
+   - *Concatenación Directa (`SAST-006`)*: Construcción de prompts o mensajes hacia LLMs interpolando entradas del usuario sin delimitadores defensivos (`prompt = $"Summarize: {userInput}"`, `prompt = "Translate: " + req.query.text`).
+   - *Jailbreaks y Firmas Adversariales (`SAST-007`)*: Directivas que intentan anular o forzar modos desprotegidos (*"ignore previous instructions"*, *"system prompt override"*, *"DAN mode"*, rupturas `</system>`).
+   - *Runtime Guard*: Función exportada `detectPromptInjection(text)` en `@ai-sdlc/core` para validación programática en memoria.
+
+#### Cobertura Multilingüe Universal:
+El motor SAST escanea código fuente en lenguajes generalistas y plantillas de IA: **TypeScript/JavaScript** (`.ts`, `.js`), **Python** (`.py`), **C#** (`.cs`), **Java/Kotlin/Scala** (`.java`, `.kt`, `.scala`), **C/C++** (`.c`, `.cpp`, `.cc`), **Go** (`.go`), **Rust** (`.rs`), **PHP** (`.php`), **Ruby** (`.rb`), **Swift** (`.swift`) y plantillas de prompts (`.prompt`).
+
+Opcionalmente, `--semgrep` permite delegar la ejecución en el motor corporativo de Semgrep si está presente en el entorno.
+
+
+### 3. Comandos Prácticos de Seguridad
+
+```bash
+# 1. Escaneo completo de secretos en el árbol de trabajo
+pnpm run verify:secrets
+# o vía npx:
+npx aisdlc verify secrets
+
+# 2. Escaneo ultra-rápido sobre el diff local de Git (ideal para pre-commit hooks)
+npx aisdlc verify secrets --diff
+
+# 3. Escaneo de diff frente a una rama base en CI (Pull Request)
+npx aisdlc verify secrets --diff --base origin/main
+
+# 4. Ajuste de sensibilidad de entropía de Shannon (ej. 5.0 para menor sensibilidad)
+npx aisdlc verify secrets --entropy 5.0
+
+# 5. Escaneo de secretos delegando en el binario oficial de Gitleaks
+npx aisdlc verify secrets --gitleaks
+
+# 6. Escaneo estático SAST shift-left de vulnerabilidades generadas por IA
+pnpm run verify:sast
+# o vía npx:
+npx aisdlc verify sast
+
+# 7. Escaneo SAST con delegación opcional en Semgrep
+npx aisdlc verify sast --semgrep
+
+# 8. Pre-vuelo consolidado (incluye Gate 9 de secretos)
+pnpm run check
+```
+
+### 4. Salidas y Reportes Generados
+
+- **`reports/SECRET_SCAN_REPORT.md`**: Informe formal de auditoría de secretos con regla infringida, severidad, fichero, línea y token enmascarado.
+- **`reports/SAST_REPORT.md`**: Informe formal de vulnerabilidades SAST con tipo de fallo, severidad, fichero, línea y fragmento de código de muestra.
 
 ---
 

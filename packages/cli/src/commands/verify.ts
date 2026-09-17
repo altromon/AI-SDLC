@@ -10,6 +10,8 @@ import {
   verifyPdacGraph,
   verifyProgressiveFriction,
   verifyQualityGate,
+  verifySast,
+  verifySecrets,
   verifyTasksGovernance,
   verifyTestingCoverage,
   verifyTraceability,
@@ -379,6 +381,152 @@ export function runVerifyDuplicates(options: DuplicatesVerifyOptions = {}): bool
   return isOk;
 }
 
+export interface SecretVerifyCliOptions {
+  root?: string;
+  diff?: boolean;
+  base?: string;
+  gitleaks?: boolean;
+  entropy?: number | string;
+  silent?: boolean;
+}
+
+export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean {
+  const rootDir = options.root || process.cwd();
+  const entropyThreshold =
+    options.entropy !== undefined ? Number(options.entropy) : undefined;
+
+  if (!options.silent) {
+    console.log(
+      pc.bold(
+        pc.cyan(
+          '\n🔐 [AI-SDLC] Verificando Detección Determinista de Secretos y Credenciales (Gitleaks Gate)...'
+        )
+      )
+    );
+  }
+
+  const result = verifySecrets({
+    rootDir,
+    diff: options.diff,
+    baseBranch: options.base,
+    gitleaks: options.gitleaks,
+    entropyThreshold,
+  });
+
+  if (!options.silent) {
+    console.log(`  Archivos analizados:     ${pc.bold(String(result.totalFilesScanned))}`);
+    console.log(
+      `  Fugas de credenciales:   ${result.findingsCount > 0 ? pc.red(String(result.findingsCount)) : pc.green('0')}`
+    );
+    console.log(
+      `  Motor Gitleaks nativo:   ${result.scannedWithGitleaks ? pc.cyan('Activo / Integrado') : pc.dim('Escáner Determinista (@ai-sdlc/core)')}`
+    );
+
+    if (result.findings.length > 0) {
+      console.log(pc.red('\n  Credenciales expuestas detectadas:'));
+      for (const f of result.findings) {
+        console.log(
+          `    ${pc.red('✖')} [${f.ruleId}] ${pc.bold(`${f.relPath}:${f.lineNumber}`)}: ${f.maskedMatch} - ${f.message}`
+        );
+      }
+    }
+  }
+
+  const isOk = result.success;
+  if (!options.silent) {
+    console.log(
+      isOk
+        ? pc.green('\n✔ Detección de Secretos CONFORME (0 Fugas de Credenciales)\n')
+        : pc.red('\n✖ Detección de Secretos BLOQUEADA (Código de Salida 4: Secreto Expuesto)\n')
+    );
+  }
+  return isOk;
+}
+
+export interface SastVerifyCliOptions {
+  root?: string;
+  semgrep?: boolean;
+  minSeverity?: string;
+  silent?: boolean;
+}
+
+export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
+  const rootDir = options.root || process.cwd();
+
+  if (!options.silent) {
+    console.log(
+      pc.bold(
+        pc.cyan(
+          '\n🛡️  [AI-SDLC] Verificando Seguridad Shift-Left SAST (Inyecciones y OWASP Top 10)...'
+        )
+      )
+    );
+  }
+
+  const result = verifySast({
+    rootDir,
+    semgrep: options.semgrep,
+    minSeverity: options.minSeverity as any,
+  });
+
+  if (!options.silent) {
+    console.log(`  Archivos evaluados:      ${pc.bold(String(result.totalFilesScanned))}`);
+    console.log(
+      `  Vulnerabilidades SAST:   ${result.violationsCount > 0 ? pc.red(String(result.violationsCount)) : pc.green('0')}`
+    );
+
+    if (result.violations.length > 0) {
+      console.log(pc.red('\n  Vulnerabilidades detectadas:'));
+      for (const v of result.violations) {
+        console.log(
+          `    ${pc.red('✖')} [${v.severity}] [${v.ruleId}] ${pc.bold(`${v.relPath}:${v.lineNumber}`)}: ${v.message}`
+        );
+      }
+    }
+  }
+
+  const isOk = result.success;
+  if (!options.silent) {
+    console.log(
+      isOk
+        ? pc.green('\n✔ Análisis SAST CONFORME (0 Vulnerabilidades Críticas)\n')
+        : pc.red('\n✖ Análisis SAST BLOQUEADO (Vulnerabilidades Detectadas)\n')
+    );
+  }
+  return isOk;
+}
+
+export interface SecurityVerifyCliOptions {
+  root?: string;
+  diff?: boolean;
+  base?: string;
+  gitleaks?: boolean;
+  semgrep?: boolean;
+  entropy?: number | string;
+  minSeverity?: string;
+  silent?: boolean;
+}
+
+export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boolean {
+  const okSecrets = runVerifySecrets({
+    root: options.root,
+    diff: options.diff,
+    base: options.base,
+    gitleaks: options.gitleaks,
+    entropy: options.entropy,
+    silent: options.silent,
+  });
+
+  const okSast = runVerifySast({
+    root: options.root,
+    semgrep: options.semgrep,
+    minSeverity: options.minSeverity,
+    silent: options.silent,
+  });
+
+  return okSecrets && okSast;
+}
+
 export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
   if (!options.silent) {
     console.log(pc.bold(pc.magenta('================================================================')));
@@ -395,6 +543,7 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
   const okPdac = runVerifyPdac({ root, silent: options.silent });
   const okSchemas = runVerifySchemas({ root, silent: options.silent });
   const okDuplicates = runVerifyDuplicates({ root, silent: options.silent });
+  const okSecurity = runVerifySecurity({ root, silent: options.silent });
 
   const allPassed =
     okQuality &&
@@ -404,7 +553,8 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
     okLic &&
     okPdac &&
     okSchemas &&
-    okDuplicates;
+    okDuplicates &&
+    okSecurity;
 
   if (!options.silent) {
     console.log(pc.bold(pc.magenta('================================================================')));
@@ -417,6 +567,7 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
     console.log(`  6. PDaC & Deriva Criptográfica:              ${okPdac ? pc.green('PASSED') : pc.red('FAILED')}`);
     console.log(`  7. Esquemas JSON de Artefactos:              ${okSchemas ? pc.green('PASSED') : pc.red('FAILED')}`);
     console.log(`  8. Requisitos Duplicados (Shift-Left Gate):   ${okDuplicates ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  9. Seguridad Shift-Left (Secretos & SAST):   ${okSecurity ? pc.green('PASSED') : pc.red('FAILED')}`);
     console.log(pc.bold(pc.magenta('================================================================')));
 
     if (allPassed) {
@@ -428,4 +579,5 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
 
   return allPassed;
 }
+
 

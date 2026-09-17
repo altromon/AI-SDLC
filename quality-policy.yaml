@@ -145,6 +145,27 @@ release_thresholds:
       - "CRITICAL"
     max_major_issues: 0
 
+  # Detección Determinista de Secretos (Quality Gate 9)
+  secret_scanning:
+    max_findings: 0
+    entropy_threshold: 4.5
+    action_on_breach: "BLOCK_MERGE"
+    engines: ["built-in", "gitleaks"]
+    description: "Cero tolerancia a credenciales, llaves API, tokens o secretos hardcodeados."
+
+  # Análisis Estático de Seguridad de Código (SAST Shift-Left)
+  sast_analysis:
+    max_vulnerabilities: 0
+    action_on_breach: "BLOCK_MERGE"
+    engines: ["built-in", "semgrep"]
+    rules:
+      - "sql_injection"
+      - "command_injection"
+      - "dynamic_code_evaluation"
+      - "ssrf"
+      - "path_traversal"
+    description: "Detección determinista de patrones vulnerables generados por asistentes de IA."
+
 # ------------------------------------------------------------------------------
 # 4. Guardrails de Calidad para Agentes de IA
 # ------------------------------------------------------------------------------

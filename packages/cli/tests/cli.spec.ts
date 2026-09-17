@@ -11,7 +11,10 @@ import {
   runVerifyLicenses,
   runVerifyPdac,
   runVerifyQuality,
+  runVerifySast,
   runVerifySchemas,
+  runVerifySecrets,
+  runVerifySecurity,
   runVerifyTesting,
   runVerifyTraceability,
 } from '../src/commands/verify.js';
@@ -131,7 +134,22 @@ describe('@ai-sdlc/cli Command Suite', () => {
     expect(passed).toBe(true);
   });
 
-  it('should verify all quality gates including schemas via CLI', () => {
+  it('should execute secret scanning verification via CLI', () => {
+    const passed = runVerifySecrets({ silent: true });
+    expect(passed).toBe(true);
+  });
+
+  it('should execute sast verification via CLI', () => {
+    const passed = runVerifySast({ silent: true });
+    expect(passed).toBe(true);
+  });
+
+  it('should execute unified security verification (secrets and sast) via CLI', () => {
+    const passed = runVerifySecurity({ silent: true });
+    expect(passed).toBe(true);
+  });
+
+  it('should verify all quality gates including schemas and security via CLI', () => {
     const passed = runVerifyAll({ silent: true });
     expect(passed).toBe(true);
   });

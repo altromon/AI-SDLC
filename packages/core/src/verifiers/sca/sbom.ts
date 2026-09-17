@@ -89,12 +89,29 @@ export function generateCycloneDxSbom(
   };
 }
 
-export function writeCycloneDxSbom(sbom: CycloneDxBom, outputPath: string): void {
-  const dir = path.dirname(outputPath);
+function safeWriteFileSync(filePath: string, content: string): void {
+  const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  fs.writeFileSync(outputPath, JSON.stringify(sbom, null, 2), 'utf-8');
+  let attempts = 5;
+  while (attempts > 0) {
+    try {
+      fs.writeFileSync(filePath, content, 'utf-8');
+      return;
+    } catch (err) {
+      attempts--;
+      if (attempts === 0) throw err;
+      const start = Date.now();
+      while (Date.now() - start < 100) {
+        // wait
+      }
+    }
+  }
+}
+
+export function writeCycloneDxSbom(sbom: CycloneDxBom, outputPath: string): void {
+  safeWriteFileSync(outputPath, JSON.stringify(sbom, null, 2));
 }
 
 export function generateThirdPartyNotices(
@@ -152,9 +169,5 @@ export function generateThirdPartyNotices(
 }
 
 export function writeThirdPartyNotices(content: string, outputPath: string): void {
-  const dir = path.dirname(outputPath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  fs.writeFileSync(outputPath, content, 'utf-8');
+  safeWriteFileSync(outputPath, content);
 }

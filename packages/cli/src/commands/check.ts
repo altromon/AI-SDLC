@@ -15,6 +15,8 @@ import {
   verifyLicenses,
   verifyPdacGraph,
   verifyQualityGate,
+  verifySast,
+  verifySecrets,
   verifyTasksGovernance,
   verifyTestingCoverage,
   verifyTraceability,
@@ -185,6 +187,55 @@ export function auditSchemasGate(rootDir: string): PreflightGateSummary {
   };
 }
 
+export function auditSecretsGate(rootDir: string): PreflightGateSummary {
+  const res = verifySecrets({ rootDir });
+  if (res.success) {
+    return {
+      name: 'Detección de Secretos y Credenciales (Gitleaks Gate)',
+      status: 'PASSED',
+      message: `${res.totalFilesScanned} archivos limpios (0 secretos ni credenciales expuestas)`,
+    };
+  }
+  const firstFinding = res.findings[0];
+  const findingMsg = firstFinding ? ` (ej. ${firstFinding.ruleId} en ${firstFinding.relPath}:${firstFinding.lineNumber})` : '';
+  return {
+    name: 'Detección de Secretos y Credenciales (Gitleaks Gate)',
+    status: 'FAILED',
+    message: `${res.findingsCount} credencial(es) o clave(s) expuesta(s)${findingMsg}`,
+    remediation: 'Revoca los tokens expuestos, almacénalos en variables de entorno o usa // ai-sdlc:allow-secret.',
+  };
+}
+
+export function auditSecurityGate(rootDir: string): PreflightGateSummary {
+  const secRes = verifySecrets({ rootDir });
+  const sastRes = verifySast({ rootDir });
+
+  if (secRes.success && sastRes.success) {
+    return {
+      name: 'Seguridad Shift-Left (Secretos Gitleaks y SAST)',
+      status: 'PASSED',
+      message: `${secRes.totalFilesScanned} archivos limpios (0 secretos, 0 vulnerabilidades)`,
+    };
+  }
+
+  const errors: string[] = [];
+  if (!secRes.success) {
+    const f = secRes.findings[0];
+    errors.push(`${secRes.findingsCount} secreto(s) (ej. ${f.ruleId} en ${f.relPath}:${f.lineNumber})`);
+  }
+  if (!sastRes.success) {
+    const v = sastRes.violations[0];
+    errors.push(`${sastRes.violationsCount} fallo(s) SAST (ej. ${v.ruleId} en ${v.relPath}:${v.lineNumber})`);
+  }
+
+  return {
+    name: 'Seguridad Shift-Left (Secretos Gitleaks y SAST)',
+    status: 'FAILED',
+    message: errors.join('; '),
+    remediation: "Ejecuta 'aisdlc verify security' y corrige las credenciales o patrones vulnerables.",
+  };
+}
+
 export function renderDashboard(
   gates: PreflightGateSummary[],
   autoFixExecuted: boolean,
@@ -250,6 +301,7 @@ export function executePreflightCheck(options: PreflightCheckOptions = {}): Pref
     auditTestingGate(rootDir),
     auditLicensesGate(rootDir),
     auditSchemasGate(rootDir),
+    auditSecurityGate(rootDir),
   ];
 
   const success = gates.every((g) => g.status === 'PASSED' || g.status === 'FIXED');

@@ -19,7 +19,10 @@ import {
   runVerifyLicenses,
   runVerifyPdac,
   runVerifyQuality,
+  runVerifySast,
   runVerifySchemas,
+  runVerifySecrets,
+  runVerifySecurity,
   runVerifyTesting,
   runVerifyTraceability,
 } from './commands/verify.js';
@@ -174,6 +177,63 @@ verifyCommand
   .option('-s, --similarity <number>', 'Umbral de similitud léxica para títulos (0.0 a 1.0)', '0.85')
   .action((opts) => {
     const passed = runVerifyDuplicates({ root: opts.root, similarity: opts.similarity });
+    process.exit(passed ? 0 : 1);
+  });
+
+verifyCommand
+  .command('security')
+  .description('Verificación unificada de seguridad: detección determinista de secretos (Gitleaks) y SAST shift-left')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('-d, --diff', 'Escanea únicamente las líneas añadidas en el diff git de la rama actual')
+  .option('-b, --base <branch>', 'Rama base para el cálculo del diff git (por defecto: origin/main o HEAD)')
+  .option('-g, --gitleaks', 'Delega o contrasta con el binario nativo de Gitleaks si está disponible')
+  .option('-s, --semgrep', 'Delega en el CLI de Semgrep si está instalado')
+  .option('-e, --entropy <number>', 'Umbral mínimo de entropía de Shannon (0.0 a 8.0)', '4.3')
+  .option('-m, --min-severity <level>', 'Severidad mínima para fallo SAST: CRITICAL, HIGH, MEDIUM', 'HIGH')
+  .action((opts) => {
+    const passed = runVerifySecurity({
+      root: opts.root,
+      diff: opts.diff,
+      base: opts.base,
+      gitleaks: opts.gitleaks,
+      semgrep: opts.semgrep,
+      entropy: opts.entropy,
+      minSeverity: opts.minSeverity,
+    });
+    process.exit(passed ? 0 : 4);
+  });
+
+verifyCommand
+  .command('secrets')
+  .description('Verifica la ausencia de credenciales, API keys y certificados expuestos (Gitleaks Gate)')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('-d, --diff', 'Escanea únicamente las líneas añadidas en el diff git de la rama actual')
+  .option('-b, --base <branch>', 'Rama base para el cálculo del diff git (por defecto: origin/main o HEAD)')
+  .option('-g, --gitleaks', 'Delega o contrasta con el binario nativo de Gitleaks si está disponible')
+  .option('-e, --entropy <number>', 'Umbral mínimo de entropía de Shannon (0.0 a 8.0)', '4.3')
+  .action((opts) => {
+    const passed = runVerifySecrets({
+      root: opts.root,
+      diff: opts.diff,
+      base: opts.base,
+      gitleaks: opts.gitleaks,
+      entropy: opts.entropy,
+    });
+    process.exit(passed ? 0 : 4);
+  });
+
+verifyCommand
+  .command('sast')
+  .description('Análisis estático de seguridad (SAST) shift-left para patrones críticos (SQLi, exec, SSRF)')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('-s, --semgrep', 'Delega en el CLI de Semgrep si está instalado')
+  .option('-m, --min-severity <level>', 'Severidad mínima para fallo: CRITICAL, HIGH, MEDIUM', 'HIGH')
+  .action((opts) => {
+    const passed = runVerifySast({
+      root: opts.root,
+      semgrep: opts.semgrep,
+      minSeverity: opts.minSeverity,
+    });
     process.exit(passed ? 0 : 1);
   });
 
