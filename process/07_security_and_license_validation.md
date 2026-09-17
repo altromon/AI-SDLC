@@ -69,11 +69,17 @@ El escaneo de secretos previene la fuga involuntaria de credenciales en el códi
 
 Para erradicar patrones de código vulnerable comunes en código sintetizado por modelos de lenguaje (LLMs):
 - **Patrones Detectados**:
-  - *SQL Injection*: Concatenación directa de cadenas en consultas SQL sin sentencias parametrizadas.
-  - *Command Injection*: Ejecución de comandos del sistema operativo (`exec`, `execSync`, `spawn` con shell activo) con interpolación de variables.
-  - *Dynamic Code Evaluation*: Uso inseguro de `eval(...)` o constructores `new Function(...)`.
-  - *Server-Side Request Forgery (SSRF)*: Peticiones HTTP salientes donde la URL objetivo se construye directamente con entradas no sanitizadas.
-  - *Path Traversal*: Operaciones de sistema de archivos construidas mediante concatenación de rutas sin normalización ni comprobación de límites.
+  - *SQL Injection*: Concatenación directa de cadenas en consultas SQL sin sentencias parametrizadas (`SAST-001`).
+  - *Command Injection*: Ejecución de comandos del sistema operativo (`exec`, `execSync`, `spawn` con shell activo) con interpolación de variables (`SAST-002`).
+  - *Dynamic Code Evaluation*: Uso inseguro de `eval(...)` o constructores `new Function(...)` (`SAST-003`).
+  - *Server-Side Request Forgery (SSRF)*: Peticiones HTTP salientes donde la URL objetivo se construye directamente con entradas no sanitizadas (`SAST-004`).
+  - *Path Traversal*: Operaciones de sistema de archivos construidas mediante concatenación de rutas sin normalización ni comprobación de límites (`SAST-005`).
+  - *Prompt Injection (OWASP LLM01)*:
+    - **Concatenación Directa**: Interpolación directa de variables o entradas de usuario en llamadas a LLMs o plantillas de prompts sin delimitadores defensivos (`SAST-006`).
+    - **Jailbreak / System Override**: Firmas adversariales de evasión de restricciones de seguridad (*"ignore previous instructions"*, *"system override"*, *"DAN mode"*, rupturas de delimitadores `</system>`) (`SAST-007`).
+- **Cobertura Multilingüe Universal**: Escaneo determinista sobre lenguajes generalistas y plantillas: TypeScript/JavaScript (`.ts`, `.js`), Python (`.py`), C# (`.cs`), Java/Kotlin (`.java`, `.kt`, `.scala`), C/C++ (`.c`, `.cpp`, `.cc`), Go (`.go`), Rust (`.rs`), PHP (`.php`), Ruby (`.rb`), Swift (`.swift`) y plantillas `.prompt`.
+- **Runtime Guard (`detectPromptInjection`)**: Función utilitaria exportada por `@ai-sdlc/core` para evaluación programática en memoria antes de invocar a los modelos.
+- **Supresión Justificada**: Se permite ignorar advertencias mediante el comentario en línea `// ai-sdlc:allow-prompt-injection` o `// ai-sdlc:allow-sast`.
 - **Conector Opcional Semgrep (`--semgrep`)**: Ejecuta reglas corporativas de Semgrep sobre el repositorio si está disponible.
 - **Salida Formal**: Genera `reports/SAST_REPORT.md` y emite código de salida 1 en caso de vulnerabilidades detectadas.
 

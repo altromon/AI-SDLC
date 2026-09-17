@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-09-17 07:10:19 UTC` | *Módulos y Manuales Integrados:* `15`  
+> *Fecha de Compilación:* `2026-09-17 08:31:20 UTC` | *Módulos y Manuales Integrados:* `15`  
 
 ---
 
@@ -791,16 +791,24 @@ El escaneo de secretos inspecciona el repositorio en busca de credenciales, llav
 - **Código de Salida 4**:
   - Cualquier violación detectada finaliza con **exit code 4**, bloqueando de inmediato el pipeline de integración continua.
 
-### 2. Análisis Estático de Vulnerabilidades SAST (`verify sast`)
+### 2. Análisis Estático de Vulnerabilidades SAST y Prompt Injection (`verify sast`)
 
-Los asistentes de IA generativa pueden sintetizar soluciones sintácticamente elegantes pero intrínsecamente vulnerables. El motor SAST shift-left evalúa el código frente a los 5 patrones de riesgo más críticos de OWASP:
+Los asistentes de IA generativa pueden sintetizar soluciones sintácticamente elegantes pero intrínsecamente vulnerables. El motor SAST shift-left evalúa el código frente a los patrones de riesgo más críticos de OWASP y OWASP Top 10 for LLMs:
 1. **SQL Injection (CWE-89)**: Concatenación directa o interpolación en sentencias SQL (`SELECT ... + userInput`).
 2. **Command Injection (CWE-78)**: Llamadas al sistema operativo (`exec`, `execSync`, `spawn`) con interpolación de cadenas sin parametrización.
 3. **Dynamic Code Evaluation (CWE-95)**: Uso de `eval(...)` o `new Function(...)` con variables no confiables.
 4. **Server-Side Request Forgery - SSRF (CWE-918)**: Solicitudes HTTP salientes (`fetch`, `axios`, `http.get`) donde la URL o dominio se construye con entradas del usuario.
 5. **Path Traversal (CWE-22)**: Acceso a archivos (`fs.readFile`, `fs.open`) con interpolación directa sin resolución o *jail* de ruta.
+6. **Prompt Injection Inseguro (OWASP LLM01 / CWE-1427)**:
+   - *Concatenación Directa (`SAST-006`)*: Construcción de prompts o mensajes hacia LLMs interpolando entradas del usuario sin delimitadores defensivos (`prompt = $"Summarize: {userInput}"`, `prompt = "Translate: " + req.query.text`).
+   - *Jailbreaks y Firmas Adversariales (`SAST-007`)*: Directivas que intentan anular o forzar modos desprotegidos (*"ignore previous instructions"*, *"system prompt override"*, *"DAN mode"*, rupturas `</system>`).
+   - *Runtime Guard*: Función exportada `detectPromptInjection(text)` en `@ai-sdlc/core` para validación programática en memoria.
+
+#### Cobertura Multilingüe Universal:
+El motor SAST escanea código fuente en lenguajes generalistas y plantillas de IA: **TypeScript/JavaScript** (`.ts`, `.js`), **Python** (`.py`), **C#** (`.cs`), **Java/Kotlin/Scala** (`.java`, `.kt`, `.scala`), **C/C++** (`.c`, `.cpp`, `.cc`), **Go** (`.go`), **Rust** (`.rs`), **PHP** (`.php`), **Ruby** (`.rb`), **Swift** (`.swift`) y plantillas de prompts (`.prompt`).
 
 Opcionalmente, `--semgrep` permite delegar la ejecución en el motor corporativo de Semgrep si está presente en el entorno.
+
 
 ### 3. Comandos Prácticos de Seguridad
 
@@ -2133,11 +2141,17 @@ El escaneo de secretos previene la fuga involuntaria de credenciales en el códi
 
 Para erradicar patrones de código vulnerable comunes en código sintetizado por modelos de lenguaje (LLMs):
 - **Patrones Detectados**:
-  - *SQL Injection*: Concatenación directa de cadenas en consultas SQL sin sentencias parametrizadas.
-  - *Command Injection*: Ejecución de comandos del sistema operativo (`exec`, `execSync`, `spawn` con shell activo) con interpolación de variables.
-  - *Dynamic Code Evaluation*: Uso inseguro de `eval(...)` o constructores `new Function(...)`.
-  - *Server-Side Request Forgery (SSRF)*: Peticiones HTTP salientes donde la URL objetivo se construye directamente con entradas no sanitizadas.
-  - *Path Traversal*: Operaciones de sistema de archivos construidas mediante concatenación de rutas sin normalización ni comprobación de límites.
+  - *SQL Injection*: Concatenación directa de cadenas en consultas SQL sin sentencias parametrizadas (`SAST-001`).
+  - *Command Injection*: Ejecución de comandos del sistema operativo (`exec`, `execSync`, `spawn` con shell activo) con interpolación de variables (`SAST-002`).
+  - *Dynamic Code Evaluation*: Uso inseguro de `eval(...)` o constructores `new Function(...)` (`SAST-003`).
+  - *Server-Side Request Forgery (SSRF)*: Peticiones HTTP salientes donde la URL objetivo se construye directamente con entradas no sanitizadas (`SAST-004`).
+  - *Path Traversal*: Operaciones de sistema de archivos construidas mediante concatenación de rutas sin normalización ni comprobación de límites (`SAST-005`).
+  - *Prompt Injection (OWASP LLM01)*:
+    - **Concatenación Directa**: Interpolación directa de variables o entradas de usuario en llamadas a LLMs o plantillas de prompts sin delimitadores defensivos (`SAST-006`).
+    - **Jailbreak / System Override**: Firmas adversariales de evasión de restricciones de seguridad (*"ignore previous instructions"*, *"system override"*, *"DAN mode"*, rupturas de delimitadores `</system>`) (`SAST-007`).
+- **Cobertura Multilingüe Universal**: Escaneo determinista sobre lenguajes generalistas y plantillas: TypeScript/JavaScript (`.ts`, `.js`), Python (`.py`), C# (`.cs`), Java/Kotlin (`.java`, `.kt`, `.scala`), C/C++ (`.c`, `.cpp`, `.cc`), Go (`.go`), Rust (`.rs`), PHP (`.php`), Ruby (`.rb`), Swift (`.swift`) y plantillas `.prompt`.
+- **Runtime Guard (`detectPromptInjection`)**: Función utilitaria exportada por `@ai-sdlc/core` para evaluación programática en memoria antes de invocar a los modelos.
+- **Supresión Justificada**: Se permite ignorar advertencias mediante el comentario en línea `// ai-sdlc:allow-prompt-injection` o `// ai-sdlc:allow-sast`.
 - **Conector Opcional Semgrep (`--semgrep`)**: Ejecuta reglas corporativas de Semgrep sobre el repositorio si está disponible.
 - **Salida Formal**: Genera `reports/SAST_REPORT.md` y emite código de salida 1 en caso de vulnerabilidades detectadas.
 

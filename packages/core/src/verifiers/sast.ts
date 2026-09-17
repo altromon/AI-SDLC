@@ -13,12 +13,39 @@ import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
+  PromptInjectionFinding,
   SastFindingType,
   SastSeverity,
   SastVerifierOptions,
   SastVerifierResult,
   SastViolation,
 } from '../types/index.js';
+
+export const GENERAL_SOURCE_EXTENSIONS: readonly string[] = [
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.cjs',
+  '.py',
+  '.cs',
+  '.java',
+  '.kt',
+  '.scala',
+  '.c',
+  '.cpp',
+  '.cc',
+  '.cxx',
+  '.h',
+  '.hpp',
+  '.go',
+  '.rs',
+  '.php',
+  '.rb',
+  '.swift',
+  '.prompt',
+];
 
 export interface SastRule {
   id: string;
@@ -36,7 +63,7 @@ export const SAST_RULES: readonly SastRule[] = [
     severity: 'CRITICAL',
     description: 'Concatenación o interpolación directa de variables en consulta SQL dinámica',
     pattern: /(?:\.query|\.execute|\.raw)\s*\(\s*(?:`[^`]*(?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER)[^`]*\$\{[^}]+\}[^`]*`|['"][^'"]*(?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER)[^'"]*['"]\s*\+)/i,
-    fileExtensions: ['.ts', '.js', '.tsx', '.jsx', '.py', '.go', '.java'],
+    fileExtensions: ['.ts', '.js', '.tsx', '.jsx', '.py', '.go', '.java', '.kt', '.cs', '.php', '.rb', '.cpp', '.c'],
   },
   {
     id: 'SAST-002-COMMAND-INJECTION',
@@ -44,7 +71,7 @@ export const SAST_RULES: readonly SastRule[] = [
     severity: 'CRITICAL',
     description: 'Ejecución dinámica de comandos del sistema operativo con argumentos variables',
     pattern: /(?:child_process\.(?:exec|execSync)|(?<!\.)\b(?:exec|execSync))\s*\(\s*(?:`[^`]*\$\{[^}]+\}[^`]*`|[a-zA-Z0-9_]+\s*\+|[a-zA-Z0-9_]+\))/i,
-    fileExtensions: ['.ts', '.js', '.mjs', '.cjs'],
+    fileExtensions: ['.ts', '.js', '.mjs', '.cjs', '.py', '.go', '.java', '.cs', '.php', '.rb'],
   },
   {
     id: 'SAST-003-UNSAFE-EVAL',
@@ -52,7 +79,7 @@ export const SAST_RULES: readonly SastRule[] = [
     severity: 'CRITICAL',
     description: 'Uso de evaluación dinámica de código (eval o Function constructor)',
     pattern: /(?<!\.)\b(?:eval\s*\(|new\s+Function\s*\()/g,
-    fileExtensions: ['.ts', '.js', '.py'],
+    fileExtensions: ['.ts', '.js', '.py', '.php', '.rb', '.cs'],
   },
   {
     id: 'SAST-004-SSRF-UNVALIDATED-FETCH',
@@ -60,7 +87,7 @@ export const SAST_RULES: readonly SastRule[] = [
     severity: 'HIGH',
     description: 'Petición de red saliente (fetch/http/axios) con URL dinámica sin validación previa',
     pattern: /(?:fetch|axios\.(?:get|post|put|delete)|http\.(?:get|request))\s*\(\s*(?:req\.(?:query|params|body)|urlParam|targetUrl|userInput|remoteUrl)\b/i,
-    fileExtensions: ['.ts', '.js', '.py'],
+    fileExtensions: ['.ts', '.js', '.py', '.go', '.java', '.cs', '.php', '.rb'],
   },
   {
     id: 'SAST-005-PATH-TRAVERSAL',
@@ -68,7 +95,24 @@ export const SAST_RULES: readonly SastRule[] = [
     severity: 'HIGH',
     description: 'Lectura o escritura en sistema de archivos construida directamente desde parámetros no saneados',
     pattern: /fs\.(?:readFileSync|readFile|createReadStream|writeFileSync)\s*\(\s*(?:path\.join\([^)]*req\.(?:query|params|body)|req\.(?:query|params|body))/i,
-    fileExtensions: ['.ts', '.js'],
+    fileExtensions: ['.ts', '.js', '.py', '.go', '.java', '.cs'],
+  },
+  {
+    id: 'SAST-006-PROMPT-INJECTION-CONCAT',
+    type: 'PROMPT_INJECTION_RISK',
+    severity: 'HIGH',
+    description: 'Interpolación o concatenación directa de entradas de usuario en llamadas a LLM o plantillas de prompts sin delimitación defensiva (OWASP LLM01)',
+    pattern: /(?:(?:(?:\b(?:prompt|system_?prompt|user_?prompt|prompt_?template|prompt_?text|llm_?prompt)\b\s*(?::=|\+=|\+|=))|(?:messages\s*:\s*\[[^\n]*content\s*:\s*)|(?:generateContent|chat\.completions\.create)\s*\()\s*(?:`[^`]*\$\{[^}]*(?:req\.|user_?input|raw_?input|client_?input)[^}]*\}`|f["'][^"']*\{[^}]*(?:req|user_?input|raw_?input|client_?input)[^}]*\}["']|\$["'][^"']*\{[^}]*(?:req|user_?input|raw_?input|client_?input)[^}]*\}["']|format!\s*\([^)]*(?:user_?input|raw_?input|req)[^)]*\)|(?:fmt\.)?Sprintf\s*\([^)]*(?:user_?input|raw_?input|req)[^)]*\)|(?:["'][^"']*["']\s*\+\s*|\+\s*["'][^"']*["']\s*\+?\s*|\s*\+=\s*)(?:req\.(?:body|query|params|getParameter)|user_?input|raw_?input|client_?input)))/i,
+    fileExtensions: GENERAL_SOURCE_EXTENSIONS,
+  },
+  {
+    id: 'SAST-007-PROMPT-INJECTION-JAILBREAK',
+    type: 'PROMPT_INJECTION_RISK',
+    severity: 'CRITICAL',
+    description:
+      'Firma o vector adversarial de inyección de prompt o anulación de directivas de sistema (Jailbreak / Inyección LLM01)', // ai-sdlc:allow-prompt-injection
+    pattern: /(?:\b(?:ignore|disregard|forget)\s+(?:all\s+)?(?:previous|prior|above)\s+(?:instructions|prompts|directions|rules)\b|\b(?:system\s+(?:prompt\s+)?override|override\s+system\s+prompt|developer\s+mode\s+enabled|dan\s+mode(?:\s+enabled)?|unfiltered\s+(?:ai\s+)?mode)\b|\b(?:reveal|print|output)\s+(?:your\s+)?(?:system\s+prompt|initial\s+instructions)\b|<\/(?:system|instructions)>\s*(?:new\s+instructions|you\s+are\s+now|system:)|\[(?:SYSTEM|SYSTEM_OVERRIDE)\])/i,
+    fileExtensions: GENERAL_SOURCE_EXTENSIONS,
   },
 ] as const;
 
@@ -158,7 +202,7 @@ export function walkSourceFiles(
         files.push(...walkSourceFiles(fullPath, rootDir, excludes));
       } else if (entry.isFile()) {
         const ext = path.extname(entry.name).toLowerCase();
-        if (['.ts', '.tsx', '.js', '.jsx', '.py', '.go', '.java', '.cs', '.rs'].includes(ext)) {
+        if (GENERAL_SOURCE_EXTENSIONS.includes(ext)) {
           files.push(fullPath);
         }
       }
@@ -185,7 +229,12 @@ export function scanFileForSast(
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (line.includes('ai-sdlc:allow-sast') || line.includes('nosec')) continue;
+      if (
+        line.includes('ai-sdlc:allow-sast') ||
+        line.includes('ai-sdlc:allow-prompt-injection') ||
+        line.includes('nosec')
+      )
+        continue;
 
       for (const rule of SAST_RULES) {
         if (rule.fileExtensions && !rule.fileExtensions.includes(ext)) continue;
@@ -217,7 +266,7 @@ export function scanFileForSast(
 export function verifySast(options: SastVerifierOptions = {}): SastVerifierResult {
   const rootDir = options.rootDir || process.cwd();
   const minSeverity = options.minSeverity || 'HIGH';
-  const targetDirs = options.targetDirectories || ['src', 'packages', 'examples/src'];
+  const targetDirs = options.targetDirectories || ['src', 'packages', 'examples/src', 'prompts'];
 
   const filesToScan: string[] = [];
   for (const tDir of targetDirs) {
@@ -270,8 +319,8 @@ export function generateSastReportMarkdown(result: SastVerifierResult): string {
       ``,
       `## Resumen de Conformidad`,
       ``,
-      `No se detectaron patrones de inyección SQL, ejecución dinámica arbitraria de comandos (eval/exec), SSRF o path traversal en los módulos de código analizados.`,
-      `El código generado por personas y agentes es conforme con el estándar de codificación segura OWASP Top 10.`
+      `No se detectaron patrones de inyección SQL, ejecución dinámica arbitraria de comandos (eval/exec), SSRF, path traversal o prompt injection (OWASP LLM01) en los módulos de código analizados.`,
+      `El código generado por personas y agentes es conforme con el estándar de codificación segura OWASP Top 10 y OWASP Top 10 for LLMs.`
     );
   } else {
     lines.push(
@@ -292,3 +341,88 @@ export function generateSastReportMarkdown(result: SastVerifierResult): string {
 
   return lines.join('\n');
 }
+
+export const PROMPT_INJECTION_SIGNATURES: readonly {
+  ruleId: string;
+  severity: SastSeverity;
+  regex: RegExp;
+  message: string;
+}[] = [
+  {
+    ruleId: 'PROMPT-INJ-JAILBREAK',
+    severity: 'CRITICAL',
+    regex: /(?:\b(?:ignore|disregard|forget)\s+(?:all\s+)?(?:previous|prior|above)\s+(?:instructions|prompts|directions|rules)\b)/i,
+    message: 'Intento de anulación o ignorado de instrucciones previas del sistema',
+  },
+  {
+    ruleId: 'PROMPT-INJ-MODE-OVERRIDE',
+    severity: 'CRITICAL',
+    regex: /(?:\b(?:system\s+(?:prompt\s+)?override|override\s+system\s+prompt|developer\s+mode\s+enabled|dan\s+mode(?:\s+enabled)?|unfiltered\s+(?:ai\s+)?mode)\b)/i,
+    message: 'Intento de forzar modo no restringido, modo desarrollador o sobrescritura de sistema',
+  },
+  {
+    ruleId: 'PROMPT-INJ-LEAK',
+    severity: 'HIGH',
+    regex: /(?:\b(?:reveal|print|output|display)\s+(?:your\s+)?(?:system\s+prompt|initial\s+instructions|base\s+prompt)\b)/i,
+    message: 'Intento de filtración o extracción de instrucciones de sistema (Prompt Leaking)',
+  },
+  {
+    ruleId: 'PROMPT-INJ-DELIMITER-ESCAPE',
+    severity: 'CRITICAL',
+    regex: /(?:<\/(?:system|instructions|prompt|context)>\s*(?:new\s+instructions|you\s+are\s+now|system:)|\[(?:SYSTEM|SYSTEM_OVERRIDE|ADMIN)\])/i,
+    message: 'Intento de ruptura de delimitadores estructurales de contexto o inyección de rol',
+  },
+  {
+    ruleId: 'PROMPT-INJ-ROLE-SPOOFING',
+    severity: 'HIGH',
+    regex: /(?:\r?\n|^)\s*(?:System|Admin|Root):\s*(?:You\s+are|Override|Ignore|Execute)/i,
+    message: 'Intento de suplantación de rol privilegiado (Role Spoofing)',
+  },
+];
+
+export function detectPromptInjection(content: string): PromptInjectionFinding[] {
+  const findings: PromptInjectionFinding[] = [];
+  if (!content) return findings;
+
+  const lines = content.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.includes('ai-sdlc:allow-prompt-injection') || line.includes('nosec')) continue;
+
+    for (const sig of PROMPT_INJECTION_SIGNATURES) {
+      sig.regex.lastIndex = 0;
+      if (sig.regex.test(line)) {
+        findings.push({
+          ruleId: sig.ruleId,
+          severity: sig.severity,
+          pattern: sig.regex.source,
+          snippet: line.trim(),
+          lineNumber: i + 1,
+          message: sig.message,
+        });
+      }
+    }
+  }
+
+  // Multiline checks
+  for (const sig of PROMPT_INJECTION_SIGNATURES) {
+    if (sig.ruleId === 'PROMPT-INJ-ROLE-SPOOFING') {
+      sig.regex.lastIndex = 0;
+      if (sig.regex.test(content)) {
+        const alreadyFound = findings.some((f) => f.ruleId === sig.ruleId);
+        if (!alreadyFound) {
+          findings.push({
+            ruleId: sig.ruleId,
+            severity: sig.severity,
+            pattern: sig.regex.source,
+            snippet: content.slice(0, 100).trim(),
+            message: sig.message,
+          });
+        }
+      }
+    }
+  }
+
+  return findings;
+}
+

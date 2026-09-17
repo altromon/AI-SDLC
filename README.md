@@ -628,16 +628,24 @@ El escaneo de secretos inspecciona el repositorio en busca de credenciales, llav
 - **Código de Salida 4**:
   - Cualquier violación detectada finaliza con **exit code 4**, bloqueando de inmediato el pipeline de integración continua.
 
-### 2. Análisis Estático de Vulnerabilidades SAST (`verify sast`)
+### 2. Análisis Estático de Vulnerabilidades SAST y Prompt Injection (`verify sast`)
 
-Los asistentes de IA generativa pueden sintetizar soluciones sintácticamente elegantes pero intrínsecamente vulnerables. El motor SAST shift-left evalúa el código frente a los 5 patrones de riesgo más críticos de OWASP:
+Los asistentes de IA generativa pueden sintetizar soluciones sintácticamente elegantes pero intrínsecamente vulnerables. El motor SAST shift-left evalúa el código frente a los patrones de riesgo más críticos de OWASP y OWASP Top 10 for LLMs:
 1. **SQL Injection (CWE-89)**: Concatenación directa o interpolación en sentencias SQL (`SELECT ... + userInput`).
 2. **Command Injection (CWE-78)**: Llamadas al sistema operativo (`exec`, `execSync`, `spawn`) con interpolación de cadenas sin parametrización.
 3. **Dynamic Code Evaluation (CWE-95)**: Uso de `eval(...)` o `new Function(...)` con variables no confiables.
 4. **Server-Side Request Forgery - SSRF (CWE-918)**: Solicitudes HTTP salientes (`fetch`, `axios`, `http.get`) donde la URL o dominio se construye con entradas del usuario.
 5. **Path Traversal (CWE-22)**: Acceso a archivos (`fs.readFile`, `fs.open`) con interpolación directa sin resolución o *jail* de ruta.
+6. **Prompt Injection Inseguro (OWASP LLM01 / CWE-1427)**:
+   - *Concatenación Directa (`SAST-006`)*: Construcción de prompts o mensajes hacia LLMs interpolando entradas del usuario sin delimitadores defensivos (`prompt = $"Summarize: {userInput}"`, `prompt = "Translate: " + req.query.text`).
+   - *Jailbreaks y Firmas Adversariales (`SAST-007`)*: Directivas que intentan anular o forzar modos desprotegidos (*"ignore previous instructions"*, *"system prompt override"*, *"DAN mode"*, rupturas `</system>`).
+   - *Runtime Guard*: Función exportada `detectPromptInjection(text)` en `@ai-sdlc/core` para validación programática en memoria.
+
+#### Cobertura Multilingüe Universal:
+El motor SAST escanea código fuente en lenguajes generalistas y plantillas de IA: **TypeScript/JavaScript** (`.ts`, `.js`), **Python** (`.py`), **C#** (`.cs`), **Java/Kotlin/Scala** (`.java`, `.kt`, `.scala`), **C/C++** (`.c`, `.cpp`, `.cc`), **Go** (`.go`), **Rust** (`.rs`), **PHP** (`.php`), **Ruby** (`.rb`), **Swift** (`.swift`) y plantillas de prompts (`.prompt`).
 
 Opcionalmente, `--semgrep` permite delegar la ejecución en el motor corporativo de Semgrep si está presente en el entorno.
+
 
 ### 3. Comandos Prácticos de Seguridad
 

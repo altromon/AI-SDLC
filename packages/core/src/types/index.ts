@@ -765,4 +765,13 @@ export interface SastVerifierResult {
   reportMarkdown?: string;
 }
 
+export interface PromptInjectionFinding {
+  ruleId: string;
+  severity: SastSeverity;
+  pattern: string;
+  snippet: string;
+  lineNumber?: number;
+  message: string;
+}
+
 
