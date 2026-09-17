@@ -16,7 +16,7 @@ import {
 } from './commands/git.js';
 import { runInit } from './commands/init.js';
 import { runKpiPr, runKpiRelease } from './commands/kpi.js';
-import { runReportQuality } from './commands/report.js';
+import { runReportDashboard, runReportQuality } from './commands/report.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
   runVerifyAll,
@@ -277,6 +277,23 @@ reportCommand
       minMaintainability: opts.minMaintainability,
       maxLines: opts.maxLines,
       enforceMode: opts.mode,
+    });
+    process.exit(passed ? 0 : 1);
+  });
+
+reportCommand
+  .command('dashboard')
+  .description('Genera el dashboard web interactivo y visualizador de grafos PDaC / RTM (reports/dashboard.html)')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('-o, --output <path>', 'Ruta del archivo HTML de salida (por defecto: reports/dashboard.html)')
+  .option('-t, --title <title>', 'Título del dashboard web')
+  .option('--open', 'Abre el dashboard en el navegador predeterminado')
+  .action((opts) => {
+    const passed = runReportDashboard({
+      root: opts.root,
+      output: opts.output,
+      title: opts.title,
+      open: opts.open,
     });
     process.exit(passed ? 0 : 1);
   });

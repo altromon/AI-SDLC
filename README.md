@@ -690,7 +690,46 @@ pnpm run check
 
 ---
 
+## 🌐 Tutorial 6: Dashboard Web Interactivo y Visualizador de Grafos (Cytoscape.js)
+
+AI-SDLC incluye un generador de dashboard web interactivo y visualizador de redes de dependencias (`reports/dashboard.html`) basado en **Cytoscape.js (MIT)**, diseñado para Product Owners, CISOs, directores de ingeniería y auditores.
+
+### 1. Características Principales
+- **Visualizador de Red PDaC / RTM**:
+  - Navegación multinivel por 4 capas: Producto (Upstream), Requerimientos, Arquitectura (Midstream) y Pruebas BDD (Downstream).
+  - Semáforo de conformidad determinista: Nodos verdes (conformes) vs. nodos rojos (huérfanos o con deriva de digest SHA-256).
+  - **Resaltado de Camino Crítico**: Al pulsar en cualquier requerimiento o nodo, se ilumina toda su cadena de impacto upstream y downstream.
+  - Filtros en vivo por capa y por estado de salud, búsqueda con auto-foco y layouts intercambiables (jerárquico, COSE, concéntrico).
+- **Matriz de Trazabilidad 360° en Tabla**:
+  - Búsqueda en tiempo real con salto interactivo directo hacia el grafo.
+- **Métricas de Calidad & Gobernanza de Autonomía**:
+  - Indicadores ejecutivos (Mantenibilidad SEI MI, CC promedio, veredicto de Release Gate).
+  - Desglose de tareas por modo de autonomía (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
+- **Telemetría y KPIs con Histórico**:
+  - Métricas de la rama activa (commits, líneas añadidas/eliminadas, tiempo de desarrollo activo, consumo de tokens y coste computacional en USD).
+  - Registro histórico consolidado de releases desde `reports/releases/*.kpis.json` para monitorizar KLoC, bugs, DIR y costes a lo largo del tiempo.
+- **Cero Infraestructura Externa (100% Offline)**:
+  - Todo el código JavaScript de Cytoscape.js y los estilos están incrustados en un único archivo HTML autocontenido. Se abre localmente con doble clic o se publica en GitHub/GitLab Pages sin requerir servidores locales ni conexión a internet.
+
+### 2. Comandos CLI
+
+```bash
+# 1. Generar el dashboard en reports/dashboard.html
+npx aisdlc report dashboard
+# o vía script pnpm:
+pnpm run report:dashboard
+
+# 2. Generar y abrir automáticamente en el navegador web
+npx aisdlc report dashboard --open
+
+# 3. Personalizar ruta de salida y título del dashboard
+npx aisdlc report dashboard --output docs/dashboard.html --title "SentinelCore Mission Control"
+```
+
+---
+
 ## 🚀 Guía Rápida para Equipos Humanos
+
 
 1. **Definir la Intención del Producto**:
    - Usa plantillas en `templates/product/` para modelar Actores (`ACT-*`), Casos de Uso (`UC-*`) y Reglas de Negocio (`BR-*`).

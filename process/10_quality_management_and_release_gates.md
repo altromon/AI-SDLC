@@ -363,3 +363,40 @@ Active-Time-Seconds: 420
 
 Estas métricas son puramente observacionales y analíticas, proporcionando a los líderes de ingeniería visibilidad sobre qué modelos LLM son más fiables y cuál es el impacto real de los defectos en el presupuesto del proyecto.
 
+---
+
+## 8. Dashboard Web Interactivo y Visualizador de Grafos PDaC / RTM (Cytoscape.js)
+
+Para stakeholders no técnicos (Product Owners, CISOs, auditores y directores de ingeniería), explorar la red completa de dependencias de producto (`Actores ➔ Casos de Uso ➔ Reglas de Negocio ➔ Requisitos ➔ Componentes arc42 ➔ Tests BDD`) en documentos Markdown estáticos genera fricción cognitiva.
+
+El comando CLI `npx aisdlc report dashboard` compila la totalidad del grafo PDaC, la matriz RTM 360°, las métricas de calidad y la telemetría histórica de KPIs en un artefacto HTML autocontenido (`reports/dashboard.html`):
+
+```bash
+# Generar el dashboard en reports/dashboard.html
+npx aisdlc report dashboard
+
+# Generar y abrir inmediatamente en el navegador predeterminado
+npx aisdlc report dashboard --open
+
+# Personalizar ruta de destino y título
+npx aisdlc report dashboard --output dist/governance.html --title "SentinelCore Enterprise SDLC"
+```
+
+### Características Principales del Dashboard:
+1. **Visualizador de Red con Cytoscape.js (MIT)**:
+   - Capas semánticas diferenciadas por geometría y color: Producto (rombos cian), Requisitos (rectángulos verdes/rojos), Arquitectura (hexágonos índigo) y Pruebas (elipses esmeralda).
+   - Coloreado determinista de estado: 🟢 Verde para nodos conformes sin derivas; 🔴 Rojo para requisitos huérfanos o con deriva criptográfica SHA-256 (`DRIFT`).
+   - Controles de navegación: Zoom, encuadre centrado, layouts intercambiables (jerárquico por capas, COSE, concéntrico, circular).
+   - **Resaltado de Camino Crítico**: Al hacer clic sobre cualquier nodo, se iluminan sus dependencias upstream y downstream, atenuando el resto del grafo.
+2. **Matriz de Trazabilidad 360° Interactiva**:
+   - Tabla con filtrado en tiempo real por texto o estado, con enlace bidireccional que enfoca y centra el nodo seleccionado en el grafo.
+3. **Métricas de Calidad y Gobernanza**:
+   - Tarjetas de resumen ejecutivo (Release Gate PASS/FAIL, Mantenibilidad SEI MI, Complejidad Ciclomática, Cobertura BDD).
+   - Desglose de distribución de modos de autonomía de tareas (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
+4. **Telemetría Activa e Histórico de KPIs**:
+   - Métricas de la rama activa (commits, líneas añadidas/eliminadas, tiempo de desarrollo activo, consumo de tokens y coste computacional en USD).
+   - Tabla y tendencias históricas consolidadas procedentes de `reports/releases/*.kpis.json` para análisis de KLoC, bugs, DIR y re-trabajo a lo largo de los sprints.
+5. **Cero Infraestructura Externa (100% Offline)**:
+   - El archivo generado incrusta todos los scripts y estilos necesarios, permitiendo su apertura directa con doble clic local (`file:///...`) o su publicación estática en GitHub Pages / GitLab Pages sin necesidad de backend.
+
+
