@@ -1,0 +1,15 @@
+id: HOF-CHG-025-STRUCTURED-JSON-VERIFY
+type: handoff
+title: Handoff Canónico de Producto para structured-json-verify
+changeId: CHG-025-STRUCTURED-JSON-VERIFY
+version: 1.0.0
+createdAt: '2026-09-17T20:56:29.515Z'
+subgraph:
+  requirements:
+    - FR-025-STRUCTURED-JSON-VERIFY-001
+  useCases:
+    - UC-025-STRUCTURED-JSON-VERIFY
+citations:
+  - id: FR-025-STRUCTURED-JSON-VERIFY-001
+    digest: sha256:d1db8f1e859e72508222243249c7c5ede5a4e79f4ff47a5e6bd0f7f8c133e967
+    comment: Requerimiento funcional canónico asociado (Génesis CHG-025-STRUCTURED-JSON-VERIFY)

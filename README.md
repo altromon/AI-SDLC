@@ -152,6 +152,7 @@ pnpm run check:fix
 # 5. Ejecutar la suite consolidada de CI/CD (9 Gates de calidad y gobernanza)
 pnpm run verify:all
 # o vía npx: npx aisdlc verify all
+# o con salida estructurada JSON para agentes de IA / CI: npx aisdlc verify all --json
 
 # 6. Integrar el cambio a la línea base canónica (promoción de requisitos y arquitectura)
 npx aisdlc sdd integrate --auto
@@ -170,20 +171,22 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc git plan` | `pnpm run git:plan` | **Planificación Git** | Renderiza el árbol visual de jerarquía de ramas antes de trabajar |
 | `npx aisdlc git validate <rama>` | `pnpm run git:validate <rama>` | **Gobierno Git** | Valida la nomenclatura estricta de cualquier rama según su Tier (1 a 4) |
 | `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Telemetría Git** | Instala el hook `prepare-commit-msg` para inyección automática de trailers en commits |
-| `npx aisdlc kpi pr [opciones]` | `pnpm run kpi:pr` | **Métricas Pull Request** | Calcula y genera la tabla Markdown agregada de KPIs (tiempo, tokens, autoría) para el PR |
-| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Consolidado de Release** | Computa DIR por modelo/humano, densidad de defectos y coste de re-trabajo (`RELEASE_KPIS_<release>.md`) |
+| `npx aisdlc kpi pr [opciones]` | `pnpm run kpi:pr` | **Métricas Pull Request** | Calcula y genera la tabla Markdown agregada de KPIs (tiempo, tokens, autoría) para el PR (admite `--json`) |
+| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Consolidado de Release** | Computa DIR por modelo/humano, densidad de defectos y coste de re-trabajo (`RELEASE_KPIS_<release>.md`, admite `--json`) |
 | `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Pre-vuelo Unificado** | Sincroniza bloques Gherkin a `.feature`, actualiza digests SHA-256 PDaC, audita seguridad y verifica Quality Gates |
-| `npx aisdlc verify all` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 9 Quality Gates (Calidad AST, Trazabilidad 360°, Gobierno, Tests, Licencias/SCA, PDaC, Schemas, Duplicados, Seguridad) |
-| `npx aisdlc verify security [opciones]` | `pnpm run verify:security` | **Seguridad Shift-Left (Gate 9)** | Verificación unificada de secretos (Gitleaks) y SAST determinista (OWASP Top 10) |
-| `npx aisdlc verify secrets [opciones]` | `pnpm run verify:secrets` | **Escaneo de Secretos** | Detección determinista de credenciales, llaves API, tokens y alta entropía (Shannon) con soporte git diff y delegación Gitleaks |
-| `npx aisdlc verify sast [opciones]` | `pnpm run verify:sast` | **Seguridad SAST** | Detección determinista de patrones vulnerables generados por IA (SQLi, command injection, eval, SSRF, path traversal) y Semgrep |
-| `npx aisdlc verify quality` | `pnpm run verify:quality` | **Release Gate de Código** | Evalúa Complejidad Ciclomática ($\le 10$), Cognitiva ($\le 15$) y Mantenibilidad ($\ge 50$) |
-| `npx aisdlc verify traceability` | `pnpm run verify:traceability` | **Matriz 360° RTM** | Valida triangulación obligatoria: Producto (`HOF-*`) ➔ Arquitectura (`CMP-*`) ➔ Tests (`.feature`) |
-| `npx aisdlc verify governance` | `pnpm run verify:governance` | **Gobierno de Tareas** | Audita modos de autonomía (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `HIGH_RISK_MANUAL`, `AMBIGUOUS`) |
-| `npx aisdlc verify testing` | `pnpm run verify:testing` | **Auditoría de Tests** | Comprueba que el 100% de requerimientos y tareas cuentan con pruebas verificables en disco |
-| `npx aisdlc verify licenses [opciones]` | `pnpm run verify:licenses` | **Gobernanza IP / OSS y SCA** | Escaneo dinámico de dependencias y generación de SBOM CycloneDX 1.5 y avisos de terceros (`THIRD_PARTY_NOTICES.md`) frente a `license-policy.yaml` |
-| `npx aisdlc verify pdac` | `pnpm run verify:pdac` | **Integridad Criptográfica**| Detecta derivas (*drift*) en el grafo PDaC comparando hashes SHA-256 |
-| `npx aisdlc verify schemas` | `pnpm run verify:schemas` | **Conformidad Estructural** | Valida artefactos Markdown frente a esquemas JSON canónicos (Draft 2020-12) |
+| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 9 Quality Gates (soporta `--json` determinista sin ANSI para agentes autónomos) |
+| `npx aisdlc verify security [opciones]` | `pnpm run verify:security` | **Seguridad Shift-Left (Gate 9)** | Verificación unificada de secretos (Gitleaks) y SAST determinista (OWASP Top 10, `--json`, código de salida 4 en fugas) |
+| `npx aisdlc verify secrets [opciones]` | `pnpm run verify:secrets` | **Escaneo de Secretos** | Detección determinista de credenciales, llaves API y alta entropía (Shannon) con soporte git diff, `--json` y exitCode 4 |
+| `npx aisdlc verify sast [opciones]` | `pnpm run verify:sast` | **Seguridad SAST** | Detección determinista de patrones vulnerables generados por IA (SQLi, exec, eval, SSRF, `--json`) |
+| `npx aisdlc verify quality [--json]` | `pnpm run verify:quality` | **Release Gate de Código** | Evalúa Complejidad Ciclomática ($\le 10$), Cognitiva ($\le 15$) y Mantenibilidad ($\ge 50$) con soporte `--json` |
+| `npx aisdlc verify traceability [--json]`| `pnpm run verify:traceability` | **Matriz 360° RTM** | Valida triangulación obligatoria: Producto (`HOF-*`) ➔ Arquitectura (`CMP-*`) ➔ Tests (`.feature`) |
+| `npx aisdlc verify governance [--json]` | `pnpm run verify:governance` | **Gobierno de Tareas** | Audita modos de autonomía (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc., admite `--json`) |
+| `npx aisdlc verify testing [--json]` | `pnpm run verify:testing` | **Auditoría de Tests** | Comprueba cobertura al 100% de requisitos y tareas con pruebas verificables en disco (`--json`) |
+| `npx aisdlc verify licenses [opciones]` | `pnpm run verify:licenses` | **Gobernanza IP / OSS y SCA** | Escaneo dinámico de dependencias, SBOM CycloneDX 1.5 y atribución legal frente a `license-policy.yaml` (`--json`) |
+| `npx aisdlc verify pdac [--json]` | `pnpm run verify:pdac` | **Integridad Criptográfica**| Detecta derivas (*drift*) en el grafo PDaC comparando hashes SHA-256 (`--json`) |
+| `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Conformidad Estructural** | Valida artefactos Markdown frente a esquemas JSON canónicos (Draft 2020-12, `--json`) |
+| `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancia** | Audita colisiones léxicas y solapamientos de requisitos antes de codificar (`--json`) |
+| `npx aisdlc verify friction [change]` | - | **Fricción Progresiva** | Valida protecciones Anti-Bypass y umbrales según el perfil de riesgo (`patch`/`standard`/`critical`, `--json`) |
 | `npx aisdlc sdd verify` | - | **Conformidad SDD** | Audita que los cambios activos cumplan la especificación y contengan sidecars válidos |
 | `npx aisdlc sdd integrate [--auto]` | - | **Promoción a Baseline** | Promueve requerimientos a `active`, enlaza arquitectura, marca propuesta `applied` y archiva el cambio |
 | `npx aisdlc report quality` | `pnpm run report:quality` | **Reporting Formal** | Genera informe detallado de métricas en `reports/QUALITY_REPORT.md` |

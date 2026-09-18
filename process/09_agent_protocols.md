@@ -248,3 +248,34 @@ DIRECTRICES OPERATIVAS:
     ├── El humano evalúa la lógica, el valor de negocio y el impacto técnico
     └── Aprueba el cambio: status: active / status: approved o aprueba el PR
 ```
+
+---
+
+## 5. Protocolo de Interfaz Determinista y Salida Estructurada `--json` para Agentes de IA
+
+Para evitar la fragilidad del parsing de texto libre con colores ANSI (`picocolors`) y reducir la sobrecarga de tokens en llamadas a modelos de lenguaje (Antigravity, Claude Code, Cursor, Aider) y pipelines CI/CD, toda la suite de comandos deterministas `aisdlc verify` implementa el flag `--json`.
+
+### 1. Directrices de Consumo para Agentes de IA
+- **Supresión ANSI Innegociable**: Cuando el flag `--json` está activo, el CLI suprime banners decorativos, encabezados ASCII y códigos de escape ANSI, emitiendo un flujo JSON puro por `stdout` que puede consumirse directamente con `JSON.parse()`.
+- **Estructura Normalizada Canónica**:
+  ```json
+  {
+    "gate": "quality",
+    "success": true,
+    "exitCode": 0,
+    "summary": {
+      "totalFiles": 11,
+      "totalFunctions": 20,
+      "passCount": 20,
+      "failCount": 0
+    },
+    "violations": []
+  }
+  ```
+- **Códigos de Salida Deterministas**:
+  - `0`: Aprobado (gate superado al 100%).
+  - `1`: Bloqueado por fallo de calidad, complejidad ciclomática, trazabilidad, gobierno o esquemas.
+  - `4`: Bloqueo crítico por fuga de secretos o credenciales expuestas (`verify secrets` o `verify security`).
+- **Verificación Agregada (`verify all --json`)**:
+  Emite un resumen general con la totalidad de gates evaluados (`quality`, `traceability`, `governance`, `testing`, `licenses`, `pdac`, `schemas`, `duplicates`, `security`) en el objeto `gates`, junto con la lista agregada de violaciones detectadas.
+

@@ -17,10 +17,23 @@ import {
   verifyTraceability,
 } from '@ai-sdlc/core';
 
-export interface QualityVerifyOptions {
+export interface VerifyBaseOptions {
   root?: string;
-  policy?: string;
   silent?: boolean;
+  json?: boolean;
+}
+
+export interface VerifyJsonPayload<TSummary = Record<string, unknown>, TViolation = unknown> {
+  gate: string;
+  success: boolean;
+  exitCode: number;
+  summary: TSummary;
+  violations: TViolation[];
+  [key: string]: unknown;
+}
+
+export interface QualityVerifyOptions extends VerifyBaseOptions {
+  policy?: string;
   maxCyclomatic?: number | string;
   maxCognitive?: number | string;
   minMaintainability?: number | string;
@@ -30,7 +43,8 @@ export interface QualityVerifyOptions {
 
 export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  if (!options.silent) {
+  const isSilent = Boolean(options.silent || options.json);
+  if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Quality Gate (Complejidad y Mantenibilidad)...')));
   }
 
@@ -43,6 +57,40 @@ export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
   };
 
   const result = verifyQualityGate({ rootDir, policyPath: options.policy, thresholds });
+
+  if (options.json) {
+    const violations = result.results
+      .filter((r) => r.status === 'FAIL')
+      .flatMap((r) =>
+        r.violations.map((v) => ({
+          file: r.relPath,
+          function: r.functionName,
+          metric: 'quality',
+          message: v,
+          metrics: {
+            loc: r.loc,
+            cyclomatic: r.cyclomatic,
+            cognitive: r.cognitive,
+            maintainability: r.maintainability,
+          },
+        }))
+      );
+
+    const payload: VerifyJsonPayload = {
+      gate: 'quality',
+      success: result.success,
+      exitCode: result.success ? 0 : 1,
+      summary: {
+        totalFiles: result.totalFiles,
+        totalFunctions: result.totalFunctions,
+        passCount: result.passCount,
+        failCount: result.failCount,
+      },
+      violations,
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return result.success;
+  }
 
   if (!options.silent) {
     console.log(
@@ -68,13 +116,39 @@ export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
   return isOk;
 }
 
-export function runVerifyTraceability(options: { root?: string; silent?: boolean }): boolean {
+export interface TraceabilityVerifyOptions extends VerifyBaseOptions {}
+
+export function runVerifyTraceability(options: TraceabilityVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  if (!options.silent) {
+  const isSilent = Boolean(options.silent || options.json);
+  if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Trazabilidad 360° (Producto -> Arquitectura -> Pruebas)...')));
   }
 
   const result = verifyTraceability({ rootDir });
+
+  if (options.json) {
+    const payload: VerifyJsonPayload = {
+      gate: 'traceability',
+      success: result.success,
+      exitCode: result.success ? 0 : 1,
+      summary: {
+        totalRequirements: result.totalRequirements,
+        conformingCount: result.totalRequirements - result.orphanCount,
+        orphanCount: result.orphanCount,
+      },
+      violations: result.orphans.map((o) => ({
+        id: o.id,
+        title: o.title,
+        productStatus: o.productStatus,
+        archStatus: o.archStatus,
+        testStatus: o.testStatus,
+        message: `Requisito huérfano [${o.id}]`,
+      })),
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return result.success;
+  }
 
   if (!options.silent) {
     console.log(`  Requerimientos totales: ${pc.bold(String(result.totalRequirements))}`);
@@ -96,13 +170,34 @@ export function runVerifyTraceability(options: { root?: string; silent?: boolean
   return isOk;
 }
 
-export function runVerifyGovernance(options: { root?: string; silent?: boolean }): boolean {
+export interface GovernanceVerifyOptions extends VerifyBaseOptions {}
+
+export function runVerifyGovernance(options: GovernanceVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  if (!options.silent) {
+  const isSilent = Boolean(options.silent || options.json);
+  if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Gobierno de Tareas y Clasificación de Autonomía...')));
   }
 
   const result = verifyTasksGovernance({ rootDir });
+
+  if (options.json) {
+    const payload: VerifyJsonPayload = {
+      gate: 'governance',
+      success: result.success,
+      exitCode: result.success ? 0 : 1,
+      summary: {
+        totalTasks: result.totalTasks,
+        verifiedCount: result.verifiedCount,
+        unverifiedCount: result.unverifiedCount,
+        modeCounts: result.modeCounts,
+        riskCounts: result.riskCounts,
+      },
+      violations: result.violations.map((v) => ({ message: v })),
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return result.success;
+  }
 
   if (!options.silent) {
     console.log(`  Tareas totales auditadas: ${pc.bold(String(result.totalTasks))}`);
@@ -129,13 +224,55 @@ export function runVerifyGovernance(options: { root?: string; silent?: boolean }
   return isOk;
 }
 
-export function runVerifyTesting(options: { root?: string; silent?: boolean }): boolean {
+export interface TestingVerifyOptions extends VerifyBaseOptions {}
+
+export function runVerifyTesting(options: TestingVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  if (!options.silent) {
+  const isSilent = Boolean(options.silent || options.json);
+  if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Cobertura de Pruebas en Requisitos y Tareas...')));
   }
 
   const result = verifyTestingCoverage({ rootDir });
+
+  if (options.json) {
+    const reqViolations = result.requirements
+      .filter((r) => r.status !== 'VERIFICADO_CON_PRUEBA')
+      .map((r) => ({
+        type: 'REQUIREMENT',
+        id: r.id,
+        title: r.title,
+        file: r.file,
+        message: `Requisito sin prueba verificable [${r.id}]`,
+      }));
+
+    const taskViolations = result.tasks
+      .filter((t) => t.status !== 'VERIFICADO_CON_PRUEBA')
+      .map((t) => ({
+        type: 'TASK',
+        id: t.id,
+        title: t.title,
+        file: t.file,
+        message: `Tarea sin verificación de prueba [${t.id}]`,
+      }));
+
+    const payload: VerifyJsonPayload = {
+      gate: 'testing',
+      success: result.success,
+      exitCode: result.success ? 0 : 1,
+      summary: {
+        totalRequirements: result.totalRequirements,
+        passedRequirements: result.passedRequirements,
+        failedRequirements: result.failedRequirements,
+        totalTasks: result.totalTasks,
+        passedTasks: result.passedTasks,
+        failedTasks: result.failedTasks,
+      },
+      violations: [...reqViolations, ...taskViolations],
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return result.success;
+  }
 
   if (!options.silent) {
     console.log(`  Requisitos verificados:   ${pc.green(`${result.passedRequirements}/${result.totalRequirements}`)}`);
@@ -159,8 +296,7 @@ export function runVerifyTesting(options: { root?: string; silent?: boolean }): 
   return isOk;
 }
 
-export interface LicenseVerifyOptions {
-  root?: string;
+export interface LicenseVerifyOptions extends VerifyBaseOptions {
   policy?: string;
   manifest?: string;
   dynamic?: boolean;
@@ -168,12 +304,12 @@ export interface LicenseVerifyOptions {
   depth?: 'direct' | 'transitive';
   sbom?: boolean | string;
   notices?: boolean | string;
-  silent?: boolean;
 }
 
 export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  if (!options.silent) {
+  const isSilent = Boolean(options.silent || options.json);
+  if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Cumplimiento de Licencias Open Source (SCA)...')));
   }
 
@@ -194,6 +330,32 @@ export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
     generateNotices,
     noticesPath,
   });
+
+  if (options.json) {
+    const payload: VerifyJsonPayload = {
+      gate: 'licenses',
+      success: result.success,
+      exitCode: result.success ? 0 : 1,
+      summary: {
+        totalEvaluated: result.totalEvaluated,
+        permittedCount: result.permittedCount,
+        violationsCount: result.violations.length,
+      },
+      violations: result.violations.map((v) => ({
+        package: v.packageName,
+        version: v.version,
+        license: v.license,
+        category: v.category,
+        message: v.reason,
+      })),
+      artifacts: {
+        sbomPath: result.sbomPath,
+        noticesPath: result.noticesPath,
+      },
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return result.success;
+  }
 
   if (!options.silent) {
     console.log(`  Dependencias evaluadas:   ${pc.bold(String(result.totalEvaluated))}`);
@@ -221,13 +383,39 @@ export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
   return isOk;
 }
 
-export function runVerifyPdac(options: { root?: string; silent?: boolean }): boolean {
+export interface PdacVerifyOptions extends VerifyBaseOptions {}
+
+export function runVerifyPdac(options: PdacVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  if (!options.silent) {
+  const isSilent = Boolean(options.silent || options.json);
+  if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Grafo PDaC y Deriva Criptográfica (SHA-256)...')));
   }
 
   const result = verifyPdacGraph({ rootDir });
+
+  if (options.json) {
+    const payload: VerifyJsonPayload = {
+      gate: 'pdac',
+      success: result.success,
+      exitCode: result.success ? 0 : 1,
+      summary: {
+        totalNodes: result.totalNodes,
+        totalEdges: result.totalEdges,
+        driftCount: result.drifts.length,
+      },
+      violations: result.drifts.map((d) => ({
+        sourceId: d.sourceId,
+        targetId: d.targetId,
+        sourceFile: d.sourceFile,
+        expectedDigest: d.expectedDigest,
+        actualDigest: d.actualDigest,
+        message: `Deriva criptográfica en ${d.sourceFile} citando ${d.targetId}`,
+      })),
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return result.success;
+  }
 
   if (!options.silent) {
     console.log(`  Nodos PDaC en línea base: ${pc.bold(String(result.totalNodes))}`);
@@ -249,13 +437,40 @@ export function runVerifyPdac(options: { root?: string; silent?: boolean }): boo
   return isOk;
 }
 
-export function runVerifySchemas(options: { root?: string; path?: string; silent?: boolean }): boolean {
+export interface SchemasVerifyOptions extends VerifyBaseOptions {
+  path?: string;
+}
+
+export function runVerifySchemas(options: SchemasVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  if (!options.silent) {
+  const isSilent = Boolean(options.silent || options.json);
+  if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Conformidad con Esquemas JSON (Draft 2020-12)...')));
   }
 
   const result = verifyArtifactsSchemas({ rootDir, targetPath: options.path });
+
+  if (options.json) {
+    const payload: VerifyJsonPayload = {
+      gate: 'schemas',
+      success: result.success,
+      exitCode: result.success ? 0 : 1,
+      summary: {
+        totalEvaluated: result.totalEvaluated,
+        validCount: result.validCount,
+        invalidCount: result.invalidCount,
+      },
+      violations: result.violations.map((v) => ({
+        file: v.filePath,
+        id: v.id,
+        schemaId: v.schemaId,
+        property: v.property,
+        message: v.message,
+      })),
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return result.success;
+  }
 
   if (!options.silent) {
     console.log(`  Artefactos evaluados:    ${pc.bold(String(result.totalEvaluated))}`);
@@ -277,16 +492,15 @@ export function runVerifySchemas(options: { root?: string; path?: string; silent
   return isOk;
 }
 
-export interface FrictionVerifyOptions {
-  root?: string;
+export interface FrictionVerifyOptions extends VerifyBaseOptions {
   change?: string;
   diffFiles?: string[];
-  silent?: boolean;
 }
 
 export function runVerifyFriction(options: FrictionVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  if (!options.silent) {
+  const isSilent = Boolean(options.silent || options.json);
+  if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🛡️  [AI-SDLC] Verificando Fricción Progresiva y Anti-Bypass Guardrails...')));
   }
 
@@ -295,6 +509,26 @@ export function runVerifyFriction(options: FrictionVerifyOptions = {}): boolean 
     changeId: options.change,
     diffFiles: options.diffFiles,
   });
+
+  if (options.json) {
+    const violations = [
+      ...result.bypassedRules.map((rule) => ({ type: 'ANTI_BYPASS', message: rule })),
+      ...result.errors.map((err) => ({ type: 'PROFILE_ERROR', message: err })),
+    ];
+    const payload: VerifyJsonPayload = {
+      gate: 'friction',
+      success: result.success,
+      exitCode: result.success ? 0 : 1,
+      summary: {
+        profile: result.profile,
+        evaluatedFilesCount: result.evaluatedFiles.length,
+        bypassed: result.bypassed,
+      },
+      violations,
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return result.success;
+  }
 
   if (!options.silent) {
     console.log(`  Perfil detectado:        ${pc.magenta(result.profile)}`);
@@ -324,18 +558,17 @@ export function runVerifyFriction(options: FrictionVerifyOptions = {}): boolean 
   return isOk;
 }
 
-export interface DuplicatesVerifyOptions {
-  root?: string;
+export interface DuplicatesVerifyOptions extends VerifyBaseOptions {
   similarity?: number | string;
-  silent?: boolean;
 }
 
 export function runVerifyDuplicates(options: DuplicatesVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
   const similarityThreshold =
     options.similarity !== undefined ? Number(options.similarity) : undefined;
+  const isSilent = Boolean(options.silent || options.json);
 
-  if (!options.silent) {
+  if (!isSilent) {
     console.log(
       pc.bold(
         pc.cyan(
@@ -349,6 +582,29 @@ export function runVerifyDuplicates(options: DuplicatesVerifyOptions = {}): bool
     rootDir,
     titleSimilarityThreshold: similarityThreshold,
   });
+
+  if (options.json) {
+    const payload: VerifyJsonPayload = {
+      gate: 'duplicates',
+      success: result.success,
+      exitCode: result.success ? 0 : 1,
+      summary: {
+        totalRequirements: result.totalRequirements,
+        errorCount: result.errorCount,
+        warningCount: result.warningCount,
+      },
+      violations: result.issues.map((i) => ({
+        type: i.type,
+        severity: i.severity,
+        id: i.id,
+        file: i.file,
+        conflictingId: i.conflictingId,
+        message: i.message,
+      })),
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return result.success;
+  }
 
   if (!options.silent) {
     console.log(`  Requisitos evaluados:    ${pc.bold(String(result.totalRequirements))}`);
@@ -381,21 +637,20 @@ export function runVerifyDuplicates(options: DuplicatesVerifyOptions = {}): bool
   return isOk;
 }
 
-export interface SecretVerifyCliOptions {
-  root?: string;
+export interface SecretVerifyCliOptions extends VerifyBaseOptions {
   diff?: boolean;
   base?: string;
   gitleaks?: boolean;
   entropy?: number | string;
-  silent?: boolean;
 }
 
 export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
   const entropyThreshold =
     options.entropy !== undefined ? Number(options.entropy) : undefined;
+  const isSilent = Boolean(options.silent || options.json);
 
-  if (!options.silent) {
+  if (!isSilent) {
     console.log(
       pc.bold(
         pc.cyan(
@@ -412,6 +667,29 @@ export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean 
     gitleaks: options.gitleaks,
     entropyThreshold,
   });
+
+  if (options.json) {
+    const payload: VerifyJsonPayload = {
+      gate: 'secrets',
+      success: result.success,
+      exitCode: result.success ? 0 : 4,
+      summary: {
+        totalFilesScanned: result.totalFilesScanned,
+        findingsCount: result.findingsCount,
+        scannedWithGitleaks: result.scannedWithGitleaks,
+      },
+      violations: result.findings.map((f) => ({
+        ruleId: f.ruleId,
+        file: f.relPath,
+        line: f.lineNumber,
+        type: f.type,
+        maskedMatch: f.maskedMatch,
+        message: f.message,
+      })),
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return result.success;
+  }
 
   if (!options.silent) {
     console.log(`  Archivos analizados:     ${pc.bold(String(result.totalFilesScanned))}`);
@@ -443,17 +721,16 @@ export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean 
   return isOk;
 }
 
-export interface SastVerifyCliOptions {
-  root?: string;
+export interface SastVerifyCliOptions extends VerifyBaseOptions {
   semgrep?: boolean;
   minSeverity?: string;
-  silent?: boolean;
 }
 
 export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
+  const isSilent = Boolean(options.silent || options.json);
 
-  if (!options.silent) {
+  if (!isSilent) {
     console.log(
       pc.bold(
         pc.cyan(
@@ -468,6 +745,28 @@ export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
     semgrep: options.semgrep,
     minSeverity: options.minSeverity as any,
   });
+
+  if (options.json) {
+    const payload: VerifyJsonPayload = {
+      gate: 'sast',
+      success: result.success,
+      exitCode: result.success ? 0 : 1,
+      summary: {
+        totalFilesScanned: result.totalFilesScanned,
+        violationsCount: result.violationsCount,
+      },
+      violations: result.violations.map((v) => ({
+        ruleId: v.ruleId,
+        file: v.relPath,
+        line: v.lineNumber,
+        type: v.type,
+        severity: v.severity,
+        message: v.message,
+      })),
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return result.success;
+  }
 
   if (!options.silent) {
     console.log(`  Archivos evaluados:      ${pc.bold(String(result.totalFilesScanned))}`);
@@ -496,54 +795,95 @@ export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
   return isOk;
 }
 
-export interface SecurityVerifyCliOptions {
-  root?: string;
+export interface SecurityVerifyCliOptions extends VerifyBaseOptions {
   diff?: boolean;
   base?: string;
   gitleaks?: boolean;
   semgrep?: boolean;
   entropy?: number | string;
   minSeverity?: string;
-  silent?: boolean;
 }
 
 export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boolean {
-  const okSecrets = runVerifySecrets({
-    root: options.root,
+  const rootDir = options.root || process.cwd();
+  const entropyThreshold =
+    options.entropy !== undefined ? Number(options.entropy) : undefined;
+
+  const resultSecrets = verifySecrets({
+    rootDir,
     diff: options.diff,
-    base: options.base,
+    baseBranch: options.base,
     gitleaks: options.gitleaks,
-    entropy: options.entropy,
-    silent: options.silent,
+    entropyThreshold,
   });
 
-  const okSast = runVerifySast({
-    root: options.root,
+  const resultSast = verifySast({
+    rootDir,
     semgrep: options.semgrep,
-    minSeverity: options.minSeverity,
-    silent: options.silent,
+    minSeverity: options.minSeverity as any,
   });
 
-  return okSecrets && okSast;
+  const okSecrets = resultSecrets.success;
+  const okSast = resultSast.success;
+  const isOk = okSecrets && okSast;
+
+  if (options.json) {
+    const exitCode = isOk ? 0 : (!okSecrets ? 4 : 1);
+    const payload: VerifyJsonPayload = {
+      gate: 'security',
+      success: isOk,
+      exitCode,
+      summary: {
+        secretsScanned: resultSecrets.totalFilesScanned,
+        secretFindings: resultSecrets.findingsCount,
+        sastScanned: resultSast.totalFilesScanned,
+        sastViolations: resultSast.violationsCount,
+      },
+      violations: [
+        ...resultSecrets.findings.map((f) => ({
+          type: 'SECRET',
+          ruleId: f.ruleId,
+          file: f.relPath,
+          line: f.lineNumber,
+          message: f.message,
+        })),
+        ...resultSast.violations.map((v) => ({
+          type: 'SAST',
+          ruleId: v.ruleId,
+          file: v.relPath,
+          line: v.lineNumber,
+          severity: v.severity,
+          message: v.message,
+        })),
+      ],
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return isOk;
+  }
+
+  const okS = runVerifySecrets({ ...options, silent: options.silent });
+  const okA = runVerifySast({ ...options, silent: options.silent });
+  return okS && okA;
 }
 
 export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
-  if (!options.silent) {
+  const isSilent = Boolean(options.silent || options.json);
+  if (!isSilent) {
     console.log(pc.bold(pc.magenta('================================================================')));
     console.log(pc.bold(pc.magenta('          AI-SDLC: SUITE COMPLETA DE QUALITY GATES Y GOBIERNO    ')));
     console.log(pc.bold(pc.magenta('================================================================')));
   }
 
   const root = options.root || process.cwd();
-  const okQuality = runVerifyQuality(options);
-  const okTrace = runVerifyTraceability({ root, silent: options.silent });
-  const okGov = runVerifyGovernance({ root, silent: options.silent });
-  const okTest = runVerifyTesting({ root, silent: options.silent });
-  const okLic = runVerifyLicenses({ root, silent: options.silent });
-  const okPdac = runVerifyPdac({ root, silent: options.silent });
-  const okSchemas = runVerifySchemas({ root, silent: options.silent });
-  const okDuplicates = runVerifyDuplicates({ root, silent: options.silent });
-  const okSecurity = runVerifySecurity({ root, silent: options.silent });
+  const okQuality = runVerifyQuality({ ...options, root, silent: isSilent, json: false });
+  const okTrace = runVerifyTraceability({ root, silent: isSilent, json: false });
+  const okGov = runVerifyGovernance({ root, silent: isSilent, json: false });
+  const okTest = runVerifyTesting({ root, silent: isSilent, json: false });
+  const okLic = runVerifyLicenses({ root, silent: isSilent, json: false });
+  const okPdac = runVerifyPdac({ root, silent: isSilent, json: false });
+  const okSchemas = runVerifySchemas({ root, silent: isSilent, json: false });
+  const okDuplicates = runVerifyDuplicates({ root, silent: isSilent, json: false });
+  const okSecurity = runVerifySecurity({ root, silent: isSilent, json: false });
 
   const allPassed =
     okQuality &&
@@ -555,6 +895,43 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
     okSchemas &&
     okDuplicates &&
     okSecurity;
+
+  if (options.json) {
+    const gatesSummary: Record<string, { success: boolean }> = {
+      quality: { success: okQuality },
+      traceability: { success: okTrace },
+      governance: { success: okGov },
+      testing: { success: okTest },
+      licenses: { success: okLic },
+      pdac: { success: okPdac },
+      schemas: { success: okSchemas },
+      duplicates: { success: okDuplicates },
+      security: { success: okSecurity },
+    };
+
+    const passedCount = Object.values(gatesSummary).filter((g) => g.success).length;
+    const failedCount = 9 - passedCount;
+    const exitCode = allPassed ? 0 : (!okSecurity ? 4 : 1);
+
+    const violations = Object.entries(gatesSummary)
+      .filter(([, g]) => !g.success)
+      .map(([name]) => ({ gate: name, message: `Gate ${name} no superó los criterios de verificación` }));
+
+    const payload: VerifyJsonPayload = {
+      gate: 'all',
+      success: allPassed,
+      exitCode,
+      summary: {
+        totalGates: 9,
+        passedGates: passedCount,
+        failedGates: failedCount,
+      },
+      gates: gatesSummary,
+      violations,
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return allPassed;
+  }
 
   if (!options.silent) {
     console.log(pc.bold(pc.magenta('================================================================')));
