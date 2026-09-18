@@ -1,0 +1,15 @@
+id: HOF-CHG-026-AGENT-NATIVE-CONFIGS
+type: handoff
+title: Handoff Canónico de Producto para agent-native-configs
+changeId: CHG-026-AGENT-NATIVE-CONFIGS
+version: 1.0.0
+createdAt: '2026-09-18T06:13:44.345Z'
+subgraph:
+  requirements:
+    - FR-026-AGENT-NATIVE-CONFIGS-001
+  useCases:
+    - UC-026-AGENT-NATIVE-CONFIGS
+citations:
+  - id: FR-026-AGENT-NATIVE-CONFIGS-001
+    digest: sha256:044b649d0b4739b026972d05af37155f0a5743d8dd915598a8839f4e6f3f2050
+    comment: Requerimiento funcional canónico asociado (Génesis CHG-026-AGENT-NATIVE-CONFIGS)

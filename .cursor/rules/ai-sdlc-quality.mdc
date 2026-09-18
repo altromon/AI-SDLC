@@ -1,0 +1,29 @@
+---
+description: Directivas de calidad de código, arquitectura, TDD y límites de complejidad
+globs: packages/**, src/**, scripts/**, tests/**
+alwaysApply: false
+---
+
+# Directrices de Calidad de Código y Arquitectura
+
+Referencia canónica: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) y [`process/10_quality_management_and_release_gates.md`](process/10_quality_management_and_release_gates.md).
+
+## 1. Umbrales de Calidad Innegociables (`quality-policy.yaml`)
+- **Complejidad Ciclomática (CC)**: $\le 10$ por función (alerta preventiva si $> 7$).
+- **Complejidad Cognitiva**: $\le 15$ por función (alerta si $> 10$).
+- **Índice de Mantenibilidad (MI)**: $\ge 50$ (mínimo objetivo $\ge 65$).
+- **Longitud de Función**: $\le 40$ líneas (alerta si $> 30$).
+- Si una función excede estos límites, descompón la lógica en funciones auxiliares cohesivas antes de finalizar la tarea.
+
+## 2. Metodología TDD y Pruebas Unitarias
+- Aplica Test-Driven Development: genera las pruebas unitarias antes o en paralelo a la lógica del componente.
+- Etiqueta las pruebas vinculadas a requerimientos con comentarios de cabecera citando el ID (`FR-*` o `SEC-REQ-*`) para habilitar la trazabilidad inversa.
+- Prohibido suprimir tipos (`any`), reglas de linter (`eslint-disable`) o tests unitarios para forzar que el pipeline pase.
+
+## 3. Política de Licencias Open Source (`license-policy.yaml`)
+- Antes de agregar cualquier dependencia en `package.json`, verifica su identificador SPDX.
+- Solo se permiten dependencias permisivas (`MIT`, `Apache-2.0`, `BSD-2/3-Clause`, `ISC`).
+- Prohibidas licencias virales (`GPL`, `AGPL`) o comerciales sin aprobación (`BSL`, `SSPL`).
+
+## 4. Salida Estructurada `--json`
+- Cualquier extensión a los comandos de CLI debe preservar la compatibilidad con el flag `--json` y suprimir códigos de escape ANSI cuando este flag esté presente.

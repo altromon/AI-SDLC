@@ -1,0 +1,26 @@
+---
+description: Directivas para edición de especificaciones SDD, artefactos ProductShape y Ciberseguridad
+globs: specs/**, templates/**
+alwaysApply: false
+---
+
+# Directrices para Producto y Especificaciones SDD
+
+Referencia canónica: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) y [`process/02_product_definition.md`](process/02_product_definition.md).
+
+## 1. Taxonomía de Identificadores y Esquemas JSON
+Todo artefacto generado o modificado debe seguir la nomenclatura canónica y satisfacer su esquema en `schemas/`:
+- Actores de Producto: `ACT-[SUFIJO]` (`schemas/product/actor.schema.json`)
+- Casos de Uso: `UC-[SUFIJO]` (`schemas/product/use-case.schema.json`)
+- Requerimientos Funcionales: `FR-[SUFIJO]-[NUM3]` (`schemas/product/requirement.schema.json`)
+- Requerimientos de Calidad: `QR-[SUFIJO]` (`schemas/product/requirement.schema.json`)
+- Reglas de Negocio: `BR-[SUFIJO]` (`schemas/product/business-rule.schema.json`)
+- Actores de Amenaza: `ACT-THREAT-[SUFIJO]` (`schemas/security/threat-actor.schema.json`)
+- Casos de Abuso: `ABUSE-[SUFIJO]` (`schemas/security/abuse-case.schema.json`)
+- Requisitos de Seguridad: `SEC-REQ-[SUFIJO]` (`schemas/security/security-req.schema.json`)
+
+## 2. Reglas del Protocolo "AI as Scribe"
+- **Estado Inicial**: Todo nuevo artefacto inicia obligatoriamente en `status: draft`. Prohibido crear artefactos directamente en `active` o `approved`.
+- **Criterios de Aceptación Gherkin**: En todo requerimiento `FR-*`, incluye un bloque ```gherkin con etiquetas `@<ID> @automated @regression` y al menos un `Scenario Outline` con tabla de datos `Examples`.
+- **Mitigaciones de Seguridad**: Todo `SEC-REQ-*` debe incluir pruebas negativas en Gherkin (`@security @mitigation`).
+- **Validación Determinista**: Ejecuta `pnpm run verify:schemas` y `pnpm run verify:duplicates` antes de presentar el borrador al revisor humano.
