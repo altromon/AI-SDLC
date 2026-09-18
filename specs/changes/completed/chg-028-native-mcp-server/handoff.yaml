@@ -1,0 +1,15 @@
+id: HOF-CHG-028-NATIVE-MCP-SERVER
+type: handoff
+title: Handoff Canónico de Producto para native-mcp-server
+changeId: CHG-028-NATIVE-MCP-SERVER
+version: 1.0.0
+createdAt: '2026-09-18T17:23:52.768Z'
+subgraph:
+  requirements:
+    - FR-028-NATIVE-MCP-SERVER-001
+  useCases:
+    - UC-028-NATIVE-MCP-SERVER
+citations:
+  - id: FR-028-NATIVE-MCP-SERVER-001
+    digest: sha256:b5654893362291dd0b29d37632e2e124b908152b86b7d75eb1a97511e1d7f7c2
+    comment: Requerimiento funcional canónico asociado (Génesis CHG-028-NATIVE-MCP-SERVER)

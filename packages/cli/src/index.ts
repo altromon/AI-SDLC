@@ -16,6 +16,7 @@ import {
 } from './commands/git.js';
 import { runInit } from './commands/init.js';
 import { runKpiPr, runKpiRelease } from './commands/kpi.js';
+import { runMcpServer } from './commands/mcp.js';
 import { runReportDashboard, runReportQuality } from './commands/report.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
@@ -570,6 +571,15 @@ program
   .action((directory, opts) => {
     const passed = runInit(directory, { dryRun: opts.dryRun, ci: opts.ci });
     process.exit(passed ? 0 : 1);
+  });
+
+// --- mcp command ---
+program
+  .command('mcp')
+  .description('Inicia el servidor Model Context Protocol (MCP) nativo de AI-SDLC (stdio)')
+  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .action(async (opts) => {
+    await runMcpServer({ root: opts.root });
   });
 
 // Handle unknown commands gracefully
