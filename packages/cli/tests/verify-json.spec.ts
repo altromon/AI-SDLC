@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import {
   runVerifyAll,
   runVerifyDuplicates,
@@ -371,5 +371,116 @@ describe('@ai-sdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () 
       expect(parsed.gates[gateName].success).toBe(true);
     }
     expect(parsed.violations).toEqual([]);
+  });
+
+  describe('Environment Variable and Format Selection Suite (FR-027-ENV-OUTPUT-JSON-001)', () => {
+    const origFormat = process.env.AISDLC_FORMAT;
+    const origOutput = process.env.AISDLC_OUTPUT;
+
+    afterEach(() => {
+      if (origFormat !== undefined) {
+        process.env.AISDLC_FORMAT = origFormat;
+      } else {
+        delete process.env.AISDLC_FORMAT;
+      }
+      if (origOutput !== undefined) {
+        process.env.AISDLC_OUTPUT = origOutput;
+      } else {
+        delete process.env.AISDLC_OUTPUT;
+      }
+    });
+
+    it('should emit JSON when AISDLC_FORMAT=json is set in environment (FR-027-ENV-OUTPUT-JSON-001)', () => {
+      process.env.AISDLC_FORMAT = 'json';
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runVerifyQuality();
+      });
+
+      expect(passed).toBe(true);
+      expect(output).not.toMatch(ANSI_REGEX);
+      const parsed = JSON.parse(output);
+      expect(parsed.gate).toBe('quality');
+      expect(parsed.success).toBe(true);
+    });
+
+    it('should emit JSON when AISDLC_OUTPUT=json is set in environment (FR-027-ENV-OUTPUT-JSON-001)', () => {
+      process.env.AISDLC_OUTPUT = 'json';
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runVerifyTraceability();
+      });
+
+      expect(passed).toBe(true);
+      expect(output).not.toMatch(ANSI_REGEX);
+      const parsed = JSON.parse(output);
+      expect(parsed.gate).toBe('traceability');
+      expect(parsed.success).toBe(true);
+    });
+
+    it('should emit JSON when options.format="json" is passed explicitly (FR-027-ENV-OUTPUT-JSON-001)', () => {
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runVerifyGovernance({ format: 'json' });
+      });
+
+      expect(passed).toBe(true);
+      expect(output).not.toMatch(ANSI_REGEX);
+      const parsed = JSON.parse(output);
+      expect(parsed.gate).toBe('governance');
+      expect(parsed.success).toBe(true);
+    });
+
+    it('should prioritize explicit json: false over AISDLC_FORMAT=json (FR-027-ENV-OUTPUT-JSON-001)', () => {
+      process.env.AISDLC_FORMAT = 'json';
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runVerifyQuality({ json: false });
+      });
+
+      expect(passed).toBe(true);
+      expect(() => JSON.parse(output)).toThrow();
+      expect(output).toContain('Release Gate APROBADO');
+    });
+
+    it('should prioritize explicit format: "text" over AISDLC_FORMAT=json (FR-027-ENV-OUTPUT-JSON-001)', () => {
+      process.env.AISDLC_FORMAT = 'json';
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runVerifyQuality({ format: 'text' });
+      });
+
+      expect(passed).toBe(true);
+      expect(() => JSON.parse(output)).toThrow();
+      expect(output).toContain('Release Gate APROBADO');
+    });
+
+    it('should emit human-readable text by default when no flags or env vars are set (FR-027-ENV-OUTPUT-JSON-001)', () => {
+      delete process.env.AISDLC_FORMAT;
+      delete process.env.AISDLC_OUTPUT;
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runVerifyQuality();
+      });
+
+      expect(passed).toBe(true);
+      expect(() => JSON.parse(output)).toThrow();
+      expect(output).toContain('Release Gate APROBADO');
+    });
+
+    it('should emit consolidated JSON for runVerifyAll when AISDLC_FORMAT=json is set (FR-027-ENV-OUTPUT-JSON-001)', () => {
+      process.env.AISDLC_FORMAT = 'json';
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runVerifyAll();
+      });
+
+      expect(passed).toBe(true);
+      expect(output).not.toMatch(ANSI_REGEX);
+      const parsed = JSON.parse(output);
+      expect(parsed.gate).toBe('all');
+      expect(parsed.summary.totalGates).toBe(9);
+      expect(parsed.violations).toEqual([]);
+    });
   });
 });

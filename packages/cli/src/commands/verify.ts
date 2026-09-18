@@ -21,6 +21,19 @@ export interface VerifyBaseOptions {
   root?: string;
   silent?: boolean;
   json?: boolean;
+  format?: string;
+}
+
+export function isJsonOutput(options: VerifyBaseOptions = {}): boolean {
+  if (options.json !== undefined) {
+    return Boolean(options.json);
+  }
+  if (options.format !== undefined) {
+    return options.format.trim().toLowerCase() === 'json';
+  }
+  const env = process.env.AISDLC_FORMAT?.trim().toLowerCase() ||
+              process.env.AISDLC_OUTPUT?.trim().toLowerCase();
+  return env === 'json';
 }
 
 export interface VerifyJsonPayload<TSummary = Record<string, unknown>, TViolation = unknown> {
@@ -43,7 +56,8 @@ export interface QualityVerifyOptions extends VerifyBaseOptions {
 
 export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  const isSilent = Boolean(options.silent || options.json);
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Quality Gate (Complejidad y Mantenibilidad)...')));
   }
@@ -58,7 +72,7 @@ export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
 
   const result = verifyQualityGate({ rootDir, policyPath: options.policy, thresholds });
 
-  if (options.json) {
+  if (useJson) {
     const violations = result.results
       .filter((r) => r.status === 'FAIL')
       .flatMap((r) =>
@@ -120,14 +134,15 @@ export interface TraceabilityVerifyOptions extends VerifyBaseOptions {}
 
 export function runVerifyTraceability(options: TraceabilityVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  const isSilent = Boolean(options.silent || options.json);
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Trazabilidad 360° (Producto -> Arquitectura -> Pruebas)...')));
   }
 
   const result = verifyTraceability({ rootDir });
 
-  if (options.json) {
+  if (useJson) {
     const payload: VerifyJsonPayload = {
       gate: 'traceability',
       success: result.success,
@@ -174,14 +189,15 @@ export interface GovernanceVerifyOptions extends VerifyBaseOptions {}
 
 export function runVerifyGovernance(options: GovernanceVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  const isSilent = Boolean(options.silent || options.json);
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Gobierno de Tareas y Clasificación de Autonomía...')));
   }
 
   const result = verifyTasksGovernance({ rootDir });
 
-  if (options.json) {
+  if (useJson) {
     const payload: VerifyJsonPayload = {
       gate: 'governance',
       success: result.success,
@@ -228,14 +244,15 @@ export interface TestingVerifyOptions extends VerifyBaseOptions {}
 
 export function runVerifyTesting(options: TestingVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  const isSilent = Boolean(options.silent || options.json);
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Cobertura de Pruebas en Requisitos y Tareas...')));
   }
 
   const result = verifyTestingCoverage({ rootDir });
 
-  if (options.json) {
+  if (useJson) {
     const reqViolations = result.requirements
       .filter((r) => r.status !== 'VERIFICADO_CON_PRUEBA')
       .map((r) => ({
@@ -308,7 +325,8 @@ export interface LicenseVerifyOptions extends VerifyBaseOptions {
 
 export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  const isSilent = Boolean(options.silent || options.json);
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Cumplimiento de Licencias Open Source (SCA)...')));
   }
@@ -331,7 +349,7 @@ export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
     noticesPath,
   });
 
-  if (options.json) {
+  if (useJson) {
     const payload: VerifyJsonPayload = {
       gate: 'licenses',
       success: result.success,
@@ -387,14 +405,15 @@ export interface PdacVerifyOptions extends VerifyBaseOptions {}
 
 export function runVerifyPdac(options: PdacVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  const isSilent = Boolean(options.silent || options.json);
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Grafo PDaC y Deriva Criptográfica (SHA-256)...')));
   }
 
   const result = verifyPdacGraph({ rootDir });
 
-  if (options.json) {
+  if (useJson) {
     const payload: VerifyJsonPayload = {
       gate: 'pdac',
       success: result.success,
@@ -443,14 +462,15 @@ export interface SchemasVerifyOptions extends VerifyBaseOptions {
 
 export function runVerifySchemas(options: SchemasVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  const isSilent = Boolean(options.silent || options.json);
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Conformidad con Esquemas JSON (Draft 2020-12)...')));
   }
 
   const result = verifyArtifactsSchemas({ rootDir, targetPath: options.path });
 
-  if (options.json) {
+  if (useJson) {
     const payload: VerifyJsonPayload = {
       gate: 'schemas',
       success: result.success,
@@ -499,7 +519,8 @@ export interface FrictionVerifyOptions extends VerifyBaseOptions {
 
 export function runVerifyFriction(options: FrictionVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  const isSilent = Boolean(options.silent || options.json);
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🛡️  [AI-SDLC] Verificando Fricción Progresiva y Anti-Bypass Guardrails...')));
   }
@@ -510,7 +531,7 @@ export function runVerifyFriction(options: FrictionVerifyOptions = {}): boolean 
     diffFiles: options.diffFiles,
   });
 
-  if (options.json) {
+  if (useJson) {
     const violations = [
       ...result.bypassedRules.map((rule) => ({ type: 'ANTI_BYPASS', message: rule })),
       ...result.errors.map((err) => ({ type: 'PROFILE_ERROR', message: err })),
@@ -566,7 +587,8 @@ export function runVerifyDuplicates(options: DuplicatesVerifyOptions = {}): bool
   const rootDir = options.root || process.cwd();
   const similarityThreshold =
     options.similarity !== undefined ? Number(options.similarity) : undefined;
-  const isSilent = Boolean(options.silent || options.json);
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
 
   if (!isSilent) {
     console.log(
@@ -583,7 +605,7 @@ export function runVerifyDuplicates(options: DuplicatesVerifyOptions = {}): bool
     titleSimilarityThreshold: similarityThreshold,
   });
 
-  if (options.json) {
+  if (useJson) {
     const payload: VerifyJsonPayload = {
       gate: 'duplicates',
       success: result.success,
@@ -648,7 +670,8 @@ export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean 
   const rootDir = options.root || process.cwd();
   const entropyThreshold =
     options.entropy !== undefined ? Number(options.entropy) : undefined;
-  const isSilent = Boolean(options.silent || options.json);
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
 
   if (!isSilent) {
     console.log(
@@ -668,7 +691,7 @@ export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean 
     entropyThreshold,
   });
 
-  if (options.json) {
+  if (useJson) {
     const payload: VerifyJsonPayload = {
       gate: 'secrets',
       success: result.success,
@@ -728,7 +751,8 @@ export interface SastVerifyCliOptions extends VerifyBaseOptions {
 
 export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  const isSilent = Boolean(options.silent || options.json);
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
 
   if (!isSilent) {
     console.log(
@@ -746,7 +770,7 @@ export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
     minSeverity: options.minSeverity as any,
   });
 
-  if (options.json) {
+  if (useJson) {
     const payload: VerifyJsonPayload = {
       gate: 'sast',
       success: result.success,
@@ -806,6 +830,7 @@ export interface SecurityVerifyCliOptions extends VerifyBaseOptions {
 
 export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
+  const useJson = isJsonOutput(options);
   const entropyThreshold =
     options.entropy !== undefined ? Number(options.entropy) : undefined;
 
@@ -827,7 +852,7 @@ export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boole
   const okSast = resultSast.success;
   const isOk = okSecrets && okSast;
 
-  if (options.json) {
+  if (useJson) {
     const exitCode = isOk ? 0 : (!okSecrets ? 4 : 1);
     const payload: VerifyJsonPayload = {
       gate: 'security',
@@ -867,7 +892,8 @@ export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boole
 }
 
 export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
-  const isSilent = Boolean(options.silent || options.json);
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
     console.log(pc.bold(pc.magenta('================================================================')));
     console.log(pc.bold(pc.magenta('          AI-SDLC: SUITE COMPLETA DE QUALITY GATES Y GOBIERNO    ')));
@@ -896,7 +922,7 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
     okDuplicates &&
     okSecurity;
 
-  if (options.json) {
+  if (useJson) {
     const gatesSummary: Record<string, { success: boolean }> = {
       quality: { success: okQuality },
       traceability: { success: okTrace },
