@@ -1,0 +1,15 @@
+id: HOF-CHG-027-ENV-OUTPUT-JSON
+type: handoff
+title: Handoff Canónico de Producto para env-output-json
+changeId: CHG-027-ENV-OUTPUT-JSON
+version: 1.0.0
+createdAt: '2026-09-18T06:08:57.595Z'
+subgraph:
+  requirements:
+    - FR-027-ENV-OUTPUT-JSON-001
+  useCases:
+    - UC-027-ENV-OUTPUT-JSON
+citations:
+  - id: FR-027-ENV-OUTPUT-JSON-001
+    digest: sha256:55129ac473a0dc915ca43c0c933e67e9006d9af8ef2067c0cb4235797720df41
+    comment: Requerimiento funcional canónico asociado (Génesis CHG-027-ENV-OUTPUT-JSON)
