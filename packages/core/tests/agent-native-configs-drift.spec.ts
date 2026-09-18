@@ -102,6 +102,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(content).toContain('agent-product-analyst');
     expect(content).toContain('agent-threat-modeler');
     expect(content).toContain('agent-developer');
+    expect(content).toContain('agent-expert-user');
   });
 
   it('verifies Cursor product rules declare the ProductShape taxonomy and draft status', () => {

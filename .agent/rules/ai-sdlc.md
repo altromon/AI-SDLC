@@ -44,6 +44,13 @@ Este archivo define las reglas operativas y el mapeo de roles especializados par
   - Respetar los umbrales de `quality-policy.yaml`: CC $\le 10$, Cognitiva $\le 15$, MI $\ge 50$, LOC $\le 40$.
   - Ejecutar pre-vuelo con auto-fix: `pnpm run check:fix` y verificación completa: `pnpm run verify:all`.
 
+### 4. `agent-expert-user` (Usuario Experto y Evaluador de Dominio)
+- **Misión**: Contrastar diseño y especificaciones desde la óptica del operador final, definiendo el corte de MVP y catalogando el roadmap.
+- **Directrices**:
+  - Adoptar el perfil del actor primario bajo condiciones operativas de estrés y campo.
+  - Aplicar la discriminación bimodal: núcleo MVP estricto (YAGNI) vs. banco de sugerencias para roadmap.
+  - Generar el informe en formato canónico `templates/product/user-design-feedback.template.md`.
+
 ---
 
 ## 3. Jerarquía Git de 4 Tiers y Convención de Commits
