@@ -298,3 +298,112 @@ Para evitar que las configuraciones de integración discrepen con el tiempo de l
 2. Los 5 Mandamientos Inquebrantables estén presentes de forma fidedigna y sin desviaciones semánticas.
 3. Se citen explícitamente `license-policy.yaml`, los comandos de pre-vuelo (`aisdlc check --fix` / `pnpm run verify:all`) y la jerarquía de 4 tiers.
 
+---
+
+## 7. Servidor Model Context Protocol (MCP) Nativo (`@ai-sdlc/mcp` / `aisdlc mcp`)
+
+Para permitir que personas y agentes de IA operen sobre el ciclo de vida AI-SDLC directamente desde sus entornos de desarrollo integrados (IDEs como Cursor, Claude Desktop, Google Antigravity, VS Code y Copilot), el framework incorpora un **servidor nativo Model Context Protocol (MCP)** implementado en el paquete `@ai-sdlc/mcp` y ejecutable mediante el comando `aisdlc mcp` (o `npx @ai-sdlc/mcp`).
+
+### 1. Arquitectura y Mecanismo de Transporte
+- **Transporte Estándar**: Opera sobre `stdio` (entrada/salida estándar) utilizando el SDK oficial `@modelcontextprotocol/sdk`.
+- **Validación Estricta con Zod**: Cada herramienta expuesta cuenta con un esquema de entrada fuertemente tipado y validado en tiempo de ejecución.
+- **Enclave de Seguridad**: Diseñado bajo el enclave `SEC-ENC-DMZ` con sanitización de rutas para prevenir escalada de directorios (*path traversal*).
+
+### 2. Catálogo de Herramientas MCP Expuestas (20 Tools)
+
+#### A. Comandos Resumen / Compuestos (High-Level Workflows)
+| Herramienta | Parámetros de Entrada | Descripción / Efecto |
+| :--- | :--- | :--- |
+| `new` | `targetDir` (opcional), `template` (opcional), `ci` (opcional), `force` (opcional) | Inicializa un nuevo proyecto o arranca AI-SDLC en un repositorio existente, configurando carpetas, esquemas, políticas de calidad y plantillas de CI (`github`, `gitlab`, `azure`, `bitbucket`). |
+| `verify` | `rootDir` (opcional), `summaryOnly` (opcional) | Ejecuta simultáneamente la suite completa de los 9 Quality Gates deterministas de AI-SDLC (`quality`, `traceability`, `governance`, `licenses`, `schemas`, `duplicates`, `security`, `testing`, `pdac`). |
+| `report` | `rootDir` (opcional), `outputDir` (opcional) | Genera simultáneamente el panel interactivo HTML (`reports/dashboard.html`) y el informe consolidado de calidad en Markdown (`reports/QUALITY_REPORT.md`). |
+
+#### B. Ciclo de Entrega SDD (Spec-Driven Development)
+| Herramienta | Parámetros de Entrada | Descripción / Efecto |
+| :--- | :--- | :--- |
+| `sdd_init` | `rootDir` (opcional), `framework` (opcional) | Inicializa la infraestructura y directorios SDD en el proyecto. |
+| `sdd_new` | `name` (requerido), `rootDir` (opcional), `from` (opcional), `framework` (opcional), `profile` (opcional) | Genera el andamiaje completo para un cambio SDD (`proposal.md`, `spec.md`, `design.md`, `tasks.md`) y su sidecar PDaC. |
+| `sdd_deposit` | `change` (requerido), `rootDir` (opcional), `framework` (opcional), `title` (opcional), `requirements` (opcional), `useCases` (opcional) | Deposita el sidecar PDaC Handoff (`handoff.yaml`) para un cambio específico. |
+| `sdd_integrate` | `change` (opcional), `auto` (opcional), `rootDir` (opcional), `author` (opcional) | Consolida un cambio completado en la especificación canónica y lo archiva en `specs/changes/completed/`. |
+
+#### C. Quality Gates Deterministas Individuales
+| Herramienta | Parámetros de Entrada | Descripción / Efecto |
+| :--- | :--- | :--- |
+| `verify_quality` | `rootDir` (opcional), `srcDir` (opcional) | Audita complejidad ciclomática ($\le 10$) e índice de mantenibilidad ($\ge 50$). |
+| `verify_traceability` | `rootDir` (opcional) | Audita la matriz RTM 360° (Producto $\rightarrow$ Arquitectura $\rightarrow$ Pruebas). |
+| `verify_governance` | `rootDir` (opcional) | Audita el cumplimiento de modos de autonomía en tareas (`tasks.md`). |
+| `verify_licenses` | `rootDir` (opcional), `allowlistOnly` (opcional) | Audita licencias de dependencias frente a `license-policy.yaml`. |
+| `verify_schemas` | `rootDir` (opcional), `schemaDir` (opcional) | Valida artefactos Markdown y YAML frontmatter contra esquemas JSON canónicos. |
+| `verify_duplicates` | `rootDir` (opcional) | Detecta colisiones y duplicidades léxicas en requerimientos de producto. |
+| `verify_security` | `rootDir` (opcional), `scanSecrets` (opcional), `scanSast` (opcional) | Ejecuta escaneo determinista SAST y detección de fugas de secretos (Gitleaks). |
+| `verify_testing` | `rootDir` (opcional) | Audita la cobertura de requerimientos mediante pruebas automatizadas. |
+| `verify_pdac` | `rootDir` (opcional) | Audita la coherencia criptográfica de sidecars PDaC frente a la línea base. |
+
+#### D. Reportes, KPIs y Git
+| Herramienta | Parámetros de Entrada | Descripción / Efecto |
+| :--- | :--- | :--- |
+| `report_markdown` | `rootDir` (opcional), `outputPath` (opcional) | Genera el informe formal de calidad en Markdown (`reports/QUALITY_REPORT.md`). |
+| `report_dashboard` | `rootDir` (opcional), `outputPath` (opcional), `title` (opcional) | Genera el dashboard visual HTML interactivo autocontenido (`reports/dashboard.html`). |
+| `kpi_pr` | `baseBranch` (opcional), `headBranch` (opcional), `rootDir` (opcional) | Evalúa y genera la tabla Markdown agregada de KPIs de desarrollo para Pull Requests. |
+| `git_detect_author` | `commitSha` (opcional), `rootDir` (opcional) | Analiza los trailers del commit para clasificar la autoría (`human`, `agent`, `hybrid`). |
+
+### 3. Recursos Canónicos Expuestos (`aisdlc://`)
+
+| URI del Recurso | Tipo MIME | Contenido Proporcionado |
+| :--- | :--- | :--- |
+| `aisdlc://policies/quality` | `application/yaml` | Contenido de `quality-policy.yaml` (umbrales de complejidad, cobertura y calidad). |
+| `aisdlc://policies/licenses` | `application/yaml` | Contenido de `license-policy.yaml` (licencias permitidas, restringidas y bloqueadas). |
+| `aisdlc://changes/active` | `application/json` | Lista estructurada de cambios SDD activos en `specs/changes/active/` con su estado de tareas. |
+| `aisdlc://changes/completed` | `application/json` | Historial de cambios SDD consolidados y archivados en `specs/changes/completed/`. |
+| `aisdlc://status/summary` | `application/json` | Resumen consolidado del estado del repositorio (gates, cambios activos, métricas). |
+
+### 4. Guías de Configuración para Entornos IDE y Agentes
+
+#### A. Cursor (`.cursor/mcp.json`)
+```json
+{
+  "mcpServers": {
+    "ai-sdlc": {
+      "command": "npx",
+      "args": ["@ai-sdlc/mcp"]
+    }
+  }
+}
+```
+
+#### B. Claude Desktop (`claude_desktop_config.json`)
+```json
+{
+  "mcpServers": {
+    "ai-sdlc": {
+      "command": "node",
+      "args": ["/ruta/absoluta/a/packages/mcp/dist/cli.js"]
+    }
+  }
+}
+```
+
+#### C. Google Antigravity / Gemini CLI (`antigravity.mcp.json`)
+```json
+{
+  "mcpServers": {
+    "ai-sdlc": {
+      "command": "aisdlc",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+#### D. VS Code (`.vscode/mcp.json`)
+```json
+{
+  "servers": {
+    "ai-sdlc": {
+      "command": "npx",
+      "args": ["@ai-sdlc/mcp"]
+    }
+  }
+}
+```
+

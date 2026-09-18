@@ -1,11 +1,11 @@
 {
-  "name": "@ai-sdlc/cli",
+  "name": "@ai-sdlc/mcp",
   "version": "1.0.0",
-  "description": "Command line interface for AI-SDLC quality gates, governance, and scaffolding",
+  "description": "Model Context Protocol (MCP) native server for AI-SDLC tools, resources, and governance",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "aisdlc": "./bin/aisdlc.js"
+    "aisdlc-mcp": "./bin/aisdlc-mcp.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -24,9 +24,8 @@
   },
   "dependencies": {
     "@ai-sdlc/core": "workspace:*",
-    "@ai-sdlc/mcp": "workspace:*",
-    "commander": "^13.1.0",
-    "picocolors": "^1.1.1"
+    "@modelcontextprotocol/sdk": "^1.6.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",

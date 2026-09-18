@@ -1,8 +1,8 @@
 # 📜 Third-Party Software Notices and Information
 
 > **Proyecto:** AI-SDLC
-> **Fecha:** 2026-09-17
-> **Total Componentes:** 409
+> **Fecha:** 2026-09-18
+> **Total Componentes:** 485
 
 Este documento contiene los avisos de copyright y términos de licencia aplicables a los componentes de terceros utilizados en este proyecto.
 
@@ -46,6 +46,7 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`@eslint/object-schema`** | `2.1.7` | `Apache-2.0` |
 | **`@eslint/plugin-kit`** | `0.4.1` | `Apache-2.0` |
 | **`@gar/promise-retry`** | `1.0.3` | `MIT` |
+| **`@hono/node-server`** | `2.1.1` | `MIT` |
 | **`@humanfs/core`** | `0.19.2` | `Apache-2.0` |
 | **`@humanfs/node`** | `0.16.8` | `Apache-2.0` |
 | **`@humanfs/types`** | `0.15.0` | `Apache-2.0` |
@@ -66,6 +67,7 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`@jridgewell/trace-mapping`** | `0.3.31` | `MIT` |
 | **`@manypkg/find-root`** | `1.1.0` | `MIT` |
 | **`@manypkg/get-packages`** | `1.1.3` | `MIT` |
+| **`@modelcontextprotocol/sdk`** | `1.30.0` | `MIT` |
 | **`@nodelib/fs.scandir`** | `2.1.5` | `MIT` |
 | **`@nodelib/fs.stat`** | `2.0.5` | `MIT` |
 | **`@nodelib/fs.walk`** | `1.2.8` | `MIT` |
@@ -116,10 +118,13 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`@vitest/utils`** | `2.1.9` | `MIT` |
 | **`abbrev`** | `2.0.0` | `ISC` |
 | **`abbrev`** | `4.0.0` | `ISC` |
+| **`accepts`** | `2.0.0` | `MIT` |
 | **`acorn`** | `8.18.0` | `MIT` |
 | **`acorn-jsx`** | `5.3.2` | `MIT` |
 | **`agent-base`** | `7.1.4` | `MIT` |
 | **`ajv`** | `6.15.0` | `MIT` |
+| **`ajv`** | `8.20.0` | `MIT` |
+| **`ajv-formats`** | `3.0.1` | `MIT` |
 | **`ansi-colors`** | `4.1.3` | `MIT` |
 | **`ansi-regex`** | `5.0.1` | `MIT` |
 | **`ansi-styles`** | `4.3.0` | `MIT` |
@@ -133,12 +138,16 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`balanced-match`** | `4.0.4` | `MIT` |
 | **`better-path-resolve`** | `1.0.0` | `MIT` |
 | **`bin-links`** | `6.0.2` | `ISC` |
+| **`body-parser`** | `2.3.0` | `MIT` |
 | **`brace-expansion`** | `1.1.18` | `MIT` |
 | **`brace-expansion`** | `5.0.12` | `MIT` |
 | **`braces`** | `3.0.3` | `MIT` |
 | **`bundle-require`** | `5.1.0` | `MIT` |
+| **`bytes`** | `3.1.2` | `MIT` |
 | **`cac`** | `6.7.14` | `MIT` |
 | **`cacache`** | `20.0.4` | `ISC` |
+| **`call-bind-apply-helpers`** | `1.0.2` | `MIT` |
+| **`call-bound`** | `1.0.4` | `MIT` |
 | **`callsites`** | `3.1.0` | `MIT` |
 | **`chai`** | `5.3.3` | `MIT` |
 | **`chalk`** | `4.1.2` | `MIT` |
@@ -157,21 +166,34 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`concat-map`** | `0.0.1` | `MIT` |
 | **`confbox`** | `0.1.8` | `MIT` |
 | **`consola`** | `3.4.2` | `MIT` |
+| **`content-disposition`** | `1.1.0` | `MIT` |
+| **`content-type`** | `1.0.5` | `MIT` |
 | **`content-type`** | `2.1.0` | `MIT` |
+| **`cookie`** | `0.7.2` | `MIT` |
+| **`cookie-signature`** | `1.2.2` | `MIT` |
+| **`cors`** | `2.8.6` | `MIT` |
 | **`cross-spawn`** | `7.0.6` | `MIT` |
 | **`cssesc`** | `3.0.0` | `MIT` |
 | **`cytoscape`** | `3.34.3` | `MIT` |
 | **`debug`** | `4.4.3` | `MIT` |
 | **`deep-eql`** | `5.0.2` | `MIT` |
 | **`deep-is`** | `0.1.4` | `MIT` |
+| **`depd`** | `2.0.0` | `MIT` |
 | **`detect-indent`** | `6.1.0` | `MIT` |
 | **`dir-glob`** | `3.0.1` | `MIT` |
+| **`dunder-proto`** | `1.0.1` | `MIT` |
+| **`ee-first`** | `1.1.1` | `MIT` |
+| **`encodeurl`** | `2.0.0` | `MIT` |
 | **`enquirer`** | `2.4.1` | `MIT` |
 | **`env-paths`** | `2.2.1` | `MIT` |
+| **`es-define-property`** | `1.0.1` | `MIT` |
+| **`es-errors`** | `1.3.0` | `MIT` |
 | **`es-module-lexer`** | `1.7.0` | `MIT` |
+| **`es-object-atoms`** | `1.1.2` | `MIT` |
 | **`esbuild`** | `0.28.2` | `MIT` |
 | **`esbuild`** | `0.21.5` | `MIT` |
 | **`esbuild`** | `0.27.7` | `MIT` |
+| **`escape-html`** | `1.0.3` | `MIT` |
 | **`escape-string-regexp`** | `2.0.0` | `MIT` |
 | **`escape-string-regexp`** | `4.0.0` | `MIT` |
 | **`eslint`** | `9.39.5` | `MIT` |
@@ -185,35 +207,52 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`estraverse`** | `5.3.0` | `BSD-2-Clause` |
 | **`estree-walker`** | `3.0.3` | `MIT` |
 | **`esutils`** | `2.0.3` | `BSD-2-Clause` |
+| **`etag`** | `1.8.1` | `MIT` |
+| **`eventsource`** | `3.0.7` | `MIT` |
+| **`eventsource-parser`** | `3.1.1` | `MIT` |
 | **`expect`** | `30.5.1` | `MIT` |
 | **`expect-type`** | `1.4.0` | `Apache-2.0` |
 | **`exponential-backoff`** | `3.1.3` | `Apache-2.0` |
+| **`express`** | `5.2.1` | `MIT` |
+| **`express-rate-limit`** | `8.7.0` | `MIT` |
 | **`extendable-error`** | `0.1.7` | `MIT` |
 | **`fast-deep-equal`** | `3.1.3` | `MIT` |
 | **`fast-glob`** | `3.3.3` | `MIT` |
 | **`fast-json-stable-stringify`** | `2.1.0` | `MIT` |
 | **`fast-levenshtein`** | `2.0.6` | `MIT` |
+| **`fast-uri`** | `3.1.8` | `BSD-3-Clause` |
 | **`fastq`** | `1.20.3` | `ISC` |
 | **`fdir`** | `6.5.0` | `MIT` |
 | **`file-entry-cache`** | `8.0.0` | `MIT` |
 | **`fill-range`** | `7.1.1` | `MIT` |
+| **`finalhandler`** | `2.1.1` | `MIT` |
 | **`find-up`** | `4.1.0` | `MIT` |
 | **`find-up`** | `5.0.0` | `MIT` |
 | **`fix-dts-default-cjs-exports`** | `1.0.1` | `MIT` |
 | **`flat-cache`** | `4.0.1` | `MIT` |
 | **`flatted`** | `3.4.4` | `ISC` |
+| **`forwarded`** | `0.2.0` | `MIT` |
+| **`fresh`** | `2.0.0` | `MIT` |
 | **`fs-extra`** | `7.0.1` | `MIT` |
 | **`fs-extra`** | `8.1.0` | `MIT` |
 | **`fs-minipass`** | `3.0.3` | `ISC` |
+| **`function-bind`** | `1.1.2` | `MIT` |
+| **`get-intrinsic`** | `1.3.0` | `MIT` |
+| **`get-proto`** | `1.0.1` | `MIT` |
 | **`glob`** | `13.0.6` | `BlueOak-1.0.0` |
 | **`glob-parent`** | `5.1.2` | `ISC` |
 | **`glob-parent`** | `6.0.2` | `ISC` |
 | **`globals`** | `14.0.0` | `MIT` |
 | **`globby`** | `11.1.0` | `MIT` |
+| **`gopd`** | `1.2.0` | `MIT` |
 | **`graceful-fs`** | `4.2.11` | `ISC` |
 | **`has-flag`** | `4.0.0` | `MIT` |
+| **`has-symbols`** | `1.1.0` | `MIT` |
+| **`hasown`** | `2.0.4` | `MIT` |
+| **`hono`** | `4.13.8` | `MIT` |
 | **`hosted-git-info`** | `9.0.3` | `ISC` |
 | **`http-cache-semantics`** | `4.2.0` | `BSD-2-Clause` |
+| **`http-errors`** | `2.0.1` | `MIT` |
 | **`http-proxy-agent`** | `7.0.2` | `MIT` |
 | **`https-proxy-agent`** | `7.0.6` | `MIT` |
 | **`human-id`** | `4.2.1` | `MIT` |
@@ -222,11 +261,14 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`ignore-walk`** | `8.0.0` | `ISC` |
 | **`import-fresh`** | `3.3.1` | `MIT` |
 | **`imurmurhash`** | `0.1.4` | `MIT` |
+| **`inherits`** | `2.0.4` | `ISC` |
 | **`ini`** | `6.0.0` | `ISC` |
 | **`ip-address`** | `10.7.2` | `MIT` |
+| **`ipaddr.js`** | `1.9.1` | `MIT` |
 | **`is-extglob`** | `2.1.1` | `MIT` |
 | **`is-glob`** | `4.0.3` | `MIT` |
 | **`is-number`** | `7.0.0` | `MIT` |
+| **`is-promise`** | `4.0.0` | `MIT` |
 | **`is-subdir`** | `1.2.0` | `MIT` |
 | **`is-windows`** | `1.0.2` | `MIT` |
 | **`isexe`** | `2.0.0` | `ISC` |
@@ -237,6 +279,7 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`jest-mock`** | `30.5.1` | `MIT` |
 | **`jest-regex-util`** | `30.5.0` | `MIT` |
 | **`jest-util`** | `30.5.1` | `MIT` |
+| **`jose`** | `6.2.12` | `MIT` |
 | **`joycon`** | `3.1.1` | `MIT` |
 | **`js-tokens`** | `4.0.0` | `MIT` |
 | **`js-yaml`** | `3.15.2` | `MIT` |
@@ -244,6 +287,8 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`json-buffer`** | `3.0.1` | `MIT` |
 | **`json-parse-even-better-errors`** | `5.0.0` | `MIT` |
 | **`json-schema-traverse`** | `0.4.1` | `MIT` |
+| **`json-schema-traverse`** | `1.0.0` | `MIT` |
+| **`json-schema-typed`** | `8.0.2` | `BSD-2-Clause` |
 | **`json-stable-stringify-without-jsonify`** | `1.0.1` | `MIT` |
 | **`json-stringify-nice`** | `1.1.4` | `ISC` |
 | **`jsonfile`** | `4.0.0` | `MIT` |
@@ -265,8 +310,13 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`lru-cache`** | `11.5.2` | `BlueOak-1.0.0` |
 | **`magic-string`** | `0.30.21` | `MIT` |
 | **`make-fetch-happen`** | `15.0.6` | `ISC` |
+| **`math-intrinsics`** | `1.1.0` | `MIT` |
+| **`media-typer`** | `1.1.1` | `MIT` |
+| **`merge-descriptors`** | `2.0.0` | `MIT` |
 | **`merge2`** | `1.4.1` | `MIT` |
 | **`micromatch`** | `4.0.8` | `MIT` |
+| **`mime-db`** | `1.54.0` | `MIT` |
+| **`mime-types`** | `3.0.2` | `MIT` |
 | **`minimatch`** | `10.2.6` | `BlueOak-1.0.0` |
 | **`minimatch`** | `3.1.5` | `ISC` |
 | **`minipass`** | `3.3.6` | `ISC` |
@@ -296,6 +346,9 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`npm-pick-manifest`** | `11.0.3` | `ISC` |
 | **`npm-registry-fetch`** | `19.1.1` | `ISC` |
 | **`object-assign`** | `4.1.1` | `MIT` |
+| **`object-inspect`** | `1.13.4` | `MIT` |
+| **`on-finished`** | `2.4.1` | `MIT` |
+| **`once`** | `1.4.0` | `ISC` |
 | **`optionator`** | `0.9.4` | `MIT` |
 | **`outdent`** | `0.5.0` | `MIT` |
 | **`p-filter`** | `2.1.0` | `MIT` |
@@ -310,10 +363,12 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`pacote`** | `21.5.1` | `ISC` |
 | **`parent-module`** | `1.0.1` | `MIT` |
 | **`parse-conflict-json`** | `5.0.1` | `ISC` |
+| **`parseurl`** | `1.3.3` | `MIT` |
 | **`path-browserify`** | `1.0.1` | `MIT` |
 | **`path-exists`** | `4.0.0` | `MIT` |
 | **`path-key`** | `3.1.1` | `MIT` |
 | **`path-scurry`** | `2.0.2` | `BlueOak-1.0.0` |
+| **`path-to-regexp`** | `8.4.2` | `MIT` |
 | **`path-type`** | `4.0.0` | `MIT` |
 | **`pathe`** | `1.1.2` | `MIT` |
 | **`pathe`** | `2.0.3` | `MIT` |
@@ -323,6 +378,7 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`picomatch`** | `2.3.2` | `MIT` |
 | **`pify`** | `4.0.1` | `MIT` |
 | **`pirates`** | `4.0.7` | `MIT` |
+| **`pkce-challenge`** | `5.0.1` | `MIT` |
 | **`pkg-types`** | `1.3.1` | `MIT` |
 | **`postcss`** | `8.5.28` | `MIT` |
 | **`postcss-load-config`** | `6.0.1` | `MIT` |
@@ -335,23 +391,36 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`proggy`** | `4.0.0` | `ISC` |
 | **`promise-all-reject-late`** | `1.0.1` | `ISC` |
 | **`promise-call-limit`** | `3.0.2` | `ISC` |
+| **`proxy-addr`** | `2.0.8` | `MIT` |
 | **`punycode`** | `2.3.1` | `MIT` |
+| **`qs`** | `6.16.0` | `BSD-3-Clause` |
 | **`quansync`** | `0.2.11` | `MIT` |
 | **`queue-microtask`** | `1.2.3` | `MIT` |
+| **`range-parser`** | `1.3.0` | `MIT` |
+| **`raw-body`** | `3.0.2` | `MIT` |
 | **`react-is`** | `18.3.1` | `MIT` |
 | **`react-is`** | `19.3.0` | `MIT` |
 | **`read-cmd-shim`** | `6.0.0` | `ISC` |
 | **`read-yaml-file`** | `1.1.0` | `MIT` |
 | **`readdirp`** | `4.1.2` | `MIT` |
+| **`require-from-string`** | `2.0.2` | `MIT` |
 | **`resolve-from`** | `4.0.0` | `MIT` |
 | **`resolve-from`** | `5.0.0` | `MIT` |
 | **`reusify`** | `1.1.0` | `MIT` |
 | **`rollup`** | `4.63.2` | `MIT` |
+| **`router`** | `2.2.0` | `MIT` |
 | **`run-parallel`** | `1.2.0` | `MIT` |
 | **`safer-buffer`** | `2.1.2` | `MIT` |
 | **`semver`** | `7.8.5` | `ISC` |
+| **`send`** | `1.2.1` | `MIT` |
+| **`serve-static`** | `2.2.1` | `MIT` |
+| **`setprototypeof`** | `1.2.0` | `ISC` |
 | **`shebang-command`** | `2.0.0` | `MIT` |
 | **`shebang-regex`** | `3.0.0` | `MIT` |
+| **`side-channel`** | `1.1.1` | `MIT` |
+| **`side-channel-list`** | `1.0.1` | `MIT` |
+| **`side-channel-map`** | `1.0.1` | `MIT` |
+| **`side-channel-weakmap`** | `1.0.2` | `MIT` |
 | **`siginfo`** | `2.0.0` | `ISC` |
 | **`signal-exit`** | `4.1.0` | `ISC` |
 | **`sigstore`** | `4.1.1` | `Apache-2.0` |
@@ -374,6 +443,7 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`ssri`** | `13.0.1` | `ISC` |
 | **`stack-utils`** | `2.0.6` | `MIT` |
 | **`stackback`** | `0.0.2` | `MIT` |
+| **`statuses`** | `2.0.2` | `MIT` |
 | **`std-env`** | `3.10.0` | `MIT` |
 | **`strip-ansi`** | `6.0.1` | `MIT` |
 | **`strip-bom`** | `3.0.0` | `MIT` |
@@ -391,6 +461,7 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`tinyrainbow`** | `1.2.0` | `MIT` |
 | **`tinyspy`** | `3.0.2` | `MIT` |
 | **`to-regex-range`** | `5.0.1` | `MIT` |
+| **`toidentifier`** | `1.0.1` | `MIT` |
 | **`tree-kill`** | `1.2.2` | `MIT` |
 | **`treeify`** | `1.1.0` | `MIT` |
 | **`treeverse`** | `3.0.0` | `ISC` |
@@ -400,14 +471,17 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`tsx`** | `4.23.13` | `MIT` |
 | **`tuf-js`** | `4.1.0` | `MIT` |
 | **`type-check`** | `0.4.0` | `MIT` |
+| **`type-is`** | `2.1.0` | `MIT` |
 | **`typescript`** | `5.9.3` | `Apache-2.0` |
 | **`ufo`** | `1.6.4` | `MIT` |
 | **`undici`** | `6.28.1` | `MIT` |
 | **`undici-types`** | `6.21.0` | `MIT` |
 | **`universalify`** | `0.1.2` | `MIT` |
+| **`unpipe`** | `1.0.0` | `MIT` |
 | **`uri-js`** | `4.4.1` | `BSD-2-Clause` |
 | **`util-deprecate`** | `1.0.2` | `MIT` |
 | **`validate-npm-package-name`** | `7.0.2` | `ISC` |
+| **`vary`** | `1.1.2` | `MIT` |
 | **`vite`** | `5.4.21` | `MIT` |
 | **`vite-node`** | `2.1.9` | `MIT` |
 | **`vitest`** | `2.1.9` | `MIT` |
@@ -416,11 +490,13 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`which`** | `6.0.1` | `ISC` |
 | **`why-is-node-running`** | `2.3.0` | `MIT` |
 | **`word-wrap`** | `1.2.5` | `MIT` |
+| **`wrappy`** | `1.0.2` | `ISC` |
 | **`write-file-atomic`** | `7.0.1` | `ISC` |
 | **`yallist`** | `4.0.0` | `ISC` |
 | **`yallist`** | `5.0.0` | `BlueOak-1.0.0` |
 | **`yocto-queue`** | `0.1.0` | `MIT` |
 | **`zod`** | `3.25.76` | `MIT` |
+| **`zod-to-json-schema`** | `3.25.2` | `ISC` |
 
 ---
 
@@ -919,6 +995,34 @@ LIABILITY, W
 ... (texto truncado)
 ```
 
+### @hono/node-server@2.1.1
+- **Licencia:** `MIT`
+- **Autor:** Yusuke Wada <yusuke@kamawada.com> (https://github.com/yusukebe)
+- **Repositorio:** git+https://github.com/honojs/node-server.git
+
+```
+MIT License
+
+Copyright (c) 2022 - present, Yusuke Wada and Hono contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, A
+... (texto truncado)
+```
+
 ### @humanfs/core@0.19.2
 - **Licencia:** `Apache-2.0`
 - **Autor:** Nicholas C. Zakas
@@ -1409,6 +1513,35 @@ OUT OF O
 
 ### @manypkg/get-packages@1.1.3
 - **Licencia:** `MIT`
+
+### @modelcontextprotocol/sdk@1.30.0
+- **Licencia:** `MIT`
+- **Autor:** Anthropic, PBC (https://anthropic.com)
+- **Repositorio:** git+https://github.com/modelcontextprotocol/typescript-sdk.git
+
+```
+MIT License
+
+Copyright (c) 2024 Anthropic, PBC
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
+```
 
 ### @nodelib/fs.scandir@2.1.5
 - **Licencia:** `MIT`
@@ -2705,6 +2838,35 @@ Permission i
 ... (texto truncado)
 ```
 
+### accepts@2.0.0
+- **Licencia:** `MIT`
+- **Repositorio:** jshttp/accepts
+
+```
+(The MIT License)
+
+Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
+Copyright (c) 2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER
+... (texto truncado)
+```
+
 ### acorn@8.18.0
 - **Licencia:** `MIT`
 - **Repositorio:** git+https://github.com/acornjs/acorn.git
@@ -2813,6 +2975,63 @@ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+... (texto truncado)
+```
+
+### ajv@8.20.0
+- **Licencia:** `MIT`
+- **Autor:** Evgeny Poberezkin
+- **Repositorio:** ajv-validator/ajv
+
+```
+The MIT License (MIT)
+
+Copyright (c) 2015-2021 Evgeny Poberezkin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+... (texto truncado)
+```
+
+### ajv-formats@3.0.1
+- **Licencia:** `MIT`
+- **Autor:** Evgeny Poberezkin
+- **Repositorio:** git+https://github.com/ajv-validator/ajv-formats.git
+
+```
+MIT License
+
+Copyright (c) 2020 Evgeny Poberezkin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN C
 ... (texto truncado)
 ```
 
@@ -3146,6 +3365,35 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
+### body-parser@2.3.0
+- **Licencia:** `MIT`
+- **Repositorio:** expressjs/body-parser
+
+```
+(The MIT License)
+
+Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
+Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR 
+... (texto truncado)
+```
+
 ### brace-expansion@1.1.18
 - **Licencia:** `MIT`
 - **Autor:** Julian Gruber
@@ -3257,6 +3505,36 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHER
 ... (texto truncado)
 ```
 
+### bytes@3.1.2
+- **Licencia:** `MIT`
+- **Autor:** TJ Holowaychuk <tj@vision-media.ca> (http://tjholowaychuk.com)
+- **Repositorio:** visionmedia/bytes.js
+
+```
+(The MIT License)
+
+Copyright (c) 2012-2014 TJ Holowaychuk <tj@vision-media.ca>
+Copyright (c) 2015 Jed Watson <jed.watson@me.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WH
+... (texto truncado)
+```
+
 ### cac@6.7.14
 - **Licencia:** `MIT`
 - **Autor:** egoist <0x142857@gmail.com>
@@ -3307,6 +3585,64 @@ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
 OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
 OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
 USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
+### call-bind-apply-helpers@1.0.2
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/ljharb/call-bind-apply-helpers.git
+
+```
+MIT License
+
+Copyright (c) 2024 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
+```
+
+### call-bound@1.0.4
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/ljharb/call-bound.git
+
+```
+MIT License
+
+Copyright (c) 2024 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
 ```
 
 ### callsites@3.1.0
@@ -3814,6 +4150,66 @@ OUT OF OR
 ... (texto truncado)
 ```
 
+### content-disposition@1.1.0
+- **Licencia:** `MIT`
+- **Autor:** Douglas Christopher Wilson <doug@somethingdoug.com>
+- **Repositorio:** jshttp/content-disposition
+
+```
+(The MIT License)
+
+Copyright (c) 2014-2017 Douglas Christopher Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING 
+... (texto truncado)
+```
+
+### content-type@1.0.5
+- **Licencia:** `MIT`
+- **Autor:** Douglas Christopher Wilson <doug@somethingdoug.com>
+- **Repositorio:** jshttp/content-type
+
+```
+(The MIT License)
+
+Copyright (c) 2015 Douglas Christopher Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM,
+... (texto truncado)
+```
+
 ### content-type@2.1.0
 - **Licencia:** `MIT`
 - **Autor:** Douglas Christopher Wilson <doug@somethingdoug.com>
@@ -3841,6 +4237,95 @@ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM,
+... (texto truncado)
+```
+
+### cookie@0.7.2
+- **Licencia:** `MIT`
+- **Autor:** Roman Shtylman <shtylman@gmail.com>
+- **Repositorio:** jshttp/cookie
+
+```
+(The MIT License)
+
+Copyright (c) 2012-2014 Roman Shtylman <shtylman@gmail.com>
+Copyright (c) 2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES O
+... (texto truncado)
+```
+
+### cookie-signature@1.2.2
+- **Licencia:** `MIT`
+- **Autor:** TJ Holowaychuk <tj@learnboost.com>
+- **Repositorio:** https://github.com/visionmedia/node-cookie-signature.git
+
+```
+(The MIT License)
+
+Copyright (c) 2012–2024 LearnBoost <tj@learnboost.com> and other contributors;
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+... (texto truncado)
+```
+
+### cors@2.8.6
+- **Licencia:** `MIT`
+- **Autor:** Troy Goode <troygoode@gmail.com> (https://github.com/troygoode/)
+- **Repositorio:** expressjs/cors
+
+```
+(The MIT License)
+
+Copyright (c) 2013 Troy Goode <troygoode@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING
 ... (texto truncado)
 ```
 
@@ -3984,6 +4469,36 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 ... (texto truncado)
 ```
 
+### depd@2.0.0
+- **Licencia:** `MIT`
+- **Autor:** Douglas Christopher Wilson <doug@somethingdoug.com>
+- **Repositorio:** dougwilson/nodejs-depd
+
+```
+(The MIT License)
+
+Copyright (c) 2014-2018 Douglas Christopher Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING 
+... (texto truncado)
+```
+
 ### detect-indent@6.1.0
 - **Licencia:** `MIT`
 - **Autor:** Sindre Sorhus
@@ -4017,6 +4532,92 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT O
+... (texto truncado)
+```
+
+### dunder-proto@1.0.1
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/es-shims/dunder-proto.git
+
+```
+MIT License
+
+Copyright (c) 2024 ECMAScript Shims
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CO
+... (texto truncado)
+```
+
+### ee-first@1.1.1
+- **Licencia:** `MIT`
+- **Autor:** Jonathan Ong
+- **Repositorio:** jonathanong/ee-first
+
+```
+The MIT License (MIT)
+
+Copyright (c) 2014 Jonathan Ong me@jongleberry.com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARIS
+... (texto truncado)
+```
+
+### encodeurl@2.0.0
+- **Licencia:** `MIT`
+- **Repositorio:** pillarjs/encodeurl
+
+```
+(The MIT License)
+
+Copyright (c) 2016 Douglas Christopher Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM,
 ... (texto truncado)
 ```
 
@@ -4066,6 +4667,64 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ... (texto truncado)
 ```
 
+### es-define-property@1.0.1
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/ljharb/es-define-property.git
+
+```
+MIT License
+
+Copyright (c) 2024 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
+```
+
+### es-errors@1.3.0
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/ljharb/es-errors.git
+
+```
+MIT License
+
+Copyright (c) 2024 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
+```
+
 ### es-module-lexer@1.7.0
 - **Licencia:** `MIT`
 - **Autor:** Guy Bedford
@@ -4082,6 +4741,35 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+... (texto truncado)
+```
+
+### es-object-atoms@1.1.2
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/ljharb/es-object-atoms.git
+
+```
+MIT License
+
+Copyright (c) 2024 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
 ... (texto truncado)
 ```
 
@@ -4166,6 +4854,36 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNEC
+... (texto truncado)
+```
+
+### escape-html@1.0.3
+- **Licencia:** `MIT`
+- **Repositorio:** component/escape-html
+
+```
+(The MIT License)
+
+Copyright (c) 2012-2013 TJ Holowaychuk
+Copyright (c) 2015 Andreas Lubbe
+Copyright (c) 2015 Tiancheng "Timothy" Gu
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY
 ... (texto truncado)
 ```
 
@@ -4410,6 +5128,93 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - **Licencia:** `BSD-2-Clause`
 - **Repositorio:** http://github.com/estools/esutils.git
 
+### etag@1.8.1
+- **Licencia:** `MIT`
+- **Repositorio:** jshttp/etag
+
+```
+(The MIT License)
+
+Copyright (c) 2014-2016 Douglas Christopher Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING 
+... (texto truncado)
+```
+
+### eventsource@3.0.7
+- **Licencia:** `MIT`
+- **Autor:** Espen Hovlandsdal <espen@hovlandsdal.com>
+- **Repositorio:** git://git@github.com/EventSource/eventsource.git
+
+```
+The MIT License
+
+Copyright (c) EventSource GitHub organisation
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, O
+... (texto truncado)
+```
+
+### eventsource-parser@3.1.1
+- **Licencia:** `MIT`
+- **Autor:** Espen Hovlandsdal <espen@hovlandsdal.com>
+- **Repositorio:** git+ssh://git@github.com/rexxars/eventsource-parser.git
+
+```
+MIT License
+
+Copyright (c) 2026 Espen Hovlandsdal <espen@hovlandsdal.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARIS
+... (texto truncado)
+```
+
 ### expect@30.5.1
 - **Licencia:** `MIT`
 - **Repositorio:** https://github.com/jestjs/jest.git
@@ -4502,6 +5307,65 @@ Apache License
       outstanding shares, or (iii) beneficial ownership of such entity.
 
       "You
+... (texto truncado)
+```
+
+### express@5.2.1
+- **Licencia:** `MIT`
+- **Autor:** TJ Holowaychuk <tj@vision-media.ca>
+- **Repositorio:** expressjs/express
+
+```
+(The MIT License)
+
+Copyright (c) 2009-2014 TJ Holowaychuk <tj@vision-media.ca>
+Copyright (c) 2013-2014 Roman Shtylman <shtylman+expressjs@gmail.com>
+Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVEN
+... (texto truncado)
+```
+
+### express-rate-limit@8.7.0
+- **Licencia:** `MIT`
+- **Autor:** Nathan Friedly
+- **Repositorio:** git+https://github.com/express-rate-limit/express-rate-limit.git
+
+```
+MIT License
+
+Copyright 2023 Nathan Friedly, Vedant K
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR I
 ... (texto truncado)
 ```
 
@@ -4628,6 +5492,32 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARI
 ... (texto truncado)
 ```
 
+### fast-uri@3.1.8
+- **Licencia:** `BSD-3-Clause`
+- **Autor:** Vincent Le Goff <vince.legoff@gmail.com> (https://github.com/zekth)
+- **Repositorio:** git+https://github.com/fastify/fast-uri.git
+
+```
+Copyright (c) 2011-2021, Gary Court until https://github.com/garycourt/uri-js/commit/a1acf730b4bba3f1097c9f52e7d9d3aba8cdcaae
+Copyright (c) 2021-present The Fastify team <https://github.com/fastify/fastify#team>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * The names of any contributors may not be used to endorse or promote
+      products derived from this software without specific prior written
+      permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPL
+... (texto truncado)
+```
+
 ### fastq@1.20.3
 - **Licencia:** `ISC`
 - **Autor:** Matteo Collina <hello@matteocollina.com>
@@ -4719,6 +5609,36 @@ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FRO
+... (texto truncado)
+```
+
+### finalhandler@2.1.1
+- **Licencia:** `MIT`
+- **Autor:** Douglas Christopher Wilson <doug@somethingdoug.com>
+- **Repositorio:** pillarjs/finalhandler
+
+```
+(The MIT License)
+
+Copyright (c) 2014-2022 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TO
 ... (texto truncado)
 ```
 
@@ -4838,6 +5758,65 @@ OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ```
 
+### forwarded@0.2.0
+- **Licencia:** `MIT`
+- **Repositorio:** jshttp/forwarded
+
+```
+(The MIT License)
+
+Copyright (c) 2014-2017 Douglas Christopher Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING 
+... (texto truncado)
+```
+
+### fresh@2.0.0
+- **Licencia:** `MIT`
+- **Autor:** TJ Holowaychuk <tj@vision-media.ca> (http://tjholowaychuk.com)
+- **Repositorio:** jshttp/fresh
+
+```
+(The MIT License)
+
+Copyright (c) 2012 TJ Holowaychuk <tj@vision-media.ca>
+Copyright (c) 2016-2017 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES O
+... (texto truncado)
+```
+
 ### fs-extra@7.0.1
 - **Licencia:** `MIT`
 - **Autor:** JP Richardson <jprichardson@gmail.com>
@@ -4907,6 +5886,91 @@ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
+### function-bind@1.1.2
+- **Licencia:** `MIT`
+- **Autor:** Raynos <raynos2@gmail.com>
+- **Repositorio:** https://github.com/Raynos/function-bind.git
+
+```
+Copyright (c) 2013 Raynos.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFT
+... (texto truncado)
+```
+
+### get-intrinsic@1.3.0
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/ljharb/get-intrinsic.git
+
+```
+MIT License
+
+Copyright (c) 2020 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
+```
+
+### get-proto@1.0.1
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/ljharb/get-proto.git
+
+```
+MIT License
+
+Copyright (c) 2025 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
 ```
 
 ### glob@13.0.6
@@ -5038,6 +6102,35 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ... (texto truncado)
 ```
 
+### gopd@1.2.0
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/ljharb/gopd.git
+
+```
+MIT License
+
+Copyright (c) 2022 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
+```
+
 ### graceful-fs@4.2.11
 - **Licencia:** `ISC`
 - **Repositorio:** https://github.com/isaacs/node-graceful-fs
@@ -5078,6 +6171,92 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ... (texto truncado)
 ```
 
+### has-symbols@1.1.0
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband
+- **Repositorio:** git://github.com/inspect-js/has-symbols.git
+
+```
+MIT License
+
+Copyright (c) 2016 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
+```
+
+### hasown@2.0.4
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/inspect-js/hasOwn.git
+
+```
+MIT License
+
+Copyright (c) Jordan Harband and contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT O
+... (texto truncado)
+```
+
+### hono@4.13.8
+- **Licencia:** `MIT`
+- **Autor:** Yusuke Wada <yusuke@kamawada.com> (https://github.com/yusukebe)
+- **Repositorio:** git+https://github.com/honojs/hono.git
+
+```
+MIT License
+
+Copyright (c) 2021 - present, Yusuke Wada and Hono contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, A
+... (texto truncado)
+```
+
 ### hosted-git-info@9.0.3
 - **Licencia:** `ISC`
 - **Autor:** GitHub Inc.
@@ -5114,6 +6293,34 @@ Redistribution and use in source and binary forms, with or without modification,
 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA
+... (texto truncado)
+```
+
+### http-errors@2.0.1
+- **Licencia:** `MIT`
+- **Autor:** Jonathan Ong <me@jongleberry.com> (http://jongleberry.com)
+- **Repositorio:** jshttp/http-errors
+
+```
+The MIT License (MIT)
+
+Copyright (c) 2014 Jonathan Ong me@jongleberry.com
+Copyright (c) 2016 Douglas Christopher Wilson doug@somethingdoug.com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 ... (texto truncado)
 ```
 
@@ -5286,6 +6493,28 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - **Autor:** Jens Taylor
 - **Repositorio:** https://github.com/jensyt/imurmurhash-js
 
+### inherits@2.0.4
+- **Licencia:** `ISC`
+- **Repositorio:** git://github.com/isaacs/inherits
+
+```
+The ISC License
+
+Copyright (c) Isaac Z. Schlueter
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+```
+
 ### ini@6.0.0
 - **Licencia:** `ISC`
 - **Autor:** GitHub Inc.
@@ -5333,6 +6562,33 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WIT
+... (texto truncado)
+```
+
+### ipaddr.js@1.9.1
+- **Licencia:** `MIT`
+- **Autor:** whitequark <whitequark@whitequark.org>
+- **Repositorio:** git://github.com/whitequark/ipaddr.js
+
+```
+Copyright (C) 2011-2017 whitequark <whitequark@whitequark.org>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+O
 ... (texto truncado)
 ```
 
@@ -5419,6 +6675,33 @@ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FRO
+... (texto truncado)
+```
+
+### is-promise@4.0.0
+- **Licencia:** `MIT`
+- **Autor:** ForbesLindesay
+- **Repositorio:** https://github.com/then/is-promise.git
+
+```
+Copyright (c) 2014 Forbes Lindesay
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH 
 ... (texto truncado)
 ```
 
@@ -5715,6 +6998,35 @@ LIABILITY, WHETHER IN AN ACTION OF
 ... (texto truncado)
 ```
 
+### jose@6.2.12
+- **Licencia:** `MIT`
+- **Autor:** Filip Skokan <panva.ip@gmail.com>
+- **Repositorio:** panva/jose
+
+```
+The MIT License (MIT)
+
+Copyright (c) 2018 Filip Skokan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR
+... (texto truncado)
+```
+
 ### joycon@3.1.1
 - **Licencia:** `MIT`
 - **Autor:** egoist <0x142857@gmail.com>
@@ -5913,6 +7225,68 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN C
+... (texto truncado)
+```
+
+### json-schema-traverse@1.0.0
+- **Licencia:** `MIT`
+- **Autor:** Evgeny Poberezkin
+- **Repositorio:** git+https://github.com/epoberezkin/json-schema-traverse.git
+
+```
+MIT License
+
+Copyright (c) 2017 Evgeny Poberezkin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN C
+... (texto truncado)
+```
+
+### json-schema-typed@8.0.2
+- **Licencia:** `BSD-2-Clause`
+- **Autor:** Remy Rylan
+- **Repositorio:** https://github.com/RemyRylan/json-schema-typed.git
+
+```
+BSD 2-Clause License
+
+Original source code is copyright (c) 2019-2025 Remy Rylan
+<https://github.com/RemyRylan>
+
+All JSON Schema documentation and descriptions are copyright (c):
+
+2009 [draft-0] IETF Trust <https://www.ietf.org/>, Kris Zyp <kris@sitepen.com>,
+and SitePen (USA) <https://www.sitepen.com/>.
+
+2009 [draft-1] IETF Trust <https://www.ietf.org/>, Kris Zyp <kris@sitepen.com>,
+and SitePen (USA) <https://www.sitepen.com/>.
+
+2010 [draft-2] IETF Trust <https://www.ietf.org/>, Kris Zyp <kris@sitepen.com>,
+and SitePen (USA) <https://www.sitepen.com/>.
+
+2010 [draft-3] IETF Trust <https://www.ietf.org/>, Kris Zyp <kris@sitepen.com>,
+Gary Court <gary.court@gmail.com>, and SitePen (USA) <https://www.sitepen.com/>.
+
+2013 [draft-4] IETF Trust <https://www.ietf.org/>), Francis Galiegue
+<fgaliegue@gmail.com>, Kris Zyp <kris@sitepen.com>, Gary Court
+<gary.court@gmail.com>, and SitePen (USA) <https://www.sitepen.com/>.
+
+2018 [draft-7] IETF Trust <https://www.ietf.org/>, 
 ... (texto truncado)
 ```
 
@@ -6462,6 +7836,84 @@ OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
 USE OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
+### math-intrinsics@1.1.0
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/es-shims/math-intrinsics.git
+
+```
+MIT License
+
+Copyright (c) 2024 ECMAScript Shims
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CO
+... (texto truncado)
+```
+
+### media-typer@1.1.1
+- **Licencia:** `MIT`
+- **Autor:** Douglas Christopher Wilson <doug@somethingdoug.com>
+- **Repositorio:** jshttp/media-typer
+
+```
+(The MIT License)
+
+Copyright (c) 2014-2017 Douglas Christopher Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING 
+... (texto truncado)
+```
+
+### merge-descriptors@2.0.0
+- **Licencia:** `MIT`
+- **Repositorio:** sindresorhus/merge-descriptors
+
+```
+MIT License
+
+Copyright (c) Jonathan Ong <me@jongleberry.com>
+Copyright (c) Douglas Christopher Wilson <doug@somethingdoug.com>
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR
+... (texto truncado)
+```
+
 ### merge2@1.4.1
 - **Licencia:** `MIT`
 - **Repositorio:** git@github.com:teambition/merge2.git
@@ -6515,6 +7967,64 @@ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FRO
+... (texto truncado)
+```
+
+### mime-db@1.54.0
+- **Licencia:** `MIT`
+- **Repositorio:** jshttp/mime-db
+
+```
+(The MIT License)
+
+Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
+Copyright (c) 2015-2022 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR 
+... (texto truncado)
+```
+
+### mime-types@3.0.2
+- **Licencia:** `MIT`
+- **Repositorio:** jshttp/mime-types
+
+```
+(The MIT License)
+
+Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
+Copyright (c) 2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER
 ... (texto truncado)
 ```
 
@@ -7307,6 +8817,87 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TO
 ... (texto truncado)
 ```
 
+### object-inspect@1.13.4
+- **Licencia:** `MIT`
+- **Autor:** James Halliday
+- **Repositorio:** git://github.com/inspect-js/object-inspect.git
+
+```
+MIT License
+
+Copyright (c) 2013 James Halliday
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
+```
+
+### on-finished@2.4.1
+- **Licencia:** `MIT`
+- **Repositorio:** jshttp/on-finished
+
+```
+(The MIT License)
+
+Copyright (c) 2013 Jonathan Ong <me@jongleberry.com>
+Copyright (c) 2014 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER
+... (texto truncado)
+```
+
+### once@1.4.0
+- **Licencia:** `ISC`
+- **Autor:** Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)
+- **Repositorio:** git://github.com/isaacs/once
+
+```
+The ISC License
+
+Copyright (c) Isaac Z. Schlueter and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
 ### optionator@0.9.4
 - **Licencia:** `MIT`
 - **Autor:** George Zahariev <z@georgezahariev.com>
@@ -7607,6 +9198,35 @@ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
 USE OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
+### parseurl@1.3.3
+- **Licencia:** `MIT`
+- **Repositorio:** pillarjs/parseurl
+
+```
+(The MIT License)
+
+Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
+Copyright (c) 2014-2017 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR 
+... (texto truncado)
+```
+
 ### path-browserify@1.0.1
 - **Licencia:** `MIT`
 - **Autor:** James Halliday
@@ -7714,6 +9334,33 @@ changes, also gets the text of this license or a link to
 If anyone notifies you in writing that you have not
 complied with [Notices](#notices), you can keep your
 license by taking all practical steps to comply within
+... (texto truncado)
+```
+
+### path-to-regexp@8.4.2
+- **Licencia:** `MIT`
+- **Repositorio:** https://github.com/pillarjs/path-to-regexp.git
+
+```
+The MIT License (MIT)
+
+Copyright (c) 2014 Blake Embrey (hello@blakeembrey.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ... (texto truncado)
 ```
 
@@ -7937,6 +9584,35 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONN
+... (texto truncado)
+```
+
+### pkce-challenge@5.0.1
+- **Licencia:** `MIT`
+- **Autor:** crouchcd
+- **Repositorio:** git+https://github.com/crouchcd/pkce-challenge.git
+
+```
+MIT License
+
+Copyright (c) 2019 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH TH
 ... (texto truncado)
 ```
 
@@ -8213,10 +9889,70 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
+### proxy-addr@2.0.8
+- **Licencia:** `MIT`
+- **Autor:** Douglas Christopher Wilson <doug@somethingdoug.com>
+- **Repositorio:** jshttp/proxy-addr
+
+```
+(The MIT License)
+
+Copyright (c) 2014-2016 Douglas Christopher Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING 
+... (texto truncado)
+```
+
 ### punycode@2.3.1
 - **Licencia:** `MIT`
 - **Autor:** Mathias Bynens
 - **Repositorio:** https://github.com/mathiasbynens/punycode.js.git
+
+### qs@6.16.0
+- **Licencia:** `BSD-3-Clause`
+- **Repositorio:** https://github.com/ljharb/qs.git
+
+```
+BSD 3-Clause License
+
+Copyright (c) 2014, Nathan LaFreniere and other [contributors](https://github.com/ljharb/qs/graphs/contributors)
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIE
+... (texto truncado)
+```
 
 ### quansync@0.2.11
 - **Licencia:** `MIT`
@@ -8271,6 +10007,64 @@ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF 
+... (texto truncado)
+```
+
+### range-parser@1.3.0
+- **Licencia:** `MIT`
+- **Autor:** TJ Holowaychuk <tj@vision-media.ca> (http://tjholowaychuk.com)
+- **Repositorio:** jshttp/range-parser
+
+```
+(The MIT License)
+
+Copyright (c) 2012-2014 TJ Holowaychuk <tj@vision-media.ca>
+Copyright (c) 2015-2016 Douglas Christopher Wilson <doug@somethingdoug.com
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAG
+... (texto truncado)
+```
+
+### raw-body@3.0.2
+- **Licencia:** `MIT`
+- **Autor:** Jonathan Ong <me@jongleberry.com> (http://jongleberry.com)
+- **Repositorio:** stream-utils/raw-body
+
+```
+The MIT License (MIT)
+
+Copyright (c) 2013-2014 Jonathan Ong <me@jongleberry.com>
+Copyright (c) 2014-2022 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DA
 ... (texto truncado)
 ```
 
@@ -8407,6 +10201,34 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 ... (texto truncado)
 ```
 
+### require-from-string@2.0.2
+- **Licencia:** `MIT`
+- **Autor:** Vsevolod Strukchinsky
+- **Repositorio:** floatdrop/require-from-string
+
+```
+The MIT License (MIT)
+
+Copyright (c) Vsevolod Strukchinsky <floatdrop@gmail.com> (github.com/floatdrop)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CON
+... (texto truncado)
+```
+
 ### resolve-from@4.0.0
 - **Licencia:** `MIT`
 - **Autor:** Sindre Sorhus
@@ -8493,6 +10315,36 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ... (texto truncado)
 ```
 
+### router@2.2.0
+- **Licencia:** `MIT`
+- **Autor:** Douglas Christopher Wilson <doug@somethingdoug.com>
+- **Repositorio:** pillarjs/router
+
+```
+(The MIT License)
+
+Copyright (c) 2013 Roman Shtylman
+Copyright (c) 2014-2022 Douglas Christopher Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CON
+... (texto truncado)
+```
+
 ### run-parallel@1.2.0
 - **Licencia:** `MIT`
 - **Autor:** Feross Aboukhadijeh
@@ -8572,6 +10424,89 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
+### send@1.2.1
+- **Licencia:** `MIT`
+- **Autor:** TJ Holowaychuk <tj@vision-media.ca>
+- **Repositorio:** pillarjs/send
+
+```
+(The MIT License)
+
+Copyright (c) 2012 TJ Holowaychuk
+Copyright (c) 2014-2022 Douglas Christopher Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CON
+... (texto truncado)
+```
+
+### serve-static@2.2.1
+- **Licencia:** `MIT`
+- **Autor:** Douglas Christopher Wilson <doug@somethingdoug.com>
+- **Repositorio:** expressjs/serve-static
+
+```
+(The MIT License)
+
+Copyright (c) 2010 Sencha Inc.
+Copyright (c) 2011 LearnBoost
+Copyright (c) 2011 TJ Holowaychuk
+Copyright (c) 2014-2016 Douglas Christopher Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+C
+... (texto truncado)
+```
+
+### setprototypeof@1.2.0
+- **Licencia:** `ISC`
+- **Autor:** Wes Todd
+- **Repositorio:** https://github.com/wesleytodd/setprototypeof.git
+
+```
+Copyright (c) 2015, Wes Todd
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
 ### shebang-command@2.0.0
 - **Licencia:** `MIT`
 - **Autor:** Kevin Mårtensson
@@ -8605,6 +10540,122 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHE
+... (texto truncado)
+```
+
+### side-channel@1.1.1
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/ljharb/side-channel.git
+
+```
+MIT License
+
+Copyright (c) 2019 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
+```
+
+### side-channel-list@1.0.1
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/ljharb/side-channel-list.git
+
+```
+MIT License
+
+Copyright (c) 2024 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
+```
+
+### side-channel-map@1.0.1
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/ljharb/side-channel-map.git
+
+```
+MIT License
+
+Copyright (c) 2024 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
+... (texto truncado)
+```
+
+### side-channel-weakmap@1.0.2
+- **Licencia:** `MIT`
+- **Autor:** Jordan Harband <ljharb@gmail.com>
+- **Repositorio:** git+https://github.com/ljharb/side-channel-weakmap.git
+
+```
+MIT License
+
+Copyright (c) 2019 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONN
 ... (texto truncado)
 ```
 
@@ -9125,6 +11176,33 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMA
 - **Autor:** Roman Shtylman <shtylman@gmail.com>
 - **Repositorio:** git://github.com/shtylman/node-stackback.git
 
+### statuses@2.0.2
+- **Licencia:** `MIT`
+- **Repositorio:** jshttp/statuses
+
+```
+The MIT License (MIT)
+
+Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
+Copyright (c) 2016 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR O
+... (texto truncado)
+```
+
 ### std-env@3.10.0
 - **Licencia:** `MIT`
 - **Repositorio:** unjs/std-env
@@ -9581,6 +11659,34 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FRO
 ... (texto truncado)
 ```
 
+### toidentifier@1.0.1
+- **Licencia:** `MIT`
+- **Autor:** Douglas Christopher Wilson <doug@somethingdoug.com>
+- **Repositorio:** component/toidentifier
+
+```
+MIT License
+
+Copyright (c) 2016 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHER
+... (texto truncado)
+```
+
 ### tree-kill@1.2.2
 - **Licencia:** `MIT`
 - **Autor:** Peteris Krumins
@@ -9838,6 +11944,35 @@ FROM, OUT OF OR IN CONNECTION WITH THE S
 ... (texto truncado)
 ```
 
+### type-is@2.1.0
+- **Licencia:** `MIT`
+- **Repositorio:** jshttp/type-is
+
+```
+(The MIT License)
+
+Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
+Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR 
+... (texto truncado)
+```
+
 ### typescript@5.9.3
 - **Licencia:** `Apache-2.0`
 - **Autor:** Microsoft Corp.
@@ -9976,6 +12111,36 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, AR
 ... (texto truncado)
 ```
 
+### unpipe@1.0.0
+- **Licencia:** `MIT`
+- **Autor:** Douglas Christopher Wilson <doug@somethingdoug.com>
+- **Repositorio:** stream-utils/unpipe
+
+```
+(The MIT License)
+
+Copyright (c) 2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR
+... (texto truncado)
+```
+
 ### uri-js@4.4.1
 - **Licencia:** `BSD-2-Clause`
 - **Autor:** Gary Court <gary.court@gmail.com>
@@ -10037,6 +12202,36 @@ Copyright (c) 2015, npm, Inc
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
 
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
+### vary@1.1.2
+- **Licencia:** `MIT`
+- **Autor:** Douglas Christopher Wilson <doug@somethingdoug.com>
+- **Repositorio:** jshttp/vary
+
+```
+(The MIT License)
+
+Copyright (c) 2014-2017 Douglas Christopher Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING 
+... (texto truncado)
 ```
 
 ### vite@5.4.21
@@ -10257,6 +12452,29 @@ O
 ... (texto truncado)
 ```
 
+### wrappy@1.0.2
+- **Licencia:** `ISC`
+- **Autor:** Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)
+- **Repositorio:** https://github.com/npm/wrappy
+
+```
+The ISC License
+
+Copyright (c) Isaac Z. Schlueter and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
 ### write-file-atomic@7.0.1
 - **Licencia:** `ISC`
 - **Autor:** GitHub Inc.
@@ -10385,4 +12603,27 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CON
 ... (texto truncado)
+```
+
+### zod-to-json-schema@3.25.2
+- **Licencia:** `ISC`
+- **Autor:** Stefan Terdell
+- **Repositorio:** https://github.com/StefanTerdell/zod-to-json-schema
+
+```
+ISC License
+
+Copyright (c) 2020, Stefan Terdell
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```

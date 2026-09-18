@@ -31,4 +31,5 @@ export * from './reporters/release-kpis.js';
 export * from './reporters/cytoscape-bundle.js';
 export * from './reporters/dashboard.js';
 export * from './adapters/sdd/index.js';
+export * from './init/index.js';
 export * from './utils/fs.js';

@@ -74,6 +74,7 @@ AI-SDLC/
 │
 ├── packages/                                 # Monorepo Workspace (pnpm + Changesets)
 │   ├── core/                                 # @ai-sdlc/core: Motor de dominio, verificadores puros y reporters
+│   ├── mcp/                                  # @ai-sdlc/mcp: Servidor nativo Model Context Protocol (npx @ai-sdlc/mcp / aisdlc mcp)
 │   └── cli/                                  # @ai-sdlc/cli: CLI ejecutable binario (npx aisdlc)
 │
 ├── process/                                  # Especificación Normativa del Proceso
@@ -193,6 +194,7 @@ npx aisdlc sdd integrate --auto
 | `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Catálogo de Producto** | Genera catálogo consolidado de requerimientos en `reports/ACTIVE_REQUIREMENTS.md` |
 | `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | **Dossier Maestro** | Compila documentación y manuales con TOC interactiva en `reports/AI_SDLC_SPECIFICATION_FULL.md` |
 | `npx aisdlc init [dir] [--ci <provider>]` | - | **Inicialización** | Inicializa un nuevo repo con carpetas, esquemas, políticas y pipeline CI/CD (`github`, `gitlab`, `azure`, `bitbucket`) |
+| `npx aisdlc mcp` / `npx @ai-sdlc/mcp` | `pnpm run mcp` | **Servidor MCP Nativo** | Arranca el servidor Model Context Protocol sobre `stdio` con 20 herramientas tipadas (incluyendo `new`, `verify`, `report`) y 5 recursos canónicos |
 
 
 ---
@@ -728,6 +730,64 @@ npx aisdlc report dashboard --open
 # 3. Personalizar ruta de salida y título del dashboard
 npx aisdlc report dashboard --output docs/dashboard.html --title "SentinelCore Mission Control"
 ```
+
+---
+
+## 🔌 Servidor Nativo Model Context Protocol (MCP): Control Total desde tu IDE
+
+El framework AI-SDLC incluye un servidor oficial **Model Context Protocol (MCP)** en `@ai-sdlc/mcp` que expone todo el ciclo de vida metodológico a asistentes y agentes de IA en tiempo real sobre `stdio`. Cualquier desarrollador humano o agente puede invocar las herramientas de AI-SDLC directamente desde **Cursor, Claude Desktop / Code, Google Antigravity, VS Code o GitHub Copilot**.
+
+### 1. Comandos Resumen (High-Level Workflows)
+Para simplificar la interacción y minimizar el número de pasos, el servidor MCP ofrece 3 herramientas agregadas principales:
+- **`new`**: Inicializa un nuevo proyecto o adopta AI-SDLC en un repositorio existente, configurando carpetas metodológicas, esquemas, políticas (`quality-policy.yaml`, `license-policy.yaml`) y plantillas de CI (`github`, `gitlab`, `azure`, `bitbucket`).
+- **`verify`**: Ejecuta la suite consolidada de los 9 Quality Gates deterministas a la vez (`quality`, `traceability`, `governance`, `licenses`, `schemas`, `duplicates`, `security`, `testing`, `pdac`), devolviendo el veredicto consolidado y el detalle de cada gate.
+- **`report`**: Genera simultáneamente el panel interactivo HTML (`reports/dashboard.html`) y el informe consolidado en Markdown (`reports/QUALITY_REPORT.md`).
+
+### 2. Catálogo Completo de Herramientas (20 Tools) y Recursos (5 Resources)
+- **Ciclo SDD**: `sdd_init`, `sdd_new`, `sdd_deposit`, `sdd_integrate`.
+- **Quality Gates Individuales**: `verify_quality`, `verify_traceability`, `verify_governance`, `verify_licenses`, `verify_schemas`, `verify_duplicates`, `verify_security`, `verify_testing`, `verify_pdac`.
+- **Informes & KPIs**: `report_markdown`, `report_dashboard`, `kpi_pr`, `git_detect_author`.
+- **Recursos Canónicos (`aisdlc://`)**: `aisdlc://policies/quality`, `aisdlc://policies/licenses`, `aisdlc://changes/active`, `aisdlc://changes/completed`, `aisdlc://status/summary`.
+
+### 3. Configuración en Clientes MCP e IDEs
+
+#### En Cursor (`.cursor/mcp.json`):
+```json
+{
+  "mcpServers": {
+    "ai-sdlc": {
+      "command": "npx",
+      "args": ["@ai-sdlc/mcp"]
+    }
+  }
+}
+```
+
+#### En Claude Desktop (`claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "ai-sdlc": {
+      "command": "npx",
+      "args": ["@ai-sdlc/mcp"]
+    }
+  }
+}
+```
+
+#### En Google Antigravity / Gemini CLI (`antigravity.mcp.json`):
+```json
+{
+  "mcpServers": {
+    "ai-sdlc": {
+      "command": "aisdlc",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+> Para el detalle completo de los esquemas Zod y opciones avanzadas, consulta [process/09_agent_protocols.md](process/09_agent_protocols.md#7-servidor-model-context-protocol-mcp-nativo-ai-sdlcmcp--aisdlc-mcp).
 
 ---
 
