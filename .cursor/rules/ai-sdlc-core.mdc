@@ -1,0 +1,30 @@
+---
+description: Directrices canónicas globales, 5 mandamientos inquebrantables y pre-vuelo de AI-SDLC
+globs: *
+alwaysApply: true
+---
+
+# Reglas Globales AI-SDLC (Core)
+
+Referencia canónica: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) y [`process/01_governance_and_roles.md`](process/01_governance_and_roles.md).
+
+## 1. Los 5 Mandamientos Inquebrantables de los Agentes
+Todo agente que opere en este repositorio debe acatar estrictamente los siguientes guardrails:
+1. **PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: No apruebes PRs ni realices merges directos a ramas protegidas (`main`, `release/*`). La aprobación es exclusiva de revisores humanos.
+2. **PROHIBIDO INVENTAR DECISIONES DE PRODUCTO O ARQUITECTURA**: Ante cualquier ambigüedad, formula preguntas abiertas (`open-questions`). No asumas requerimientos no documentados.
+3. **PROHIBIDO INTRODUCIR DEPENDENCIAS SIN INSPECCIÓN DE LICENCIA**: Verifica siempre `license-policy.yaml`. Prohibidas dependencias virales (GPL/AGPL) o comerciales de pago (BSL/SSPL) sin aprobación explícita.
+4. **PROHIBIDO IGNORAR LA CIBERSEGURIDAD (SECURITY-BY-DEFAULT)**: Valida entradas, aplica mínimo privilegio y acompaña todo cambio con pruebas de seguridad (`SEC-TEST-*`). Prohibido suprimir linters o tests para forzar el paso en verde.
+5. **OBLIGACIÓN DE CITACIÓN CRIPTOGRÁFICA**: Vincula especificaciones con identificadores inmutables y hashes SHA-256 normalizados en Unix LF.
+
+## 2. Comandos de Verificación Pre-Vuelo
+Antes de finalizar cambios o proponer commits:
+- Pre-vuelo con auto-fix: `pnpm run check:fix` (o `npx aisdlc check --fix`)
+- Verificación completa: `pnpm run verify:all` (o `npx aisdlc verify all`)
+- Pruebas unitarias: `pnpm test`
+- Tipado estricto: `pnpm run typecheck`
+
+## 3. Jerarquía Git de 4 Tiers
+- Tier 1: `main` (Producción)
+- Tier 2: `release/vX.Y.Z` (Release congelada)
+- Tier 3: `feat/<FEAT-ID>-<slug>` / `bug/<BUG-ID>-<slug>` (Funcionalidad)
+- Tier 4: `task/<PARENT-ID>/<TSK-ID>-<slug>` (Tarea atómica)

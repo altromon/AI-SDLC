@@ -279,3 +279,22 @@ Para evitar la fragilidad del parsing de texto libre con colores ANSI (`picocolo
 - **Verificación Agregada (`verify all --json`)**:
   Emite un resumen general con la totalidad de gates evaluados (`quality`, `traceability`, `governance`, `testing`, `licenses`, `pdac`, `schemas`, `duplicates`, `security`) en el objeto `gates`, junto con la lista agregada de violaciones detectadas.
 
+---
+
+## 6. Matriz de Compatibilidad e Integración Nativa con Entornos de Agentes
+
+Para garantizar que cualquier agente de IA que opere en el repositorio cargue automáticamente las directrices canónicas, los 5 mandamientos inquebrantables, la jerarquía Git de 4 tiers y los Quality Gates sin requerir inyección manual por parte del usuario, el repositorio incorpora configuraciones nativas estándar:
+
+| Entorno de Agente | Archivo de Configuración | Ámbito de Activación | Mecanismo de Inyección y Directrices Principales |
+| :--- | :--- | :--- | :--- |
+| **Cursor** | `.cursor/rules/ai-sdlc-core.mdc`<br>`.cursor/rules/ai-sdlc-product.mdc`<br>`.cursor/rules/ai-sdlc-quality.mdc` | Modular (`alwaysApply` para core, `specs/**` para producto, `src/**`/`packages/**` para código) | Inyección contextual automática en Cursor Agent / Composer. Carga los 5 mandamientos, taxonomía ProductShape (`ACT-*`, `UC-*`, `FR-*`), esquemas JSON y umbrales de complejidad (CC $\le 10$, MI $\ge 50$). |
+| **Claude Code** | `CLAUDE.md` | Raíz del repositorio | Guía de comandos CLI unificados (`pnpm run check:fix`, `pnpm run verify:all`), reglas de commit con trailers estructurados, flujo SDD y prohibición de auto-merge. |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | Global (Copilot Chat y Copilot Workspace) | Inyección automática en cada prompt de Copilot. Contexto de ciclo de vida SDD, estructura 4-tier de ramas Git y política estricta de licencias (`license-policy.yaml`). |
+| **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md` | Global en workspace | Mapeo determinista de roles especializados (`agent-product-analyst`, `agent-threat-modeler`, `agent-developer`), guardrails y protocolo "AI as Scribe". |
+
+### Mantenimiento Anti-Deriva Automatizado
+Para evitar que las configuraciones de integración discrepen con el tiempo de las especificaciones canónicas de este documento, la suite de pruebas determinista en `packages/core/tests/agent-native-configs-drift.spec.ts` audita en CI/CD que:
+1. Todos los archivos de integración existan y referencien canónicamente a `process/09_agent_protocols.md`.
+2. Los 5 Mandamientos Inquebrantables estén presentes de forma fidedigna y sin desviaciones semánticas.
+3. Se citen explícitamente `license-policy.yaml`, los comandos de pre-vuelo (`aisdlc check --fix` / `pnpm run verify:all`) y la jerarquía de 4 tiers.
+

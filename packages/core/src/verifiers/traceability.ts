@@ -210,11 +210,16 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
 
   function scanFeatureFiles(dir: string) {
     if (!fs.existsSync(dir)) return;
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
     for (const e of entries) {
       const fullPath = path.join(dir, e.name);
       if (e.isDirectory()) {
-        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist' && e.name !== 'scratch' && e.name !== 'fixtures') {
+        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist' && e.name !== 'scratch' && e.name !== 'fixtures' && !e.name.startsWith('temp-')) {
           scanFeatureFiles(fullPath);
         }
       } else if (e.name.endsWith('.feature')) {
@@ -245,7 +250,7 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     for (const e of entries) {
       const fullPath = path.join(dir, e.name);
       if (e.isDirectory()) {
-        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist' && e.name !== 'scratch' && e.name !== 'fixtures') {
+        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist' && e.name !== 'scratch' && e.name !== 'fixtures' && !e.name.startsWith('temp-')) {
           scanCodeTestFiles(fullPath);
         }
       } else if (

@@ -763,6 +763,16 @@ npx aisdlc report dashboard --output docs/dashboard.html --title "SentinelCore M
 4. **Validación Determinista**:
    - Al finalizar, ejecuta los linters y verificadores de esquemas. Nunca intentes auto-aprobar o forzar el merge de un PR.
 
+### Integración Nativa por Entorno de IA
+
+El repositorio cuenta con archivos de contexto estándar listos para su carga automática:
+- **Cursor**: Reglas modulares en [`.cursor/rules/`](.cursor/rules/) (`ai-sdlc-core.mdc`, `ai-sdlc-product.mdc`, `ai-sdlc-quality.mdc`).
+- **Claude Code**: Directrices de ejecución, commits y pre-vuelo en [`CLAUDE.md`](CLAUDE.md).
+- **GitHub Copilot**: Contexto de ciclo de vida SDD y políticas en [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
+- **Google Antigravity / Gemini CLI**: Mapeo de roles y guardrails en [`.agent/rules/ai-sdlc.md`](.agent/rules/ai-sdlc.md).
+
+> Para más detalles, consulta la [Matriz de Compatibilidad en process/09_agent_protocols.md](process/09_agent_protocols.md#6-matriz-de-compatibilidad-e-integración-nativa-con-entornos-de-agentes).
+
 ---
 
 ## 📜 Licencia
