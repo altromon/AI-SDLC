@@ -121,4 +121,33 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(content).toContain('TDD');
     expect(content).toContain('license-policy.yaml');
   });
+
+  it('verifies canonical workflow handoff template exists and enforces autonomy activation rule', () => {
+    const templatePath = path.join(rootDir, 'templates/workflow/agent-handoff.template.md');
+    expect(fs.existsSync(templatePath)).toBe(true);
+    const content = fs.readFileSync(templatePath, 'utf-8');
+    expect(content).toContain('Handoff de Flujo de Trabajo');
+    expect(content).toContain('HUMAN_REVIEW_PLAN');
+    expect(content).toContain('AUTONOMOUS');
+    expect(content).toContain('Ventana de Acción Humana');
+  });
+
+  it('verifies all agent configurations document the Workflow Handoff protocol with autonomy condition', () => {
+    const handoffConfigs = [
+      canonicalProtocolPath,
+      configFiles.copilot,
+      configFiles.cursorCore,
+      configFiles.claude,
+      configFiles.antigravity,
+    ];
+
+    for (const filePath of handoffConfigs) {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      expect(content).toMatch(/Workflow Handoff|Handoff de Flujo de Trabajo/);
+      expect(content).toContain('HUMAN_REVIEW_PLAN');
+      expect(content).toContain('agent-handoff.template.md');
+      expect(content).toMatch(/Ventana de Acci[oó]n Humana/i);
+    }
+  });
 });
+

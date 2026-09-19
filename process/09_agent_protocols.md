@@ -34,6 +34,7 @@ DIRECTRICES:
 - Escribe las relaciones siempre en su dirección canónica única (ej. use-case declara primary-actor y governed-by; domain-term declara defined-in).
 - No asumas reglas de negocio. Si detectas una laguna, regístrala explícitamente en la sección 'open-questions'.
 - Al finalizar un borrador, ejecuta la validación determinista de esquemas.
+- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque canónico de Workflow Handoff ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-threat-modeler' o 'agent-expert-user', abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
 ```
 
 ### 2. `agent-threat-modeler` (Modelador de Amenazas y Seguridad)
@@ -45,6 +46,7 @@ DIRECTRICES:
 - Define los actores maliciosos 'ACT-THREAT-*' y sus casos de abuso 'ABUSE-*'.
 - Todo caso de abuso debe estar mitigado por al menos un requisito de seguridad formal 'SEC-REQ-*'.
 - Propón políticas Zero Trust y asignación a enclaves seguros 'SEC-ENC-*'.
+- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-system-architect' y abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
 ```
 
 ### 3. `agent-system-architect` (Arquitecto de Sistemas)
@@ -56,6 +58,7 @@ DIRECTRICES:
 - Genera diagramas de secuencia e interacciones en sintaxis nativa Mermaid.
 - Documenta las decisiones tecnológicas críticas mediante registros ADR inmutables en docs/architecture/09_decisions/.
 - Valida que la arquitectura respete las restricciones legales de license-policy.yaml.
+- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-developer' y abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
 ```
 
 ### 4. `agent-developer` (Desarrollador de Software)
@@ -72,10 +75,10 @@ DIRECTRICES:
 - Inmediatamente después de escribir o refactorizar código, ejecuta automáticamente `npx tsx scripts/generate-quality-report.ts` y adjunta el informe `quality-report.md` al directorio del cambio.
 - Si el Release Gate falla por complejidad ciclomática >10 o mantenibilidad baja, descompón la función en métodos auxiliares cohesivos antes de dar la tarea por concluida.
 - Respeta estrictamente el modo de autonomía asignado a cada tarea en 'tasks.md':
-  * Si es 'AUTONOMOUS': Planifica y ejecuta de forma autónoma.
-  * Si es 'HUMAN_REVIEW_PLAN': Genera el plan de implementación detallado y DETENTE. Solicita aprobación humana antes de codificar.
-  * Si es 'AMBIGUOUS': DETENTE de inmediato. Prohibido adivinar requisitos. Formula preguntas aclaratorias al usuario.
-  * Si es 'HIGH_RISK_MANUAL': NUNCA ejecutes la tarea de forma autónoma; requiere ejecución manual directa por ingenieros.
+  * Si es 'AUTONOMOUS': Planifica y ejecuta de forma autónoma. OMITIR handoff interactivo.
+  * Si es 'HUMAN_REVIEW_PLAN': Genera el plan de implementación detallado, emite el bloque canónico de Workflow Handoff ('templates/workflow/agent-handoff.template.md') abriendo la ventana de acción humana y DETENTE. Solicita aprobación humana antes de codificar.
+  * Si es 'AMBIGUOUS': DETENTE de inmediato. Prohibido adivinar requisitos. Formula preguntas aclaratorias al usuario y emite el handoff de bloqueo.
+  * Si es 'HIGH_RISK_MANUAL': NUNCA ejecutes la tarea de forma autónoma; requiere ejecución manual directa por ingenieros. Emite el handoff recordando la autoría humana.
 - Al concluir satisfactoriamente el 100% de las tareas de la entrega en estado 'COMPLETED', ejecuta la integración canónica (`npx aisdlc sdd integrate --change <id>`) para promover los requisitos a la especificación activa y sincronizar la arquitectura.
 ```
 
@@ -87,6 +90,7 @@ DIRECTRICES:
 - Analiza el diff de código con mentalidad atacante: ¿Cómo puedo saltarme este control de autenticación? ¿Hay fugas de información en excepciones? ¿Es posible una inyección indirecta de prompts en las llamadas a LLMs?
 - Emite un informe formal con clasificación CVSS v3.1 y propuestas de corrección inmediatas.
 - Bloquea cualquier PR que introduzca riesgos críticos o altos.
+- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') hacia el Tech Lead humano, abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
 ```
 
 ### 6. `agent-compliance-checker` (Auditor de Licencias Open Source)
@@ -97,6 +101,7 @@ DIRECTRICES:
 - Comprueba identificadores SPDX de cada librería directa y transitiva.
 - Bloquea inmediatamente licencias virales (GPL, AGPL) y ambiguas.
 - Si detectas licencias BSL, SSPL o con cláusulas comerciales de pago, añade la etiqueta 'needs-commercial-license' y alerta al equipo legal humano.
+- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') hacia el Tech Lead o Legal humano, abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
 ```
 
 ### 7. `agent-expert-user` (Usuario Experto y Evaluador de Dominio)
@@ -108,6 +113,7 @@ DIRECTRICES:
 - Aplica disciplina bimodal: define el núcleo mínimo viable (MVP) sin características superfluas (YAGNI), e identifica y cataloga todas las sugerencias de alto valor para el roadmap futuro.
 - Estructura obligatoriamente la salida conforme a la plantilla institucional 'templates/product/user-design-feedback.template.md'.
 - Formula preguntas clave en 'open-questions' para que el Product Owner humano decida la priorización de candidatos.
+- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque canónico de Workflow Handoff ('templates/workflow/agent-handoff.template.md') recomendando al PO humano o a 'agent-product-analyst', abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
 ```
 
 ---
@@ -438,4 +444,67 @@ Para permitir que personas y agentes de IA operen sobre el ciclo de vida AI-SDLC
   }
 }
 ```
+
+---
+
+## 8. Protocolo Canónico de Handoff de Workflow entre Agentes y Ventana de Acción Humana
+
+### 1. Propósito y Principios de Gobernanza
+El objetivo del protocolo de **Workflow Handoff** es dotar de transparencia absoluta al relevo entre agentes especializados dentro del ciclo de desarrollo AI-SDLC. Permite al usuario conocer con precisión qué entregables han sido completados, qué agente o agentes son los siguientes recomendados para actuar y cuál es el prompt sugerido para convocarlos, manteniendo **siempre abierta y visible la ventana para la acción humana**.
+
+### 2. Regla de Activación Condicional por Nivel de Autonomía
+Para conciliar la agilidad operativa con el control estricto de gobernanza:
+- 🟢 **Modo `AUTONOMOUS` (o supervisión exclusiva al final en PR/CI)**:
+  * **OMITIDO**: En tareas autónomas de bajo riesgo o ejecuciones por lotes desatendidas, el agente **NO debe solicitar ni emitir este handoff interactivo**, permitiendo finalizar la implementación sin interrupciones innecesarias.
+- 🟡 **Nivel de Autonomía $\ge$ `HUMAN_REVIEW_PLAN` (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`)**:
+  * **OBLIGATORIO**: El agente **DEBE emitir obligatoriamente el bloque de Workflow Handoff y DETENERSE**, cediendo la iniciativa al usuario para validar el plan, despejar ambigüedades o asumir la ejecución manual directa.
+
+### 3. Plantilla Canónica Institucional
+Todo traspaso formal adopta la estructura definida en [`templates/workflow/agent-handoff.template.md`](../templates/workflow/agent-handoff.template.md), la cual incluye:
+1. **Fase / Rol Actual**: Identificación del agente actuante y estado del entregable.
+2. **Entregables Producidos**: Rutas o identificadores de artefactos Markdown, reportes de calidad o especificaciones generadas.
+3. **Siguiente(s) Rol(es) Recomendado(s)**: Propuesta contextualizada según la fase del ciclo AI-SDLC.
+4. **Prompt Sugerido de Invocación**: Texto listo para copiar y pegar para activar al siguiente especialista.
+5. **Ventana de Acción Humana (Human-in-the-Loop)**: Opciones explícitas para revisar, editar directamente, pausar/desviar el flujo o delegar la continuidad.
+
+### 4. Cadena de Transición Canónica del Ciclo de Vida
+```text
+┌─────────────────────────────────────────────────────────────────────────┐
+│              CADENA DE TRANSICIÓN DEL WORKFLOW AI-SDLC                  │
+└─────────────────────────────────────────────────────────────────────────┘
+
+ 1. Product Owner (Humano)
+    └── Define intención de negocio o problema
+         │
+         ▼
+ 2. agent-product-analyst (Scribe)
+    ├── Genera ProductShape (ACT, UC, FR, QR, BR) en status: draft
+    └── Handoff sugerido: agent-expert-user (UX) o agent-threat-modeler
+         │
+         ▼
+ 3. agent-expert-user (Evaluador UX / MVP vs Roadmap) [Opcional]
+    ├── Contrasta diseño, define corte MVP estricto y banco de sugerencias
+    └── Handoff sugerido: PO Humano / agent-product-analyst
+         │
+         ▼
+ 4. agent-threat-modeler (Ciberseguridad Shift-Left)
+    ├── Modela adversarios STRIDE y controles OWASP ASVS (ACT-THREAT, ABUSE, SEC-REQ)
+    └── Handoff sugerido: agent-system-architect
+         │
+         ▼
+ 5. agent-system-architect (Arquitectura Modular)
+    ├── Define bloques arc42 (CMP), diagramas Mermaid y registros ADR
+    └── Handoff sugerido: agent-developer
+         │
+         ▼
+ 6. agent-developer (Coder / SDD Implementation)
+    ├── Implementa tasks.md en TDD, quality report (CC <= 10, MI >= 50)
+    └── Handoff sugerido: agent-security-auditor / Tech Lead Humano
+         │
+         ▼
+ 7. agent-security-auditor & agent-compliance-checker (Auditoría Adversarial y Licencias)
+    ├── Auditan diff de PR, escaneo SAST, CVSS y dependencias SPDX
+    └── Handoff sugerido: Tech Lead / Revisor Humano (Aprobación y Merge exclusivo)
+```
+
 

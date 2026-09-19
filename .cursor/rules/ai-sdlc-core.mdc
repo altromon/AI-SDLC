@@ -28,3 +28,10 @@ Antes de finalizar cambios o proponer commits:
 - Tier 2: `release/vX.Y.Z` (Release congelada)
 - Tier 3: `feat/<FEAT-ID>-<slug>` / `bug/<BUG-ID>-<slug>` (Funcionalidad)
 - Tier 4: `task/<PARENT-ID>/<TSK-ID>-<slug>` (Tarea atómica)
+
+## 4. Protocolo de Workflow Handoff y Ventana de Acción Humana
+- **Activación Condicional**:
+  * 🟢 **`AUTONOMOUS`** (o supervisión en PR/CI): **OMITIDO**. No solicitar ni emitir handoff interactivo.
+  * 🟡 **Autonomía $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **OBLIGATORIO**. Emitir bloque de Workflow Handoff conforme a [`templates/workflow/agent-handoff.template.md`](templates/workflow/agent-handoff.template.md) y **DETENERSE**.
+- **Contenido**: Declarar entregables completados, recomendar siguiente(s) rol(es), proveer prompt sugerido de invocación y **mantener abierta la ventana para que el usuario humano tome acción** (revisar, editar a mano, pausar/desviar o delegar).
+

@@ -26,6 +26,7 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
 
     expect(fs.existsSync(path.join(tempDir, 'quality-policy.yaml'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'license-policy.yaml'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'templates/workflow/agent-handoff.template.md'))).toBe(true);
 
     // Agent files should not be present
     expect(fs.existsSync(path.join(tempDir, 'CLAUDE.md'))).toBe(false);
@@ -46,6 +47,7 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
     expect(agContent).toContain('PROHIBIDO AUTO-APROBAR');
     expect(agContent).toContain('agent-product-analyst');
     expect(agContent).toContain('agent-expert-user');
+    expect(agContent).toContain('Workflow Handoff');
 
     // Cursor
     expect(fs.existsSync(path.join(tempDir, '.cursor/rules/ai-sdlc-core.mdc'))).toBe(true);
@@ -58,6 +60,7 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
     expect(fs.existsSync(claudeFile)).toBe(true);
     const claudeContent = fs.readFileSync(claudeFile, 'utf-8');
     expect(claudeContent).toContain('PROHIBIDO AUTO-APROBAR');
+    expect(claudeContent).toContain('Workflow Handoff');
     expect(claudeContent).toContain('license-policy.yaml');
 
     // Copilot

@@ -1,0 +1,12 @@
+id: HOF-CHG-031-WORKFLOW-AGENT-HANDOFF
+type: handoff
+title: Handoff Canónico de Producto para workflow-agent-handoff
+changeId: CHG-031-WORKFLOW-AGENT-HANDOFF
+version: 1.0.0
+createdAt: '2026-09-19T12:00:00.000Z'
+subgraph:
+  requirements:
+    - FR-031-WORKFLOW-AGENT-HANDOFF-001
+  useCases:
+    - UC-031-WORKFLOW-AGENT-HANDOFF
+citations: []
