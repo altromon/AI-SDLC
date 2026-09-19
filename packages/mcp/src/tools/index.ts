@@ -76,6 +76,10 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
         .boolean()
         .optional()
         .describe('Si es true, simula la creación sin escribir archivos en disco'),
+      agents: z
+        .string()
+        .optional()
+        .describe('Entornos de agentes de IA a configurar (ej. "all", "cursor", "claude", "antigravity", "copilot", "mcp")'),
     },
     async (params) => {
       try {
@@ -83,6 +87,7 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
           rootDir: baseRoot,
           targetDir: params.targetDir,
           ci: params.ci,
+          agents: params.agents,
           dryRun: params.dryRun,
         });
         return formatResponse(result, !result.success);

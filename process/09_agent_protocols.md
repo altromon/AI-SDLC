@@ -302,6 +302,27 @@ Para garantizar que cualquier agente de IA que opere en el repositorio cargue au
 | **Claude Code** | `CLAUDE.md` | Raíz del repositorio | Guía de comandos CLI unificados (`pnpm run check:fix`, `pnpm run verify:all`), reglas de commit con trailers estructurados, flujo SDD y prohibición de auto-merge. |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | Global (Copilot Chat y Copilot Workspace) | Inyección automática en cada prompt de Copilot. Contexto de ciclo de vida SDD, estructura 4-tier de ramas Git y política estricta de licencias (`license-policy.yaml`). |
 | **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md` | Global en workspace | Mapeo determinista de roles especializados (`agent-product-analyst`, `agent-threat-modeler`, `agent-developer`), guardrails y protocolo "AI as Scribe". |
+| **Model Context Protocol (MCP)** | `.cursor/mcp.json`<br>`antigravity.mcp.json`<br>`.vscode/mcp.json` | IDE / Workspace | Declaración de servidores MCP para acceso directo a herramientas deterministas de AI-SDLC. |
+
+### Despliegue Automatizado y Selectivo de Agentes (`aisdlc init --agents`)
+
+Durante la inicialización de un proyecto con `aisdlc init`, el usuario o agente puede desplegar automáticamente los andamiajes y directrices canónicas para los distintos entornos de agentes:
+
+```bash
+# Modo interactivo en TTY (solicita seleccionar los agentes a desplegar)
+aisdlc init
+
+# Despliegue de todos los agentes y configuraciones MCP
+aisdlc init --agents all
+
+# Despliegue granular para herramientas específicas
+aisdlc init --agents cursor,antigravity,mcp
+aisdlc init --agents claude
+```
+
+#### Reglas de Despliegue y Protección No-Clobber:
+- **Protección No-Clobber Innegociable**: Si un archivo de directrices o reglas (`.agent/rules/ai-sdlc.md`, `CLAUDE.md`, `.cursor/rules/*`, etc.) ya existe en el proyecto destino, el proceso de inicialización **nunca lo sobreescribe**. Se reporta informativamente en consola (`ℹ Archivo omitido (ya existente)`).
+- **Consumo MCP Programático**: La herramienta MCP `new` acepta el parámetro `agents` (`"all"`, `"cursor,claude"`, etc.) para permitir a agentes inicializar proyectos con soporte multi-agente sin requerir interacción manual.
 
 ### Mantenimiento Anti-Deriva Automatizado
 Para evitar que las configuraciones de integración discrepen con el tiempo de las especificaciones canónicas de este documento, la suite de pruebas determinista en `packages/core/tests/agent-native-configs-drift.spec.ts` audita en CI/CD que:
@@ -325,7 +346,7 @@ Para permitir que personas y agentes de IA operen sobre el ciclo de vida AI-SDLC
 #### A. Comandos Resumen / Compuestos (High-Level Workflows)
 | Herramienta | Parámetros de Entrada | Descripción / Efecto |
 | :--- | :--- | :--- |
-| `new` | `targetDir` (opcional), `template` (opcional), `ci` (opcional), `force` (opcional) | Inicializa un nuevo proyecto o arranca AI-SDLC en un repositorio existente, configurando carpetas, esquemas, políticas de calidad y plantillas de CI (`github`, `gitlab`, `azure`, `bitbucket`). |
+| `new` | `targetDir` (opcional), `template` (opcional), `ci` (opcional), `agents` (opcional), `force` (opcional) | Inicializa un nuevo proyecto o arranca AI-SDLC en un repositorio existente, configurando carpetas, esquemas, políticas de calidad, plantillas de CI (`github`, `gitlab`, `azure`, `bitbucket`) y andamiaje opcional de directrices para agentes de IA (`cursor`, `claude`, `antigravity`, `copilot`, `mcp`, `all`). |
 | `verify` | `rootDir` (opcional), `summaryOnly` (opcional) | Ejecuta simultáneamente la suite completa de los 9 Quality Gates deterministas de AI-SDLC (`quality`, `traceability`, `governance`, `licenses`, `schemas`, `duplicates`, `security`, `testing`, `pdac`). |
 | `report` | `rootDir` (opcional), `outputDir` (opcional) | Genera simultáneamente el panel interactivo HTML (`reports/dashboard.html`) y el informe consolidado de calidad en Markdown (`reports/QUALITY_REPORT.md`). |
 

@@ -1,0 +1,12 @@
+id: HOF-CHG-030-INIT-AGENT-SCAFFOLDING
+type: handoff
+title: Handoff Canónico de Producto para init-agent-scaffolding
+changeId: CHG-030-INIT-AGENT-SCAFFOLDING
+version: 1.0.0
+createdAt: '2026-09-19T09:46:35.732Z'
+subgraph:
+  requirements:
+    - FR-030-INIT-AGENT-SCAFFOLDING-001
+  useCases:
+    - UC-030-INIT-AGENT-SCAFFOLDING
+citations: []

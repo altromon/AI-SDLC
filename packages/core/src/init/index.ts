@@ -5,6 +5,17 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { installGitHooks } from '../git/hook-installer.js';
+import {
+  STARTER_ANTIGRAVITY_RULES,
+  STARTER_CURSOR_CORE_RULES,
+  STARTER_CURSOR_PRODUCT_RULES,
+  STARTER_CURSOR_QUALITY_RULES,
+  STARTER_CLAUDE_RULES,
+  STARTER_COPILOT_RULES,
+  STARTER_CURSOR_MCP,
+  STARTER_ANTIGRAVITY_MCP,
+  STARTER_VSCODE_MCP,
+} from './agent-templates.js';
 
 export const VALID_CI_PROVIDERS = ['github', 'gitlab', 'azure', 'bitbucket'] as const;
 export type SupportedCiProvider = (typeof VALID_CI_PROVIDERS)[number];
@@ -503,10 +514,16 @@ jobs:
           fi
 `;
 
+export * from './agent-templates.js';
+
+export const VALID_AGENT_TARGETS = ['cursor', 'claude', 'antigravity', 'copilot', 'mcp', 'all'] as const;
+export type AgentTarget = (typeof VALID_AGENT_TARGETS)[number];
+
 export interface InitProjectOptions {
   rootDir?: string;
   targetDir?: string;
   ci?: string;
+  agents?: string | boolean | string[];
   dryRun?: boolean;
 }
 
@@ -516,8 +533,102 @@ export interface InitProjectResult {
   directoriesCreated: string[];
   filesCreated: string[];
   ciProvider?: SupportedCiProvider;
+  agentsConfigured: string[];
   gitHookInstalled: boolean;
   error?: string;
+}
+
+export function resolveAgentTargets(agents?: string | boolean | string[]): Set<string> {
+  const result = new Set<string>();
+  if (!agents) return result;
+  if (agents === true || agents === 'all') {
+    VALID_AGENT_TARGETS.forEach((t) => result.add(t));
+    return result;
+  }
+  const rawList = Array.isArray(agents) ? agents : String(agents).split(',');
+  for (const raw of rawList) {
+    const item = raw.trim().toLowerCase();
+    if (item === 'all') {
+      VALID_AGENT_TARGETS.forEach((t) => result.add(t));
+      return result;
+    }
+    if (VALID_AGENT_TARGETS.includes(item as AgentTarget)) {
+      result.add(item);
+    }
+  }
+  return result;
+}
+
+export function collectAgentFiles(targets: Set<string>): {
+  dirs: string[];
+  files: { relPath: string; content: string }[];
+} {
+  const dirs: string[] = [];
+  const files: { relPath: string; content: string }[] = [];
+
+  const includeAll = targets.has('all');
+  const includeCursor = includeAll || targets.has('cursor');
+  const includeClaude = includeAll || targets.has('claude');
+  const includeAntigravity = includeAll || targets.has('antigravity');
+  const includeCopilot = includeAll || targets.has('copilot');
+  const includeMcp = includeAll || targets.has('mcp');
+
+  if (includeAntigravity) {
+    dirs.push('.agent/rules');
+    files.push({ relPath: '.agent/rules/ai-sdlc.md', content: STARTER_ANTIGRAVITY_RULES });
+  }
+  if (includeCursor) {
+    dirs.push('.cursor/rules');
+    files.push(
+      { relPath: '.cursor/rules/ai-sdlc-core.mdc', content: STARTER_CURSOR_CORE_RULES },
+      { relPath: '.cursor/rules/ai-sdlc-product.mdc', content: STARTER_CURSOR_PRODUCT_RULES },
+      { relPath: '.cursor/rules/ai-sdlc-quality.mdc', content: STARTER_CURSOR_QUALITY_RULES }
+    );
+  }
+  if (includeClaude) {
+    files.push({ relPath: 'CLAUDE.md', content: STARTER_CLAUDE_RULES });
+  }
+  if (includeCopilot) {
+    dirs.push('.github');
+    files.push({ relPath: '.github/copilot-instructions.md', content: STARTER_COPILOT_RULES });
+  }
+  if (includeMcp || includeCursor) {
+    dirs.push('.cursor');
+    files.push({ relPath: '.cursor/mcp.json', content: STARTER_CURSOR_MCP });
+  }
+  if (includeMcp || includeAntigravity) {
+    files.push({ relPath: 'antigravity.mcp.json', content: STARTER_ANTIGRAVITY_MCP });
+  }
+  if (includeMcp) {
+    dirs.push('.vscode');
+    files.push({ relPath: '.vscode/mcp.json', content: STARTER_VSCODE_MCP });
+  }
+
+  return { dirs, files };
+}
+
+function writeProjectFiles(
+  destDir: string,
+  files: { relPath: string; content: string }[],
+  dryRun?: boolean
+): string[] {
+  const filesCreated: string[] = [];
+  for (const f of files) {
+    const fullFilePath = path.join(destDir, f.relPath);
+    const parentDir = path.dirname(fullFilePath);
+    if (!dryRun) {
+      if (!fs.existsSync(parentDir)) {
+        fs.mkdirSync(parentDir, { recursive: true });
+      }
+      if (!fs.existsSync(fullFilePath)) {
+        fs.writeFileSync(fullFilePath, f.content, 'utf-8');
+        filesCreated.push(f.relPath);
+      }
+    } else {
+      filesCreated.push(f.relPath);
+    }
+  }
+  return filesCreated;
 }
 
 export function initProject(options: InitProjectOptions = {}): InitProjectResult {
@@ -533,6 +644,7 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
         targetDir: destDir,
         directoriesCreated: [],
         filesCreated: [],
+        agentsConfigured: [],
         gitHookInstalled: false,
         error: `Proveedor CI no reconocido: '${options.ci}'. Opciones válidas: ${VALID_CI_PROVIDERS.join(', ')}.`,
       };
@@ -562,6 +674,14 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
 
   if (ciProvider === 'github') {
     directories.push('.github/workflows');
+  }
+
+  const agentTargets = resolveAgentTargets(options.agents);
+  const { dirs: agentDirs, files: agentFiles } = collectAgentFiles(agentTargets);
+  for (const d of agentDirs) {
+    if (!directories.includes(d)) {
+      directories.push(d);
+    }
   }
 
   const directoriesCreated: string[] = [];
@@ -596,22 +716,9 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
     );
   }
 
-  const filesCreated: string[] = [];
-  for (const f of filesToWrite) {
-    const fullFilePath = path.join(destDir, f.relPath);
-    const parentDir = path.dirname(fullFilePath);
-    if (!options.dryRun) {
-      if (!fs.existsSync(parentDir)) {
-        fs.mkdirSync(parentDir, { recursive: true });
-      }
-      if (!fs.existsSync(fullFilePath)) {
-        fs.writeFileSync(fullFilePath, f.content, 'utf-8');
-        filesCreated.push(f.relPath);
-      }
-    } else {
-      filesCreated.push(f.relPath);
-    }
-  }
+  filesToWrite.push(...agentFiles);
+
+  const filesCreated = writeProjectFiles(destDir, filesToWrite, options.dryRun);
 
   let gitHookInstalled = false;
   if (!options.dryRun) {
@@ -622,12 +729,18 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
     }
   }
 
+  const agentsConfigured = Array.from(agentTargets).filter((t) => t !== 'all');
+  if (agentTargets.has('all')) {
+    agentsConfigured.unshift('all');
+  }
+
   return {
     success: true,
     targetDir: destDir,
     directoriesCreated,
     filesCreated,
     ciProvider,
+    agentsConfigured,
     gitHookInstalled,
   };
 }
