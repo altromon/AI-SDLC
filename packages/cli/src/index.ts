@@ -14,7 +14,7 @@ import {
   runGitPlan,
   runGitValidate,
 } from './commands/git.js';
-import { runInit } from './commands/init.js';
+import { promptForAgents, runInit } from './commands/init.js';
 import { runKpiPr, runKpiRelease } from './commands/kpi.js';
 import { runMcpServer } from './commands/mcp.js';
 import { runReportDashboard, runReportQuality } from './commands/report.js';
@@ -568,8 +568,13 @@ program
   .description('Inicializa un nuevo repositorio con las directrices, esquemas y políticas de AI-SDLC')
   .option('-d, --dry-run', 'Simula la creación de archivos y directorios sin escribir en disco')
   .option('--ci <provider>', 'Proveedor de CI/CD para generar pipeline (github, gitlab, azure, bitbucket)')
-  .action((directory, opts) => {
-    const passed = runInit(directory, { dryRun: opts.dryRun, ci: opts.ci });
+  .option('--agents [targets]', 'Entornos de agentes a configurar (all, cursor, claude, antigravity, copilot, mcp, o combinación separada por comas)')
+  .action(async (directory, opts) => {
+    let agents = opts.agents;
+    if (agents === undefined && process.stdin.isTTY && !opts.dryRun) {
+      agents = await promptForAgents();
+    }
+    const passed = runInit(directory, { dryRun: opts.dryRun, ci: opts.ci, agents });
     process.exit(passed ? 0 : 1);
   });
 
