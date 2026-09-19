@@ -1,0 +1,12 @@
+id: HOF-CHG-029-EXPERT-USER-AGENT
+type: handoff
+title: Handoff Canónico de Producto para expert-user-agent
+changeId: CHG-029-EXPERT-USER-AGENT
+version: 1.0.0
+createdAt: '2026-09-18T23:59:00.000Z'
+subgraph:
+  requirements:
+    - FR-029-EXPERT-USER-AGENT-001
+  useCases:
+    - UC-029-EXPERT-USER-AGENT
+citations: []

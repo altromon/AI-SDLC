@@ -43,6 +43,9 @@ El framework AI-SDLC organiza a las personas y a los agentes de IA dentro de un 
    - Realiza revisiones adversariales del código en el PR buscando vulnerabilidades lógicas, inyecciones y fallos de autorización.
 7. **Agente de Cumplimiento de Licencias (`agent-compliance-checker`)**:
    - Inspecciona manifiestos de dependencias contra `license-policy.yaml`, alerta sobre licencias comerciales y genera borradores de atribución.
+8. **Agente Usuario Experto y Evaluador de Dominio (`agent-expert-user`)**:
+   - Contrasta el diseño de producto y especificaciones desde la perspectiva del usuario final o avanzado.
+   - Aplica discriminación bimodal definiendo el alcance estricto del MVP inmediato y canalizando mejoras avanzadas hacia el radar de roadmap mediante la plantilla institucional (`templates/product/user-design-feedback.template.md`).
 
 ---
 
@@ -58,6 +61,7 @@ El framework AI-SDLC organiza a las personas y a los agentes de IA dentro de un 
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | **Exploración y Redacción PDaC (Scribe)** | A | C | C | I | C | R (Analista Scribe) | IA redacta borrador conforme; no aprueba |
 | **Aprobación de Product Change** | **A** | C | C | I | I | - | **Prohibido para agentes (Solo humano)** |
+| **Evaluación de Diseño de Usuario (MVP vs Roadmap)** | **A** | C | C | I | C | R (Usuario Experto) | Aplica plantilla canónica; PO humano decide alcance |
 | **Modelado de Amenazas (Scribe)** | C | C | A | I | C | R (Threat Modeler Scribe) | Inferencia STRIDE/ASVS; validación de esquemas |
 | **Diseño Arquitectónico (arc42/NAF)** | I | **A** | C | I | C | R (Arquitecto) | Bloques deben citar casos de uso `UC-*` válidos |
 | **Aprobación de ADRs** | C | **A** | C | I | C | - | **Solo humanos aprueban decisiones técnicas** |
