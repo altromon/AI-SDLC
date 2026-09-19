@@ -68,3 +68,12 @@ Change-ID: CHG-026-AGENT-NATIVE-CONFIGS
 - **Índice de Mantenibilidad (MI)**: $\ge 50$
 - **Líneas por Función**: $\le 40$
 - Salida determinista CLI: todo comando `verify` admite `--json` sin códigos de escape ANSI.
+
+---
+
+## 5. Protocolo de Workflow Handoff y Ventana de Acción Humana
+- **Activación Condicional**:
+  - 🟢 **`AUTONOMOUS`** (o supervisión en PR/CI): **OMITIDO**. Ejecución continua sin interrupción.
+  - 🟡 **Autonomía $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **OBLIGATORIO**. Emitir bloque de Workflow Handoff ([`templates/workflow/agent-handoff.template.md`](templates/workflow/agent-handoff.template.md)) y **DETENERSE**.
+- **Contenido**: Entregables completados, siguiente(s) rol(es) sugerido(s), prompt listo para copiar y **ventana abierta para que el usuario tome acción** (revisar, editar a mano, pausar/desviar o delegar).
+

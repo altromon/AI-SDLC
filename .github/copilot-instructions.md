@@ -52,14 +52,22 @@ Umbrales de Calidad Innegociables (`quality-policy.yaml`):
 
 ## 4. Modos de Autonomía de Tareas (`tasks.md`)
 
-- 🟢 **`AUTONOMOUS`**: Riesgo bajo, tarea aislada. Implementa código y pruebas directamente.
-- 🟡 **`HUMAN_REVIEW_PLAN`**: Riesgo medio. Diseña el plan detallado y espera confirmación humana antes de codificar.
+- 🟢 **`AUTONOMOUS`**: Riesgo bajo, tarea aislada. Implementa código y pruebas directamente. Omitir bloque interactivo de handoff.
+- 🟡 **`HUMAN_REVIEW_PLAN`**: Riesgo medio. Diseña el plan detallado, emite bloque de Workflow Handoff y espera confirmación humana antes de codificar.
 - 🟠 **`AMBIGUOUS`**: Requisitos incompletos. Bloqueado: solicita clarificación humana.
 - 🔴 **`HIGH_RISK_MANUAL`**: Riesgo crítico (migraciones, criptografía). Ejecución manual exclusiva por humanos.
 
 ---
 
-## 5. Referencia Canónica
+## 5. Protocolo de Workflow Handoff y Ventana de Acción Humana
+- **Activación Condicional**:
+  * 🟢 **Modo `AUTONOMOUS`** (o supervisión en PR/CI): **OMITIDO**. No interrumpir la ejecución desatendida.
+  * 🟡 **Autonomía $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **OBLIGATORIO**. Emitir bloque de Workflow Handoff conforme a [`templates/workflow/agent-handoff.template.md`](../templates/workflow/agent-handoff.template.md) y **DETENERSE**.
+- **Componentes**: Declarar entregables completados, recomendar siguientes roles (`agent-threat-modeler`, `agent-system-architect`, `agent-developer`, `agent-security-auditor`), prompt sugerido de invocación y **mantener siempre abierta la ventana para que el usuario tome acción** (revisar, editar a mano, pausar/desviar o delegar).
+
+---
+
+## 6. Referencia Canónica
 Para consultar los protocolos completos, prompts especializados y contratos de interfaz:
 - [`process/09_agent_protocols.md`](../process/09_agent_protocols.md)
 - [`process/01_governance_and_roles.md`](../process/01_governance_and_roles.md)

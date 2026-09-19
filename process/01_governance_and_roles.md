@@ -126,6 +126,13 @@ Para evitar pérdidas de contexto o asunciones no válidas:
    - Al concluir la implementación y superar la verificación determinista, el cambio se integra en la especificación canónica mediante `aisdlc sdd integrate`, actualizando el estado de los requerimientos y los mapas arquitectónicos de dependencias.
 5. **De Agente a Agente (Subagent Delegation)**:
    - Los agentes delegan tareas mediante contratos estructurados: objetivo claro, enlaces a artefactos canónicos citados, restricciones de tiempo/formato y comandos deterministas para verificar el resultado.
+6. **Handoff entre Agentes del Workflow y Ventana de Acción Humana**:
+   - Para garantizar que al usuario le quede nítido quién o quiénes son los siguientes en actuar dentro del flujo, los agentes adoptan el protocolo canónico de **Workflow Handoff** basado en la plantilla institucional [`templates/workflow/agent-handoff.template.md`](../templates/workflow/agent-handoff.template.md).
+   - **Regla de Activación Condicional por Nivel de Autonomía**:
+     * 🟢 **Modo `AUTONOMOUS`** (o tareas donde el humano supervisa únicamente la ejecución final en el PR o pipeline de CI): **NO se solicita ni emite este handoff interactivo**, permitiendo al agente ejecutar de manera desatendida y continua sin fricciones innecesarias.
+     * 🟡 **Nivel de Autonomía $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **es OBLIGATORIO emitir el bloque de Workflow Handoff y DETENERSE**, exponiendo los entregables completados, sugiriendo el siguiente rol en el flujo y **dejando siempre la ventana abierta para que el usuario tome acción** (revisar, editar a mano, pausar, desviar o delegar al siguiente agente).
+   - **Cadena de Transición Canónica del Ciclo de Vida**:
+     $$\text{PO Humano} \rightarrow \text{agent-product-analyst} \rightarrow \text{agent-expert-user} \rightarrow \text{agent-threat-modeler} \rightarrow \text{agent-system-architect} \rightarrow \text{agent-developer} \rightarrow \text{agent-test-engineer} \rightarrow \text{agent-security-auditor} \rightarrow \text{agent-compliance-checker} \rightarrow \text{Tech Lead Humano}$$
 
 ---
 

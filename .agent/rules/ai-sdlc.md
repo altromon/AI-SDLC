@@ -62,3 +62,12 @@ Este archivo define las reglas operativas y el mapeo de roles especializados par
   Task-ID: TSK-XXX
   Change-ID: CHG-XXX
   ```
+
+---
+
+## 4. Protocolo de Workflow Handoff y Ventana de Acción Humana
+- **Regla de Activación Condicional por Autonomía**:
+  - 🟢 **`AUTONOMOUS`** (o supervisión exclusiva al final en PR/CI): **OMITIDO**. No solicitar ni emitir handoff interactivo para no interrumpir la ejecución desatendida.
+  - 🟡 **Autonomía $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **OBLIGATORIO**. Emitir el bloque de Workflow Handoff conforme a [`templates/workflow/agent-handoff.template.md`](../../templates/workflow/agent-handoff.template.md) y **DETENERSE**.
+- **Contenido del Bloque**: Declarar entregables producidos, recomendar el siguiente rol en el flujo (`agent-threat-modeler`, `agent-system-architect`, `agent-developer`, `agent-security-auditor`, etc.), proporcionar el prompt sugerido de invocación y mantener **siempre abierta la ventana para que el usuario humano tome acción** (revisar, editar a mano, pausar/desviar o delegar).
+
