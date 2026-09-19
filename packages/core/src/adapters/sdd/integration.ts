@@ -499,6 +499,13 @@ function resolveMatchFromMetadata(
   activeFolders: string[],
   options: ChangeDetectionOptions
 ): { changeId?: string; source?: ChangeDetectionResult['source']; reason?: string } {
+  const hasSpecificFilter = Boolean(
+    options.headRef ||
+    (options.changedFiles && options.changedFiles.length > 0) ||
+    options.prTitle ||
+    options.prBody
+  );
+
   if (options.headRef) {
     const found = activeFolders.find((f) => matchesFolderOrPrefix(f, options.headRef!));
     if (found) return { changeId: found, source: 'branch', reason: `Coincidencia por rama origen '${options.headRef}'.` };
@@ -519,7 +526,7 @@ function resolveMatchFromMetadata(
     const found = activeFolders.find((f) => matchesFolderOrPrefix(f, options.prBody!));
     if (found) return { changeId: found, source: 'body', reason: `Coincidencia por mención en cuerpo del PR.` };
   }
-  if (activeFolders.length === 1) {
+  if (!hasSpecificFilter && activeFolders.length === 1) {
     return { changeId: activeFolders[0], source: 'single_active_completed', reason: `Único cambio activo disponible '${activeFolders[0]}'.` };
   }
   return {};
