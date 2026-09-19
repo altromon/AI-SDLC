@@ -2,10 +2,11 @@
 id: CHG-029-EXPERT-USER-AGENT
 type: spec-change-proposal
 title: expert-user-agent
-status: active
+status: applied
 author: agent-developer / human-dev
 citations: []
 ---
+
 
 # Propuesta de Cambio: CHG-029-EXPERT-USER-AGENT
 
