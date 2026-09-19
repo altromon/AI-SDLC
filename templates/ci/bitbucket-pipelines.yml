@@ -35,20 +35,15 @@ definitions:
           - pnpm install --frozen-lockfile
           - pnpm approve-builds --all
           - pnpm run build
-          - npx tsx scripts/sdd-integrate-ci.ts
+          - node packages/cli/bin/aisdlc.js sdd integrate --auto || true
           - |
-            if [ -f sdd-integrate.env ]; then
-              source sdd-integrate.env
-            fi
-            if [ "$INTEGRATED" = "true" ]; then
-              git config user.name "bitbucket-pipelines[bot]"
-              git config user.email "pipelines[bot]@bitbucket.org"
-              git add -A
-              if ! git diff --cached --quiet; then
-                git commit -m "chore(sdd): integrate ${CHANGE_ID} into canonical baseline [skip ci]"
-                git push origin HEAD:$BITBUCKET_BRANCH
-                echo "✔ Integración canónica sincronizada en Bitbucket."
-              fi
+            git config user.name "bitbucket-pipelines[bot]"
+            git config user.email "pipelines[bot]@bitbucket.org"
+            git add -A
+            if ! git diff --cached --quiet; then
+              git commit -m "chore(sdd): integrate changes into canonical baseline [skip ci]"
+              git push origin HEAD:$BITBUCKET_BRANCH
+              echo "✔ Integración canónica sincronizada en Bitbucket."
             fi
 
 pipelines:

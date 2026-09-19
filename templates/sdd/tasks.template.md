@@ -19,7 +19,7 @@ tasks:
     autonomy-mode: "AUTONOMOUS"
     verification:
       method: "quality-gate"
-      command-or-criteria: "npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts"
+      command-or-criteria: "npx tsc --noEmit && node packages/cli/bin/aisdlc.js verify quality"
     assigned-to: "agent-developer"
     status: "PENDING"
 
@@ -70,7 +70,7 @@ Cada tarea se clasifica rigurosamente según su nivel de complejidad y riesgo pa
 - **ID**: `TSK-001`
 - **Descripción**: Crear las interfaces y estructuras de datos estipuladas en `design.md`.
 - **Modo**: `AUTONOMOUS` 🟢
-- **Verificación**: `npx tsc --noEmit && npx tsx scripts/verify-quality-gate.ts`
+- **Verificación**: `npx tsc --noEmit && node packages/cli/bin/aisdlc.js verify quality`
 
 ### Fase 2: Implementación y Pruebas BDD (TSK-002)
 - **ID**: `TSK-002`
