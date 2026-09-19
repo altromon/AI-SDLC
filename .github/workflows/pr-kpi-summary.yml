@@ -44,4 +44,4 @@ jobs:
           PR_BASE_REF: origin/${{ github.base_ref }}
           PR_HEAD_REF: HEAD
         run: |
-          npx tsx scripts/aggregate-pr-kpis.ts
+          node packages/cli/bin/aisdlc.js kpi pr --base origin/${{ github.base_ref }} --head HEAD >> $GITHUB_STEP_SUMMARY

@@ -131,6 +131,24 @@ export function emitCiOutput(
 
   if (envOutputFile) {
     const uppercaseKey = key.toUpperCase();
-    fs.appendFileSync(envOutputFile, `${uppercaseKey}=${value}\n`, 'utf-8');
+    const envString = `${uppercaseKey}=${value}`;
+    if (fs.existsSync(envOutputFile)) {
+      const content = fs.readFileSync(envOutputFile, 'utf-8');
+      const lines = content.split('\n');
+      let found = false;
+      const newLines = lines.map(line => {
+        if (line.startsWith(`${uppercaseKey}=`)) {
+          found = true;
+          return envString;
+        }
+        return line;
+      });
+      if (!found) {
+        newLines.push(envString);
+      }
+      fs.writeFileSync(envOutputFile, newLines.filter(l => l.trim() !== '').join('\n') + '\n', 'utf-8');
+    } else {
+      fs.writeFileSync(envOutputFile, envString + '\n', 'utf-8');
+    }
   }
 }

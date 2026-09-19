@@ -62,17 +62,15 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
           MANUAL_CHANGE_ID: ${{ github.event.inputs.change_id }}
         run: |
-          npx tsx scripts/sdd-integrate-ci.ts
+          node packages/cli/bin/aisdlc.js sdd integrate --auto || true
 
       - name: Commit and Push Canonical Baseline Changes
-        if: steps.integrate.outputs.integrated == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
           if ! git diff --cached --quiet; then
-            CHANGE_ID="${{ steps.integrate.outputs.change_id }}"
-            git commit -m "chore(sdd): integrate ${CHANGE_ID} into canonical baseline [skip ci]"
+            git commit -m "chore(sdd): integrate changes into canonical baseline [skip ci]"
             git push
             echo "✔ Integración canónica commiteada y sincronizada en el repositorio."
           else

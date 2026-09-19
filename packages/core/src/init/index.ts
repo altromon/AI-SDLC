@@ -248,19 +248,14 @@ sdd-canonical-integration:
     GIT_STRATEGY: clone
     GIT_DEPTH: 0
   script:
-    - npx tsx scripts/sdd-integrate-ci.ts
+    - node packages/cli/bin/aisdlc.js sdd integrate --auto || true
     - |
-      if [ -f sdd-integrate.env ]; then
-        source sdd-integrate.env
-      fi
-      if [ "$INTEGRATED" = "true" ]; then
-        git config user.name "gitlab-ci-bot"
-        git config user.email "gitlab-ci-bot@noreply.gitlab.com"
-        git add -A
-        if ! git diff --cached --quiet; then
-          git commit -m "chore(sdd): integrate \${CHANGE_ID} into canonical baseline [skip ci]"
-          git push "https://oauth2:\${CI_JOB_TOKEN}@\${CI_SERVER_HOST}/\${CI_PROJECT_PATH}.git" "HEAD:\${CI_COMMIT_BRANCH}"
-        fi
+      git config user.name "gitlab-ci-bot"
+      git config user.email "gitlab-ci-bot@noreply.gitlab.com"
+      git add -A
+      if ! git diff --cached --quiet; then
+        git commit -m "chore(sdd): integrate changes into canonical baseline [skip ci]"
+        git push "https://oauth2:\${CI_JOB_TOKEN}@\${CI_SERVER_HOST}/\${CI_PROJECT_PATH}.git" "HEAD:\${CI_COMMIT_BRANCH}"
       fi
 `;
 
@@ -341,7 +336,7 @@ stages:
             displayName: 'Instalar dependencias'
 
           - script: |
-              npx tsx scripts/sdd-integrate-ci.ts
+              node packages/cli/bin/aisdlc.js sdd integrate --auto || true
             name: SddIntegrate
             displayName: 'Detectar e integrar incremento SDD'
 
@@ -350,10 +345,9 @@ stages:
               git config user.email "azure-pipelines[bot]@dev.azure.com"
               git add -A
               if ! git diff --cached --quiet; then
-                git commit -m "chore(sdd): integrate $(SddIntegrate.change_id) into canonical baseline [skip ci]"
+                git commit -m "chore(sdd): integrate changes into canonical baseline [skip ci]"
                 git push origin HEAD:$(Build.SourceBranchName)
               fi
-            condition: eq(variables['SddIntegrate.integrated'], 'true')
             displayName: 'Sincronizar cambios canónicos en repositorio'
 `;
 
@@ -393,19 +387,14 @@ definitions:
           - pnpm install --frozen-lockfile
           - pnpm approve-builds --all
           - pnpm run build
-          - npx tsx scripts/sdd-integrate-ci.ts
+          - node packages/cli/bin/aisdlc.js sdd integrate --auto || true
           - |
-            if [ -f sdd-integrate.env ]; then
-              source sdd-integrate.env
-            fi
-            if [ "$INTEGRATED" = "true" ]; then
-              git config user.name "bitbucket-pipelines[bot]"
-              git config user.email "pipelines[bot]@bitbucket.org"
-              git add -A
-              if ! git diff --cached --quiet; then
-                git commit -m "chore(sdd): integrate \${CHANGE_ID} into canonical baseline [skip ci]"
-                git push origin HEAD:$BITBUCKET_BRANCH
-              fi
+            git config user.name "bitbucket-pipelines[bot]"
+            git config user.email "pipelines[bot]@bitbucket.org"
+            git add -A
+            if ! git diff --cached --quiet; then
+              git commit -m "chore(sdd): integrate changes into canonical baseline [skip ci]"
+              git push origin HEAD:$BITBUCKET_BRANCH
             fi
 
 pipelines:
@@ -531,17 +520,15 @@ jobs:
           PR_BODY: \${{ github.event.pull_request.body }}
           MANUAL_CHANGE_ID: \${{ github.event.inputs.change_id }}
         run: |
-          npx tsx scripts/sdd-integrate-ci.ts
+          node packages/cli/bin/aisdlc.js sdd integrate --auto || true
 
       - name: Commit and Push Canonical Baseline Changes
-        if: steps.integrate.outputs.integrated == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
           if ! git diff --cached --quiet; then
-            CHANGE_ID="\${{ steps.integrate.outputs.change_id }}"
-            git commit -m "chore(sdd): integrate \${CHANGE_ID} into canonical baseline [skip ci]"
+            git commit -m "chore(sdd): integrate changes into canonical baseline [skip ci]"
             git push
             echo "✔ Integración canónica commiteada y sincronizada en el repositorio."
           else

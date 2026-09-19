@@ -76,7 +76,7 @@ stages:
             displayName: 'Instalar dependencias'
 
           - script: |
-              npx tsx scripts/sdd-integrate-ci.ts
+              node packages/cli/bin/aisdlc.js sdd integrate --auto || true
             name: SddIntegrate
             displayName: 'Detectar e integrar incremento SDD'
 
@@ -85,11 +85,10 @@ stages:
               git config user.email "azure-pipelines[bot]@dev.azure.com"
               git add -A
               if ! git diff --cached --quiet; then
-                git commit -m "chore(sdd): integrate $(SddIntegrate.change_id) into canonical baseline [skip ci]"
+                git commit -m "chore(sdd): integrate changes into canonical baseline [skip ci]"
                 git push origin HEAD:$(Build.SourceBranchName)
                 echo "✔ Integración canónica sincronizada en Azure DevOps."
               else
                 echo "ℹ No se generaron modificaciones en el working tree."
               fi
-            condition: eq(variables['SddIntegrate.integrated'], 'true')
             displayName: 'Sincronizar cambios canónicos en repositorio'
