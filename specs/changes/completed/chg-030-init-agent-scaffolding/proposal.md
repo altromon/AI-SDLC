@@ -1,11 +1,12 @@
 ---
 id: CHG-030-INIT-AGENT-SCAFFOLDING
 type: spec-change-proposal
-title: "init-agent-scaffolding"
-status: draft
-author: "agent-developer / human-dev"
+title: init-agent-scaffolding
+status: applied
+author: agent-developer / human-dev
 citations: []
 ---
+
 
 # Propuesta de Cambio: CHG-030-INIT-AGENT-SCAFFOLDING
 
