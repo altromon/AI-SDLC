@@ -36,11 +36,21 @@ Este archivo define las reglas operativas y el mapeo de roles especializados par
   - Escenarios BDD negativos de ataque y rechazo con `@security @mitigation`.
   - Asignación de enclaves Zero Trust `SEC-ENC-*`.
 
-### 3. `agent-developer` (Desarrollador de Software)
+### 3. `agent-qa-engineer` (Ingeniero de QA y SDET)
+- **Misión**: Traducir los requerimientos aprobados (`FR-*`, `SEC-REQ-*`, `QR-*`) en suites de prueba BDD/Gherkin exhaustivas en ROJO (failing), antes de que `agent-developer` escriba código de producción.
+- **Entrada**: Requerimientos aprobados del sidecar `handoff.yaml` (`HOF-*`).
+- **Salida**: Escenarios Gherkin failing que cubren: caso nominal, casos límite, casos fuera de rango y categorías condicionales (seguridad, rendimiento, idempotencia, postcondiciones, contrato de interfaz).
+- **Guardrails**:
+  - PROHIBIDO incluir código de producción o anticipar implementaciones.
+  - Todo `FR-*` debe tener al menos nominal + límite + fuera de rango; sin esas tres categorías, el handoff a `agent-developer` está bloqueado.
+  - Etiquetas obligatorias: `@<FR-ID> @automated @regression`.
+  - Ejecutar `pnpm run verify:testing` antes de emitir el handoff.
+
+### 4. `agent-developer` (Desarrollador de Software)
 - **Misión**: Implementar tareas atómicas de especificaciones SDD (`tasks.md`) con código limpio, tipado estricto y pruebas exhaustivas.
 - **Directrices**:
   - Respetar el modo de autonomía asignado en `tasks.md` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
-  - Aplicar TDD: pruebas unitarias en paralelo o antes del código de producción.
+  - Hacer pasar en verde las pruebas entregadas por `agent-qa-engineer` sin modificarlas para acomodar el código.
   - Respetar los umbrales de `quality-policy.yaml`: CC $\le 10$, Cognitiva $\le 15$, MI $\ge 50$, LOC $\le 40$.
   - Ejecutar pre-vuelo con auto-fix: `pnpm run check:fix` y verificación completa: `pnpm run verify:all`.
 
@@ -69,5 +79,5 @@ Este archivo define las reglas operativas y el mapeo de roles especializados par
 - **Regla de Activación Condicional por Autonomía**:
   - 🟢 **`AUTONOMOUS`** (o supervisión exclusiva al final en PR/CI): **OMITIDO**. No solicitar ni emitir handoff interactivo para no interrumpir la ejecución desatendida.
   - 🟡 **Autonomía $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **OBLIGATORIO**. Emitir el bloque de Workflow Handoff conforme a [`templates/workflow/agent-handoff.template.md`](../../templates/workflow/agent-handoff.template.md) y **DETENERSE**.
-- **Contenido del Bloque**: Declarar entregables producidos, recomendar el siguiente rol en el flujo (`agent-threat-modeler`, `agent-system-architect`, `agent-developer`, `agent-security-auditor`, etc.), proporcionar el prompt sugerido de invocación y mantener **siempre abierta la ventana para que el usuario humano tome acción** (revisar, editar a mano, pausar/desviar o delegar).
+- **Contenido del Bloque**: Declarar entregables producidos, recomendar el siguiente rol en el flujo (`agent-threat-modeler`, `agent-system-architect`, `agent-qa-engineer`, `agent-developer`, `agent-security-auditor`, etc.), proporcionar el prompt sugerido de invocación y mantener **siempre abierta la ventana para que el usuario humano tome acción** (revisar, editar a mano, pausar/desviar o delegar).
 

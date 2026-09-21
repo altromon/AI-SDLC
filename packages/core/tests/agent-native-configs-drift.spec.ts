@@ -101,6 +101,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     const content = fs.readFileSync(configFiles.antigravity, 'utf-8');
     expect(content).toContain('agent-product-analyst');
     expect(content).toContain('agent-threat-modeler');
+    expect(content).toContain('agent-qa-engineer');
     expect(content).toContain('agent-developer');
     expect(content).toContain('agent-expert-user');
   });
