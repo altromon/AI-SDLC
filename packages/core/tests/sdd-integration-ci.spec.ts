@@ -6,6 +6,7 @@ import {
   detectActiveChangeForIntegration,
   integrateSddChange,
 } from '../src/adapters/sdd/integration.js';
+import { emitCiOutput } from '../src/adapters/sdd/ci.js';
 
 describe('CI/CD Automated SDD Integration & Change Detection Engine', () => {
   let tempDir: string;
@@ -168,5 +169,55 @@ citations:
     expect(result.allTasksCompleted).toBe(false);
     expect(result.completedTasksCount).toBe(1);
     expect(result.totalTasksCount).toBe(2);
+  });
+});
+
+describe('emitCiOutput — No-Duplication Regression (#57)', () => {
+  let tmpEnvFile: string;
+
+  beforeEach(() => {
+    tmpEnvFile = path.join(os.tmpdir(), `ci-output-${Date.now()}.env`);
+  });
+
+  afterEach(() => {
+    try { fs.rmSync(tmpEnvFile, { force: true }); } catch {}
+  });
+
+  it('should not duplicate lines when the same key is written multiple times', () => {
+    const env = { CI_OUTPUT_FILE: tmpEnvFile };
+    emitCiOutput('INTEGRATED', 'false', env);
+    emitCiOutput('INTEGRATED', 'false', env);
+    emitCiOutput('INTEGRATED', 'false', env);
+
+    const content = fs.readFileSync(tmpEnvFile, 'utf-8');
+    const lines = content.split('\n').filter((l) => l.trim() !== '');
+    const matches = lines.filter((l) => l.startsWith('INTEGRATED='));
+    expect(matches).toHaveLength(1);
+  });
+
+  it('should update the value in place when the same key is written with a new value', () => {
+    const env = { CI_OUTPUT_FILE: tmpEnvFile };
+    emitCiOutput('INTEGRATED', 'false', env);
+    emitCiOutput('INTEGRATED', 'true', env);
+
+    const content = fs.readFileSync(tmpEnvFile, 'utf-8');
+    const lines = content.split('\n').filter((l) => l.trim() !== '');
+    expect(lines).toContain('INTEGRATED=true');
+    expect(lines.filter((l) => l.startsWith('INTEGRATED='))).toHaveLength(1);
+  });
+
+  it('should create the file with a single key-value pair on first write', () => {
+    const env = { CI_OUTPUT_FILE: tmpEnvFile };
+    emitCiOutput('CHANGE_ID', 'chg-001', env);
+
+    const content = fs.readFileSync(tmpEnvFile, 'utf-8').trim();
+    expect(content).toBe('CHANGE_ID=chg-001');
+  });
+
+  it('should be a no-op when no output file env vars are set', () => {
+    // No GITHUB_OUTPUT, no CI_OUTPUT_FILE, no GITLAB_CI, no BITBUCKET_COMMIT
+    emitCiOutput('INTEGRATED', 'false', {});
+    // The function should not throw and should not create any file
+    expect(fs.existsSync(tmpEnvFile)).toBe(false);
   });
 });
