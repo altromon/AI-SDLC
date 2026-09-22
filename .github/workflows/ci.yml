@@ -39,5 +39,8 @@ jobs:
       - name: Run Vitest Unit & Integration Suites
         run: pnpm test
 
+      - name: Run Vitest Coverage (thresholds enforced)
+        run: pnpm run test:coverage
+
       - name: Dogfooding - Run AI-SDLC Full Verification Suite
         run: node packages/cli/bin/aisdlc.js verify all

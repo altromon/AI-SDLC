@@ -9,6 +9,7 @@
     "test": "vitest run packages",
     "test:example": "vitest run examples",
     "test:all": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "pnpm --filter \"@ai-sdlc/*\" typecheck",
     "extract:gherkin": "tsx packages/cli/src/index.ts gherkin extract",
     "extract:gherkin:all": "tsx packages/cli/src/index.ts gherkin extract --all",
@@ -42,6 +43,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.27.12",
     "@types/node": "^22.10.1",
+    "@vitest/coverage-v8": "^5.0.1",
     "eslint": "^9.16.0",
     "prettier": "^3.4.2",
     "tsup": "^8.3.6",
