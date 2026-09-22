@@ -4,6 +4,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import yaml from 'js-yaml';
 import {
   AutonomyMode,
   GovernanceOptions,
@@ -22,60 +23,41 @@ export function parseTasksDoc(content: string): { frontmatter: TasksFrontmatter;
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return { frontmatter: { tasks: [] }, body: content };
 
-  const yamlContent = match[1];
-  const lines = yamlContent.split('\n');
-  const frontmatter: TasksFrontmatter = { tasks: [] };
-
-  let currentTask: TaskItem | null = null;
-  let inVerification = false;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-
-    if (trimmed.startsWith('- id:')) {
-      if (currentTask) frontmatter.tasks.push(currentTask);
-      currentTask = {
-        id: trimmed.split(':')[1].replace(/['"]/g, '').trim(),
-        verification: {},
-      };
-      inVerification = false;
-    } else if (currentTask) {
-      if (trimmed.startsWith('title:')) {
-        currentTask.title = trimmed.split(':').slice(1).join(':').replace(/['"]/g, '').trim();
-      } else if (trimmed.startsWith('complexity:')) {
-        currentTask.complexity = trimmed.split(':')[1].replace(/['"]/g, '').trim();
-      } else if (trimmed.startsWith('risk-level:')) {
-        currentTask.riskLevel = trimmed.split(':')[1].replace(/['"]/g, '').trim();
-      } else if (trimmed.startsWith('autonomy-mode:')) {
-        currentTask.autonomyMode = trimmed.split(':')[1].replace(/['"]/g, '').trim();
-      } else if (trimmed.startsWith('assigned-to:')) {
-        currentTask.assignedTo = trimmed.split(':')[1].replace(/['"]/g, '').trim();
-      } else if (trimmed.startsWith('status:')) {
-        currentTask.status = trimmed.split(':')[1].replace(/['"]/g, '').trim();
-      } else if (trimmed.startsWith('blocking-reason:')) {
-        currentTask.blockingReason = trimmed.split(':').slice(1).join(':').replace(/['"]/g, '').trim();
-      } else if (trimmed.startsWith('verification:')) {
-        inVerification = true;
-      } else if (inVerification && trimmed.startsWith('method:')) {
-        currentTask.verification.method = trimmed.split(':')[1].replace(/['"]/g, '').trim();
-      } else if (inVerification && trimmed.startsWith('command-or-criteria:')) {
-        currentTask.verification.criteria = trimmed.split(':').slice(1).join(':').replace(/['"]/g, '').trim();
-      }
-    } else {
-      const parts = trimmed.split(':');
-      if (parts.length >= 2) {
-        const key = parts[0].trim();
-        if (key !== 'tasks') {
-          const val = parts.slice(1).join(':').replace(/['"]/g, '').trim();
-          frontmatter[key] = val;
-        }
-      }
-    }
+  let parsed: unknown;
+  try {
+    parsed = yaml.load(match[1]);
+  } catch {
+    return { frontmatter: { tasks: [] }, body: content };
   }
 
-  if (currentTask) frontmatter.tasks.push(currentTask);
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return { frontmatter: { tasks: [] }, body: content };
+  }
 
+  const raw = parsed as Record<string, unknown>;
+  const rawTasks = Array.isArray(raw['tasks']) ? (raw['tasks'] as Record<string, unknown>[]) : [];
+
+  const tasks: TaskItem[] = rawTasks.map((t) => {
+    const verification: TaskItem['verification'] = {};
+    if (t['verification'] && typeof t['verification'] === 'object') {
+      const v = t['verification'] as Record<string, unknown>;
+      if (typeof v['method'] === 'string') verification.method = v['method'];
+      if (typeof v['command-or-criteria'] === 'string') verification.criteria = v['command-or-criteria'];
+    }
+    return {
+      id: typeof t['id'] === 'string' ? t['id'] : String(t['id'] ?? ''),
+      title: typeof t['title'] === 'string' ? t['title'] : undefined,
+      complexity: typeof t['complexity'] === 'string' ? t['complexity'] : undefined,
+      riskLevel: typeof t['risk-level'] === 'string' ? t['risk-level'] : undefined,
+      autonomyMode: typeof t['autonomy-mode'] === 'string' ? t['autonomy-mode'] : undefined,
+      assignedTo: typeof t['assigned-to'] === 'string' ? t['assigned-to'] : undefined,
+      status: typeof t['status'] === 'string' ? t['status'] : undefined,
+      blockingReason: typeof t['blocking-reason'] === 'string' ? t['blocking-reason'] : undefined,
+      verification,
+    };
+  });
+
+  const frontmatter: TasksFrontmatter = { ...raw, tasks };
   return { frontmatter, body: content.substring(match[0].length) };
 }
 
