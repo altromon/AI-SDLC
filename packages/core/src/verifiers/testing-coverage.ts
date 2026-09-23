@@ -4,6 +4,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import yaml from 'js-yaml';
 import {
   RequirementAuditItem,
   TaskAuditItem,
@@ -37,70 +38,44 @@ export function parseGenericDoc(content: string): { frontmatter: GenericFrontmat
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return { frontmatter: {}, body: content };
 
-  const lines = match[1].split('\n');
-  const frontmatter: GenericFrontmatter = { tasks: [] };
-  let currentKey: string | null = null;
-  let currentTask: ParsedTaskItem | null = null;
-  let inVerification = false;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;    // Manejo de tareas en tasks.md
-    if (currentKey === 'tasks' && trimmed.startsWith('- id:')) {
-      if (currentTask && frontmatter.tasks) frontmatter.tasks.push(currentTask);
-      currentTask = {
-        id: trimmed.split(':')[1].replace(/['"]/g, '').trim(),
-        verification: {},
-      };
-      inVerification = false;
-      continue;
-    }
-
-    if (currentTask) {
-      if (trimmed.startsWith('title:')) {
-        currentTask.title = trimmed.split(':').slice(1).join(':').replace(/['"]/g, '').trim();
-      } else if (trimmed.startsWith('verification:')) {
-        inVerification = true;
-      } else if (inVerification && trimmed.startsWith('method:')) {
-        currentTask.verification = currentTask.verification || {};
-        currentTask.verification.method = trimmed.split(':')[1].replace(/['"]/g, '').trim();
-      } else if (inVerification && trimmed.startsWith('command-or-criteria:')) {
-        currentTask.verification = currentTask.verification || {};
-        currentTask.verification.criteria = trimmed.split(':').slice(1).join(':').replace(/['"]/g, '').trim();
-      } else if (!trimmed.startsWith('command-or-criteria:') && !trimmed.startsWith('method:') && inVerification) {
-        inVerification = false;
-      }
-      if (trimmed.endsWith(':') && !trimmed.startsWith('- ') && !inVerification) {
-        if (currentTask && frontmatter.tasks) frontmatter.tasks.push(currentTask);
-        currentTask = null;
-      } else {
-        continue;
-      }
-    }
-
-    if (trimmed.startsWith('- ') && currentKey) {
-      const item = trimmed.substring(2).trim().replace(/^["']|["']$/g, '');
-      const existing = frontmatter[currentKey];
-      if (!Array.isArray(existing)) {
-        frontmatter[currentKey] = [item];
-      } else {
-        (existing as string[]).push(item);
-      }
-    } else {
-      const parts = trimmed.split(':');
-      if (parts.length >= 2) {
-        currentKey = parts[0].trim();
-        const val = parts.slice(1).join(':').trim().replace(/^["']|["']$/g, '');
-        if (val === '' || val === '[]') {
-          frontmatter[currentKey] = [];
-        } else {
-          frontmatter[currentKey] = val;
-        }
-      }
-    }
+  let parsed: unknown;
+  try {
+    parsed = yaml.load(match[1]);
+  } catch {
+    return { frontmatter: {}, body: content };
   }
 
-  if (currentTask && frontmatter.tasks) frontmatter.tasks.push(currentTask);
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return { frontmatter: {}, body: content };
+  }
+
+  const raw = parsed as Record<string, unknown>;
+
+  const rawTasks = Array.isArray(raw['tasks']) ? (raw['tasks'] as Record<string, unknown>[]) : [];
+  const tasks: ParsedTaskItem[] = rawTasks.map((t) => {
+    const verification: ParsedTaskItem['verification'] = {};
+    if (t['verification'] && typeof t['verification'] === 'object') {
+      const v = t['verification'] as Record<string, unknown>;
+      if (typeof v['method'] === 'string') verification.method = v['method'];
+      if (typeof v['command-or-criteria'] === 'string') verification.criteria = v['command-or-criteria'];
+    }
+    return {
+      id: typeof t['id'] === 'string' ? t['id'] : String(t['id'] ?? ''),
+      title: typeof t['title'] === 'string' ? t['title'] : undefined,
+      verification,
+    };
+  });
+
+  const verifiedBy = raw['verified-by-tests'];
+  const frontmatter: GenericFrontmatter = {
+    ...raw,
+    tasks,
+    'verified-by-tests': Array.isArray(verifiedBy)
+      ? (verifiedBy as unknown[]).map(String)
+      : typeof verifiedBy === 'string'
+        ? [verifiedBy]
+        : undefined,
+  };
 
   return { frontmatter, body: content.substring(match[0].length) };
 }

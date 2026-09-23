@@ -53,6 +53,10 @@ describe('AI as Scribe & JSON Schema Validation Suite', () => {
     expect(inferArtifactTypeFromId('MAN-USER-SENTINELCORE')).toBe('user-manual');
     expect(inferArtifactTypeFromId('MAN-PROD-SENTINELCORE')).toBe('production-manual');
     expect(inferArtifactTypeFromId('SAF-REQ-ALTITUDE-LIMIT')).toBe('safety-requirement');
+    expect(inferArtifactTypeFromId('HAZ-COLLISION-TERRAIN')).toBe('hazard');
+    expect(inferArtifactTypeFromId('SEC-ENC-VAULT-PERIMETER')).toBe('security-enclave');
+    expect(inferArtifactTypeFromId('JRN-ONBOARDING-OPERATOR')).toBe('journey');
+    expect(inferArtifactTypeFromId('TERM-WAYPOINT-ENVELOPE')).toBe('term');
   });
 
   it('should validate AI as Scribe generated Product artifacts from natural language prompt', () => {
@@ -267,5 +271,69 @@ unknown-extra-property: "disallowed"
     expect(result.errors.some((e) => e.includes('length must be >='))).toBe(true);
     expect(result.errors.some((e) => e.includes('unknown-status'))).toBe(true);
     expect(result.errors.some((e) => e.includes('disallowed extra property'))).toBe(true);
+  });
+
+  it('should validate enterprise artifacts: hazard, security-enclave, journey, and term against JSON schemas', () => {
+    // 1. Hazard (HAZ)
+    const hazardFm = {
+      id: 'HAZ-ROTOR-FAILURE-001',
+      type: 'hazard',
+      title: 'Pérdida de tracción por fallo de rotor primario',
+      status: 'active',
+      version: '1.0.0',
+      severity: 'critical',
+      probability: 'remote',
+      'fault-tolerance-time-ms': 200,
+      'mitigated-by': ['SAF-REQ-ROTOR-REDUNDANCY-001'],
+    };
+    const hazRes = validateArtifactSchema(hazardFm, 'hazard', repoRoot);
+    expect(hazRes.valid).toBe(true);
+    expect(hazRes.errors).toHaveLength(0);
+
+    // 2. Security Enclave (SEC-ENC)
+    const enclaveFm = {
+      id: 'SEC-ENC-HSM-VAULT-001',
+      type: 'security-enclave',
+      title: 'Enclave Criptográfico de Hardware Seguro',
+      status: 'active',
+      version: '1.0.0',
+      'trust-zone': 'highly-trusted',
+      'perimeter-rules': ['mTLS con certificados raíz de hardware', 'Zero inbound sin clave efímera'],
+      'allowed-inbound': ['CMP-CRYPTO-SIGNER-001'],
+      'allowed-outbound': ['SEC-ENC-AUDIT-LOG-001'],
+      'authentication-mechanism': 'mtls',
+    };
+    const encRes = validateArtifactSchema(enclaveFm, 'security-enclave', repoRoot);
+    expect(encRes.valid).toBe(true);
+    expect(encRes.errors).toHaveLength(0);
+
+    // 3. Journey (JRN)
+    const journeyFm = {
+      id: 'JRN-DRONE-MISSION-LIFECYCLE',
+      type: 'journey',
+      title: 'Ciclo de Vida de Misión de Vuelo Autónomo',
+      status: 'active',
+      version: '1.0.0',
+      persona: 'ACT-DRONE-PILOT-001',
+      stages: ['Pre-vuelo', 'Despegue', 'Misión', 'Aterrizaje'],
+      touchpoints: ['App Móvil', 'Estación de Telemetría', 'Bocina de Alerta'],
+    };
+    const jrnRes = validateArtifactSchema(journeyFm, 'journey', repoRoot);
+    expect(jrnRes.valid).toBe(true);
+    expect(jrnRes.errors).toHaveLength(0);
+
+    // 4. Term (TERM)
+    const termFm = {
+      id: 'TERM-FTTI-ENVELOPE',
+      type: 'term',
+      title: 'Fault Tolerant Time Interval (FTTI)',
+      status: 'active',
+      version: '1.0.0',
+      definition: 'Tiempo máximo transcurrido entre la aparición de un fallo y la materialización de un peligro en ausencia de mitigación.',
+      'bounded-context': 'FunctionalSafety',
+    };
+    const termRes = validateArtifactSchema(termFm, 'term', repoRoot);
+    expect(termRes.valid).toBe(true);
+    expect(termRes.errors).toHaveLength(0);
   });
 });

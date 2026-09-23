@@ -178,6 +178,44 @@ Body content`;
     expect(frontmatter.tasks[0].autonomyMode).toBe('AUTONOMOUS');
     expect(frontmatter.tasks[0].verification.criteria).toBe('pnpm test');
   });
+
+  it('should correctly parse titles containing colons (regression for split(:) bug)', () => {
+    const doc = `---
+tasks:
+  - id: "TSK-002"
+    title: "Fase 3: Conectividad y Protocolos"
+    autonomy-mode: "HUMAN_REVIEW_PLAN"
+    verification:
+      method: "MANUAL"
+      command-or-criteria: "Review checklist item 3: verify protocol handshake"
+---
+`;
+    const { frontmatter } = parseTasksDoc(doc);
+    expect(frontmatter.tasks[0].title).toBe('Fase 3: Conectividad y Protocolos');
+    expect(frontmatter.tasks[0].verification.criteria).toBe('Review checklist item 3: verify protocol handshake');
+  });
+
+  it('should return empty tasks array for malformed YAML frontmatter', () => {
+    const doc = `---
+tasks:
+  - id: [unclosed bracket
+    title: broken
+---
+`;
+    const { frontmatter } = parseTasksDoc(doc);
+    expect(frontmatter.tasks).toHaveLength(0);
+  });
+
+  it('should return empty tasks when frontmatter has no tasks key', () => {
+    const doc = `---
+id: "TASKS-001"
+version: "1.0.0"
+---
+# Body
+`;
+    const { frontmatter } = parseTasksDoc(doc);
+    expect(frontmatter.tasks).toHaveLength(0);
+  });
 });
 
 describe('Gherkin Extractor Engine', () => {

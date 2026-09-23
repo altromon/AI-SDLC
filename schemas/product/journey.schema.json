@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-sdlc.org/schemas/product/journey.schema.json",
+  "title": "Customer / Operator Journey Schema",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "title",
+    "status",
+    "version",
+    "persona",
+    "stages",
+    "touchpoints"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^JRN-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    },
+    "type": {
+      "type": "string",
+      "const": "journey"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
+      "description": "Versión semántica del journey (SemVer)."
+    },
+    "schema-version": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "retired"]
+    },
+    "persona": {
+      "type": "string",
+      "pattern": "^ACT-[A-Z0-9]+(-[A-Z0-9]+)*$",
+      "description": "Actor (persona) que protagoniza este journey."
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "Etapas secuenciales del journey (ej. Awareness, Onboarding, Activation, Retention)."
+    },
+    "touchpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "Puntos de contacto entre la persona y el sistema en cada etapa."
+    },
+    "related-use-cases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^UC-[A-Z0-9]+(-[A-Z0-9]+)*$"
+      },
+      "description": "Casos de uso del sistema relacionados con este journey."
+    },
+    "pain-points": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Fricciones o problemas detectados en el recorrido del usuario."
+    },
+    "supersedes": {
+      "type": ["string", "null"]
+    },
+    "superseded-by": {
+      "type": ["string", "null"]
+    }
+  },
+  "additionalProperties": false
+}
