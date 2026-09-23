@@ -224,14 +224,14 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       const result = await client.callTool({
         name: 'kpi_release',
         arguments: {
-          release: 'main',
-          base: 'main',
+          release: 'HEAD',
+          base: 'HEAD',
         },
       });
 
       expect(result.isError).toBeFalsy();
       const content = JSON.parse((result.content[0] as any).text);
-      expect(content.releaseBranch).toBe('main');
+      expect(content.releaseBranch).toBe('HEAD');
       expect(content.totalCommits).toBeDefined();
       expect(content.authorStats).toBeDefined();
     });
