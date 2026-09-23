@@ -141,10 +141,17 @@ AI-SDLC estructura su carpeta `specs/` conectándola con herramientas reconocida
      - **Experiencia de Desarrollo**: Los ingenieros y agentes no necesitan ejecutar manualmente `sdd integrate` antes de abrir el PR; una vez fusionado el PR, basta con ejecutar `git pull` en la copia local para obtener el catálogo canónico actualizado.
 
 4. **Comandos CLI Operativos**:
-   - `npx aisdlc change new "<nombre>" [--from <id>]`: Genera el andamiaje completo de un nuevo cambio SDD con las 4 plantillas y el sidecar `handoff.yaml`.
+   - `npx aisdlc check [--fix] [--json]`: Ejecuta la suite consolidada de pre-vuelo sobre todos los Quality Gates con auto-fix no destructivo opcional.
+   - `npx aisdlc change new "<nombre>" [--from <id>] [--profile <patch|standard|critical>] [--json]`: Genera el andamiaje completo de un nuevo cambio SDD con las 4 plantillas y el sidecar `handoff.yaml`.
    - `npx aisdlc sdd new "<nombre>"`: Alias conveniente de `change new`.
-   - `npx aisdlc sdd deposit --framework <openspec|speckit> --change <id>`: Deposita el sidecar `handoff.yaml` en el cambio activo.
-   - `npx aisdlc sdd verify`: Audita la conformidad de todos los espacios de trabajo y sidecars de handoff, ejecutando la compuerta pre-vuelo de duplicados.
-   - `npx aisdlc verify duplicates`: Audita colisiones de IDs, textos normativos idénticos, títulos redundantes y solapamientos BDD.
-   - `npx aisdlc sdd integrate [--change <id>] [--auto]`: Integra y promueve el cambio completado a las especificaciones canónicas (soporta resolución manual o automática).
-   - `npx aisdlc verify traceability`: Ejecuta la matriz de trazabilidad 360° determinista.
+   - `npx aisdlc sdd deposit --change <id> [--framework <openspec|speckit>] [--requirements <reqs>] [--json]`: Deposita el sidecar `handoff.yaml` en el cambio activo.
+   - `npx aisdlc sdd verify [--json]`: Audita la conformidad de todos los espacios de trabajo y sidecars de handoff, ejecutando la compuerta pre-vuelo de duplicados.
+   - `npx aisdlc sdd integrate [--change <id>] [--auto] [--json]`: Integra y promueve el cambio completado a las especificaciones canónicas (soporta resolución manual o automática).
+   - `npx aisdlc gherkin extract [--all] [--path <path>] [--json]`: Extrae y sincroniza escenarios BDD Gherkin a archivos `.feature` en disco.
+   - `npx aisdlc init [directory] [--dry-run] [--ci <provider>] [--agents <list>] [--json]`: Inicializa la gobernanza, esquemas y políticas en un nuevo repositorio.
+   - `npx aisdlc verify all [--json]`: Ejecuta los 9 Quality Gates deterministas emitiendo resumen estructurado o texto humano.
+
+5. **Consumo Programático y Automatizado por Agentes de IA (`--json` y `AISDLC_FORMAT=json`)**:
+   - **Salida JSON Pura Sin Caracteres de Escape**: Todos los comandos (`check`, `sdd *`, `gherkin extract`, `init`, `verify *`) soportan el flag `--json` o `-F, --format json`, suprimiendo de forma estricta colores y secuencias de escape ANSI (`picocolors`).
+   - **Variable de Entorno Global**: Configurar `export AISDLC_FORMAT=json` (o `AISDLC_OUTPUT=json`) activa la emisión JSON estructurada en todas las invocaciones de la CLI de manera transparente, permitiendo que orquestadores, agentes desatendidos y pipelines CI/CD consuman payloads parseables mediante `JSON.parse()` con códigos de salida estandarizados (0 = éxito, 1 = bloqueo/violación).
+

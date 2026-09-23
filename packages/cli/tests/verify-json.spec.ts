@@ -17,6 +17,15 @@ import {
   runVerifyTesting,
   runVerifyTraceability,
 } from '../src/commands/verify.js';
+import { runCheck } from '../src/commands/check.js';
+import { runGherkinExtract } from '../src/commands/gherkin.js';
+import { runInit } from '../src/commands/init.js';
+import {
+  runChangeNew,
+  runSddDeposit,
+  runSddIntegrate,
+  runSddVerify,
+} from '../src/commands/sdd.js';
 
 const ANSI_REGEX = /\u001b\[[0-9;]*m/;
 
@@ -483,4 +492,181 @@ describe('@ai-sdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () 
       expect(parsed.violations).toEqual([]);
     });
   });
+
+  describe('Unified JSON Output Suite for check, sdd, gherkin, init (#58)', () => {
+    let tmpDir: string;
+
+    afterEach(() => {
+      delete process.env.AISDLC_FORMAT;
+      delete process.env.AISDLC_OUTPUT;
+      if (tmpDir && fs.existsSync(tmpDir)) {
+        try {
+          fs.rmSync(tmpDir, { recursive: true, force: true });
+        } catch {
+          // ignore
+        }
+      }
+    });
+
+    it('should emit valid JSON without ANSI codes for runCheck({ json: true })', () => {
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runCheck({ json: true });
+      });
+
+      expect(passed).toBe(true);
+      expect(output).not.toMatch(ANSI_REGEX);
+
+      const parsed = JSON.parse(output);
+      expect(parsed.command).toBe('check');
+      expect(parsed.success).toBe(true);
+      expect(parsed.exitCode).toBe(0);
+      expect(Array.isArray(parsed.gates)).toBe(true);
+      expect(parsed.gates.length).toBe(9);
+    });
+
+    it('should emit valid JSON for runCheck when AISDLC_FORMAT=json is set', () => {
+      process.env.AISDLC_FORMAT = 'json';
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runCheck();
+      });
+
+      expect(passed).toBe(true);
+      expect(output).not.toMatch(ANSI_REGEX);
+
+      const parsed = JSON.parse(output);
+      expect(parsed.command).toBe('check');
+      expect(parsed.success).toBe(true);
+    });
+
+    it('should emit valid JSON without ANSI codes for runGherkinExtract({ json: true })', () => {
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runGherkinExtract({ json: true });
+      });
+
+      expect(passed).toBe(true);
+      expect(output).not.toMatch(ANSI_REGEX);
+
+      const parsed = JSON.parse(output);
+      expect(parsed.command).toBe('gherkin:extract');
+      expect(parsed.success).toBe(true);
+      expect(parsed.exitCode).toBe(0);
+      expect(parsed.totalScenarios).toBeDefined();
+      expect(Array.isArray(parsed.features)).toBe(true);
+    });
+
+    it('should emit valid JSON without ANSI codes for runInit with --dry-run and --json', () => {
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-test-init-json-'));
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runInit(tmpDir, { json: true, dryRun: true, ci: 'github', agents: 'none' });
+      });
+
+      expect(passed).toBe(true);
+      expect(output).not.toMatch(ANSI_REGEX);
+
+      const parsed = JSON.parse(output);
+      expect(parsed.command).toBe('init');
+      expect(parsed.success).toBe(true);
+      expect(parsed.exitCode).toBe(0);
+      expect(parsed.dryRun).toBe(true);
+      expect(parsed.ciProvider).toBe('github');
+      expect(Array.isArray(parsed.directoriesCreated)).toBe(true);
+      expect(Array.isArray(parsed.filesCreated)).toBe(true);
+    });
+
+    it('should emit valid JSON without ANSI codes for runSddVerify({ json: true })', () => {
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runSddVerify({ json: true });
+      });
+
+      expect(passed).toBe(true);
+      expect(output).not.toMatch(ANSI_REGEX);
+
+      const parsed = JSON.parse(output);
+      expect(parsed.command).toBe('sdd:verify');
+      expect(parsed.success).toBe(true);
+      expect(parsed.exitCode).toBe(0);
+      expect(parsed.totalHandoffs).toBeGreaterThanOrEqual(0);
+      expect(Array.isArray(parsed.handoffs)).toBe(true);
+    });
+
+    it('should emit valid JSON without ANSI codes for runSddDeposit({ json: true })', () => {
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-test-sdd-deposit-json-'));
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runSddDeposit({
+          root: tmpDir,
+          change: 'chg-999-test-deposit',
+          framework: 'openspec',
+          title: 'Test Deposit',
+          requirements: 'FR-001,FR-002',
+          useCases: 'UC-001',
+          json: true,
+        });
+      });
+
+      expect(passed).toBe(true);
+      expect(output).not.toMatch(ANSI_REGEX);
+
+      const parsed = JSON.parse(output);
+      expect(parsed.command).toBe('sdd:deposit');
+      expect(parsed.success).toBe(true);
+      expect(parsed.exitCode).toBe(0);
+      expect(parsed.changeId).toBe('chg-999-test-deposit');
+      expect(parsed.depositedPath).toBeDefined();
+      expect(parsed.handoff).toBeDefined();
+      expect(parsed.handoff.subgraph.requirements).toEqual(['FR-001', 'FR-002']);
+    });
+
+    it('should emit valid JSON without ANSI codes for runSddIntegrate when no active change is detected', () => {
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-test-sdd-integrate-json-'));
+      let passed: boolean = true;
+      const output = captureConsoleLog(() => {
+        passed = runSddIntegrate({
+          root: tmpDir,
+          auto: true,
+          json: true,
+        });
+      });
+
+      expect(passed).toBe(false);
+      expect(output).not.toMatch(ANSI_REGEX);
+
+      const parsed = JSON.parse(output);
+      expect(parsed.command).toBe('sdd:integrate');
+      expect(parsed.success).toBe(false);
+      expect(parsed.exitCode).toBe(1);
+      expect(parsed.error).toBeDefined();
+    });
+
+    it('should emit valid JSON without ANSI codes for runChangeNew({ json: true })', () => {
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-test-change-new-json-'));
+      let passed: boolean = false;
+      const output = captureConsoleLog(() => {
+        passed = runChangeNew({
+          root: tmpDir,
+          name: 'test-change-new',
+          profile: 'patch',
+          framework: 'openspec',
+          json: true,
+        });
+      });
+
+      expect(passed).toBe(true);
+      expect(output).not.toMatch(ANSI_REGEX);
+
+      const parsed = JSON.parse(output);
+      expect(parsed.command).toBe('change:new');
+      expect(parsed.success).toBe(true);
+      expect(parsed.exitCode).toBe(0);
+      expect(parsed.canonicalId).toBeDefined();
+      expect(parsed.profile).toBe('patch');
+      expect(Array.isArray(parsed.createdFiles)).toBe(true);
+    });
+  });
 });
+

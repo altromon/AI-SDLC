@@ -21,6 +21,13 @@ import {
   verifyTestingCoverage,
   verifyTraceability,
 } from '@ai-sdlc/core';
+import { isJsonOutput } from './verify.js';
+
+export interface CheckCommandOptions extends PreflightCheckOptions {
+  json?: boolean;
+  format?: string;
+}
+
 
 export function runAutoFix(rootDir: string, silent?: boolean): { gherkinCount: number; digestsCount: number } {
   const gherkinRes = extractGherkinFeatures({ rootDir });
@@ -281,13 +288,15 @@ export function renderDashboard(
   }
 }
 
-export function executePreflightCheck(options: PreflightCheckOptions = {}): PreflightCheckResult {
+export function executePreflightCheck(options: CheckCommandOptions = {}): PreflightCheckResult {
   const rootDir = options.root || process.cwd();
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
   let gherkinCount = 0;
   let digestsCount = 0;
 
   if (options.fix) {
-    const fixResult = runAutoFix(rootDir, options.silent);
+    const fixResult = runAutoFix(rootDir, isSilent);
     gherkinCount = fixResult.gherkinCount;
     digestsCount = fixResult.digestsCount;
   }
@@ -306,20 +315,36 @@ export function executePreflightCheck(options: PreflightCheckOptions = {}): Pref
 
   const success = gates.every((g) => g.status === 'PASSED' || g.status === 'FIXED');
 
-  if (!options.silent) {
+  if (!isSilent) {
     renderDashboard(gates, Boolean(options.fix), gherkinCount, digestsCount);
   }
 
-  return {
+  const result: PreflightCheckResult = {
     success,
     autoFixExecuted: Boolean(options.fix),
     gherkinSynced: gherkinCount,
     digestsSynced: digestsCount,
     gates,
   };
+
+  if (useJson) {
+    const payload = {
+      command: 'check',
+      success: result.success,
+      exitCode: result.success ? 0 : 1,
+      autoFixExecuted: result.autoFixExecuted,
+      gherkinSynced: result.gherkinSynced,
+      digestsSynced: result.digestsSynced,
+      gates: result.gates,
+    };
+    console.log(JSON.stringify(payload, null, 2));
+  }
+
+  return result;
 }
 
-export function runCheck(options: PreflightCheckOptions = {}): boolean {
+export function runCheck(options: CheckCommandOptions = {}): boolean {
   const result = executePreflightCheck(options);
   return result.success;
 }
+
