@@ -33,7 +33,6 @@ export function getNextCorrelativeNumber(rootDir: string): number {
     path.join(rootDir, 'specs', 'changes', 'active'),
     path.join(rootDir, 'specs', 'changes', 'completed'),
     path.join(rootDir, 'specs'),
-    path.join(rootDir, 'examples', 'specs'),
     path.join(rootDir, 'openspec', 'changes'),
   ];
 

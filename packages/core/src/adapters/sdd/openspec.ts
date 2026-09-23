@@ -22,9 +22,9 @@ export class OpenSpecAdapter implements SddAdapter {
     const activeChangeDir = path.join(rootDir, 'specs', 'changes', 'active', changeId);
     if (fs.existsSync(activeChangeDir)) return activeChangeDir;
 
-    // 3. Check for examples/specs/<changeId>
-    const exampleDir = path.join(rootDir, 'examples', 'specs', changeId);
-    if (fs.existsSync(exampleDir)) return exampleDir;
+    // 3. Check for AI-SDLC completed change path: specs/changes/completed/<changeId>
+    const completedChangeDir = path.join(rootDir, 'specs', 'changes', 'completed', changeId);
+    if (fs.existsSync(completedChangeDir)) return completedChangeDir;
 
     // 4. Default: specs/changes/active/<changeId>
     return activeChangeDir;

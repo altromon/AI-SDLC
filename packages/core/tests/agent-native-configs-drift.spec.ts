@@ -1,3 +1,6 @@
+/**
+ * Cites: FR-026-AGENT-NATIVE-CONFIGS-001
+ */
 import { describe, it, expect } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';

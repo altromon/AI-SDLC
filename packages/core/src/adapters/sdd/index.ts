@@ -52,14 +52,14 @@ export function scanAllProductHandoffs(
 
   // Look across potential SDD change locations:
   // 1. specs/changes/active/*
-  // 2. specs/*
-  // 3. openspec/changes/*
-  // 4. examples/specs/*
+  // 2. specs/changes/completed/*
+  // 3. specs/*
+  // 4. openspec/changes/*
   const candidateParentDirs = [
     path.join(rootDir, 'specs', 'changes', 'active'),
+    path.join(rootDir, 'specs', 'changes', 'completed'),
     path.join(rootDir, 'specs'),
     path.join(rootDir, 'openspec', 'changes'),
-    path.join(rootDir, 'examples', 'specs'),
   ];
 
   for (const parentDir of candidateParentDirs) {

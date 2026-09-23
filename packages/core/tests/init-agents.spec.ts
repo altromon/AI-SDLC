@@ -1,3 +1,8 @@
+/**
+ * Cites: FR-029-EXPERT-USER-AGENT-001
+ * Cites: FR-030-INIT-AGENT-SCAFFOLDING-001
+ * Cites: FR-031-WORKFLOW-AGENT-HANDOFF-001
+ */
 import * as fs from 'fs';
 import * as path from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';

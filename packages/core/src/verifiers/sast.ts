@@ -266,7 +266,7 @@ export function scanFileForSast(
 export function verifySast(options: SastVerifierOptions = {}): SastVerifierResult {
   const rootDir = options.rootDir || process.cwd();
   const minSeverity = options.minSeverity || 'HIGH';
-  const targetDirs = options.targetDirectories || ['src', 'packages', 'examples/src', 'prompts'];
+  const targetDirs = options.targetDirectories || ['src', 'packages', 'prompts'];
 
   const filesToScan: string[] = [];
   for (const tDir of targetDirs) {

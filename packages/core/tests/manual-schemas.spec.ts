@@ -90,7 +90,7 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
   });
 
   it('should validate SentinelCore User Manual instance', () => {
-    const examplePath = path.join(repoRoot, 'examples/manuals/MAN-USER-SENTINELCORE.md');
+    const examplePath = path.join(repoRoot, 'examples/sentinel-core/manuals/MAN-USER-SENTINELCORE.md');
     expect(fs.existsSync(examplePath)).toBe(true);
 
     const fm = extractFrontmatter(examplePath);
@@ -115,7 +115,7 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
   });
 
   it('should validate SentinelCore Production Manual instance', () => {
-    const examplePath = path.join(repoRoot, 'examples/manuals/MAN-PROD-SENTINELCORE.md');
+    const examplePath = path.join(repoRoot, 'examples/sentinel-core/manuals/MAN-PROD-SENTINELCORE.md');
     expect(fs.existsSync(examplePath)).toBe(true);
 
     const fm = extractFrontmatter(examplePath);

@@ -93,7 +93,6 @@ export function findChangeWorkspaceDir(rootDir: string, changeId: string): strin
   const candidateDirs = [
     path.join(rootDir, 'specs', 'changes', 'active', changeId),
     path.join(rootDir, 'specs', changeId),
-    path.join(rootDir, 'examples', 'specs', changeId),
     path.join(rootDir, 'openspec', 'changes', changeId),
     path.join(rootDir, 'specs', 'changes', 'completed', changeId),
   ];
@@ -401,11 +400,10 @@ export function verifySddIntegration(options: { rootDir?: string } = {}): {
   const audits: SddIntegrationAudit[] = [];
   const errors: string[] = [];
 
-  // Look for changes in specs/changes/active, specs/changes/completed, and examples/specs
+  // Look for changes in specs/changes/active and specs/changes/completed
   const searchDirs = [
     path.join(rootDir, 'specs', 'changes', 'completed'),
     path.join(rootDir, 'specs', 'changes', 'active'),
-    path.join(rootDir, 'examples', 'specs'),
   ];
 
   // Scan all canonical requirements

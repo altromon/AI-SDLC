@@ -37,6 +37,8 @@
     "report:dashboard": "tsx packages/cli/src/index.ts report dashboard",
     "report:requirements": "tsx scripts/export-active-requirements.ts",
     "report:docs": "tsx scripts/bundle-documentation.ts",
+    "verify:example": "tsx packages/cli/src/index.ts verify all --root examples/sentinel-core",
+    "report:example": "tsx packages/cli/src/index.ts report dashboard --root examples/sentinel-core",
     "change:new": "tsx packages/cli/src/index.ts change new",
     "changeset": "changeset"
   },

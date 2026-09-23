@@ -143,7 +143,7 @@ export function scanAllTestArtifacts(rootDir: string): Map<string, string[]> {
     for (const e of entries) {
       const fullPath = path.join(dir, e.name);
       if (e.isDirectory()) {
-        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist' && e.name !== 'scratch' && e.name !== 'fixtures') {
+        if (!['node_modules', '.git', 'dist', '.changeset', 'scratch', 'fixtures', 'templates', 'examples'].includes(e.name)) {
           walk(fullPath);
         }
       } else {

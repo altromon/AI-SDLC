@@ -1,3 +1,6 @@
+/**
+ * Cites: FR-025-STRUCTURED-JSON-VERIFY-001
+ */
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';

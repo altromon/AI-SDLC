@@ -6,7 +6,7 @@ status: applied
 author: agent-developer / human-dev
 citations:
   - id: FR-028-NATIVE-MCP-SERVER-001
-    digest: sha256:b5654893362291dd0b29d37632e2e124b908152b86b7d75eb1a97511e1d7f7c2
+    digest: sha256:9b7fcdcac21867f3caf3ebf3d63ee96bde9e25aef448ebe9f38a9a0db7e3289c
     comment: Requerimiento funcional canónico asociado (Génesis CHG-028-NATIVE-MCP-SERVER)
 ---
 

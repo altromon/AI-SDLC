@@ -61,7 +61,21 @@ export function parseTasksDoc(content: string): { frontmatter: TasksFrontmatter;
   return { frontmatter, body: content.substring(match[0].length) };
 }
 
-export function walkTaskFiles(dir: string, fileList: string[] = []): string[] {
+export function walkTaskFiles(
+  dir: string,
+  fileList: string[] = [],
+  excludeDirs: string[] = [
+    'node_modules',
+    '.git',
+    'dist',
+    '.changeset',
+    'scratch',
+    'test-scaffold',
+    'fixtures',
+    'templates',
+    'examples',
+  ]
+): string[] {
   try {
     if (!fs.existsSync(dir)) return fileList;
     const files = fs.readdirSync(dir);
@@ -69,13 +83,12 @@ export function walkTaskFiles(dir: string, fileList: string[] = []): string[] {
       const fullPath = path.join(dir, file);
       try {
         if (fs.statSync(fullPath).isDirectory()) {
-          if (!['node_modules', '.git', 'dist', '.changeset', 'scratch', 'test-scaffold'].includes(file)) {
-            walkTaskFiles(fullPath, fileList);
+          if (!excludeDirs.includes(file)) {
+            walkTaskFiles(fullPath, fileList, excludeDirs);
           }
         } else if (
-          file.toLowerCase() === 'tasks.md' ||
-          file.endsWith('.tasks.md') ||
-          file.toLowerCase() === 'tasks.template.md'
+          (file.toLowerCase() === 'tasks.md' || file.endsWith('.tasks.md')) &&
+          !file.includes('.template.')
         ) {
           fileList.push(fullPath);
         }

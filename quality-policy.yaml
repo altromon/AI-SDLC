@@ -19,18 +19,9 @@ scope:
   target_directories:
     - "src"
     - "lib"
-    - "examples"
-    - "tests"
   supported_extensions:
     - ".ts"
     - ".js"
-    - ".py"
-    - ".java"
-    - ".go"
-    - ".cs"
-    - ".rs"
-    - ".cpp"
-    - ".c"
   exclude_patterns:
     - "node_modules"
     - "__pycache__"
@@ -42,6 +33,9 @@ scope:
     - "reports"
     - "dist"
     - ".changeset"
+    - "examples"
+    - "scratch"
+    - "templates"
 
 # ------------------------------------------------------------------------------
 # 1. Mapeo de Ecosistemas de Lenguaje (Language Toolchains)

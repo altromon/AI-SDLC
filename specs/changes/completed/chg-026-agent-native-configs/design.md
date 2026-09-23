@@ -11,7 +11,7 @@ enclave: "SEC-ENC-DMZ"
 status: draft
 citations:
   - id: FR-026-AGENT-NATIVE-CONFIGS-001
-    digest: sha256:044b649d0b4739b026972d05af37155f0a5743d8dd915598a8839f4e6f3f2050
+    digest: sha256:10515f23a2276a362b1023693c433922994ccb1ac663ce8a421542dc3bb900dd
     comment: Requerimiento funcional canónico asociado (Génesis CHG-026-AGENT-NATIVE-CONFIGS)
 ---
 

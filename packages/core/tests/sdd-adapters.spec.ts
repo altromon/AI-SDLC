@@ -367,21 +367,20 @@ satisfies-requirements: []
 
     const res = scaffoldSddChange({
       rootDir: process.cwd(),
-      name: 'Reintento resiliente de telemetría',
+      name: 'Reintento resiliente de servidor MCP',
       changeId: 'chg-test-from-cli',
-      from: 'UC-STREAM-TELEMETRY',
+      from: 'UC-028-NATIVE-MCP-SERVER',
       framework: 'openspec',
       silent: true,
     });
 
-
     expect(res.success).toBe(true);
-    expect(res.citedArtifacts.some((c) => c.id === 'UC-STREAM-TELEMETRY')).toBe(true);
-    expect(res.citedArtifacts.some((c) => c.id === 'FR-TELEMETRY-STREAM-001')).toBe(true);
+    expect(res.citedArtifacts.some((c) => c.id === 'UC-028-NATIVE-MCP-SERVER')).toBe(true);
+    expect(res.citedArtifacts.some((c) => c.id === 'FR-028-NATIVE-MCP-SERVER-001')).toBe(true);
 
     const handoff = loadProductHandoffSidecar(res.changeDir);
-    expect(handoff?.subgraph.requirements).toContain('FR-TELEMETRY-STREAM-001');
-    expect(handoff?.subgraph.useCases).toContain('UC-STREAM-TELEMETRY');
+    expect(handoff?.subgraph.requirements).toContain('FR-028-NATIVE-MCP-SERVER-001');
+    expect(handoff?.subgraph.useCases).toContain('UC-028-NATIVE-MCP-SERVER');
 
     // Clean up created change folder
     if (fs.existsSync(res.changeDir)) {
