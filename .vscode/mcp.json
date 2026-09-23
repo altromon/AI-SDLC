@@ -1,0 +1,10 @@
+{
+  "servers": {
+    "ai-sdlc": {
+      "command": "node",
+      "args": [
+        "./packages/mcp/dist/cli.js"
+      ]
+    }
+  }
+}
