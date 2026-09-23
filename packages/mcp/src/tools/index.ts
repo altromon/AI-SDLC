@@ -9,6 +9,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import {
   aggregatePrKpis,
+  aggregateReleaseKpis,
   checkGherkinInSync,
   depositProductHandoffSidecar,
   detectAuthorIdentity,
@@ -24,12 +25,14 @@ import {
   verifyArtifactsSchemas,
   verifyLicenses,
   verifyPdacGraph,
+  verifyProgressiveFriction,
   verifyQualityGate,
   verifySast,
   verifySecrets,
   verifyTasksGovernance,
   verifyTestingCoverage,
   verifyTraceability,
+  writeReleaseKpiReport,
 } from '@ai-sdlc/core';
 
 export interface RegisterToolsOptions {
@@ -557,6 +560,53 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
     }
   );
 
+  // Tool: verify_friction
+  server.tool(
+    'verify_friction',
+    'Evalúa las reglas de fricción progresiva y guardrails anti-bypass (impide que cambios con perfil patch modifiquen rutas protegidas de seguridad, esquemas o arquitectura).',
+    {
+      change: z.string().optional().describe('Identificador del cambio SDD activo o ruta de spec (opcional)'),
+      diffFiles: z.array(z.string()).optional().describe('Lista opcional de rutas de archivos modificados a auditar frente a guardrails'),
+      root: z.string().optional().describe('Directorio raíz del proyecto'),
+    },
+    async (params) => {
+      try {
+        const root = resolveRoot(params.root, baseRoot);
+        const result = verifyProgressiveFriction({
+          rootDir: root,
+          changeId: params.change,
+          diffFiles: params.diffFiles,
+        });
+        return formatResponse(result, !result.success);
+      } catch (err: any) {
+        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+      }
+    }
+  );
+
+  // Tool: verify_pdac
+  server.tool(
+    'verify_pdac',
+    'Audita el grafo de producto (Product Definition as Code) y verifica de forma determinista la ausencia de derivas criptográficas (digests SHA-256) en citaciones.',
+    {
+      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      autoSync: z.boolean().optional().describe('Si es true, sincroniza y recalcula automáticamente los digests desfasados en disco'),
+    },
+    async (params) => {
+      try {
+        const root = resolveRoot(params.root, baseRoot);
+        if (params.autoSync) {
+          const syncResult = syncPdacDigests({ rootDir: root });
+          return formatResponse(syncResult, !syncResult.success);
+        }
+        const result = verifyPdacGraph({ rootDir: root });
+        return formatResponse(result, !result.success);
+      } catch (err: any) {
+        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+      }
+    }
+  );
+
   // ============================================================================
   // 4. HERRAMIENTAS DE REPORTING Y TELEMETRÍA (Reports & Telemetry)
   // ============================================================================
@@ -623,6 +673,35 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
         const root = resolveRoot(params.root, baseRoot);
         const result = aggregatePrKpis(params.base || 'main', params.head || 'HEAD', { cwd: root });
         return formatResponse(result);
+      } catch (err: any) {
+        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+      }
+    }
+  );
+
+  // Tool: kpi_release
+  server.tool(
+    'kpi_release',
+    'Calcula el informe consolidado de KPIs de Release (Defect Injection Rate, ratio de retrabajo, volumen KLoC, tiempos y costes de tokens entre humano y modelos de IA).',
+    {
+      release: z.string().describe('Nombre de la rama de release a auditar (ej. release/v1.0.0)'),
+      base: z.string().optional().describe('Rama base de comparación (por defecto main)'),
+      outputDir: z.string().optional().describe('Directorio opcional donde generar los informes Markdown y JSON'),
+      writeReports: z.boolean().optional().describe('Si es true, genera los archivos de reporte en disco'),
+      root: z.string().optional().describe('Directorio raíz del proyecto'),
+    },
+    async (params) => {
+      try {
+        const root = resolveRoot(params.root, baseRoot);
+        const report = aggregateReleaseKpis(params.release, params.base || 'main', { cwd: root });
+        let filesWritten: { markdownPath: string; jsonPath: string } | undefined;
+        if (params.writeReports || params.outputDir) {
+          filesWritten = writeReleaseKpiReport(report, { outputDir: params.outputDir });
+        }
+        return formatResponse({
+          ...report,
+          filesWritten,
+        });
       } catch (err: any) {
         return formatResponse({ success: false, error: err?.message || String(err) }, true);
       }

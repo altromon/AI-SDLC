@@ -53,9 +53,12 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       expect(toolNames).toContain('report_dashboard');
       expect(toolNames).toContain('report_quality');
       expect(toolNames).toContain('kpi_pr');
+      expect(toolNames).toContain('kpi_release');
       expect(toolNames).toContain('git_detect_author');
+      expect(toolNames).toContain('verify_friction');
+      expect(toolNames).toContain('verify_pdac');
 
-      expect(response.tools.length).toBeGreaterThanOrEqual(18);
+      expect(response.tools.length).toBeGreaterThanOrEqual(21);
     });
 
     it('should register all canonical read-only context resources', async () => {
@@ -187,6 +190,50 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       const content = JSON.parse((result.content[0] as any).text);
       expect(content.authorType).toBeDefined();
       expect(content.model).toBeDefined();
+    });
+
+    it('should execute "verify_friction" and audit anti-bypass rules', async () => {
+      const result = await client.callTool({
+        name: 'verify_friction',
+        arguments: {
+          diffFiles: ['src/index.ts'],
+        },
+      });
+
+      expect(result.isError).toBeFalsy();
+      const content = JSON.parse((result.content[0] as any).text);
+      expect(content.success).toBe(true);
+      expect(content.profile).toBeDefined();
+      expect(content.violations).toBeDefined();
+    });
+
+    it('should execute "verify_pdac" and verify product graph integrity', async () => {
+      const result = await client.callTool({
+        name: 'verify_pdac',
+        arguments: {},
+      });
+
+      expect(result.isError).toBeFalsy();
+      const content = JSON.parse((result.content[0] as any).text);
+      expect(content.success).toBe(true);
+      expect(content.totalNodes).toBeGreaterThan(0);
+      expect(content.drifts).toHaveLength(0);
+    });
+
+    it('should execute "kpi_release" and aggregate release metrics', async () => {
+      const result = await client.callTool({
+        name: 'kpi_release',
+        arguments: {
+          release: 'HEAD',
+          base: 'HEAD',
+        },
+      });
+
+      expect(result.isError).toBeFalsy();
+      const content = JSON.parse((result.content[0] as any).text);
+      expect(content.releaseBranch).toBe('HEAD');
+      expect(content.totalCommits).toBeDefined();
+      expect(content.authorStats).toBeDefined();
     });
   });
 });

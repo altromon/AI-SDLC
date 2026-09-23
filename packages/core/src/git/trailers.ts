@@ -145,11 +145,28 @@ export function extractCommitKpisFromRange(
 ): CommitKpiRecord[] {
   const cwd = options.cwd || process.cwd();
   const format = '---AI_SDLC_COMMIT---%n%H%x1f%an%x1f%ae%x1f%aI%x1f%s%n%B%n---AI_SDLC_BODY_END---';
-  const rawOutput = execFileSync(
-    'git',
-    ['log', `${baseRef}..${headRef}`, `--format=${format}`, '--numstat'],
-    { cwd, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
-  );
+  let rawOutput = '';
+  try {
+    rawOutput = execFileSync(
+      'git',
+      ['log', `${baseRef}..${headRef}`, `--format=${format}`, '--numstat'],
+      { cwd, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
+    );
+  } catch {
+    if (!baseRef.includes('/')) {
+      try {
+        rawOutput = execFileSync(
+          'git',
+          ['log', `origin/${baseRef}..${headRef}`, `--format=${format}`, `--numstat`],
+          { cwd, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
+        );
+      } catch {
+        return [];
+      }
+    } else {
+      return [];
+    }
+  }
 
   const chunks = parseRawLogChunks(rawOutput);
   const records: CommitKpiRecord[] = [];
