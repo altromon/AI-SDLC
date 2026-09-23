@@ -6,7 +6,7 @@ status: applied
 author: agent-developer
 citations:
   - id: FR-027-ENV-OUTPUT-JSON-001
-    digest: sha256:07336f4b177e663656fdd6d6e528b2721d293ef752df924145caebadf55a0fac
+    digest: sha256:4a779fe3f7ee13509c16fea8f083ce0ba7962aad103bcf91076ff2b9192ccc71
     comment: Requerimiento funcional canónico asociado (Génesis CHG-027-ENV-OUTPUT-JSON)
 ---
 

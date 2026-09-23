@@ -1,8 +1,8 @@
 # 📊 Informe Formal de Calidad y Release Gate (AI-SDLC)
 
-> **Fecha de Generación:** 2026-09-19T20:53:02.434Z
+> **Fecha de Generación:** 2026-09-23T21:07:47.153Z
 > **Veredicto Release Gate:** 🟢 APROBADO (RELEASE READY)
-> **Calificación Global:** **`B`** (Índice MI: 72.5/100, CC Promedio: 2.2)
+> **Calificación Global:** **`B`** (Índice MI: 71.8/100, CC Promedio: 1.5)
 
 ---
 
@@ -10,12 +10,12 @@
 
 | Métrica Clave | Valor Medido | Umbral de Política | Cumplimiento |
 | :--- | :---: | :---: | :---: |
-| **Archivos Analizados** | `11` | N/A | ℹ️ |
-| **Funciones Evaluadas** | `20` | N/A | ℹ️ |
-| **Líneas de Código (LOC)** | `241` | N/A | ℹ️ |
-| **Complejidad Ciclomática (Promedio)** | `2.2` | $\le 10$ | ✅ CONFORME |
-| **Complejidad Cognitiva (Promedio)** | `1.8` | $\le 15$ | ✅ CONFORME |
-| **Índice de Mantenibilidad (SEI MI)** | `72.5 / 100` | $\ge 50$ | ✅ CONFORME |
+| **Archivos Analizados** | `1` | N/A | ℹ️ |
+| **Funciones Evaluadas** | `2` | N/A | ℹ️ |
+| **Líneas de Código (LOC)** | `12` | N/A | ℹ️ |
+| **Complejidad Ciclomática (Promedio)** | `1.5` | $\le 10$ | ✅ CONFORME |
+| **Complejidad Cognitiva (Promedio)** | `0.5` | $\le 15$ | ✅ CONFORME |
+| **Índice de Mantenibilidad (SEI MI)** | `71.8 / 100` | $\ge 50$ | ✅ CONFORME |
 | **Funciones en Violación** | `0` | $0$ (Modo STRICT) | ✅ 0 VIOLACIONES |
 
 ---
@@ -24,12 +24,7 @@
 
 | Lenguaje | Funciones | LOC Total | MI Promedio | CC Promedio | Calificación |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Python** | `3` | `38` | `71.4` | `3.3` | `B` |
-| **Go** | `3` | `28` | `63.2` | `2` | `B` |
-| **C#** | `1` | `21` | `63.9` | `3` | `B` |
-| **Rust** | `1` | `2` | `81` | `1` | `A` |
-| **Java** | `1` | `9` | `79.1` | `4` | `A` |
-| **TypeScript** | `11` | `143` | `74.7` | `1.8` | `B` |
+| **TypeScript** | `2` | `12` | `71.8` | `1.5` | `B` |
 
 ---
 

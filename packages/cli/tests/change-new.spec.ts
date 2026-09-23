@@ -61,39 +61,40 @@ describe('@ai-sdlc/cli change new Command Suite', () => {
       fs.rmSync(testChangeDir, { recursive: true, force: true });
     }
 
-    const passed = runChangeNew({
-      root: process.cwd(),
-      name: 'Reintento resiliente de telemetría',
-      id: 'chg-cli-test-retry',
-      from: 'UC-STREAM-TELEMETRY',
-      silent: true,
-    });
+    try {
+      const passed = runChangeNew({
+        root: process.cwd(),
+        name: 'Reintento resiliente de telemetría',
+        id: 'chg-cli-test-retry',
+        from: 'UC-028-NATIVE-MCP-SERVER',
+        silent: true,
+      });
 
+      expect(passed).toBe(true);
 
-    expect(passed).toBe(true);
+      const changeDir = path.join(
+        process.cwd(),
+        'specs',
+        'changes',
+        'active',
+        'chg-cli-test-retry'
+      );
+      expect(fs.existsSync(changeDir)).toBe(true);
 
-    const changeDir = path.join(
-      process.cwd(),
-      'specs',
-      'changes',
-      'active',
-      'chg-cli-test-retry'
-    );
-    expect(fs.existsSync(changeDir)).toBe(true);
+      const handoffContent = fs.readFileSync(path.join(changeDir, 'handoff.yaml'), 'utf-8');
+      expect(handoffContent).toContain('UC-028-NATIVE-MCP-SERVER');
+      expect(handoffContent).toContain('FR-028-NATIVE-MCP-SERVER-001');
+      expect(handoffContent).toContain('sha256:');
+      expect(handoffContent).not.toContain('00000000000000000000000000000000');
 
-    const handoffContent = fs.readFileSync(path.join(changeDir, 'handoff.yaml'), 'utf-8');
-    expect(handoffContent).toContain('UC-STREAM-TELEMETRY');
-    expect(handoffContent).toContain('FR-TELEMETRY-STREAM-001');
-    expect(handoffContent).toContain('sha256:');
-    expect(handoffContent).not.toContain('00000000000000000000000000000000');
-
-    // Verify SDD workspace passes verify
-    const verifyPassed = runSddVerify({ root: process.cwd(), silent: true });
-    expect(verifyPassed).toBe(true);
-
-    // Clean up created change folder
-    if (fs.existsSync(changeDir)) {
-      fs.rmSync(changeDir, { recursive: true, force: true });
+      // Verify SDD workspace passes verify
+      const verifyPassed = runSddVerify({ root: process.cwd(), silent: true });
+      expect(verifyPassed).toBe(true);
+    } finally {
+      // Clean up created change folder
+      if (fs.existsSync(testChangeDir)) {
+        fs.rmSync(testChangeDir, { recursive: true, force: true });
+      }
     }
   });
 

@@ -14,7 +14,7 @@ import {
 
 describe('Standalone Unknown Project End-to-End Suite', () => {
   const tempProjectDir = path.join(process.cwd(), 'scratch', 'test-standalone-unknown-project');
-  const examplesDir = path.join(process.cwd(), 'examples');
+  const examplesDir = path.join(process.cwd(), 'examples', 'sentinel-core');
 
   beforeAll(() => {
     if (fs.existsSync(tempProjectDir)) {
@@ -24,11 +24,11 @@ describe('Standalone Unknown Project End-to-End Suite', () => {
 
     // 1. Copy policies
     fs.copyFileSync(
-      path.join(process.cwd(), 'quality-policy.yaml'),
+      path.join(examplesDir, 'quality-policy.yaml'),
       path.join(tempProjectDir, 'quality-policy.yaml')
     );
     fs.copyFileSync(
-      path.join(process.cwd(), 'license-policy.yaml'),
+      path.join(examplesDir, 'license-policy.yaml'),
       path.join(tempProjectDir, 'license-policy.yaml')
     );
 
@@ -45,7 +45,7 @@ describe('Standalone Unknown Project End-to-End Suite', () => {
     // 4. Deploy change spec to standard active SDD path: specs/changes/active/chg-001-telemetry-ingestion
     const activeSpecsDest = path.join(tempProjectDir, 'specs', 'changes', 'active', 'chg-001-telemetry-ingestion');
     fs.mkdirSync(path.dirname(activeSpecsDest), { recursive: true });
-    fs.cpSync(path.join(examplesDir, 'specs', 'chg-001-telemetry-ingestion'), activeSpecsDest, { recursive: true });
+    fs.cpSync(path.join(examplesDir, 'specs', 'changes', 'completed', 'chg-001-telemetry-ingestion'), activeSpecsDest, { recursive: true });
   });
 
   afterAll(() => {

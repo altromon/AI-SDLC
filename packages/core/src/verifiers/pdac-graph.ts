@@ -189,8 +189,7 @@ export function verifyPdacGraph(options: PdacGraphOptions = {}): PdacGraphResult
           relFile.startsWith('sdd/') ||
           relFile.startsWith('delivery/') ||
           relFile.startsWith('changes/') ||
-          relFile.includes('/specs/') ||
-          relFile.startsWith('examples/specs/')) &&
+          relFile.includes('/specs/')) &&
         !relFile.includes('.template.');
       if (isDeliveryDoc) {
         const fileCitations = extractCitations(content, relFile);
@@ -357,8 +356,7 @@ export function syncPdacDigests(options: PdacSyncOptions = {}): PdacSyncResult {
           relFile.startsWith('sdd/') ||
           relFile.startsWith('delivery/') ||
           relFile.startsWith('changes/') ||
-          relFile.includes('/specs/') ||
-          relFile.startsWith('examples/specs/')) &&
+          relFile.includes('/specs/')) &&
         !relFile.includes('.template.');
       if (isDeliveryDoc) candidateFiles.push(file);
     }

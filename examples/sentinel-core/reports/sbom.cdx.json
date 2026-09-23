@@ -1,0 +1,22 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "serialNumber": "urn:uuid:2fb63d8b-28ec-4557-b571-5ad7b8bb755d",
+  "metadata": {
+    "timestamp": "2026-09-23T19:29:01.269Z",
+    "tools": [
+      {
+        "vendor": "AI-SDLC",
+        "name": "@ai-sdlc/core",
+        "version": "1.0.0"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "name": "ai-sdlc-project",
+      "version": "1.0.0"
+    }
+  },
+  "components": []
+}

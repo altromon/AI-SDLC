@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
  * ==============================================================================
- * AI-SDLC: Generador de Documento Único Consolidado de Documentación y Manuales
+ * AI-SDLC: Generador de Documento Único Consolidado de Documentación
  * ==============================================================================
- * Concatena el archivo README.md, todos los módulos normativos de process/*.md
- * y los manuales As-Code de examples/manuals/*.md en un único documento maestro,
- * estructurado por partes con una Tabla de Contenidos (TOC) interactiva con anclas.
+ * Concatena el archivo README.md y todos los módulos normativos de process/*.md
+ * en un único documento maestro, estructurado por partes con una Tabla de
+ * Contenidos (TOC) interactiva multinivel (H2 y H3) con anclas deterministas.
  *
  * Uso:
  *   npx tsx scripts/bundle-documentation.ts [--out <ruta>]
@@ -16,12 +16,18 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+export interface SubsectionEntry {
+  title: string;
+  anchor: string;
+  level: number;
+}
+
 export interface SectionEntry {
   title: string;
   anchor: string;
   group: string;
   sourceFile: string;
-  subsections: Array<{ title: string; anchor: string }>;
+  subsections: SubsectionEntry[];
 }
 
 export function slugify(text: string): string {
@@ -36,11 +42,11 @@ export function slugify(text: string): string {
 
 export function extractHeadings(content: string, filePrefix: string): {
   title: string;
-  subsections: Array<{ title: string; anchor: string }>;
+  subsections: SubsectionEntry[];
 } {
   const lines = content.split(/\r?\n/);
   let mainTitle = '';
-  const subsections: Array<{ title: string; anchor: string }> = [];
+  const subsections: SubsectionEntry[] = [];
 
   for (const line of lines) {
     const h1Match = line.match(/^#\s+(.+)$/);
@@ -53,7 +59,16 @@ export function extractHeadings(content: string, filePrefix: string): {
     if (h2Match) {
       const subTitle = h2Match[1].trim();
       const subAnchor = `${filePrefix}-${slugify(subTitle)}`;
-      subsections.push({ title: subTitle, anchor: subAnchor });
+      subsections.push({ title: subTitle, anchor: subAnchor, level: 2 });
+      continue;
+    }
+
+    const h3Match = line.match(/^###\s+(.+)$/);
+    if (h3Match) {
+      const subTitle = h3Match[1].trim();
+      const subAnchor = `${filePrefix}-${slugify(subTitle)}`;
+      subsections.push({ title: subTitle, anchor: subAnchor, level: 3 });
+      continue;
     }
   }
 
@@ -104,29 +119,6 @@ export function buildConsolidatedDocument(rootDir: string): {
     }
   }
 
-  // 3. Parte III: Manuales As-Code (examples/manuals/*.md)
-  const manualsDir = path.join(rootDir, 'examples', 'manuals');
-  if (fs.existsSync(manualsDir)) {
-    const manualFiles = fs
-      .readdirSync(manualsDir)
-      .filter((file) => file.endsWith('.md'))
-      // Priorizar MAN-USER antes que MAN-PROD para coherencia de lectura
-      .sort((a, b) => {
-        if (a.includes('USER') && !b.includes('USER')) return -1;
-        if (!a.includes('USER') && b.includes('USER')) return 1;
-        return a.localeCompare(b);
-      });
-
-    for (const mFile of manualFiles) {
-      const prefix = path.basename(mFile, '.md').toLowerCase().replace(/_/g, '-');
-      filesToInclude.push({
-        relPath: path.join('examples', 'manuals', mFile),
-        prefix,
-        group: 'Parte III: Manuales As-Code del Sistema',
-      });
-    }
-  }
-
   const sections: SectionEntry[] = [];
   const processedBodies: Array<{
     meta: SectionEntry;
@@ -149,7 +141,7 @@ export function buildConsolidatedDocument(rootDir: string): {
     };
     sections.push(entry);
 
-    // Inyectar anclas HTML en los H2 para navegación 100% determinista
+    // Inyectar anclas HTML en H2 y H3 para navegación 100% determinista
     const lines = rawContent.split(/\r?\n/);
     const transformedLines: string[] = [];
 
@@ -159,9 +151,18 @@ export function buildConsolidatedDocument(rootDir: string): {
         const subTitle = h2Match[1].trim();
         const subAnchor = `${item.prefix}-${slugify(subTitle)}`;
         transformedLines.push(`<a id="${subAnchor}"></a>\n\n${line}`);
-      } else {
-        transformedLines.push(line);
+        continue;
       }
+
+      const h3Match = line.match(/^###\s+(.+)$/);
+      if (h3Match) {
+        const subTitle = h3Match[1].trim();
+        const subAnchor = `${item.prefix}-${slugify(subTitle)}`;
+        transformedLines.push(`<a id="${subAnchor}"></a>\n\n${line}`);
+        continue;
+      }
+
+      transformedLines.push(line);
     }
 
     processedBodies.push({
@@ -174,10 +175,10 @@ export function buildConsolidatedDocument(rootDir: string): {
   // Ensamblar cabecera y metadatos
   const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
   let out = '';
-  out += `# AI-SDLC: Especificación Normativa, Metodología y Manuales As-Code\n\n`;
+  out += `# AI-SDLC: Especificación Normativa y Metodología del Framework\n\n`;
   out += `> **Dossier y Documento Maestro Consolidado de AI-SDLC**  \n`;
   out += `> Framework de Desarrollo Híbrido para Personas y Agentes de IA  \n`;
-  out += `> *Fecha de Compilación:* \`${timestamp}\` | *Módulos y Manuales Integrados:* \`${filesToInclude.length}\`  \n\n`;
+  out += `> *Fecha de Compilación:* \`${timestamp}\` | *Módulos Integrados:* \`${filesToInclude.length}\`  \n\n`;
   out += `---\n\n`;
 
   // Ensamblar Índice General (Table of Contents) agrupado por partes
@@ -186,17 +187,14 @@ export function buildConsolidatedDocument(rootDir: string): {
   for (const s of sections) {
     if (s.group !== currentGroup) {
       currentGroup = s.group;
-      const groupIcon = currentGroup.includes('Parte I:')
-        ? '🏛️'
-        : currentGroup.includes('Parte II:')
-          ? '📘'
-          : '📖';
+      const groupIcon = currentGroup.includes('Parte I:') ? '🏛️' : '📘';
       out += `### ${groupIcon} ${currentGroup}\n\n`;
     }
     out += `- [**${s.title}**](#${s.anchor}) *(Fuente: \`${s.sourceFile}\`)*\n`;
     if (s.subsections.length > 0) {
       for (const sub of s.subsections) {
-        out += `  - [${sub.title}](#${sub.anchor})\n`;
+        const indent = sub.level === 3 ? '    -' : '  -';
+        out += `${indent} [${sub.title}](#${sub.anchor})\n`;
       }
     }
     out += `\n`;
@@ -232,7 +230,7 @@ export function main(): void {
   }
 
   console.log('================================================================');
-  console.log('AI-SDLC: Compilador de Documentación Integral y Manuales As-Code');
+  console.log('AI-SDLC: Compilador de Documentación Integral del Framework');
   console.log('================================================================\n');
 
   const rootDir = process.cwd();

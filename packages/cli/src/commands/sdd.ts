@@ -154,7 +154,7 @@ export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
 
   if (totalFound === 0) {
     if (!isSilent) {
-      console.log(pc.yellow('  [AVISO] No se encontraron archivos de acompañamiento handoff.yaml en specs/ ni examples/specs/.'));
+      console.log(pc.yellow('  [AVISO] No se encontraron archivos de acompañamiento handoff.yaml en specs/.'));
     }
   } else {
     for (const [, { handoff, changeDir }] of handoffsMap.entries()) {

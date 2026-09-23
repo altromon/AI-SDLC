@@ -2,9 +2,9 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:2e90e2df-875c-4cbd-b204-ba8ed2da13ca",
+  "serialNumber": "urn:uuid:77e2c2bd-666b-4ef9-b471-fea18af13c53",
   "metadata": {
-    "timestamp": "2026-09-19T20:53:06.086Z",
+    "timestamp": "2026-09-23T21:07:37.796Z",
     "tools": [
       {
         "vendor": "AI-SDLC",
@@ -21,9 +21,37 @@
   "components": [
     {
       "type": "library",
+      "name": "@ampproject/remapping",
+      "version": "2.3.0",
+      "purl": "pkg:npm/@ampproject/remapping@2.3.0",
+      "author": "Justin Ridgewell <jridgewell@google.com>",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "@babel/code-frame",
       "version": "7.29.7",
       "purl": "pkg:npm/@babel/code-frame@7.29.7",
+      "author": "The Babel Team (https://babel.dev/team)",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "@babel/helper-string-parser",
+      "version": "7.29.7",
+      "purl": "pkg:npm/@babel/helper-string-parser@7.29.7",
       "author": "The Babel Team (https://babel.dev/team)",
       "licenses": [
         {
@@ -49,10 +77,66 @@
     },
     {
       "type": "library",
+      "name": "@babel/parser",
+      "version": "7.29.9",
+      "purl": "pkg:npm/@babel/parser@7.29.9",
+      "author": "The Babel Team (https://babel.dev/team)",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "@babel/runtime",
       "version": "7.29.7",
       "purl": "pkg:npm/@babel/runtime@7.29.7",
       "author": "The Babel Team (https://babel.dev/team)",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "@babel/types",
+      "version": "7.29.8",
+      "purl": "pkg:npm/@babel/types@7.29.8",
+      "author": "The Babel Team (https://babel.dev/team)",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "@bcoe/v8-coverage",
+      "version": "0.2.3",
+      "purl": "pkg:npm/@bcoe/v8-coverage@0.2.3",
+      "author": "Charles Samborski <demurgos@demurgos.net> (https://demurgos.net)",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "@bcoe/v8-coverage",
+      "version": "1.0.2",
+      "purl": "pkg:npm/@bcoe/v8-coverage@1.0.2",
+      "author": "Charles Samborski <demurgos@demurgos.net> (https://demurgos.net)",
       "licenses": [
         {
           "license": {
@@ -461,19 +545,6 @@
     },
     {
       "type": "library",
-      "name": "@gar/promise-retry",
-      "version": "1.0.3",
-      "purl": "pkg:npm/@gar/promise-retry@1.0.3",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "@hono/node-server",
       "version": "2.1.1",
       "purl": "pkg:npm/@hono/node-server@2.1.1",
@@ -572,10 +643,10 @@
     },
     {
       "type": "library",
-      "name": "@isaacs/fs-minipass",
-      "version": "4.0.1",
-      "purl": "pkg:npm/@isaacs/fs-minipass@4.0.1",
-      "author": "Isaac Z. Schlueter",
+      "name": "@isaacs/cliui",
+      "version": "8.0.2",
+      "purl": "pkg:npm/@isaacs/cliui@8.0.2",
+      "author": "Ben Coe <ben@npmjs.com>",
       "licenses": [
         {
           "license": {
@@ -586,14 +657,14 @@
     },
     {
       "type": "library",
-      "name": "@isaacs/string-locale-compare",
-      "version": "1.1.0",
-      "purl": "pkg:npm/@isaacs/string-locale-compare@1.1.0",
-      "author": "Isaac Z. Schlueter <i@izs.me> (https://izs.me)",
+      "name": "@istanbuljs/schema",
+      "version": "0.1.6",
+      "purl": "pkg:npm/@istanbuljs/schema@0.1.6",
+      "author": "Corey Farrell",
       "licenses": [
         {
           "license": {
-            "id": "ISC"
+            "id": "MIT"
           }
         }
       ]
@@ -813,196 +884,14 @@
     },
     {
       "type": "library",
-      "name": "@npmcli/agent",
-      "version": "4.0.2",
-      "purl": "pkg:npm/@npmcli/agent@4.0.2",
-      "author": "GitHub Inc.",
+      "name": "@pkgjs/parseargs",
+      "version": "0.11.0",
+      "purl": "pkg:npm/@pkgjs/parseargs@0.11.0",
+      "author": "",
       "licenses": [
         {
           "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/arborist",
-      "version": "9.6.0",
-      "purl": "pkg:npm/@npmcli/arborist@9.6.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/fs",
-      "version": "5.0.0",
-      "purl": "pkg:npm/@npmcli/fs@5.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/git",
-      "version": "7.0.2",
-      "purl": "pkg:npm/@npmcli/git@7.0.2",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/installed-package-contents",
-      "version": "4.0.0",
-      "purl": "pkg:npm/@npmcli/installed-package-contents@4.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/map-workspaces",
-      "version": "5.0.3",
-      "purl": "pkg:npm/@npmcli/map-workspaces@5.0.3",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/metavuln-calculator",
-      "version": "9.0.3",
-      "purl": "pkg:npm/@npmcli/metavuln-calculator@9.0.3",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/name-from-folder",
-      "version": "4.0.0",
-      "purl": "pkg:npm/@npmcli/name-from-folder@4.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/node-gyp",
-      "version": "5.0.0",
-      "purl": "pkg:npm/@npmcli/node-gyp@5.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/package-json",
-      "version": "7.0.5",
-      "purl": "pkg:npm/@npmcli/package-json@7.0.5",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/promise-spawn",
-      "version": "9.0.1",
-      "purl": "pkg:npm/@npmcli/promise-spawn@9.0.1",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/query",
-      "version": "5.0.0",
-      "purl": "pkg:npm/@npmcli/query@5.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/redact",
-      "version": "4.0.0",
-      "purl": "pkg:npm/@npmcli/redact@4.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@npmcli/run-script",
-      "version": "10.0.4",
-      "purl": "pkg:npm/@npmcli/run-script@10.0.4",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
+            "id": "MIT"
           }
         }
       ]
@@ -1037,90 +926,6 @@
     },
     {
       "type": "library",
-      "name": "@sigstore/bundle",
-      "version": "4.0.0",
-      "purl": "pkg:npm/@sigstore/bundle@4.0.0",
-      "author": "bdehamer@github.com",
-      "licenses": [
-        {
-          "license": {
-            "id": "Apache-2.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@sigstore/core",
-      "version": "3.2.1",
-      "purl": "pkg:npm/@sigstore/core@3.2.1",
-      "author": "bdehamer@github.com",
-      "licenses": [
-        {
-          "license": {
-            "id": "Apache-2.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@sigstore/protobuf-specs",
-      "version": "0.5.2",
-      "purl": "pkg:npm/@sigstore/protobuf-specs@0.5.2",
-      "author": "bdehamer@github.com",
-      "licenses": [
-        {
-          "license": {
-            "id": "Apache-2.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@sigstore/sign",
-      "version": "4.1.1",
-      "purl": "pkg:npm/@sigstore/sign@4.1.1",
-      "author": "bdehamer@github.com",
-      "licenses": [
-        {
-          "license": {
-            "id": "Apache-2.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@sigstore/tuf",
-      "version": "4.0.2",
-      "purl": "pkg:npm/@sigstore/tuf@4.0.2",
-      "author": "bdehamer@github.com",
-      "licenses": [
-        {
-          "license": {
-            "id": "Apache-2.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@sigstore/verify",
-      "version": "3.1.1",
-      "purl": "pkg:npm/@sigstore/verify@3.1.1",
-      "author": "bdehamer@github.com",
-      "licenses": [
-        {
-          "license": {
-            "id": "Apache-2.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "@sinclair/typebox",
       "version": "0.34.52",
       "purl": "pkg:npm/@sinclair/typebox@0.34.52",
@@ -1139,34 +944,6 @@
       "version": "0.29.0",
       "purl": "pkg:npm/@ts-morph/common@0.29.0",
       "author": "David Sherret",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@tufjs/canonical-json",
-      "version": "2.0.0",
-      "purl": "pkg:npm/@tufjs/canonical-json@2.0.0",
-      "author": "bdehamer@github.com",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@tufjs/models",
-      "version": "4.1.0",
-      "purl": "pkg:npm/@tufjs/models@4.1.0",
-      "author": "bdehamer@github.com",
       "licenses": [
         {
           "license": {
@@ -1333,9 +1110,65 @@
     },
     {
       "type": "library",
+      "name": "@vitest/coverage-v8",
+      "version": "2.1.9",
+      "purl": "pkg:npm/@vitest/coverage-v8@2.1.9",
+      "author": "Anthony Fu <anthonyfu117@hotmail.com>",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "@vitest/coverage-v8",
+      "version": "5.0.1",
+      "purl": "pkg:npm/@vitest/coverage-v8@5.0.1",
+      "author": "Anthony Fu <anthonyfu117@hotmail.com>",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "@vitest/expect",
       "version": "2.1.9",
       "purl": "pkg:npm/@vitest/expect@2.1.9",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "@vitest/istanbul-lib-coverage",
+      "version": "1.0.1",
+      "purl": "pkg:npm/@vitest/istanbul-lib-coverage@1.0.1",
+      "author": "Vitest Team",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "@vitest/istanbul-lib-report",
+      "version": "1.0.1",
+      "purl": "pkg:npm/@vitest/istanbul-lib-report@1.0.1",
+      "author": "Vitest Team",
       "licenses": [
         {
           "license": {
@@ -1424,34 +1257,6 @@
     },
     {
       "type": "library",
-      "name": "abbrev",
-      "version": "2.0.0",
-      "purl": "pkg:npm/abbrev@2.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "abbrev",
-      "version": "4.0.0",
-      "purl": "pkg:npm/abbrev@4.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "accepts",
       "version": "2.0.0",
       "purl": "pkg:npm/accepts@2.0.0",
@@ -1481,20 +1286,6 @@
       "name": "acorn-jsx",
       "version": "5.3.2",
       "purl": "pkg:npm/acorn-jsx@5.3.2",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "agent-base",
-      "version": "7.1.4",
-      "purl": "pkg:npm/agent-base@7.1.4",
-      "author": "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
       "licenses": [
         {
           "license": {
@@ -1575,9 +1366,37 @@
     },
     {
       "type": "library",
+      "name": "ansi-regex",
+      "version": "6.3.0",
+      "purl": "pkg:npm/ansi-regex@6.3.0",
+      "author": "Sindre Sorhus",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "ansi-styles",
       "version": "4.3.0",
       "purl": "pkg:npm/ansi-styles@4.3.0",
+      "author": "Sindre Sorhus",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ansi-styles",
+      "version": "6.2.3",
+      "purl": "pkg:npm/ansi-styles@6.2.3",
       "author": "Sindre Sorhus",
       "licenses": [
         {
@@ -1629,20 +1448,6 @@
     },
     {
       "type": "library",
-      "name": "array-find-index",
-      "version": "1.0.2",
-      "purl": "pkg:npm/array-find-index@1.0.2",
-      "author": "Sindre Sorhus",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "array-union",
       "version": "2.1.0",
       "purl": "pkg:npm/array-union@2.1.0",
@@ -1661,6 +1466,20 @@
       "version": "2.0.1",
       "purl": "pkg:npm/assertion-error@2.0.1",
       "author": "Jake Luer <jake@qualiancy.com> (http://qualiancy.com)",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ast-v8-to-istanbul",
+      "version": "1.0.6",
+      "purl": "pkg:npm/ast-v8-to-istanbul@1.0.6",
+      "author": "Ari Perkkiö <ari.perkkio@gmail.com>",
       "licenses": [
         {
           "license": {
@@ -1712,20 +1531,6 @@
     },
     {
       "type": "library",
-      "name": "bin-links",
-      "version": "6.0.2",
-      "purl": "pkg:npm/bin-links@6.0.2",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "body-parser",
       "version": "2.3.0",
       "purl": "pkg:npm/body-parser@2.3.0",
@@ -1742,6 +1547,20 @@
       "name": "brace-expansion",
       "version": "1.1.18",
       "purl": "pkg:npm/brace-expansion@1.1.18",
+      "author": "Julian Gruber",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "brace-expansion",
+      "version": "2.1.7",
+      "purl": "pkg:npm/brace-expansion@2.1.7",
       "author": "Julian Gruber",
       "licenses": [
         {
@@ -1815,20 +1634,6 @@
         {
           "license": {
             "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "cacache",
-      "version": "20.0.4",
-      "purl": "pkg:npm/cacache@20.0.4",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
           }
         }
       ]
@@ -1946,20 +1751,6 @@
     },
     {
       "type": "library",
-      "name": "chownr",
-      "version": "3.0.0",
-      "purl": "pkg:npm/chownr@3.0.0",
-      "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
-      "licenses": [
-        {
-          "license": {
-            "id": "BlueOak-1.0.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "ci-info",
       "version": "4.4.0",
       "purl": "pkg:npm/ci-info@4.4.0",
@@ -1968,20 +1759,6 @@
         {
           "license": {
             "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "cmd-shim",
-      "version": "8.0.0",
-      "purl": "pkg:npm/cmd-shim@8.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
           }
         }
       ]
@@ -2052,20 +1829,6 @@
         {
           "license": {
             "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "common-ancestor-path",
-      "version": "2.0.0",
-      "purl": "pkg:npm/common-ancestor-path@2.0.0",
-      "author": "Isaac Z. Schlueter <i@izs.me> (https://izs.me)",
-      "licenses": [
-        {
-          "license": {
-            "id": "BlueOak-1.0.0"
           }
         }
       ]
@@ -2210,20 +1973,6 @@
     },
     {
       "type": "library",
-      "name": "cssesc",
-      "version": "3.0.0",
-      "purl": "pkg:npm/cssesc@3.0.0",
-      "author": "Mathias Bynens",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "cytoscape",
       "version": "3.34.3",
       "purl": "pkg:npm/cytoscape@3.34.3",
@@ -2335,10 +2084,52 @@
     },
     {
       "type": "library",
+      "name": "eastasianwidth",
+      "version": "0.2.0",
+      "purl": "pkg:npm/eastasianwidth@0.2.0",
+      "author": "Masaki Komagata",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "ee-first",
       "version": "1.1.1",
       "purl": "pkg:npm/ee-first@1.1.1",
       "author": "Jonathan Ong",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "emoji-regex",
+      "version": "8.0.0",
+      "purl": "pkg:npm/emoji-regex@8.0.0",
+      "author": "Mathias Bynens",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "emoji-regex",
+      "version": "9.2.2",
+      "purl": "pkg:npm/emoji-regex@9.2.2",
+      "author": "Mathias Bynens",
       "licenses": [
         {
           "license": {
@@ -2366,20 +2157,6 @@
       "version": "2.4.1",
       "purl": "pkg:npm/enquirer@2.4.1",
       "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "env-paths",
-      "version": "2.2.1",
-      "purl": "pkg:npm/env-paths@2.2.1",
-      "author": "Sindre Sorhus",
       "licenses": [
         {
           "license": {
@@ -2743,20 +2520,6 @@
     },
     {
       "type": "library",
-      "name": "exponential-backoff",
-      "version": "3.1.3",
-      "purl": "pkg:npm/exponential-backoff@3.1.3",
-      "author": "Sami Sayegh",
-      "licenses": [
-        {
-          "license": {
-            "id": "Apache-2.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "express",
       "version": "5.2.1",
       "purl": "pkg:npm/express@5.2.1",
@@ -3009,6 +2772,20 @@
     },
     {
       "type": "library",
+      "name": "foreground-child",
+      "version": "3.3.1",
+      "purl": "pkg:npm/foreground-child@3.3.1",
+      "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "forwarded",
       "version": "0.2.0",
       "purl": "pkg:npm/forwarded@0.2.0",
@@ -3064,20 +2841,6 @@
     },
     {
       "type": "library",
-      "name": "fs-minipass",
-      "version": "3.0.3",
-      "purl": "pkg:npm/fs-minipass@3.0.3",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "function-bind",
       "version": "1.1.2",
       "purl": "pkg:npm/function-bind@1.1.2",
@@ -3121,13 +2884,13 @@
     {
       "type": "library",
       "name": "glob",
-      "version": "13.0.6",
-      "purl": "pkg:npm/glob@13.0.6",
+      "version": "10.5.0",
+      "purl": "pkg:npm/glob@10.5.0",
       "author": "Isaac Z. Schlueter <i@izs.me> (https://blog.izs.me/)",
       "licenses": [
         {
           "license": {
-            "id": "BlueOak-1.0.0"
+            "id": "ISC"
           }
         }
       ]
@@ -3273,28 +3036,14 @@
     },
     {
       "type": "library",
-      "name": "hosted-git-info",
-      "version": "9.0.3",
-      "purl": "pkg:npm/hosted-git-info@9.0.3",
-      "author": "GitHub Inc.",
+      "name": "html-escaper",
+      "version": "2.0.2",
+      "purl": "pkg:npm/html-escaper@2.0.2",
+      "author": "Andrea Giammarchi",
       "licenses": [
         {
           "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "http-cache-semantics",
-      "version": "4.2.0",
-      "purl": "pkg:npm/http-cache-semantics@4.2.0",
-      "author": "Kornel Lesiński <npms2@geekhood.net> (https://kornel.ski/)",
-      "licenses": [
-        {
-          "license": {
-            "id": "BSD-2-Clause"
+            "id": "MIT"
           }
         }
       ]
@@ -3305,34 +3054,6 @@
       "version": "2.0.1",
       "purl": "pkg:npm/http-errors@2.0.1",
       "author": "Jonathan Ong <me@jongleberry.com> (http://jongleberry.com)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "http-proxy-agent",
-      "version": "7.0.2",
-      "purl": "pkg:npm/http-proxy-agent@7.0.2",
-      "author": "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "https-proxy-agent",
-      "version": "7.0.6",
-      "purl": "pkg:npm/https-proxy-agent@7.0.6",
-      "author": "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
       "licenses": [
         {
           "license": {
@@ -3385,20 +3106,6 @@
     },
     {
       "type": "library",
-      "name": "ignore-walk",
-      "version": "8.0.0",
-      "purl": "pkg:npm/ignore-walk@8.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "import-fresh",
       "version": "3.3.1",
       "purl": "pkg:npm/import-fresh@3.3.1",
@@ -3430,20 +3137,6 @@
       "name": "inherits",
       "version": "2.0.4",
       "purl": "pkg:npm/inherits@2.0.4",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "ini",
-      "version": "6.0.0",
-      "purl": "pkg:npm/ini@6.0.0",
-      "author": "GitHub Inc.",
       "licenses": [
         {
           "license": {
@@ -3486,6 +3179,20 @@
       "version": "2.1.1",
       "purl": "pkg:npm/is-extglob@2.1.1",
       "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "is-fullwidth-code-point",
+      "version": "3.0.0",
+      "purl": "pkg:npm/is-fullwidth-code-point@3.0.0",
+      "author": "Sindre Sorhus",
       "licenses": [
         {
           "license": {
@@ -3580,10 +3287,66 @@
     },
     {
       "type": "library",
-      "name": "isexe",
-      "version": "4.0.0",
-      "purl": "pkg:npm/isexe@4.0.0",
-      "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
+      "name": "istanbul-lib-coverage",
+      "version": "3.2.2",
+      "purl": "pkg:npm/istanbul-lib-coverage@3.2.2",
+      "author": "Krishnan Anantheswaran <kananthmail-github@yahoo.com>",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "istanbul-lib-report",
+      "version": "3.0.1",
+      "purl": "pkg:npm/istanbul-lib-report@3.0.1",
+      "author": "Krishnan Anantheswaran <kananthmail-github@yahoo.com>",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "istanbul-lib-source-maps",
+      "version": "5.0.6",
+      "purl": "pkg:npm/istanbul-lib-source-maps@5.0.6",
+      "author": "Krishnan Anantheswaran <kananthmail-github@yahoo.com>",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "istanbul-reports",
+      "version": "3.2.0",
+      "purl": "pkg:npm/istanbul-reports@3.2.0",
+      "author": "Krishnan Anantheswaran <kananthmail-github@yahoo.com>",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "jackspeak",
+      "version": "3.4.3",
+      "purl": "pkg:npm/jackspeak@3.4.3",
+      "author": "Isaac Z. Schlueter <i@izs.me>",
       "licenses": [
         {
           "license": {
@@ -3714,6 +3477,20 @@
     },
     {
       "type": "library",
+      "name": "js-tokens",
+      "version": "10.0.0",
+      "purl": "pkg:npm/js-tokens@10.0.0",
+      "author": "Simon Lydell",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "js-yaml",
       "version": "3.15.2",
       "purl": "pkg:npm/js-yaml@3.15.2",
@@ -3746,20 +3523,6 @@
       "version": "3.0.1",
       "purl": "pkg:npm/json-buffer@3.0.1",
       "author": "Dominic Tarr <dominic.tarr@gmail.com> (http://dominictarr.com)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "json-parse-even-better-errors",
-      "version": "5.0.0",
-      "purl": "pkg:npm/json-parse-even-better-errors@5.0.0",
-      "author": "GitHub Inc.",
       "licenses": [
         {
           "license": {
@@ -3826,66 +3589,10 @@
     },
     {
       "type": "library",
-      "name": "json-stringify-nice",
-      "version": "1.1.4",
-      "purl": "pkg:npm/json-stringify-nice@1.1.4",
-      "author": "Isaac Z. Schlueter <i@izs.me> (https://izs.me)",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "jsonfile",
       "version": "4.0.0",
       "purl": "pkg:npm/jsonfile@4.0.0",
       "author": "JP Richardson <jprichardson@gmail.com>",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "jsonparse",
-      "version": "1.3.1",
-      "purl": "pkg:npm/jsonparse@1.3.1",
-      "author": "Tim Caswell <tim@creationix.com>",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "just-diff",
-      "version": "6.0.2",
-      "purl": "pkg:npm/just-diff@6.0.2",
-      "author": "Angus Croll",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "just-diff-apply",
-      "version": "5.5.0",
-      "purl": "pkg:npm/just-diff-apply@5.5.0",
-      "author": "Angus Croll",
       "licenses": [
         {
           "license": {
@@ -3918,20 +3625,6 @@
         {
           "license": {
             "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "license-checker-rseidelsohn",
-      "version": "5.0.1",
-      "purl": "pkg:npm/license-checker-rseidelsohn@5.0.1",
-      "author": "Roman Seidelsohn <rseidelsohn@gmail.com>",
-      "licenses": [
-        {
-          "license": {
-            "id": "BSD-3-Clause"
           }
         }
       ]
@@ -4007,20 +3700,6 @@
     },
     {
       "type": "library",
-      "name": "lodash.clonedeep",
-      "version": "4.5.0",
-      "purl": "pkg:npm/lodash.clonedeep@4.5.0",
-      "author": "John-David Dalton <john.david.dalton@gmail.com> (http://allyoucanleet.com/)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "lodash.merge",
       "version": "4.6.2",
       "purl": "pkg:npm/lodash.merge@4.6.2",
@@ -4064,13 +3743,13 @@
     {
       "type": "library",
       "name": "lru-cache",
-      "version": "11.5.2",
-      "purl": "pkg:npm/lru-cache@11.5.2",
+      "version": "10.4.3",
+      "purl": "pkg:npm/lru-cache@10.4.3",
       "author": "Isaac Z. Schlueter <i@izs.me>",
       "licenses": [
         {
           "license": {
-            "id": "BlueOak-1.0.0"
+            "id": "ISC"
           }
         }
       ]
@@ -4091,14 +3770,40 @@
     },
     {
       "type": "library",
-      "name": "make-fetch-happen",
-      "version": "15.0.6",
-      "purl": "pkg:npm/make-fetch-happen@15.0.6",
-      "author": "GitHub Inc.",
+      "name": "magicast",
+      "version": "0.3.5",
+      "purl": "pkg:npm/magicast@0.3.5",
       "licenses": [
         {
           "license": {
-            "id": "ISC"
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "magicast",
+      "version": "0.5.5",
+      "purl": "pkg:npm/magicast@0.5.5",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "make-dir",
+      "version": "4.0.0",
+      "purl": "pkg:npm/make-dir@4.0.0",
+      "author": "Sindre Sorhus",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
           }
         }
       ]
@@ -4227,10 +3932,10 @@
     },
     {
       "type": "library",
-      "name": "minipass",
-      "version": "3.3.6",
-      "purl": "pkg:npm/minipass@3.3.6",
-      "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
+      "name": "minimatch",
+      "version": "9.0.9",
+      "purl": "pkg:npm/minimatch@9.0.9",
+      "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me)",
       "licenses": [
         {
           "license": {
@@ -4249,103 +3954,6 @@
         {
           "license": {
             "id": "BlueOak-1.0.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "minipass-collect",
-      "version": "2.0.1",
-      "purl": "pkg:npm/minipass-collect@2.0.1",
-      "author": "Isaac Z. Schlueter <i@izs.me> (https://izs.me)",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "minipass-fetch",
-      "version": "5.0.2",
-      "purl": "pkg:npm/minipass-fetch@5.0.2",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "minipass-flush",
-      "version": "1.0.7",
-      "purl": "pkg:npm/minipass-flush@1.0.7",
-      "author": "Isaac Z. Schlueter <i@izs.me> (https://izs.me)",
-      "licenses": [
-        {
-          "license": {
-            "id": "BlueOak-1.0.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "minipass-pipeline",
-      "version": "1.2.4",
-      "purl": "pkg:npm/minipass-pipeline@1.2.4",
-      "author": "Isaac Z. Schlueter <i@izs.me> (https://izs.me)",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "minipass-sized",
-      "version": "2.0.0",
-      "purl": "pkg:npm/minipass-sized@2.0.0",
-      "author": "Isaac Z. Schlueter <i@izs.me> (https://izs.me)",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "minizlib",
-      "version": "3.1.0",
-      "purl": "pkg:npm/minizlib@3.1.0",
-      "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "mkdirp",
-      "version": "1.0.4",
-      "purl": "pkg:npm/mkdirp@1.0.4",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
           }
         }
       ]
@@ -4447,146 +4055,6 @@
     },
     {
       "type": "library",
-      "name": "node-gyp",
-      "version": "12.4.0",
-      "purl": "pkg:npm/node-gyp@12.4.0",
-      "author": "Nathan Rajlich <nathan@tootallnate.net> (http://tootallnate.net)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "nopt",
-      "version": "7.2.1",
-      "purl": "pkg:npm/nopt@7.2.1",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "nopt",
-      "version": "9.0.0",
-      "purl": "pkg:npm/nopt@9.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "npm-bundled",
-      "version": "5.0.0",
-      "purl": "pkg:npm/npm-bundled@5.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "npm-install-checks",
-      "version": "8.0.0",
-      "purl": "pkg:npm/npm-install-checks@8.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "BSD-2-Clause"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "npm-normalize-package-bin",
-      "version": "5.0.0",
-      "purl": "pkg:npm/npm-normalize-package-bin@5.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "npm-package-arg",
-      "version": "13.0.2",
-      "purl": "pkg:npm/npm-package-arg@13.0.2",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "npm-packlist",
-      "version": "10.0.4",
-      "purl": "pkg:npm/npm-packlist@10.0.4",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "npm-pick-manifest",
-      "version": "11.0.3",
-      "purl": "pkg:npm/npm-pick-manifest@11.0.3",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "npm-registry-fetch",
-      "version": "19.1.1",
-      "purl": "pkg:npm/npm-registry-fetch@19.1.1",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "object-assign",
       "version": "4.1.1",
       "purl": "pkg:npm/object-assign@4.1.1",
@@ -4605,6 +4073,20 @@
       "version": "1.13.4",
       "purl": "pkg:npm/object-inspect@1.13.4",
       "author": "James Halliday",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "obug",
+      "version": "2.2.1",
+      "purl": "pkg:npm/obug@2.2.1",
+      "author": "Kevin Deng <sxzz@sxzz.moe>",
       "licenses": [
         {
           "license": {
@@ -4754,9 +4236,9 @@
     },
     {
       "type": "library",
-      "name": "p-map",
-      "version": "7.0.8",
-      "purl": "pkg:npm/p-map@7.0.8",
+      "name": "p-try",
+      "version": "2.2.0",
+      "purl": "pkg:npm/p-try@2.2.0",
       "author": "Sindre Sorhus",
       "licenses": [
         {
@@ -4768,14 +4250,14 @@
     },
     {
       "type": "library",
-      "name": "p-try",
-      "version": "2.2.0",
-      "purl": "pkg:npm/p-try@2.2.0",
-      "author": "Sindre Sorhus",
+      "name": "package-json-from-dist",
+      "version": "1.0.1",
+      "purl": "pkg:npm/package-json-from-dist@1.0.1",
+      "author": "Isaac Z. Schlueter <i@izs.me> (https://izs.me)",
       "licenses": [
         {
           "license": {
-            "id": "MIT"
+            "id": "BlueOak-1.0.0"
           }
         }
       ]
@@ -4796,20 +4278,6 @@
     },
     {
       "type": "library",
-      "name": "pacote",
-      "version": "21.5.1",
-      "purl": "pkg:npm/pacote@21.5.1",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "parent-module",
       "version": "1.0.1",
       "purl": "pkg:npm/parent-module@1.0.1",
@@ -4818,20 +4286,6 @@
         {
           "license": {
             "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "parse-conflict-json",
-      "version": "5.0.1",
-      "purl": "pkg:npm/parse-conflict-json@5.0.1",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
           }
         }
       ]
@@ -4894,8 +4348,8 @@
     {
       "type": "library",
       "name": "path-scurry",
-      "version": "2.0.2",
-      "purl": "pkg:npm/path-scurry@2.0.2",
+      "version": "1.11.1",
+      "purl": "pkg:npm/path-scurry@1.11.1",
       "author": "Isaac Z. Schlueter <i@izs.me> (https://blog.izs.me)",
       "licenses": [
         {
@@ -5099,19 +4553,6 @@
     },
     {
       "type": "library",
-      "name": "postcss-selector-parser",
-      "version": "7.1.6",
-      "purl": "pkg:npm/postcss-selector-parser@7.1.6",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "prelude-ls",
       "version": "1.2.1",
       "purl": "pkg:npm/prelude-ls@1.2.1",
@@ -5162,62 +4603,6 @@
         {
           "license": {
             "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "proc-log",
-      "version": "6.1.0",
-      "purl": "pkg:npm/proc-log@6.1.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "proggy",
-      "version": "4.0.0",
-      "purl": "pkg:npm/proggy@4.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "promise-all-reject-late",
-      "version": "1.0.1",
-      "purl": "pkg:npm/promise-all-reject-late@1.0.1",
-      "author": "Isaac Z. Schlueter <i@izs.me> (https://izs.me)",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "promise-call-limit",
-      "version": "3.0.2",
-      "purl": "pkg:npm/promise-call-limit@3.0.2",
-      "author": "Isaac Z. Schlueter <i@izs.me> (https://izs.me)",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
           }
         }
       ]
@@ -5341,20 +4726,6 @@
         {
           "license": {
             "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "read-cmd-shim",
-      "version": "6.0.0",
-      "purl": "pkg:npm/read-cmd-shim@6.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
           }
         }
       ]
@@ -5669,66 +5040,10 @@
     },
     {
       "type": "library",
-      "name": "sigstore",
-      "version": "4.1.1",
-      "purl": "pkg:npm/sigstore@4.1.1",
-      "author": "bdehamer@github.com",
-      "licenses": [
-        {
-          "license": {
-            "id": "Apache-2.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "slash",
       "version": "3.0.0",
       "purl": "pkg:npm/slash@3.0.0",
       "author": "Sindre Sorhus",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "smart-buffer",
-      "version": "4.2.0",
-      "purl": "pkg:npm/smart-buffer@4.2.0",
-      "author": "Josh Glazebrook",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "socks",
-      "version": "2.8.10",
-      "purl": "pkg:npm/socks@2.8.10",
-      "author": "Josh Glazebrook",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "socks-proxy-agent",
-      "version": "8.0.5",
-      "purl": "pkg:npm/socks-proxy-agent@8.0.5",
-      "author": "Nathan Rajlich",
       "licenses": [
         {
           "license": {
@@ -5781,117 +5096,6 @@
     },
     {
       "type": "library",
-      "name": "spdx-compare",
-      "version": "1.0.0",
-      "purl": "pkg:npm/spdx-compare@1.0.0",
-      "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "spdx-correct",
-      "version": "3.2.0",
-      "purl": "pkg:npm/spdx-correct@3.2.0",
-      "licenses": [
-        {
-          "license": {
-            "id": "Apache-2.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "spdx-exceptions",
-      "version": "2.5.0",
-      "purl": "pkg:npm/spdx-exceptions@2.5.0",
-      "author": "The Linux Foundation",
-      "licenses": [
-        {
-          "license": {
-            "id": "CC-BY-3.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "spdx-expression-parse",
-      "version": "3.0.1",
-      "purl": "pkg:npm/spdx-expression-parse@3.0.1",
-      "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "spdx-expression-parse",
-      "version": "4.0.0",
-      "purl": "pkg:npm/spdx-expression-parse@4.0.0",
-      "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "spdx-license-ids",
-      "version": "3.0.23",
-      "purl": "pkg:npm/spdx-license-ids@3.0.23",
-      "author": "Shinnosuke Watanabe (https://github.com/shinnn)",
-      "licenses": [
-        {
-          "license": {
-            "id": "CC0-1.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "spdx-ranges",
-      "version": "2.1.1",
-      "purl": "pkg:npm/spdx-ranges@2.1.1",
-      "author": "The Linux Foundation",
-      "licenses": [
-        {
-          "license": {
-            "id": "(MIT AND CC-BY-3.0)"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "spdx-satisfies",
-      "version": "6.0.0",
-      "purl": "pkg:npm/spdx-satisfies@6.0.0",
-      "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "sprintf-js",
       "version": "1.0.3",
       "purl": "pkg:npm/sprintf-js@1.0.3",
@@ -5900,20 +5104,6 @@
         {
           "license": {
             "id": "BSD-3-Clause"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "ssri",
-      "version": "13.0.1",
-      "purl": "pkg:npm/ssri@13.0.1",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
           }
         }
       ]
@@ -5974,9 +5164,64 @@
     },
     {
       "type": "library",
+      "name": "std-env",
+      "version": "4.2.0",
+      "purl": "pkg:npm/std-env@4.2.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "string-width",
+      "version": "4.2.3",
+      "purl": "pkg:npm/string-width@4.2.3",
+      "author": "Sindre Sorhus",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "string-width",
+      "version": "5.1.2",
+      "purl": "pkg:npm/string-width@5.1.2",
+      "author": "Sindre Sorhus",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "strip-ansi",
       "version": "6.0.1",
       "purl": "pkg:npm/strip-ansi@6.0.1",
+      "author": "Sindre Sorhus",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "strip-ansi",
+      "version": "7.2.0",
+      "purl": "pkg:npm/strip-ansi@7.2.0",
       "author": "Sindre Sorhus",
       "licenses": [
         {
@@ -6044,20 +5289,6 @@
     },
     {
       "type": "library",
-      "name": "tar",
-      "version": "7.5.22",
-      "purl": "pkg:npm/tar@7.5.22",
-      "author": "Isaac Z. Schlueter",
-      "licenses": [
-        {
-          "license": {
-            "id": "BlueOak-1.0.0"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "term-size",
       "version": "2.2.1",
       "purl": "pkg:npm/term-size@2.2.1",
@@ -6066,6 +5297,20 @@
         {
           "license": {
             "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "test-exclude",
+      "version": "7.0.2",
+      "purl": "pkg:npm/test-exclude@7.0.2",
+      "author": "Ben Coe <ben@npmjs.com>",
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC"
           }
         }
       ]
@@ -6167,6 +5412,19 @@
     },
     {
       "type": "library",
+      "name": "tinyrainbow",
+      "version": "3.1.1",
+      "purl": "pkg:npm/tinyrainbow@3.1.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "tinyspy",
       "version": "3.0.2",
       "purl": "pkg:npm/tinyspy@3.0.2",
@@ -6216,34 +5474,6 @@
         {
           "license": {
             "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "treeify",
-      "version": "1.1.0",
-      "purl": "pkg:npm/treeify@1.1.0",
-      "author": "Luke Plaster <notatestuser@gmail.com>",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "treeverse",
-      "version": "3.0.0",
-      "purl": "pkg:npm/treeverse@3.0.0",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
           }
         }
       ]
@@ -6306,20 +5536,6 @@
     },
     {
       "type": "library",
-      "name": "tuf-js",
-      "version": "4.1.0",
-      "purl": "pkg:npm/tuf-js@4.1.0",
-      "author": "bdehamer@github.com",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "type-check",
       "version": "0.4.0",
       "purl": "pkg:npm/type-check@0.4.0",
@@ -6364,19 +5580,6 @@
       "name": "ufo",
       "version": "1.6.4",
       "purl": "pkg:npm/ufo@1.6.4",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "undici",
-      "version": "6.28.1",
-      "purl": "pkg:npm/undici@6.28.1",
       "licenses": [
         {
           "license": {
@@ -6442,34 +5645,6 @@
     },
     {
       "type": "library",
-      "name": "util-deprecate",
-      "version": "1.0.2",
-      "purl": "pkg:npm/util-deprecate@1.0.2",
-      "author": "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "validate-npm-package-name",
-      "version": "7.0.2",
-      "purl": "pkg:npm/validate-npm-package-name@7.0.2",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "vary",
       "version": "1.1.2",
       "purl": "pkg:npm/vary@1.1.2",
@@ -6526,38 +5701,10 @@
     },
     {
       "type": "library",
-      "name": "walk-up-path",
-      "version": "4.0.0",
-      "purl": "pkg:npm/walk-up-path@4.0.0",
-      "author": "Isaac Z. Schlueter <i@izs.me> (https://izs.me)",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "which",
       "version": "2.0.2",
       "purl": "pkg:npm/which@2.0.2",
       "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me)",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "which",
-      "version": "6.0.1",
-      "purl": "pkg:npm/which@6.0.1",
-      "author": "GitHub Inc.",
       "licenses": [
         {
           "license": {
@@ -6596,6 +5743,34 @@
     },
     {
       "type": "library",
+      "name": "wrap-ansi",
+      "version": "7.0.0",
+      "purl": "pkg:npm/wrap-ansi@7.0.0",
+      "author": "Sindre Sorhus",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wrap-ansi",
+      "version": "8.1.0",
+      "purl": "pkg:npm/wrap-ansi@8.1.0",
+      "author": "Sindre Sorhus",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "wrappy",
       "version": "1.0.2",
       "purl": "pkg:npm/wrappy@1.0.2",
@@ -6604,48 +5779,6 @@
         {
           "license": {
             "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "write-file-atomic",
-      "version": "7.0.1",
-      "purl": "pkg:npm/write-file-atomic@7.0.1",
-      "author": "GitHub Inc.",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "yallist",
-      "version": "4.0.0",
-      "purl": "pkg:npm/yallist@4.0.0",
-      "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "yallist",
-      "version": "5.0.0",
-      "purl": "pkg:npm/yallist@5.0.0",
-      "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
-      "licenses": [
-        {
-          "license": {
-            "id": "BlueOak-1.0.0"
           }
         }
       ]

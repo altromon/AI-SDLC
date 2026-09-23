@@ -102,6 +102,114 @@ export function generateTraceabilityReportMarkdown(rows: TraceabilityRow[], erro
   return reportLines.join('\n');
 }
 
+const SKIPPED_DIR_NAMES = new Set([
+  'node_modules',
+  '.git',
+  'dist',
+  'scratch',
+  'fixtures',
+  'templates',
+  'examples',
+]);
+
+function shouldSkipDir(name: string): boolean {
+  return SKIPPED_DIR_NAMES.has(name) || name.startsWith('temp-');
+}
+
+function isCodeTestFile(name: string): boolean {
+  return (
+    name.endsWith('.spec.ts') ||
+    name.endsWith('.spec.js') ||
+    name.endsWith('.test.ts') ||
+    name.endsWith('.test.js') ||
+    name.endsWith('_test.py') ||
+    name.endsWith('_test.go')
+  );
+}
+
+function indexFeatureFile(
+  fullPath: string,
+  rootDir: string,
+  map: Map<string, string[]>
+): void {
+  try {
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    const tags = extractFeatureTags(content);
+    const relFeature = path.relative(rootDir, fullPath).replace(/\\/g, '/');
+    for (const tag of tags) {
+      const existing = map.get(tag) || [];
+      if (!existing.includes(relFeature)) existing.push(relFeature);
+      map.set(tag, existing);
+    }
+  } catch {
+    // Ignore read error
+  }
+}
+
+function scanFeatureFiles(
+  dir: string,
+  rootDir: string,
+  map: Map<string, string[]>
+): void {
+  if (!fs.existsSync(dir)) return;
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const e of entries) {
+      const fullPath = path.join(dir, e.name);
+      if (e.isDirectory() && !shouldSkipDir(e.name)) {
+        scanFeatureFiles(fullPath, rootDir, map);
+      } else if (e.name.endsWith('.feature')) {
+        indexFeatureFile(fullPath, rootDir, map);
+      }
+    }
+  } catch {
+    // Ignore directory error
+  }
+}
+
+function indexCodeTestFile(
+  fullPath: string,
+  rootDir: string,
+  reqIds: string[],
+  map: Map<string, string[]>
+): void {
+  try {
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    const relTest = path.relative(rootDir, fullPath).replace(/\\/g, '/');
+    for (const artId of reqIds) {
+      if (content.includes(artId)) {
+        const existing = map.get(artId) || [];
+        if (!existing.includes(relTest)) existing.push(relTest);
+        map.set(artId, existing);
+      }
+    }
+  } catch {
+    // Ignore read error
+  }
+}
+
+function scanCodeTestFiles(
+  dir: string,
+  rootDir: string,
+  reqIds: string[],
+  map: Map<string, string[]>
+): void {
+  if (!fs.existsSync(dir)) return;
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const e of entries) {
+      const fullPath = path.join(dir, e.name);
+      if (e.isDirectory() && !shouldSkipDir(e.name)) {
+        scanCodeTestFiles(fullPath, rootDir, reqIds, map);
+      } else if (isCodeTestFile(e.name)) {
+        indexCodeTestFile(fullPath, rootDir, reqIds, map);
+      }
+    }
+  } catch {
+    // Ignore directory error
+  }
+}
+
 export function verifyTraceability(options: TraceabilityOptions = {}): TraceabilityResult {
   const rootDir = options.rootDir || process.cwd();
   const allMdFiles = walkMdFiles(rootDir);
@@ -208,84 +316,20 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
   const featureTagMap = new Map<string, string[]>(); // reqId -> featureFiles[]
   const codeTestMap = new Map<string, string[]>(); // reqId -> testFiles[]
 
-  function scanFeatureFiles(dir: string) {
-    if (!fs.existsSync(dir)) return;
-    let entries: fs.Dirent[];
-    try {
-      entries = fs.readdirSync(dir, { withFileTypes: true });
-    } catch {
-      return;
-    }
-    for (const e of entries) {
-      const fullPath = path.join(dir, e.name);
-      if (e.isDirectory()) {
-        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist' && e.name !== 'scratch' && e.name !== 'fixtures' && !e.name.startsWith('temp-')) {
-          scanFeatureFiles(fullPath);
-        }
-      } else if (e.name.endsWith('.feature')) {
-        try {
-          const content = fs.readFileSync(fullPath, 'utf-8');
-          const tags = extractFeatureTags(content);
-          const relFeature = path.relative(rootDir, fullPath).replace(/\\/g, '/');
-          for (const tag of tags) {
-            const existing = featureTagMap.get(tag) || [];
-            if (!existing.includes(relFeature)) existing.push(relFeature);
-            featureTagMap.set(tag, existing);
-          }
-        } catch {
-          // Ignore read error
-        }
-      }
+  const targetReqIds: string[] = [];
+  for (const [artId] of artifactMap.entries()) {
+    if (
+      artId.startsWith('FR-') ||
+      artId.startsWith('QR-') ||
+      artId.startsWith('SEC-REQ-') ||
+      artId.startsWith('CON-')
+    ) {
+      targetReqIds.push(artId);
     }
   }
 
-  function scanCodeTestFiles(dir: string) {
-    if (!fs.existsSync(dir)) return;
-    let entries: fs.Dirent[];
-    try {
-      entries = fs.readdirSync(dir, { withFileTypes: true });
-    } catch {
-      return;
-    }
-    for (const e of entries) {
-      const fullPath = path.join(dir, e.name);
-      if (e.isDirectory()) {
-        if (e.name !== 'node_modules' && e.name !== '.git' && e.name !== 'dist' && e.name !== 'scratch' && e.name !== 'fixtures' && !e.name.startsWith('temp-')) {
-          scanCodeTestFiles(fullPath);
-        }
-      } else if (
-        e.name.endsWith('.spec.ts') ||
-        e.name.endsWith('.spec.js') ||
-        e.name.endsWith('.test.ts') ||
-        e.name.endsWith('.test.js') ||
-        e.name.endsWith('_test.py') ||
-        e.name.endsWith('_test.go')
-      ) {
-        try {
-          const content = fs.readFileSync(fullPath, 'utf-8');
-          const relTest = path.relative(rootDir, fullPath).replace(/\\/g, '/');
-          for (const [artId] of artifactMap.entries()) {
-            if (
-              (artId.startsWith('FR-') ||
-                artId.startsWith('QR-') ||
-                artId.startsWith('SEC-REQ-') ||
-                artId.startsWith('CON-')) &&
-              content.includes(artId)
-            ) {
-              const existing = codeTestMap.get(artId) || [];
-              if (!existing.includes(relTest)) existing.push(relTest);
-              codeTestMap.set(artId, existing);
-            }
-          }
-        } catch {
-          // Ignore read error
-        }
-      }
-    }
-  }
-
-  scanFeatureFiles(rootDir);
-  scanCodeTestFiles(rootDir);
+  scanFeatureFiles(rootDir, rootDir, featureTagMap);
+  scanCodeTestFiles(rootDir, rootDir, targetReqIds, codeTestMap);
 
   // 4. Identify all requirements to verify (excluding templates and process docs)
   const requirements: ArtifactEntry[] = [];

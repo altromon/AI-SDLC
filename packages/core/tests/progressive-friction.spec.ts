@@ -126,7 +126,7 @@ profile: patch
   });
 
   it('should validate the reference example chg-002-fast-patch', () => {
-    const exampleDir = path.join(process.cwd(), 'examples', 'specs', 'chg-002-fast-patch');
+    const exampleDir = path.join(process.cwd(), 'examples', 'sentinel-core', 'specs', 'changes', 'completed', 'chg-002-fast-patch');
     expect(fs.existsSync(exampleDir)).toBe(true);
 
     const detected = detectProfileFromChange(exampleDir);
@@ -138,7 +138,7 @@ profile: patch
     expect(validation.workspace?.profile).toBe('patch');
 
     const friction = verifyProgressiveFriction({
-      rootDir: process.cwd(),
+      rootDir: path.join(process.cwd(), 'examples', 'sentinel-core'),
       changeId: 'chg-002-fast-patch',
       diffFiles: ['packages/core/src/utils.ts'],
     });
@@ -149,7 +149,7 @@ profile: patch
 
   it('should trigger Anti-Patch Bypass if a patch change modifies schemas or enclaves', () => {
     const bypassSchemas = verifyProgressiveFriction({
-      rootDir: process.cwd(),
+      rootDir: path.join(process.cwd(), 'examples', 'sentinel-core'),
       changeId: 'chg-002-fast-patch',
       diffFiles: [
         'packages/core/src/index.ts',
@@ -161,7 +161,7 @@ profile: patch
     expect(bypassSchemas.bypassedRules[0]).toContain('schemas/product/requirement.schema.json');
 
     const bypassEnclave = verifyProgressiveFriction({
-      rootDir: process.cwd(),
+      rootDir: path.join(process.cwd(), 'examples', 'sentinel-core'),
       changeId: 'chg-002-fast-patch',
       diffFiles: [
         'architecture/arc42/enclaves/dmz.md',
