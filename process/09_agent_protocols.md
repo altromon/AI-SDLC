@@ -192,14 +192,18 @@ Todo artefacto generado por un agente amanuense debe adoptar la taxonomía canó
 | Tipo de Artefacto | Patrón de Identificador | Esquema JSON Obligatorio |
 | :--- | :--- | :--- |
 | **Actor de Producto** | `ACT-[SUFIJO]` (ej. `ACT-WEATHER-MONITOR`) | `schemas/product/actor.schema.json` |
+| **Journey de Usuario / Operador** | `JRN-[SUFIJO]` (ej. `JRN-MISSION-LIFECYCLE`) | `schemas/product/journey.schema.json` |
 | **Caso de Uso** | `UC-[SUFIJO]` (ej. `UC-ABORT-MISSION`) | `schemas/product/use-case.schema.json` |
 | **Requisito Funcional** | `FR-[SUFIJO]-[NUM3]` (ej. `FR-ABORT-MISSION-001`) | `schemas/product/requirement.schema.json` |
 | **Requisito de Calidad** | `QR-[SUFIJO]` (ej. `QR-ABORT-PROPAGATION-TIME`) | `schemas/product/requirement.schema.json` |
 | **Regla de Negocio** | `BR-[SUFIJO]` (ej. `BR-ABORT-AUTHORITY`) | `schemas/product/business-rule.schema.json` |
+| **Término de Glosario de Dominio** | `TERM-[SUFIJO]` (ej. `TERM-FTTI-ENVELOPE`) | `schemas/product/term.schema.json` |
 | **Actor de Amenaza** | `ACT-THREAT-[SUFIJO]` (ej. `ACT-THREAT-ROGUE-OPERATOR`) | `schemas/security/threat-actor.schema.json` |
 | **Caso de Abuso** | `ABUSE-[SUFIJO]` (ej. `ABUSE-UNAUTHORIZED-ABORT`) | `schemas/security/abuse-case.schema.json` |
 | **Requisito de Seguridad** | `SEC-REQ-[SUFIJO]` (ej. `SEC-REQ-ABORT-SIGNATURE`) | `schemas/security/security-req.schema.json` |
-| **Enclave Seguro** | `SEC-ENC-[SUFIJO]` (ej. `SEC-ENC-FLIGHT-DISPATCH`) | Citado en `enforced-in-enclave` |
+| **Enclave Seguro Zero Trust** | `SEC-ENC-[SUFIJO]` (ej. `SEC-ENC-FLIGHT-DISPATCH`) | `schemas/security/enclave.schema.json` |
+| **Peligro Operacional (Hazard)** | `HAZ-[SUFIJO]` (ej. `HAZ-ROTOR-FAILURE-001`) | `schemas/safety/hazard.schema.json` |
+| **Requisito de Safety** | `SAF-REQ-[SUFIJO]` (ej. `SAF-REQ-ALTITUDE-LIMIT`) | `schemas/safety/safety-req.schema.json` |
 
 #### Algoritmo de Asignación Correlativa
 1. El agente inspecciona los archivos existentes en el directorio correspondiente (`specs/product/`, `specs/security/`, `examples/`).

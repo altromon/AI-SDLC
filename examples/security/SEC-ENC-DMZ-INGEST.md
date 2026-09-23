@@ -3,8 +3,22 @@ id: SEC-ENC-DMZ-INGEST
 type: security-enclave
 title: Enclave Perimetral de Ingesta Segura (DMZ Ingestion Enclave)
 status: active
+version: "1.0.0"
+schema-version: "1.0"
+trust-zone: dmz
 trust-level: "zero-trust-boundary"
 isolation: "network-namespace-and-mtls"
+perimeter-rules:
+  - "Aislamiento de red estricto mediante Kubernetes NetworkPolicy"
+  - "Autenticación mTLS obligatoria para productores de telemetría"
+  - "Acceso exclusivo a puertos públicos de balanceador de carga"
+allowed-inbound:
+  - CMP-EDGE-GATEWAY-001
+allowed-outbound:
+  - CMP-KAFKA-BROKER-001
+authentication-mechanism: mtls
+supersedes: null
+superseded-by: null
 ---
 
 # SEC-ENC-DMZ-INGEST: Enclave Perimetral de Ingesta

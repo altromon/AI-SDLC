@@ -160,6 +160,12 @@ Para que una versión candidata sea autorizada para su paso a producción por el
    - **Estrategia y Procedimiento de Despliegue**: Enclaves de red (`SEC-ENC-*`), secretos/certificados mTLS, verificación de salud y plan de rollback inmediato.
    - **Runbooks de Errores Probables**: Diagnóstico y mitigación paso a paso de fallos típicos en producción (mTLS, fugas OOM, desconexiones, límites de red).
 
+3. **Artefactos Enterprise de Seguridad, Safety y Dominio (`schemas/`)**:
+   - **Enclaves de Red Zero Trust (`SEC-ENC-*`)**: Conformes con `schemas/security/enclave.schema.json`, delimitando zonas de confianza, reglas perimetrales y componentes autorizados inbound/outbound.
+   - **Peligros Operacionales y Análisis de Riesgos (`HAZ-*`)**: Conformes con `schemas/safety/hazard.schema.json`, tipificando severidad, probabilidad y tiempo límite de tolerancia a fallos (FTTI).
+   - **Journeys de Usuario y Operador (`JRN-*`)**: Conformes con `schemas/product/journey.schema.json`, mapeando etapas, puntos de contacto y casos de uso vinculados.
+   - **Glosario de Lenguaje Ubicuo y Términos (`TERM-*`)**: Conformes con `schemas/product/term.schema.json`, acotando definiciones canónicas por bounded context.
+
 ### 4.2 Puertas de Calidad Adaptativas por Perfil de Riesgo (Progressive Friction Gates)
 
 Las compuertas de liberación no imponen la misma fricción burocrática a todos los cambios; evalúan los artefactos y exigencias en función del campo `profile` declarado en el frontmatter de `spec.md`:

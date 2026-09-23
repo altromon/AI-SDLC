@@ -19,11 +19,14 @@ export const TYPE_TO_SCHEMA_MAP: Record<string, string> = {
   // Product
   actor: 'schemas/product/actor.schema.json',
   'business-rule': 'schemas/product/business-rule.schema.json',
+  journey: 'schemas/product/journey.schema.json',
   requirement: 'schemas/product/requirement.schema.json',
+  term: 'schemas/product/term.schema.json',
   'use-case': 'schemas/product/use-case.schema.json',
 
   // Security
   'abuse-case': 'schemas/security/abuse-case.schema.json',
+  'security-enclave': 'schemas/security/enclave.schema.json',
   'security-requirement': 'schemas/security/security-req.schema.json',
   'threat-actor': 'schemas/security/threat-actor.schema.json',
 
@@ -32,6 +35,7 @@ export const TYPE_TO_SCHEMA_MAP: Record<string, string> = {
   component: 'schemas/architecture/component.schema.json',
 
   // Safety
+  hazard: 'schemas/safety/hazard.schema.json',
   'safety-requirement': 'schemas/safety/safety-req.schema.json',
 
   // Manuals
@@ -49,8 +53,12 @@ export function inferArtifactTypeFromId(id: string): string | null {
   if (id.startsWith('UC-')) return 'use-case';
   if (id.startsWith('BR-')) return 'business-rule';
   if (id.startsWith('FR-') || id.startsWith('QR-') || id.startsWith('CON-')) return 'requirement';
+  if (id.startsWith('JRN-')) return 'journey';
+  if (id.startsWith('TERM-')) return 'term';
   if (id.startsWith('ABUSE-')) return 'abuse-case';
+  if (id.startsWith('SEC-ENC-')) return 'security-enclave';
   if (id.startsWith('SEC-REQ-')) return 'security-requirement';
+  if (id.startsWith('HAZ-')) return 'hazard';
   if (id.startsWith('SAF-REQ-') || id.startsWith('SAF-')) return 'safety-requirement';
   if (id.startsWith('ADR-')) return 'architecture-decision-record';
   if (id.startsWith('CMP-')) return 'component';
