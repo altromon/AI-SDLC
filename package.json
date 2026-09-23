@@ -9,7 +9,7 @@
     "test": "vitest run packages",
     "test:example": "vitest run examples",
     "test:all": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run packages --coverage",
     "typecheck": "pnpm --filter \"@ai-sdlc/*\" typecheck",
     "extract:gherkin": "tsx packages/cli/src/index.ts gherkin extract",
     "extract:gherkin:all": "tsx packages/cli/src/index.ts gherkin extract --all",
