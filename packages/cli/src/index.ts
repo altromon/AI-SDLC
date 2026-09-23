@@ -48,10 +48,14 @@ program
   .description('Comando unificado de pre-vuelo: valida Quality Gates con auto-fix no destructivo opcional')
   .option('--fix', 'Sincroniza automáticamente escenarios Gherkin (.feature) y digests criptográficos de citaciones PDaC')
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
+  .option('-F, --format <format>', 'Formato de salida: text o json')
   .action((opts) => {
     const passed = runCheck({
       fix: opts.fix,
       root: opts.root,
+      json: opts.json,
+      format: opts.format,
     });
     process.exit(passed ? 0 : 1);
   });
@@ -348,9 +352,17 @@ gherkinCommand
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
   .option('-p, --path <path>', 'Archivo Markdown o directorio objetivo')
   .option('-a, --all', 'Procesa todas las especificaciones y requerimientos')
+  .option('--json', 'Salida en formato JSON estructurado')
+  .option('-F, --format <format>', 'Formato de salida: text o json')
   .action((opts) => {
-    runGherkinExtract({ root: opts.root, path: opts.path, all: opts.all });
-    process.exit(0);
+    const passed = runGherkinExtract({
+      root: opts.root,
+      path: opts.path,
+      all: opts.all,
+      json: opts.json,
+      format: opts.format,
+    });
+    process.exit(passed ? 0 : 1);
   });
 
 // --- git command suite ---
@@ -466,6 +478,8 @@ changeCommand
   .option('-p, --profile <profile>', 'Perfil de riesgo del cambio: patch, standard o critical', 'standard')
   .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit', 'openspec')
   .option('-a, --author <author>', 'Nombre del autor o agente desarrollador')
+  .option('--json', 'Salida en formato JSON estructurado')
+  .option('-F, --format <format>', 'Formato de salida: text o json')
   .action((name, opts) => {
     const passed = runChangeNew({
       root: opts.root,
@@ -475,6 +489,8 @@ changeCommand
       profile: opts.profile,
       framework: opts.framework,
       author: opts.author,
+      json: opts.json,
+      format: opts.format,
     });
     process.exit(passed ? 0 : 1);
   });
@@ -493,6 +509,8 @@ sddCommand
   .option('-p, --profile <profile>', 'Perfil de riesgo del cambio: patch, standard o critical', 'standard')
   .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit', 'openspec')
   .option('-a, --author <author>', 'Nombre del autor o agente desarrollador')
+  .option('--json', 'Salida en formato JSON estructurado')
+  .option('-F, --format <format>', 'Formato de salida: text o json')
   .action((name, opts) => {
     const passed = runChangeNew({
       root: opts.root,
@@ -502,6 +520,8 @@ sddCommand
       profile: opts.profile,
       framework: opts.framework,
       author: opts.author,
+      json: opts.json,
+      format: opts.format,
     });
     process.exit(passed ? 0 : 1);
   });
@@ -515,6 +535,8 @@ sddCommand
   .option('-t, --title <title>', 'Título del handoff PDaC')
   .option('--requirements <reqs>', 'Lista de IDs de requerimientos separados por comas')
   .option('--use-cases <ucs>', 'Lista de IDs de casos de uso separados por comas')
+  .option('--json', 'Salida en formato JSON estructurado')
+  .option('-F, --format <format>', 'Formato de salida: text o json')
   .action((opts) => {
     const passed = runSddDeposit({
       root: opts.root,
@@ -523,6 +545,8 @@ sddCommand
       title: opts.title,
       requirements: opts.requirements,
       useCases: opts.useCases,
+      json: opts.json,
+      format: opts.format,
     });
     process.exit(passed ? 0 : 1);
   });
@@ -532,8 +556,15 @@ sddCommand
   .description('Valida la conformidad de los archivos de acompañamiento handoff.yaml (HOF-*) en los cambios')
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
   .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit')
+  .option('--json', 'Salida en formato JSON estructurado')
+  .option('-F, --format <format>', 'Formato de salida: text o json')
   .action((opts) => {
-    const passed = runSddVerify({ root: opts.root, framework: opts.framework });
+    const passed = runSddVerify({
+      root: opts.root,
+      framework: opts.framework,
+      json: opts.json,
+      format: opts.format,
+    });
     process.exit(passed ? 0 : 1);
   });
 
@@ -548,6 +579,8 @@ sddCommand
   .option('-r, --root <path>', 'Directorio raíz del proyecto')
   .option('-a, --author <author>', 'Nombre del autor o agente que realiza la integración')
   .option('--no-archive', 'No archivar el cambio a specs/changes/completed tras la integración')
+  .option('--json', 'Salida en formato JSON estructurado')
+  .option('-F, --format <format>', 'Formato de salida: text o json')
   .action((opts) => {
     const passed = runSddIntegrate({
       root: opts.root,
@@ -558,6 +591,8 @@ sddCommand
       prBody: opts.prBody,
       author: opts.author,
       autoArchive: opts.archive !== false,
+      json: opts.json,
+      format: opts.format,
     });
     process.exit(passed ? 0 : 1);
   });
@@ -569,12 +604,21 @@ program
   .option('-d, --dry-run', 'Simula la creación de archivos y directorios sin escribir en disco')
   .option('--ci <provider>', 'Proveedor de CI/CD para generar pipeline (github, gitlab, azure, bitbucket)')
   .option('--agents [targets]', 'Entornos de agentes a configurar (all, cursor, claude, antigravity, copilot, mcp, o combinación separada por comas)')
+  .option('--json', 'Salida en formato JSON estructurado')
+  .option('-F, --format <format>', 'Formato de salida: text o json')
   .action(async (directory, opts) => {
     let agents = opts.agents;
-    if (agents === undefined && process.stdin.isTTY && !opts.dryRun) {
+    const isJson = opts.json || opts.format === 'json' || process.env.AISDLC_FORMAT === 'json' || process.env.AISDLC_OUTPUT === 'json';
+    if (agents === undefined && process.stdin.isTTY && !opts.dryRun && !isJson) {
       agents = await promptForAgents();
     }
-    const passed = runInit(directory, { dryRun: opts.dryRun, ci: opts.ci, agents });
+    const passed = runInit(directory, {
+      dryRun: opts.dryRun,
+      ci: opts.ci,
+      agents,
+      json: opts.json,
+      format: opts.format,
+    });
     process.exit(passed ? 0 : 1);
   });
 

@@ -1,15 +1,15 @@
-/**
- * CLI Handler: aisdlc init
- */
-
 import * as readline from 'node:readline/promises';
 import { initProject } from '@ai-sdlc/core';
 import pc from 'picocolors';
+import { isJsonOutput } from './verify.js';
 
 export interface InitCliOptions {
   dryRun?: boolean;
   ci?: string;
   agents?: string | boolean;
+  silent?: boolean;
+  json?: boolean;
+  format?: string;
 }
 
 export async function promptForAgents(): Promise<string> {
@@ -49,6 +49,9 @@ export function runInit(
   targetDir: string = '.',
   options: InitCliOptions = {}
 ): boolean {
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
+
   const result = initProject({
     rootDir: process.cwd(),
     targetDir,
@@ -58,45 +61,83 @@ export function runInit(
   });
 
   if (!result.success) {
-    console.error(pc.red(`\n✖ [ERROR] ${result.error || 'Error al inicializar el proyecto.'}\n`));
+    if (!isSilent) {
+      console.error(pc.red(`\n✖ [ERROR] ${result.error || 'Error al inicializar el proyecto.'}\n`));
+    }
+    if (useJson) {
+      const payload = {
+        command: 'init',
+        success: false,
+        exitCode: 1,
+        targetDir: result.targetDir,
+        directoriesCreated: result.directoriesCreated,
+        filesCreated: result.filesCreated,
+        ciProvider: result.ciProvider,
+        agentsConfigured: result.agentsConfigured,
+        gitHookInstalled: result.gitHookInstalled,
+        dryRun: Boolean(options.dryRun),
+        error: result.error || 'Error al inicializar el proyecto.',
+      };
+      console.log(JSON.stringify(payload, null, 2));
+    }
     return false;
   }
 
-  console.log(pc.bold(pc.cyan(`\n🚀 [AI-SDLC] Inicializando estructura de gobernanza en: ${result.targetDir}\n`)));
+  if (!isSilent) {
+    console.log(pc.bold(pc.cyan(`\n🚀 [AI-SDLC] Inicializando estructura de gobernanza en: ${result.targetDir}\n`)));
 
-  for (const d of result.directoriesCreated) {
-    if (options.dryRun) {
-      console.log(`  ${pc.blue('DRY-RUN')} Crear directorio: ${d}`);
-    } else {
-      console.log(`  ${pc.green('✔')} Directorio creado: ${d}`);
+    for (const d of result.directoriesCreated) {
+      if (options.dryRun) {
+        console.log(`  ${pc.blue('DRY-RUN')} Crear directorio: ${d}`);
+      } else {
+        console.log(`  ${pc.green('✔')} Directorio creado: ${d}`);
+      }
     }
-  }
 
-  for (const f of result.filesCreated) {
-    if (options.dryRun) {
-      console.log(`  ${pc.blue('DRY-RUN')} Crear archivo: ${f}`);
-    } else {
-      console.log(`  ${pc.green('✔')} Archivo generado: ${f}`);
+    for (const f of result.filesCreated) {
+      if (options.dryRun) {
+        console.log(`  ${pc.blue('DRY-RUN')} Crear archivo: ${f}`);
+      } else {
+        console.log(`  ${pc.green('✔')} Archivo generado: ${f}`);
+      }
     }
+
+    if (result.ciProvider) {
+      console.log(pc.cyan(`\n  ✔ Configuración de CI/CD generada para proveedor: ${pc.bold(result.ciProvider)}`));
+    }
+
+    if (result.agentsConfigured && result.agentsConfigured.length > 0) {
+      console.log(pc.cyan(`\n  ✔ Agentes de IA configurados: ${pc.bold(result.agentsConfigured.join(', '))}`));
+    }
+
+    if (options.dryRun) {
+      console.log(`  ${pc.blue('DRY-RUN')} Instalar Git Hook: .git/hooks/prepare-commit-msg`);
+    } else if (result.gitHookInstalled) {
+      console.log(`  ${pc.green('✔')} Git Hook instalado: ${pc.bold('prepare-commit-msg')}`);
+    } else {
+      console.log(`  ${pc.yellow('ℹ')} Repositorio Git no detectado en el destino.`);
+      console.log(`    ${pc.gray("Ejecuta 'git init' y luego 'aisdlc git hook install' para activar los hooks de commit.")}`);
+    }
+
+    console.log(pc.green('\n✔ Repositorio configurado con políticas y plantillas AI-SDLC.\n'));
   }
 
-  if (result.ciProvider) {
-    console.log(pc.cyan(`\n  ✔ Configuración de CI/CD generada para proveedor: ${pc.bold(result.ciProvider)}`));
+  if (useJson) {
+    const payload = {
+      command: 'init',
+      success: true,
+      exitCode: 0,
+      targetDir: result.targetDir,
+      directoriesCreated: result.directoriesCreated,
+      filesCreated: result.filesCreated,
+      ciProvider: result.ciProvider,
+      agentsConfigured: result.agentsConfigured,
+      gitHookInstalled: result.gitHookInstalled,
+      dryRun: Boolean(options.dryRun),
+    };
+    console.log(JSON.stringify(payload, null, 2));
   }
 
-  if (result.agentsConfigured && result.agentsConfigured.length > 0) {
-    console.log(pc.cyan(`\n  ✔ Agentes de IA configurados: ${pc.bold(result.agentsConfigured.join(', '))}`));
-  }
-
-  if (options.dryRun) {
-    console.log(`  ${pc.blue('DRY-RUN')} Instalar Git Hook: .git/hooks/prepare-commit-msg`);
-  } else if (result.gitHookInstalled) {
-    console.log(`  ${pc.green('✔')} Git Hook instalado: ${pc.bold('prepare-commit-msg')}`);
-  } else {
-    console.log(`  ${pc.yellow('ℹ')} Repositorio Git no detectado en el destino.`);
-    console.log(`    ${pc.gray("Ejecuta 'git init' y luego 'aisdlc git hook install' para activar los hooks de commit.")}`);
-  }
-
-  console.log(pc.green('\n✔ Repositorio configurado con políticas y plantillas AI-SDLC.\n'));
   return true;
 }
+
