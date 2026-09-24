@@ -153,5 +153,21 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       expect(content).toMatch(/Ventana de Acci[oó]n Humana/i);
     }
   });
+
+  it('verifies that canonical protocol documents the technical security feedback loop between architect and threat modeler (#81)', () => {
+    const content = fs.readFileSync(canonicalProtocolPath, 'utf-8');
+    expect(content).toContain('BUCLE DE RETORNO DE SEGURIDAD TÉCNICA');
+    expect(content).toMatch(/Bucle de Retorno: Seguridad T[eé]cnica/i);
+    const agContent = fs.readFileSync(configFiles.antigravity, 'utf-8');
+    expect(agContent).toMatch(/bucle de retorno de seguridad t[eé]cnica sobre arquitectura/i);
+  });
+
+  it('verifies that canonical protocol and configurations document the post-development functional validation step (#83)', () => {
+    const content = fs.readFileSync(canonicalProtocolPath, 'utf-8');
+    expect(content).toMatch(/Validaci[oó]n Funcional Post-Desarrollo/i);
+    expect(content).toMatch(/MODO VALIDACI[OÓ]N FUNCIONAL/i);
+    const agContent = fs.readFileSync(configFiles.antigravity, 'utf-8');
+    expect(agContent).toMatch(/modo validaci[oó]n funcional/i);
+  });
 });
 

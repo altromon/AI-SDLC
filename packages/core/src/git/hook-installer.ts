@@ -52,29 +52,52 @@ if [ -n "$DETECTED" ]; then
   COMPLETION_TOKENS="\${DET_COMPL:-\$COMPLETION_TOKENS}"
   ACTIVE_TIME_SEC="\${DET_TIME:-\$ACTIVE_TIME_SEC}"
 else
-  if [ -n "$AI_MODEL" ] || [ -n "$AI_AGENT_NAME" ] || [ -n "$ANTIGRAVITY_AGENT_ID" ] || [ -n "$CLAUDE_CODE" ] || [ -n "$CURSOR_AGENT" ] || [ -n "$WINDSURF_AGENT" ] || [ -n "$AIDER_MODEL" ] || [ -f "$TELEMETRY_FILE" ]; then
+  if [ -n "$AI_MODEL" ] || [ -n "$AI_AGENT_NAME" ] || [ -n "$ANTIGRAVITY_AGENT" ] || [ -n "$ANTIGRAVITY_AGENT_ID" ] || [ -n "$ANTIGRAVITY_CONVERSATION_ID" ] || [ -n "$CLAUDE_CODE" ] || [ -n "$CURSOR_AGENT" ] || [ -n "$WINDSURF_AGENT" ] || [ -n "$AIDER_MODEL" ] || [ -f "$TELEMETRY_FILE" ]; then
     AUTHOR_TYPE="agent"
     AI_MODEL_NAME="\${AI_MODEL:-\${AI_AGENT_NAME:-\${AIDER_MODEL:-agent-developer}}}"
   fi
 fi
 
-# Check if trailers are already present in the commit message
-HAS_TRAILERS=$(grep -E "^(Task-ID|Author-Type):" "$COMMIT_MSG_FILE" 2>/dev/null || echo "")
+# Estimate tokens and active time if not provided for agent
+if [ "\$PROMPT_TOKENS" = "0" ] && [ "\$AUTHOR_TYPE" = "agent" ]; then
+  CHG_LINES=\$(git diff --cached --shortstat 2>/dev/null | grep -oE '[0-9]+ (insertion|deletion)' | awk '{s+=\$1} END {print s+0}')
+  if [ -n "\$CHG_LINES" ] && [ "\$CHG_LINES" -gt 0 ]; then
+    COMPLETION_TOKENS=\$((CHG_LINES * 10))
+    PROMPT_TOKENS=\$((2500 + CHG_LINES * 25))
+    ACTIVE_TIME_SEC=\$((30 + CHG_LINES / 2))
+  else
+    PROMPT_TOKENS=1000
+    COMPLETION_TOKENS=0
+    ACTIVE_TIME_SEC=30
+  fi
+fi
 
-if [ -z "$HAS_TRAILERS" ]; then
-  TRAILERS_TO_ADD=""
-  if [ -n "$TASK_ID" ]; then
-    TRAILERS_TO_ADD="\${TRAILERS_TO_ADD}Task-ID: $TASK_ID\n"
-  fi
-  if [ -n "$PARENT_REF" ]; then
-    TRAILERS_TO_ADD="\${TRAILERS_TO_ADD}Parent-Ref: $PARENT_REF\n"
-  fi
+# Inject missing trailers individually into the commit message
+TRAILERS_TO_ADD=""
+
+if [ -n "$TASK_ID" ] && ! grep -qE "^Task-ID:" "$COMMIT_MSG_FILE" 2>/dev/null; then
+  TRAILERS_TO_ADD="\${TRAILERS_TO_ADD}Task-ID: $TASK_ID\n"
+fi
+if [ -n "$PARENT_REF" ] && ! grep -qE "^Parent-Ref:" "$COMMIT_MSG_FILE" 2>/dev/null; then
+  TRAILERS_TO_ADD="\${TRAILERS_TO_ADD}Parent-Ref: $PARENT_REF\n"
+fi
+if ! grep -qE "^Author-Type:" "$COMMIT_MSG_FILE" 2>/dev/null; then
   TRAILERS_TO_ADD="\${TRAILERS_TO_ADD}Author-Type: $AUTHOR_TYPE\n"
+fi
+if [ "$AUTHOR_TYPE" = "agent" ] && ! grep -qE "^AI-Model:" "$COMMIT_MSG_FILE" 2>/dev/null; then
   TRAILERS_TO_ADD="\${TRAILERS_TO_ADD}AI-Model: $AI_MODEL_NAME\n"
+fi
+if ! grep -qE "^Prompt-Tokens:" "$COMMIT_MSG_FILE" 2>/dev/null; then
   TRAILERS_TO_ADD="\${TRAILERS_TO_ADD}Prompt-Tokens: $PROMPT_TOKENS\n"
+fi
+if ! grep -qE "^Completion-Tokens:" "$COMMIT_MSG_FILE" 2>/dev/null; then
   TRAILERS_TO_ADD="\${TRAILERS_TO_ADD}Completion-Tokens: $COMPLETION_TOKENS\n"
+fi
+if ! grep -qE "^Active-Time-Seconds:" "$COMMIT_MSG_FILE" 2>/dev/null; then
   TRAILERS_TO_ADD="\${TRAILERS_TO_ADD}Active-Time-Seconds: $ACTIVE_TIME_SEC\n"
+fi
 
+if [ -n "$TRAILERS_TO_ADD" ]; then
   echo "" >> "$COMMIT_MSG_FILE"
   printf "$TRAILERS_TO_ADD" >> "$COMMIT_MSG_FILE"
 fi

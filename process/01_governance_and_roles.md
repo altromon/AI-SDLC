@@ -32,20 +32,19 @@ El framework AI-SDLC organiza a las personas y a los agentes de IA dentro de un 
 1. **Agente Analista de Producto (`agent-product-analyst`)**:
    - Ejecuta habilidades de exploración (`ps:explore`), redacta borradores de artefactos de producto (`ACT-*`, `UC-*`, `BR-*`, `FR-*`), y detecta ambigüedades.
 2. **Agente Modelador de Amenazas y Seguridad (`agent-threat-modeler`)**:
-   - Aplica STRIDE y OWASP ASVS sobre los casos de uso, proponiendo actores maliciosos (`ACT-THREAT-*`), casos de abuso (`ABUSE-*`) y requisitos de seguridad (`SEC-REQ-*`).
+   - Aplica STRIDE y OWASP ASVS sobre los casos de uso (`UC-*`) y sobre artefactos técnicos de arquitectura (`CMP-*`, diagramas Mermaid, ADRs) en el bucle de retorno técnico procedente del arquitecto, proponiendo actores maliciosos (`ACT-THREAT-*`), casos de abuso (`ABUSE-*`) y requisitos de seguridad (`SEC-REQ-*`).
 3. **Agente Arquitecto de Sistemas (`agent-system-architect`)**:
-   - Genera diagramas de secuencia Mermaid, especificaciones OpenAPI, modelos de datos y propuestas de descomposición en bloques (`SRV-*`, `SYS-*`).
+   - Genera diagramas de secuencia Mermaid, especificaciones OpenAPI, modelos de datos y propuestas de descomposición en bloques (`SRV-*`, `CMP-*`, `SYS-*`). Emite un bucle de retorno de seguridad técnica hacia `agent-threat-modeler` ante decisiones de infraestructura o persistencia con impacto en superficie de ataque.
 4. **Agente Desarrollador / Coder (`agent-developer`)**:
    - Lee especificaciones de entrega SDD y genera código fuente limpio, modular y con tipado estricto, respetando los contratos de arquitectura.
-5. **Agente de Pruebas / QA (`agent-test-engineer`)**:
-   - Genera pruebas unitarias, de integración, pruebas de contrato y tests de mitigación de seguridad (`SEC-TEST-*`).
+5. **Agente de Pruebas / QA (`agent-test-engineer` / `agent-qa-engineer`)**:
+   - Genera pruebas unitarias, de integración, pruebas de contrato y suites BDD/Gherkin exhaustivas en ROJO antes de la implementación.
 6. **Agente Auditor de Código y Seguridad (`agent-security-auditor`)**:
    - Realiza revisiones adversariales del código en el PR buscando vulnerabilidades lógicas, inyecciones y fallos de autorización.
 7. **Agente de Cumplimiento de Licencias (`agent-compliance-checker`)**:
    - Inspecciona manifiestos de dependencias contra `license-policy.yaml`, alerta sobre licencias comerciales y genera borradores de atribución.
 8. **Agente Usuario Experto y Evaluador de Dominio (`agent-expert-user`)**:
-   - Contrasta el diseño de producto y especificaciones desde la perspectiva del usuario final o avanzado.
-   - Aplica discriminación bimodal definiendo el alcance estricto del MVP inmediato y canalizando mejoras avanzadas hacia el radar de roadmap mediante la plantilla institucional (`templates/product/user-design-feedback.template.md`).
+   - Opera de forma bimodal: en fase de diseño define el corte MVP estricto y banco de sugerencias de roadmap (`templates/product/user-design-feedback.template.md`); en fase post-desarrollo realiza la validación funcional de extremo a extremo contrastando la interfaz y el comportamiento CLI frente a `UC-*` y `FR-*` antes de la auditoría de seguridad pre-merge.
 
 ---
 
@@ -62,13 +61,14 @@ El framework AI-SDLC organiza a las personas y a los agentes de IA dentro de un 
 | **Exploración y Redacción PDaC (Scribe)** | A | C | C | I | C | R (Analista Scribe) | IA redacta borrador conforme; no aprueba |
 | **Aprobación de Product Change** | **A** | C | C | I | I | - | **Prohibido para agentes (Solo humano)** |
 | **Evaluación de Diseño de Usuario (MVP vs Roadmap)** | **A** | C | C | I | C | R (Usuario Experto) | Aplica plantilla canónica; PO humano decide alcance |
-| **Modelado de Amenazas (Scribe)** | C | C | A | I | C | R (Threat Modeler Scribe) | Inferencia STRIDE/ASVS; validación de esquemas |
+| **Modelado de Amenazas (Scribe y Retorno Técnico)** | C | C | A | I | C | R (Threat Modeler Scribe) | Inferencia STRIDE/ASVS sobre UC-* y retorno técnico desde CMP-* |
 | **Diseño Arquitectónico (arc42/NAF)** | I | **A** | C | I | C | R (Arquitecto) | Bloques deben citar casos de uso `UC-*` válidos |
 | **Aprobación de ADRs** | C | **A** | C | I | C | - | **Solo humanos aprueban decisiones técnicas** |
 | **Evaluación de Licencias OSS** | I | C | I | **A** | C | R (Compliance) | Detección automática en `license-policy.yaml` |
 | **Compra de Licencia Comercial** | I | I | I | **A** | C | - | **Agentes no firman contratos ni pagan licencias** |
 | **Elaboración de Spec SDD** | I | C | C | I | A | R (Desarrollador) | Citación criptográfica obligatoria (`id + digest`) y sidecar `handoff.yaml` |
 | **Generación de Código & Tests** | I | I | I | I | A | R (Coder / QA) | Linter y compilación estricta sin errores |
+| **Validación Funcional Post-Desarrollo** | **A** | C | I | I | C | R (Usuario Experto) | Contraste de UI/CLI contra UC-* y FR-* previo a auditoría de seguridad |
 | **Tareas de Alto Riesgo (`HIGH_RISK_MANUAL`)** | I | A | A | I | **R (Ejecutor Humano Exclusivo)** | - | **Bloqueada para IA. Solo implementación humana** |
 | **Tareas Interactivas (`HUMAN_REVIEW_PLAN`)** | I | C | C | I | **A (Aprobador Paso a Paso)** | R (Planificador / Co-implementador) | El agente se detiene en cada paso; el humano aprueba |
 | **Auditoría de Vulnerabilidades** | I | I | A | I | C | R (Security Auditor) | SAST determinista + Agente adversarial |
