@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-09-24 09:31:30 UTC` | *Módulos Integrados:* `13`  
+> *Fecha de Compilación:* `2026-09-24 13:04:06 UTC` | *Módulos Integrados:* `13`  
 
 ---
 
@@ -50,6 +50,10 @@
     - [3. Configuración en Clientes MCP e IDEs](#doc-readme-3-configuracion-en-clientes-mcp-e-ides)
   - [🚀 Guía Rápida para Equipos Humanos](#doc-readme-guia-rapida-para-equipos-humanos)
   - [🤖 Guía Operativa para Agentes de IA](#doc-readme-guia-operativa-para-agentes-de-ia)
+    - [1. Principios y Guardrails Innegociables](#doc-readme-1-principios-y-guardrails-innegociables)
+    - [2. Catálogo Canónico de Agentes Especializados (10 Roles)](#doc-readme-2-catalogo-canonico-de-agentes-especializados-10-roles)
+    - [3. La Tríada de Auditoría Pre-Merge](#doc-readme-3-la-triada-de-auditoria-pre-merge)
+    - [4. Automatización e Infraestructura: `agent-devops` y Guardrail de No Invasión](#doc-readme-4-automatizacion-e-infraestructura-agent-devops-y-guardrail-de-no-invasion)
     - [Integración Nativa por Entorno de IA](#doc-readme-integracion-nativa-por-entorno-de-ia)
   - [📜 Licencia](#doc-readme-licencia)
 
@@ -186,6 +190,8 @@
     - [6. `agent-security-auditor` (Auditor Adversarial de Código)](#cap-09-agent-protocols-6-agent-security-auditor-auditor-adversarial-de-codigo)
     - [7. `agent-compliance-checker` (Auditor de Licencias Open Source)](#cap-09-agent-protocols-7-agent-compliance-checker-auditor-de-licencias-open-source)
     - [8. `agent-expert-user` (Usuario Experto y Evaluador de Dominio)](#cap-09-agent-protocols-8-agent-expert-user-usuario-experto-y-evaluador-de-dominio)
+    - [9. `agent-code-reviewer` (Revisor Técnico y Arquitectónico de Código)](#cap-09-agent-protocols-9-agent-code-reviewer-revisor-tecnico-y-arquitectonico-de-codigo)
+    - [10. `agent-devops` (Ingeniero de Automatización e Infraestructura)](#cap-09-agent-protocols-10-agent-devops-ingeniero-de-automatizacion-e-infraestructura)
   - [4. Protocolo Operativo "AI as Scribe" (Redacción Técnica Asistida)](#cap-09-agent-protocols-4-protocolo-operativo-ai-as-scribe-redaccion-tecnica-asistida)
     - [1. Propósito y Filosofía](#cap-09-agent-protocols-1-proposito-y-filosofia)
     - [2. Contrato de Entrada / Salida (I/O Contract)](#cap-09-agent-protocols-2-contrato-de-entrada-salida-io-contract)
@@ -1163,20 +1169,48 @@ Para simplificar la interacción y minimizar el número de pasos, el servidor MC
 
 ## 🤖 Guía Operativa para Agentes de IA
 
-1. **Lectura de Contexto mediante Citaciones**:
-   - Nunca asumas comportamientos ni inventes reglas. Lee los artefactos canónicos citados en la especificación (`SPEC-*`).
-2. **Respeto a los Guardrails de Seguridad**:
-   - Todo código generado debe cumplir con los principios OWASP Secure Coding.
-   - Si la tarea implementa un `SEC-REQ-*`, debes generar obligatoriamente la prueba automatizada correspondiente (`SEC-TEST-*`).
-3. **Inspección Previa de Licencias de Dependencias**:
-   - Antes de modificar manifiestos de paquetes (`package.json`, etc.), consulta la licencia del paquete.
-   - Si la licencia es GPL/AGPL (viral) o BSL/SSPL (comercial de pago), DETÉN la adición y notifica al usuario en el PR proponiendo una alternativa permisiva (MIT/Apache 2.0).
-4. **Instanciación y Evolución Arquitectural**:
-   - Al modelar nuevos módulos o servicios, copia la plantilla correspondiente desde `templates/architecture/` hacia `docs/architecture/` (o diseña la solución en `specs/changes/active/.../design.md` respetando la estructura arc42 / NAF v4).
-   - Completa rigurosamente el frontmatter YAML (`id`, `title`, `type`, `version`, `schema-version`, `status`, `implements-use-cases`, `satisfies-requirements`).
-   - Valida la integridad estructural con `npx aisdlc verify schemas --path docs/architecture` y confirma la resolución de dependencias mediante `npx aisdlc verify traceability`.
-5. **Validación Determinista**:
-   - Al finalizar, ejecuta los linters y verificadores de esquemas. Nunca intentes auto-aprobar o forzar el merge de un PR.
+<a id="doc-readme-1-principios-y-guardrails-innegociables"></a>
+
+### 1. Principios y Guardrails Innegociables
+1. **Lectura de Contexto mediante Citaciones**: Nunca asumas comportamientos ni inventes reglas. Lee los artefactos canónicos citados en la especificación (`SPEC-*`).
+2. **Respeto a los Guardrails de Seguridad**: Todo código generado debe cumplir con los principios OWASP Secure Coding. Si la tarea implementa un `SEC-REQ-*`, debes generar obligatoriamente la prueba automatizada correspondiente (`SEC-TEST-*`).
+3. **Inspección Previa de Licencias de Dependencias**: Antes de modificar manifiestos de paquetes (`package.json`, etc.), consulta la licencia del paquete frente a `license-policy.yaml`. Quedan prohibidas dependencias virales (`GPL`/`AGPL`) o comerciales de pago sin aprobación previa.
+4. **Instanciación y Evolución Arquitectural**: Al modelar nuevos módulos o servicios, copia la plantilla correspondiente desde `templates/architecture/` hacia `docs/architecture/` (o diseña en `specs/changes/active/.../design.md`). Completa rigurosamente el frontmatter YAML y valida con `npx aisdlc verify schemas` y `npx aisdlc verify traceability`.
+5. **Validación Determinista y Cero Auto-Aprobación**: Al finalizar, ejecuta los linters y verificadores de esquemas (`pnpm run check:fix` y `pnpm run verify:all`). Nunca intentes auto-aprobar o forzar el merge de un PR: la aprobación y fusión es prerrogativa humana exclusiva.
+
+<a id="doc-readme-2-catalogo-canonico-de-agentes-especializados-10-roles"></a>
+
+### 2. Catálogo Canónico de Agentes Especializados (10 Roles)
+
+AI-SDLC define 10 roles especializados con responsabilidades demarcadas, contratos de entrada/salida y compuertas deterministas (ver detalle canónico en [process/09_agent_protocols.md](process/09_agent_protocols.md) y [process/01_governance_and_roles.md](process/01_governance_and_roles.md)):
+
+| Rol de Agente | Especialidad / Misión | Entregables Principales | Guardrails Críticos |
+| :--- | :--- | :--- | :--- |
+| **`agent-product-analyst`** | Analista de Producto y Scribe PDaC | `ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*` en `specs/product/` | `status: draft`, estructura Gherkin obligatoria, sin asunciones. |
+| **`agent-threat-modeler`** | Modelado de Amenazas y Shift-Left Security | `ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`, `SEC-ENC-*` | STRIDE / ASVS, pruebas negativas, bucle de retorno de seguridad técnica. |
+| **`agent-system-architect`** | Arquitecto de Sistemas arc42 / NAF v4 | `CMP-*`, diagramas Mermaid, registros `ADR-*` | Citación de `implements-use-cases` y `satisfies-requirements`; retorno a threat modeler. |
+| **`agent-qa-engineer`** | Ingeniero de QA y SDET | Suites BDD en ROJO (`nominal`, `límite`, `fuera de rango`) | **Cero código de producción**; bloqueo si falta límite o fuera de rango. |
+| **`agent-developer`** | Desarrollador de Software | Código en verde (`src/`), tests unitarios, TDD | Umbrales `quality-policy.yaml` (CC $\le 10$, MI $\ge 50$); handoff post-desarrollo. |
+| **`agent-expert-user`** | Usuario Experto y Evaluador de Dominio | Feedback MVP (diseño) / Atestación funcional (post-dev) | Bimodal: MVP estricto upstream vs. validación funcional CLI/UI downstream. |
+| **`agent-security-auditor`** | Auditor Adversarial de Código (Pre-Merge) | Informe CVSS v3.1, auditoría SAST / secretos | Mentalidad atacante; bloqueo de PRs ante vulnerabilidades críticas o altas. |
+| **`agent-compliance-checker`** | Auditor de Licencias y Propiedad Intelectual | Dictamen de compatibilidad legal de dependencias | Verificación SPDX contra `license-policy.yaml`; bloqueo de virales/comerciales. |
+| **`agent-code-reviewer`** | Revisor Técnico y Arquitectónico (Pre-Merge) | Auditoría Clean Code, SOLID, DRY, YAGNI, AST | Umbrales CC $\le 10$, MI $\ge 50$; categorización `[BLOQUEANTE]` vs `[SUGERENCIA]`. |
+| **`agent-devops`** | Ingeniero de Automatización e Infraestructura | `.github/workflows/`, Dockerfiles, IaC, scripts | **NO INVASIÓN**: Prohibido modificar código de aplicación en `src/`. |
+
+<a id="doc-readme-3-la-triada-de-auditoria-pre-merge"></a>
+
+### 3. La Tríada de Auditoría Pre-Merge
+Antes de someter cualquier Pull Request a la aprobación humana del Tech Lead, tres agentes especializados auditan concurrentemente el diff:
+1. **`agent-code-reviewer`**: Audita la salud técnica, legibilidad, patrones de diseño, ausencia de deuda técnica y respeto a las métricas de complejidad AST.
+2. **`agent-security-auditor`**: Examina la superficie de ataque, vectores de inyección, sanitización y controles criptográficos.
+3. **`agent-compliance-checker`**: Audita manifiestos, bloquea licencias incompatibles y verifica el SBOM.
+
+<a id="doc-readme-4-automatizacion-e-infraestructura-agent-devops-y-guardrail-de-no-invasion"></a>
+
+### 4. Automatización e Infraestructura: `agent-devops` y Guardrail de No Invasión
+El agente `agent-devops` asume la evolución y mantenimiento de pipelines de CI/CD, imágenes de contenedor y scripts de infraestructura. Opera bajo un **guardrail de no invasión estricto**:
+- **Ámbito permitido**: `.github/workflows/`, `Dockerfile*`, `docker-compose*.yml`, manifiestos IaC y `scripts/`.
+- **Ámbito prohibido**: Prohibido terminantemente modificar o refactorizar archivos de código fuente de la aplicación (`src/`, `packages/*/src/app/`). La lógica de negocio es competencia exclusiva de `agent-developer`.
 
 <a id="doc-readme-integracion-nativa-por-entorno-de-ia"></a>
 
@@ -1314,20 +1348,23 @@ El framework AI-SDLC organiza a las personas y a los agentes de IA dentro de un 
 1. **Agente Analista de Producto (`agent-product-analyst`)**:
    - Ejecuta habilidades de exploración (`ps:explore`), redacta borradores de artefactos de producto (`ACT-*`, `UC-*`, `BR-*`, `FR-*`), y detecta ambigüedades.
 2. **Agente Modelador de Amenazas y Seguridad (`agent-threat-modeler`)**:
-   - Aplica STRIDE y OWASP ASVS sobre los casos de uso, proponiendo actores maliciosos (`ACT-THREAT-*`), casos de abuso (`ABUSE-*`) y requisitos de seguridad (`SEC-REQ-*`).
+   - Aplica STRIDE y OWASP ASVS sobre los casos de uso (`UC-*`) y sobre artefactos técnicos de arquitectura (`CMP-*`, diagramas Mermaid, ADRs) en el bucle de retorno técnico procedente del arquitecto, proponiendo actores maliciosos (`ACT-THREAT-*`), casos de abuso (`ABUSE-*`) y requisitos de seguridad (`SEC-REQ-*`).
 3. **Agente Arquitecto de Sistemas (`agent-system-architect`)**:
-   - Genera diagramas de secuencia Mermaid, especificaciones OpenAPI, modelos de datos y propuestas de descomposición en bloques (`SRV-*`, `SYS-*`).
+   - Genera diagramas de secuencia Mermaid, especificaciones OpenAPI, modelos de datos y propuestas de descomposición en bloques (`SRV-*`, `CMP-*`, `SYS-*`). Emite un bucle de retorno de seguridad técnica hacia `agent-threat-modeler` ante decisiones de infraestructura o persistencia con impacto en superficie de ataque.
 4. **Agente Desarrollador / Coder (`agent-developer`)**:
    - Lee especificaciones de entrega SDD y genera código fuente limpio, modular y con tipado estricto, respetando los contratos de arquitectura.
-5. **Agente de Pruebas / QA (`agent-test-engineer`)**:
-   - Genera pruebas unitarias, de integración, pruebas de contrato y tests de mitigación de seguridad (`SEC-TEST-*`).
+5. **Agente de Pruebas / QA (`agent-test-engineer` / `agent-qa-engineer`)**:
+   - Genera pruebas unitarias, de integración, pruebas de contrato y suites BDD/Gherkin exhaustivas en ROJO antes de la implementación.
 6. **Agente Auditor de Código y Seguridad (`agent-security-auditor`)**:
    - Realiza revisiones adversariales del código en el PR buscando vulnerabilidades lógicas, inyecciones y fallos de autorización.
 7. **Agente de Cumplimiento de Licencias (`agent-compliance-checker`)**:
    - Inspecciona manifiestos de dependencias contra `license-policy.yaml`, alerta sobre licencias comerciales y genera borradores de atribución.
 8. **Agente Usuario Experto y Evaluador de Dominio (`agent-expert-user`)**:
-   - Contrasta el diseño de producto y especificaciones desde la perspectiva del usuario final o avanzado.
-   - Aplica discriminación bimodal definiendo el alcance estricto del MVP inmediato y canalizando mejoras avanzadas hacia el radar de roadmap mediante la plantilla institucional (`templates/product/user-design-feedback.template.md`).
+   - Opera de forma bimodal: en fase de diseño define el corte MVP estricto y banco de sugerencias de roadmap (`templates/product/user-design-feedback.template.md`); en fase post-desarrollo realiza la validación funcional de extremo a extremo contrastando la interfaz y el comportamiento CLI frente a `UC-*` y `FR-*` antes de la auditoría de seguridad pre-merge.
+9. **Agente Revisor Técnico y Arquitectónico (`agent-code-reviewer`)**:
+   - Audita Pull Requests evaluando legibilidad, cumplimiento de principios SOLID/DRY, ausencia de code smells y límites de complejidad ciclomática y cognitiva, conformando la Tríada de Auditoría Pre-Merge.
+10. **Agente Ingeniero de DevOps e Infraestructura (`agent-devops`)**:
+    - Mantiene y evoluciona la infraestructura automatizada: flujos de CI/CD, Dockerfiles, manifiestos IaC y scripts de soporte, bajo el guardrail estricto de no invasión sobre el código fuente de la aplicación (`src/`).
 
 ---
 
@@ -1346,16 +1383,19 @@ El framework AI-SDLC organiza a las personas y a los agentes de IA dentro de un 
 | **Exploración y Redacción PDaC (Scribe)** | A | C | C | I | C | R (Analista Scribe) | IA redacta borrador conforme; no aprueba |
 | **Aprobación de Product Change** | **A** | C | C | I | I | - | **Prohibido para agentes (Solo humano)** |
 | **Evaluación de Diseño de Usuario (MVP vs Roadmap)** | **A** | C | C | I | C | R (Usuario Experto) | Aplica plantilla canónica; PO humano decide alcance |
-| **Modelado de Amenazas (Scribe)** | C | C | A | I | C | R (Threat Modeler Scribe) | Inferencia STRIDE/ASVS; validación de esquemas |
+| **Modelado de Amenazas (Scribe y Retorno Técnico)** | C | C | A | I | C | R (Threat Modeler Scribe) | Inferencia STRIDE/ASVS sobre UC-* y retorno técnico desde CMP-* |
 | **Diseño Arquitectónico (arc42/NAF)** | I | **A** | C | I | C | R (Arquitecto) | Bloques deben citar casos de uso `UC-*` válidos |
 | **Aprobación de ADRs** | C | **A** | C | I | C | - | **Solo humanos aprueban decisiones técnicas** |
 | **Evaluación de Licencias OSS** | I | C | I | **A** | C | R (Compliance) | Detección automática en `license-policy.yaml` |
 | **Compra de Licencia Comercial** | I | I | I | **A** | C | - | **Agentes no firman contratos ni pagan licencias** |
 | **Elaboración de Spec SDD** | I | C | C | I | A | R (Desarrollador) | Citación criptográfica obligatoria (`id + digest`) y sidecar `handoff.yaml` |
 | **Generación de Código & Tests** | I | I | I | I | A | R (Coder / QA) | Linter y compilación estricta sin errores |
+| **Validación Funcional Post-Desarrollo** | **A** | C | I | I | C | R (Usuario Experto) | Contraste de UI/CLI contra UC-* y FR-* previo a auditoría de seguridad |
 | **Tareas de Alto Riesgo (`HIGH_RISK_MANUAL`)** | I | A | A | I | **R (Ejecutor Humano Exclusivo)** | - | **Bloqueada para IA. Solo implementación humana** |
 | **Tareas Interactivas (`HUMAN_REVIEW_PLAN`)** | I | C | C | I | **A (Aprobador Paso a Paso)** | R (Planificador / Co-implementador) | El agente se detiene en cada paso; el humano aprueba |
-| **Auditoría de Vulnerabilidades** | I | I | A | I | C | R (Security Auditor) | SAST determinista + Agente adversarial |
+| **Revisión de Código Pre-Merge (SOLID / Clean Code)** | I | C | I | I | **A (Garante)** | R (Code Reviewer) | Inspección de CC <= 10, MI >= 50, code smells y principios SOLID |
+| **Auditoría de Vulnerabilidades y SAST** | I | I | A | I | C | R (Security Auditor) | SAST determinista + Agente adversarial |
+| **Infraestructura como Código y CI/CD** | I | C | C | I | **A** | R (DevOps) | Modificación exclusiva de .github/, Dockerfiles y scripts (prohibido src/) |
 | **Integración Canónica SDD** | C | C | I | I | **A** | R (Desarrollador / CLI) | Todas las tareas en `tasks.md` deben estar `COMPLETED` |
 | **Revisión de PR y Balance del Plan (`X`/`O`)** | I | C | C | I | **A (Garante y Aprobador)** | R (Declara matriz, puntos débiles y asunciones) | Obligatoria inclusión de todos y cada uno de los puntos; justificación de todo `[O]` |
 | **Merge del Pull Request** | I | I | I | I | **A** | - | **Prohibido auto-merge por IA (Bloqueado por CI)** |
@@ -2933,13 +2973,14 @@ DIRECTRICES:
 ### 2. `agent-threat-modeler` (Modelador de Amenazas y Seguridad)
 ```text
 ROL: Eres el Agente Especialista en Threat Modeling y Ciberseguridad Shift-Left.
-MISIÓN: Analizar casos de uso de negocio y modelar proactivamente adversarios, vectores de ataque y requisitos de mitigación.
+MISIÓN: Analizar casos de uso de negocio y artefactos de arquitectura para modelar proactivamente adversarios, vectores de ataque técnicos y requisitos de mitigación.
 DIRECTRICES:
-- Aplica la metodología STRIDE y OWASP ASVS sobre cada caso de uso 'UC-*'.
+- Aplica la metodología STRIDE y OWASP ASVS sobre cada caso de uso 'UC-*' y componente de arquitectura 'CMP-*' (diagramas Mermaid C4/arc42, registros ADR).
 - Define los actores maliciosos 'ACT-THREAT-*' y sus casos de abuso 'ABUSE-*'.
+- En el bucle de retorno de seguridad técnica (procedente de 'agent-system-architect'), analiza las decisiones de infraestructura, persistencia, middleware y APIs para emitir 'ACT-THREAT-*' y 'SEC-REQ-*' a nivel de software/sistema.
 - Todo caso de abuso debe estar mitigado por al menos un requisito de seguridad formal 'SEC-REQ-*'.
 - Propón políticas Zero Trust y asignación a enclaves seguros 'SEC-ENC-*'.
-- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-system-architect' y abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-system-architect' (o 'agent-qa-engineer' tras completar el modelado técnico) y abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
 ```
 
 <a id="cap-09-agent-protocols-3-agent-system-architect-arquitecto-de-sistemas"></a>
@@ -2953,7 +2994,8 @@ DIRECTRICES:
 - Genera diagramas de secuencia e interacciones en sintaxis nativa Mermaid.
 - Documenta las decisiones tecnológicas críticas mediante registros ADR inmutables en docs/architecture/09_decisions/.
 - Valida que la arquitectura respete las restricciones legales de license-policy.yaml.
-- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-developer' y abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+- BUCLE DE RETORNO DE SEGURIDAD TÉCNICA: Si las decisiones de arquitectura (ej. bases de datos, colas, caching distribuido, APIs de terceros o esquemas de autenticación) introducen nuevos vectores de ataque, emite un handoff secundario de retorno hacia 'agent-threat-modeler' para modelado técnico antes de la fase de pruebas.
+- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-qa-engineer' (o a 'agent-threat-modeler' si se requiere ciclo de retorno de seguridad técnica) y abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
 ```
 
 <a id="cap-09-agent-protocols-4-agent-qa-engineer-ingeniero-de-qa-y-sdet"></a>
@@ -3021,6 +3063,7 @@ DIRECTRICES:
   * Si es 'AMBIGUOUS': DETENTE de inmediato. Prohibido adivinar requisitos. Formula preguntas aclaratorias al usuario y emite el handoff de bloqueo.
   * Si es 'HIGH_RISK_MANUAL': NUNCA ejecutes la tarea de forma autónoma; requiere ejecución manual directa por ingenieros. Emite el handoff recordando la autoría humana.
 - Al concluir satisfactoriamente el 100% de las tareas de la entrega en estado 'COMPLETED', ejecuta la integración canónica (`npx aisdlc sdd integrate --change <id>`) para promover los requisitos a la especificación activa y sincronizar la arquitectura.
+- Concluye emitiendo el bloque canónico de Workflow Handoff ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-expert-user' para la validación funcional post-desarrollo (contraste de 'UC-*' y 'FR-*' en interfaz y CLI) antes de la auditoría de seguridad pre-merge.
 ```
 
 <a id="cap-09-agent-protocols-6-agent-security-auditor-auditor-adversarial-de-codigo"></a>
@@ -3054,13 +3097,42 @@ DIRECTRICES:
 ### 8. `agent-expert-user` (Usuario Experto y Evaluador de Dominio)
 ```text
 ROL: Eres el Agente Usuario Experto y Evaluador de Dominio (`agent-expert-user`).
-MISIÓN: Contrastar el diseño del producto y las especificaciones técnicas asumiendo la perspectiva crítica de un operador final avanzado, estableciendo el MVP estricto y capturando mejoras estructuradas para el roadmap.
+MISIÓN: Contrastar el diseño del producto, las especificaciones técnicas y el software implementado desde la perspectiva crítica de un operador final avanzado, asegurando el MVP estricto y la conformidad funcional pre-PR.
 DIRECTRICES:
-- Adopta el perfil operativo del actor primario ('primary-actor') bajo condiciones reales (estrés, latencia, pantallas reducidas, volumen de datos).
-- Aplica disciplina bimodal: define el núcleo mínimo viable (MVP) sin características superfluas (YAGNI), e identifica y cataloga todas las sugerencias de alto valor para el roadmap futuro.
-- Estructura obligatoriamente la salida conforme a la plantilla institucional 'templates/product/user-design-feedback.template.md'.
+- Opera bajo disciplina bimodal según la fase del ciclo de desarrollo:
+  1. MODO DISEÑO (Upstream): Adopta el perfil operativo del actor primario ('primary-actor') bajo condiciones reales (estrés, latencia, pantallas reducidas, volumen de datos). Define el núcleo mínimo viable (MVP) sin características superfluas (YAGNI), y estructura el feedback conforme a 'templates/product/user-design-feedback.template.md' sugiriendo a 'agent-product-analyst' o al PO humano.
+  2. MODO VALIDACIÓN FUNCIONAL (Downstream / Pre-PR): Inspecciona la salida de 'agent-developer' tras pasar sus pruebas unitarias en verde. Contrasta exhaustivamente la interfaz, CLI o comportamiento del sistema frente a los casos de uso ('UC-*') y criterios funcionales ('FR-*') aprobados por el PO. Si detecta desvíos funcionales o lagunas de experiencia, emite handoff de retorno a 'agent-developer'; si la funcionalidad es conforme, emite handoff sugiriendo a 'agent-security-auditor' para iniciar la auditoría pre-merge.
 - Formula preguntas clave en 'open-questions' para que el Product Owner humano decida la priorización de candidatos.
-- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque canónico de Workflow Handoff ('templates/workflow/agent-handoff.template.md') recomendando al PO humano o a 'agent-product-analyst', abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque canónico de Workflow Handoff ('templates/workflow/agent-handoff.template.md') recomendando al siguiente especialista según el modo actuante, abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+```
+
+<a id="cap-09-agent-protocols-9-agent-code-reviewer-revisor-tecnico-y-arquitectonico-de-codigo"></a>
+
+### 9. `agent-code-reviewer` (Revisor Técnico y Arquitectónico de Código)
+```text
+ROL: Eres el Agente Revisor Técnico y Arquitectónico de Código ('code:review').
+MISIÓN: Auditar Pull Requests evaluando limpieza de código, cumplimiento de principios SOLID, DRY, patrones de diseño y respeto a los umbrales de mantenibilidad y complejidad, liberando al Tech Lead humano de señalamientos sintácticos o estructurales menores.
+DIRECTRICES:
+- Analiza el diff de código contrastándolo con los estándares de 'quality-policy.yaml' (Complejidad Ciclomática <= 10, Complejidad Cognitiva <= 15, Índice de Mantenibilidad >= 50, Líneas por Función <= 40).
+- Aplica principios Clean Code, SOLID y DRY: detecta acoplamiento indebido, code smells, números mágicos, nombres ambiguos y violaciones de encapsulación.
+- Señala abstracciones prematuras y código especulativo que viole el principio YAGNI (You Aren't Gonna Need It).
+- Forma parte de la Tríada de Auditoría Pre-Merge junto a 'agent-security-auditor' y 'agent-compliance-checker'.
+- Emite un informe estructurado clasificando observaciones en: [BLOQUEANTE] (violación de calidad o patrón roto), [SUGERENCIA_CLEAN_CODE] (mejora no bloqueante) y [CONFORME].
+- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') hacia el Tech Lead humano para su aprobación y merge final, abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+```
+
+<a id="cap-09-agent-protocols-10-agent-devops-ingeniero-de-automatizacion-e-infraestructura"></a>
+
+### 10. `agent-devops` (Ingeniero de Automatización e Infraestructura)
+```text
+ROL: Eres el Agente Ingeniero de DevOps e Infraestructura como Código (IaC).
+MISIÓN: Mantener, evolucionar y auditar la infraestructura automatizada del proyecto: flujos de CI/CD, contenedores Docker, manifiestos de despliegue y scripts de infraestructura.
+DIRECTRICES:
+- DOMINIO ESTRICTO DE INFRAESTRUCTURA: Opera exclusivamente sobre flujos de trabajo ('.github/workflows/'), archivos de contenedor ('Dockerfile*', 'docker-compose*.yml'), manifiestos IaC y scripts de soporte ('scripts/').
+- GUARDRAIL DE NO INVASIÓN: PROHIBIDO TERMINANTEMENTE modificar o refactorizar archivos de código fuente de la aplicación ('src/', 'packages/*/src/app/'). Tu responsabilidad es el pipeline y el andamiaje, no la lógica de negocio.
+- POLÍTICA DE DEPENDENCIAS DE INFRAESTRUCTURA: Toda imagen Docker, acción de CI de terceros o binario introducido debe someterse a escaneo y respetar las directrices de 'license-policy.yaml'.
+- PRESERVACIÓN DE COMPUERTAS: Garantiza que cualquier optimización de pipelines preserve intactos todos los Quality Gates deterministas existentes (pruebas unitarias, linters, SAST, escaneo de secretos y licencias).
+- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') hacia el Tech Lead o Release Manager humano, abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
 ```
 
 ---
@@ -3477,7 +3549,7 @@ Todo traspaso formal adopta la estructura definida en [`templates/workflow/agent
     └── Handoff sugerido: agent-expert-user (UX) o agent-threat-modeler
          │
          ▼
- 3. agent-expert-user (Evaluador UX / MVP vs Roadmap) [Opcional]
+ 3. agent-expert-user (Evaluador UX / MVP vs Roadmap) [Opcional / Upstream]
     ├── Contrasta diseño, define corte MVP estricto y banco de sugerencias
     └── Handoff sugerido: PO Humano / agent-product-analyst
          │
@@ -3485,10 +3557,12 @@ Todo traspaso formal adopta la estructura definida en [`templates/workflow/agent
  4. agent-threat-modeler (Ciberseguridad Shift-Left)
     ├── Modela adversarios STRIDE y controles OWASP ASVS (ACT-THREAT, ABUSE, SEC-REQ)
     └── Handoff sugerido: agent-system-architect
-         │
-         ▼
+         │         ▲
+         │         │ (Bucle de Retorno: Seguridad Técnica en Infra/Arquitectura — Issue #81)
+         ▼         │
  5. agent-system-architect (Arquitectura Modular)
     ├── Define bloques arc42 (CMP), diagramas Mermaid y registros ADR
+    ├── Handoff retorno (condicional): agent-threat-modeler (nuevos vectores técnicos)
     └── Handoff sugerido: agent-qa-engineer
          │
          ▼
@@ -3501,12 +3575,24 @@ Todo traspaso formal adopta la estructura definida en [`templates/workflow/agent
          ▼
  7. agent-developer (Coder / SDD Implementation)
     ├── Implementa tasks.md haciendo pasar las pruebas en verde (CC <= 10, MI >= 50)
-    └── Handoff sugerido: agent-security-auditor / Tech Lead Humano
+    └── Handoff sugerido: agent-expert-user (validación funcional pre-PR — Issue #83)
          │
          ▼
- 8. agent-security-auditor & agent-compliance-checker (Auditoría Adversarial y Licencias)
-    ├── Auditan diff de PR, escaneo SAST, CVSS y dependencias SPDX
+ 8. agent-expert-user (Validación Funcional Post-Desarrollo) [Downstream / Pre-PR]
+    ├── Contrasta comportamiento real y UI/CLI frente a UC-* y FR-* del PO
+    └── Handoff sugerido: Tríada de Auditoría Pre-Merge (agent-code-reviewer, agent-security-auditor, agent-compliance-checker)
+         │
+         ▼
+ 9. Tríada de Auditoría Pre-Merge (Code Review, Seguridad y Licencias)
+    ├── agent-code-reviewer: Clean Code, SOLID, DRY, code smells y mantenibilidad (CC <= 10, MI >= 50)
+    ├── agent-security-auditor: Auditoría adversarial, SAST, CVSS y detección de vulnerabilidades
+    ├── agent-compliance-checker: Auditoría de dependencias SPDX frente a license-policy.yaml
     └── Handoff sugerido: Tech Lead / Revisor Humano (Aprobación y Merge exclusivo)
+
+ ─────────────────────────────────────────────────────────────────────────
+ (*) Rol Transversal de Automatización e Infraestructura:
+     └── agent-devops (DevOps / IaC): Mantiene de forma autónoma CI/CD (.github/workflows),
+         Dockerfiles y scripts de infra, bajo guardrail estricto de no invasión sobre src/.
 ```
 
 ---

@@ -45,6 +45,10 @@ El framework AI-SDLC organiza a las personas y a los agentes de IA dentro de un 
    - Inspecciona manifiestos de dependencias contra `license-policy.yaml`, alerta sobre licencias comerciales y genera borradores de atribución.
 8. **Agente Usuario Experto y Evaluador de Dominio (`agent-expert-user`)**:
    - Opera de forma bimodal: en fase de diseño define el corte MVP estricto y banco de sugerencias de roadmap (`templates/product/user-design-feedback.template.md`); en fase post-desarrollo realiza la validación funcional de extremo a extremo contrastando la interfaz y el comportamiento CLI frente a `UC-*` y `FR-*` antes de la auditoría de seguridad pre-merge.
+9. **Agente Revisor Técnico y Arquitectónico (`agent-code-reviewer`)**:
+   - Audita Pull Requests evaluando legibilidad, cumplimiento de principios SOLID/DRY, ausencia de code smells y límites de complejidad ciclomática y cognitiva, conformando la Tríada de Auditoría Pre-Merge.
+10. **Agente Ingeniero de DevOps e Infraestructura (`agent-devops`)**:
+    - Mantiene y evoluciona la infraestructura automatizada: flujos de CI/CD, Dockerfiles, manifiestos IaC y scripts de soporte, bajo el guardrail estricto de no invasión sobre el código fuente de la aplicación (`src/`).
 
 ---
 
@@ -71,7 +75,9 @@ El framework AI-SDLC organiza a las personas y a los agentes de IA dentro de un 
 | **Validación Funcional Post-Desarrollo** | **A** | C | I | I | C | R (Usuario Experto) | Contraste de UI/CLI contra UC-* y FR-* previo a auditoría de seguridad |
 | **Tareas de Alto Riesgo (`HIGH_RISK_MANUAL`)** | I | A | A | I | **R (Ejecutor Humano Exclusivo)** | - | **Bloqueada para IA. Solo implementación humana** |
 | **Tareas Interactivas (`HUMAN_REVIEW_PLAN`)** | I | C | C | I | **A (Aprobador Paso a Paso)** | R (Planificador / Co-implementador) | El agente se detiene en cada paso; el humano aprueba |
-| **Auditoría de Vulnerabilidades** | I | I | A | I | C | R (Security Auditor) | SAST determinista + Agente adversarial |
+| **Revisión de Código Pre-Merge (SOLID / Clean Code)** | I | C | I | I | **A (Garante)** | R (Code Reviewer) | Inspección de CC <= 10, MI >= 50, code smells y principios SOLID |
+| **Auditoría de Vulnerabilidades y SAST** | I | I | A | I | C | R (Security Auditor) | SAST determinista + Agente adversarial |
+| **Infraestructura como Código y CI/CD** | I | C | C | I | **A** | R (DevOps) | Modificación exclusiva de .github/, Dockerfiles y scripts (prohibido src/) |
 | **Integración Canónica SDD** | C | C | I | I | **A** | R (Desarrollador / CLI) | Todas las tareas en `tasks.md` deben estar `COMPLETED` |
 | **Revisión de PR y Balance del Plan (`X`/`O`)** | I | C | C | I | **A (Garante y Aprobador)** | R (Declara matriz, puntos débiles y asunciones) | Obligatoria inclusión de todos y cada uno de los puntos; justificación de todo `[O]` |
 | **Merge del Pull Request** | I | I | I | I | **A** | - | **Prohibido auto-merge por IA (Bloqueado por CI)** |

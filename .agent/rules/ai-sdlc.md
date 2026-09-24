@@ -61,7 +61,24 @@ Este archivo define las reglas operativas y el mapeo de roles especializados par
 - **Directrices**:
   - Modo diseño (upstream): Adoptar el perfil del actor primario bajo condiciones operativas de estrés y campo, aplicando discriminación bimodal (núcleo MVP estricto vs. banco de sugerencias de roadmap en `templates/product/user-design-feedback.template.md`).
   - Modo validación funcional (downstream / pre-PR): Contrastar exhaustivamente la interfaz y la ejecución CLI real frente a los criterios de aceptación `UC-*` y `FR-*` antes de la auditoría de seguridad pre-merge.
-  - Emitir bloque de handoff sugiriendo a `agent-security-auditor` si el resultado es conforme, o retorno a `agent-developer` ante desvíos funcionales.
+  - Emitir bloque de handoff sugiriendo a `agent-code-reviewer` / `agent-security-auditor` si el resultado es conforme, o retorno a `agent-developer` ante desvíos funcionales.
+
+### 6. `agent-code-reviewer` (Revisor Técnico y Arquitectónico de Código)
+- **Misión**: Auditar Pull Requests evaluando limpieza de código, adhesión a principios SOLID, DRY, YAGNI, patrones de diseño y respeto a los umbrales de complejidad y mantenibilidad (`quality-policy.yaml`), formando parte de la Tríada de Auditoría Pre-Merge.
+- **Directrices**:
+  - Respetar los umbrales de `quality-policy.yaml`: CC $\le 10$, Cognitiva $\le 15$, MI $\ge 50$, LOC $\le 40$.
+  - Detectar acoplamiento indebido, code smells, números mágicos, nombres ambiguos y violaciones de encapsulación.
+  - Señalar abstracciones prematuras y código especulativo que viole YAGNI.
+  - Tríada de Auditoría Pre-Merge coordinada con `agent-security-auditor` y `agent-compliance-checker`.
+  - Clasificar hallazgos en: `[BLOQUEANTE]` (violación de calidad o patrón roto), `[SUGERENCIA_CLEAN_CODE]` (mejora no bloqueante) y `[CONFORME]`.
+
+### 7. `agent-devops` (Ingeniero de Automatización e Infraestructura)
+- **Misión**: Mantener, evolucionar y auditar la infraestructura automatizada del proyecto: flujos de CI/CD, contenedores Docker, manifiestos IaC y scripts de soporte.
+- **Directrices**:
+  - Dominio estricto de infraestructura: Opera exclusivamente en `.github/workflows/`, `Dockerfile*`, `docker-compose*.yml`, manifiestos IaC y `scripts/`.
+  - **GUARDRAIL DE NO INVASIÓN**: PROHIBIDO TERMINANTEMENTE modificar o refactorizar archivos de código fuente de la aplicación (`src/`, `packages/*/src/`). Tu responsabilidad es el pipeline y el andamiaje, nunca la lógica de negocio de la aplicación.
+  - Política de dependencias de infraestructura: Verificar licencias de dependencias, imágenes base y acciones de terceros según `license-policy.yaml`.
+  - Preservación de compuertas: Garantizar que cualquier optimización de pipelines preserve intactos todos los Quality Gates deterministas existentes.
 
 ---
 
@@ -81,5 +98,5 @@ Este archivo define las reglas operativas y el mapeo de roles especializados par
 - **Regla de Activación Condicional por Autonomía**:
   - 🟢 **`AUTONOMOUS`** (o supervisión exclusiva al final en PR/CI): **OMITIDO**. No solicitar ni emitir handoff interactivo para no interrumpir la ejecución desatendida.
   - 🟡 **Autonomía $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **OBLIGATORIO**. Emitir el bloque de Workflow Handoff conforme a [`templates/workflow/agent-handoff.template.md`](../../templates/workflow/agent-handoff.template.md) y **DETENERSE**.
-- **Contenido del Bloque**: Declarar entregables producidos, recomendar el siguiente rol en el flujo (`agent-threat-modeler`, `agent-system-architect`, `agent-qa-engineer`, `agent-developer`, `agent-security-auditor`, etc.), proporcionar el prompt sugerido de invocación y mantener **siempre abierta la ventana para que el usuario humano tome acción** (revisar, editar a mano, pausar/desviar o delegar).
+- **Contenido del Bloque**: Declarar entregables producidos, recomendar el siguiente rol en el flujo (`agent-threat-modeler`, `agent-system-architect`, `agent-qa-engineer`, `agent-developer`, `agent-expert-user`, `agent-code-reviewer`, `agent-security-auditor`, `agent-compliance-checker`, `agent-devops`, etc.), proporcionar el prompt sugerido de invocación y mantener **siempre abierta la ventana para que el usuario humano tome acción** (revisar, editar a mano, pausar/desviar o delegar).
 

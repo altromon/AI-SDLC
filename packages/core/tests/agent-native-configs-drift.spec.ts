@@ -107,6 +107,8 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(content).toContain('agent-qa-engineer');
     expect(content).toContain('agent-developer');
     expect(content).toContain('agent-expert-user');
+    expect(content).toContain('agent-code-reviewer');
+    expect(content).toContain('agent-devops');
   });
 
   it('verifies Cursor product rules declare the ProductShape taxonomy and draft status', () => {
@@ -168,6 +170,32 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(content).toMatch(/MODO VALIDACI[OÓ]N FUNCIONAL/i);
     const agContent = fs.readFileSync(configFiles.antigravity, 'utf-8');
     expect(agContent).toMatch(/modo validaci[oó]n funcional/i);
+  });
+
+  it('verifies that canonical protocol and Antigravity rules introduce agent-code-reviewer in the pre-merge audit triad (#84)', () => {
+    const canonicalContent = fs.readFileSync(canonicalProtocolPath, 'utf-8');
+    expect(canonicalContent).toContain('agent-code-reviewer');
+    expect(canonicalContent).toMatch(/Tr[ií]ada de Auditor[ií]a Pre-Merge/i);
+    expect(canonicalContent).toContain('SOLID');
+    expect(canonicalContent).toContain('YAGNI');
+
+    const agContent = fs.readFileSync(configFiles.antigravity, 'utf-8');
+    expect(agContent).toContain('agent-code-reviewer');
+    expect(agContent).toMatch(/Tr[ií]ada de Auditor[ií]a Pre-Merge/i);
+    expect(agContent).toContain('SOLID');
+    expect(agContent).toContain('YAGNI');
+  });
+
+  it('verifies that canonical protocol and Antigravity rules define agent-devops with strict non-invasion guardrail in src/ (#82)', () => {
+    const canonicalContent = fs.readFileSync(canonicalProtocolPath, 'utf-8');
+    expect(canonicalContent).toContain('agent-devops');
+    expect(canonicalContent).toMatch(/GUARDRAIL DE NO INVAS[IÍ]ÓN/i);
+    expect(canonicalContent).toContain('src/');
+
+    const agContent = fs.readFileSync(configFiles.antigravity, 'utf-8');
+    expect(agContent).toContain('agent-devops');
+    expect(agContent).toMatch(/GUARDRAIL DE NO INVAS[IÍ]ÓN/i);
+    expect(agContent).toContain('src/');
   });
 });
 
