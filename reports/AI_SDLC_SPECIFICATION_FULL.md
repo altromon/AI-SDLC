@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-09-23 19:28:14 UTC` | *Módulos Integrados:* `13`  
+> *Fecha de Compilación:* `2026-09-24 08:14:22 UTC` | *Módulos Integrados:* `13`  
 
 ---
 
@@ -135,7 +135,10 @@
     - [Sección 8: Conceptos Transversales](#cap-05-architecture-arc42-nafv4-seccion-8-conceptos-transversales)
     - [Sección 9: Decisiones de Arquitectura (ADRs)](#cap-05-architecture-arc42-nafv4-seccion-9-decisiones-de-arquitectura-adrs)
   - [4. Estructura de Carpetas de Arquitectura](#cap-05-architecture-arc42-nafv4-4-estructura-de-carpetas-de-arquitectura)
-  - [5. Trazabilidad 360° e Integración Canónica Post-Implementación](#cap-05-architecture-arc42-nafv4-5-trazabilidad-360-e-integracion-canonica-post-implementacion)
+  - [5. Catálogo Canónico de Plantillas de Arquitectura (`templates/architecture/`)](#cap-05-architecture-arc42-nafv4-5-catalogo-canonico-de-plantillas-de-arquitectura-templatesarchitecture)
+    - [5.1 Matriz de Plantillas y Artefactos](#cap-05-architecture-arc42-nafv4-51-matriz-de-plantillas-y-artefactos)
+    - [5.2 Guía de Uso e Instanciación en Proyectos](#cap-05-architecture-arc42-nafv4-52-guia-de-uso-e-instanciacion-en-proyectos)
+  - [6. Trazabilidad 360° e Integración Canónica Post-Implementación](#cap-05-architecture-arc42-nafv4-6-trazabilidad-360-e-integracion-canonica-post-implementacion)
 
 - [**06. Entrega e Implementación: Spec-Driven Development (SDD)**](#cap-06-spec-driven-development) *(Fuente: `process/06_spec_driven_development.md`)*
   - [1. El Puente entre la Definición y el Código](#cap-06-spec-driven-development-1-el-puente-entre-la-definicion-y-el-codigo)
@@ -365,6 +368,19 @@ AI-SDLC/
 │   ├── security/                             # Plantillas THREAT, ABUSE, SEC-REQ, SEC-POL
 │   ├── compliance/                           # Plantillas CON-LIC, ADR-LIC, Solicitud de Compra
 │   ├── architecture/                         # Plantillas arc42 (01-12) enriquecidas con NAF v4
+│   │   ├── introduction-and-goals.template.md      # Sec. 1 (Enterprise & Capability: ARCH-INTRO-*)
+│   │   ├── architecture-constraints.template.md    # Sec. 2 (Constraints: CON-*, ACON-*)
+│   │   ├── context-and-scope.template.md           # Sec. 3 (Operational: CTX-*, OIE-*)
+│   │   ├── solution-strategy.template.md           # Sec. 4 (Strategy: STRAT-*)
+│   │   ├── level-1-whitebox.template.md            # Sec. 5 (Services L1: ARCH-L1-*)
+│   │   ├── component.template.md                   # Sec. 5 (Services L1-L3: CMP-*)
+│   │   ├── runtime-view.template.md                # Sec. 6 (Behaviour & Sequences: SEQ-*, FLW-*)
+│   │   ├── deployment-view.template.md             # Sec. 7 (Resource Deployment: RES-*, DEP-*)
+│   │   ├── cross-cutting-concepts.template.md      # Sec. 8 (Info & Security: DATA-*, SEC-*)
+│   │   ├── adr.template.md                         # Sec. 9 (Governance: ADR-*)
+│   │   ├── quality-requirements.template.md        # Sec. 10 (Quality: ARCH-QUAL-*, QR-*)
+│   │   ├── risks-and-technical-debt.template.md    # Sec. 11 (Risk & Debt: RSK-*)
+│   │   └── glossary.template.md                    # Sec. 12 (Taxonomy: TERM-*, BC-*)
 │   ├── sdd/                                  # Plantillas SDD (Proposal, Spec, Design, Tasks, Handoff)
 │   ├── manuals/                              # Plantillas MAN-USER (Manual de Usuario), MAN-PROD (Manual de Producción)
 │   └── ci/                                   # Plantillas de CI/CD (GitLab CI, Azure DevOps, Bitbucket, GitHub Actions)
@@ -1132,8 +1148,9 @@ Para simplificar la interacción y minimizar el número de pasos, el servidor MC
    - Modela actores maliciosos (`ACT-THREAT-*`) y casos de abuso (`ABUSE-*`).
    - Define requisitos de seguridad (`SEC-REQ-*`) y restricciones Zero Trust antes de diseñar la solución técnica.
 3. **Modelar la Arquitectura arc42 / NAF v4**:
-   - Modela los límites de contexto, componentes (`CMP-*`) y enclaves de red (`SEC-ENC-*`).
-   - Cada componente debe citar los casos de uso que implementa.
+   - Utiliza el catálogo canónico de 12 plantillas en `templates/architecture/` para instanciar la documentación técnica en `docs/architecture/` (detallado en [process/05_architecture_arc42_nafv4.md](process/05_architecture_arc42_nafv4.md)).
+   - Modela contexto y alcance (`context-and-scope`), caja blanca L1 (`level-1-whitebox`), componentes (`component`), vistas de ejecución (`runtime-view`), topología con enclaves (`deployment-view`), decisiones inmutables (`adr`), árbol de calidad (`quality-requirements`) y matriz de riesgos (`risks-and-technical-debt`).
+   - Cada componente (`CMP-*`) debe citar explícitamente los casos de uso (`implements-use-cases`) y requerimientos (`satisfies-requirements`) que implementa para asegurar la trazabilidad 360°.
 4. **Verificar Cumplimiento de Licencias**:
    - Consulta `license-policy.yaml`. Si se necesita una librería comercial o dual, tramita la solicitud formal (`ADR-LIC-*`).
 5. **Revisión y Aprobación Humana**:
@@ -1153,7 +1170,11 @@ Para simplificar la interacción y minimizar el número de pasos, el servidor MC
 3. **Inspección Previa de Licencias de Dependencias**:
    - Antes de modificar manifiestos de paquetes (`package.json`, etc.), consulta la licencia del paquete.
    - Si la licencia es GPL/AGPL (viral) o BSL/SSPL (comercial de pago), DETÉN la adición y notifica al usuario en el PR proponiendo una alternativa permisiva (MIT/Apache 2.0).
-4. **Validación Determinista**:
+4. **Instanciación y Evolución Arquitectural**:
+   - Al modelar nuevos módulos o servicios, copia la plantilla correspondiente desde `templates/architecture/` hacia `docs/architecture/` (o diseña la solución en `specs/changes/active/.../design.md` respetando la estructura arc42 / NAF v4).
+   - Completa rigurosamente el frontmatter YAML (`id`, `title`, `type`, `version`, `schema-version`, `status`, `implements-use-cases`, `satisfies-requirements`).
+   - Valida la integridad estructural con `npx aisdlc verify schemas --path docs/architecture` y confirma la resolución de dependencias mediante `npx aisdlc verify traceability`.
+5. **Validación Determinista**:
    - Al finalizar, ejecuta los linters y verificadores de esquemas. Nunca intentes auto-aprobar o forzar el merge de un PR.
 
 <a id="doc-readme-integracion-nativa-por-entorno-de-ia"></a>
@@ -2219,31 +2240,108 @@ Modela la estructura interna del sistema mediante un **esquema único universal 
 
 ```text
 docs/architecture/
-├── 01_introduction_and_goals.md
-├── 02_architecture_constraints.md
-├── 03_context_and_scope/
+├── 01_introduction_and_goals.md        # Instanciado desde introduction-and-goals.template.md
+├── 02_architecture_constraints.md       # Instanciado desde architecture-constraints.template.md
+├── 03_context_and_scope/                # Instanciado desde context-and-scope.template.md
 │   ├── business_context.md
 │   └── technical_context.md
-├── 04_solution_strategy.md
+├── 04_solution_strategy.md              # Instanciado desde solution-strategy.template.md
 ├── 05_building_blocks/
-│   ├── level_1_whitebox.md              # Resumen del sistema y Bounded Contexts
-│   └── components/                      # CMP-*.md (Servicios, DLLs, Funciones)
-├── 06_runtime_view/                     # SEQ-*.md con diagramas Mermaid
-├── 07_deployment_view/                  # DEP-*.md y RES-*.md
+│   ├── level_1_whitebox.md              # Instanciado desde level-1-whitebox.template.md
+│   └── components/                      # CMP-*.md instanciados desde component.template.md
+├── 06_runtime_view/                     # SEQ-*.md instanciados desde runtime-view.template.md
+├── 07_deployment_view/                  # DEP-*.md instanciados desde deployment-view.template.md
 ├── 08_cross_cutting/
 │   ├── data_models/                     # DATA-*.md y schemas
-│   └── security_concept.md
-├── 09_decisions/                        # ADR-*.md
-├── 10_quality_requirements.md           # Árbol de calidad citando QR-*
-├── 11_risks_and_technical_debt.md       # RSK-*.md
-└── 12_glossary.md                       # Enlace canónico a TERM-* y BC-*
+│   └── security_concept.md              # Instanciado desde cross-cutting-concepts.template.md
+├── 09_decisions/                        # ADR-*.md instanciados desde adr.template.md
+├── 10_quality_requirements.md           # Instanciado desde quality-requirements.template.md
+├── 11_risks_and_technical_debt.md       # Instanciado desde risks-and-technical-debt.template.md
+└── 12_glossary.md                       # Instanciado desde glossary.template.md
 ```
 
 ---
 
-<a id="cap-05-architecture-arc42-nafv4-5-trazabilidad-360-e-integracion-canonica-post-implementacion"></a>
+<a id="cap-05-architecture-arc42-nafv4-5-catalogo-canonico-de-plantillas-de-arquitectura-templatesarchitecture"></a>
 
-## 5. Trazabilidad 360° e Integración Canónica Post-Implementación
+## 5. Catálogo Canónico de Plantillas de Arquitectura (`templates/architecture/`)
+
+AI-SDLC provee un conjunto completo y estandarizado de plantillas Markdown con **YAML frontmatter** estructurado bajo `templates/architecture/`, cubriendo exhaustivamente las 12 secciones de arc42 y sus correspondencias en NAF v4:
+
+<a id="cap-05-architecture-arc42-nafv4-51-matriz-de-plantillas-y-artefactos"></a>
+
+### 5.1 Matriz de Plantillas y Artefactos
+
+| Sección arc42 | Perspectiva NAF v4 | Archivo de Plantilla | Artefactos / IDs | Propósito y Contenido Clave |
+| :---: | :--- | :--- | :--- | :--- |
+| **01** | Enterprise & Capability | [`introduction-and-goals.template.md`](../templates/architecture/introduction-and-goals.template.md) | `ARCH-INTRO-*` | Visión ejecutiva, objetivos de calidad (`QR-*`) y stakeholders (`ACT-*`). |
+| **02** | Architecture Constraints | [`architecture-constraints.template.md`](../templates/architecture/architecture-constraints.template.md) | `CON-*`, `ACON-*` | Restricciones técnicas, organizativas y políticas de licencia OSS (`license-policy.yaml`). |
+| **03** | Operational Perspective | [`context-and-scope.template.md`](../templates/architecture/context-and-scope.template.md) | `CTX-*`, `OIE-*` | Delimitación de fronteras, contexto de negocio/técnico e intercambios de información. |
+| **04** | Service & Resource Strat | [`solution-strategy.template.md`](../templates/architecture/solution-strategy.template.md) | `STRAT-*` | Decisiones tecnológicas base, patrones fundamentales (DDD, Event-Driven) y tradeoffs. |
+| **05** | Services & Systems (L1) | [`level-1-whitebox.template.md`](../templates/architecture/level-1-whitebox.template.md) | `ARCH-L1-*` | Caja blanca macro Nivel 1, Bounded Contexts y descomposición en subsistemas. |
+| **05** | Services & Systems (L1-L3) | [`component.template.md`](../templates/architecture/component.template.md) | `CMP-*` | Especificación recursiva de componentes (servicios, DLLs, funciones, contratos). |
+| **06** | Behaviour & Sequences | [`runtime-view.template.md`](../templates/architecture/runtime-view.template.md) | `SEQ-*`, `FLW-*` | Escenarios nominales, excepciones y seguridad con diagramas Mermaid nativos. |
+| **07** | Resource / Deployment | [`deployment-view.template.md`](../templates/architecture/deployment-view.template.md) | `RES-*`, `DEP-*` | Topología de nodos físicos/cloud, clusters y enclaves segmentados (`SEC-ENC-*`). |
+| **08** | Information & Security | [`cross-cutting-concepts.template.md`](../templates/architecture/cross-cutting-concepts.template.md) | `DATA-*`, `SEC-*` | Concepto de seguridad Zero Trust, modelos de datos (`DATA-*`) y observabilidad. |
+| **09** | Governance & Architecture | [`adr.template.md`](../templates/architecture/adr.template.md) | `ADR-*` | Registros inmutables de decisiones arquitectónicas con consecuencias y aprobación. |
+| **10** | Quality Perspective | [`quality-requirements.template.md`](../templates/architecture/quality-requirements.template.md) | `ARCH-QUAL-*` | Árbol de calidad jerárquico (ISO/IEC 25010) y escenarios evaluables citando `QR-*`. |
+| **11** | Risk & Technical Debt | [`risks-and-technical-debt.template.md`](../templates/architecture/risks-and-technical-debt.template.md) | `RSK-*` | Matriz de riesgos técnicos, severidad, impacto, mitigación y registro de deuda técnica. |
+| **12** | Taxonomy & Terms | [`glossary.template.md`](../templates/architecture/glossary.template.md) | `TERM-*`, `BC-*` | Glosario unificado citando términos de dominio (`TERM-*`) y Bounded Contexts (`BC-*`). |
+
+---
+
+<a id="cap-05-architecture-arc42-nafv4-52-guia-de-uso-e-instanciacion-en-proyectos"></a>
+
+### 5.2 Guía de Uso e Instanciación en Proyectos
+
+1. **Instanciación Inicial de la Arquitectura del Sistema**:
+   Al arrancar un proyecto o módulo mayor, copie las plantillas estructurales hacia `docs/architecture/`:
+   ```bash
+   # Crear estructura base de documentación de arquitectura
+   mkdir -p docs/architecture/03_context_and_scope
+   mkdir -p docs/architecture/05_building_blocks/components
+   mkdir -p docs/architecture/06_runtime_view
+   mkdir -p docs/architecture/07_deployment_view
+   mkdir -p docs/architecture/08_cross_cutting/data_models
+   mkdir -p docs/architecture/09_decisions
+
+   # Instanciar las plantillas base
+   cp templates/architecture/introduction-and-goals.template.md docs/architecture/01_introduction_and_goals.md
+   cp templates/architecture/architecture-constraints.template.md docs/architecture/02_architecture_constraints.md
+   cp templates/architecture/solution-strategy.template.md docs/architecture/04_solution_strategy.md
+   cp templates/architecture/level-1-whitebox.template.md docs/architecture/05_building_blocks/level_1_whitebox.md
+   cp templates/architecture/quality-requirements.template.md docs/architecture/10_quality_requirements.md
+   cp templates/architecture/risks-and-technical-debt.template.md docs/architecture/11_risks_and_technical_debt.md
+   cp templates/architecture/glossary.template.md docs/architecture/12_glossary.md
+   ```
+
+2. **Creación de Componentes (`CMP-*`) y Decisiones (`ADR-*`)**:
+   Para cada nuevo microservicio, DLL o librería modular:
+   ```bash
+   cp templates/architecture/component.template.md docs/architecture/05_building_blocks/components/CMP-MI-SERVICIO.md
+   ```
+   Rellene en el frontmatter YAML los campos `level`, `implementation-type`, `implements-use-cases` y `satisfies-requirements`.
+
+   Para registrar decisiones técnicas vinculantes:
+   ```bash
+   cp templates/architecture/adr.template.md docs/architecture/09_decisions/ADR-001-STACK-SELECCIONADO.md
+   ```
+
+3. **Verificación Determinista y Trazabilidad**:
+   Una vez instanciados o modificados los artefactos de arquitectura, audite la conformidad de esquemas y la resolución 360°:
+   ```bash
+   # Validar esquemas JSON de los componentes y ADRs
+   npx aisdlc verify schemas --path docs/architecture
+
+   # Validar trazabilidad 360° RTM (Upstream -> Midstream -> Downstream)
+   npx aisdlc verify traceability
+   ```
+
+---
+
+<a id="cap-05-architecture-arc42-nafv4-6-trazabilidad-360-e-integracion-canonica-post-implementacion"></a>
+
+## 6. Trazabilidad 360° e Integración Canónica Post-Implementación
 
 Para garantizar que los modelos arquitectónicos no diverjan del software ejecutado ni del producto:
 

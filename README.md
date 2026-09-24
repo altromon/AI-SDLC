@@ -104,6 +104,19 @@ AI-SDLC/
 │   ├── security/                             # Plantillas THREAT, ABUSE, SEC-REQ, SEC-POL
 │   ├── compliance/                           # Plantillas CON-LIC, ADR-LIC, Solicitud de Compra
 │   ├── architecture/                         # Plantillas arc42 (01-12) enriquecidas con NAF v4
+│   │   ├── introduction-and-goals.template.md      # Sec. 1 (Enterprise & Capability: ARCH-INTRO-*)
+│   │   ├── architecture-constraints.template.md    # Sec. 2 (Constraints: CON-*, ACON-*)
+│   │   ├── context-and-scope.template.md           # Sec. 3 (Operational: CTX-*, OIE-*)
+│   │   ├── solution-strategy.template.md           # Sec. 4 (Strategy: STRAT-*)
+│   │   ├── level-1-whitebox.template.md            # Sec. 5 (Services L1: ARCH-L1-*)
+│   │   ├── component.template.md                   # Sec. 5 (Services L1-L3: CMP-*)
+│   │   ├── runtime-view.template.md                # Sec. 6 (Behaviour & Sequences: SEQ-*, FLW-*)
+│   │   ├── deployment-view.template.md             # Sec. 7 (Resource Deployment: RES-*, DEP-*)
+│   │   ├── cross-cutting-concepts.template.md      # Sec. 8 (Info & Security: DATA-*, SEC-*)
+│   │   ├── adr.template.md                         # Sec. 9 (Governance: ADR-*)
+│   │   ├── quality-requirements.template.md        # Sec. 10 (Quality: ARCH-QUAL-*, QR-*)
+│   │   ├── risks-and-technical-debt.template.md    # Sec. 11 (Risk & Debt: RSK-*)
+│   │   └── glossary.template.md                    # Sec. 12 (Taxonomy: TERM-*, BC-*)
 │   ├── sdd/                                  # Plantillas SDD (Proposal, Spec, Design, Tasks, Handoff)
 │   ├── manuals/                              # Plantillas MAN-USER (Manual de Usuario), MAN-PROD (Manual de Producción)
 │   └── ci/                                   # Plantillas de CI/CD (GitLab CI, Azure DevOps, Bitbucket, GitHub Actions)
@@ -801,8 +814,9 @@ Para simplificar la interacción y minimizar el número de pasos, el servidor MC
    - Modela actores maliciosos (`ACT-THREAT-*`) y casos de abuso (`ABUSE-*`).
    - Define requisitos de seguridad (`SEC-REQ-*`) y restricciones Zero Trust antes de diseñar la solución técnica.
 3. **Modelar la Arquitectura arc42 / NAF v4**:
-   - Modela los límites de contexto, componentes (`CMP-*`) y enclaves de red (`SEC-ENC-*`).
-   - Cada componente debe citar los casos de uso que implementa.
+   - Utiliza el catálogo canónico de 12 plantillas en `templates/architecture/` para instanciar la documentación técnica en `docs/architecture/` (detallado en [process/05_architecture_arc42_nafv4.md](process/05_architecture_arc42_nafv4.md)).
+   - Modela contexto y alcance (`context-and-scope`), caja blanca L1 (`level-1-whitebox`), componentes (`component`), vistas de ejecución (`runtime-view`), topología con enclaves (`deployment-view`), decisiones inmutables (`adr`), árbol de calidad (`quality-requirements`) y matriz de riesgos (`risks-and-technical-debt`).
+   - Cada componente (`CMP-*`) debe citar explícitamente los casos de uso (`implements-use-cases`) y requerimientos (`satisfies-requirements`) que implementa para asegurar la trazabilidad 360°.
 4. **Verificar Cumplimiento de Licencias**:
    - Consulta `license-policy.yaml`. Si se necesita una librería comercial o dual, tramita la solicitud formal (`ADR-LIC-*`).
 5. **Revisión y Aprobación Humana**:
@@ -820,7 +834,11 @@ Para simplificar la interacción y minimizar el número de pasos, el servidor MC
 3. **Inspección Previa de Licencias de Dependencias**:
    - Antes de modificar manifiestos de paquetes (`package.json`, etc.), consulta la licencia del paquete.
    - Si la licencia es GPL/AGPL (viral) o BSL/SSPL (comercial de pago), DETÉN la adición y notifica al usuario en el PR proponiendo una alternativa permisiva (MIT/Apache 2.0).
-4. **Validación Determinista**:
+4. **Instanciación y Evolución Arquitectural**:
+   - Al modelar nuevos módulos o servicios, copia la plantilla correspondiente desde `templates/architecture/` hacia `docs/architecture/` (o diseña la solución en `specs/changes/active/.../design.md` respetando la estructura arc42 / NAF v4).
+   - Completa rigurosamente el frontmatter YAML (`id`, `title`, `type`, `version`, `schema-version`, `status`, `implements-use-cases`, `satisfies-requirements`).
+   - Valida la integridad estructural con `npx aisdlc verify schemas --path docs/architecture` y confirma la resolución de dependencias mediante `npx aisdlc verify traceability`.
+5. **Validación Determinista**:
    - Al finalizar, ejecuta los linters y verificadores de esquemas. Nunca intentes auto-aprobar o forzar el merge de un PR.
 
 ### Integración Nativa por Entorno de IA
