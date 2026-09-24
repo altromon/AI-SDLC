@@ -1,0 +1,15 @@
+id: HOF-CHG-033-ARCHITECTURE-TEMPLATES
+type: handoff
+title: Handoff Canónico de Producto para architecture-templates
+changeId: CHG-033-ARCHITECTURE-TEMPLATES
+version: 1.0.0
+createdAt: '2026-09-24T07:45:58.581Z'
+subgraph:
+  requirements:
+    - FR-033-ARCHITECTURE-TEMPLATES-001
+  useCases:
+    - UC-033-ARCHITECTURE-TEMPLATES
+citations:
+  - id: FR-033-ARCHITECTURE-TEMPLATES-001
+    digest: sha256:a3e55ba3c916876fad86254326df37f2e36a67bb3103d9a299fee450d2906aa4
+    comment: Requerimiento funcional canónico asociado (Génesis CHG-033-ARCHITECTURE-TEMPLATES)
