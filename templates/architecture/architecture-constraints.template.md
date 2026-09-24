@@ -1,7 +1,7 @@
 ---
 id: ARCH-CONSTR-001
 type: architecture-constraints
-title: "02. Restricciones de Arquitectura"
+title: "02. Architecture Constraints"
 status: proposed # proposed, accepted, deprecated, superseded
 version: "1.0.0"
 schema-version: "1.0"
@@ -15,39 +15,39 @@ supersedes: null
 superseded-by: null
 ---
 
-# 02. Restricciones de Arquitectura (arc42 Sec. 2 / NAF Constraints)
+# 02. Architecture Constraints (arc42 Sec. 2 / NAF Constraints)
 
-## 1. Restricciones Técnicas Innegociables (`CON-*`)
-Limitaciones impuestas por hardware, software base, sistemas operativos, protocolos de red o compatibilidad binaria:
+## 1. Non-Negotiable Technical Constraints (`CON-*`)
+Limitations imposed by hardware, underlying platform, operating systems, network protocols, or binary compatibility:
 
-| ID Restricción | Nombre de la Restricción | Descripción y Justificación Técnica |
+| Constraint ID | Constraint Name | Description and Technical Rationale |
 | :--- | :--- | :--- |
-| `CON-TECH-001` | Compatibilidad Multiplataforma | Soporte obligatorio para Linux x86_64, ARM64 y Windows Server |
-| `CON-TECH-002` | Runtime y Toolchain Fijada | Ejecución sobre Node.js LTS 20+ y empaquetado determinista con pnpm |
-| `CON-TECH-003` | Cero Memoria Dinámica Descontrolada | Límite máximo de consumo de 512 MB por proceso en contenedores |
+| `CON-TECH-001` | Cross-Platform Compatibility | Mandatory support for Linux x86_64, ARM64, and Windows Server |
+| `CON-TECH-002` | Fixed Runtime and Toolchain | Execution on Node.js LTS 20+ and deterministic packaging with pnpm |
+| `CON-TECH-003` | Controlled Dynamic Memory | 512 MB maximum memory consumption limit per containerized process |
 
 ---
 
-## 2. Restricciones Organizativas y de Proceso (`ACON-*`)
-Reglas de gobernanza, normativas institucionales y convenios de equipo:
+## 2. Organizational and Process Constraints (`ACON-*`)
+Governance rules, organizational standards, and team conventions:
 
-| ID Restricción | Nombre | Directiva Vinculante |
+| Constraint ID | Name | Binding Directive |
 | :--- | :--- | :--- |
-| `ACON-ORG-001` | Gobernanza Git en 4 Tiers | Flujo estricto: task ➔ feat ➔ release ➔ main |
-| `ACON-ORG-002` | Soberanía Humana Innegociable | Prohibición estricta de auto-aprobación desatendida de PRs por IA |
+| `ACON-ORG-001` | 4-Tier Git Governance | Strict flow: task ➔ feat ➔ release ➔ main |
+| `ACON-ORG-002` | Inalienable Human Sovereignty | Strict ban on unattended AI auto-approval of PRs |
 
 ---
 
-## 3. Conformidad de Licencias Open Source (`LIC-POL-*`)
-Conforme a `license-policy.yaml`:
-- **Permisivas (ALLOW)**: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC.
-- **Copyleft Débil (REVIEW_REQUIRED)**: LGPL-2.1+, MPL-2.0 (restringidas a enlace dinámico desacoplado).
-- **Copyleft Fuerte / Viral (DENY)**: GPLv2, GPLv3, AGPLv3 (estrictamente prohibidas en el árbol de dependencias).
+## 3. Open Source License Compliance (`LIC-POL-*`)
+In accordance with `license-policy.yaml`:
+- **Permissive (ALLOW)**: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC.
+- **Weak Copyleft (REVIEW_REQUIRED)**: LGPL-2.1+, MPL-2.0 (restricted to dynamically linked decoupled libraries).
+- **Strong Copyleft / Viral (DENY)**: GPLv2, GPLv3, AGPLv3 (strictly prohibited in dependency tree).
 
 ---
 
-## 4. Historial de Revisiones y Control de Versiones
+## 4. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de restricciones | CHG-ARCH-001 |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial constraints definition | CHG-ARCH-001 |

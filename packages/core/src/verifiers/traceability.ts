@@ -67,36 +67,38 @@ export function extractFeatureTags(featureContent: string): string[] {
 export function generateTraceabilityReportMarkdown(rows: TraceabilityRow[], errors: number): string {
   const isOk = errors === 0;
   const reportLines: string[] = [
-    '# Matriz de Trazabilidad de Requerimientos 360° (RTM)',
+    '# 360° Requirements Traceability Matrix (RTM)',
     '',
-    `*Fecha de Verificación: ${new Date().toISOString()}*`,
-    `*Estado General: ${isOk ? '100% TRAZABLE (PASSED)' : `ERRORES DETECTADOS (${errors} brechas)`}*`,
+    `*Verification Date: ${new Date().toISOString()}*`,
+    `*Overall Status: ${isOk ? '100% TRACEABLE (PASSED)' : `ERRORS DETECTED (${errors} gaps)`}*`,
     '',
-    '## 1. Cobertura de Extremo a Extremo (PDaC Handoff ➔ arc42/NAF v4 ➔ BDD/Gherkin)',
+    '## 1. End-to-End Coverage (PDaC Handoff ➔ arc42/NAF v4 ➔ BDD/Gherkin)',
     '',
-    '| ID Requerimiento | Handoff PDaC | Título | Producto (Upstream) | Arquitectura (Midstream) | Pruebas (Downstream) | Estado Global |',
+    '| Requirement ID | PDaC Handoff | Title | Product (Upstream) | Architecture (Midstream) | Testing (Downstream) | Global Status |',
     '| :--- | :--- | :--- | :--- | :--- | :--- | :---: |',
   ];
 
   for (const r of rows) {
-    const ok = r.productStatus === 'CONFORME' && r.archStatus === 'CONFORME' && r.testStatus === 'CONFORME';
+    const ok = (r.productStatus === 'COMPLIANT' || r.productStatus === 'CONFORME') &&
+      (r.archStatus === 'COMPLIANT' || r.archStatus === 'CONFORME') &&
+      (r.testStatus === 'COMPLIANT' || r.testStatus === 'CONFORME');
     reportLines.push(
       `| **\`${r.id}\`** | \`${r.hofId || 'N/A'}\` | ${r.title} | \`${r.productTraces}\` | \`${r.archTraces}\` | \`${r.testTraces}\` | ${
-        ok ? '✅ CONFORME' : '❌ HUÉRFANO'
+        ok ? '✅ COMPLIANT' : '❌ ORPHAN'
       } |`
     );
   }
 
   reportLines.push('');
-  reportLines.push('## 2. Criterios de Validación Determinista');
+  reportLines.push('## 2. Deterministic Validation Criteria');
   reportLines.push(
-    '- **Producto (Upstream)**: El requerimiento está emitido en un Handoff formal de PDaC (`HOF-*`) y deriva de un Caso de Uso (`UC-*`), Regla de Negocio (`BR-*`) o Caso de Abuso (`ABUSE-*`).'
+    '- **Product (Upstream)**: Requirement is issued in a formal PDaC Handoff (`HOF-*`) and derives from a Use Case (`UC-*`), Business Rule (`BR-*`), or Abuse Case (`ABUSE-*`).'
   );
   reportLines.push(
-    '- **Arquitectura (Midstream)**: El requerimiento está asignado a al menos un Componente (`CMP-*`), Enclave (`SEC-ENC-*`), Decisión (`ADR-*`) o Vista de Ejecución arc42/NAF v4.'
+    '- **Architecture (Midstream)**: Requirement is assigned to at least one Component (`CMP-*`), Security Enclave (`SEC-ENC-*`), Decision (`ADR-*`), or arc42/NAF v4 Execution View.'
   );
   reportLines.push(
-    '- **Pruebas (Downstream)**: El requerimiento cuenta con escenarios ejecutables en suites BDD/Gherkin (`.feature`) con etiquetas correspondientes o tests automatizados verificados.'
+    '- **Testing (Downstream)**: Requirement has executable scenarios in BDD/Gherkin (`.feature`) test suites with matching tags or verified automated test cases.'
   );
 
   return reportLines.join('\n');
@@ -396,7 +398,7 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     const isProductConforme =
       validProductTraces.length > 0 || (associatedHandoff !== undefined && (associatedHandoff.subgraph?.requirements?.includes(reqId) ?? false));
 
-    const productStatus: 'CONFORME' | 'HUÉRFANO' = isProductConforme ? 'CONFORME' : 'HUÉRFANO';
+    const productStatus: 'COMPLIANT' | 'ORPHAN' = isProductConforme ? 'COMPLIANT' : 'ORPHAN';
     if (!isProductConforme) errorCount++;
 
     // --- B. MIDSTREAM: ARCHITECTURE TRACEABILITY (arc42 / NAF v4 - Reverse Lookup) ---
@@ -425,7 +427,7 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     }
 
     const uniqueArchTraces = Array.from(new Set(archTraces));
-    const archStatus: 'CONFORME' | 'HUÉRFANO' = uniqueArchTraces.length > 0 ? 'CONFORME' : 'HUÉRFANO';
+    const archStatus: 'COMPLIANT' | 'ORPHAN' = uniqueArchTraces.length > 0 ? 'COMPLIANT' : 'ORPHAN';
     if (uniqueArchTraces.length === 0) errorCount++;
 
     // --- C. DOWNSTREAM: TEST TRACEABILITY (BDD / Gherkin & Code Tests - Reverse Lookup) ---
@@ -445,24 +447,24 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     testTraces.push(...matchingCodeTests);
 
     const uniqueTestTraces = Array.from(new Set(testTraces));
-    const testStatus: 'CONFORME' | 'HUÉRFANO' = uniqueTestTraces.length > 0 ? 'CONFORME' : 'HUÉRFANO';
+    const testStatus: 'COMPLIANT' | 'ORPHAN' = uniqueTestTraces.length > 0 ? 'COMPLIANT' : 'ORPHAN';
     if (uniqueTestTraces.length === 0) errorCount++;
 
     const row: TraceabilityRow = {
       id: reqId,
-      title: (fm.title as string) || 'Sin título',
+      title: (fm.title as string) || 'Untitled',
       type: req.type,
       hofId: associatedHandoff?.id,
-      productTraces: validProductTraces.join(', ') || (associatedHandoff ? associatedHandoff.id : 'NINGUNO'),
+      productTraces: validProductTraces.join(', ') || (associatedHandoff ? associatedHandoff.id : 'NONE'),
       productStatus,
-      archTraces: uniqueArchTraces.join(', ') || 'NINGUNO',
+      archTraces: uniqueArchTraces.join(', ') || 'NONE',
       archStatus,
-      testTraces: uniqueTestTraces.join(', ') || 'NINGUNO',
+      testTraces: uniqueTestTraces.join(', ') || 'NONE',
       testStatus,
     };
 
     matrixRows.push(row);
-    if (productStatus === 'HUÉRFANO' || archStatus === 'HUÉRFANO' || testStatus === 'HUÉRFANO') {
+    if (productStatus === 'ORPHAN' || archStatus === 'ORPHAN' || testStatus === 'ORPHAN') {
       orphans.push(row);
     }
   }

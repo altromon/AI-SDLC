@@ -45,11 +45,11 @@ program
 // --- check command (unified pre-flight with auto-fix) ---
 program
   .command('check')
-  .description('Comando unificado de pre-vuelo: valida Quality Gates con auto-fix no destructivo opcional')
-  .option('--fix', 'Sincroniza automáticamente escenarios Gherkin (.feature) y digests criptográficos de citaciones PDaC')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Unified pre-flight command: validates Quality Gates with optional non-destructive auto-fix')
+  .option('--fix', 'Automatically synchronize Gherkin scenarios (.feature) and cryptographic digests of PDaC citations')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runCheck({
       fix: opts.fix,
@@ -63,20 +63,20 @@ program
 // --- verify command suite ---
 const verifyCommand = program
   .command('verify')
-  .description('Ejecuta verificadores deterministas de calidad, trazabilidad, gobierno y licencias');
+  .description('Run deterministic verifiers for quality, traceability, governance, and licenses');
 
 verifyCommand
   .command('all', { isDefault: true })
-  .description('Ejecuta la suite completa de calidad y gobierno (Quality Gate + RTM + Tasks + Tests + Licenses + PDaC)')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-p, --policy <path>', 'Ruta a quality-policy.yaml')
-  .option('-C, --max-cyclomatic <number>', 'Umbral máximo de Complejidad Ciclomática')
-  .option('-K, --max-cognitive <number>', 'Umbral máximo de Complejidad Cognitiva')
-  .option('-M, --min-maintainability <number>', 'Umbral mínimo de Mantenibilidad (0-100)')
-  .option('-L, --max-lines <number>', 'Umbral máximo de líneas por función')
-  .option('-m, --mode <mode>', 'Modo de cumplimiento: STRICT o PERMISSIVE')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Run the full quality and governance suite (Quality Gate + RTM + Tasks + Tests + Licenses + PDaC + Schemas + Duplicates + Security)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-p, --policy <path>', 'Path to quality-policy.yaml')
+  .option('-C, --max-cyclomatic <number>', 'Maximum Cyclomatic Complexity threshold')
+  .option('-K, --max-cognitive <number>', 'Maximum Cognitive Complexity threshold')
+  .option('-M, --min-maintainability <number>', 'Minimum Maintainability threshold (0-100)')
+  .option('-L, --max-lines <number>', 'Maximum lines per function threshold')
+  .option('-m, --mode <mode>', 'Enforcement mode: STRICT or PERMISSIVE')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifyAll({
       root: opts.root,
@@ -94,16 +94,16 @@ verifyCommand
 
 verifyCommand
   .command('quality')
-  .description('Release Gate de Calidad (Complejidad Ciclomática <= 10, Mantenibilidad >= 50)')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-p, --policy <path>', 'Ruta a quality-policy.yaml')
-  .option('-C, --max-cyclomatic <number>', 'Umbral máximo de Complejidad Ciclomática')
-  .option('-K, --max-cognitive <number>', 'Umbral máximo de Complejidad Cognitiva')
-  .option('-M, --min-maintainability <number>', 'Umbral mínimo de Mantenibilidad (0-100)')
-  .option('-L, --max-lines <number>', 'Umbral máximo de líneas por función')
-  .option('-m, --mode <mode>', 'Modo de cumplimiento: STRICT o PERMISSIVE')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Quality Release Gate (Cyclomatic Complexity <= 10, Maintainability >= 50)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-p, --policy <path>', 'Path to quality-policy.yaml')
+  .option('-C, --max-cyclomatic <number>', 'Maximum Cyclomatic Complexity threshold')
+  .option('-K, --max-cognitive <number>', 'Maximum Cognitive Complexity threshold')
+  .option('-M, --min-maintainability <number>', 'Minimum Maintainability threshold (0-100)')
+  .option('-L, --max-lines <number>', 'Maximum lines per function threshold')
+  .option('-m, --mode <mode>', 'Enforcement mode: STRICT or PERMISSIVE')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifyQuality({
       root: opts.root,
@@ -121,10 +121,10 @@ verifyCommand
 
 verifyCommand
   .command('traceability')
-  .description('Audita la Matriz de Trazabilidad 360° (Producto -> Arquitectura -> Pruebas)')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Audit the 360° Requirements Traceability Matrix (Product -> Architecture -> Testing)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifyTraceability({ root: opts.root, json: opts.json, format: opts.format });
     process.exit(passed ? 0 : 1);
@@ -132,10 +132,10 @@ verifyCommand
 
 verifyCommand
   .command('governance')
-  .description('Audita el gobierno de tareas y modos de autonomía humana (AUTONOMOUS, HUMAN_REVIEW_PLAN, etc.)')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Audit task governance and human autonomy modes (AUTONOMOUS, HUMAN_REVIEW_PLAN, etc.)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifyGovernance({ root: opts.root, json: opts.json, format: opts.format });
     process.exit(passed ? 0 : 1);
@@ -143,10 +143,10 @@ verifyCommand
 
 verifyCommand
   .command('testing')
-  .description('Audita que el 100% de requisitos y tareas cuentan con pruebas verificables')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Audit that 100% of requirements and tasks have verifiable tests')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifyTesting({ root: opts.root, json: opts.json, format: opts.format });
     process.exit(passed ? 0 : 1);
@@ -154,17 +154,17 @@ verifyCommand
 
 verifyCommand
   .command('licenses')
-  .description('Verifica el cumplimiento de licencias OSS frente a license-policy.yaml (SCA dinámico y SBOM)')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-p, --policy <path>', 'Ruta a license-policy.yaml')
-  .option('-m, --manifest <path>', 'Ruta a license-manifest.yaml')
-  .option('--no-dynamic', 'Desactiva el escaneo dinámico y exige archivo de manifiesto estático')
-  .option('--sbom [path]', 'Genera archivo SBOM en formato estándar CycloneDX 1.5 JSON')
-  .option('--notices [path]', 'Genera archivo de avisos y atribuciones legales THIRD_PARTY_NOTICES.md')
-  .option('--tool <tool>', 'Herramienta SCA: native, trivy, syft', 'native')
-  .option('--depth <depth>', 'Profundidad de análisis: direct o transitive', 'transitive')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Verify OSS license compliance against license-policy.yaml (dynamic SCA and SBOM)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-p, --policy <path>', 'Path to license-policy.yaml')
+  .option('-m, --manifest <path>', 'Path to license-manifest.yaml')
+  .option('--no-dynamic', 'Disable dynamic scanning and require static manifest file')
+  .option('--sbom [path]', 'Generate CycloneDX 1.5 JSON standard SBOM file')
+  .option('--notices [path]', 'Generate THIRD_PARTY_NOTICES.md legal notices and attributions file')
+  .option('--tool <tool>', 'SCA tool: native, trivy, syft', 'native')
+  .option('--depth <depth>', 'Analysis depth: direct or transitive', 'transitive')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifyLicenses({
       root: opts.root,
@@ -183,10 +183,10 @@ verifyCommand
 
 verifyCommand
   .command('pdac')
-  .description('Verifica el grafo PDaC y evalúa derivas criptográficas de citaciones SHA-256')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Verify PDaC graph and evaluate cryptographic drift of SHA-256 citations')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifyPdac({ root: opts.root, json: opts.json, format: opts.format });
     process.exit(passed ? 0 : 1);
@@ -194,11 +194,11 @@ verifyCommand
 
 verifyCommand
   .command('schemas')
-  .description('Verifica la conformidad de los artefactos Markdown frente a sus esquemas JSON canónicos (Draft 2020-12)')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-p, --path <path>', 'Ruta al archivo o directorio objetivo')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Verify Markdown artifacts compliance against canonical JSON schemas (Draft 2020-12)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-p, --path <path>', 'Target file or directory path')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifySchemas({ root: opts.root, path: opts.path, json: opts.json, format: opts.format });
     process.exit(passed ? 0 : 1);
@@ -206,11 +206,11 @@ verifyCommand
 
 verifyCommand
   .command('duplicates')
-  .description('Audita requisitos duplicados, colisiones de IDs, redundancia léxica y solapamientos BDD')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-s, --similarity <number>', 'Umbral de similitud léxica para títulos (0.0 a 1.0)', '0.85')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Audit duplicate requirements, ID collisions, lexical redundancy, and BDD overlaps')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-s, --similarity <number>', 'Lexical similarity threshold for titles (0.0 to 1.0)', '0.85')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifyDuplicates({ root: opts.root, similarity: opts.similarity, json: opts.json, format: opts.format });
     process.exit(passed ? 0 : 1);
@@ -218,16 +218,16 @@ verifyCommand
 
 verifyCommand
   .command('security')
-  .description('Verificación unificada de seguridad: detección determinista de secretos (Gitleaks) y SAST shift-left')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-d, --diff', 'Escanea únicamente las líneas añadidas en el diff git de la rama actual')
-  .option('-b, --base <branch>', 'Rama base para el cálculo del diff git (por defecto: origin/main o HEAD)')
-  .option('-g, --gitleaks', 'Delega o contrasta con el binario nativo de Gitleaks si está disponible')
-  .option('-s, --semgrep', 'Delega en el CLI de Semgrep si está instalado')
-  .option('-e, --entropy <number>', 'Umbral mínimo de entropía de Shannon (0.0 a 8.0)', '4.3')
-  .option('-m, --min-severity <level>', 'Severidad mínima para fallo SAST: CRITICAL, HIGH, MEDIUM', 'HIGH')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Unified security verification: deterministic secrets detection (Gitleaks) and shift-left SAST')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-d, --diff', 'Scan only lines added in the current branch git diff')
+  .option('-b, --base <branch>', 'Base branch for git diff calculation (default: origin/main or HEAD)')
+  .option('-g, --gitleaks', 'Delegate or contrast with native Gitleaks binary if available')
+  .option('-s, --semgrep', 'Delegate to Semgrep CLI if installed')
+  .option('-e, --entropy <number>', 'Minimum Shannon entropy threshold (0.0 to 8.0)', '4.3')
+  .option('-m, --min-severity <level>', 'Minimum severity for SAST failure: CRITICAL, HIGH, MEDIUM', 'HIGH')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifySecurity({
       root: opts.root,
@@ -245,14 +245,14 @@ verifyCommand
 
 verifyCommand
   .command('secrets')
-  .description('Verifica la ausencia de credenciales, API keys y certificados expuestos (Gitleaks Gate)')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-d, --diff', 'Escanea únicamente las líneas añadidas en el diff git de la rama actual')
-  .option('-b, --base <branch>', 'Rama base para el cálculo del diff git (por defecto: origin/main o HEAD)')
-  .option('-g, --gitleaks', 'Delega o contrasta con el binario nativo de Gitleaks si está disponible')
-  .option('-e, --entropy <number>', 'Umbral mínimo de entropía de Shannon (0.0 a 8.0)', '4.3')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Verify absence of exposed credentials, API keys, and certificates (Gitleaks Gate)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-d, --diff', 'Scan only lines added in the current branch git diff')
+  .option('-b, --base <branch>', 'Base branch for git diff calculation (default: origin/main or HEAD)')
+  .option('-g, --gitleaks', 'Delegate or contrast with native Gitleaks binary if available')
+  .option('-e, --entropy <number>', 'Minimum Shannon entropy threshold (0.0 to 8.0)', '4.3')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifySecrets({
       root: opts.root,
@@ -268,12 +268,12 @@ verifyCommand
 
 verifyCommand
   .command('sast')
-  .description('Análisis estático de seguridad (SAST) shift-left para patrones críticos (SQLi, exec, SSRF)')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-s, --semgrep', 'Delega en el CLI de Semgrep si está instalado')
-  .option('-m, --min-severity <level>', 'Severidad mínima para fallo: CRITICAL, HIGH, MEDIUM', 'HIGH')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Shift-left static application security testing (SAST) for critical patterns (SQLi, exec, SSRF)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-s, --semgrep', 'Delegate to Semgrep CLI if installed')
+  .option('-m, --min-severity <level>', 'Minimum severity for failure: CRITICAL, HIGH, MEDIUM', 'HIGH')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifySast({
       root: opts.root,
@@ -287,10 +287,10 @@ verifyCommand
 
 verifyCommand
   .command('friction [change]')
-  .description('Verifica la fricción progresiva y las protecciones Anti-Bypass para parches rápidos')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('--json', 'Emite los resultados de la verificación en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Verify progressive friction and Anti-Bypass guardrails for quick patches')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((change, opts) => {
     const passed = runVerifyFriction({ root: opts.root, change, json: opts.json, format: opts.format });
     process.exit(passed ? 0 : 1);
@@ -299,18 +299,18 @@ verifyCommand
 // --- report command suite ---
 const reportCommand = program
   .command('report')
-  .description('Genera informes formales de métricas en formato Markdown');
+  .description('Generate formal metric reports in Markdown format');
 
 reportCommand
   .command('quality')
-  .description('Genera el informe formal políglota de calidad de código (reports/QUALITY_REPORT.md)')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-p, --policy <path>', 'Ruta a quality-policy.yaml')
-  .option('-C, --max-cyclomatic <number>', 'Umbral máximo de Complejidad Ciclomática')
-  .option('-K, --max-cognitive <number>', 'Umbral máximo de Complejidad Cognitiva')
-  .option('-M, --min-maintainability <number>', 'Umbral mínimo de Mantenibilidad (0-100)')
-  .option('-L, --max-lines <number>', 'Umbral máximo de líneas por función')
-  .option('-m, --mode <mode>', 'Modo de cumplimiento: STRICT o PERMISSIVE')
+  .description('Generate formal polyglot code quality report (reports/QUALITY_REPORT.md)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-p, --policy <path>', 'Path to quality-policy.yaml')
+  .option('-C, --max-cyclomatic <number>', 'Maximum Cyclomatic Complexity threshold')
+  .option('-K, --max-cognitive <number>', 'Maximum Cognitive Complexity threshold')
+  .option('-M, --min-maintainability <number>', 'Minimum Maintainability threshold (0-100)')
+  .option('-L, --max-lines <number>', 'Maximum lines per function threshold')
+  .option('-m, --mode <mode>', 'Enforcement mode: STRICT or PERMISSIVE')
   .action((opts) => {
     const passed = runReportQuality({
       root: opts.root,
@@ -326,11 +326,11 @@ reportCommand
 
 reportCommand
   .command('dashboard')
-  .description('Genera el dashboard web interactivo y visualizador de grafos PDaC / RTM (reports/dashboard.html)')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-o, --output <path>', 'Ruta del archivo HTML de salida (por defecto: reports/dashboard.html)')
-  .option('-t, --title <title>', 'Título del dashboard web')
-  .option('--open', 'Abre el dashboard en el navegador predeterminado')
+  .description('Generate interactive web dashboard and PDaC / RTM graph visualizer (reports/dashboard.html)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-o, --output <path>', 'Output HTML file path (default: reports/dashboard.html)')
+  .option('-t, --title <title>', 'Web dashboard title')
+  .option('--open', 'Open dashboard in default browser')
   .action((opts) => {
     const passed = runReportDashboard({
       root: opts.root,
@@ -344,16 +344,16 @@ reportCommand
 // --- gherkin command suite ---
 const gherkinCommand = program
   .command('gherkin')
-  .description('Herramientas de sincronización y extracción BDD / Gherkin');
+  .description('BDD / Gherkin synchronization and extraction tools');
 
 gherkinCommand
   .command('extract')
-  .description('Extrae bloques ```gherkin``` de especificaciones Markdown a archivos .feature')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-p, --path <path>', 'Archivo Markdown o directorio objetivo')
-  .option('-a, --all', 'Procesa todas las especificaciones y requerimientos')
-  .option('--json', 'Salida en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Extract ```gherkin``` blocks from Markdown specifications into .feature files')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-p, --path <path>', 'Target Markdown file or directory')
+  .option('-a, --all', 'Process all specifications and requirements')
+  .option('--json', 'Structured JSON format output')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runGherkinExtract({
       root: opts.root,
@@ -368,11 +368,11 @@ gherkinCommand
 // --- git command suite ---
 const gitCommand = program
   .command('git')
-  .description('Herramientas del modelo jerárquico de ramas Git de 4 tiers');
+  .description('Tools for the 4-tier hierarchical Git branch model');
 
 gitCommand
   .command('validate <branch>')
-  .description('Valida la nomenclatura y jerarquía de una rama Git (Tier 1 a 4)')
+  .description('Validate naming and hierarchy of a Git branch (Tier 1 to 4)')
   .action((branch) => {
     const passed = runGitValidate(branch);
     process.exit(passed ? 0 : 1);
@@ -380,10 +380,10 @@ gitCommand
 
 gitCommand
   .command('plan')
-  .description('Planifica la jerarquía de ramas Git de 4 tiers para una versión y feature')
-  .option('-r, --release <version>', 'Versión del release (ej. v1.1.0)', 'v1.1.0')
-  .option('-f, --feature <feature>', 'Identificador de la feature (ej. CHG-001-telemetry)', 'CHG-001-telemetry')
-  .option('-t, --tasks <tasks>', 'Lista de tareas separadas por comas (ej. TSK-001,TSK-002)', 'TSK-001,TSK-002')
+  .description('Plan 4-tier Git branch hierarchy for a version and feature')
+  .option('-r, --release <version>', 'Release version (e.g. v1.1.0)', 'v1.1.0')
+  .option('-f, --feature <feature>', 'Feature identifier (e.g. CHG-001-telemetry)', 'CHG-001-telemetry')
+  .option('-t, --tasks <tasks>', 'Comma-separated tasks list (e.g. TSK-001,TSK-002)', 'TSK-001,TSK-002')
   .action((opts) => {
     runGitPlan({ version: opts.release, feature: opts.feature, tasks: opts.tasks });
     process.exit(0);
@@ -391,8 +391,8 @@ gitCommand
 
 gitCommand
   .command('checkout <task>')
-  .description('Navega y crea automáticamente ramas en cascada de 4 tiers para una tarea')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .description('Navigate and automatically create 4-tier cascading branches for a task')
+  .option('-r, --root <path>', 'Project root directory')
   .action((task, opts) => {
     const passed = runGitCheckout(task, { root: opts.root });
     process.exit(passed ? 0 : 1);
@@ -400,12 +400,12 @@ gitCommand
 
 const gitHookCommand = gitCommand
   .command('hook')
-  .description('Gestión e instalación de Git Hooks automatizados de AI-SDLC');
+  .description('AI-SDLC automated Git Hooks management and installation');
 
 gitHookCommand
   .command('install')
-  .description('Instala el hook prepare-commit-msg para inyección automática de trailers en commits')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .description('Install prepare-commit-msg hook for automatic commit trailer injection')
+  .option('-r, --root <path>', 'Project root directory')
   .action((opts) => {
     const passed = runGitHookInstall({ root: opts.root });
     process.exit(passed ? 0 : 1);
@@ -413,9 +413,9 @@ gitHookCommand
 
 gitCommand
   .command('detect-author')
-  .description('Detecta de forma universal e independiente de IDE si el autor es humano o agente')
-  .option('--json', 'Salida en formato JSON estructurado')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .description('Universally detect IDE-independently whether the author is human or an agent')
+  .option('--json', 'Structured JSON format output')
+  .option('-r, --root <path>', 'Project root directory')
   .action((opts) => {
     const passed = runGitDetectAuthor({ root: opts.root, json: opts.json });
     process.exit(passed ? 0 : 1);
@@ -424,16 +424,16 @@ gitCommand
 // --- kpi command suite ---
 const kpiCommand = program
   .command('kpi')
-  .description('Herramientas de agregación de métricas, telemetría y KPIs (PR y Release)');
+  .description('Metrics, telemetry, and KPI aggregation tools (PR and Release)');
 
 kpiCommand
   .command('pr')
-  .description('Calcula y genera la tabla Markdown agregada de KPIs para un Pull Request')
-  .option('-b, --base <branch>', 'Rama base de comparación', 'main')
-  .option('-h, --head <branch>', 'Rama origen o HEAD', 'HEAD')
-  .option('-u, --update-file <path>', 'Archivo donde inyectar el bloque de KPIs (ej. .github/PULL_REQUEST_TEMPLATE.md)')
-  .option('--json', 'Imprime la salida en formato JSON estructurado')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .description('Calculate and generate aggregated Markdown KPI table for a Pull Request')
+  .option('-b, --base <branch>', 'Comparison base branch', 'main')
+  .option('-h, --head <branch>', 'Source branch or HEAD', 'HEAD')
+  .option('-u, --update-file <path>', 'File where to inject the KPI block (e.g. .github/PULL_REQUEST_TEMPLATE.md)')
+  .option('--json', 'Print output in structured JSON format')
+  .option('-r, --root <path>', 'Project root directory')
   .action((opts) => {
     const passed = runKpiPr({
       base: opts.base,
@@ -447,12 +447,12 @@ kpiCommand
 
 kpiCommand
   .command('release')
-  .description('Consolida los KPIs de la release, DIR por modelo/humano y costes de re-trabajo')
-  .requiredOption('--release <branch>', 'Rama de la release a auditar (ej. release/v1.1.0)')
-  .option('-b, --base <branch>', 'Rama base estable (ej. main)', 'main')
-  .option('-o, --output <dir>', 'Directorio de salida para los informes (por defecto reports/releases/)')
-  .option('--json', 'Imprime la salida en formato JSON estructurado')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .description('Consolidate release KPIs, DIR by model/human, and rework costs')
+  .requiredOption('--release <branch>', 'Release branch to audit (e.g. release/v1.1.0)')
+  .option('-b, --base <branch>', 'Stable base branch (e.g. main)', 'main')
+  .option('-o, --output <dir>', 'Output directory for reports (default: reports/releases/)')
+  .option('--json', 'Print output in structured JSON format')
+  .option('-r, --root <path>', 'Project root directory')
   .action((opts) => {
     const passed = runKpiRelease({
       release: opts.release,
@@ -467,19 +467,19 @@ kpiCommand
 // --- change command suite ---
 const changeCommand = program
   .command('change')
-  .description('Gestión del ciclo de vida y andamiaje de cambios SDD');
+  .description('SDD change lifecycle and scaffolding management');
 
 changeCommand
   .command('new <name>')
-  .description('Crea el andamiaje completo de un nuevo cambio SDD (proposal, spec, design, tasks, handoff.yaml)')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('--from <ids...>', 'Identificador o lista de identificadores a citar (UC-*, FR-*, etc.)')
-  .option('--id <changeId>', 'Identificador explícito para el cambio (ej. chg-002-mi-cambio)')
-  .option('-p, --profile <profile>', 'Perfil de riesgo del cambio: patch, standard o critical', 'standard')
-  .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit', 'openspec')
-  .option('-a, --author <author>', 'Nombre del autor o agente desarrollador')
-  .option('--json', 'Salida en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Create complete scaffolding for a new SDD change (proposal, spec, design, tasks, handoff.yaml)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--from <ids...>', 'Identifier or list of identifiers to cite (UC-*, FR-*, etc.)')
+  .option('--id <changeId>', 'Explicit change identifier (e.g. chg-002-my-change)')
+  .option('-p, --profile <profile>', 'Change risk profile: patch, standard, or critical', 'standard')
+  .option('-f, --framework <framework>', 'SDD framework: openspec or speckit', 'openspec')
+  .option('-a, --author <author>', 'Author name or developer agent')
+  .option('--json', 'Structured JSON format output')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((name, opts) => {
     const passed = runChangeNew({
       root: opts.root,
@@ -498,19 +498,19 @@ changeCommand
 // --- sdd command suite ---
 const sddCommand = program
   .command('sdd')
-  .description('Herramientas de integración con ecosistemas SDD (OpenSpec y Spec Kit)');
+  .description('Tools for integration with SDD ecosystems (OpenSpec and Spec Kit)');
 
 sddCommand
   .command('new <name>')
-  .description('Alias de `aisdlc change new`: crea el andamiaje completo de un nuevo cambio SDD')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('--from <ids...>', 'Identificador o lista de identificadores a citar (UC-*, FR-*, etc.)')
-  .option('--id <changeId>', 'Identificador explícito para el cambio (ej. chg-002-mi-cambio)')
-  .option('-p, --profile <profile>', 'Perfil de riesgo del cambio: patch, standard o critical', 'standard')
-  .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit', 'openspec')
-  .option('-a, --author <author>', 'Nombre del autor o agente desarrollador')
-  .option('--json', 'Salida en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Alias of `aisdlc change new`: create complete scaffolding for a new SDD change')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--from <ids...>', 'Identifier or list of identifiers to cite (UC-*, FR-*, etc.)')
+  .option('--id <changeId>', 'Explicit change identifier (e.g. chg-002-my-change)')
+  .option('-p, --profile <profile>', 'Change risk profile: patch, standard, or critical', 'standard')
+  .option('-f, --framework <framework>', 'SDD framework: openspec or speckit', 'openspec')
+  .option('-a, --author <author>', 'Author name or developer agent')
+  .option('--json', 'Structured JSON format output')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((name, opts) => {
     const passed = runChangeNew({
       root: opts.root,
@@ -528,15 +528,15 @@ sddCommand
 
 sddCommand
   .command('deposit')
-  .description('Deposita un subgrafo de producto como archivo de acompañamiento (sidecar handoff.yaml)')
-  .requiredOption('-c, --change <id>', 'Identificador del cambio (ej. chg-001-telemetry)')
-  .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit', 'openspec')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-t, --title <title>', 'Título del handoff PDaC')
-  .option('--requirements <reqs>', 'Lista de IDs de requerimientos separados por comas')
-  .option('--use-cases <ucs>', 'Lista de IDs de casos de uso separados por comas')
-  .option('--json', 'Salida en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Deposit a product subgraph as a sidecar companion file (handoff.yaml)')
+  .requiredOption('-c, --change <id>', 'Change identifier (e.g. chg-001-telemetry)')
+  .option('-f, --framework <framework>', 'SDD framework: openspec or speckit', 'openspec')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-t, --title <title>', 'PDaC handoff title')
+  .option('--requirements <reqs>', 'Comma-separated list of requirement IDs')
+  .option('--use-cases <ucs>', 'Comma-separated list of use case IDs')
+  .option('--json', 'Structured JSON format output')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runSddDeposit({
       root: opts.root,
@@ -553,11 +553,11 @@ sddCommand
 
 sddCommand
   .command('verify')
-  .description('Valida la conformidad de los archivos de acompañamiento handoff.yaml (HOF-*) en los cambios')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-f, --framework <framework>', 'Framework SDD: openspec o speckit')
-  .option('--json', 'Salida en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Validate compliance of handoff.yaml sidecar files (HOF-*) in changes')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-f, --framework <framework>', 'SDD framework: openspec or speckit')
+  .option('--json', 'Structured JSON format output')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runSddVerify({
       root: opts.root,
@@ -570,17 +570,17 @@ sddCommand
 
 sddCommand
   .command('integrate')
-  .description('Integra y sincroniza los cambios SDD implementados en la especificación canónica (producto, requisitos y arquitectura)')
-  .option('-c, --change <id>', 'Identificador del cambio (ej. chg-001-telemetry)')
-  .option('--auto', 'Detecta automáticamente el cambio activo a integrar en base a la rama, PR o diff')
-  .option('--head-ref <ref>', 'Rama origen para la resolución automática')
-  .option('--pr-title <title>', 'Título del Pull Request para la resolución automática')
-  .option('--pr-body <body>', 'Cuerpo del Pull Request para la resolución automática')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
-  .option('-a, --author <author>', 'Nombre del autor o agente que realiza la integración')
-  .option('--no-archive', 'No archivar el cambio a specs/changes/completed tras la integración')
-  .option('--json', 'Salida en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Integrate and synchronize implemented SDD changes into canonical specification (product, requirements, and architecture)')
+  .option('-c, --change <id>', 'Change identifier (e.g. chg-001-telemetry)')
+  .option('--auto', 'Automatically detect active change to integrate based on branch, PR, or diff')
+  .option('--head-ref <ref>', 'Source branch for automatic resolution')
+  .option('--pr-title <title>', 'Pull Request title for automatic resolution')
+  .option('--pr-body <body>', 'Pull Request body for automatic resolution')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-a, --author <author>', 'Name of author or agent performing integration')
+  .option('--no-archive', 'Do not archive change to specs/changes/completed after integration')
+  .option('--json', 'Structured JSON format output')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runSddIntegrate({
       root: opts.root,
@@ -600,13 +600,13 @@ sddCommand
 // --- init command ---
 program
   .command('init [directory]')
-  .description('Inicializa un nuevo repositorio con las directrices, esquemas y políticas de AI-SDLC')
-  .option('-d, --dry-run', 'Simula la creación de archivos y directorios sin escribir en disco')
-  .option('--ci <provider>', 'Proveedor de CI/CD para generar pipeline (github, gitlab, azure, bitbucket)')
-  .option('--agents [targets]', 'Entornos de agentes a configurar (all, cursor, claude, antigravity, copilot, mcp, o combinación separada por comas)')
-  .option('--arch, --architecture <granularity>', 'Nivel de granularidad de plantillas de arquitectura (minimal, full, complete, none)')
-  .option('--json', 'Salida en formato JSON estructurado')
-  .option('-F, --format <format>', 'Formato de salida: text o json')
+  .description('Initialize a new repository with AI-SDLC guidelines, schemas, and policies')
+  .option('-d, --dry-run', 'Simulate file and directory creation without writing to disk')
+  .option('--ci <provider>', 'CI/CD provider for pipeline generation (github, gitlab, azure, bitbucket)')
+  .option('--agents [targets]', 'AI agent environments to configure (all, cursor, claude, antigravity, copilot, mcp, or comma-separated combination)')
+  .option('--arch, --architecture <granularity>', 'Architecture templates granularity level (minimal, full, complete, none)')
+  .option('--json', 'Structured JSON format output')
+  .option('-F, --format <format>', 'Output format: text or json')
   .action(async (directory, opts) => {
     let agents = opts.agents;
     let arch = opts.architecture || opts.arch;
@@ -631,16 +631,16 @@ program
 // --- mcp command ---
 program
   .command('mcp')
-  .description('Inicia el servidor Model Context Protocol (MCP) nativo de AI-SDLC (stdio)')
-  .option('-r, --root <path>', 'Directorio raíz del proyecto')
+  .description('Start native AI-SDLC Model Context Protocol (MCP) server (stdio)')
+  .option('-r, --root <path>', 'Project root directory')
   .action(async (opts) => {
     await runMcpServer({ root: opts.root });
   });
 
 // Handle unknown commands gracefully
 program.on('command:*', () => {
-  console.error(pc.red(`\n[ERROR] Comando no reconocido: ${program.args.join(' ')}`));
-  console.log(pc.yellow('Ejecuta `aisdlc --help` para ver los comandos disponibles.\n'));
+  console.error(pc.red(`\n[ERROR] Unrecognized command: ${program.args.join(' ')}`));
+  console.log(pc.yellow('Run `aisdlc --help` to see available commands.\n'));
   process.exit(1);
 });
 

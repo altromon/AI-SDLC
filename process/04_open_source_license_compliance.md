@@ -1,143 +1,143 @@
-# 04. Gobernanza y Cumplimiento de Licencias Open Source: Libre Uso vs. Adquisición Comercial
+# 04. Open Source License Governance and Compliance: Free Use vs. Commercial Acquisition
 
-## 1. Visión y Riesgo de Propiedad Intelectual
+## 1. Intellectual Property Vision and Risk
 
-El uso indiscriminado de dependencias externas por parte de desarrolladores humanos o agentes de IA expone a la organización a riesgos severos:
-1. **Riesgo de Infección Viral (Copyleft Fuerte / AGPL)**: Obligación legal de publicar el código fuente privado del producto.
-2. **Riesgo de Infracción Comercial (Dual-License / Source-Available / BSL / SSPL)**: Uso no autorizado de software que requiere pago de licencias o suscripciones comerciales para entornos productivos o modelos SaaS.
-3. **Riesgo de Falta de Atribución**: Incumplimiento de los términos de licencias permisivas al omitir los avisos de copyright.
+Indiscriminate dependency usage by human developers or AI agents exposes the organization to severe legal and financial risks:
+1. **Viral Infection Risk (Strong Copyleft / AGPL)**: Legal mandate requiring proprietary source code disclosure.
+2. **Commercial Infringement Risk (Dual-License / Source-Available / BSL / SSPL)**: Unauthorized usage of software requiring license payments or commercial subscriptions for production or SaaS environments.
+3. **Missing Attribution Risk**: Non-compliance with permissive license terms by omitting copyright and permission notices.
 
-AI-SDLC implementa un marco **License Compliance as Code** con evaluación determinista continua.
+AI-SDLC implements a **License Compliance as Code** framework backed by continuous deterministic evaluation.
 
 ---
 
-## 2. Taxonomía de Licencias en 5 Categorías
+## 2. 5-Category License Taxonomy
 
-Toda dependencia directa o transitiva se clasifica dentro de una de las siguientes cinco categorías operativas:
+Every direct or transitive dependency is classified into one of the following five operational categories:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│               TAXONOMÍA DE LICENCIAS OPEN SOURCE Y TERCEROS             │
+│               OPEN SOURCE AND THIRD-PARTY LICENSE TAXONOMY             │
 └────────────────────────────────────────────────────────────────────────┘
 
- [CATEGORÍA A: PERMISIVAS (LIBRE USO COMERCIAL)] ──► ALLOWLIST
-  │ Ejemplos: MIT, Apache-2.0, BSD-2/3, ISC, Unlicense, CC0, MS-PL (.NET)
-  └─► Permiten uso comercial, modificación y cierre de código. Solo exigen atribución.
+ [CATEGORY A: PERMISSIVE (FREE COMMERCIAL USE)] ────────► ALLOWLIST
+  │ Examples: MIT, Apache-2.0, BSD-2/3, ISC, Unlicense, CC0, MS-PL (.NET)
+  └─► Permit commercial use, modification, and closed distribution. Attribution only.
 
- [CATEGORÍA B: COPYLEFT DÉBIL (USO CONDICIONADO)] ──► CONDITIONAL REVIEW
-  │ Ejemplos: LGPL-2.1/3.0, MPL-2.0, EPL-2.0, CDDL, MS-RL (.NET), MS-LPL, MS-LRL
-  └─► Permitidas solo si se consumen como librería externa dinámica o módulo separado.
+ [CATEGORY B: WEAK COPYLEFT (CONDITIONED USE)] ─────────► CONDITIONAL REVIEW
+  │ Examples: LGPL-2.1/3.0, MPL-2.0, EPL-2.0, CDDL, MS-RL (.NET), MS-LPL, MS-LRL
+  └─► Permitted only if consumed as an external dynamic library or separate module.
 
- [CATEGORÍA C: COPYLEFT FUERTE / VIRAL] ────────────► DENYLIST
-  │ Ejemplos: GPL-2.0/3.0, AGPL-3.0, EUPL, OSL
-  └─► PROHIBIDAS en software propietario o SaaS para evitar obligación de liberar código.
+ [CATEGORY C: STRONG / VIRAL COPYLEFT] ─────────────────► DENYLIST
+  │ Examples: GPL-2.0/3.0, AGPL-3.0, EUPL, OSL
+  └─► PROHIBITED in proprietary software or SaaS to prevent mandatory source disclosure.
 
- [CATEGORÍA D: DUAL / SOURCE-AVAILABLE / PAGO] ─────► COMMERCIAL ACQUISITION
-  │ Ejemplos: SSPL (MongoDB), BSL (Redis/Terraform), Elastic-2.0, Comerciales
-  └─► CÓDIGO VISIBLE PERO NO LIBRE: Requiere formalizar y pagar licencia comercial.
+ [CATEGORY D: DUAL / SOURCE-AVAILABLE / PAID] ──────────► COMMERCIAL ACQUISITION
+  │ Examples: SSPL (MongoDB), BSL (Redis/Terraform), Elastic-2.0, Commercial
+  └─► VISIBLE BUT NOT FREE: Requires formal procurement and commercial license payment.
 
- [CATEGORÍA E: DESCONOCIDAS / AMBIGUAS] ────────────► HARD BLOCK
-  │ Ejemplos: Sin archivo LICENSE, licencias inventadas ("JSON License")
-  └─► BLOQUEO INMEDIATO: Prohibidas hasta resolución legal formal.
+ [CATEGORY E: UNKNOWN / AMBIGUOUS] ─────────────────────► HARD BLOCK
+  │ Examples: Missing LICENSE file, non-standard licenses ("JSON License")
+  └─► IMMEDIATE BLOCK: Prohibited until formal legal resolution.
 ```
 
 ---
 
-## 3. Guardrails para Agentes de IA en la Selección de Paquetes
+## 3. Guardrails for AI Agents in Package Selection
 
-Los agentes de IA que actúan como desarrolladores (`agent-developer`) o arquitectos deben cumplir estrictamente las siguientes reglas operativas:
+AI agents acting as developers (`agent-developer`) or architects must strictly observe the following operational guardrails:
 
-1. **Inspección Previa Mandatoria**:
-   - Antes de sugerir o añadir un paquete a manifiestos (`package.json`, `pom.xml`, `go.mod`, `Cargo.toml`, `pyproject.toml`, etc.), el agente debe consultar los metadatos de licencia del paquete en el registro oficial.
-2. **Rechazo Automático de Licencias Virales**:
-   - Si el paquete utiliza GPL o AGPL, el agente **no debe agregarlo**. Debe buscar activamente y proponer una alternativa con licencia permisiva (MIT o Apache-2.0).
-3. **Detección y Notificación de Licencias de Pago (Categoría D)**:
-   - Si un paquete opera bajo BSL, SSPL o modelo dual comercial, el agente **debe emitir una alerta explícita** en la propuesta o Pull Request:
-   > ⚠️ **ALERTA DE LICENCIA COMERCIAL**: El paquete `[nombre]` utiliza la licencia `[licencia]`. Su uso en este producto requiere la **adquisición formal de una licencia comercial o contrato de pago**. Se requiere aprobación del responsable legal y de compras antes de continuar.
-4. **Validación contra `license-policy.yaml`**:
-   - El agente debe comprobar que el identificador SPDX de la licencia esté explícitamente listado en la sección `permissive_free` de la política local.
+1. **Mandatory Pre-Inspection**:
+   - Before suggesting or adding a package to manifests (`package.json`, `pom.xml`, `go.mod`, `Cargo.toml`, `pyproject.toml`, etc.), the agent must inspect package license metadata in the official registry.
+2. **Automatic Rejection of Viral Licenses**:
+   - If a package uses GPL or AGPL, the agent **must not add it**. It must actively search for and propose an alternative with a permissive license (MIT or Apache-2.0).
+3. **Detection and Notification of Paid Licenses (Category D)**:
+   - If a package operates under BSL, SSPL, or a commercial dual-license model, the agent **must output an explicit warning** in the proposal or Pull Request:
+   > ⚠️ **COMMERCIAL LICENSE ALERT**: Package `[name]` uses the `[license]` license. Its use in this product requires **formal commercial license acquisition or payment agreement**. Approval from legal and procurement leads is required before proceeding.
+4. **Validation Against `license-policy.yaml`**:
+   - The agent must verify that the license SPDX identifier is explicitly listed under the `permissive_free` section of the local policy.
 
 ---
 
-## 4. Flujo de Adquisición de Licencia Comercial
+## 4. Commercial License Acquisition Flow
 
-Cuando una funcionalidad crítica requiera una librería de Categoría D:
+When a critical capability requires a Category D library:
 
 ```text
- Necesidad de Dependencia de Pago
-                │
-                ▼
- Agente emite Solicitud / PR con etiqueta 'needs-commercial-license'
-                │
-                ▼
- Revisión Humana: Tech Lead + Asesor Legal + Responsable de Compras
-                │
-         ┌──────┴──────┐
-         ▼             ▼
-   [ RECHAZADA ]  [ APROBADA ]
-         │             │
-         │             ▼
-         │       Contratación / Pago formal de la licencia comercial
-         │             │
-         │             ▼
-         │       Registro de excepción formal en docs/compliance/adrs/
-         │             │
-         ▼             ▼
-   Búsqueda de      Incorporación del paquete en el manifiesto con
-   alternativa      declaración formal de compra registrada
+ Need for Commercial Dependency
+               │
+               ▼
+ Agent files Request / PR tagged 'needs-commercial-license'
+               │
+               ▼
+ Human Review: Tech Lead + Legal Counsel + Procurement Lead
+               │
+        ┌──────┴──────┐
+        ▼             ▼
+  [ REJECTED ]   [ APPROVED ]
+        │             │
+        │             ▼
+        │       Commercial license formal procurement / payment
+        │             │
+        │             ▼
+        │       Formal exception logged in docs/compliance/adrs/
+        │             │
+        ▼             ▼
+  Search for    Package added to manifest with formal purchase
+  alternative   record registered
 ```
 
 ---
 
-## 5. Validación Determinista en CI/CD y Generación de SBOM
+## 5. Deterministic Validation in CI/CD and SBOM Generation
 
-En cada ejecución del pipeline de integración continua y en la compuerta de pre-vuelo (`aisdlc check`):
-1. **Inspección Dinámica de Dependencias (SCA)**:
-   - El motor nativo de `@ai-sdlc/core` inspecciona el árbol real de paquetes instalados (`node_modules` y almacén `.pnpm`) sin requerir manifiestos redactados a mano.
-   - Resuelve metadatos de `package.json`, identifica archivos de licencia (`LICENSE`, `LICENSE.md`, `LICENSE.txt`), normaliza identificadores SPDX y analiza expresiones compuestas (`AND`/`OR`).
-2. **Generación de SBOM (Software Bill of Materials)**:
-   - Se compila el inventario completo de dependencias directas y transitivas en formato estándar **CycloneDX 1.5 JSON** (`reports/sbom.cdx.json`).
-3. **Escaneo y Clasificación Automatizada contra `license-policy.yaml`**:
-   - Cada paquete se evalúa contra las listas de licencias permitidas (`permissive_free`), restringidas (`weak_copyleft_conditional` / `commercial_acquisition_required`) y bloqueadas (`strong_copyleft_viral`).
-   - Si se detecta cualquier licencia en la `denylist` (GPL/AGPL sin excepción) o desconocida, el pipeline **falla de inmediato (exit code 1)**.
-4. **Generación Automática de Atribuciones**:
-   - Se genera el artefacto derivado `THIRD_PARTY_NOTICES.md` recopilando autores, copyrights, URLs de repositorio y textos de licencias permisivas para cumplimiento legal.
+On every CI pipeline run and pre-flight gate (`aisdlc check`):
+1. **Dynamic Dependency Inspection (SCA)**:
+   - The native `@ai-sdlc/core` engine inspects the installed package tree (`node_modules` and `.pnpm` store) without requiring hand-crafted manifests.
+   - Resolves `package.json` metadata, identifies license files (`LICENSE`, `LICENSE.md`, `LICENSE.txt`), normalizes SPDX identifiers, and analyzes compound expressions (`AND`/`OR`).
+2. **SBOM (Software Bill of Materials) Generation**:
+   - Compiles the full direct and transitive dependency inventory in standard **CycloneDX 1.5 JSON** format (`reports/sbom.cdx.json`).
+3. **Automated Scanning and Classification Against `license-policy.yaml`**:
+   - Each package is evaluated against permitted (`permissive_free`), restricted (`weak_copyleft_conditional` / `commercial_acquisition_required`), and denylisted (`strong_copyleft_viral`) lists.
+   - If any denylisted (unexcepted GPL/AGPL) or unknown license is detected, the pipeline **fails immediately (exit code 1)**.
+4. **Automated Legal Attribution Generation**:
+   - Generates the derived `THIRD_PARTY_NOTICES.md` artifact compiling authors, copyrights, repository URLs, and permissive license texts for legal compliance.
 
 ---
 
-## 6. Tutorial Práctico: Auditoría Dinámica de Licencias y Generación de SBOM
+## 6. Practical Tutorial: Dynamic License Audit and SBOM Generation
 
-### Paso 1: Auditoría Dinámica Local
-Para verificar el cumplimiento del árbol completo de dependencias antes de confirmar código o abrir un Pull Request:
+### Step 1: Local Dynamic Audit
+To verify compliance across the full dependency tree before committing code or opening a Pull Request:
 
 ```bash
-# Ejecución estándar (inspección nativa de node_modules)
+# Standard execution (native node_modules inspection)
 npx aisdlc verify licenses
 
-# Inspección restringida únicamente a dependencias directas de producción
+# Restricted inspection for production direct dependencies only
 npx aisdlc verify licenses --depth direct
 ```
 
-Salida esperada en consola:
+Expected terminal output:
 ```text
-🔍 [AI-SDLC] Verificando Cumplimiento de Licencias Open Source (SCA)...
-  Dependencias evaluadas:   408
-  Dependencias conformes:   408
-  Violaciones de licencia:  0
-  SBOM CycloneDX generado:  reports/sbom.cdx.json
-  Avisos legales generados: THIRD_PARTY_NOTICES.md
+🔍 [AI-SDLC] Verifying Open Source License Compliance (SCA)...
+  Evaluated dependencies:   408
+  Compliant dependencies:   408
+  License violations:       0
+  Generated CycloneDX SBOM: reports/sbom.cdx.json
+  Generated legal notices:  THIRD_PARTY_NOTICES.md
 
-✔ Gobernanza de Licencias OSS CONFORME
+✔ OSS License Governance COMPLIANT
 ```
 
-### Paso 2: Generación Personalizada de SBOM CycloneDX 1.5
-Si se requiere emitir el archivo SBOM en una ubicación específica para su ingesta por plataformas de seguridad (como Dependency-Track o Snyk):
+### Step 2: Custom CycloneDX 1.5 SBOM Generation
+When exporting an SBOM file to a specific destination for security platforms (such as Dependency-Track or Snyk):
 
 ```bash
 npx aisdlc verify licenses --sbom build/artifacts/sbom.cdx.json
 ```
 
-El archivo generado cumple rigurosamente con la especificación CycloneDX 1.5:
+The generated file strictly complies with the CycloneDX 1.5 specification:
 ```json
 {
   "bomFormat": "CycloneDX",
@@ -160,27 +160,27 @@ El archivo generado cumple rigurosamente con la especificación CycloneDX 1.5:
 }
 ```
 
-### Paso 3: Generación del Archivo de Atribuciones Legales
-Para generar el resumen formal de copyright y textos de licencias para distribución del producto:
+### Step 3: Legal Attribution Notice Generation
+To generate the formal copyright and license text summary for product distribution:
 
 ```bash
 npx aisdlc verify licenses --notices dist/THIRD_PARTY_NOTICES.md
 ```
 
-### Paso 4: Integración Opcional con Herramientas Externas (Trivy / Syft)
-En entornos que requieran invocar herramientas corporativas adicionales instaladas en el sistema o en la imagen Docker de CI:
+### Step 4: Optional External Tool Integration (Trivy / Syft)
+In environments requiring additional corporate scanning tools installed on the system or CI Docker image:
 
 ```bash
-# Escaneo mediante Aqua Security Trivy
+# Scan via Aqua Security Trivy
 npx aisdlc verify licenses --tool trivy
 
-# Escaneo mediante Anchore Syft
+# Scan via Anchore Syft
 npx aisdlc verify licenses --tool syft
 ```
-*Nota*: Si la herramienta especificada no está disponible en el `PATH`, el CLI realiza un fallback transparente al motor nativo emitiendo una notificación informativa.
+*Note*: If the specified tool is unavailable in `PATH`, the CLI transparently falls back to the native engine with an informational notice.
 
-### Paso 5: Gestión de Excepciones y Licencias Restringidas
-Si una dependencia legítima opera bajo licencia dual o comercial aprobada (ej. `BSL-1.1`), registre la excepción formal en `license-policy.yaml`:
+### Step 5: Managing Exceptions and Restricted Licenses
+If a legitimate dependency operates under an approved dual or commercial license (e.g. `BSL-1.1`), register the formal exception in `license-policy.yaml`:
 
 ```yaml
 exceptions:
@@ -189,4 +189,4 @@ exceptions:
       license: "BSL-1.1"
       reason: "APPROVED_BY_LEGAL_REF_ADR_004"
 ```
-Al re-ejecutar `aisdlc verify licenses`, el paquete será aceptado como justificado sin bloquear el release gate.
+Upon re-running `aisdlc verify licenses`, the package is accepted as justified without blocking the release gate.

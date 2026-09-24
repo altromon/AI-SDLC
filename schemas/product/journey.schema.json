@@ -25,7 +25,7 @@
     "version": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
-      "description": "Versión semántica del journey (SemVer)."
+      "description": "Journey semantic version (SemVer)."
     },
     "schema-version": {
       "type": "string"
@@ -41,7 +41,7 @@
     "persona": {
       "type": "string",
       "pattern": "^ACT-[A-Z0-9]+(-[A-Z0-9]+)*$",
-      "description": "Actor (persona) que protagoniza este journey."
+      "description": "Actor (persona) starring in this journey."
     },
     "stages": {
       "type": "array",
@@ -49,7 +49,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Etapas secuenciales del journey (ej. Awareness, Onboarding, Activation, Retention)."
+      "description": "Sequential journey stages (e.g. Awareness, Onboarding, Activation, Retention)."
     },
     "touchpoints": {
       "type": "array",
@@ -57,7 +57,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Puntos de contacto entre la persona y el sistema en cada etapa."
+      "description": "Touchpoints between persona and system at each stage."
     },
     "related-use-cases": {
       "type": "array",
@@ -65,14 +65,14 @@
         "type": "string",
         "pattern": "^UC-[A-Z0-9]+(-[A-Z0-9]+)*$"
       },
-      "description": "Casos de uso del sistema relacionados con este journey."
+      "description": "System use cases related to this journey."
     },
     "pain-points": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Fricciones o problemas detectados en el recorrido del usuario."
+      "description": "Frictions or issues detected along the user journey."
     },
     "supersedes": {
       "type": ["string", "null"]

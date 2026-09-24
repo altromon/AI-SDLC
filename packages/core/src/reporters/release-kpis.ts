@@ -62,7 +62,7 @@ function resolveAuthorKey(record: CommitKpiRecord): { key: string; isAgent: bool
   if (record.trailers.authorType === 'agent') {
     return { key: record.trailers.aiModel || 'agent-generic', isAgent: true };
   }
-  return { key: `Humano (${record.authorName || 'developer'})`, isAgent: false };
+  return { key: `Human (${record.authorName || 'developer'})`, isAgent: false };
 }
 
 function createEmptyModelStats(key: string, isAgent: boolean): ModelDefectStats {
@@ -191,40 +191,40 @@ export function formatReleaseKpiMarkdown(report: ReleaseKpiReport): string {
 
   const bugRows = report.bugList.length > 0
     ? report.bugList.map((b) => `| \`${b.sha}\` | ${b.subject} | ${b.author} | ${b.parentRef || 'N/A'} | ${Math.round(b.timeSeconds / 60)} min | ${b.tokens.toLocaleString('en-US')} |`)
-    : ['| — | *No se detectaron defectos en este ciclo* | — | — | 0 min | 0 |'];
+    : ['| — | *No defects detected in this cycle* | — | — | 0 min | 0 |'];
 
   return [
-    `# 📈 Informe Consolidado de KPIs de Release: \`${report.releaseBranch}\``,
+    `# 📈 Consolidated Release KPI Report: \`${report.releaseBranch}\``,
     '',
-    `> **Línea Base:** \`${report.baseBranch}\` ➔ \`${report.releaseBranch}\``,
-    `> **Fecha de Auditoría:** ${report.generatedAt}`,
-    `> **Volumen Total:** ${report.totalCommits} commits | ${report.totalKloc} KLoC (+${report.totalLinesAdded} / -${report.totalLinesDeleted})`,
-    `> **Densidad Global de Defectos:** **${report.globalDefectDensity} bugs / KLoC** (${report.totalBugs} bugs confirmados)`,
+    `> **Baseline:** \`${report.baseBranch}\` ➔ \`${report.releaseBranch}\``,
+    `> **Audit Date:** ${report.generatedAt}`,
+    `> **Total Volume:** ${report.totalCommits} commits | ${report.totalKloc} KLoC (+${report.totalLinesAdded} / -${report.totalLinesDeleted})`,
+    `> **Global Defect Density:** **${report.globalDefectDensity} bugs / KLoC** (${report.totalBugs} confirmed bugs)`,
     '',
     '---',
     '',
-    '## 1. Distribución de Autoría, Volumen y Defect Injection Rate (DIR)',
+    '## 1. Authorship Distribution, Volume, and Defect Injection Rate (DIR)',
     '',
-    '| Entidad / Modelo | Commits | KLoC | Bugs | DIR (Bugs/KLoC) | Tiempo Total | Tokens | Coste Est. ($) |',
+    '| Entity / Model | Commits | KLoC | Bugs | DIR (Bugs/KLoC) | Total Time | Tokens | Est. Cost ($) |',
     '| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |',
     ...authorRows,
     `| **TOTAL RELEASE** | **${report.totalCommits}** | **${report.totalKloc}** | **${report.totalBugs}** | **${report.globalDefectDensity}** | **${formatHours(report.totalTimeSeconds)}** | **${report.totalTokens.toLocaleString('en-US')}** | **$${report.totalCostUsd.toFixed(2)} USD** |`,
     '',
     '---',
     '',
-    '## 2. Coste de Re-trabajo por Bugs vs. Coste Total de la Release',
+    '## 2. Bug Rework Cost vs. Total Release Cost',
     '',
-    '| Dimensión de Coste | Inversión Total Release | Invertido en Resolver Bugs | Rework Cost Ratio | Estado Observacional |',
+    '| Cost Dimension | Total Release Investment | Invested in Bug Fixes | Rework Cost Ratio | Observational Status |',
     '| :--- | :---: | :---: | :---: | :---: |',
-    `| **Tiempo de Ciclo** | ${formatHours(report.totalTimeSeconds)} | ${formatHours(report.reworkTimeSeconds)} | **${report.reworkTimePercent}%** | ${report.reworkTimePercent <= 10 ? '🟢 ÓPTIMO (≤10%)' : '🟡 ALERTA (>10%)'} |`,
-    `| **Tokens de IA** | ${report.totalTokens.toLocaleString('en-US')} tokens | ${report.reworkTokens.toLocaleString('en-US')} tokens | **${report.reworkTokensPercent}%** | ${report.reworkTokensPercent <= 10 ? '🟢 ÓPTIMO (≤10%)' : '🟡 ALERTA (>10%)'} |`,
-    `| **Coste Computacional ($)** | $${report.totalCostUsd.toFixed(2)} USD | $${report.reworkCostUsd.toFixed(2)} USD | **${report.reworkCostPercent}%** | ${report.reworkCostPercent <= 10 ? '🟢 ÓPTIMO (≤10%)' : '🟡 ALERTA (>10%)'} |`,
+    `| **Cycle Time** | ${formatHours(report.totalTimeSeconds)} | ${formatHours(report.reworkTimeSeconds)} | **${report.reworkTimePercent}%** | ${report.reworkTimePercent <= 10 ? '🟢 OPTIMAL (≤10%)' : '🟡 ALERT (>10%)'} |`,
+    `| **AI Tokens** | ${report.totalTokens.toLocaleString('en-US')} tokens | ${report.reworkTokens.toLocaleString('en-US')} tokens | **${report.reworkTokensPercent}%** | ${report.reworkTokensPercent <= 10 ? '🟢 OPTIMAL (≤10%)' : '🟡 ALERT (>10%)'} |`,
+    `| **Computational Cost ($)** | $${report.totalCostUsd.toFixed(2)} USD | $${report.reworkCostUsd.toFixed(2)} USD | **${report.reworkCostPercent}%** | ${report.reworkCostPercent <= 10 ? '🟢 OPTIMAL (≤10%)' : '🟡 ALERT (>10%)'} |`,
     '',
     '---',
     '',
-    '## 3. Relación de Defectos y Commits de Corrección',
+    '## 3. Defects and Fix Commits Breakdown',
     '',
-    '| Commit SHA | Descripción | Atribución | Referencia | Tiempo Fix | Tokens Fix |',
+    '| Commit SHA | Description | Attribution | Reference | Fix Time | Fix Tokens |',
     '| :--- | :--- | :--- | :--- | :---: | :---: |',
     ...bugRows,
   ].join('\n');

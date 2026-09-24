@@ -1,57 +1,57 @@
 ---
 id: ARCH-INTRO-001
 type: architecture-introduction
-title: "01. Introducción y Objetivos del Sistema"
+title: "01. Introduction and System Goals"
 status: proposed # proposed, accepted, deprecated, superseded
 version: "1.0.0"
 schema-version: "1.0"
 arc42-section: 1
 naf-perspective: "Enterprise & Capability"
 cites-product-actors:
-  - ACT-NOMBRE-001
+  - ACT-NAME-001
 cites-quality-goals:
   - QR-LATENCY-001
   - QR-AVAILABILITY-001
 cites-use-cases:
-  - UC-PRINCIPAL-001
+  - UC-MAIN-001
 supersedes: null
 superseded-by: null
 ---
 
-# 01. Introducción y Objetivos del Sistema (arc42 Sec. 1 / NAF Enterprise)
+# 01. Introduction and System Goals (arc42 Sec. 1 / NAF Enterprise)
 
-## 1. Visión del Sistema y Resumen Ejecutivo
-Describe la misión fundamental del sistema, el problema de negocio que resuelve y el valor entregado a los usuarios y a la organización.
+## 1. System Vision and Executive Summary
+Describes core system mission, the business problem it solves, and value delivered to users and organization.
 
-### 1.1 Declaración de Misión
-> *El sistema [Nombre del Sistema] proporciona la capacidad de [misión clave] para [audiencia objetivo], garantizando [garantías clave de seguridad, rendimiento o fiabilidad].*
+### 1.1 Mission Statement
+> *The [System Name] system provides [key capability] for [target audience], guaranteeing [key security, performance, or reliability guarantees].*
 
 ---
 
-## 2. Objetivos de Calidad Prioritarios (Cita canónica ProductShape)
-Lista los 3 a 5 objetivos de calidad más críticos para la arquitectura, enlazando directamente con los requerimientos no funcionales (`QR-*`) definidos en ProductShape:
+## 2. Priority Quality Goals (Canonical ProductShape Citations)
+Lists top 3 to 5 critical quality goals, linking directly to non-functional requirements (`QR-*`) defined in ProductShape:
 
-| Prioridad | Objetivo de Calidad | ID Requerimiento | Motivación Arquitectónica |
+| Priority | Quality Goal | Requirement ID | Architectural Rationale |
 | :---: | :--- | :--- | :--- |
-| **1** | Alta Disponibilidad y Resiliencia | `QR-AVAILABILITY-001` | Arquitectura desacoplada, redundancia activa y failover automático |
-| **2** | Latencia en Tiempo Real / Rendimiento | `QR-LATENCY-001` | Pipeline de procesamiento asíncrono, colas de baja latencia |
-| **3** | Seguridad Zero Trust | `SEC-REQ-AUTH-001` | Autenticación mTLS estricta y aislamiento en enclaves |
+| **1** | High Availability and Resilience | `QR-AVAILABILITY-001` | Decoupled architecture, active redundancy, and automated failover |
+| **2** | Real-Time Latency / Performance | `QR-LATENCY-001` | Asynchronous processing pipeline, low-latency queues |
+| **3** | Zero Trust Security | `SEC-REQ-AUTH-001` | Strict mTLS authentication and enclave isolation |
 
 ---
 
-## 3. Matriz de Stakeholders y Actores Principales
-Mapeo de los interesados del sistema con sus expectativas arquitectónicas:
+## 3. Stakeholder and Primary Actors Matrix
+Mapping of system stakeholders with architectural expectations:
 
-| Rol / Stakeholder | ID Actor | Expectativas Arquitectónicas |
+| Role / Stakeholder | Actor ID | Architectural Expectations |
 | :--- | :--- | :--- |
-| **Operadores del Sistema** | `ACT-OPERATOR-001` | Paneles de observabilidad, alertas tempranas y auditoría |
-| **Usuarios Finales** | `ACT-USER-001` | Tiempos de respuesta consistentes e interfaces seguras |
-| **Equipo de Seguridad** | `ACT-SEC-AUDITOR` | Cero filtración de secretos y registro inmutable de accesos |
+| **System Operators** | `ACT-OPERATOR-001` | Observability dashboards, early alerting, and auditability |
+| **End Users** | `ACT-USER-001` | Consistent response times and secure interfaces |
+| **Security Team** | `ACT-SEC-AUDITOR` | Zero secrets leakage and immutable access logging |
 
 ---
 
-## 4. Historial de Revisiones y Control de Versiones
+## 4. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de objetivos de arquitectura | CHG-ARCH-001 |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial architecture goals definition | CHG-ARCH-001 |

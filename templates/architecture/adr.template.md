@@ -1,40 +1,40 @@
 ---
-id: ADR-001-NOMBRE-DECISION
+id: ADR-001-DECISION-NAME
 type: architecture-decision-record
-title: Título Claro de la Decisión Técnica
+title: Clear Title of Technical Decision
 status: proposed # proposed, accepted, rejected, deprecated, superseded
 version: "1.0.0"
 schema-version: "1.0"
 deciders:
-  - "Nombre del Arquitecto Lead"
-  - "Nombre del Tech Lead"
+  - "Lead Architect Name"
+  - "Tech Lead Name"
 decision-date: "2026-09-03"
 affects-components:
-  - CMP-NOMBRE-001
+  - CMP-NAME-001
 supersedes: null
 superseded-by: null
 ---
 
-# ADR-001: Título Claro de la Decisión Técnica
+# ADR-001: Clear Title of Technical Decision
 
-## 1. Contexto y Planteamiento del Problema
-Describe el contexto tecnológico, los requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`) que motivan la decisión y las fuerzas en tensión (rendimiento, coste, complejidad, cumplimiento de licencias).
+## 1. Context and Problem Statement
+Describe the technological context, requirements (`FR-*`, `QR-*`, `SEC-REQ-*`) driving the decision, and forces in tension (performance, cost, complexity, license compliance).
 
-## 2. Opciones Tecnológicas Consideradas
-1. **Opción A**: [Ventajas y desventajas, régimen de licencia OSS].
-2. **Opción B**: [Ventajas y desventajas, régimen de licencia OSS].
+## 2. Considered Technology Options
+1. **Option A**: [Pros and cons, OSS license regime].
+2. **Option B**: [Pros and cons, OSS license regime].
 
-## 3. Decisión Adoptada
-Elegimos la **Opción [A/B]** porque [justificación técnica y de negocio sólida].
+## 3. Decision Outcome
+Chosen **Option [A/B]** because [solid technical and business justification].
 
-## 4. Consecuencias
-- **Positivas**: Reducción de latencia, conformidad con `license-policy.yaml`.
-- **Negativas / Compromisos (Trade-offs)**: Mayor consumo de memoria inicial o necesidad de instrumentación adicional.
+## 4. Consequences
+- **Positive**: Latency reduction, compliance with `license-policy.yaml`.
+- **Negative / Trade-offs**: Higher initial memory footprint or additional instrumentation needed.
 
 ---
 
-## 5. Historial de Revisiones y Control de Versiones
+## 5. Revision History and Version Control
 
-| Versión | Fecha | Decisores | Estado de la Decisión | Referencia (Change/PR) |
+| Version | Date | Deciders | Decision Status | Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-03 | Lead Architect & Tech Lead | Propuesta formal de la decisión | CHG-ARCH-001 |
+| **1.0.0** | 2026-09-03 | Lead Architect & Tech Lead | Formal decision proposal | CHG-ARCH-001 |

@@ -1,153 +1,153 @@
-# 05. Arquitectura de Sistemas: Fusión de arc42 y NAF v4
+# 05. Systems Architecture: Fusion of arc42 and NAF v4
 
-## 1. Visión y Necesidad de la Arquitectura en la Era de los Agentes
+## 1. Vision and Need for Architecture in the Agent Era
 
-ProductShape define *qué* es el producto y *para quién*. Sin embargo, los agentes de IA necesitan instrucciones arquitectónicas precisas sobre *cómo* se estructuran los servicios, qué protocolos de red se emplean, cómo se desacoplan los módulos y qué límites de seguridad rigen cada componente.
+ProductShape defines *what* the product is and *for whom*. However, AI agents require precise architectural instructions on *how* services are structured, what network protocols are utilized, how modules decouple, and what security boundaries govern each component.
 
-**AI-SDLC unifica dos estándares líderes:**
-1. **arc42**: Proporciona el marco pragmático, comprensible y estructurado en 12 secciones que los desarrolladores y los LLMs comprenden de forma natural.
-2. **NAF v4 (NATO Architecture Framework v4)**: Aporta el rigor formal de la matriz de arquitectura empresarial (perspectivas de Capacidades, Operacional, de Servicios y de Recursos/Sistemas), ideal para sistemas críticos, escalables e interoperables.
+**AI-SDLC unifies two leading standards:**
+1. **arc42**: Provides a pragmatic, understandable, 12-section structured framework that developers and LLMs naturally grasp.
+2. **NAF v4 (NATO Architecture Framework v4)**: Contributes the formal rigor of enterprise architecture grids (Capabilities, Operational, Services, and Resource/System perspectives), ideal for critical, scalable, and interoperable systems.
 
 ---
 
-## 2. La Matriz de Fusión: arc42 Enriquecido con NAF v4
+## 2. The Fusion Matrix: arc42 Enriched with NAF v4
 
-Cada sección de **arc42** se materializa en el repositorio como documentos Markdown modulares con YAML frontmatter, integrando los conceptos clave del grid de **NAF v4**:
+Each section of **arc42** materializes in the repository as modular Markdown documents with YAML frontmatter, integrating key concepts from the **NAF v4** grid:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   MAPEO CANÓNICO: arc42 + NAF v4                       │
+│                   CANONICAL MAPPING: arc42 + NAF v4                    │
 └────────────────────────────────────────────────────────────────────────┘
 
- arc42 Sección                        Perspectiva NAF v4       Artefactos AI-SDLC
+ arc42 Section                        NAF v4 Perspective       AI-SDLC Artifacts
  ─────────────────────────────────── ──────────────────────── ──────────────────────────
- 1. Introducción y Objetivos         Enterprise & Capability  Cita ProductShape ACT & UC
- 2. Restricciones de Arquitectura    Architecture Constraints CON-*, ACON-*, LIC-POL-*
- 3. Contexto y Alcance               Operational Perspective  CTX-*, OIE-* (Info Exchange)
- 4. Estrategia de Solución           Service & Resource Strat STRAT-*
- 5. Vista de Bloques (Building)      Services & Systems       CMP-* (Whitebox L1-L3)
- 6. Vista de Ejecución (Runtime)     Behaviour & Sequences    SEQ-*, FLW-*
- 7. Vista de Despliegue              Resource / Deployment    RES-*, DEP-* (Nodos, Infra)
- 8. Conceptos Transversales          Information & Security   DATA-*, SEC-ENC-*, SEC-POL-*
- 9. Decisiones de Arquitectura       Governance & Architecture ADR-* (Decisiones Inmutables)
- 10. Requerimientos de Calidad       Quality Perspective      Cita ProductShape QR-*
- 11. Riesgos y Deuda Técnica         Risk & Technical Debt    RSK-*
- 12. Glosario                        Taxonomy & Terms         Cita ProductShape TERM-*, BC-*
+ 1. Introduction and Goals           Enterprise & Capability  Cites ProductShape ACT & UC
+ 2. Architecture Constraints         Architecture Constraints CON-*, ACON-*, LIC-POL-*
+ 3. Context and Scope                Operational Perspective  CTX-*, OIE-* (Info Exchange)
+ 4. Solution Strategy                Service & Resource Strat STRAT-*
+ 5. Building Block View              Services & Systems       CMP-* (Whitebox L1-L3)
+ 6. Runtime View                     Behaviour & Sequences    SEQ-*, FLW-*
+ 7. Deployment View                  Resource / Deployment    RES-*, DEP-* (Nodes, Infra)
+ 8. Cross-Cutting Concepts           Information & Security   DATA-*, SEC-ENC-*, SEC-POL-*
+ 9. Architecture Decisions           Governance & Architecture ADR-* (Immutable Decisions)
+ 10. Quality Requirements            Quality Perspective      Cites ProductShape QR-*
+ 11. Risks and Technical Debt        Risk & Technical Debt    RSK-*
+ 12. Glossary                        Taxonomy & Terms         Cites ProductShape TERM-*, BC-*
 ```
 
 ---
 
-## 3. Detalle de Secciones Clave en el Paradigma As-Code
+## 3. Key Sections Detail in the As-Code Paradigm
 
-### Sección 3: Contexto y Alcance (NAF Operational)
-- Modela el límite del sistema respecto a actores externos y sistemas vecinos.
-- **Intercambios de Información Operativa (`OIE-*`)**: Define los mensajes, eventos o cargas útiles que cruzan la frontera del sistema.
+### Section 3: Context and Scope (NAF Operational)
+- Models the system boundary relative to external actors and adjacent systems.
+- **Operational Information Exchanges (`OIE-*`)**: Defines messages, events, or payloads crossing system boundaries.
 
-### Sección 5: Vista de Bloques de Construcción (NAF Services & Systems / arc42 Sec. 5)
-Modela la estructura interna del sistema mediante un **esquema único universal de componente (`CMP-*`)**, permitiendo una descomposición recursiva multinivel que se adapta a sistemas distribuidos, monolitos modulares y arquitecturas basadas en plugins o DLLs:
+### Section 5: Building Block View (NAF Services & Systems / arc42 Sec. 5)
+Models internal system structure through a **single universal component schema (`CMP-*`)**, enabling recursive multilevel decomposition adaptable to distributed systems, modular monoliths, and plugin/DLL architectures:
 
-#### Niveles de Arquitectura Recomendados:
-1. **Nivel 1: Sistema Raíz / Bounded Context (DDD)**:
-   - Delimita una frontera conceptual, lingüística y de dominio explícita (`bounded-context: "Nombre"`).
-   - Metadatos: `level: 1`, `parent-component: null`.
-   - Implementación: `implementation-type: composite` (para agrupar lógicamente subsistemas/contenedores sin código ejecutable propio) o `service` / `function` si el sistema es un ejecutable autónomo.
-2. **Nivel 2: Subsistemas / Módulos de Despliegue / Contenedores**:
-   - Define las unidades de despliegue o contenedores de ejecución del Bounded Context.
-   - Metadatos: `level: 2`, `parent-component: CMP-CONTEXT-ROOT`.
-   - Implementación:
-     - `service`: Microservicios, daemons en red o workers asíncronos con interfaces de red (`REST/HTTP`, `gRPC`, `WebSocket`, `Kafka`, `MQTT`, `IPC`).
-     - `dll`: Bibliotecas dinámicas principales o subsistemas compartidos.
-     - `function`: Módulos de aplicación de proceso único o monolitos.
-3. **Nivel 3: Unidades de Ejecución / Componentes Internos**:
-   - Descomposición de grano fino dentro de un contenedor o subsistema.
-   - Metadatos: `level: 3`, `parent-component: CMP-SUBSYSTEM-ROOT`.
-   - Implementación:
-     - `dll`: Plugins nativos o librerías de enlace dinámico (.dll, .so, .dylib) con contratos binarios (`C-ABI`, `Native-ABI`, `FFI`).
-     - `function`: Módulos de cálculo matemático, parsers o lógica de dominio pura con contratos in-process (`Function-Call`, `In-Process API`, `CLI`).
-4. **Nivel 4 (Opcional): Clases / Algoritmos Atómicos Críticos**:
-   - Reservado para componentes hipercríticos (criptografía, algoritmos cinemáticos de seguridad) donde funciones individuales requieren auditoría y trazabilidad RTM unitaria.
+#### Recommended Architecture Levels:
+1. **Level 1: Root System / Bounded Context (DDD)**:
+   - Delimits an explicit conceptual, linguistic, and domain boundary (`bounded-context: "Name"`).
+   - Metadata: `level: 1`, `parent-component: null`.
+   - Implementation: `implementation-type: composite` (to logically group subsystems/containers without standalone executable code) or `service` / `function` if the system is a standalone executable.
+2. **Level 2: Subsystems / Deployment Modules / Containers**:
+   - Defines deployment units or execution containers within the Bounded Context.
+   - Metadata: `level: 2`, `parent-component: CMP-CONTEXT-ROOT`.
+   - Implementation:
+     - `service`: Microservices, network daemons, or asynchronous workers with network interfaces (`REST/HTTP`, `gRPC`, `WebSocket`, `Kafka`, `MQTT`, `IPC`).
+     - `dll`: Major dynamic libraries or shared subsystems.
+     - `function`: Single-process application modules or monoliths.
+3. **Level 3: Execution Units / Internal Components**:
+   - Fine-grained decomposition inside a container or subsystem.
+   - Metadata: `level: 3`, `parent-component: CMP-SUBSYSTEM-ROOT`.
+   - Implementation:
+     - `dll`: Native plugins or dynamic link libraries (.dll, .so, .dylib) with binary contracts (`C-ABI`, `Native-ABI`, `FFI`).
+     - `function`: Pure mathematical calculation modules, parsers, or domain logic with in-process contracts (`Function-Call`, `In-Process API`, `CLI`).
+4. **Level 4 (Optional): Critical Atomic Classes / Algorithms**:
+   - Reserved for hyper-critical components (cryptography, safety kinematic algorithms) where individual functions require unit RTM traceability and audits.
 
-#### Regla de Trazabilidad Multinivel:
-- Todo componente `CMP-*` declara qué casos de uso implementa (`implements-use-cases: [UC-*]`) y qué requerimientos funcionales, de calidad o de seguridad satisface (`satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`).
-- Si un requerimiento se satisface en un componente especializado de Nivel 3 (p. ej., una DLL o función), el motor de trazabilidad 360° resuelve la cobertura tanto a nivel del componente ejecutor como de su contexto padre (`parent-component`).
-- El campo `hosted-in-enclave: SEC-ENC-*` solo es obligatorio cuando el componente se despliega en un enclave de red físico o lógico segmentado. Para DLLs o funciones in-process, es opcional.
+#### Multilevel Traceability Rule:
+- Every `CMP-*` component declares which use cases it implements (`implements-use-cases: [UC-*]`) and which functional, quality, or security requirements it satisfies (`satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`).
+- When a requirement is satisfied in a Level 3 specialized component (e.g. a DLL or function), the 360° traceability engine resolves coverage at both the executing component level and its parent context (`parent-component`).
+- The `hosted-in-enclave: SEC-ENC-*` field is mandatory only when the component deploys into a physically or logically segmented network enclave. For DLLs or in-process functions, it is optional.
 
-### Sección 6: Vista de Ejecución / Runtime (NAF Sequences & Behaviour)
-- Diagramas de secuencia y flujos de estados (modelados mediante sintaxis nativa de **Mermaid**).
-- Describe la orquestación entre servicios ante peticiones de negocio o eventos asíncronos.
+### Section 6: Runtime View (NAF Sequences & Behaviour)
+- Sequence diagrams and state flows (modeled via native **Mermaid** syntax).
+- Describes orchestration across services upon business requests or asynchronous events.
 
-### Sección 7: Vista de Despliegue (NAF Resource Deployment)
-- Mapeo de los bloques de software a infraestructura física o en la nube (Kubernetes Pods, Serverless functions, bases de datos gestionadas, enclaves perimetrales).
+### Section 7: Deployment View (NAF Resource Deployment)
+- Mapping software building blocks to physical or cloud infrastructure (Kubernetes Pods, Serverless functions, managed databases, perimeter enclaves).
 
-### Sección 8: Conceptos Transversales
-- **Modelos de Datos (`DATA-*`)**: Esquemas de datos lógicos y físicos (DDL, contratos OpenAPI/AsyncAPI, Protobuf).
-- **Concepto de Seguridad (`SEC-CONCEPT-*`)**: Identidad, autenticación mTLS, gestión de secretos, rotación de claves y cifrado.
-- **Concepto de Observabilidad**: Trazabilidad distribuida (OpenTelemetry), métricas y logs estructurados.
+### Section 8: Cross-Cutting Concepts
+- **Data Models (`DATA-*`)**: Logical and physical data schemas (DDL, OpenAPI/AsyncAPI contracts, Protobuf).
+- **Security Concept (`SEC-CONCEPT-*`)**: Identity, mTLS authentication, secret management, key rotation, and encryption.
+- **Observability Concept**: Distributed tracing (OpenTelemetry), metrics, and structured logging.
 
-### Sección 9: Decisiones de Arquitectura (ADRs)
-- Cada decisión técnica relevante (elección de base de datos, patrón de mensajería, selección de frameworks de terceros) se registra mediante un **ADR inmutable**:
-  - Estado: `proposed`, `accepted`, `superseded`.
-  - Contexto, decisión adoptada y consecuencias (positivas y negativas).
-  - Aprobación exclusivamente humana.
+### Section 9: Architecture Decisions (ADRs)
+- Every significant technical decision (database selection, messaging pattern, third-party framework adoption) is recorded via an **immutable ADR**:
+  - Status: `proposed`, `accepted`, `superseded`.
+  - Context, decision adopted, and consequences (positive and negative).
+  - Strictly human approval.
 
 ---
 
-## 4. Estructura de Carpetas de Arquitectura
+## 4. Architecture Directory Structure
 
 ```text
 docs/architecture/
-├── 01_introduction_and_goals.md        # Instanciado desde introduction-and-goals.template.md
-├── 02_architecture_constraints.md       # Instanciado desde architecture-constraints.template.md
-├── 03_context_and_scope/                # Instanciado desde context-and-scope.template.md
+├── 01_introduction_and_goals.md        # Instantiated from introduction-and-goals.template.md
+├── 02_architecture_constraints.md       # Instantiated from architecture-constraints.template.md
+├── 03_context_and_scope/                # Instantiated from context-and-scope.template.md
 │   ├── business_context.md
 │   └── technical_context.md
-├── 04_solution_strategy.md              # Instanciado desde solution-strategy.template.md
+├── 04_solution_strategy.md              # Instantiated from solution-strategy.template.md
 ├── 05_building_blocks/
-│   ├── level_1_whitebox.md              # Instanciado desde level-1-whitebox.template.md
-│   └── components/                      # CMP-*.md instanciados desde component.template.md
-├── 06_runtime_view/                     # SEQ-*.md instanciados desde runtime-view.template.md
-├── 07_deployment_view/                  # DEP-*.md instanciados desde deployment-view.template.md
+│   ├── level_1_whitebox.md              # Instantiated from level-1-whitebox.template.md
+│   └── components/                      # CMP-*.md instantiated from component.template.md
+├── 06_runtime_view/                     # SEQ-*.md instantiated from runtime-view.template.md
+├── 07_deployment_view/                  # DEP-*.md instantiated from deployment-view.template.md
 ├── 08_cross_cutting/
-│   ├── data_models/                     # DATA-*.md y schemas
-│   └── security_concept.md              # Instanciado desde cross-cutting-concepts.template.md
-├── 09_decisions/                        # ADR-*.md instanciados desde adr.template.md
-├── 10_quality_requirements.md           # Instanciado desde quality-requirements.template.md
-├── 11_risks_and_technical_debt.md       # Instanciado desde risks-and-technical-debt.template.md
-└── 12_glossary.md                       # Instanciado desde glossary.template.md
+│   ├── data_models/                     # DATA-*.md and schemas
+│   └── security_concept.md              # Instantiated from cross-cutting-concepts.template.md
+├── 09_decisions/                        # ADR-*.md instantiated from adr.template.md
+├── 10_quality_requirements.md           # Instantiated from quality-requirements.template.md
+├── 11_risks_and_technical_debt.md       # Instantiated from risks-and-technical-debt.template.md
+└── 12_glossary.md                       # Instantiated from glossary.template.md
 ```
 
 ---
 
-## 5. Catálogo Canónico de Plantillas de Arquitectura (`templates/architecture/`)
+## 5. Canonical Architecture Templates Catalog (`templates/architecture/`)
 
-AI-SDLC provee un conjunto completo y estandarizado de plantillas Markdown con **YAML frontmatter** estructurado bajo `templates/architecture/`, cubriendo exhaustivamente las 12 secciones de arc42 y sus correspondencias en NAF v4:
+AI-SDLC provides a comprehensive standardized set of Markdown templates with structured **YAML frontmatter** under `templates/architecture/`, exhaustively covering the 12 arc42 sections and NAF v4 correspondences:
 
-### 5.1 Matriz de Plantillas y Artefactos
+### 5.1 Templates and Artifacts Matrix
 
-| Sección arc42 | Perspectiva NAF v4 | Archivo de Plantilla | Artefactos / IDs | Propósito y Contenido Clave |
+| arc42 Section | NAF v4 Perspective | Template File | Artifacts / IDs | Key Purpose and Contents |
 | :---: | :--- | :--- | :--- | :--- |
-| **01** | Enterprise & Capability | [`introduction-and-goals.template.md`](../templates/architecture/introduction-and-goals.template.md) | `ARCH-INTRO-*` | Visión ejecutiva, objetivos de calidad (`QR-*`) y stakeholders (`ACT-*`). |
-| **02** | Architecture Constraints | [`architecture-constraints.template.md`](../templates/architecture/architecture-constraints.template.md) | `CON-*`, `ACON-*` | Restricciones técnicas, organizativas y políticas de licencia OSS (`license-policy.yaml`). |
-| **03** | Operational Perspective | [`context-and-scope.template.md`](../templates/architecture/context-and-scope.template.md) | `CTX-*`, `OIE-*` | Delimitación de fronteras, contexto de negocio/técnico e intercambios de información. |
-| **04** | Service & Resource Strat | [`solution-strategy.template.md`](../templates/architecture/solution-strategy.template.md) | `STRAT-*` | Decisiones tecnológicas base, patrones fundamentales (DDD, Event-Driven) y tradeoffs. |
-| **05** | Services & Systems (L1) | [`level-1-whitebox.template.md`](../templates/architecture/level-1-whitebox.template.md) | `ARCH-L1-*` | Caja blanca macro Nivel 1, Bounded Contexts y descomposición en subsistemas. |
-| **05** | Services & Systems (L1-L3) | [`component.template.md`](../templates/architecture/component.template.md) | `CMP-*` | Especificación recursiva de componentes (servicios, DLLs, funciones, contratos). |
-| **06** | Behaviour & Sequences | [`runtime-view.template.md`](../templates/architecture/runtime-view.template.md) | `SEQ-*`, `FLW-*` | Escenarios nominales, excepciones y seguridad con diagramas Mermaid nativos. |
-| **07** | Resource / Deployment | [`deployment-view.template.md`](../templates/architecture/deployment-view.template.md) | `RES-*`, `DEP-*` | Topología de nodos físicos/cloud, clusters y enclaves segmentados (`SEC-ENC-*`). |
-| **08** | Information & Security | [`cross-cutting-concepts.template.md`](../templates/architecture/cross-cutting-concepts.template.md) | `DATA-*`, `SEC-*` | Concepto de seguridad Zero Trust, modelos de datos (`DATA-*`) y observabilidad. |
-| **09** | Governance & Architecture | [`adr.template.md`](../templates/architecture/adr.template.md) | `ADR-*` | Registros inmutables de decisiones arquitectónicas con consecuencias y aprobación. |
-| **10** | Quality Perspective | [`quality-requirements.template.md`](../templates/architecture/quality-requirements.template.md) | `ARCH-QUAL-*` | Árbol de calidad jerárquico (ISO/IEC 25010) y escenarios evaluables citando `QR-*`. |
-| **11** | Risk & Technical Debt | [`risks-and-technical-debt.template.md`](../templates/architecture/risks-and-technical-debt.template.md) | `RSK-*` | Matriz de riesgos técnicos, severidad, impacto, mitigación y registro de deuda técnica. |
-| **12** | Taxonomy & Terms | [`glossary.template.md`](../templates/architecture/glossary.template.md) | `TERM-*`, `BC-*` | Glosario unificado citando términos de dominio (`TERM-*`) y Bounded Contexts (`BC-*`). |
+| **01** | Enterprise & Capability | [`introduction-and-goals.template.md`](../templates/architecture/introduction-and-goals.template.md) | `ARCH-INTRO-*` | Executive vision, quality goals (`QR-*`), and stakeholders (`ACT-*`). |
+| **02** | Architecture Constraints | [`architecture-constraints.template.md`](../templates/architecture/architecture-constraints.template.md) | `CON-*`, `ACON-*` | Technical and organizational constraints, and OSS license policies (`license-policy.yaml`). |
+| **03** | Operational Perspective | [`context-and-scope.template.md`](../templates/architecture/context-and-scope.template.md) | `CTX-*`, `OIE-*` | Boundary delimitation, business/technical context, and information exchanges. |
+| **04** | Service & Resource Strat | [`solution-strategy.template.md`](../templates/architecture/solution-strategy.template.md) | `STRAT-*` | Core tech decisions, fundamental patterns (DDD, Event-Driven), and tradeoffs. |
+| **05** | Services & Systems (L1) | [`level-1-whitebox.template.md`](../templates/architecture/level-1-whitebox.template.md) | `ARCH-L1-*` | Level 1 macro whitebox, Bounded Contexts, and subsystem decomposition. |
+| **05** | Services & Systems (L1-L3) | [`component.template.md`](../templates/architecture/component.template.md) | `CMP-*` | Recursive component spec (services, DLLs, functions, contracts). |
+| **06** | Behaviour & Sequences | [`runtime-view.template.md`](../templates/architecture/runtime-view.template.md) | `SEQ-*`, `FLW-*` | Nominal, exception, and security scenarios with native Mermaid diagrams. |
+| **07** | Resource / Deployment | [`deployment-view.template.md`](../templates/architecture/deployment-view.template.md) | `RES-*`, `DEP-*` | Physical/cloud node topology, clusters, and segmented enclaves (`SEC-ENC-*`). |
+| **08** | Information & Security | [`cross-cutting-concepts.template.md`](../templates/architecture/cross-cutting-concepts.template.md) | `DATA-*`, `SEC-*` | Zero Trust security concept, data models (`DATA-*`), and observability. |
+| **09** | Governance & Architecture | [`adr.template.md`](../templates/architecture/adr.template.md) | `ADR-*` | Immutable architecture decision records with consequences and approvals. |
+| **10** | Quality Perspective | [`quality-requirements.template.md`](../templates/architecture/quality-requirements.template.md) | `ARCH-QUAL-*` | Hierarchical quality tree (ISO/IEC 25010) and evaluable scenarios citing `QR-*`. |
+| **11** | Risk & Technical Debt | [`risks-and-technical-debt.template.md`](../templates/architecture/risks-and-technical-debt.template.md) | `RSK-*` | Technical risks matrix, severity, impact, mitigation, and technical debt log. |
+| **12** | Taxonomy & Terms | [`glossary.template.md`](../templates/architecture/glossary.template.md) | `TERM-*`, `BC-*` | Unified glossary citing domain terms (`TERM-*`) and Bounded Contexts (`BC-*`). |
 
 ---
 
-### 5.2 Guía de Uso e Instanciación en Proyectos
+### 5.2 Project Usage and Instantiation Guide
 
-1. **Instanciación Inicial de la Arquitectura del Sistema**:
-   Al arrancar un proyecto o módulo mayor, copie las plantillas estructurales hacia `docs/architecture/`:
+1. **Initial System Architecture Instantiation**:
+   When starting a project or major module, copy structural templates to `docs/architecture/`:
    ```bash
-   # Crear estructura base de documentación de arquitectura
+   # Create architecture documentation base structure
    mkdir -p docs/architecture/03_context_and_scope
    mkdir -p docs/architecture/05_building_blocks/components
    mkdir -p docs/architecture/06_runtime_view
@@ -155,7 +155,7 @@ AI-SDLC provee un conjunto completo y estandarizado de plantillas Markdown con *
    mkdir -p docs/architecture/08_cross_cutting/data_models
    mkdir -p docs/architecture/09_decisions
 
-   # Instanciar las plantillas base
+   # Instantiate base templates
    cp templates/architecture/introduction-and-goals.template.md docs/architecture/01_introduction_and_goals.md
    cp templates/architecture/architecture-constraints.template.md docs/architecture/02_architecture_constraints.md
    cp templates/architecture/solution-strategy.template.md docs/architecture/04_solution_strategy.md
@@ -165,65 +165,63 @@ AI-SDLC provee un conjunto completo y estandarizado de plantillas Markdown con *
    cp templates/architecture/glossary.template.md docs/architecture/12_glossary.md
    ```
 
-2. **Creación de Componentes (`CMP-*`) y Decisiones (`ADR-*`)**:
-   Para cada nuevo microservicio, DLL o librería modular:
+2. **Creating Components (`CMP-*`) and Decisions (`ADR-*`)**:
+   For each new microservice, DLL, or modular library:
    ```bash
-   cp templates/architecture/component.template.md docs/architecture/05_building_blocks/components/CMP-MI-SERVICIO.md
+   cp templates/architecture/component.template.md docs/architecture/05_building_blocks/components/CMP-MY-SERVICE.md
    ```
-   Rellene en el frontmatter YAML los campos `level`, `implementation-type`, `implements-use-cases` y `satisfies-requirements`.
+   Fill in YAML frontmatter fields `level`, `implementation-type`, `implements-use-cases`, and `satisfies-requirements`.
 
-   Para registrar decisiones técnicas vinculantes:
+   To register binding technical decisions:
    ```bash
-   cp templates/architecture/adr.template.md docs/architecture/09_decisions/ADR-001-STACK-SELECCIONADO.md
+   cp templates/architecture/adr.template.md docs/architecture/09_decisions/ADR-001-CHOSEN-STACK.md
    ```
 
-3. **Verificación Determinista y Trazabilidad**:
-   Una vez instanciados o modificados los artefactos de arquitectura, audite la conformidad de esquemas y la resolución 360°:
+3. **Deterministic Verification and Traceability**:
+   Once architecture artifacts are instantiated or edited, audit schema compliance and 360° resolution:
    ```bash
-   # Validar esquemas JSON de los componentes y ADRs
+   # Validate JSON schemas for components and ADRs
    npx aisdlc verify schemas --path docs/architecture
 
-   # Validar trazabilidad 360° RTM (Upstream -> Midstream -> Downstream)
+   # Validate 360° RTM traceability (Upstream -> Midstream -> Downstream)
    npx aisdlc verify traceability
    ```
 
 ---
 
-### 5.3 Modos de Granularidad de Arquitectura e Inicialización Automatizada (`aisdlc init`)
+### 5.3 Architecture Granularity Modes and Automated Initialization (`aisdlc init`)
 
-Para evitar tener que copiar o borrar plantillas manualmente según la complejidad del proyecto, el comando de inicialización `aisdlc init` incorpora selección de granularidad arquitectónica (interactiva o mediante la opción `--arch, --architecture`):
+To prevent manually copying or deleting templates depending on project complexity, the initialization command `aisdlc init` incorporates architectural granularity selection (interactive or via option `--arch, --architecture`):
 
 ```bash
-# Inicialización interactiva (solicita seleccionar la granularidad por consola):
+# Interactive initialization (prompts for granularity selection in console):
 npx aisdlc init
 
-# Inicialización con granularidad explícita (desatendida o CI/CD):
-npx aisdlc init --arch minimal    # [Recomendado] Solo componentes (CMP-*) y decisiones (ADR-*)
-npx aisdlc init --arch full       # Catálogo exhaustivo de 12 secciones arc42 + NAF v4 (13 plantillas)
-npx aisdlc init --arch none       # Sin plantillas de arquitectura (scripts, utilidades o libs simples)
+# Initialization with explicit granularity (unattended or CI/CD):
+npx aisdlc init --arch minimal    # [Recommended] Components (CMP-*) and decisions (ADR-*) only
+npx aisdlc init --arch full       # Full 12-section arc42 + NAF v4 catalog (13 templates)
+npx aisdlc init --arch none       # No architecture templates (scripts, utilities, or simple libs)
 ```
 
-| Nivel de Granularidad | Plantillas Desplegadas en `templates/architecture/` | Casos de Uso Recomendados | Cumplimiento RTM |
+| Granularity Level | Templates Deployed in `templates/architecture/` | Recommended Use Cases | RTM Compliance |
 |---|---|---|---|
-| **`minimal`** *(Por defecto)* | `component.template.md`, `adr.template.md` | Microservicios, APIs, librerías, SaaS estándar y desarrollo ágil. | **100% de Trazabilidad RTM**. Permite mapear `CMP-*` a `UC-*` y `FR-*`, y documentar `ADR-*` sin sobrecarga documental. |
-| **`full` / `complete`** | 13 plantillas completas (Secciones 1 a 12 arc42 + NAF v4) | Sistemas críticos (defensa, aeronáutica, banca/fintech, telecomunicaciones, plataformas multicontenedor). | Rigor formal exhaustivo en todas las perspectivas (Capacidades, Operacional, Despliegue, Riesgos). |
-| **`none`** | Ninguna plantilla desplegada en `templates/architecture/` | Herramientas internas de línea de comandos, scripts de soporte o utilidades sin arquitectura formal. | Proyectos exentos de modelado formal de componentes. |
+| **`minimal`** *(Default)* | `component.template.md`, `adr.template.md` | Microservices, APIs, libraries, standard SaaS, and agile development. | **100% RTM Traceability**. Allows mapping `CMP-*` to `UC-*` and `FR-*`, and documenting `ADR-*` without documentation overhead. |
+| **`full` / `complete`** | 13 complete templates (Sections 1 to 12 arc42 + NAF v4) | Critical systems (defense, aerospace, banking/fintech, telecoms, multi-container platforms). | Exhaustive formal rigor across all perspectives (Capabilities, Operational, Deployment, Risks). |
+| **`none`** | No templates deployed in `templates/architecture/` | Internal CLI tools, support scripts, or utilities without formal architecture. | Projects exempt from formal component modeling. |
 
 ---
 
-## 6. Trazabilidad 360° e Integración Canónica Post-Implementación
+## 6. 360° Traceability and Post-Implementation Canonical Integration
 
-Para garantizar que los modelos arquitectónicos no diverjan del software ejecutado ni del producto:
+To ensure architectural models never diverge from running software or product specifications:
 
-1. **Trazabilidad 360° Determinista e Invertida (Midstream)**:
-   - Bajo el modelo de trazabilidad invertida, los requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`) no contienen punteros descendentes. En su lugar, son los componentes de arquitectura (`CMP-*`) los que declaran explícitamente en `satisfies-requirements` qué requerimientos satisfacen.
-   - El verificador `aisdlc verify traceability` valida mediante resolución inversa que todo componente (`CMP-*`), decisión (`ADR-*`) y vista de ejecución (`06_runtime_view.md`) esté vinculado a los identificadores `HOF-*` de entrega y a sus pruebas asociadas, sin introducir acoplamiento descendente en el producto.
-   - Si un requerimiento se satisface en un componente hijo de Nivel 3 (DLL o función), el motor resuelve la cobertura ascendente hacia el Bounded Context de Nivel 1 mediante `parent-component`.
-   - Elimina la necesidad de inspección manual de documentos o diagramas desactualizados.
+1. **Deterministic and Inverted 360° Traceability (Midstream)**:
+   - Under the inverted traceability model, requirements (`FR-*`, `QR-*`, `SEC-REQ-*`) contain no downstream pointers. Instead, architectural components (`CMP-*`) explicitly declare in `satisfies-requirements` which requirements they satisfy.
+   - The `aisdlc verify traceability` verifier confirms via reverse lookup that every component (`CMP-*`), decision (`ADR-*`), and execution view (`06_runtime_view.md`) is linked to delivery `HOF-*` identifiers and associated tests, without coupling product to code.
+   - When a requirement is satisfied in a Level 3 child component (DLL or function), the engine resolves upstream coverage to the Level 1 Bounded Context via `parent-component`.
+   - Eliminates the need for manual inspection of stale documents or diagrams.
 
-2. **Integración Canónica Post-Implementación**:
-   - Una vez que la entrega concluye con éxito y supera todos los tests, el comando `aisdlc sdd integrate --change <id>` actualiza automáticamente los bloques de arquitectura en `specs/architecture/`:
-     - Inserta los nuevos requerimientos implementados en la lista `satisfies-requirements` de cada componente responsable.
-     - Garantiza que la arquitectura refleje el estado real y verificado del sistema en producción.
-
-
+2. **Post-Implementation Canonical Integration**:
+   - Once delivery finishes successfully and passes all tests, `aisdlc sdd integrate --change <id>` automatically updates architectural building blocks in `specs/architecture/`:
+     - Inserts newly implemented requirements into the `satisfies-requirements` list of each responsible component.
+     - Ensures architecture continuously mirrors the verified production state of the system.

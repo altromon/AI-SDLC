@@ -1,7 +1,7 @@
 ---
 id: ARCH-QUAL-001
 type: quality-requirements
-title: "10. Requerimientos de Calidad y Árbol de Calidad"
+title: "10. Quality Requirements and Quality Tree"
 status: proposed # proposed, accepted, deprecated, superseded
 version: "1.0.0"
 schema-version: "1.0"
@@ -15,39 +15,39 @@ supersedes: null
 superseded-by: null
 ---
 
-# 10. Requerimientos de Calidad (arc42 Sec. 10 / NAF Quality)
+# 10. Quality Requirements (arc42 Sec. 10 / NAF Quality)
 
-## 1. Árbol de Calidad (Quality Tree)
-Estructura jerárquica de los atributos de calidad clave del sistema según la norma ISO/IEC 25010:
+## 1. Quality Tree
+Hierarchical structure of key system quality attributes based on ISO/IEC 25010:
 
 ```mermaid
 graph TD
-    QualityTree[Calidad del Sistema] --> Performance[Eficiencia de Desempeño]
-    QualityTree --> Reliability[Fiabilidad y Resiliencia]
-    QualityTree --> Security[Seguridad Zero Trust]
-    QualityTree --> Maintainability[Mantenibilidad As-Code]
+    QualityTree[System Quality] --> Performance[Performance Efficiency]
+    QualityTree --> Reliability[Reliability & Resilience]
+    QualityTree --> Security[Zero Trust Security]
+    QualityTree --> Maintainability[As-Code Maintainability]
 
-    Performance --> P1[Latencia en Tiempo Real: QR-LATENCY-001]
-    Reliability --> R1[Disponibilidad 99.99%: QR-AVAILABILITY-001]
-    Security --> S1[Autenticación Estricta: SEC-REQ-AUTH-001]
-    Maintainability --> M1[Complejidad Ciclomática <= 10: quality-policy.yaml]
+    Performance --> P1[Real-Time Latency: QR-LATENCY-001]
+    Reliability --> R1[99.99% Availability: QR-AVAILABILITY-001]
+    Security --> S1[Strict Authentication: SEC-REQ-AUTH-001]
+    Maintainability --> M1[Cyclomatic Complexity <= 10: quality-policy.yaml]
 ```
 
 ---
 
-## 2. Escenarios de Calidad Evaluables (Quality Scenarios)
-Definición de escenarios concretos con estímulo, entorno, respuesta y medida:
+## 2. Assessable Quality Scenarios
+Definition of concrete scenarios with stimulus, environment, response, and measure:
 
-| ID Requerimiento | Atributo ISO | Estímulo y Entorno | Respuesta del Sistema | Medida Objetiva |
+| Requirement ID | ISO Attribute | Stimulus and Environment | System Response | Objective Measure |
 | :--- | :--- | :--- | :--- | :--- |
-| `QR-LATENCY-001` | Rendimiento | Carga pico de 10,000 req/s | Procesamiento y persistencia en cola | Latencia p95 < 50ms |
-| `QR-AVAILABILITY-001` | Fiabilidad | Caída abrupta de 1 nodo trabajador | Redistribución automática de pods | Pérdida de servicio = 0s |
-| `QR-MAINTAINABILITY-001`| Mantenibilidad | Refactorización de submódulos | Ejecución de Release Gates deterministas | CC $\le 10$, LOC $\le 40$ |
+| `QR-LATENCY-001` | Performance | Peak load of 10,000 req/s | Processing and queuing persistence | p95 latency < 50ms |
+| `QR-AVAILABILITY-001` | Reliability | Abrupt crash of 1 worker node | Automatic pod redistribution | Service downtime = 0s |
+| `QR-MAINTAINABILITY-001`| Maintainability | Submodule refactoring | Deterministic Release Gates execution | CC $\le 10$, LOC $\le 40$ |
 
 ---
 
-## 3. Historial de Revisiones y Control de Versiones
+## 3. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial del árbol de calidad | CHG-ARCH-001 |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial quality tree definition | CHG-ARCH-001 |

@@ -115,50 +115,50 @@ export function generateGovernanceReportMarkdown(
   const countHighRiskManual = modeCounts['HIGH_RISK_MANUAL'] || 0;
 
   const reportContent: string[] = [
-    `# 📋 Informe de Gobierno de Tareas y Clasificación de Autonomía Humana`,
+    `# 📋 Task Governance and Human Autonomy Classification Report`,
     ``,
-    `> **Fecha de Auditoría:** ${new Date().toISOString()}`,
-    `> **Veredicto General:** ${
+    `> **Audit Date:** ${new Date().toISOString()}`,
+    `> **Overall Verdict:** ${
       violationsCount === 0
-        ? 'CONFORME (0 Violaciones de Gobierno)'
-        : `NO CONFORME (${violationsCount} Infracciones detectadas)`
+        ? 'COMPLIANT (0 Governance Violations)'
+        : `NON-COMPLIANT (${violationsCount} Violations detected)`
     }`,
     ``,
     `---`,
     ``,
-    `## 1. Distribución de Modos de Autonomía del Proyecto`,
+    `## 1. Project Autonomy Modes Distribution`,
     ``,
-    `| Modo de Autonomía | Semáforo | Cantidad | Porcentaje | Rol del Agente de IA | Intervención Humana Requerida |`,
+    `| Autonomy Mode | Status | Count | Percentage | AI Agent Role | Human Intervention Required |`,
     `| :--- | :---: | :---: | :---: | :--- | :--- |`,
     `| **\`AUTONOMOUS\`** | 🟢 | **${countAutonomous}** | ${
       Math.round((countAutonomous / (totalTasks || 1)) * 100)
-    }% | Planificación y codificación autónoma | Revisión asíncrona del PR final |`,
+    }% | Autonomous planning and coding | Asynchronous final PR review |`,
     `| **\`HUMAN_REVIEW_PLAN\`** | 🟡 | **${countHumanReviewPlan}** | ${
       Math.round((countHumanReviewPlan / (totalTasks || 1)) * 100)
-    }% | Elaboración del plan detallado | **Aprobación explícita del plan ANTES de codificar** |`,
+    }% | Detailed plan elaboration | **Explicit plan approval BEFORE coding** |`,
     `| **\`AMBIGUOUS\`** | 🟠 | **${countAmbiguous}** | ${
       Math.round((countAmbiguous / (totalTasks || 1)) * 100)
-    }% | **DETENIDO**: Prohibido codificar | Refinamiento y aclaración con el Product Owner |`,
+    }% | **HALTED**: Coding prohibited | Refinement and clarification with Product Owner |`,
     `| **\`HIGH_RISK_MANUAL\`** | 🔴 | **${countHighRiskManual}** | ${
       Math.round((countHighRiskManual / (totalTasks || 1)) * 100)
-    }% | Solo asistencia o soporte en pair-programming | **Ejecución directa por ingenieros humanos** |`,
+    }% | Pair-programming assistance only | **Direct execution by human engineers** |`,
     ``,
     `---`,
     ``,
-    `## 2. Detalle de Tareas Verificables y Criterios de Aceptación`,
+    `## 2. Verifiable Tasks Detail and Acceptance Criteria`,
     ``,
-    `| ID Tarea | Archivo Origen | Título | Riesgo | Autonomía | Criterio de Verificación Concreto | Asignado a | Estado |`,
+    `| Task ID | Source File | Title | Risk | Autonomy | Concrete Verification Criterion | Assigned To | Status |`,
     `| :--- | :--- | :--- | :---: | :---: | :--- | :--- | :---: |`,
   ];
 
   for (const t of summaries) {
     const isConform = !t.riskAnomaly && t.hasVerification && t.validAutonomy;
-    const icon = isConform ? '✅ OK' : '❌ BRECHA';
-    const criteria = t.task.verification?.criteria || 'AUSENTE';
+    const icon = isConform ? '✅ OK' : '❌ GAP';
+    const criteria = t.task.verification?.criteria || 'MISSING';
     reportContent.push(
-      `| **\`${t.task.id}\`** | \`${t.file}\` | ${t.task.title || 'Sin título'} | \`${
+      `| **\`${t.task.id}\`** | \`${t.file}\` | ${t.task.title || 'Untitled'} | \`${
         t.task.riskLevel || 'MEDIUM'
-      }\` | \`${t.task.autonomyMode || 'DESCONOCIDO'}\` | \`${criteria}\` | \`${
+      }\` | \`${t.task.autonomyMode || 'UNKNOWN'}\` | \`${criteria}\` | \`${
         t.task.assignedTo || 'agent-developer'
       }\` | ${icon} |`
     );
@@ -167,15 +167,15 @@ export function generateGovernanceReportMarkdown(
   reportContent.push('');
   reportContent.push('---');
   reportContent.push('');
-  reportContent.push('## 3. Directrices de Cumplimiento');
+  reportContent.push('## 3. Compliance Guidelines');
   reportContent.push(
-    '1. Ningún agente puede iniciar una tarea marcada como `HUMAN_REVIEW_PLAN` sin un comentario o aprobación explícita humana en el issue/PR.'
+    '1. No agent may start a task marked as `HUMAN_REVIEW_PLAN` without explicit human approval/comment in the issue/PR.'
   );
   reportContent.push(
-    '2. Las tareas marcadas como `AMBIGUOUS` requieren una sesión de preguntas/respuestas o refinamiento de la especificación SDD.'
+    '2. Tasks marked as `AMBIGUOUS` require a Q&A session or refinement of the SDD specification.'
   );
   reportContent.push(
-    '3. Toda tarea completada debe acompañarse de la evidencia de ejecución del comando de verificación especificado.'
+    '3. Every completed task must be accompanied by execution evidence of the specified verification command.'
   );
 
   return reportContent.join('\n');
@@ -235,17 +235,17 @@ export function verifyTasksGovernance(options: GovernanceOptions = {}): Governan
         t.assignedTo.startsWith('agent-') &&
         t.assignedTo !== 'pair-human-agent'
       ) {
-        safetyViolation = `[${t.id}] Tarea de ALTO RIESGO asignada a agente autónomo sin supervisor humano.`;
+        safetyViolation = `[${t.id}] HIGH RISK task assigned to autonomous agent without human supervisor.`;
       }
       if (t.autonomyMode === 'AMBIGUOUS' && t.status === 'IN_PROGRESS') {
-        safetyViolation = `[${t.id}] Tarea AMBIGUA en ejecución: Debe detenerse hasta clarificación.`;
+        safetyViolation = `[${t.id}] AMBIGUOUS task in progress: Must halt until clarification.`;
       }
       if (!hasVerification) {
-        safetyViolation = `[${t.id}] Falta criterio o comando concreto de verificación.`;
+        safetyViolation = `[${t.id}] Missing concrete verification criterion or command.`;
         unverifiedCount++;
       }
       if (!isModeValid) {
-        safetyViolation = `[${t.id}] Modo de autonomía inválido: "${t.autonomyMode}".`;
+        safetyViolation = `[${t.id}] Invalid autonomy mode: "${t.autonomyMode}".`;
       }
 
       if (safetyViolation) {

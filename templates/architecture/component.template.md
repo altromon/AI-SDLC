@@ -1,52 +1,52 @@
 ---
-id: CMP-NOMBRE-001
+id: CMP-NAME-001
 type: component
-title: Nombre del Componente de Arquitectura
+title: Architecture Component Name
 status: proposed # proposed, accepted, deprecated, retired
 version: "1.0.0"
 schema-version: "1.0"
-level: 1 # 1: Bounded Context / Sistema Raíz, 2: Subsistema / Contenedor, 3: Unidad Ejecutable / DLL / Función
-bounded-context: "Nombre del Bounded Context" # Contexto delimitado en DDD
-parent-component: null # null para Nivel 1; ID del componente padre (CMP-PADRE-001) para Nivel > 1
+level: 1 # 1: Bounded Context / Root System, 2: Subsystem / Container, 3: Executable Unit / DLL / Function
+bounded-context: "Bounded Context Name" # Domain bounded context in DDD
+parent-component: null # null for Level 1; parent component ID (CMP-PARENT-001) for Level > 1
 implementation-type: service # service | dll | function | composite
 implements-use-cases:
-  - UC-ACCION-001
+  - UC-ACTION-001
 satisfies-requirements:
-  - FR-FUNCIONALIDAD-001
+  - FR-FEATURE-001
   - SEC-REQ-CONTROL-001
-hosted-in-enclave: SEC-ENC-DMZ-001 # Opcional: obligatorio solo si opera en enclave de red físico/lógico
+hosted-in-enclave: SEC-ENC-DMZ-001 # Optional: mandatory only if operating in physical/logical network enclave
 interfaces:
-  # Según implementation-type:
+  # By implementation-type:
   # - service: REST/HTTP, gRPC, WebSocket, Kafka, MQTT, IPC
   # - dll: C-ABI, Native-ABI, FFI
   # - function: Function-Call, In-Process API, CLI, GUI
-  - name: "API / Contrato de Interfaz"
+  - name: "API / Interface Contract"
     protocol: "WebSocket"
     contract-spec: "docs/architecture/08_cross_cutting/data_models/ingestion_asyncapi.yaml"
 supersedes: null
 superseded-by: null
 ---
 
-# CMP-NOMBRE-001: Nombre del Componente de Arquitectura
+# CMP-NAME-001: Architecture Component Name
 
-## 1. Propósito, Responsabilidad y Bounded Context
-Define la responsabilidad única del componente, su alineación con el Bounded Context de dominio y su nivel de abstracción dentro de la arquitectura general.
+## 1. Purpose, Responsibility, and Bounded Context
+Defines the single responsibility of the component, its domain Bounded Context alignment, and abstraction level within the overall architecture.
 
-## 2. Diagrama de Estructura y Conectividad (arc42 Sec. 5 / NAF v4)
+## 2. Structure and Connectivity Diagram (arc42 Sec. 5 / NAF v4)
 ```mermaid
 graph TD
-    Client[Actor / Cliente Externo] -->|Protocolo / Interfaz| CMP[CMP-NOMBRE-001]
-    CMP -->|In-Process / Red / C-ABI| SubModule[Subcomponente o Persistencia]
+    Client[Actor / External Client] -->|Protocol / Interface| CMP[CMP-NAME-001]
+    CMP -->|In-Process / Network / C-ABI| SubModule[Subcomponent or Persistence]
 ```
 
-## 3. Contratos de Interfaz y Políticas de Ejecución
-- **Mecanismo de Ejecución**: Especificación del ciclo de vida (servicio autónomo, carga dinámica mediante `LoadLibrary`/`dlopen` si es DLL, o invocación funcional directa).
-- **Tolerancia a Fallos y Rendimiento**: Límites de memoria, latencia objetivo, concurrencia o aislamiento de fallos.
+## 3. Interface Contracts and Execution Policies
+- **Execution Mechanism**: Lifecycle specification (autonomous daemon/service, dynamic loading via `LoadLibrary`/`dlopen` if DLL, or direct function invocation).
+- **Fault Tolerance and Performance**: Memory bounds, target latency, concurrency, or failure isolation.
 
 ---
 
-## 4. Historial de Revisiones y Control de Versiones
+## 4. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-14 | Lead Architect | Definición inicial de la arquitectura del componente | CHG-ARCH-001 |
+| **1.0.0** | 2026-09-14 | Lead Architect | Initial component architecture definition | CHG-ARCH-001 |

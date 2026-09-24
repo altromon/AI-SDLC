@@ -1,58 +1,58 @@
 # Claude Code Instructions - AI-SDLC Monorepo
 
-Referencia canónica: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) y [`process/01_governance_and_roles.md`](process/01_governance_and_roles.md).
+Canonical Reference: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) and [`process/01_governance_and_roles.md`](process/01_governance_and_roles.md).
 
-Este repositorio implementa el framework **AI-SDLC** (Spec-Driven Development, gobernanza determinista de calidad y licencias OSS para colaboración persona-agente).
-
----
-
-## 1. Los 5 Mandamientos Inquebrantables de los Agentes
-
-1. **PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: Nunca apruebes PRs ni fusiones directamente a `main` o ramas protegidas. La aprobación es exclusivamente humana.
-2. **PROHIBIDO INVENTAR DECISIONES DE PRODUCTO O ARQUITECTURA**: Ante requerimientos ambiguos, formula preguntas abiertas (`open-questions`). No asumas comportamientos no documentados.
-3. **PROHIBIDO INTRODUCIR DEPENDENCIAS SIN INSPECCIÓN DE LICENCIA**: Valida siempre el identificador SPDX contra `license-policy.yaml`. Prohibidas librerías virales (`GPL`/`AGPL`) o comerciales de pago (`BSL`/`SSPL`) sin aprobación formal.
-4. **PROHIBIDO IGNORAR LA CIBERSEGURIDAD (SECURITY-BY-DEFAULT)**: Valida entradas, sanitiza datos y añade pruebas de mitigación (`SEC-TEST-*`). Prohibido desactivar linters o suprimir errores de tipado (`any`, `@ts-ignore`).
-5. **OBLIGACIÓN DE CITACIÓN CRIPTOGRÁFICA**: Toda spec o sidecar debe incluir identificadores inmutables y digests SHA-256 normalizados en Unix LF.
+This repository implements the **AI-SDLC** framework (Spec-Driven Development, deterministic quality governance, and OSS license compliance for human-agent collaboration).
 
 ---
 
-## 2. Comandos Esenciales de Ejecución y Pre-Vuelo
+## 1. The 5 Unbreakable Commandments of Agents | Los 5 Mandamientos Inquebrantables de los Agentes
+
+1. **FORBIDDEN TO AUTO-APPROVE OR AUTO-MERGE | PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: Never approve PRs or merge directly to `main` or protected branches. Approval is exclusively a human prerogative.
+2. **FORBIDDEN TO INVENT PRODUCT OR ARCHITECTURE DECISIONS**: When facing ambiguous requirements, formulate open questions (`open-questions`). Never assume undocumented behaviors.
+3. **FORBIDDEN TO INTRODUCE DEPENDENCIES WITHOUT LICENSE INSPECTION**: Always validate the SPDX identifier against `license-policy.yaml`. Viral libraries (`GPL`/`AGPL`) or paid commercial libraries (`BSL`/`SSPL`) are strictly forbidden without formal human approval.
+4. **FORBIDDEN TO IGNORE CYBERSECURITY (SECURITY-BY-DEFAULT)**: Validate inputs, sanitize data, and include mitigation tests (`SEC-TEST-*`). Disabling linters or suppressing typing errors (`any`, `@ts-ignore`) is prohibited.
+5. **MANDATORY CRYPTOGRAPHIC CITATION**: Every spec or sidecar must cite immutable identifiers and Unix LF-normalized SHA-256 digests.
+
+---
+
+## 2. Essential Execution and Pre-Flight Commands
 
 ```bash
-# 1. Pre-vuelo con auto-fix determinista (Gherkin & digests SHA-256)
+# 1. Pre-flight with deterministic auto-fix (Gherkin & SHA-256 digests)
 pnpm run check:fix
 
-# 2. Verificación completa de todos los Quality Gates (Quality, RTM, Governance, Testing, Licenses, PDaC, Schemas, Duplicates, Security)
+# 2. Complete verification across all Quality Gates (Quality, RTM, Governance, Testing, Licenses, PDaC, Schemas, Duplicates, Security)
 pnpm run verify:all
 
-# 3. Suite completa de tests automatizados (Vitest)
+# 3. Complete automated test suite (Vitest)
 pnpm test
 
-# 4. Comprobación estricta de tipado TypeScript
+# 4. Strict TypeScript typechecking
 pnpm run typecheck
 
-# 5. Creación de andamiaje para nuevo cambio SDD
-pnpm run change:new <nombre> --id <chg-id>
+# 5. Scaffolding for a new SDD change
+pnpm run change:new <name> --id <chg-id>
 
-# 6. Integración canónica de un cambio SDD completado
+# 6. Canonical integration of a completed SDD change
 npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 ```
 
 ---
 
-## 3. Flujo Git y Reglas de Commit con Trailers
+## 3. Git Workflow and Commit Rules with Trailers
 
-### Jerarquía de 4 Tiers
-1. **Tier 1 (`main`)**: Producción y estabilidad absoluta.
-2. **Tier 2 (`release/vX.Y.Z`)**: Estabilización de release.
-3. **Tier 3 (`feat/<FEAT-ID>-<slug>` o `bug/<BUG-ID>-<slug>`)**: Incremento de entrega SDD.
-4. **Tier 4 (`task/<PARENT-ID>/<TSK-ID>-<slug>`)**: Tarea atómica de implementación.
+### 4-Tier Hierarchy
+1. **Tier 1 (`main`)**: Absolute stability and production readiness.
+2. **Tier 2 (`release/vX.Y.Z`)**: Release stabilization.
+3. **Tier 3 (`feat/<FEAT-ID>-<slug>` or `bug/<BUG-ID>-<slug>`)**: SDD delivery increment.
+4. **Tier 4 (`task/<PARENT-ID>/<TSK-ID>-<slug>`)**: Atomic implementation task.
 
-### Formato de Commits (Conventional Commits + Git Trailers)
+### Commit Format (Conventional Commits + Git Trailers)
 ```text
-feat(scope): descripción concisa en imperativo (#issue)
+feat(scope): concise imperative description (#issue)
 
-Cuerpo explicando la motivación y justificación técnica del cambio.
+Body explaining the motivation and technical justification of the change.
 
 Author-Type: agent
 AI-Model: claude-3-7-sonnet
@@ -62,18 +62,17 @@ Change-ID: CHG-026-AGENT-NATIVE-CONFIGS
 
 ---
 
-## 4. Umbrales de Calidad Innegociables (`quality-policy.yaml`)
-- **Complejidad Ciclomática (CC)**: $\le 10$
-- **Complejidad Cognitiva**: $\le 15$
-- **Índice de Mantenibilidad (MI)**: $\ge 50$
-- **Líneas por Función**: $\le 40$
-- Salida determinista CLI: todo comando `verify` admite `--json` sin códigos de escape ANSI.
+## 4. Non-Negotiable Quality Thresholds (`quality-policy.yaml`)
+- **Cyclomatic Complexity (CC)**: $\le 10$
+- **Cognitive Complexity**: $\le 15$
+- **Maintainability Index (MI)**: $\ge 50$
+- **Lines per Function**: $\le 40$
+- Deterministic CLI output: every `verify` command supports `--json` without ANSI escape codes.
 
 ---
 
-## 5. Protocolo de Workflow Handoff y Ventana de Acción Humana
-- **Activación Condicional**:
-  - 🟢 **`AUTONOMOUS`** (o supervisión en PR/CI): **OMITIDO**. Ejecución continua sin interrupción.
-  - 🟡 **Autonomía $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **OBLIGATORIO**. Emitir bloque de Workflow Handoff ([`templates/workflow/agent-handoff.template.md`](templates/workflow/agent-handoff.template.md)) y **DETENERSE**.
-- **Contenido**: Entregables completados, siguiente(s) rol(es) sugerido(s), prompt listo para copiar y **ventana abierta para que el usuario tome acción** (revisar, editar a mano, pausar/desviar o delegar).
-
+## 5. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
+- **Conditional Activation**:
+  - 🟢 **`AUTONOMOUS`** (or PR/CI final supervision): **OMITTED**. Uninterrupted continuous execution.
+  - 🟡 **Autonomy $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **MANDATORY**. Emit Workflow Handoff block ([`templates/workflow/agent-handoff.template.md`](templates/workflow/agent-handoff.template.md)) and **STOP**.
+- **Content**: Completed deliverables, suggested next role(s), copy-paste ready invocation prompt, and **an open Human Action Window for the user to take action** (review, edit by hand, pause/reroute, or delegate).

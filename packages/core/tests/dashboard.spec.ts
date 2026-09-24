@@ -64,7 +64,7 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
       expect(data.id).toBeTruthy();
       expect(data.layer).toBeDefined();
       expect(['product', 'requirement', 'architecture', 'test']).toContain(data.layer);
-      expect(['CONFORME', 'HUÉRFANO', 'DRIFT', 'REVIEW']).toContain(data.status);
+      expect(['COMPLIANT', 'ORPHAN', 'DRIFT', 'REVIEW', 'CONFORME', 'HUÉRFANO']).toContain(data.status);
     }
   });
 
@@ -138,9 +138,9 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(htmlContent).toContain('cytoscape');
     expect(htmlContent).toContain('id="cy"');
     expect(htmlContent).toContain('highlightCriticalPath');
-    expect(htmlContent).toContain('Matriz de Trazabilidad de Requerimientos 360°');
-    expect(htmlContent).toContain('Distribución de Modos de Autonomía de Tareas');
-    expect(htmlContent).toMatch(/Telemetría Activa.*e Histórico de KPIs/);
+    expect(htmlContent).toContain('360° Requirements Traceability Matrix');
+    expect(htmlContent).toContain('Task Autonomy Modes Distribution');
+    expect(htmlContent).toMatch(/Active Telemetry.*and KPI History/);
 
     // Verify it is larger than 100KB due to bundled Cytoscape library
     expect(htmlContent.length).toBeGreaterThan(100000);

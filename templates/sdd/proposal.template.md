@@ -1,25 +1,25 @@
 ---
-id: CHG-NOMBRE-001
+id: CHG-NAME-001
 type: spec-change-proposal
-title: Nombre Conciso del Incremento de Entrega
+title: Concise Delivery Increment Title
 status: draft # draft, review, approved, applied
 author: "agent-developer / human-dev"
 citations:
-  - id: "UC-ACCION-001"
+  - id: "UC-ACTION-001"
     digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
-    comment: "Caso de uso que motiva este incremento."
+    comment: "Use case driving this increment."
   - id: "SEC-REQ-CONTROL-001"
     digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
-    comment: "Requisito de seguridad obligatorio a implementar."
-  - id: "CMP-NOMBRE-001"
+    comment: "Mandatory security requirement to implement."
+  - id: "CMP-NAME-001"
     digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
-    comment: "Componente arquitectónico que aloja el cambio."
+    comment: "Architectural component housing the change."
 ---
 
-# Propuesta de Cambio: CHG-NOMBRE-001
+# Change Proposal: CHG-NAME-001
 
-## 1. Motivación y Alcance
-Explica el problema que resuelve este incremento y qué partes del código serán alteradas.
+## 1. Motivation and Scope
+Explains the problem solved by this increment and what parts of the codebase will be modified.
 
-## 2. Dependencias Externas Evaluadas
-- Lista de dependencias nuevas a incorporar y verificación de licencia según `license-policy.yaml`.
+## 2. Evaluated External Dependencies
+- List of new dependencies to be added and license verification per `license-policy.yaml`.

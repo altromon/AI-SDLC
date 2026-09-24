@@ -1,303 +1,303 @@
-# 10. Gestión de Calidad, Reglas de Código y Puertas de Liberación (Release Gates)
+# 10. Quality Management, Coding Rules, and Release Gates
 
-## 1. Gestión de Calidad en el AI-SDLC: Software Quality as Code
+## 1. Quality Management in AI-SDLC: Software Quality as Code
 
-La velocidad exponencial con la que los agentes de IA generan código plantea un riesgo de degradación estructural acelerada si no existen controles férreos. 
+The exponential speed with which AI agents generate code introduces severe risks of rapid structural degradation unless strict controls are enforced.
 
-**En el framework AI-SDLC, la calidad del software no es una aspiración subjetiva; es una política declarativa auditable y ejecutable mediante herramientas deterministas (`quality-policy.yaml`)**.
+**In the AI-SDLC framework, software quality is not a subjective aspiration; it is an auditable, declarative policy enforced through deterministic tooling (`quality-policy.yaml`)**.
 
-El modelo de calidad se estructura en **tres niveles de defensa**:
-1. **Reglas de Código y Estilo (Coding Rules)**: Prevención en tiempo de diseño y codificación.
-2. **Métricas Estándar de Mantenibilidad y Complejidad**: Análisis cuantitativo de la arquitectura interna del código.
-3. **Puertas de Liberación (Release Gates)**: Restricciones de paso en CI/CD que bloquean de forma automática e implacable cualquier versión que no cumpla con los umbrales mínimos.
+The quality model is structured into **three lines of defense**:
+1. **Coding Rules**: Prevention at design and authoring time.
+2. **Standard Maintainability and Complexity Metrics**: Quantitative analysis of internal code architecture.
+3. **Release Gates**: Relentless CI/CD gates that automatically block any version falling below defined thresholds.
 
 ---
 
-## 2. Reglas de Código Automatizadas (Coding Rules)
+## 2. Automated Coding Rules
 
-Tanto los desarrolladores humanos como los agentes de codificación (`agent-developer`) están obligados a seguir los siguientes estándares automatizados:
+Both human engineers and coding agents (`agent-developer`) must adhere to the following automated standards:
 
-### A. Motores de Inspección Estática
-- **TypeScript / JavaScript**: ESLint (perfil estricto con `@typescript-eslint/recommended-requiring-type-checking`) y Prettier para formateo determinista.
-- **Python**: Ruff / Flake8 y Black.
+### A. Static Inspection Engines
+- **TypeScript / JavaScript**: ESLint (strict profile with `@typescript-eslint/recommended-requiring-type-checking`) and Prettier for deterministic formatting.
+- **Python**: Ruff / Flake8 and Black.
 - **Java / C# / Go**: SonarQube Quality Profile, Spotless / golangci-lint.
 
-### B. Reglas de Código Obligatorias
-1. **Cero Tolerancia a Tipado Débil (`no-explicit-any`)**: Prohibido el uso de tipos genéricos no seguros o casts opacos.
-2. **Cero Tolerancia a Código Muerto (`no-dead-code`, `no-unused-vars`)**: Variables, imports o funciones no referenciadas causan fallo inmediato de compilación.
-3. **Límite de Longitud por Función**: Ninguna función puede superar las **40 líneas de código efectivo**. Funciones más extensas deben descomponerse en métodos auxiliares cohesivos.
-4. **Prohibición de Supresiones Silenciosas**: Queda terminantemente prohibido para agentes o humanos añadir comentarios de supresión (`// @ts-ignore`, `// eslint-disable`, `# noqa`) sin un justificante formal (`ADR-TECH-DEBT-*`).
+### B. Mandatory Coding Rules
+1. **Zero Tolerance for Weak Typing (`no-explicit-any`)**: Insecure generic types or opaque casts are prohibited.
+2. **Zero Tolerance for Dead Code (`no-dead-code`, `no-unused-vars`)**: Unreferenced variables, imports, or functions cause immediate compilation/linter failures.
+3. **Function Length Limit**: No function may exceed **40 effective lines of code**. Longer functions must be decomposed into cohesive helper methods.
+4. **Prohibition of Silent Suppressions**: Adding suppression comments (`// @ts-ignore`, `// eslint-disable`, `# noqa`) without formal justification (`ADR-TECH-DEBT-*`) is strictly prohibited.
 
 ---
 
-## 3. Métricas Estándar de Software y Umbrales de Liberación
+## 3. Standard Software Metrics and Release Thresholds
 
-El framework evalúa cuantitativamente todo el código fuente frente a cuatro métricas de la industria estandarizadas por IEEE, SEI e ISO/IEC 25010:
+The framework quantitatively evaluates all source code against industry metrics standardized by IEEE, SEI, and ISO/IEC 25010:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   MÉTRICAS ESTÁNDAR Y UMBRALES DE RELEASE              │
+│                 STANDARD METRICS AND RELEASE THRESHOLDS                │
 └────────────────────────────────────────────────────────────────────────┘
 
- 1. COMPLEJIDAD CICLOMÁTICA (McCabe)
-    ├── Definición: Número de caminos linealmente independientes en el grafo de flujo.
-    ├── Umbral Máximo: 10 por función.
-    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+ 1. CYCLOMATIC COMPLEXITY (McCabe)
+    ├── Definition: Number of linearly independent paths through code.
+    ├── Maximum Threshold: 10 per function.
+    └── Violation Action: IMMEDIATE MERGE / RELEASE BLOCK.
 
- 2. COMPLEJIDAD COGNITIVA (SonarSource)
-    ├── Definición: Dificultad humana para comprender y razonar sobre el flujo de control.
-    ├── Umbral Máximo: 15 por función.
-    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+ 2. COGNITIVE COMPLEXITY (SonarSource)
+    ├── Definition: Human difficulty in understanding and reasoning about control flow.
+    ├── Maximum Threshold: 15 per function.
+    └── Violation Action: IMMEDIATE MERGE / RELEASE BLOCK.
 
- 3. ÍNDICE DE MANTENIBILIDAD (SEI / Microsoft / ISO 25010)
-    ├── Definición: Escala compuesta 0-100 basada en Halstead, McCabe y LOC.
-    ├── Fórmula: MI = 171 - 5.2*ln(HV) - 0.23*CC - 16.2*ln(LOC)
-    ├── Umbral Mínimo Aceptable: 65.0 / 100 (Objetivo: >85.0).
-    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+ 3. MAINTAINABILITY INDEX (SEI / Microsoft / ISO 25010)
+    ├── Definition: Composite score 0-100 based on Halstead, McCabe, and LOC.
+    ├── Formula: MI = 171 - 5.2*ln(HV) - 0.23*CC - 16.2*ln(LOC)
+    ├── Minimum Acceptable Threshold: 65.0 / 100 (Target: > 85.0).
+    └── Violation Action: IMMEDIATE MERGE / RELEASE BLOCK.
 
- 4. DUPLICACIÓN DE CÓDIGO
-    ├── Definición: Porcentaje de líneas idénticas o casi idénticas repetidas en el proyecto.
-    ├── Umbral Máximo: 3.0%.
-    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+ 4. CODE DUPLICATION
+    ├── Definition: Percentage of identical or near-identical repeated lines.
+    ├── Maximum Threshold: 3.0%.
+    └── Violation Action: IMMEDIATE MERGE / RELEASE BLOCK.
 
- 5. COBERTURA DE PRUEBAS AUTOMATIZADAS
-    ├── Línea: Mínimo 85.0% | Ramas (Branch): Mínimo 80.0%.
-    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+ 5. AUTOMATED TEST COVERAGE
+    ├── Line: Minimum 85.0% | Branch: Minimum 80.0%.
+    └── Violation Action: IMMEDIATE MERGE / RELEASE BLOCK.
 
- 6. MATRIZ DE TRAZABILIDAD 360° (RTM DETERMINISTA MEDIANTE RESOLUCIÓN INVERSA)
-    ├── Definición: Cobertura total compilada por reverse lookup entre paquetes PDaC (HOF-*),
-    │   arquitectura arc42/NAF v4 (satisfies-requirements) y suites de tests (.feature y .spec).
-    ├── Principio: Inversión de Dependencias (los requisitos no almacenan enlaces descendentes).
-    ├── Umbral Obligatorio: 100% de requerimientos conformes sin dependencias huérfanas ni deriva.
-    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+ 6. 360° TRACEABILITY MATRIX (DETERMINISTIC REVERSE-LOOKUP RTM)
+    ├── Definition: Total coverage compiled via reverse lookup across PDaC packages (HOF-*),
+    │   arc42/NAF v4 architecture (satisfies-requirements), and test suites (.feature and .spec).
+    ├── Principle: Inverted Dependency (requirements store no downstream links).
+    ├── Mandatory Threshold: 100% compliant requirements without orphans or drift.
+    └── Violation Action: IMMEDIATE MERGE / RELEASE BLOCK.
 ```
 
 ---
 
-## 3.1 Motor de Análisis Estático Basado en AST Real (Polyglot AST Engine)
+## 3.1 Real AST-Based Static Analysis Engine (Polyglot AST Engine)
 
-Para garantizar mediciones de complejidad y mantenibilidad de máxima precisión sin falsos positivos, **AI-SDLC** abandona las expresiones regulares y el conteo ingenuo de llaves `{ }`, adoptando una arquitectura de **Árbol de Sintaxis Abstracta (AST) Real**:
+To guarantee high-precision complexity and maintainability measurements without false positives, **AI-SDLC** avoids brittle regex and naive brace counting `{ }`, adopting a **Real Abstract Syntax Tree (AST)** architecture:
 
 ```text
 ┌───────────────────────────────────────────────────────────────────────────────────┐
-│              ARQUITECTURA DEL MOTOR DE ANÁLISIS ESTÁTICO (AST REAL)                │
+│                 REAL AST STATIC ANALYSIS ENGINE ARCHITECTURE                      │
 └───────────────────────────────────────────────────────────────────────────────────┘
-   Código Fuente Multilenguaje (.ts, .tsx, .js, .jsx, .py, .go, .rs, .java, .cs, .c)
-                                       │
-                    ┌──────────────────┴──────────────────┐
-                    ▼                                     ▼
-      [TypeScript / TSX / JS Engine]           [Polyglot Token-Aware Scanner]
-          Powered by ts-morph                  (Go, Rust, Java, C#, C/C++, Python)
-  ├── AST Nodes: Functions, Methods, Classes   ├── Lexer de estados: comillas, raw strings
-  ├── Conteo CC por nodos condicionales reales ├── Aislamiento total de comentarios (//, /*, #)
-  ├── Cognitiva por niveles de anidamiento     ├── Delimitación exacta de bloques sin colisión
-  └── Smells: any semántico (SyntaxKind.Any)   └── Métricas estandarizadas (CC, Cog, LOC, MI)
-                    │                                     │
-                    └──────────────────┬──────────────────┘
-                                       ▼
-                       [Quality Gate Determinista (STRICT)]
-                        CC <= 10 | Cog <= 15 | MI >= 50
+    Polyglot Source Code (.ts, .tsx, .js, .jsx, .py, .go, .rs, .java, .cs, .c)
+                                        │
+                     ┌──────────────────┴──────────────────┐
+                     ▼                                     ▼
+       [TypeScript / TSX / JS Engine]           [Polyglot Token-Aware Scanner]
+           Powered by ts-morph                  (Go, Rust, Java, C#, C/C++, Python)
+   ├── AST Nodes: Functions, Methods, Classes   ├── Lexer states: quotes, raw strings
+   ├── CC count via real conditional nodes      ├── Complete comment isolation (//, /*, #)
+   ├── Cognitive complexity by nesting level    ├── Exact block boundary matching
+   └── Smells: semantic any (SyntaxKind.Any)    └── Standardized metrics (CC, Cog, LOC, MI)
+                     │                                     │
+                     └──────────────────┬──────────────────┘
+                                        ▼
+                         [Deterministic Quality Gate (STRICT)]
+                          CC <= 10 | Cog <= 15 | MI >= 50
 ```
 
-### Ventajas Técnicas y Eliminación de Falsos Positivos:
-1. **Componentes TSX/JSX Modernos**: Delimitación exacta de componentes funcionales y handlers de eventos sin interferencia de etiquetas JSX o props complejas (ej. `style={{ backgroundColor: 'red' }}`).
-2. **Template Literals con Interpolación Anidada**: Soporte nativo para expresiones multilínea como `${{ key: val }}`, donde las llaves internas eran erróneamente interpretadas por analizadores regex.
-3. **Closures y Funciones Anidadas**: Las funciones internas y callbacks no corrompen el conteo de líneas ni el cálculo de complejidad de la función contenedora.
-4. **Resiliencia Políglota**: En lenguajes como Go, Rust, Java y C#, los caracteres `{` o `}` presentes en literales de texto (ej. JSON embebido o raw strings `r#"..."#`) o comentarios nunca incrementan el balanceador de bloques.
-5. **Detección Tipada de `any`**: Mediante `SyntaxKind.AnyKeyword`, se detecta el uso prohibido de `any` en TypeScript sin generar falsas alarmas sobre nombres de variables legítimos como `company` o textos descriptivos.
+### Technical Advantages and False Positive Elimination:
+1. **Modern TSX/JSX Components**: Precise demarcation of functional components and event handlers without interference from JSX tags or complex prop objects (e.g., `style={{ backgroundColor: 'red' }}`).
+2. **Template Literals with Nested Interpolation**: Native support for multiline expressions like `${{ key: val }}`, where interior braces previously misled regex parsers.
+3. **Closures and Nested Functions**: Inner callbacks do not corrupt the outer function's line count or complexity metrics.
+4. **Polyglot Resilience**: In Go, Rust, Java, and C#, braces `{` or `}` inside string literals (e.g., embedded JSON or raw strings `r#"..."#`) or comments never skew block balance.
+5. **Typed `any` Detection**: Through `SyntaxKind.AnyKeyword`, prohibited `any` usage in TypeScript is flagged without false alarms on variable names like `company` or descriptive comments.
 
 ---
 
-## 4. El Mecanismo del Release Gate (Restricciones a la Liberación)
+## 4. The Release Gate Mechanism (Constraints on Release)
 
-El paso de una versión a producción (o el merge de un PR hacia `main`) se somete a la siguiente máquina de estados determinista:
+Promoting a version to production (or merging a PR into `main`) must satisfy this deterministic state machine:
 
 ```mermaid
 flowchart TD
-    A[Pull Request de Código / Candidato a Release] --> B[Pipeline CI/CD: Linters y Tipado Estricto]
-    B -->|Errores de estilo / Any| X[FALLO: Corrección Requerida]
+    A[Code Pull Request / Release Candidate] --> B[CI/CD Pipeline: Linters and Strict Typing]
+    B -->|Style errors / Any| X[FAIL: Remediation Required]
 
-    B -->|Pass| C[Ejecución de Tests y Cobertura >= 85%]
-    C -->|Cobertura < 85%| X
+    B -->|Pass| C[Test Execution & Coverage >= 85%]
+    C -->|Coverage < 85%| X
 
-    C -->|Pass| D[Análisis de Complejidad y Mantenibilidad]
-    D --> E{Evaluación contra quality-policy.yaml}
+    C -->|Pass| D[Complexity and Maintainability Analysis]
+    D --> E{Evaluation against quality-policy.yaml}
 
-    E -->|Complejidad Ciclomática > 10| F[RECHAZO: Función Demasiado Compleja]
-    E -->|Mantenibilidad < 65.0| G[RECHAZO: Código No Mantenible]
-    E -->|Duplicación > 3%| H[RECHAZO: Duplicación Excesiva]
+    E -->|Cyclomatic Complexity > 10| F[REJECT: Function Too Complex]
+    E -->|Maintainability < 65.0| G[REJECT: Unmaintainable Code]
+    E -->|Duplication > 3%| H[REJECT: Excessive Duplication]
 
     F --> X
     G --> X
     H --> X
 
-    E -->|Métricas OK| T[Verificación de Trazabilidad 360° aisdlc verify traceability]
-    T -->|Requisitos huérfanos / Sin tests BDD| X
-    T -->|Trazabilidad 100% Conforme| I[QUALITY GATE PASSED ✅]
-    I --> J[Revisión Humana Tech Lead]
-    J --> K[Liberación Autorizada para Producción]
+    E -->|Metrics OK| T[360° Traceability Verification: aisdlc verify traceability]
+    T -->|Orphan requirements / Missing BDD tests| X
+    T -->|Traceability 100% Compliant| I[QUALITY GATE PASSED ✅]
+    I --> J[Human Tech Lead Review]
+    J --> K[Release Authorized for Production]
 ```
 
 > [!NOTE]
-> **Modelo de Trazabilidad Invertida en el Release Gate**:
-> Para evitar acoplamiento frágil y colisiones en Git, los requisitos de producto (`FR-*`, `QR-*`, `SEC-REQ-*`) no declaran qué servicios los implementan ni qué archivos de prueba los ejecutan. El paso de verificación `aisdlc verify traceability` inspecciona los bloques de arquitectura (`satisfies-requirements`) y escanea las suites de prueba (`.feature` y `.spec.*`) para construir inversamente la RTM completa. Si un requisito no es satisfecho por ningún servicio o carece de pruebas asociadas, el Release Gate bloquea el pipeline de forma determinista.
+> **Inverted Traceability Model in the Release Gate**:
+> To eliminate fragile coupling and Git merge conflicts, product requirements (`FR-*`, `QR-*`, `SEC-REQ-*`) do not declare which services implement them or which test files verify them. The `aisdlc verify traceability` step inspects architecture blocks (`satisfies-requirements`) and scans test suites (`.feature` and `.spec.*`) to inversely assemble the complete RTM. If any requirement lacks an implementing service or test coverage, the Release Gate deterministically blocks the pipeline.
 
-### 4.1 Entregables Documentales Obligatorios de Release (Manuales As-Code)
+### 4.1 Mandatory Documentary Release Deliverables (Manuals As-Code)
 
-Para que una versión candidata sea autorizada para su paso a producción por el Tech Lead o Release Manager, es condición obligatoria e inviolable que el repositorio contenga actualizados y conformes a sus esquemas formales (`schemas/manuals/`):
+Before a release candidate is approved for production deployment by the Tech Lead or Release Manager, the repository must contain up-to-date documentation compliant with JSON schemas (`schemas/manuals/`):
 
-1. **Manual de Usuario (`MAN-USER-*`)**:
-   - **Catálogo de Roles de Usuario**: Definición canónica de roles autorizados (`allowed-roles`), niveles de acceso y matriz de capacidades RBAC.
-   - **Matriz de Compatibilidad de Versiones y Clientes**: Compatibilidad entre versión de backend, CLI, SDKs, navegadores homologados y formatos de configuración.
-   - **Mapeo de Roles a Journeys**: Todo Journey (`JRN-*`) debe declarar explícitamente qué roles pueden iniciarlo y completarlo, junto a sus precondiciones y flujos alternativos.
-   - **Guía de Configuración**: Parámetros, variables de entorno, ficheros de configuración comentados y credenciales requeridas.
-   - **Catálogo de Mensajes**: Clasificación estructurada de mensajes informativos, advertencias y errores con acciones correctivas recomendadas.
+1. **User Manual (`MAN-USER-*`)**:
+   - **User Role Catalog**: Canonical definition of authorized roles (`allowed-roles`), access levels, and RBAC matrix.
+   - **Version and Client Compatibility Matrix**: Compatibility across backend versions, CLI, SDKs, approved browsers, and configuration formats.
+   - **Role-to-Journey Mapping**: Every Journey (`JRN-*`) must declare which roles can initiate and complete it, including preconditions and alternate flows.
+   - **Configuration Guide**: Parameters, environment variables, commented configuration files, and required credentials.
+   - **Message Catalog**: Structured classification of informational messages, warnings, and errors with remediation steps.
 
-2. **Manual de Producción y Operaciones (`MAN-PROD-*`)**:
-   - **Regeneración Determinista (Reproducible Builds)**: Herramientas de compilación fijadas con versión y checksum, dependencias congeladas en lockfile y validación de licencias (`license-policy.yaml`).
-   - **Matriz de Compatibilidad de Infraestructura y Migración**: Compatibilidad con Kubernetes/runtimes, soporte de esquemas de datos $N-1$ para zero-downtime, interoperabilidad entre componentes (`CMP-*`) y rutas de actualización/rollback.
-   - **Arquitectura CI/CD**: Flujo completo de pipelines, triggers automáticos y release gates deterministas.
-   - **Estrategia y Procedimiento de Despliegue**: Enclaves de red (`SEC-ENC-*`), secretos/certificados mTLS, verificación de salud y plan de rollback inmediato.
-   - **Runbooks de Errores Probables**: Diagnóstico y mitigación paso a paso de fallos típicos en producción (mTLS, fugas OOM, desconexiones, límites de red).
+2. **Production and Operations Manual (`MAN-PROD-*`)**:
+   - **Reproducible Builds**: Pinned build toolchains with versions and checksums, frozen lockfiles, and license validation (`license-policy.yaml`).
+   - **Infrastructure Compatibility and Migration Matrix**: Kubernetes/runtime compatibility, $N-1$ schema support for zero-downtime deployments, component interoperability (`CMP-*`), and upgrade/rollback paths.
+   - **CI/CD Architecture**: End-to-end pipeline workflow, triggers, and deterministic release gates.
+   - **Deployment Strategy and Procedure**: Network enclaves (`SEC-ENC-*`), mTLS secrets/certificates, health checks, and rollback plans.
+   - **Runbooks for Operational Incidents**: Step-by-step troubleshooting for production issues (mTLS, OOM leaks, disconnections, network saturation).
 
-3. **Artefactos Enterprise de Seguridad, Safety y Dominio (`schemas/`)**:
-   - **Enclaves de Red Zero Trust (`SEC-ENC-*`)**: Conformes con `schemas/security/enclave.schema.json`, delimitando zonas de confianza, reglas perimetrales y componentes autorizados inbound/outbound.
-   - **Peligros Operacionales y Análisis de Riesgos (`HAZ-*`)**: Conformes con `schemas/safety/hazard.schema.json`, tipificando severidad, probabilidad y tiempo límite de tolerancia a fallos (FTTI).
-   - **Journeys de Usuario y Operador (`JRN-*`)**: Conformes con `schemas/product/journey.schema.json`, mapeando etapas, puntos de contacto y casos de uso vinculados.
-   - **Glosario de Lenguaje Ubicuo y Términos (`TERM-*`)**: Conformes con `schemas/product/term.schema.json`, acotando definiciones canónicas por bounded context.
+3. **Enterprise Security, Safety, and Domain Artifacts (`schemas/`)**:
+   - **Zero Trust Network Enclaves (`SEC-ENC-*`)**: Compliant with `schemas/security/enclave.schema.json`, delimiting trust zones, boundary rules, and inbound/outbound components.
+   - **Operational Hazards and Risk Analysis (`HAZ-*`)**: Compliant with `schemas/safety/hazard.schema.json`, categorizing severity, probability, and Fault Tolerant Time Interval (FTTI).
+   - **User and Operator Journeys (`JRN-*`)**: Compliant with `schemas/product/journey.schema.json`, mapping stages, touchpoints, and linked use cases.
+   - **Ubiquitous Language Glossary Terms (`TERM-*`)**: Compliant with `schemas/product/term.schema.json`, binding canonical definitions by bounded context.
 
-### 4.2 Puertas de Calidad Adaptativas por Perfil de Riesgo (Progressive Friction Gates)
+### 4.2 Progressive Friction Quality Gates
 
-Las compuertas de liberación no imponen la misma fricción burocrática a todos los cambios; evalúan los artefactos y exigencias en función del campo `profile` declarado en el frontmatter de `spec.md`:
+Release gates adapt governance friction according to the `profile` field declared in `spec.md` frontmatter:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│             PUERTAS DE CALIDAD POR PERFIL DE FRICCIÓN                  │
+│                 PROGRESSIVE FRICTION QUALITY GATES                     │
 └────────────────────────────────────────────────────────────────────────┘
 
- 1. PERFIL PATCH (Baja Fricción / Hotfixes & Refactors Cosméticos)
-    ├── Frontmatter: profile: patch en spec.md
-    ├── Gates Obligatorios:
-    │   • Linters y Tipado Estricto (cero errores / cero any).
-    │   • Ejecución exitosa del comando de verificación declarado en spec.md.
-    │   • Guardrail Determinista Anti-Patch Bypass (100% libre de rutas protegidas).
-    └── Exenciones Formales:
-        • Exento de RTM 360° inversa (no requiere handoff.yaml).
-        • Exento de modelado STRIDE formal.
-        • Exento de actualización de manuales MAN-USER-* y MAN-PROD-*.
+ 1. PATCH PROFILE (Low Friction / Hotfixes & Cosmetic Refactoring)
+    ├── Frontmatter: profile: patch in spec.md
+    ├── Mandatory Gates:
+    │   • Linters and Strict Typing (zero errors / zero any).
+    │   • Successful execution of verification command in spec.md.
+    │   • Deterministic Anti-Patch Bypass Guardrail (100% free of protected paths).
+    └── Formal Exemptions:
+        • Exempt from reverse 360° RTM (does not require handoff.yaml).
+        • Exempt from formal STRIDE threat modeling.
+        • Exempt from updating MAN-USER-* and MAN-PROD-* manuals.
 
- 2. PERFIL STANDARD (Fricción Nominal / Casos de Uso Estándar)
-    ├── Frontmatter: profile: standard en spec.md
-    └── Gates Obligatorios:
-        • Suite completa CI/CD: Linters, tipado y tests unitarios.
-        • Calidad de código: CC <= 10, MI >= 50, Duplicación <= 3%, Cobertura >= 85%.
-        • RTM 360° Conforme (reverse lookup entre HOF-*, arc42 y .feature).
-        • Todas las tareas de tasks.md en estado COMPLETED.
+ 2. STANDARD PROFILE (Nominal Friction / Standard Business Use Cases)
+    ├── Frontmatter: profile: standard in spec.md
+    └── Mandatory Gates:
+        • Full CI/CD suite: Linters, typing, and unit tests.
+        • Code quality: CC <= 10, MI >= 50, Duplication <= 3%, Coverage >= 85%.
+        • 360° RTM Compliant (reverse lookup across HOF-*, arc42, and .feature).
+        • All tasks in tasks.md in COMPLETED state.
 
- 3. PERFIL CRITICAL (Alta Fricción / Criptografía, Secretos y Enclaves)
-    ├── Frontmatter: profile: critical en spec.md
-    └── Gates Obligatorios:
-        • Todas las compuertas del Perfil Standard al 100%.
-        • Modelado formal de amenazas STRIDE / OWASP ASVS aprobado.
-        • Registro de Decisión Arquitectónica (ADR-*) formalmente aprobado.
-        • Verificación de enclaves Zero Trust (SEC-ENC-*).
-        • Doble aprobación humana en PR (Tech Lead + SecOps/Arquitecto).
+ 3. CRITICAL PROFILE (High Friction / Cryptography, Secrets, and Enclaves)
+    ├── Frontmatter: profile: critical in spec.md
+    └── Mandatory Gates:
+        • 100% of Standard Profile gates.
+        • Approved formal STRIDE / OWASP ASVS threat model.
+        • Formally approved Architecture Decision Record (ADR-*).
+        • Zero Trust enclave verification (SEC-ENC-*).
+        • Dual human sign-off on PR (Tech Lead + SecOps/Architect).
 
- 4. GUARDRAIL DETERMINISTA ANTI-PATCH BYPASS
-    ├── Disparador: Cambio declarado con profile: patch en su spec.md.
-    ├── Condición de Fallo Inmediato: Si el diff incluye modificaciones en:
+ 4. DETERMINISTIC ANTI-PATCH BYPASS GUARDRAIL
+    ├── Trigger: Change declared with profile: patch in spec.md.
+    ├── Immediate Failure Condition: Diff touches any of:
     │   • schemas/**
-    │   • quality-policy.yaml o license-policy.yaml
-    │   • examples/security/** o enclaves SEC-ENC-*
-    │   • Migraciones de base de datos o almacenamiento persistente
-    └── Acción: RECHAZO AUTOMÁTICO DE CI/CD (EXIT 1) con exigencia de reclasificación.
+    │   • quality-policy.yaml or license-policy.yaml
+    │   • examples/security/** or enclaves SEC-ENC-*
+    │   • Database migrations or persistent schema definitions
+    └── Action: AUTOMATIC CI/CD REJECTION (EXIT 1) with reclassification requirement.
 ```
 
-### 4.3 Comando Unificado de Pre-Vuelo con Auto-Fix (`aisdlc check --fix`)
+### 4.3 Unified Pre-Flight Command with Auto-Fix (`aisdlc check --fix`)
 
-Para evitar rechazos mecánicos en los pipelines de CI/CD por fallos menores de sincronización (escenarios Gherkin modificados en Markdown pero no extraídos a `.feature`, o desfases menores en digests criptográficos tras ajustes de formato), los ingenieros y agentes de IA deben ejecutar el comando unificado de pre-vuelo antes de abrir o actualizar una Pull Request:
+To prevent mechanical CI/CD failures caused by minor synchronization gaps (Gherkin scenarios edited in Markdown but unextracted to `.feature`, or minor SHA-256 digest shifts after formatting adjustments), engineers and AI agents run the pre-flight command before opening or updating a PR:
 
 ```bash
 npx aisdlc check --fix
 ```
 
-#### Fases de Ejecución:
-1. **Sincronización Automática Previa (No Destructiva)**:
-   - **Extracción BDD**: Detecta si los bloques ` ```gherkin ` en especificaciones de producto o seguridad difieren de los archivos `.feature` en disco y los sincroniza automáticamente.
-   - **Sincronización Anti-Deriva PDaC**: Sincroniza los digests criptográficos SHA-256 de las citaciones canónicas (`citations: - id: ... digest: ...`) si el contenido destino existe y está actualizado.
-2. **Ejecución Consolidada de Quality Gates**:
-   - Corre deterministamente todos los verificadores maestros del framework:
-     - Calidad de código (CC $\le 10$, MI $\ge 50$, LOC $\le 40$).
-     - Trazabilidad 360° RTM inversa (cero requerimientos huérfanos).
-     - Gobernanza y modos de autonomía en tareas (`tasks.md`).
-     - Cobertura de pruebas en requisitos y tareas.
-     - Licencias Open Source conformes con `license-policy.yaml`.
-     - Integridad PDaC libre de deriva de digests.
-     - Conformidad con esquemas JSON formales (Draft 2020-12).
-3. **Dashboard Accionable en Terminal**:
-   - Vuelca un resumen visual estructurado indicando el estado de cada compuerta (`PASSED`, `AUTO-FIXED`, `FAILED`).
-   - En caso de errores bloqueantes no subsanables automáticamente, detalla la causa exacta y el comando de remediación, devolviendo código de salida determinista (0 en éxito, 1 si existen infracciones).
+#### Execution Phases:
+1. **Automated Non-Destructive Pre-Synchronization**:
+   - **BDD Extraction**: Detects if ` ```gherkin ` blocks in product or security specifications differ from `.feature` files on disk and automatically synchronizes them.
+   - **PDaC Anti-Drift Sync**: Synchronizes SHA-256 cryptographic digests of canonical citations (`citations: - id: ... digest: ...`) if target content exists and is valid.
+2. **Consolidated Quality Gate Execution**:
+   - Deterministically executes all master verifiers:
+     - Code quality (CC $\le 10$, MI $\ge 50$, LOC $\le 40$).
+     - 360° reverse RTM traceability (zero orphan requirements).
+     - Task governance and autonomy modes (`tasks.md`).
+     - Test coverage across requirements and tasks.
+     - Open source license compliance with `license-policy.yaml`.
+     - PDaC cryptographic integrity free of digest drift.
+     - Formal JSON schema compliance (Draft 2020-12).
+3. **Actionable Console Dashboard**:
+   - Outputs a visual summary of gate statuses (`PASSED`, `AUTO-FIXED`, `FAILED`).
+   - If non-recoverable blocking errors occur, details root causes and remediation commands with deterministic exit codes (0 on success, 1 on violations).
 
 ---
 
-## 5. Política de Excepciones y Gestión de Deuda Técnica
+## 5. Exception Policy and Technical Debt Management
 
-Si por razones de rendimiento extremo (ej. bucle de procesamiento gráfico o parser telemétrico de bajo nivel) una función necesita superar la complejidad ciclomática de 10:
-1. **Procedimiento Obligatorio**:
-   - Se debe registrar un **ADR de Deuda Técnica** (`docs/architecture/09_decisions/ADR-TECH-DEBT-*.md`).
-   - El ADR debe contener: justificación del impacto, benchmark comparativo y un plan de mitigación con fecha límite o hito de refactorización.
-2. **Autoridad**:
-   - Solo el **Lead Architect** y el **Tech Lead humano** pueden aprobar la excepción. Ningún agente de IA puede auto-concederse una excepción de calidad.
+If for extreme performance reasons (e.g., graphics processing loops or low-level telemetry parsers) a function must exceed cyclomatic complexity of 10:
+1. **Mandatory Procedure**:
+   - A **Technical Debt ADR** must be registered (`docs/architecture/09_decisions/ADR-TECH-DEBT-*.md`).
+   - The ADR must include: impact justification, comparative benchmark, and mitigation plan with refactoring milestone/deadline.
+2. **Authority**:
+   - Only the **Lead Architect** and **human Tech Lead** may grant an exception. AI agents cannot self-grant quality exemptions.
 
 ---
 
-## 6. Generación Automática del Informe de Calidad (Quality Scorecard as Code)
+## 6. Automated Quality Report Generation (Quality Scorecard as Code)
 
-El framework incorpora la capacidad de **generar automáticamente el informe formal de calidad** tan pronto como el código es escrito o modificado por un desarrollador o agente:
+The framework can **automatically generate formal quality reports** as soon as code is authored or modified by a developer or agent:
 
-### A. Comando de Generación Automática
+### A. Automatic Generation Command
 ```bash
-# 1. Informe global del proyecto
+# 1. Global project report
 npx tsx scripts/generate-quality-report.ts
 
-# 2. Informe acotado a un incremento o cambio SDD específico
+# 2. Scoped to a specific SDD change
 npx tsx scripts/generate-quality-report.ts --change chg-001-telemetry-ingestion --target src/telemetry
 
-# 3. Informe con destino personalizado
+# 3. Custom output destination
 npx tsx scripts/generate-quality-report.ts --target src/ --output reports/SPRINT_QUALITY.md
 ```
 
-### B. Contenido del Informe Generado
-El documento producido (`reports/QUALITY_REPORT.md` o `specs/changes/active/<chg-id>/quality-report.md`) incluye:
-1. **Calificación Global (SQALE Rating A-F)** basada en métricas ponderadas.
-2. **Veredicto Determinista del Release Gate** (`AUTORIZADO (PASS)` o `BLOQUEADO (FAIL)`).
-3. **Distribución Gráfica de Complejidad Ciclomática** (Baja [1-5], Moderada [6-10], Crítica [>10]).
-4. **Tabla Desglosada por Función**: SLOC, Complejidad Ciclomática, Complejidad Cognitiva, Índice de Mantenibilidad y detección de code smells.
-5. **Instrucciones Accionables de Refactorización**: Si el Release Gate falla, el informe emite automáticamente los prompts y pautas de descomposición para que el agente de IA lo subsane sin intervención manual.
+### B. Generated Report Contents
+The generated document (`reports/QUALITY_REPORT.md` or `specs/changes/active/<chg-id>/quality-report.md`) provides:
+1. **Global Rating (SQALE Rating A-F)** based on weighted metrics.
+2. **Deterministic Release Gate Verdict** (`AUTHORIZED (PASS)` or `BLOCKED (FAIL)`).
+3. **Graphical Cyclomatic Complexity Distribution** (Low [1-5], Moderate [6-10], Critical [>10]).
+4. **Per-Function Breakdown Table**: SLOC, Cyclomatic Complexity, Cognitive Complexity, Maintainability Index, and code smell detection.
+5. **Actionable Refactoring Guidance**: If Release Gate fails, the report automatically provides decomposition prompts for AI agents to resolve violations without manual intervention.
 
 ---
 
-## 7. Arquitectura de Calidad Multilenguaje (Polyglot Support)
+## 7. Polyglot Quality Architecture (Polyglot Support)
 
-El framework AI-SDLC está concebido como una **plataforma políglota universal**. Ni la metodología ni los mecanismos de validación están atados a un único lenguaje de programación.
+The AI-SDLC framework is conceived as a **universal polyglot platform**. Neither methodology nor validation mechanisms are bound to a single programming language.
 
-### A. Niveles de Neutralidad del Framework
+### A. Framework Neutrality Levels
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   ARQUITECTURA DE CALIDAD POLÍGLOTA                    │
+│                     POLYGLOT QUALITY ARCHITECTURE                      │
 └────────────────────────────────────────────────────────────────────────┘
 
- 1. CAPA CONCEPTUAL Y METODOLÓGICA (100% Agnóstica de Lenguaje)
-    ├── Definición de Producto: ProductShape en Markdown + JSON Schema
-    ├── Arquitectura de Sistemas: arc42 (12 secciones) + NAF v4 Grid
-    ├── Ciberseguridad Shift-Left: STRIDE, OWASP ASVS, Enclaves DMZ
-    ├── Gobernanza de Licencias: SPDX, allowlist/denylist, SBOM CycloneDX
-    └── Criterios BDD: Gherkin estándar (.feature) ejecutable en cualquier runtime
+ 1. METHODOLOGICAL & CONCEPTUAL LAYER (100% Language-Agnostic)
+    ├── Product Definition: ProductShape in Markdown + JSON Schema
+    ├── Systems Architecture: arc42 (12 sections) + NAF v4 Grid
+    ├── Shift-Left Cybersecurity: STRIDE, OWASP ASVS, DMZ Enclaves
+    ├── License Governance: SPDX, allowlist/denylist, CycloneDX SBOM
+    └── BDD Criteria: Standard Gherkin (.feature) runnable on any test runtime
 
- 2. MOTOR NATIVO EMBEBIDO (Out-of-the-box en scripts/)
-    ├── Analizador sintáctico universal para métricas McCabe (CC), MI y LOC
-    └── Lenguajes soportados directamente:
+ 2. NATIVE EMBEDDED ENGINE (Out-of-the-box in scripts/)
+    ├── Universal parser for McCabe (CC), MI, and LOC metrics
+    └── Supported languages:
         • TypeScript / JavaScript (.ts, .js)
         • Python (.py)
         • Java / Kotlin (.java, .kt)
@@ -306,103 +306,101 @@ El framework AI-SDLC está concebido como una **plataforma políglota universal*
         • Rust (.rs)
         • C / C++ (.c, .cpp)
 
- 3. ADAPTADORES DE ECOSISTEMA NATIVO Y ESTÁNDARES EMPRESARIALES
+ 3. NATIVE ECOSYSTEM ADAPTERS AND ENTERPRISE STANDARDS
     ├── Python: Ruff, Black, Radon, Xenon, PyTest, Coverage.py
     ├── Java: Checkstyle, SpotBugs, PMD, JUnit 5, JaCoCo
     ├── Go: golangci-lint, gocyclo, go test -cover
     ├── C#/.NET: dotnet format, Roslyn Analyzers, Coverlet
     ├── Rust: cargo clippy, rustfmt, cargo-tarpaulin
-    └── Agregadores Empresariales: SonarQube / SonarCloud y formato SARIF (OASIS)
+    └── Enterprise Aggregators: SonarQube / SonarCloud and SARIF format (OASIS)
 ```
 
-### B. Mapeo de Ecosistemas en `quality-policy.yaml`
+### B. Ecosystem Mapping in `quality-policy.yaml`
 
-El archivo de configuración permite orquestar linters y motores de cobertura específicos para cada lenguaje manteniendo umbrales cuantitativos homogéneos (`CC <= 10`, `MI >= 50`, `Coverage >= 85%`).
+The configuration file allows orchestrating language-specific linters and coverage engines while maintaining homogeneous quantitative thresholds (`CC <= 10`, `MI >= 50`, `Coverage >= 85%`).
 
-### C. El Estándar Universal SARIF (Static Analysis Results Interchange Format)
-Para integraciones complejas en grandes organizaciones, el AI-SDLC adopta el estándar **SARIF (JSON OASIS)**. Cualquier analizador de cualquier lenguaje (Roslyn, Clang-Tidy, ESLint, Bandit, Flake8) puede volcar sus diagnósticos a formato SARIF, siendo consolidado de forma transparente por el pipeline de release.
+### C. The Universal SARIF Standard (Static Analysis Results Interchange Format)
+For enterprise integrations, AI-SDLC adopts the **SARIF (JSON OASIS)** standard. Any analyzer from any language ecosystem (Roslyn, Clang-Tidy, ESLint, Bandit, Flake8) can output diagnostics in SARIF format, seamlessly ingested by the release pipeline.
 
 ---
 
-## 7. Telemetría de Commits, Agregación de KPIs y Coste de Calidad (Rework & DIR)
+## 8. Commit Telemetry, KPI Aggregation, and Cost of Quality (Rework & DIR)
 
-Para gobernar el desarrollo simétrico personas-agentes con trazabilidad económica y técnica real, el framework implementa un sistema determinista y automatizado de **Telemetría en Tres Niveles**:
+To govern human-agent co-development with economic and technical visibility, the framework implements an automated **Three-Tier Telemetry System**:
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
-│             TELEMETRÍA DETERMINISTA Y CONTROL DE CALIDAD               │
+│               DETERMINISTIC TELEMETRY AND QUALITY CONTROL              │
 └────────────────────────────────────────────────────────────────────────┘
 
- 1. NIVEL COMMIT (Inyección Cero-Fricción vía Git Hook)
-    ├── Hook: .git/hooks/prepare-commit-msg (instalado con `aisdlc git hook install`)
-    ├── Detección de Autoría: Humano vs. Agente (modelo LLM)
-    └── Trailers inmutables: Task-ID, Parent-Ref, Tokens (Prompt/Completion), Active-Time
+ 1. COMMIT LEVEL (Zero-Friction Injection via Git Hook)
+    ├── Hook: .git/hooks/prepare-commit-msg (installed via `aisdlc git hook install`)
+    ├── Authorship Detection: Human vs. Agent (LLM model)
+    └── Immutable Trailers: Task-ID, Parent-Ref, Tokens (Prompt/Completion), Active-Time
 
- 2. NIVEL PULL REQUEST (Agregación Automática)
-    ├── Comando: `aisdlc kpi pr` (y workflow GitHub Actions pr-kpi-summary.yml)
-    ├── Agrupación: Desglose de commits, líneas (+/-), tiempo y tokens por autor/modelo
-    └── Inyección: Sección 8 en PULL_REQUEST_TEMPLATE.md delimitada por marcadores
+ 2. PULL REQUEST LEVEL (Automated Aggregation)
+    ├── Command: `aisdlc kpi pr` (and GitHub Actions workflow pr-kpi-summary.yml)
+    ├── Grouping: Breakdown of commits, lines (+/-), time, and tokens per author/model
+    └── Injection: Section 8 in PULL_REQUEST_TEMPLATE.md bounded by markers
 
- 3. NIVEL RELEASE (Informe Consolidado de Calidad y Defectos)
-    ├── Comando: `aisdlc kpi release --release <branch>`
-    ├── Defect Injection Rate (DIR): Bugs confirmados por KLoC por modelo y humano
-    ├── Ratios de Re-trabajo (Cost of Quality): % tiempo y % tokens dedicados a bugs
-    └── Artefactos canónicos: reports/releases/RELEASE_KPIS_<release>.md y .json
+ 3. RELEASE LEVEL (Consolidated Quality and Defect Report)
+    ├── Command: `aisdlc kpi release --release <branch>`
+    ├── Defect Injection Rate (DIR): Confirmed bugs per KLoC per model and human
+    ├── Rework Ratios (Cost of Quality): % time and % tokens spent on defects
+    └── Canonical Artifacts: reports/releases/RELEASE_KPIS_<release>.md and .json
 ```
 
-### A. Git Trailers Estandarizados
-En cada commit se inyectan trailers sin intervención manual:
+### A. Standardized Git Trailers
+Trailers are injected into every commit without manual friction:
 ```git
 Task-ID: TSK-002
 Parent-Ref: CHG-001
 Author-Type: agent              # agent | human
-AI-Model: claude-3-7-sonnet     # modelo LLM o n/a para humanos
+AI-Model: claude-3-7-sonnet     # LLM model or n/a for humans
 Prompt-Tokens: 14500
 Completion-Tokens: 1850
 Active-Time-Seconds: 420
 ```
 
-### B. Métricas de Re-trabajo y Observabilidad
-- **Defect Injection Rate (DIR)**: $\text{DIR} = \frac{\text{Bugs Introducidos}}{\text{KLoC generadas por el autor/modelo}}$.
-- **Ratio de Re-trabajo en Tiempo**: $\%T_{\text{rework}} = \frac{\sum T_{\text{bugs}}}{T_{\text{total\_release}}} \times 100$.
-- **Ratio de Re-trabajo en Tokens**: $\%\text{Tokens}_{\text{rework}} = \frac{\sum \text{Tokens}_{\text{bugs}}}{\text{Tokens}_{\text{total\_release}}} \times 100$.
+### B. Observability and Rework Metrics
+- **Defect Injection Rate (DIR)**: $\text{DIR} = \frac{\text{Bugs Introduced}}{\text{KLoC generated by author/model}}$.
+- **Time Rework Ratio**: $\%T_{\text{rework}} = \frac{\sum T_{\text{bugs}}}{T_{\text{total\_release}}} \times 100$.
+- **Token Rework Ratio**: $\%\text{Tokens}_{\text{rework}} = \frac{\sum \text{Tokens}_{\text{bugs}}}{\text{Tokens}_{\text{total\_release}}} \times 100$.
 
-Estas métricas son puramente observacionales y analíticas, proporcionando a los líderes de ingeniería visibilidad sobre qué modelos LLM son más fiables y cuál es el impacto real de los defectos en el presupuesto del proyecto.
+These metrics provide engineering leaders with empirical insight into LLM reliability and the real financial and temporal impact of defects across sprints.
 
 ---
 
-## 8. Dashboard Web Interactivo y Visualizador de Grafos PDaC / RTM (Cytoscape.js)
+## 9. Interactive Web Dashboard and PDaC / RTM Graph Visualizer (Cytoscape.js)
 
-Para stakeholders no técnicos (Product Owners, CISOs, auditores y directores de ingeniería), explorar la red completa de dependencias de producto (`Actores ➔ Casos de Uso ➔ Reglas de Negocio ➔ Requisitos ➔ Componentes arc42 ➔ Tests BDD`) en documentos Markdown estáticos genera fricción cognitiva.
+For non-technical stakeholders (Product Owners, CISOs, auditors, and engineering executives), exploring the complete product dependency network (`Actors ➔ Use Cases ➔ Business Rules ➔ Requirements ➔ arc42 Components ➔ BDD Tests`) across static Markdown documents introduces cognitive load.
 
-El comando CLI `npx aisdlc report dashboard` compila la totalidad del grafo PDaC, la matriz RTM 360°, las métricas de calidad y la telemetría histórica de KPIs en un artefacto HTML autocontenido (`reports/dashboard.html`):
+The CLI command `npx aisdlc report dashboard` compiles the entire PDaC graph, 360° RTM matrix, quality metrics, and historical KPI telemetry into a self-contained HTML artifact (`reports/dashboard.html`):
 
 ```bash
-# Generar el dashboard en reports/dashboard.html
+# Generate dashboard at reports/dashboard.html
 npx aisdlc report dashboard
 
-# Generar y abrir inmediatamente en el navegador predeterminado
+# Generate and immediately open in default browser
 npx aisdlc report dashboard --open
 
-# Personalizar ruta de destino y título
+# Custom destination and title
 npx aisdlc report dashboard --output dist/governance.html --title "SentinelCore Enterprise SDLC"
 ```
 
-### Características Principales del Dashboard:
-1. **Visualizador de Red con Cytoscape.js (MIT)**:
-   - Capas semánticas diferenciadas por geometría y color: Producto (rombos cian), Requisitos (rectángulos verdes/rojos), Arquitectura (hexágonos índigo) y Pruebas (elipses esmeralda).
-   - Coloreado determinista de estado: 🟢 Verde para nodos conformes sin derivas; 🔴 Rojo para requisitos huérfanos o con deriva criptográfica SHA-256 (`DRIFT`).
-   - Controles de navegación: Zoom, encuadre centrado, layouts intercambiables (jerárquico por capas, COSE, concéntrico, circular).
-   - **Resaltado de Camino Crítico**: Al hacer clic sobre cualquier nodo, se iluminan sus dependencias upstream y downstream, atenuando el resto del grafo.
-2. **Matriz de Trazabilidad 360° Interactiva**:
-   - Tabla con filtrado en tiempo real por texto o estado, con enlace bidireccional que enfoca y centra el nodo seleccionado en el grafo.
-3. **Métricas de Calidad y Gobernanza**:
-   - Tarjetas de resumen ejecutivo (Release Gate PASS/FAIL, Mantenibilidad SEI MI, Complejidad Ciclomática, Cobertura BDD).
-   - Desglose de distribución de modos de autonomía de tareas (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
-4. **Telemetría Activa e Histórico de KPIs**:
-   - Métricas de la rama activa (commits, líneas añadidas/eliminadas, tiempo de desarrollo activo, consumo de tokens y coste computacional en USD).
-   - Tabla y tendencias históricas consolidadas procedentes de `reports/releases/*.kpis.json` para análisis de KLoC, bugs, DIR y re-trabajo a lo largo de los sprints.
-5. **Cero Infraestructura Externa (100% Offline)**:
-   - El archivo generado incrusta todos los scripts y estilos necesarios, permitiendo su apertura directa con doble clic local (`file:///...`) o su publicación estática en GitHub Pages / GitLab Pages sin necesidad de backend.
-
-
+### Key Dashboard Features:
+1. **Network Visualizer with Cytoscape.js (MIT)**:
+   - Geometric and color-coded semantic layers: Product (cyan diamonds), Requirements (green/red rectangles), Architecture (indigo hexagons), and Testing (emerald ellipses).
+   - Deterministic status coloring: 🟢 Green for compliant nodes; 🔴 Red for orphan requirements or nodes with cryptographic SHA-256 drift (`DRIFT`).
+   - Navigation controls: Zoom, pan, center view, and switchable layouts (hierarchical layered, COSE, concentric, circular).
+   - **Critical Path Highlighting**: Clicking any node illuminates its upstream and downstream dependencies while dimming unrelated elements.
+2. **Interactive 360° Traceability Matrix**:
+   - Real-time search and filterable table with bidirectional navigation focusing and centering selected nodes in the graph.
+3. **Quality and Governance Metrics**:
+   - Executive scorecards (Release Gate PASS/FAIL, SEI MI Maintainability, Cyclomatic Complexity, BDD Coverage).
+   - Autonomy mode distribution breakdown (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
+4. **Active Telemetry and Historical KPIs**:
+   - Active branch metrics (commits, lines added/deleted, active development time, token consumption, estimated USD compute cost).
+   - Historical trend tables consolidated from `reports/releases/*.kpis.json` tracking KLoC, bugs, DIR, and rework across releases.
+5. **Zero External Infrastructure (100% Offline)**:
+   - Self-contained file embedding all scripts and styles, opening directly via local file protocol (`file:///...`) or hosted on static pages (GitHub Pages, GitLab Pages) without a backend.

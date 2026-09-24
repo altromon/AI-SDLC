@@ -132,6 +132,9 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
 
       expect(result.isError).toBeFalsy();
       const content = JSON.parse((result.content[0] as any).text);
+      if (!content.success) {
+        console.error('FAILED GATES IN MCP VERIFY:', JSON.stringify(content.gates.filter((g: any) => !g.success), null, 2));
+      }
       expect(content.success).toBe(true);
       expect(content.totalGates).toBe(9);
       expect(content.passedGates).toBe(9);

@@ -14,8 +14,8 @@ export interface McpCliOptions {
 export async function runMcpServer(options: McpCliOptions = {}): Promise<void> {
   const rootDir = options.root || process.cwd();
   if (!options.silent) {
-    console.error(pc.bold(pc.cyan('\n🚀 [AI-SDLC MCP] Iniciando Servidor Model Context Protocol nativo (stdio)...')));
-    console.error(pc.gray(`   Directorio base: ${rootDir}\n`));
+    console.error(pc.bold(pc.cyan('\n🚀 [AI-SDLC MCP] Starting native Model Context Protocol (MCP) server (stdio)...')));
+    console.error(pc.gray(`   Base directory: ${rootDir}\n`));
   }
 
   await startMcpServer({ rootDir });

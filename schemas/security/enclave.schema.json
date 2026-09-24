@@ -26,7 +26,7 @@
     "version": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
-      "description": "Versión semántica del enclave de seguridad (SemVer)."
+      "description": "Security enclave semantic version (SemVer)."
     },
     "schema-version": {
       "type": "string"
@@ -42,15 +42,15 @@
     "trust-zone": {
       "type": "string",
       "enum": ["untrusted", "semi-trusted", "trusted", "highly-trusted", "dmz", "zero-trust-boundary"],
-      "description": "Zona de confianza Zero Trust asignada al enclave."
+      "description": "Zero Trust confidence zone assigned to enclave."
     },
     "trust-level": {
       "type": "string",
-      "description": "Nivel descriptivo de confianza Zero Trust."
+      "description": "Descriptive Zero Trust confidence level."
     },
     "isolation": {
       "type": "string",
-      "description": "Mecanismo técnico de aislamiento perimetral."
+      "description": "Technical perimeter isolation mechanism."
     },
     "perimeter-rules": {
       "type": "array",
@@ -58,7 +58,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Reglas perimetrales que definen el contorno de seguridad del enclave (ej. mTLS, IP allowlist)."
+      "description": "Perimeter rules defining enclave security boundary (e.g. mTLS, IP allowlist)."
     },
     "allowed-inbound": {
       "type": "array",
@@ -66,7 +66,7 @@
         "type": "string",
         "pattern": "^(CMP|SEC-ENC)-[A-Z0-9]+(-[A-Z0-9]+)*$"
       },
-      "description": "Componentes o enclaves autorizados a iniciar conexiones entrantes."
+      "description": "Components or enclaves authorized to initiate inbound connections."
     },
     "allowed-outbound": {
       "type": "array",
@@ -74,7 +74,7 @@
         "type": "string",
         "pattern": "^(CMP|SEC-ENC)-[A-Z0-9]+(-[A-Z0-9]+)*$"
       },
-      "description": "Componentes o enclaves a los que este enclave puede conectarse."
+      "description": "Components or enclaves this enclave can connect to."
     },
     "enforced-by": {
       "type": "array",
@@ -82,12 +82,12 @@
         "type": "string",
         "pattern": "^SEC-REQ-[A-Z0-9]+(-[A-Z0-9]+)*$"
       },
-      "description": "Requisitos de seguridad que imponen las reglas de este enclave."
+      "description": "Security requirements enforcing this enclave's rules."
     },
     "authentication-mechanism": {
       "type": "string",
       "enum": ["mtls", "jwt", "api-key", "oauth2", "none"],
-      "description": "Mecanismo de autenticación exigido en el perímetro del enclave."
+      "description": "Authentication mechanism required at enclave perimeter."
     },
     "supersedes": {
       "type": ["string", "null"]

@@ -1,47 +1,47 @@
 ---
-id: UC-ACCION-001
+id: UC-ACTION-001
 type: use-case
-title: Título Claro de la Interacción
+title: Clear Interaction Title
 status: draft
 version: "1.0.0"
 schema-version: "1.0"
-primary-actor: ACT-NOMBRE-001
+primary-actor: ACT-NAME-001
 supporting-actors: []
 governed-by:
-  - BR-REGLA-001
+  - BR-RULE-001
 uses-terms:
-  - TERM-TERMINO-001
-in-context: BC-CONTEXTO-001
+  - TERM-TERM-001
+in-context: BC-CONTEXT-001
 supersedes: null
 superseded-by: null
 ---
 
-# UC-ACCION-001: Título Claro de la Interacción
+# UC-ACTION-001: Clear Interaction Title
 
-## 1. Intención y Resultado (User Story)
+## 1. Intention and Outcome (User Story)
 
-- **As a**: [Primary actor defined in `primary-actor`, e.g. `ACT-NOMBRE-001`]
+- **As a**: [Primary actor defined in `primary-actor`, e.g. `ACT-NAME-001`]
 - **I want**: [Concrete action, interaction, or capability requested from the system]
 - **To**: [Observable result, business value, or expected outcome]
 
-## 2. Precondiciones
-- El actor debe estar autenticado con credenciales válidas.
-- El recurso o entidad debe encontrarse en estado activo.
+## 2. Preconditions
+- The actor must be authenticated with valid credentials.
+- The resource or entity must be in active state.
 
-## 3. Flujo Principal de Éxito
-1. El actor inicia la acción enviando la carga útil requerida.
-2. El sistema valida los datos conforme a las reglas de negocio declaradas en `governed-by`.
-3. El sistema procesa la transacción y actualiza el estado interno.
-4. El sistema emite la confirmación y los eventos de dominio asociados.
+## 3. Main Success Scenario
+1. The actor initiates the action by submitting the required payload.
+2. The system validates the data in accordance with business rules declared in `governed-by`.
+3. The system processes the transaction and updates internal state.
+4. The system emits confirmation and associated domain events.
 
-## 4. Escenarios Alternativos y Excepciones
-- **4.1 Validación Fallida**: El sistema rechaza la solicitud informando de los campos inválidos sin alterar el estado.
-- **4.2 Timeout / Indisponibilidad**: El sistema aplica reintento con backoff exponencial y emite alerta.
+## 4. Alternative Scenarios and Exceptions
+- **4.1 Validation Failure**: The system rejects the request reporting invalid fields without mutating state.
+- **4.2 Timeout / Unavailability**: The system applies retry with exponential backoff and emits an alert.
 
 ---
 
-## 5. Historial de Revisiones y Control de Versiones
+## 5. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-03 | Product Owner / Analista | Definición inicial del caso de uso | CHG-INIT-001 |
+| **1.0.0** | 2026-09-03 | Product Owner / Analyst | Initial use case definition | CHG-INIT-001 |

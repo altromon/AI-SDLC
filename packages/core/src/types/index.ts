@@ -80,11 +80,11 @@ export interface TraceabilityRow {
   type?: string;
   hofId?: string;
   productTraces: string;
-  productStatus: 'CONFORME' | 'HUÉRFANO';
+  productStatus: 'COMPLIANT' | 'ORPHAN' | 'CONFORME' | 'HUÉRFANO';
   archTraces: string;
-  archStatus: 'CONFORME' | 'HUÉRFANO';
+  archStatus: 'COMPLIANT' | 'ORPHAN' | 'CONFORME' | 'HUÉRFANO';
   testTraces: string;
-  testStatus: 'CONFORME' | 'HUÉRFANO';
+  testStatus: 'COMPLIANT' | 'ORPHAN' | 'CONFORME' | 'HUÉRFANO';
 }
 
 export interface TraceabilityOptions {
@@ -776,7 +776,7 @@ export interface PromptInjectionFinding {
 
 // --- Interactive Web Dashboard & Cytoscape Graph Types ---
 export type GraphNodeLayer = 'product' | 'requirement' | 'architecture' | 'test';
-export type GraphNodeStatus = 'CONFORME' | 'HUÉRFANO' | 'DRIFT' | 'REVIEW';
+export type GraphNodeStatus = 'COMPLIANT' | 'ORPHAN' | 'DRIFT' | 'REVIEW' | 'CONFORME' | 'HUÉRFANO';
 
 export interface CytoscapeNodeData {
   id: string;

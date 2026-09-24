@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       change_id:
-        description: 'ID del cambio SDD a integrar manualmente (ej. chg-001-telemetry)'
+        description: 'SDD change ID to integrate manually (e.g. chg-001-telemetry)'
         required: false
         type: string
 
@@ -72,7 +72,7 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "chore(sdd): integrate changes into canonical baseline [skip ci]"
             git push
-            echo "✔ Integración canónica commiteada y sincronizada en el repositorio."
+            echo "✔ Canonical integration committed and synchronized to repository."
           else
-            echo "ℹ No se generaron modificaciones pendientes en el working tree."
+            echo "ℹ No pending changes generated in working tree."
           fi

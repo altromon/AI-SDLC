@@ -2,7 +2,7 @@
 id: TSK-PLAN-CHG-001
 type: task-plan
 change-id: CHG-001-FEATURE-NAME
-title: Desglose de Tareas Verificables y Gobierno de Autonomía
+title: Verifiable Tasks Breakdown and Autonomy Governance
 version: "1.0.0"
 schema-version: "1.0"
 status: draft
@@ -13,7 +13,7 @@ governance-summary:
   high-risk-manual-count: 0
 tasks:
   - id: "TSK-001"
-    title: "Definición de DTOs e Interfaces de Contrato"
+    title: "Contract DTOs and Interfaces Definition"
     complexity: "LOW"
     risk-level: "LOW"
     autonomy-mode: "AUTONOMOUS"
@@ -24,7 +24,7 @@ tasks:
     status: "PENDING"
 
   - id: "TSK-002"
-    title: "Implementación de Lógica Central y Algoritmo de Negocio"
+    title: "Core Business Logic and Algorithm Implementation"
     complexity: "MEDIUM"
     risk-level: "MEDIUM"
     autonomy-mode: "HUMAN_REVIEW_PLAN"
@@ -35,13 +35,13 @@ tasks:
     status: "PENDING"
 
   - id: "TSK-003"
-    title: "Migración de Esquema de Base de Datos / Credenciales Críticas"
+    title: "Database Schema Migration / Critical Credentials"
     complexity: "HIGH"
     risk-level: "CRITICAL"
     autonomy-mode: "HIGH_RISK_MANUAL"
     verification:
       method: "manual-inspection"
-      command-or-criteria: "Revisión DBA + ejecución manual con script idempotente verificado"
+      command-or-criteria: "DBA review + manual execution with verified idempotent script"
     assigned-to: "human-engineer"
     status: "PENDING"
 
@@ -49,45 +49,45 @@ supersedes: null
 superseded-by: null
 ---
 
-# Desglose de Tareas Verificables: CHG-001-FEATURE-NAME
+# Verifiable Tasks Breakdown: CHG-001-FEATURE-NAME
 
-## 1. Matriz de Clasificación de Autonomía y Supervisión Humana
+## 1. Autonomy Classification and Human Supervision Matrix
 
-Cada tarea se clasifica rigurosamente según su nivel de complejidad y riesgo para determinar el nivel de delegación en los agentes de IA:
+Each task is rigorously classified according to its complexity and risk level to determine the level of delegation to AI agents:
 
-| Modo de Autonomía | Semáforo | Criterio de Activación | Comportamiento del Agente y del Humano |
+| Autonomy Mode | Traffic Light | Activation Criterion | Agent and Human Behavior |
 | :--- | :---: | :--- | :--- |
-| **`AUTONOMOUS`** | 🟢 | Riesgo bajo, tarea aislada y bien especificada con pruebas inmediatas. | **Plan + Ejecución Autónoma**. El agente genera el plan y escribe el código sin interrupción. El humano valida el PR final. |
-| **`HUMAN_REVIEW_PLAN`** | 🟡 | Riesgo medio, cambios en arquitectura, contratos de API o reglas críticas. | **Revisión Obligatoria de Plan**. El agente diseña el plan detallado, pero se detiene. **El humano debe aprobar el plan antes de codificar.** |
-| **`AMBIGUOUS`** | 🟠 | Requisitos vagos, criterios incompletos o conflicto de lógica de negocio. | **Bloqueada para Implementación**. Prohibido que el agente adivine. Requiere entrevista previa y refinamiento con el usuario. |
-| **`HIGH_RISK_MANUAL`** | 🔴 | Riesgo crítico (migraciones destructivas de DB, claves criptográficas, infra de producción). | **Prohibida la Ejecución Autónoma**. Ejecución directa humana o soporte asistido con confirmación comando por comando. |
+| **`AUTONOMOUS`** | 🟢 | Low risk, isolated and well-specified task with immediate tests. | **Autonomous Plan + Execution**. Agent creates plan and writes code without interruption. Human validates final PR. |
+| **`HUMAN_REVIEW_PLAN`** | 🟡 | Medium risk, architectural changes, API contracts, or critical business rules. | **Mandatory Plan Review**. Agent designs detailed plan, but halts. **Human must approve plan before coding.** |
+| **`AMBIGUOUS`** | 🟠 | Vague requirements, incomplete criteria, or conflicting business logic. | **Blocked for Implementation**. Agent is forbidden to guess. Requires prior interview and refinement with user. |
+| **`HIGH_RISK_MANUAL`** | 🔴 | Critical risk (destructive DB migrations, cryptographic keys, production infra). | **Autonomous Execution Forbidden**. Direct human execution or assisted mode with command-by-command confirmation. |
 
 ---
 
-## 2. Plan Detallado de Tareas y Criterios de Verificación
+## 2. Detailed Task Plan and Verification Criteria
 
-### Fase 1: Tipos y Contratos (TSK-001)
+### Phase 1: Types and Contracts (TSK-001)
 - **ID**: `TSK-001`
-- **Descripción**: Crear las interfaces y estructuras de datos estipuladas en `design.md`.
-- **Modo**: `AUTONOMOUS` 🟢
-- **Verificación**: `npx tsc --noEmit && node packages/cli/bin/aisdlc.js verify quality`
+- **Description**: Create interfaces and data structures stipulated in `design.md`.
+- **Mode**: `AUTONOMOUS` 🟢
+- **Verification**: `npx tsc --noEmit && node packages/cli/bin/aisdlc.js verify quality`
 
-### Fase 2: Implementación y Pruebas BDD (TSK-002)
+### Phase 2: Implementation and BDD Tests (TSK-002)
 - **ID**: `TSK-002`
-- **Descripción**: Implementar la lógica de negocio y pasar los escenarios de Cucumber.
-- **Modo**: `HUMAN_REVIEW_PLAN` 🟡
-- **Verificación**: `npx cucumber-js tests/features/feature.feature`
+- **Description**: Implement business logic and pass Cucumber scenarios.
+- **Mode**: `HUMAN_REVIEW_PLAN` 🟡
+- **Verification**: `npx cucumber-js tests/features/feature.feature`
 
-### Fase 3: Operaciones Críticas / Despliegue (TSK-003)
+### Phase 3: Critical Operations / Deployment (TSK-003)
 - **ID**: `TSK-003`
-- **Descripción**: Aplicación de migraciones o configuración de enclaves perimetrales.
-- **Modo**: `HIGH_RISK_MANUAL` 🔴
-- **Verificación**: Checklists de aprobación manual y pruebas de humo (`smoke-test`).
+- **Description**: Apply migrations or perimeter enclave configurations.
+- **Mode**: `HIGH_RISK_MANUAL` 🔴
+- **Verification**: Manual approval checklists and smoke tests (`smoke-test`).
 
 ---
 
-## 3. Historial de Revisiones y Control de Versiones
+## 3. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-03 | Lead Engineer | Creación del plan con clasificación de riesgo y verificación 360° | CHG-INIT-001 |
+| **1.0.0** | 2026-09-03 | Lead Engineer | Plan creation with risk classification and 360° verification | CHG-INIT-001 |

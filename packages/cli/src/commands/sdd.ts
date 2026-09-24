@@ -42,7 +42,7 @@ export function runSddDeposit(options: SddDepositCliOptions): boolean {
   if (!isSilent) {
     console.log(
       pc.bold(
-        pc.cyan(`\n📦 [AI-SDLC SDD] Depositando Sidecar PDaC Handoff para '${changeId}' (${framework})...`)
+        pc.cyan(`\n📦 [AI-SDLC SDD] Depositing PDaC Handoff Sidecar for '${changeId}' (${framework})...`)
       )
     );
   }
@@ -57,7 +57,7 @@ export function runSddDeposit(options: SddDepositCliOptions): boolean {
   const handoff: ProductHandoff = {
     id: `HOF-${changeId.toUpperCase()}`,
     type: 'handoff',
-    title: options.title || `Handoff PDaC para ${changeId}`,
+    title: options.title || `PDaC Handoff for ${changeId}`,
     changeId,
     version: '1.0.0',
     createdAt: new Date().toISOString(),
@@ -76,9 +76,9 @@ export function runSddDeposit(options: SddDepositCliOptions): boolean {
     });
 
     if (!isSilent) {
-      console.log(`  ${pc.green('✔')} Sidecar depositado con éxito: ${pc.bold(depositedPath)}`);
-      console.log(`  ID Handoff: ${pc.cyan(handoff.id)}`);
-      console.log(`  Requerimientos entregados: ${reqList.join(', ')}\n`);
+      console.log(`  ${pc.green('✔')} Sidecar successfully deposited: ${pc.bold(depositedPath)}`);
+      console.log(`  Handoff ID: ${pc.cyan(handoff.id)}`);
+      console.log(`  Delivered requirements: ${reqList.join(', ')}\n`);
     }
 
     if (useJson) {
@@ -97,7 +97,7 @@ export function runSddDeposit(options: SddDepositCliOptions): boolean {
     return true;
   } catch (err: any) {
     if (!isSilent) {
-      console.error(pc.red(`  ✖ Error depositando sidecar: ${err?.message || err}\n`));
+      console.error(pc.red(`  ✖ Error depositing sidecar: ${err?.message || err}\n`));
     }
     if (useJson) {
       const payload = {
@@ -131,7 +131,7 @@ export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
   if (!isSilent) {
     console.log(
       pc.bold(
-        pc.cyan('\n🔍 [AI-SDLC SDD] Verificando Espacios de Trabajo SDD y Sidecars de Handoff (HOF-*)...')
+        pc.cyan('\n🔍 [AI-SDLC SDD] Verifying SDD Workspaces and Handoff Sidecars (HOF-*)...')
       )
     );
   }
@@ -140,7 +140,7 @@ export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
   const totalFound = handoffsMap.size;
 
   if (!isSilent) {
-    console.log(`  Sidecars PDaC encontrados: ${pc.bold(String(totalFound))}`);
+    console.log(`  Found PDaC sidecars: ${pc.bold(String(totalFound))}`);
   }
 
   let validCount = 0;
@@ -154,7 +154,7 @@ export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
 
   if (totalFound === 0) {
     if (!isSilent) {
-      console.log(pc.yellow('  [AVISO] No se encontraron archivos de acompañamiento handoff.yaml en specs/.'));
+      console.log(pc.yellow('  [NOTICE] No handoff.yaml sidecar companion files found in specs/.'));
     }
   } else {
     for (const [, { handoff, changeDir }] of handoffsMap.entries()) {
@@ -165,7 +165,7 @@ export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
       const isValid = Boolean(handoff.id && handoff.id.startsWith('HOF-') && reqCount > 0);
 
       handoffItems.push({
-        id: handoff.id || 'DESCONOCIDO',
+        id: handoff.id || 'UNKNOWN',
         changeDir: relDir,
         isValid,
         requirementsCount: reqCount,
@@ -175,14 +175,14 @@ export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
         validCount++;
         if (!isSilent) {
           console.log(
-            `  ${pc.green('✔')} [${pc.bold(handoff.id)}] en ${relDir} (Requerimientos: ${reqCount})`
+            `  ${pc.green('✔')} [${pc.bold(handoff.id)}] in ${relDir} (Requirements: ${reqCount})`
           );
         }
       } else {
         invalidCount++;
         if (!isSilent) {
           console.log(
-            `  ${pc.red('✖')} [${pc.bold(handoff.id || 'DESCONOCIDO')}] en ${relDir} - Esquema de handoff o subgrafo inválido.`
+            `  ${pc.red('✖')} [${pc.bold(handoff.id || 'UNKNOWN')}] in ${relDir} - Invalid handoff schema or subgraph.`
           );
         }
       }
@@ -199,11 +199,11 @@ export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
     if (duplicateErrors > 0 && !isSilent) {
       console.log(
         pc.red(
-          `\n  ✖ [Shift-Left Gate] Se detectaron ${duplicateErrors} colisiones/duplicados de requisitos en el espacio de trabajo:`
+          `\n  ✖ [Shift-Left Gate] Detected ${duplicateErrors} requirement collision(s)/duplicate(s) in workspace:`
         )
       );
       for (const issue of dupResult.issues.filter((i) => i.severity === 'ERROR')) {
-        console.log(`    ${pc.red('✖')} [${issue.type}] ${issue.id} en ${issue.file}: ${issue.message}`);
+        console.log(`    ${pc.red('✖')} [${issue.type}] ${issue.id} in ${issue.file}: ${issue.message}`);
       }
     }
   }
@@ -212,8 +212,8 @@ export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
   if (!isSilent) {
     console.log(
       isOk
-        ? pc.green('\n✔ Integración SDD Conforme: Todos los sidecars y requisitos son válidos.\n')
-        : pc.red('\n✖ Integración SDD Bloqueada: Se detectaron sidecars no conformes o requisitos duplicados.\n')
+        ? pc.green('\n✔ SDD Integration COMPLIANT: All sidecars and requirements are valid.\n')
+        : pc.red('\n✖ SDD Integration BLOCKED: Non-compliant sidecars or duplicate requirements detected.\n')
     );
   }
 
@@ -265,7 +265,7 @@ export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
 
     if (!detection.detected || !detection.changeId) {
       if (!isSilent) {
-        console.log(pc.yellow('\nℹ [AI-SDLC SDD] No se detectó ningún cambio SDD activo para integrar:'));
+        console.log(pc.yellow('\nℹ [AI-SDLC SDD] No active SDD change detected to integrate:'));
         for (const r of detection.reasons) {
           console.log(`    - ${r}`);
         }
@@ -277,7 +277,7 @@ export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
           success: false,
           exitCode: 1,
           reasons: detection.reasons,
-          error: 'No se detectó ningún cambio SDD activo para integrar',
+          error: 'No active SDD change detected to integrate',
         };
         console.log(JSON.stringify(payload, null, 2));
       }
@@ -288,7 +288,7 @@ export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
       if (!isSilent) {
         console.log(
           pc.red(
-            `\n✖ [AI-SDLC SDD] El cambio detectado '${detection.changeId}' tiene tareas pendientes (${detection.completedTasksCount}/${detection.totalTasksCount} completadas). Todas las tareas deben estar en estado COMPLETED.\n`
+            `\n✖ [AI-SDLC SDD] Detected change '${detection.changeId}' has pending tasks (${detection.completedTasksCount}/${detection.totalTasksCount} completed). All tasks must be in COMPLETED status.\n`
           )
         );
       }
@@ -300,7 +300,7 @@ export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
           changeId: detection.changeId,
           completedTasksCount: detection.completedTasksCount,
           totalTasksCount: detection.totalTasksCount,
-          error: `El cambio detectado '${detection.changeId}' tiene tareas pendientes (${detection.completedTasksCount}/${detection.totalTasksCount} completadas).`,
+          error: `Detected change '${detection.changeId}' has pending tasks (${detection.completedTasksCount}/${detection.totalTasksCount} completed).`,
         };
         console.log(JSON.stringify(payload, null, 2));
       }
@@ -310,21 +310,21 @@ export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
     changeId = detection.changeId;
     if (!isSilent) {
       console.log(
-        pc.cyan(`  ✔ Cambio SDD detectado automáticamente: ${pc.bold(changeId)} (vía ${detection.source})`)
+        pc.cyan(`  ✔ Automatically detected SDD change: ${pc.bold(changeId)} (via ${detection.source})`)
       );
     }
   }
 
   if (!changeId) {
     if (!isSilent) {
-      console.error(pc.red('\n✖ Debe especificar el identificador del cambio (--change <id>) o la opción --auto.\n'));
+      console.error(pc.red('\n✖ Change identifier (--change <id>) or --auto option must be specified.\n'));
     }
     if (useJson) {
       const payload = {
         command: 'sdd:integrate',
         success: false,
         exitCode: 1,
-        error: 'Debe especificar el identificador del cambio (--change <id>) o la opción --auto.',
+        error: 'Change identifier (--change <id>) or --auto option must be specified.',
       };
       console.log(JSON.stringify(payload, null, 2));
     }
@@ -334,7 +334,7 @@ export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
   if (!isSilent) {
     console.log(
       pc.bold(
-        pc.cyan(`\n🔄 [AI-SDLC SDD] Integrando cambio '${changeId}' en la especificación canónica...`)
+        pc.cyan(`\n🔄 [AI-SDLC SDD] Integrating change '${changeId}' into canonical specification...`)
       )
     );
   }
@@ -348,21 +348,21 @@ export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
 
   if (!isSilent) {
     if (result.success) {
-      console.log(`  ${pc.green('✔')} Cambio '${changeId}' procesado exitosamente:`);
-      console.log(`    - Tareas completadas:          ${pc.bold(String(result.completedTasks.length))}`);
-      console.log(`    - Requerimientos integrados:   ${pc.green(result.integratedRequirements.join(', ') || 'Ninguno')}`);
-      console.log(`    - Artefactos producto modif.:  ${pc.green(result.updatedProductArtifacts.join(', ') || 'Ninguno')}`);
-      console.log(`    - Arquitectura arc42 modif.:   ${pc.green(result.updatedArchitectureArtifacts.join(', ') || 'Ninguno')}`);
+      console.log(`  ${pc.green('✔')} Change '${changeId}' successfully processed:`);
+      console.log(`    - Completed tasks:             ${pc.bold(String(result.completedTasks.length))}`);
+      console.log(`    - Integrated requirements:     ${pc.green(result.integratedRequirements.join(', ') || 'None')}`);
+      console.log(`    - Updated product artifacts:   ${pc.green(result.updatedProductArtifacts.join(', ') || 'None')}`);
+      console.log(`    - Updated arc42 architecture:  ${pc.green(result.updatedArchitectureArtifacts.join(', ') || 'None')}`);
       if (result.archived) {
-        console.log(`    - Archivado a:                 ${pc.cyan(result.archivedPath || 'specs/changes/completed')}`);
+        console.log(`    - Archived to:                 ${pc.cyan(result.archivedPath || 'specs/changes/completed')}`);
       }
-      console.log(pc.green('\n✔ Integración en la especificación canónica COMPLETADA (EXIT 0)\n'));
+      console.log(pc.green('\n✔ Canonical specification integration COMPLETED (EXIT 0)\n'));
     } else {
-      console.log(pc.red(`\n✖ Fallo al integrar el cambio '${changeId}':`));
+      console.log(pc.red(`\n✖ Failed to integrate change '${changeId}':`));
       for (const err of result.errors) {
         console.log(`    ${pc.red('✖')} ${err}`);
       }
-      console.log(pc.red('\n✖ Integración BLOQUEADA (EXIT 1)\n'));
+      console.log(pc.red('\n✖ Integration BLOCKED (EXIT 1)\n'));
     }
   }
 
@@ -409,7 +409,7 @@ export function runChangeNew(options: ChangeNewCliOptions): boolean {
   if (!isSilent) {
     console.log(
       pc.bold(
-        pc.cyan(`\n📦 [AI-SDLC SDD] Creando andamiaje de nuevo cambio SDD '${name}' (${framework})...`)
+        pc.cyan(`\n📦 [AI-SDLC SDD] Scaffolding new SDD change '${name}' (${framework})...`)
       )
     );
   }
@@ -427,24 +427,24 @@ export function runChangeNew(options: ChangeNewCliOptions): boolean {
 
   if (!isSilent) {
     if (result.success) {
-      console.log(`  ${pc.green('✔')} Directorio del cambio: ${pc.bold(result.changeDir)}`);
-      console.log(`  ${pc.green('✔')} ID de Cambio SDD:     ${pc.cyan(result.canonicalId)} (${result.changeId})`);
-      console.log(`  ${pc.green('✔')} Perfil de riesgo:      ${pc.magenta(result.profile || 'standard')}`);
+      console.log(`  ${pc.green('✔')} Change directory:    ${pc.bold(result.changeDir)}`);
+      console.log(`  ${pc.green('✔')} SDD Change ID:       ${pc.cyan(result.canonicalId)} (${result.changeId})`);
+      console.log(`  ${pc.green('✔')} Risk profile:        ${pc.magenta(result.profile || 'standard')}`);
       if (result.productArtifactCreated) {
-        console.log(`  ${pc.green('✔')} Artefacto de producto:  ${pc.bold(result.productArtifactCreated)} (status: draft)`);
+        console.log(`  ${pc.green('✔')} Product artifact:    ${pc.bold(result.productArtifactCreated)} (status: draft)`);
       }
-      console.log(`  ${pc.green('✔')} Artefactos citados:    ${result.citedArtifacts.length}`);
+      console.log(`  ${pc.green('✔')} Cited artifacts:     ${result.citedArtifacts.length}`);
       for (const cite of result.citedArtifacts) {
-        console.log(`    - [${pc.cyan(cite.id)}] ${cite.digest.substring(0, 19)}... (${cite.title || 'Sin título'})`);
+        console.log(`    - [${pc.cyan(cite.id)}] ${cite.digest.substring(0, 19)}... (${cite.title || 'Untitled'})`);
       }
-      console.log(`  ${pc.green('✔')} Archivos generados:    ${result.createdFiles.length}`);
-      console.log(pc.green('\n✔ Cambio SDD inicializado y validado exitosamente.\n'));
+      console.log(`  ${pc.green('✔')} Generated files:     ${result.createdFiles.length}`);
+      console.log(pc.green('\n✔ SDD change successfully initialized and validated.\n'));
     } else {
-      console.log(pc.red(`\n✖ Fallo al crear el cambio SDD '${name}':`));
+      console.log(pc.red(`\n✖ Failed to create SDD change '${name}':`));
       for (const err of result.errors) {
         console.log(`    ${pc.red('✖')} ${err}`);
       }
-      console.log(pc.red('\n✖ Creación de cambio BLOQUEADA\n'));
+      console.log(pc.red('\n✖ Change creation BLOCKED\n'));
     }
   }
 

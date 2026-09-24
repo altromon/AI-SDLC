@@ -1,72 +1,72 @@
 ---
-id: UFB-NOMBRE-001
+id: UFB-NAME-001
 type: user-feedback
-title: "Evaluación de Diseño y Experiencia de Usuario: [Funcionalidad / Caso de Uso]"
+title: "Design and User Experience Evaluation: [Feature / Use Case]"
 status: draft # draft | approved | archived
 version: "1.0.0"
 schema-version: "1.0"
-evaluator-actor: ACT-NOMBRE # Actor evaluado (ej. ACT-OPERATOR, ACT-USER)
+evaluator-actor: ACT-NAME # Evaluated actor (e.g. ACT-OPERATOR, ACT-USER)
 target-use-cases:
-  - UC-NOMBRE-001
-target-change: CHG-XXX # Identificador del cambio SDD analizado
+  - UC-NAME-001
+target-change: CHG-XXX # Analyzed SDD change identifier
 created-at: "YYYY-MM-DD"
 supersedes: null
 superseded-by: null
 ---
 
-# UFB-NOMBRE-001: Evaluación de Diseño y Experiencia de Usuario: [Título Descriptivo]
+# UFB-NAME-001: Design and User Experience Evaluation: [Descriptive Title]
 
-> **Propósito:** Contrastar la definición del producto, especificaciones o interfaces técnicas desde la perspectiva de un usuario final o avanzado, estableciendo el corte estricto del MVP inmediato y capturando sugerencias estructuradas para el roadmap futuro.
-
----
-
-## 1. Contexto de la Persona Operativa (Persona Environment)
-
-Describe el perfil y las circunstancias operativas reales en las que el actor interactúa con el sistema:
-- **Actor Primario**: `ACT-[NOMBRE]`
-- **Entorno de Operación**: (ej. Trabajo de campo con luz solar directa, consola de mando en centro de operaciones, oficina ruidosa, movilidad en dispositivo táctil).
-- **Condiciones Críticas**: (ej. Conectividad intermitente/baja latencia, estrés por toma de decisiones rápidas, volumen alto de eventos por minuto).
-- **Expectativa Clave**: (ej. Confirmación inmediata de éxito, autonomía offline, reducción de pasos repetitivos).
+> **Purpose:** Contrast product definition, specifications, or technical interfaces from an end-user or power-user perspective, establishing a strict immediate MVP cut and capturing structured suggestions for the future roadmap.
 
 ---
 
-## 2. Propuesta de Alcance Mínimo Viable (MVP)
-> *Criterio de Inclusión: Lo estrictamente indispensable para que el actor alcance su objetivo funcional con certeza, sin fricción crítica, sin pérdida de datos y con visibilidad clara del estado.*
+## 1. Operating Persona Context (Persona Environment)
 
-### A. Flujo Esencial (Core Journey)
-Secuencia mínima de pasos para completar la tarea:
-1. **Inicio / Entrada**: [Punto de partida del usuario y datos iniciales requeridos]
-2. **Acción Principal**: [Interacción nuclear para procesar la intención]
-3. **Confirmación y Estado**: [Respuesta visible del sistema confirmando la ejecución]
-
-### B. Requisitos Indispensables de Usuario (Must-Have)
-- [ ] **[MVP-01] Prevención de Errores Irreversibles**: [Salvaguarda o confirmación clara si la acción altera datos permanentes o ejecuta operaciones destructivas].
-- [ ] **[MVP-02] Visibilidad del Estado en Tiempo Real**: [Indicador visual de progreso o estado del proceso (ej. procesando, sincronizado, offline)].
-- [ ] **[MVP-03] Mensajes de Error Accionables**: [Mensajes en lenguaje claro del dominio de negocio que indiquen la causa y cómo corregirla, sin filtrar trazas técnicas internas].
+Describes the profile and real-world operational circumstances under which the actor interacts with the system:
+- **Primary Actor**: `ACT-[NAME]`
+- **Operating Environment**: (e.g. Field work under direct sunlight, command console in operations center, noisy office, mobile touch device).
+- **Critical Conditions**: (e.g. Intermittent connectivity / low latency, high-stress rapid decision making, high event volume per minute).
+- **Key Expectation**: (e.g. Immediate confirmation of success, offline autonomy, reduction of repetitive steps).
 
 ---
 
-## 3. Banco de Sugerencias para el Roadmap (Future Candidates)
-> *Criterio: Sugerencias de valor, optimizaciones de flujo y necesidades avanzadas que NO bloquean el MVP, preservadas para priorización del Product Owner.*
+## 2. Minimum Viable Product (MVP) Scope Proposal
+> *Inclusion Criterion: Strictly indispensable requirements for the actor to achieve their functional objective with certainty, without critical friction, without data loss, and with clear state visibility.*
 
-| ID Candidato | Categoría | Descripción y Dolor Resuelto | Impacto UX | Complejidad Estimada |
+### A. Essential Flow (Core Journey)
+Minimum sequence of steps to complete the task:
+1. **Start / Input**: [User entry point and required initial data]
+2. **Main Action**: [Core interaction to process intent]
+3. **Confirmation and State**: [Visible system response confirming execution]
+
+### B. Indispensable User Requirements (Must-Have)
+- [ ] **[MVP-01] Irreversible Error Prevention**: [Safeguard or clear confirmation if the action modifies permanent data or executes destructive operations].
+- [ ] **[MVP-02] Real-Time State Visibility**: [Visual indicator of progress or process state (e.g. processing, synchronized, offline)].
+- [ ] **[MVP-03] Actionable Error Messages**: [Clear domain language messages indicating cause and remediation, without leaking internal technical traces].
+
+---
+
+## 3. Roadmap Suggestion Bank (Future Candidates)
+> *Criterion: Value-add suggestions, flow optimizations, and advanced needs that DO NOT block the MVP, preserved for Product Owner prioritization.*
+
+| Candidate ID | Category | Description and Pain Relieved | UX Impact | Estimated Complexity |
 | :--- | :--- | :--- | :---: | :---: |
-| **RDM-001** | *Productividad* | **Atajos de teclado / Flujo rápido:** Permite ejecutar la acción principal sin ratón para usuarios intensivos. | Alto | Baja |
-| **RDM-002** | *Resiliencia* | **Guardado local en borrador (Draft Mode):** En caso de corte de red, retener entradas de formulario para evitar reescritura. | Alto | Media |
-| **RDM-003** | *Automatización* | **Acciones en lote (Bulk Actions):** Selección múltiple para aplicar el estado a varios elementos simultáneamente. | Medio | Media |
-| **RDM-004** | *Visibilidad* | **Historial y Auditoría en Interfaz:** Vista rápida del registro histórico de cambios recientes visible para el operador. | Medio | Baja |
+| **RDM-001** | *Productivity* | **Keyboard shortcuts / Quick flow:** Allows executing main action without a mouse for power users. | High | Low |
+| **RDM-002** | *Resilience* | **Local draft saving (Draft Mode):** Retains form inputs upon network drop to prevent rewrite. | High | Medium |
+| **RDM-003** | *Automation* | **Bulk actions:** Multi-selection to apply state to multiple elements simultaneously. | Medium | Medium |
+| **RDM-004** | *Visibility* | **Interface history and audit:** Quick view of recent change logs visible to the operator. | Medium | Low |
 
 ---
 
-## 4. Preguntas Estratégicas para el Product Owner (`open-questions`)
-Cuestiones abiertas que requieren decisión de negocio para incluir en el cambio activo o diferir:
-1. *¿El volumen inicial de uso justifica incorporar la acción en lote (RDM-003) en este incremento o se valida primero el flujo individual?*
-2. *¿Es aceptable que en el MVP el historial (RDM-004) se consulte vía registros de servidor antes de exponerlo en la UI?*
+## 4. Strategic Questions for Product Owner (`open-questions`)
+Open questions requiring business decisions to include in the active change or defer:
+1. *Does initial usage volume justify incorporating bulk actions (RDM-003) in this increment, or should the single flow be validated first?*
+2. *Is it acceptable for the MVP that history (RDM-004) be queried via server logs prior to exposing it in the UI?*
 
 ---
 
-## 5. Historial de Revisiones y Control de Versiones
+## 5. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Análisis | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Analysis Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | YYYY-MM-DD | agent-expert-user | Análisis inicial de diseño y corte MVP vs. Roadmap | CHG-XXX |
+| **1.0.0** | YYYY-MM-DD | agent-expert-user | Initial design analysis and MVP vs. Roadmap cut | CHG-XXX |

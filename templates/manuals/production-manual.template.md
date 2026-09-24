@@ -1,7 +1,7 @@
 ---
 id: MAN-PROD-001
 type: production-manual
-title: "Manual de Producción y Operaciones: Nombre de la Aplicación"
+title: "Production & Operations Manual: Application Name"
 status: draft
 version: "1.0.0"
 schema-version: "1.0"
@@ -12,303 +12,303 @@ target-audience:
   - release-manager
   - secops
 components-covered:
-  - CMP-NOMBRE-001
+  - CMP-NAME-001
 enclaves-involved:
   - SEC-ENC-DMZ-001
 supersedes: null
 superseded-by: null
 ---
 
-# MAN-PROD-001: Manual de Producción y Operaciones - Nombre de la Aplicación
+# MAN-PROD-001: Production & Operations Manual - Application Name
 
-## 1. Regeneración Determinista de Releases (Reproducible Builds)
+## 1. Deterministic Release Regeneration (Reproducible Builds)
 
-Esta sección contiene las especificaciones y directivas necesarias para reproducir de forma determinista e idéntica bit a bit cualquier artefacto o release de la aplicación a partir de su etiqueta Git.
+This section contains the specifications and directives required to deterministically reproduce identical bit-by-bit application artifacts or releases from their Git tag.
 
-### 1.1 Línea Base de Código Fuente
+### 1.1 Source Code Baseline
 
-- **Repositorio Canónico**: `https://github.com/organizacion/nombre-repo.git`
-- **Etiqueta Git Inmutable (Release Tag)**: `v1.0.0`
-- **Commit SHA-256 / SHA-1**: `[COMMIT_SHA_HEXADECIMAL_VERIFICADO]`
-- **Comando de Checkout Limpio**:
+- **Canonical Repository**: `https://github.com/organization/repo-name.git`
+- **Immutable Git Release Tag**: `v1.0.0`
+- **Commit SHA-256 / SHA-1**: `[VERIFIED_HEXADECIMAL_COMMIT_SHA]`
+- **Clean Checkout Command**:
   ```bash
-  git clone --recurse-submodules https://github.com/organizacion/nombre-repo.git
-  cd nombre-repo
+  git clone --recurse-submodules https://github.com/organization/repo-name.git
+  cd repo-name
   git checkout tags/v1.0.0
   git submodule update --init --recursive
   ```
 
-### 1.2 Matriz de Herramientas de Compilación y Toolchains Congeladas
+### 1.2 Frozen Toolchains and Build Tool Matrix
 
-Para evitar discrepancias en la generación de binarios o paquetes, se exige el uso estricto de las versiones fijadas de las siguientes utilidades:
+To prevent discrepancies in binary or package generation, strict usage of pinned versions of the following utilities is enforced:
 
-| Herramienta / Runtime | Versión Exacta | Checksum / Digest de Toolchain | Propósito |
+| Tool / Runtime | Exact Version | Toolchain Checksum / Digest | Purpose |
 | :--- | :--- | :--- | :--- |
-| **Node.js LTS** | `v22.12.0` | `sha256:node-v22.12.0-linux-x64.tar.xz` | Entorno de ejecución y transpilación |
-| **pnpm** | `9.15.0` | `sha256:pnpm-v9.15.0` | Gestor de paquetes determinista monorepo |
-| **TypeScript (tsc)** | `5.7.2` | Fijado en `devDependencies` | Compilador estricto a ECMAScript |
-| **Docker BuildKit** | `v0.18.0` | `moby/buildkit:v0.18.0` | Motor de empaquetado hermético OCI |
+| **Node.js LTS** | `v22.12.0` | `sha256:node-v22.12.0-linux-x64.tar.xz` | Execution and transpilation runtime |
+| **pnpm** | `9.15.0` | `sha256:pnpm-v9.15.0` | Deterministic monorepo package manager |
+| **TypeScript (tsc)** | `5.7.2` | Pinned in `devDependencies` | Strict ECMAScript compiler |
+| **Docker BuildKit** | `v0.18.0` | `moby/buildkit:v0.18.0` | Hermetic OCI packaging engine |
 
-### 1.3 Librerías, Dependencias y Grafo de Vértices
+### 1.3 Libraries, Dependencies, and Vertex Graph
 
-- **Archivo de Bloqueo Inmutable (Lockfile)**: `pnpm-lock.yaml` (o `Cargo.lock`, `go.sum`, `requirements.lock`). Prohibido ejecutar instalaciones con resolución abierta (`pnpm install --frozen-lockfile` obligatorio).
-- **Inventario SBOM (Software Bill of Materials)**:
-  - Formato: CycloneDX JSON v1.5 / SPDX v2.3.
-  - Ruta de SBOM compilado: `reports/sbom-cyclonedx.json`.
-- **Gobernanza de Licencias OSS**:
-  - Política vinculante: `license-policy.yaml`.
-  - Verificación previa de vértices de librerías:
+- **Immutable Lockfile**: `pnpm-lock.yaml` (or `Cargo.lock`, `go.sum`, `requirements.lock`). Installations with open resolution are forbidden (`pnpm install --frozen-lockfile` mandatory).
+- **SBOM (Software Bill of Materials) Inventory**:
+  - Format: CycloneDX JSON v1.5 / SPDX v2.3.
+  - Compiled SBOM path: `reports/sbom-cyclonedx.json`.
+- **OSS License Governance**:
+  - Binding policy: `license-policy.yaml`.
+  - Library vertex pre-verification:
     ```bash
     pnpm verify:licenses
     ```
 
-### 1.4 Procedimiento Determinista de Compilación Paso a Paso
+### 1.4 Step-by-Step Deterministic Build Procedure
 
-1. **Paso 1: Instalación Hermética de Dependencias**
+1. **Step 1: Hermetic Dependency Installation**
    ```bash
    pnpm install --frozen-lockfile --ignore-scripts
    ```
 
-2. **Paso 2: Verificación de Integridad y Tipado Estricto**
+2. **Step 2: Integrity and Strict Type Checking**
    ```bash
    pnpm typecheck
    ```
 
-3. **Paso 3: Compilación de Artefactos**
+3. **Step 3: Artifact Compilation**
    ```bash
    export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
    pnpm build
    ```
 
-4. **Paso 4: Verificación Criptográfica del Artefacto Generado**
+4. **Step 4: Cryptographic Verification of Generated Artifact**
    ```bash
    sha256sum dist/app.bundle.js
-   # Comparar contra el checksum canónico registrado en el release oficial:
-   # Expected: [CHECKSUM_SHA256_CANONICO]
+   # Compare against the canonical checksum registered in official release:
+   # Expected: [CANONICAL_SHA256_CHECKSUM]
    ```
 
 ---
 
-## 2. Matriz de Compatibilidad de Versiones, Infraestructura y Migración
+## 2. Version, Infrastructure, and Migration Compatibility Matrix
 
-Esta sección define los límites de interoperabilidad técnica entre la versión del release y el ecosistema de despliegue, garantizando transiciones seguras sin interrupción de servicio (*Zero-Downtime*).
+This section defines technical interoperability boundaries between the release version and the deployment ecosystem, ensuring safe Zero-Downtime transitions.
 
-### 2.1 Compatibilidad con Plataformas y Runtimes de Ejecución
+### 2.1 Platform and Execution Runtime Compatibility
 
-| Componente de Infraestructura | Rango de Versiones Homologadas | Versión Recomendada | Estado de Soporte |
+| Infrastructure Component | Approved Version Range | Recommended Version | Support Status |
 | :--- | :--- | :--- | :---: |
-| **Clúster Kubernetes (K8s)** | `>= 1.28` y `<= 1.31` | `1.30.2` | ✅ Certificado |
-| **Container Runtime (CRI)** | containerd `>= 1.7` / CRI-O `>= 1.28` | containerd `1.7.15` | ✅ Certificado |
-| **Sistema Operativo Base (Host)** | Ubuntu 22.04 LTS / RHEL 9.2+ | Ubuntu 22.04 LTS (Kernel 6.x) | ✅ Homologado |
-| **Runtime de Lenguaje (Producción)** | Node.js `>= 20.x` y `<= 22.x` | `v22.12.0 LTS` | ✅ Hermético |
+| **Kubernetes Cluster (K8s)** | `>= 1.28` and `<= 1.31` | `1.30.2` | ✅ Certified |
+| **Container Runtime (CRI)** | containerd `>= 1.7` / CRI-O `>= 1.28` | containerd `1.7.15` | ✅ Certified |
+| **Base Operating System (Host)** | Ubuntu 22.04 LTS / RHEL 9.2+ | Ubuntu 22.04 LTS (Kernel 6.x) | ✅ Homologated |
+| **Language Runtime (Production)** | Node.js `>= 20.x` and `<= 22.x` | `v22.12.0 LTS` | ✅ Hermetic |
 
-### 2.2 Compatibilidad de Esquemas de Datos y Migraciones (Soporte $N-1$)
+### 2.2 Data Schema and Migration Compatibility (N-1 Support)
 
-Para posibilitar despliegues continuos tipo *Canary* o *Blue-Green* sin pérdida de transacciones:
+To enable Canary or Blue-Green continuous deployments without transaction loss:
 
-| Versión del Release | Versión de Esquema DB | Compatible con Código $N-1$ | Estado de Migración de Esquema |
+| Release Version | DB Schema Version | Compatible with $N-1$ Code | Schema Migration Status |
 | :---: | :---: | :---: | :--- |
-| **`v1.0.0`** (Actual) | `SCHEMA-v1.0` | ✅ Sí (soporta código `v0.9.x`) | Migración aditiva no destructiva (sin renombre de columnas). |
-| **`v0.9.x`** | `SCHEMA-v0.9` | ✅ Línea base previa | Totalmente compatible durante el periodo de drenado Canary. |
+| **`v1.0.0`** (Current) | `SCHEMA-v1.0` | ✅ Yes (supports `v0.9.x` code) | Non-destructive additive migration (no column renaming). |
+| **`v0.9.x`** | `SCHEMA-v0.9` | ✅ Previous baseline | Fully compatible during Canary drain period. |
 
-### 2.3 Interoperabilidad entre Componentes de Arquitectura (`CMP-*`)
+### 2.3 Interoperability Between Architecture Components (`CMP-*`)
 
-| Componente Dependiente | Componente Consumido | Versiones Mínimas Compatibles | Protocolo / Contrato Vinculante |
+| Dependent Component | Consumed Component | Minimum Compatible Versions | Binding Protocol / Contract |
 | :--- | :--- | :---: | :--- |
-| `CMP-NOMBRE-001` (Gateway) | `CMP-NOMBRE-002` (Backend) | `>= v1.0.0` | gRPC / Protobuf v3 (`contract_spec.proto`) |
-| `CMP-NOMBRE-001` (Gateway) | Bus de Mensajería / Kafka | `>= 3.5.0` | Protocolo Kafka v2 con TLS mTLS |
+| `CMP-NAME-001` (Gateway) | `CMP-NAME-002` (Backend) | `>= v1.0.0` | gRPC / Protobuf v3 (`contract_spec.proto`) |
+| `CMP-NAME-001` (Gateway) | Messaging Bus / Kafka | `>= 3.5.0` | Kafka v2 Protocol with TLS mTLS |
 
-### 2.4 Rutas de Actualización y Marcha Atrás Homologadas (Upgrade & Rollback Paths)
+### 2.4 Homologated Upgrade & Rollback Paths
 
-| Versión Origen | Salto Directo a `v1.0.0` | Requiere Migración Intermedia | Procedimiento de Rollback Directo |
+| Source Version | Direct Jump to `v1.0.0` | Intermediate Migration Required | Direct Rollback Procedure |
 | :---: | :---: | :---: | :---: |
-| **`v0.9.1`** | ✅ Permitido | ❌ No requerida | `kubectl rollout undo` sin pérdida de datos. |
-| **`v0.9.0`** | ✅ Permitido | ❌ No requerida | `kubectl rollout undo` sin pérdida de datos. |
-| **`< v0.9.0`** | ❌ Bloqueado | ✅ Obligatorio actualizar a `v0.9.1` primero | Requiere restauración desde snapshot de backup. |
+| **`v0.9.1`** | ✅ Allowed | ❌ Not required | `kubectl rollout undo` without data loss. |
+| **`v0.9.0`** | ✅ Allowed | ❌ Not required | `kubectl rollout undo` without data loss. |
+| **`< v0.9.0`** | ❌ Blocked | ✅ Must upgrade to `v0.9.1` first | Requires restore from backup snapshot. |
 
 ---
 
-## 3. Arquitectura y Pipelines de CI/CD
+## 3. CI/CD Architecture and Pipelines
 
-### 3.1 Modelo de Ramas Jerárquico y Triggers de Integración
+### 3.1 Hierarchical Branching Model and Integration Triggers
 
-Conforme al estándar de 4 tiers de AI-SDLC:
+Following the AI-SDLC 4-tier standard:
 
 ```text
-TIER 1: main (Producción)
+TIER 1: main (Production)
   ▲
-  └── PR Release Gate (Aprobación Manual de Tech Lead / Release Manager)
+  └── PR Release Gate (Manual Tech Lead / Release Manager Approval)
         │
-TIER 2: release/v1.0.0 (Rama de Versión Abierta)
+TIER 2: release/v1.0.0 (Open Version Branch)
   ▲
   └── PR Feature Gate (Lint + Tests + Quality Gate + SAST + SBOM)
         │
 TIER 3: feat/CHG-001-* (Feature / Bug)
 ```
 
-- **Disparador en Pull Request**: Ejecuta linters, batería completa de tests y validaciones de gobernanza sin despliegue.
-- **Disparador en Tag de Release (`v*.*.*`)**: Ejecuta el pipeline completo de compilación hermética, firma de imagen y despliegue continuo.
+- **Pull Request Trigger**: Executes linters, full test battery, and governance verifications without deployment.
+- **Release Tag Trigger (`v*.*.*`)**: Executes the full hermetic build pipeline, image signing, and continuous deployment.
 
-### 2.2 Diagrama de Flujo del Pipeline CI/CD
+### 3.2 CI/CD Pipeline Flowchart
 
 ```mermaid
 flowchart LR
-    A[Git Push / Tag v1.0.0] --> B[Checkout Hermético]
-    B --> C[Linters & Typecheck]
-    C --> D[Vitest: Unit & BDD]
-    D --> E[Quality Gate: CC & MI]
-    E --> F[SAST & Secret Scan]
-    F --> G[SBOM & License Gate]
-    G --> H[Deterministic Build]
-    H --> I[Firma Cosign / SLSA]
-    I --> J[Push a OCI Registry]
-    J --> K[Despliegue a Enclave DMZ]
+    A["Git Push / Tag v1.0.0"] --> B["Hermetic Checkout"]
+    B --> C["Linters & Typecheck"]
+    C --> D["Vitest: Unit & BDD"]
+    D --> E["Quality Gate: CC & MI"]
+    E --> F["SAST & Secret Scan"]
+    F --> G["SBOM & License Gate"]
+    G --> H["Deterministic Build"]
+    H --> I["Cosign / SLSA Signing"]
+    I --> J["Push to OCI Registry"]
+    J --> K["Deploy to DMZ Enclave"]
 ```
 
-### 2.3 Contratos y Umbrales de los Release Gates
+### 3.3 Release Gate Contracts and Thresholds
 
-| Gate / Barrera de Calidad | Herramienta / Comando | Umbral Requerido | Acción ante Incumplimiento |
+| Quality Gate | Tool / Command | Required Threshold | Action on Non-Compliance |
 | :--- | :--- | :--- | :--- |
-| **Lint & Tipado** | `pnpm typecheck` | Cero errores, cero `any` | **Fallo inmediato** |
-| **Pruebas Automatizadas** | `pnpm test:all` | 100% aprobadas, Cobertura >= 85% | **Fallo inmediato** |
-| **Complejidad Ciclomática** | `aisdlc verify quality` | CC <= 10 por función | **Bloqueo de Release** |
-| **Índice de Mantenibilidad** | `aisdlc verify quality` | MI >= 50.0 / 100 | **Bloqueo de Release** |
-| **Trazabilidad 360°** | `aisdlc verify traceability` | 100% de requerimientos enlazados | **Bloqueo de Release** |
-| **Licencias OSS** | `aisdlc verify licenses` | Cero licencias prohibidas/virales | **Bloqueo de Release** |
-| **Firma Criptográfica** | `cosign verify` | Firma válida de la CA Corporativa | **Rechazo en Despliegue** |
+| **Lint & Typecheck** | `pnpm typecheck` | Zero errors, zero `any` | **Immediate failure** |
+| **Automated Tests** | `pnpm test:all` | 100% passed, Coverage >= 85% | **Immediate failure** |
+| **Cyclomatic Complexity** | `aisdlc verify quality` | CC <= 10 per function | **Release blocked** |
+| **Maintainability Index** | `aisdlc verify quality` | MI >= 50.0 / 100 | **Release blocked** |
+| **360° Traceability** | `aisdlc verify traceability` | 100% of requirements linked | **Release blocked** |
+| **OSS Licenses** | `aisdlc verify licenses` | Zero forbidden/viral licenses | **Release blocked** |
+| **Cryptographic Signature** | `cosign verify` | Valid signature from Corporate CA | **Deployment rejected** |
 
 ---
 
-## 4. Estrategia y Procedimiento de Despliegue a Producción
+## 4. Production Deployment Strategy and Procedure
 
-### 4.1 Requisitos Previos de Infraestructura y Enclaves de Red
+### 4.1 Infrastructure Prerequisites and Network Enclaves
 
-- **Enclave de Destino**: `SEC-ENC-DMZ-001` (Segmentación estricta sin acceso directo a internet saliente no controlado).
-- **Puertos de Red Habilitados**:
-  - Puerto `8443/TCP`: Ingestión WebSocket segura con autenticación mutua TLS (mTLS).
-  - Puerto `9090/TCP`: Métricas de Prometheus (solo red de gestión interna).
-- **Gestión de Secretos y Certificados**:
-  - Certificados TLS de servidor y CA raíz de clientes montados mediante secreto inmutable en `/etc/pki/tls/`.
-  - Prohibido embeber claves criptográficas en variables de entorno o imágenes.
+- **Target Enclave**: `SEC-ENC-DMZ-001` (Strict segmentation without direct uncontrolled outbound internet access).
+- **Enabled Network Ports**:
+  - Port `8443/TCP`: Secure WebSocket ingestion with mutual TLS (mTLS) authentication.
+  - Port `9090/TCP`: Prometheus metrics (internal management network only).
+- **Secrets and Certificate Management**:
+  - Server TLS and client root CA certificates mounted via immutable secret at `/etc/pki/tls/`.
+  - Embedding cryptographic keys in environment variables or images is strictly forbidden.
 
-### 4.2 Estrategia de Rollout
+### 4.2 Rollout Strategy
 
-Se utiliza la estrategia **Canary con análisis progresivo de métricas de telemetría**:
-1. El 10% del tráfico se enruta a la nueva versión durante 15 minutos.
-2. Si la tasa de error 5xx es `<= 0.01%` y la latencia p99 es `<= 50ms`, se promociona al 100%.
+A **Canary strategy with progressive telemetry metrics analysis** is utilized:
+1. 10% of traffic is routed to the new version for 15 minutes.
+2. If the 5xx error rate is `<= 0.01%` and p99 latency is `<= 50ms`, traffic is promoted to 100%.
 
-### 4.3 Procedimiento de Despliegue Paso a Paso
+### 4.3 Step-by-Step Deployment Procedure
 
-1. **Paso 1: Pre-despliegue y Snapshot de Estado**
+1. **Step 1: Pre-deployment and State Snapshot**
    ```bash
-   # Comprobar estado del clúster y registrar baseline
-   kubectl get pods -n production -l app=sistema
-   kubectl exec -it sistema-db-0 -- /backup/create-snapshot.sh
+   # Check cluster health and record baseline
+   kubectl get pods -n production -l app=system
+   kubectl exec -it system-db-0 -- /backup/create-snapshot.sh
    ```
 
-2. **Paso 2: Aplicación del Manifiesto de Despliegue**
+2. **Step 2: Deployment Manifest Application**
    ```bash
    kubectl apply -f deploy/production/canary-deployment.yaml
-   kubectl rollout status deployment/sistema-service -n production --timeout=180s
+   kubectl rollout status deployment/system-service -n production --timeout=180s
    ```
 
-3. **Paso 3: Verificación de Salud y Pruebas de Humo (Smoke Tests)**
+3. **Step 3: Health Verification and Smoke Tests**
    ```bash
    curl -f --cacert /etc/pki/tls/ca.crt https://127.0.0.1:8443/healthz
    curl -f --cacert /etc/pki/tls/ca.crt https://127.0.0.1:8443/readyz
    pnpm test:example
    ```
 
-### 4.4 Plan de Marcha Atrás (Rollback Inmediato)
+### 4.4 Rollback Plan (Immediate Rollback)
 
-- **Criterios Objetivos de Activación de Rollback**:
-  - Tasa de fallos en handshake mTLS `> 1.0%`.
-  - Latencia de ingestión p99 `> 100ms` durante 2 minutos continuados.
-  - Alerta crítica de `CrashLoopBackOff` en más del 20% de las instancias.
-- **Comando de Ejecución de Rollback**:
+- **Objective Rollback Activation Criteria**:
+  - mTLS handshake failure rate `> 1.0%`.
+  - Ingestion p99 latency `> 100ms` for 2 continuous minutes.
+  - Critical `CrashLoopBackOff` alert on more than 20% of instances.
+- **Rollback Execution Command**:
   ```bash
-  kubectl rollout undo deployment/sistema-service -n production
-  kubectl rollout status deployment/sistema-service -n production
+  kubectl rollout undo deployment/system-service -n production
+  kubectl rollout status deployment/system-service -n production
   ```
 
 ---
 
-## 5. Resolución de Errores Probables y Troubleshooting (Runbooks)
+## 5. Likely Errors Resolution and Troubleshooting (Runbooks)
 
-Esta sección documenta los fallos más frecuentes en runtime y despliegue, junto con su diagnóstico y procedimiento de mitigación inmediata.
+This section documents the most frequent runtime and deployment failures along with diagnosis and immediate mitigation procedures.
 
-### 5.1 Matriz de Incidencias Frecuentes y Soluciones
+### 5.1 Frequent Incidents and Solutions Matrix
 
-#### Incidencia 1: Inconsistencia o Drift en Vértices de Dependencias (Build Failure)
-- **Síntoma**: El comando `pnpm install --frozen-lockfile` falla en CI con error `ERR_PNPM_LOCKFILE_OUTDATED`.
-- **Causa Raíz**: Se modificó `package.json` sin actualizar correspondientemente `pnpm-lock.yaml`.
-- **Diagnóstico**:
+#### Incident 1: Dependency Vertex Inconsistency or Drift (Build Failure)
+- **Symptom**: `pnpm install --frozen-lockfile` command fails in CI with error `ERR_PNPM_LOCKFILE_OUTDATED`.
+- **Root Cause**: `package.json` was modified without updating `pnpm-lock.yaml`.
+- **Diagnosis**:
   ```bash
   git diff HEAD^ package.json pnpm-lock.yaml
   ```
-- **Mitigación**:
-  1. En la rama de feature, ejecutar `pnpm install` localmente para regenerar el lockfile determinista.
-  2. Verificar que no se introdujeron dependencias con licencias restringidas mediante `pnpm verify:licenses`.
-  3. Comitear ambos archivos juntos en un commit atómico.
+- **Mitigation**:
+  1. On the feature branch, run `pnpm install` locally to regenerate the deterministic lockfile.
+  2. Verify no restricted-license dependencies were introduced via `pnpm verify:licenses`.
+  3. Commit both files together in an atomic commit.
 
 ---
 
-#### Incidencia 2: Fallo de Handshake mTLS o Certificado de Enclave Rechazado
-- **Síntoma**: Los clientes reciben error `ERR_TLS_CERT_ALTNAME_INVALID` o conexión cerrada con alerta TLS `certificate_unknown (46)`.
-- **Causa Raíz**: La CA raíz interna montada en el servidor no coincide con la CA emisora del certificado del cliente, o el certificado expiró.
-- **Diagnóstico**:
+#### Incident 2: mTLS Handshake Failure or Enclave Certificate Rejected
+- **Symptom**: Clients receive error `ERR_TLS_CERT_ALTNAME_INVALID` or connection closed with TLS alert `certificate_unknown (46)`.
+- **Root Cause**: Internal root CA mounted on server does not match the client certificate issuer CA, or certificate expired.
+- **Diagnosis**:
   ```bash
   openssl s_client -connect 127.0.0.1:8443 -CAfile /etc/pki/tls/ca.crt -cert /etc/pki/tls/client.crt -key /etc/pki/tls/client.key
   openssl x509 -in /etc/pki/tls/ca.crt -noout -dates -issuer -subject
   ```
-- **Mitigación**:
-  1. Verificar la fecha de validez del certificado montado en el Secret del clúster.
-  2. Si expiró, rotar el certificado inyectando el nuevo par desde el almacén HSM / Vault.
-  3. Reiniciar ordenadamente los pods con `kubectl rollout restart deployment/sistema-service`.
+- **Mitigation**:
+  1. Verify expiration date of certificate mounted in cluster Secret.
+  2. If expired, rotate the certificate by injecting the new pair from HSM / Vault storage.
+  3. Orderly restart pods with `kubectl rollout restart deployment/system-service`.
 
 ---
 
-#### Incidencia 3: Rechazo del Release Gate en CI/CD por Métricas de Calidad
-- **Síntoma**: El pipeline aborta con veredicto `Quality Gate RECHAZADO` (Complejidad Ciclomática > 10 o Mantenibilidad < 50).
-- **Causa Raíz**: Introducción de lógica anidada compleja (múltiples `if/else`, `switch` extensos o bucles con ramificaciones).
-- **Diagnóstico**:
+#### Incident 3: Release Gate Rejection in CI/CD Due to Quality Metrics
+- **Symptom**: Pipeline aborts with verdict `Quality Gate REJECTED` (Cyclomatic Complexity > 10 or Maintainability < 50).
+- **Root Cause**: Introduction of complex nested logic (multiple `if/else`, extensive `switch`, or branching loops).
+- **Diagnosis**:
   ```bash
   pnpm verify:quality
   ```
-- **Mitigación**:
-  1. Inspeccionar el reporte de infracciones en `reports/QUALITY_GATE_REPORT.md` para identificar la función infractora.
-  2. Descomponer la función en métodos privados auxiliares cohesivos siguiendo la regla de máximo 40 líneas por función.
-  3. Re-ejecutar `pnpm verify:quality` hasta confirmar veredicto verde. Prohibido añadir comentarios de supresión (`// @ts-ignore`).
+- **Mitigation**:
+  1. Inspect the violation report in `reports/QUALITY_GATE_REPORT.md` to identify the offending function.
+  2. Decompose function into cohesive private helper methods following the rule of maximum 40 lines per function.
+  3. Re-run `pnpm verify:quality` until green verdict is confirmed. Adding suppression comments (`// @ts-ignore`) is forbidden.
 
 ---
 
-#### Incidencia 4: CrashLoopBackOff por Fuga de Memoria o Límite de Conexiones
-- **Síntoma**: El pod es terminado con código `ExitCode: 137` (`OOMKilled`) tras un aumento de carga.
-- **Causa Raíz**: Acumulación de buffers de sockets no drenados en ráfagas de alta frecuencia.
-- **Diagnóstico**:
+#### Incident 4: CrashLoopBackOff Due to Memory Leak or Connection Limit
+- **Symptom**: Pod is terminated with exit code `ExitCode: 137` (`OOMKilled`) after a load spike.
+- **Root Cause**: Undrained socket buffer accumulation during high-frequency bursts.
+- **Diagnosis**:
   ```bash
-  kubectl describe pod sistema-service-xxx -n production | grep -i oom
-  kubectl logs sistema-service-xxx -n production --previous
+  kubectl describe pod system-service-xxx -n production | grep -i oom
+  kubectl logs system-service-xxx -n production --previous
   ```
-- **Mitigación**:
-  1. Ajustar los límites de memoria en el manifiesto Kubernetes (`resources.limits.memory`) temporalmente si la ráfaga es legítima.
-  2. Aplicar backpressure o descarte de paquetes caducados conforme a las reglas de negocio (`BR-*`).
-  3. Ejecutar benchmark local con `pnpm test:all` para auditar consumo de memoria.
+- **Mitigation**:
+  1. Temporarily adjust memory limits in Kubernetes manifest (`resources.limits.memory`) if the load burst is legitimate.
+  2. Apply backpressure or discard expired packets in accordance with business rules (`BR-*`).
+  3. Run local benchmark with `pnpm test:all` to audit memory consumption.
 
 ---
 
-### 5.2 Protocolo de Escalado y Gestión de Incidentes Críticos
+### 5.2 Escalation Protocol and Critical Incident Management
 
-| Nivel de Severidad | Criterio de Impacto | Tiempo Máximo de Respuesta | Roles Involucrados |
+| Severity Level | Impact Criterion | Maximum Response Time | Roles Involved |
 | :--- | :--- | :---: | :--- |
-| **SEV-1 (Crítica)** | Caída total del servicio o brecha de seguridad en enclave. | 15 minutos | SRE de Guardia + Lead Architect + SecOps |
-| **SEV-2 (Mayor)** | Degradación severa del servicio, reintentos masivos sin caída. | 1 hora | SRE de Guardia + Tech Lead |
-| **SEV-3 (Menor)** | Incidencia aislada en un nodo sin impacto en SLA global. | 4 horas | Ingeniero de Soporte / DevOps |
+| **SEV-1 (Critical)** | Complete service outage or security breach in enclave. | 15 minutes | On-call SRE + Lead Architect + SecOps |
+| **SEV-2 (Major)** | Severe service degradation, massive retries without outage. | 1 hour | On-call SRE + Tech Lead |
+| **SEV-3 (Minor)** | Isolated node incident without global SLA impact. | 4 hours | Support Engineer / DevOps |
 
 ---
 
-## 6. Historial de Revisiones y Control de Versiones
+## 6. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-15 | Equipo de Operaciones y DevOps | Generación inicial del Manual de Producción | CHG-009 |
+| **1.0.0** | 2026-09-15 | Operations & DevOps Team | Initial Production Manual generation | CHG-009 |

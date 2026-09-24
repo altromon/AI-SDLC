@@ -26,7 +26,7 @@ describe('Release KPI Report Formatter and Defect Attribution', () => {
     reworkCostPercent: 7.04,
     authorStats: [
       {
-        authorOrModel: 'Humano (lead-dev)',
+        authorOrModel: 'Human (lead-dev)',
         isAgent: false,
         commits: 5,
         linesAdded: 1000,
@@ -75,7 +75,7 @@ describe('Release KPI Report Formatter and Defect Attribution', () => {
   it('formats release Markdown report with DIR and rework ratios', () => {
     const md = formatReleaseKpiMarkdown(sampleReport);
 
-    expect(md).toContain('# 📈 Informe Consolidado de KPIs de Release: `release/v1.1.0`');
+    expect(md).toContain('# 📈 Consolidated Release KPI Report: `release/v1.1.0`');
     expect(md).toContain('0.56 bugs / KLoC');
     expect(md).toContain('claude-3-7-sonnet');
     expect(md).toContain('**0.8**'); // DIR for claude

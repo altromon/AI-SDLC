@@ -50,7 +50,7 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
     const agFile = path.join(tempDir, '.agent/rules/ai-sdlc.md');
     expect(fs.existsSync(agFile)).toBe(true);
     const agContent = fs.readFileSync(agFile, 'utf-8');
-    expect(agContent).toContain('PROHIBIDO AUTO-APROBAR');
+    expect(agContent).toContain('NO AUTO-APPROVE');
     expect(agContent).toContain('agent-product-analyst');
     expect(agContent).toContain('agent-expert-user');
     expect(agContent).toContain('Workflow Handoff');
@@ -65,7 +65,7 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
     const claudeFile = path.join(tempDir, 'CLAUDE.md');
     expect(fs.existsSync(claudeFile)).toBe(true);
     const claudeContent = fs.readFileSync(claudeFile, 'utf-8');
-    expect(claudeContent).toContain('PROHIBIDO AUTO-APROBAR');
+    expect(claudeContent).toContain('NO AUTO-APPROVE');
     expect(claudeContent).toContain('Workflow Handoff');
     expect(claudeContent).toContain('license-policy.yaml');
 

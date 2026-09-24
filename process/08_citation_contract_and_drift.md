@@ -1,140 +1,140 @@
-# 08. Contrato de Citación Criptográfica, Versionado Semántico y Detección de Deriva
+# 08. Cryptographic Citation Contract, Semantic Versioning, and Drift Detection
 
-## 1. El Modelo de Doble Versionado (Dual-Versioning Architecture)
+## 1. The Dual-Versioning Architecture
 
-Para garantizar la máxima trazabilidad en ecosistemas colaborativos donde intervienen personas, herramientas CLI y agentes de IA, el framework AI-SDLC implementa un **Modelo de Doble Versionado**:
+To ensure end-to-end traceability in collaborative environments involving humans, CLI tools, and AI agents, the AI-SDLC framework implements a **Dual-Versioning Architecture**:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   MODELO DE DOBLE VERSIONADO AI-SDLC                   │
+│                   AI-SDLC DUAL-VERSIONING ARCHITECTURE                 │
 └────────────────────────────────────────────────────────────────────────┘
 
- 1. VERSIONADO SEMÁNTICO Y AUDITABLE (SemVer + Changelog As-Code)
-    ├── Campo 'version: "X.Y.Z"' en el frontmatter del artefacto.
-    ├── Metadatos 'schema-version', 'supersedes' y 'superseded-by'.
-    └── Tabla obligatoria de 'Historial de Revisiones' en el cuerpo Markdown.
-    ► Propósito: Legibilidad humana inmediata, exportación de documentación,
-                 y gestión del ciclo de vida (draft ➔ active ➔ deprecated ➔ retired).
+ 1. AUDITABLE SEMANTIC VERSIONING (SemVer + Changelog As-Code)
+    ├── Field 'version: "X.Y.Z"' in artifact frontmatter.
+    ├── Metadata 'schema-version', 'supersedes', and 'superseded-by'.
+    └── Mandatory 'Revision History' table in the Markdown body.
+    ► Purpose: Immediate human readability, documentation export,
+                 and lifecycle management (draft ➔ active ➔ deprecated ➔ retired).
 
- 2. VERSIONADO CRIPTOGRÁFICO DETERMINISTA (Citations SHA-256)
-    ├── Hash SHA-256 calculado sobre el contenido canónico normalizado (LF).
-    └── Referencia en documentos consumidores: 'id + digest + anchor'.
-    ► Propósito: Detección automática en CI/CD de derivas silenciosas (drift).
-                 Si el texto cambia aunque la versión no se haya incrementado,
-                 el pipeline detecta estado 'stale' de forma inmediata.
+ 2. DETERMINISTIC CRYPTOGRAPHIC VERSIONING (SHA-256 Citations)
+    ├── SHA-256 hash calculated over normalized canonical UTF-8 content (LF).
+    └── Consumer document reference: 'id + digest + anchor'.
+    ► Purpose: Automated CI/CD detection of silent semantic drift.
+                 If text changes even without a version bump,
+                 the pipeline flags a 'stale' state immediately.
 
- 3. HISTORIAL DE LÍNEA BASE EN CONTROL DE VERSIONES (Git)
-    └── Commits firmados, PRs atómicos y tags de release en la rama principal.
+ 3. BASELINE HISTORY IN VERSION CONTROL (Git)
+    └── Signed commits, atomic PRs, and release tags on the main branch.
 ```
 
 ---
 
-## 2. Metadatos de Versionabilidad en Plantillas y Artefactos
+## 2. Versioning Metadata in Templates and Artifacts
 
-Todo artefacto instanciado a partir de las plantillas de `templates/` debe declarar explícitamente sus metadatos de versión:
+Every artifact instantiated from `templates/` must explicitly declare versioning metadata:
 
 ```yaml
 ---
 id: ACT-DRONE-OPERATOR
 type: actor
-title: Operador de Vuelo de Drones
+title: Drone Flight Operator
 status: active
-version: "1.0.0"          # SemVer obligatorio (MAJOR.MINOR.PATCH)
-schema-version: "1.0"     # Versión de la especificación de esquema
-supersedes: null          # Identificador del artefacto anterior si lo reemplaza
-superseded-by: null       # Identificador del artefacto sucesor al pasar a retired
+version: "1.0.0"          # Mandatory SemVer (MAJOR.MINOR.PATCH)
+schema-version: "1.0"     # Schema specification version
+supersedes: null          # Identifier of previous artifact if replaced
+superseded-by: null       # Identifier of successor artifact when retired
 ---
 ```
 
-### Reglas SemVer para Artefactos:
-- **MAJOR (`+1.0.0`)**: Modificación radical o ruptura de compatibilidad (ej. un caso de uso cambia su actor principal o precondiciones esenciales; una regla de negocio pasa de permisiva a estricta).
-- **MINOR (`0.+1.0`)**: Extensión o enriquecimiento sin ruptura (ej. se añaden escenarios alternativos a un caso de uso, nuevos criterios de verificación a un requerimiento o interfaces a un servicio).
-- **PATCH (`0.0.+1`)**: Aclaraciones editoriales, corrección de erratas sintácticas o refinamiento de redacción sin alterar el comportamiento normativo.
+### SemVer Rules for Artifacts:
+- **MAJOR (`+1.0.0`)**: Radical modification or breaking change (e.g., a use case changes its primary actor or essential preconditions; a business rule shifts from permissive to strict).
+- **MINOR (`0.+1.0`)**: Backward-compatible extension or enrichment (e.g., adding alternate scenarios to a use case, new verification criteria to a requirement, or interfaces to a service).
+- **PATCH (`0.0.+1`)**: Editorial clarifications, syntax errata fixes, or wording refinements without altering normative behavior.
 
 ---
 
-## 3. Tabla Obligatoria de Historial de Revisiones
+## 3. Mandatory Revision History Table
 
-Todo artefacto Markdown debe incluir al final de su cuerpo una sección estructurada:
+Every Markdown artifact must conclude with a structured revision history section:
 
 ```markdown
-## Historial de Revisiones y Control de Versiones
+## Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-03 | Carlos Mendoza | Creación inicial de la línea base | CHG-INIT-001 |
-| **1.1.0** | 2026-09-10 | Agente Analista | Incorporación de escenario de degradación | CHG-DEGRAD-002 |
+| **1.0.0** | 2026-09-03 | Carlos Mendoza | Initial baseline creation | CHG-INIT-001 |
+| **1.1.0** | 2026-09-10 | Analyst Agent | Added degradation scenario | CHG-DEGRAD-002 |
 ```
 
-Esta tabla permite que un agente de IA que analiza un archivo comprenda inmediatamente el contexto histórico y el motivo de las modificaciones sin necesidad de clonar o recorrer el historial complejo de Git.
+This table allows an AI agent inspecting a file to immediately understand historical context and rationale without needing to clone or traverse Git commit history.
 
 ---
 
-## 4. Anatomía de una Citación Criptográfica
+## 4. Anatomy of a Cryptographic Citation
 
-Un documento consumidor (una especificación SDD, un diseño técnico, un prompt de agente o una prueba de integración) **nunca reescribe el texto canónico**. En su lugar, emite un registro de citación:
+A consuming document (an SDD specification, a technical design, an agent prompt, or an integration test) **never duplicates canonical text**. Instead, it emits a citation record:
 
 ```yaml
 citations:
   - id: "FR-TELEMETRY-STREAM-001"
     digest: "sha256:50b17b58fc305bfd87f66c5d6c7f3496b24702b084e5b05495b7f1f79e9f4994"
     anchor: "SCENARIO-REALTIME-LATENCY"
-    comment: "Garantiza la entrega de telemetría de drones en menos de 100ms."
+    comment: "Guarantees drone telemetry delivery in under 100ms."
   - id: "SEC-REQ-MTLS-STREAM"
     digest: "sha256:f756830542ce5b850f5042dba59b7e025efba889a5489051e086b7a9849dd33f"
-    comment: "Autenticación mutua obligatoria mediante certificados x509."
+    comment: "Mandatory mutual authentication via x509 certificates."
 ```
 
-### Componentes del Registro:
-1. **`id`**: Identificador inmutable y canónico del artefacto citado (ej. `FR-001`, `UC-002`, `CMP-INGESTION`, `SEC-REQ-003`).
-2. **`digest`**: Hash criptográfico **SHA-256** calculado sobre el contenido UTF-8 canónico del artefacto (normalizado con saltos de línea LF).
-3. **`anchor` (Opcional)**: Ancla a un escenario específico dentro del artefacto (útil para pruebas concretas).
-4. **`comment`**: Explicación breve contextual del motivo de la citación.
+### Citation Record Components:
+1. **`id`**: Immutable canonical identifier of the cited artifact (e.g., `FR-001`, `UC-002`, `CMP-INGESTION`, `SEC-REQ-003`).
+2. **`digest`**: Cryptographic **SHA-256** hash calculated over the normalized canonical UTF-8 content of the artifact (with LF line endings).
+3. **`anchor` (Optional)**: Anchor pointing to a specific scenario inside the artifact (useful for targeted tests).
+4. **`comment`**: Brief contextual explanation of citation rationale.
 
 ---
 
-## 5. Estados de Verificación de una Citación
+## 5. Citation Verification States
 
-El validador determinista (`prodshape citations verify` o script del pipeline) recalcula los digests en tiempo real contra los archivos de la línea base y emite uno de los siguientes cuatro estados:
+The deterministic validator (`prodshape citations verify` or pipeline scripts) recalculates digests in real-time against baseline files and outputs one of four verification states:
 
-| Estado | Significado | Comportamiento del Sistema |
+| State | Meaning | System Behavior |
 | :--- | :--- | :--- |
-| **`current`** | El `id` existe y el hash `digest` coincide exactamente byte a byte con la línea base. | **Válido (Pass)**. La implementación está alineada con el producto y la arquitectura. |
-| **`stale`** | El `id` existe, pero el hash `digest` difiere del actual en la línea base (el requisito cambió). | **Deriva detectada (Fail exit 2)**. La especificación debe reevaluarse antes de codificar. |
-| **`unresolved`** | El `id` citado no existe en el grafo de producto ni de arquitectura. | **Enlace roto (Fail exit 1)**. Referencia a un artefacto inexistente o renombrado. |
-| **`tampered`** | El registro de citación fue alterado manualmente sin reflejar la fuente original. | **Integridad violada (Fail exit 1)**. |
+| **`current`** | The `id` exists and the hash `digest` matches byte-for-byte with the baseline. | **Valid (Pass)**. Implementation is aligned with product and architecture. |
+| **`stale`** | The `id` exists, but the hash `digest` differs from the baseline (requirement modified). | **Drift detected (Fail exit 2)**. Specification must be re-evaluated before coding. |
+| **`unresolved`** | The cited `id` does not exist in the product or architecture graph. | **Broken link (Fail exit 1)**. References a non-existent or renamed artifact. |
+| **`tampered`** | The citation record was manually altered without reflecting the original source. | **Integrity violation (Fail exit 1)**. |
 
 ---
 
-## 6. El Ciclo de Vida Libre de Deriva (Drift-Free Lifecycle)
+## 6. The Drift-Free Lifecycle
 
 ```mermaid
 flowchart TD
-    A[Línea Base: Requisito FR-001 v1.0.0] -->|Cita con digest v1| B[Spec SDD chg-001]
-    B -->|Implementa| C[Código en Producción]
+    A["Baseline: Requirement FR-001 v1.0.0"] -->|"Cite with digest v1"| B["SDD Spec chg-001"]
+    B -->|"Implements"| C["Production Code"]
 
-    D[Product Change: Incrementa FR-001 a v1.1.0] -->|Merge en main| E[Línea Base Actualizada: FR-001 v1.1.0]
+    D["Product Change: Increments FR-001 to v1.1.0"] -->|"Merge into main"| E["Updated Baseline: FR-001 v1.1.0"]
 
-    E -.->|prodshape citations verify| F{Evaluación del Pipeline}
-    B -.->|Lectura de digest| F
+    E -.->|"prodshape citations verify"| F{"Pipeline Evaluation"}
+    B -.->|"Read digest"| F
 
-    F -->|Hash no coincide!| G[ESTADO: STALE]
-    G --> H[Alerta Automática a Personas y Agentes]
-    H --> I[Agente genera propuesta de actualización de Spec]
-    I --> J{Aprobación Humana de la nueva Spec}
-    J -->|Aprobada| K[Spec SDD actualizada a digest v2]
-    K --> L[ESTADO: CURRENT]
+    F -->|"Hash mismatch!"| G["STATUS: STALE"]
+    G --> H["Automated Alert to Humans and Agents"]
+    H --> I["Agent drafts Spec update proposal"]
+    I --> J{"Human Approval of new Spec"}
+    J -->|"Approved"| K["SDD Spec updated to digest v2"]
+    K --> L["STATUS: CURRENT"]
 ```
 
 ---
 
-## 7. Empaquetamiento de Citaciones en Sidecars de Handoff (`HOF-*`)
+## 7. Citation Packaging in Handoff Sidecars (`HOF-*`)
 
-Para desacoplar los entornos de trabajo de agentes de entrega (SDD) de la lectura de repositorios masivos, PDaC empaqueta el subgrafo y sus citaciones canónicas en un archivo de acompañamiento (*sidecar*) `handoff.yaml`:
+To decouple delivery agent workspaces (SDD) from scanning massive repositories, PDaC packages the subgraph and its canonical citations into a `handoff.yaml` sidecar file:
 
-1. **Estructura Criptográfica del Sidecar**:
-   - Cada entrega recibe un identificador único de handoff (`HOF-*`).
-   - El archivo incluye la colección de citaciones canónicas:
+1. **Cryptographic Sidecar Structure**:
+   - Each delivery receives a unique handoff identifier (`HOF-*`).
+   - The file includes the canonical citation collection:
      ```yaml
      id: "HOF-001-TELEMETRY-INGESTION"
      citations:
@@ -142,11 +142,9 @@ Para desacoplar los entornos de trabajo de agentes de entrega (SDD) de la lectur
          targetId: "FR-TELEMETRY-STREAM-001"
          digest: "sha256:50b17b58fc305bfd87f66c5d6c7f3496b24702b084e5b05495b7f1f79e9f4994"
      ```
-2. **Invarianza y Detección de Deriva**:
-   - Si un archivo canónico de la línea base es modificado en `main`, el verificador `aisdlc verify traceability` detecta la divergencia de hash frente al `handoff.yaml` activo, bloqueando la entrega hasta que se re-emita el handoff y se re-apruebe el cambio.
+2. **Invariance and Drift Detection**:
+   - If a canonical baseline file is altered on `main`, the `aisdlc verify traceability` verifier detects the hash divergence against the active `handoff.yaml`, blocking delivery until handoff is re-emitted and approved.
 
-3. **Inmunidad ante Deriva Falsa por Trazabilidad Invertida**:
-   - Al no almacenar punteros descendentes (servicios o rutas de tests) dentro de los requerimientos canónicos, los artefactos de producto y seguridad (`FR-*`, `QR-*`, `SEC-REQ-*`) permanecen inmutables ante refactorizaciones de código o reorganización de suites de prueba.
-   - Esto erradica falsas alarmas de deriva (*stale citations*) y garantiza que los digests SHA-256 de las citaciones PDaC sólo cambien cuando realmente evolucione la intención o especificación funcional del negocio.
-
-
+3. **Immunity to False Drift via Inverted Traceability**:
+   - Because canonical requirements do not store downstream pointers (such as concrete service or test file paths), product and security artifacts (`FR-*`, `QR-*`, `SEC-REQ-*`) remain unaffected by code refactoring or test reorganization.
+   - This eliminates false drift alerts (*stale citations*) and ensures SHA-256 digests change only when real functional business specifications evolve.

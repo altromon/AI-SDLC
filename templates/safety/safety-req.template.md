@@ -1,25 +1,25 @@
 ---
-# Prefijos válidos: SAF-REQ- (Requisito de Safety / Seguridad Operacional)
-id: SAF-REQ-NOMBRE-001
+# Valid prefixes: SAF-REQ- (Safety Requirement / Operational Safety)
+id: SAF-REQ-NAME-001
 type: safety-requirement
-title: Título Conciso del Requisito de Safety
+title: Concise Safety Requirement Title
 status: draft
 version: "1.0.0"
 schema-version: "1.0"
 safety-domain: flight-control # flight-control, collision-avoidance, energy-management, emergency-recovery, sensor-integrity
 safety-integrity-level: "DAL-B" # DO-178C (DAL-A/B/C/D), ISO 26262 (ASIL-A/B/C/D), IEC 61508 (SIL-1/2/3/4)
 
-# 1. TRAZABILIDAD A ANÁLISIS DE PELIGROS Y RIESGOS (Upstream)
+# 1. HAZARD AND RISK ANALYSIS TRACEABILITY (Upstream)
 mitigates-hazard:
-  - HAZ-DESCRIPCION-001
+  - HAZ-DESCRIPTION-001
 
-fail-safe-action: "SAFE_STATE_ACTION" # Ej. RETURN_TO_HOME, CONTROLLED_LANDING, MOTOR_CUTOFF
-fault-tolerance-time-ms: 100 # Tiempo máximo de tolerancia a fallos (FTTI) antes de entrar en estado seguro
+fail-safe-action: "SAFE_STATE_ACTION" # e.g. RETURN_TO_HOME, CONTROLLED_LANDING, MOTOR_CUTOFF
+fault-tolerance-time-ms: 100 # Maximum fault tolerance time interval (FTTI) before entering safe state
 
-# 2. MÉTODO Y CRITERIOS DE VERIFICACIÓN
+# 2. VERIFICATION METHOD AND CRITERIA
 acceptance-format: gherkin
 cucumber-tags:
-  - "@SAF-REQ-NOMBRE-001"
+  - "@SAF-REQ-NAME-001"
   - "@safety"
   - "@failsafe"
 
@@ -27,45 +27,45 @@ supersedes: null
 superseded-by: null
 ---
 
-# SAF-REQ-NOMBRE-001: Título Conciso del Requisito de Safety
+# SAF-REQ-NAME-001: Concise Safety Requirement Title
 
-## 1. Enunciado Normativo de Seguridad Operacional
-El sistema DEBE [descripción inequívoca del comportamiento defensivo que previene un peligro o mitiga una pérdida de control no intencionada]. Si [condición anómala o fallo de hardware/sensor], el sistema DEBE transicionar al estado seguro `SAFE_STATE_ACTION` en un tiempo inferior a [X] milisegundos.
+## 1. Normative Operational Safety Statement
+The system MUST [unambiguous description of defensive behavior preventing a hazard or mitigating unintended loss of control]. If [anomalous condition or hardware/sensor failure], the system MUST transition to safe state `SAFE_STATE_ACTION` within [X] milliseconds.
 
 ---
 
-## 2. Matriz de Mitigación de Peligros y Tolerancia a Fallos
+## 2. Hazard Mitigation and Fault Tolerance Matrix
 
-| Dimensión | Enlace / Artefacto | Tipo de Relación | Estado |
+| Dimension | Link / Artifact | Relationship Type | Status |
 | :--- | :--- | :--- | :--- |
-| **Análisis de Peligros (Upstream)** | `HAZ-DESCRIPCION-001` | Mitigación de Pérdida / Accidente | Validado |
-| **Nivel de Integridad (SIL/DAL)** | `DAL-B` | Nivel Crítico de Software | Conforme |
-| **Acción Fail-Safe** | `SAFE_STATE_ACTION` | Transición de Emergencia | Verificado |
+| **Hazard Analysis (Upstream)** | `HAZ-DESCRIPTION-001` | Loss / Accident Mitigation | Validated |
+| **Integrity Level (SIL/DAL)** | `DAL-B` | Critical Software Level | Compliant |
+| **Fail-Safe Action** | `SAFE_STATE_ACTION` | Emergency Transition | Verified |
 
 ---
 
-## 3. Criterios de Mitigación en Formato Gherkin (Safety & Fail-Safe Tests)
+## 3. Mitigation Criteria in Gherkin Format (Safety & Fail-Safe Tests)
 
 ```gherkin
-@SAF-REQ-NOMBRE-001 @safety @failsafe
-Feature: Mitigación de Fallo Operacional y Entrada en Estado Seguro
-  Como Sistema de Control de Vuelo Autónomo
-  Quiero detectar anomalías críticas y ejecutar la maniobra de contingencia
-  Para prevenir accidentes, colisiones y garantizar la integridad física de las personas
+@SAF-REQ-NAME-001 @safety @failsafe
+Feature: Operational Failure Mitigation and Safe State Transition
+  As an Autonomous Flight Control System
+  I want to detect critical anomalies and execute contingency maneuvers
+  So that I prevent accidents, collisions, and safeguard physical safety
 
-  Scenario: Detección de condición anómala y activación del estado seguro
-    Given que el sistema se encuentra en operación nominal
-    When se produce la condición de fallo no recuperable
-    Then el sistema debe detectar la anomalía en menos de 100 milisegundos
-    And debe abortar la trayectoria actual
-    And debe ejecutar la maniobra de contingencia "SAFE_STATE_ACTION"
-    And debe emitir una alerta crítica a la estación de control en tierra
+  Scenario: Anomalous condition detection and safe state activation
+    Given the system is in nominal operation
+    When an unrecoverable failure condition occurs
+    Then the system must detect the anomaly in less than 100 milliseconds
+    And abort the current trajectory
+    And execute contingency maneuver "SAFE_STATE_ACTION"
+    And emit a critical alert to the ground control station
 ```
 
 ---
 
-## 4. Historial de Revisiones
+## 4. Revision History
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-15 | Safety Engineer | Creación inicial del requisito de safety | CHG-INIT-001 |
+| **1.0.0** | 2026-09-15 | Safety Engineer | Initial safety requirement creation | CHG-INIT-001 |

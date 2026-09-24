@@ -1,57 +1,57 @@
 ---
-id: TERM-NOMBRE-001
+id: TERM-NAME-001
 type: term
-title: Nombre del Término Canónico
+title: Canonical Term Name
 status: draft
 version: "1.0.0"
 schema-version: "1.0"
-definition: "Definición canónica, formal y no ambigua del concepto dentro del lenguaje ubicuo del dominio."
+definition: "Canonical, formal, and unambiguous definition of the concept within the domain's ubiquitous language."
 bounded-context: "FlightControl"
 synonyms:
-  - "Término Alternativo"
-  - "Alias Técnico"
+  - "Alternative Term"
+  - "Technical Alias"
 anti-terms:
-  - "Término Confuso o Desaconsejado"
-  - "Concepto Coloquial Inexacto"
+  - "Confusing or Discouraged Term"
+  - "Inaccurate Colloquial Concept"
 related-terms:
-  - TERM-RELACIONADO-001
+  - TERM-RELATED-001
 supersedes: null
 superseded-by: null
 ---
 
-# TERM-NOMBRE-001: Nombre del Término Canónico
+# TERM-NAME-001: Canonical Term Name
 
-## 1. Definición Formal (Lenguaje Ubicuo)
-> **Definición**: Definición canónica, formal y no ambigua del concepto dentro del lenguaje ubicuo del dominio.
+## 1. Formal Definition (Ubiquitous Language)
+> **Definition**: Canonical, formal, and unambiguous definition of the concept within the domain's ubiquitous language.
 
-Este concepto establece una verdad semántica compartida entre expertos de dominio, desarrolladores e ingenieros de seguridad, eliminando interpretaciones ambiguas en especificaciones y código.
+This concept establishes a shared semantic truth across domain experts, developers, and security engineers, eliminating ambiguous interpretations in specifications and code.
 
 ---
 
-## 2. Bounded Context y Delimitación Semántica
+## 2. Bounded Context and Semantic Boundaries
 - **Bounded Context**: `FlightControl`
-- **Ámbito de Aplicación**: Válido en modelos de dominio, entidades de base de datos, APIs públicas y eventos de telemetría de este contexto.
+- **Application Scope**: Valid across domain models, database entities, public APIs, and telemetry events within this context.
 
 ---
 
-## 3. Guía Terminológica (Uso Correcto vs. Incorrecto)
+## 3. Terminology Guide (Correct vs. Incorrect Usage)
 
-| Categoría | Término | Guía de Aplicación |
+| Category | Term | Application Guideline |
 | :--- | :--- | :--- |
-| **Canónico** | `Nombre del Término Canónico` | Usar de forma obligatoria en DTOs, interfaces y documentación formal. |
-| **Sinónimo Admitido** | `Término Alternativo` | Admitido exclusivamente en manuales de usuario o lenguaje informal. |
-| **Anti-Término (Prohibido)** | `Término Confuso o Desaconsejado` | **Prohibido**: Conduce a confusión de dominio o colisión semántica. |
+| **Canonical** | `Canonical Term Name` | Mandatory usage in DTOs, interfaces, and formal documentation. |
+| **Permitted Synonym** | `Alternative Term` | Permitted exclusively in user manuals or informal communication. |
+| **Anti-Term (Forbidden)** | `Confusing or Discouraged Term` | **Forbidden**: Leads to domain confusion or semantic collision. |
 
 ---
 
-## 4. Términos Relacionados
+## 4. Related Terms
 
-- `TERM-RELACIONADO-001`: Concepto complementario dentro del mismo bounded context.
+- `TERM-RELATED-001`: Complementary concept within the same bounded context.
 
 ---
 
-## 5. Historial de Revisiones
+## 5. Revision History
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-23 | Domain Architect / PO | Incorporación inicial al glosario de dominio | CHG-INIT-001 |
+| **1.0.0** | 2026-09-23 | Domain Architect / PO | Initial addition to domain glossary | CHG-INIT-001 |

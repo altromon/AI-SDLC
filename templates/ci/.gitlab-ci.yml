@@ -1,6 +1,6 @@
 # ==============================================================================
 # AI-SDLC: GitLab CI/CD Pipeline Template
-# Verificación continua de Quality Gates y promoción canónica de cambios SDD
+# Continuous Quality Gates verification and canonical promotion of SDD changes
 # ==============================================================================
 
 stages:
@@ -29,7 +29,7 @@ before_script:
   - pnpm run build
 
 # ------------------------------------------------------------------------------
-# Etapa 1: Pre-vuelo y Verificación de Quality Gates
+# Stage 1: Pre-flight and Quality Gates Verification
 # ------------------------------------------------------------------------------
 quality-gates:
   stage: validate
@@ -41,7 +41,7 @@ quality-gates:
     - node packages/cli/bin/aisdlc.js check
 
 # ------------------------------------------------------------------------------
-# Etapa 2: Suite de Pruebas Unitarias y Verificación Completa
+# Stage 2: Unit Test Suite & Full Verification
 # ------------------------------------------------------------------------------
 test-and-verify:
   stage: test
@@ -54,7 +54,7 @@ test-and-verify:
     - node packages/cli/bin/aisdlc.js verify all
 
 # ------------------------------------------------------------------------------
-# Etapa 3: Integración Canónica Post-Merge SDD
+# Stage 3: Post-Merge SDD Canonical Integration
 # ------------------------------------------------------------------------------
 sdd-canonical-integration:
   stage: integrate
@@ -74,7 +74,7 @@ sdd-canonical-integration:
       if ! git diff --cached --quiet; then
         git commit -m "chore(sdd): integrate changes into canonical baseline [skip ci]"
         git push "https://oauth2:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" "HEAD:${CI_COMMIT_BRANCH}"
-        echo "✔ Integración canónica sincronizada en GitLab."
+        echo "✔ Canonical integration synchronized in GitLab."
       else
-        echo "ℹ No se generaron modificaciones pendientes."
+        echo "ℹ No pending changes generated."
       fi

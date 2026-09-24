@@ -1,43 +1,43 @@
-# 00. Manifiesto y Principios Fundamentales del AI-SDLC
+# 00. AI-SDLC Manifesto and Core Principles
 
-## 1. El Manifiesto del AI-SDLC
+## 1. The AI-SDLC Manifesto
 
-Durante décadas, la fase más lenta y costosa del desarrollo de software fue la escritura manual de código. Los equipos estructuraron sus procesos alrededor de ese cuello de botella: historias de usuario condensadas, tickets de Jira efímeros, especificaciones "just-in-time" y conocimiento del producto disperso en la memoria de un par de ingenieros veteranos.
+For decades, the slowest and most expensive phase of software development was writing code manually. Teams designed their processes around that bottleneck: condensed user stories, ephemeral Jira tickets, "just-in-time" specifications, and product knowledge scattered in the memory of a handful of senior engineers.
 
-**El auge de la ingeniería asistida por Inteligencia Artificial y agentes autónomos transforma radicalmente la ecuación:**
-> *Un agente de IA capaz de generar miles de líneas de código en minutos amplifica el entendimiento que recibe. Si se le entrega un ticket ambiguo o descontextualizado, producirá código rápido, seguro de sí mismo y verosímil... para un producto que nadie definió y con una arquitectura incoherente.*
+**The rise of AI-assisted engineering and autonomous agents fundamentally transforms the equation:**
+> *An AI agent capable of generating thousands of lines of code in minutes amplifies the understanding it receives. If fed an ambiguous or decontextualized ticket, it will produce code rapidly, confidently, and plausibly... for a product nobody defined, backed by an incoherent architecture.*
 
-El recurso escaso ya no es la capacidad de teclear código; **el recurso escaso es una definición de producto y una arquitectura de sistemas rigurosa, trazable y digna de ser implementada**.
+The scarce resource is no longer the ability to type code; **the scarce resource is a rigorous, traceable product definition and system architecture worthy of being implemented**.
 
 ---
 
-## 2. Los 7 Principios Rectores
+## 2. The 7 Governing Principles
 
-### Principio 1: Todo "As-Code" y Versionado en Git
-Tanto la definición del producto, como la arquitectura técnica, las políticas de ciberseguridad, las reglas de licencias y las especificaciones de entrega residen en el repositorio Git como texto plano estructurado (Markdown con metadatos en YAML frontmatter). No existen fuentes de verdad dispersas en wikis externas o bases de datos aisladas.
+### Principle 1: Everything "As-Code" and Git-Versioned
+Product definition, technical architecture, cybersecurity policies, license rules, and delivery specifications all reside in the Git repository as structured plain text (Markdown with YAML frontmatter metadata). No single source of truth is scattered across external wikis or isolated databases.
 
-### Principio 2: Operabilidad Simétrica para Personas y Agentes (Dual-Citizenship)
-Cualquier documento o artefacto generado en el proceso debe cumplir una doble condición:
-- **Ser transparente y legible para un humano** (prosa clara en Markdown, diagramas visuales en Mermaid).
-- **Ser estrictamente computable para un agente de IA** (esquemas JSON formales, identificadores inmutables normalizados, campos tipados).
+### Principle 2: Symmetric Operability for Humans and Agents (Dual-Citizenship)
+Every document or artifact generated across the process must satisfy two conditions:
+- **Transparent and readable for a human** (clear Markdown prose, visual Mermaid diagrams).
+- **Strictly computable for an AI agent** (formal JSON schemas, normalized immutable identifiers, typed fields).
 
-### Principio 3: Separación entre Núcleo Determinista y Razonamiento de IA
-- **El núcleo determinista gobierna la estructura:** Validación de esquemas, resolución de IDs, cálculo de hashes criptográficos SHA-256, detección de ciclos en grafos y linters son 100% deterministas. Producen el mismo resultado exacto en cualquier máquina.
-- **La IA gobierna la semántica:** Exploración de ideas, análisis de impacto conceptual, modelado inicial de casos de uso y generación de código de prueba son tareas semánticas donde los agentes destacan como copilotos o ejecutores autónomos bajo supervisión.
+### Principle 3: Separation of Deterministic Core and AI Reasoning
+- **The deterministic core governs structure:** Schema validation, ID resolution, SHA-256 cryptographic digest computation, graph cycle detection, and linters are 100% deterministic. They produce the exact same outcome on any machine.
+- **AI governs semantics:** Idea exploration, conceptual impact analysis, initial use case modeling, and test code generation are semantic tasks where agents excel as copilot assistants or autonomous executors under human supervision.
 
-### Principio 4: Autoridad Humana Irrenunciable en Aprobación y Fusión
-Los agentes de IA tienen capacidad de:
-- Explorar y proponer deltas (`Product Changes`, `Specs`, `Code PRs`).
-- Validar esquemas y ejecutar pruebas.
-- Identificar riesgos y violaciones de políticas.
+### Principle 4: Inalienable Human Authority in Approval and Merge
+AI agents possess the capability to:
+- Explore and propose deltas (`Product Changes`, `Specs`, `Code PRs`).
+- Validate schemas and execute test suites.
+- Identify risks and policy violations.
 
-**Sin embargo, ningún agente ni herramienta de software tiene permitido auto-aprobarse, auto-fusionarse (`merge`) ni tomar decisiones de negocio/riesgo en nombre de la organización.** La aprobación de un cambio de producto y el merge de un PR a la rama principal es una responsabilidad exclusivamente humana.
+**However, no agent or automated software tool is ever permitted to self-approve, self-merge, or make business/risk decisions on behalf of the organization.** Product change approval and PR merge into the canonical branch are strictly human responsibilities.
 
-### Principio 5: Contratos de Citación Criptográfica (Drift-Free Architecture)
-Los documentos de entrega (especificaciones SDD, tareas de agentes, código) nunca reescriben ni duplican los requisitos o las reglas de negocio. En su lugar, los **citan** mediante su identificador único (`id`) y el digest criptográfico (`SHA-256`) del contenido canónico. Si un requerimiento cambia en la rama principal, cualquier citación dependiente queda marcada automáticamente como obsoleta (`stale`), eliminando la deriva silenciosa.
+### Principle 5: Cryptographic Citation Contracts (Drift-Free Architecture)
+Delivery documents (SDD specifications, agent tasks, code) never rewrite or duplicate requirements or business rules. Instead, they **cite** them via their unique identifier (`id`) and the cryptographic digest (`SHA-256`) of the canonical content. If a requirement mutates in the canonical branch, dependent citations are automatically flagged as stale, eliminating silent drift.
 
-### Principio 6: Ciberseguridad Shift-Left por Defecto
-La ciberseguridad no es un control reactivo al final del ciclo de desarrollo. Desde la concepción del producto se modelan los actores maliciosos (`ACT-THREAT-*`), los casos de abuso (`ABUSE-*`) y los requisitos de mitigación (`SEC-REQ-*`). En la validación, los gates deterministas (SAST, SCA, Secret Scanning) y los agentes de auditoría adversarial verifican cada cambio antes de su despliegue.
+### Principle 6: Shift-Left Cybersecurity by Default
+Cybersecurity is never a reactive audit at the end of the development lifecycle. From product inception, threat actors (`ACT-THREAT-*`), abuse cases (`ABUSE-*`), and mitigation requirements (`SEC-REQ-*`) are modeled up front. During validation, deterministic gates (SAST, SCA, Secret Scanning) and adversarial audit agents verify every change prior to deployment.
 
-### Principio 7: Gobernanza Proactiva de Licencias Open Source
-El software externo utilizado se evalúa formalmente frente a políticas declarativas (`license-policy.yaml`). Los agentes tienen prohibido incorporar dependencias con licencias virales (GPL/AGPL) o que requieran pago comercial sin la autorización y adquisición formal de licencias por parte de los responsables legales y técnicos humanos.
+### Principle 7: Proactive Open Source License Governance
+External dependencies are formally evaluated against declarative policies (`license-policy.yaml`). Agents are strictly forbidden from introducing packages with viral licenses (GPL/AGPL) or commercial acquisition requirements without formal human legal and technical authorization.

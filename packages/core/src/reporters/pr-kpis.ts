@@ -128,10 +128,10 @@ function formatMinutes(seconds: number): string {
  */
 export function formatPrKpiMarkdown(kpi: PrKpiAggregation): string {
   const models = Object.keys(kpi.byModel);
-  const modelHeaders = models.map((m) => `Agente (${m})`).join(' | ');
+  const modelHeaders = models.map((m) => `Agent (${m})`).join(' | ');
   const modelSeparator = models.map(() => ':---:').join(' | ');
 
-  const headers = `| Métrica | Humano |${models.length > 0 ? ` ${modelHeaders} |` : ''} Total PR |`;
+  const headers = `| Metric | Human |${models.length > 0 ? ` ${modelHeaders} |` : ''} Total PR |`;
   const sep = `| :--- | :---: |${models.length > 0 ? ` ${modelSeparator} |` : ''} :---: |`;
 
   const human = kpi.humanSummary;
@@ -147,22 +147,22 @@ export function formatPrKpiMarkdown(kpi: PrKpiAggregation): string {
   const totalCostStr = `$${kpi.estimatedCostUsd.toFixed(2)} USD`;
 
   const rows = [
-    `| **Commits Realizados** | ${human.commits} |${models.length > 0 ? ` ${commitCols} |` : ''} **${kpi.totalCommits}** |`,
-    `| **Líneas Añadidas / Modif.** | +${human.linesAdded} / -${human.linesDeleted} |${models.length > 0 ? ` ${linesCols} |` : ''} **${totalLines}** |`,
-    `| **Tiempo Activo de Desarrollo** | ${formatMinutes(human.activeTimeSeconds)} |${models.length > 0 ? ` ${timeCols} |` : ''} **${totalTime}** |`,
-    `| **Tokens Consumidos (In+Out)** | 0 |${models.length > 0 ? ` ${tokenCols} |` : ''} **${totalTokensStr}** |`,
-    `| **Coste Estimado (€/$)** | — (Mano de obra) |${models.length > 0 ? ` ${costCols} |` : ''} **${totalCostStr}** |`,
+    `| **Commits** | ${human.commits} |${models.length > 0 ? ` ${commitCols} |` : ''} **${kpi.totalCommits}** |`,
+    `| **Lines Added / Deleted** | +${human.linesAdded} / -${human.linesDeleted} |${models.length > 0 ? ` ${linesCols} |` : ''} **${totalLines}** |`,
+    `| **Active Development Time** | ${formatMinutes(human.activeTimeSeconds)} |${models.length > 0 ? ` ${timeCols} |` : ''} **${totalTime}** |`,
+    `| **Tokens Consumed (In+Out)** | 0 |${models.length > 0 ? ` ${tokenCols} |` : ''} **${totalTokensStr}** |`,
+    `| **Estimated Cost (USD)** | — (Human labor) |${models.length > 0 ? ` ${costCols} |` : ''} **${totalCostStr}** |`,
   ];
 
   return [
     KPI_SUMMARY_START_TAG,
-    '### 📊 AI-SDLC: Resumen Agregado de KPIs de la PR',
+    '### 📊 AI-SDLC: Aggregated PR KPI Summary',
     '',
     headers,
     sep,
     ...rows,
     '',
-    `> **Atribución de Rama:** ${kpi.isBugPr ? '🚨 *Corrección de Defecto / Bugfix*' : '✨ *Nueva Funcionalidad / Feature*'} (Rango: \`${kpi.baseRef}..${kpi.headRef}\`)`,
+    `> **Branch Attribution:** ${kpi.isBugPr ? '🚨 *Defect Fix / Bugfix*' : '✨ *New Feature*'} (Range: \`${kpi.baseRef}..${kpi.headRef}\`)`,
     KPI_SUMMARY_END_TAG,
   ].join('\n');
 }

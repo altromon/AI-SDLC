@@ -26,7 +26,7 @@
     "version": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
-      "description": "Versión semántica del peligro (SemVer)."
+      "description": "Hazard semantic version (SemVer)."
     },
     "schema-version": {
       "type": "string"
@@ -42,17 +42,17 @@
     "severity": {
       "type": "string",
       "enum": ["catastrophic", "critical", "major", "minor", "negligible"],
-      "description": "Severidad del peligro según clasificación funcional de safety (DO-178C / ISO 26262)."
+      "description": "Hazard severity per functional safety classification (DO-178C / ISO 26262)."
     },
     "probability": {
       "type": "string",
       "enum": ["frequent", "probable", "occasional", "remote", "improbable", "extremely-improbable"],
-      "description": "Probabilidad de ocurrencia del peligro operacional."
+      "description": "Probability of operational hazard occurrence."
     },
     "fault-tolerance-time-ms": {
       "type": "number",
       "minimum": 0,
-      "description": "Tiempo límite de tolerancia a fallos (FTTI) en milisegundos antes de entrar en estado seguro."
+      "description": "Fault tolerance time interval (FTTI) limit in milliseconds before entering safe state."
     },
     "mitigated-by": {
       "type": "array",
@@ -61,15 +61,15 @@
         "type": "string",
         "pattern": "^SAF-REQ-[A-Z0-9]+(-[A-Z0-9]+)*$"
       },
-      "description": "Requisitos de safety que mitigan este peligro."
+      "description": "Safety requirements mitigating this hazard."
     },
     "hazardous-condition": {
       "type": "string",
-      "description": "Descripción de la condición operacional peligrosa."
+      "description": "Description of the dangerous operational condition."
     },
     "potential-effect": {
       "type": "string",
-      "description": "Efecto potencial sobre personas, aeronave o entorno si el peligro se materializa."
+      "description": "Potential effect on people, aircraft, or environment if hazard materializes."
     },
     "supersedes": {
       "type": ["string", "null"]

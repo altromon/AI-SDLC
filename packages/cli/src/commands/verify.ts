@@ -59,7 +59,7 @@ export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
-    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Quality Gate (Complejidad y Mantenibilidad)...')));
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verifying Quality Gate (Complexity & Maintainability)...')));
   }
 
   const thresholds = {
@@ -108,15 +108,15 @@ export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
 
   if (!options.silent) {
     console.log(
-      `  Umbrales activos:       CC <= ${result.policy.max_cyclomatic} | Cognitiva <= ${result.policy.max_cognitive} | MI >= ${result.policy.min_maintainability} | Líneas <= ${result.policy.max_function_lines} | Modo: ${result.policy.enforce_mode}`
+      `  Active thresholds:      CC <= ${result.policy.max_cyclomatic} | Cognitive <= ${result.policy.max_cognitive} | MI >= ${result.policy.min_maintainability} | Lines <= ${result.policy.max_function_lines} | Mode: ${result.policy.enforce_mode}`
     );
-    console.log(`  Archivos analizados:    ${pc.bold(String(result.totalFiles))}`);
-    console.log(`  Funciones evaluadas:    ${pc.bold(String(result.totalFunctions))}`);
-    console.log(`  Funciones conformes:    ${pc.green(String(result.passCount))}`);
-    console.log(`  Funciones con fallos:   ${result.failCount > 0 ? pc.red(String(result.failCount)) : pc.green('0')}`);
+    console.log(`  Analyzed files:         ${pc.bold(String(result.totalFiles))}`);
+    console.log(`  Evaluated functions:    ${pc.bold(String(result.totalFunctions))}`);
+    console.log(`  Compliant functions:    ${pc.green(String(result.passCount))}`);
+    console.log(`  Failing functions:      ${result.failCount > 0 ? pc.red(String(result.failCount)) : pc.green('0')}`);
 
     if (result.failCount > 0) {
-      console.log(pc.red('\n  Infracciones detectadas:'));
+      console.log(pc.red('\n  Detected violations:'));
       for (const f of result.results.filter((r) => r.status === 'FAIL')) {
         console.log(`    ${pc.red('✖')} ${pc.bold(f.relPath)} [${f.functionName}]: ${f.violations.join(', ')}`);
       }
@@ -125,7 +125,7 @@ export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
 
   const isOk = result.success;
   if (!options.silent) {
-    console.log(isOk ? pc.green('\n✔ Release Gate APROBADO\n') : pc.red('\n✖ Release Gate BLOQUEADO\n'));
+    console.log(isOk ? pc.green('\n✔ Release Gate PASSED\n') : pc.red('\n✖ Release Gate BLOCKED\n'));
   }
   return isOk;
 }
@@ -137,7 +137,7 @@ export function runVerifyTraceability(options: TraceabilityVerifyOptions = {}): 
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
-    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Trazabilidad 360° (Producto -> Arquitectura -> Pruebas)...')));
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verifying 360° Traceability (Product -> Architecture -> Testing)...')));
   }
 
   const result = verifyTraceability({ rootDir });
@@ -158,7 +158,7 @@ export function runVerifyTraceability(options: TraceabilityVerifyOptions = {}): 
         productStatus: o.productStatus,
         archStatus: o.archStatus,
         testStatus: o.testStatus,
-        message: `Requisito huérfano [${o.id}]`,
+        message: `Orphan requirement [${o.id}]`,
       })),
     };
     console.log(JSON.stringify(payload, null, 2));
@@ -166,21 +166,21 @@ export function runVerifyTraceability(options: TraceabilityVerifyOptions = {}): 
   }
 
   if (!options.silent) {
-    console.log(`  Requerimientos totales: ${pc.bold(String(result.totalRequirements))}`);
-    console.log(`  Requerimientos conformes: ${pc.green(String(result.totalRequirements - result.orphanCount))}`);
-    console.log(`  Requerimientos huérfanos: ${result.orphanCount > 0 ? pc.red(String(result.orphanCount)) : pc.green('0')}`);
+    console.log(`  Total requirements:     ${pc.bold(String(result.totalRequirements))}`);
+    console.log(`  Compliant requirements: ${pc.green(String(result.totalRequirements - result.orphanCount))}`);
+    console.log(`  Orphan requirements:    ${result.orphanCount > 0 ? pc.red(String(result.orphanCount)) : pc.green('0')}`);
 
     if (result.orphanCount > 0) {
-      console.log(pc.red('\n  Brechas de trazabilidad:'));
+      console.log(pc.red('\n  Traceability gaps:'));
       for (const o of result.orphans) {
-        console.log(`    ${pc.red('✖')} [${o.id}] Producto: ${o.productStatus}, Arquitectura: ${o.archStatus}, Pruebas: ${o.testStatus}`);
+        console.log(`    ${pc.red('✖')} [${o.id}] Product: ${o.productStatus}, Architecture: ${o.archStatus}, Testing: ${o.testStatus}`);
       }
     }
   }
 
   const isOk = result.success;
   if (!options.silent) {
-    console.log(isOk ? pc.green('\n✔ Trazabilidad 360° CONFORME (100%)\n') : pc.red('\n✖ Trazabilidad BLOQUEADA\n'));
+    console.log(isOk ? pc.green('\n✔ 360° Traceability COMPLIANT (100%)\n') : pc.red('\n✖ Traceability BLOCKED\n'));
   }
   return isOk;
 }
@@ -192,7 +192,7 @@ export function runVerifyGovernance(options: GovernanceVerifyOptions = {}): bool
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
-    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Gobierno de Tareas y Clasificación de Autonomía...')));
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verifying Tasks Governance and Autonomy Classification...')));
   }
 
   const result = verifyTasksGovernance({ rootDir });
@@ -216,17 +216,17 @@ export function runVerifyGovernance(options: GovernanceVerifyOptions = {}): bool
   }
 
   if (!options.silent) {
-    console.log(`  Tareas totales auditadas: ${pc.bold(String(result.totalTasks))}`);
-    console.log(`  Tareas con verificación:  ${pc.green(String(result.verifiedCount))}`);
-    console.log(`  Tareas sin verificación:  ${result.unverifiedCount > 0 ? pc.red(String(result.unverifiedCount)) : pc.green('0')}`);
-    console.log(`  Distribución de autonomía:`);
+    console.log(`  Total audited tasks:    ${pc.bold(String(result.totalTasks))}`);
+    console.log(`  Tasks with verification: ${pc.green(String(result.verifiedCount))}`);
+    console.log(`  Tasks without verif.:   ${result.unverifiedCount > 0 ? pc.red(String(result.unverifiedCount)) : pc.green('0')}`);
+    console.log(`  Autonomy distribution:`);
     console.log(`    🟢 AUTONOMOUS:         ${result.modeCounts['AUTONOMOUS'] || 0}`);
     console.log(`    🟡 HUMAN_REVIEW_PLAN:   ${result.modeCounts['HUMAN_REVIEW_PLAN'] || 0}`);
     console.log(`    🟠 AMBIGUOUS:           ${result.modeCounts['AMBIGUOUS'] || 0}`);
     console.log(`    🔴 HIGH_RISK_MANUAL:    ${result.modeCounts['HIGH_RISK_MANUAL'] || 0}`);
 
     if (result.violations.length > 0) {
-      console.log(pc.red('\n  Infracciones de gobierno:'));
+      console.log(pc.red('\n  Governance violations:'));
       for (const v of result.violations) {
         console.log(`    ${pc.red('✖')} ${v}`);
       }
@@ -235,7 +235,7 @@ export function runVerifyGovernance(options: GovernanceVerifyOptions = {}): bool
 
   const isOk = result.success;
   if (!options.silent) {
-    console.log(isOk ? pc.green('\n✔ Gobierno de Tareas CONFORME\n') : pc.red('\n✖ Gobierno de Tareas BLOQUEADO\n'));
+    console.log(isOk ? pc.green('\n✔ Tasks Governance COMPLIANT\n') : pc.red('\n✖ Tasks Governance BLOCKED\n'));
   }
   return isOk;
 }
@@ -247,7 +247,7 @@ export function runVerifyTesting(options: TestingVerifyOptions = {}): boolean {
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
-    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Cobertura de Pruebas en Requisitos y Tareas...')));
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verifying Test Coverage in Requirements and Tasks...')));
   }
 
   const result = verifyTestingCoverage({ rootDir });
@@ -260,7 +260,7 @@ export function runVerifyTesting(options: TestingVerifyOptions = {}): boolean {
         id: r.id,
         title: r.title,
         file: r.file,
-        message: `Requisito sin prueba verificable [${r.id}]`,
+        message: `Requirement without verifiable test [${r.id}]`,
       }));
 
     const taskViolations = result.tasks
@@ -270,7 +270,7 @@ export function runVerifyTesting(options: TestingVerifyOptions = {}): boolean {
         id: t.id,
         title: t.title,
         file: t.file,
-        message: `Tarea sin verificación de prueba [${t.id}]`,
+        message: `Task without test verification [${t.id}]`,
       }));
 
     const payload: VerifyJsonPayload = {
@@ -292,23 +292,23 @@ export function runVerifyTesting(options: TestingVerifyOptions = {}): boolean {
   }
 
   if (!options.silent) {
-    console.log(`  Requisitos verificados:   ${pc.green(`${result.passedRequirements}/${result.totalRequirements}`)}`);
-    console.log(`  Tareas verificadas:       ${pc.green(`${result.passedTasks}/${result.totalTasks}`)}`);
+    console.log(`  Verified requirements:  ${pc.green(`${result.passedRequirements}/${result.totalRequirements}`)}`);
+    console.log(`  Verified tasks:         ${pc.green(`${result.passedTasks}/${result.totalTasks}`)}`);
 
     if (result.failedRequirements > 0 || result.failedTasks > 0) {
-      console.log(pc.red('\n  Elementos sin pruebas ejecutables:'));
+      console.log(pc.red('\n  Items lacking executable tests:'));
       for (const r of result.requirements.filter((r) => r.status !== 'VERIFICADO_CON_PRUEBA')) {
-        console.log(`    ${pc.red('✖')} [Requisito: ${r.id}] ${r.title} (${r.file})`);
+        console.log(`    ${pc.red('✖')} [Requirement: ${r.id}] ${r.title} (${r.file})`);
       }
       for (const t of result.tasks.filter((t) => t.status !== 'VERIFICADO_CON_PRUEBA')) {
-        console.log(`    ${pc.red('✖')} [Tarea: ${t.id}] ${t.title} (${t.file})`);
+        console.log(`    ${pc.red('✖')} [Task: ${t.id}] ${t.title} (${t.file})`);
       }
     }
   }
 
   const isOk = result.success;
   if (!options.silent) {
-    console.log(isOk ? pc.green('\n✔ Cobertura de Pruebas CONFORME (100%)\n') : pc.red('\n✖ Cobertura de Pruebas INSUFICIENTE\n'));
+    console.log(isOk ? pc.green('\n✔ Test Coverage COMPLIANT (100%)\n') : pc.red('\n✖ Test Coverage INSUFFICIENT\n'));
   }
   return isOk;
 }
@@ -328,7 +328,7 @@ export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
-    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Cumplimiento de Licencias Open Source (SCA)...')));
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verifying Open Source License Compliance (SCA)...')));
   }
 
   const sbomPath = typeof options.sbom === 'string' ? options.sbom : undefined;
@@ -376,18 +376,18 @@ export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
   }
 
   if (!options.silent) {
-    console.log(`  Dependencias evaluadas:   ${pc.bold(String(result.totalEvaluated))}`);
-    console.log(`  Dependencias conformes:   ${pc.green(String(result.permittedCount))}`);
-    console.log(`  Violaciones de licencia:  ${result.violations.length > 0 ? pc.red(String(result.violations.length)) : pc.green('0')}`);
+    console.log(`  Evaluated dependencies:   ${pc.bold(String(result.totalEvaluated))}`);
+    console.log(`  Compliant dependencies:   ${pc.green(String(result.permittedCount))}`);
+    console.log(`  License violations:       ${result.violations.length > 0 ? pc.red(String(result.violations.length)) : pc.green('0')}`);
     if (result.sbomPath) {
-      console.log(`  SBOM CycloneDX generado:  ${pc.cyan(result.sbomPath)}`);
+      console.log(`  CycloneDX SBOM generated: ${pc.cyan(result.sbomPath)}`);
     }
     if (result.noticesPath) {
-      console.log(`  Avisos legales generados: ${pc.cyan(result.noticesPath)}`);
+      console.log(`  Legal notices generated:  ${pc.cyan(result.noticesPath)}`);
     }
 
     if (result.violations.length > 0) {
-      console.log(pc.red('\n  Infracciones de licencia detectadas:'));
+      console.log(pc.red('\n  Detected license violations:'));
       for (const v of result.violations) {
         console.log(`    ${pc.red('✖')} [${v.category}] ${v.packageName} (${v.license}): ${v.reason}`);
       }
@@ -396,7 +396,7 @@ export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
 
   const isOk = result.success;
   if (!options.silent) {
-    console.log(isOk ? pc.green('\n✔ Gobernanza de Licencias OSS CONFORME\n') : pc.red('\n✖ Gobernanza de Licencias OSS BLOQUEADA\n'));
+    console.log(isOk ? pc.green('\n✔ OSS License Governance COMPLIANT\n') : pc.red('\n✖ OSS License Governance BLOCKED\n'));
   }
   return isOk;
 }
@@ -408,7 +408,7 @@ export function runVerifyPdac(options: PdacVerifyOptions = {}): boolean {
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
-    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Grafo PDaC y Deriva Criptográfica (SHA-256)...')));
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verifying PDaC Graph and Cryptographic Drift (SHA-256)...')));
   }
 
   const result = verifyPdacGraph({ rootDir });
@@ -429,7 +429,7 @@ export function runVerifyPdac(options: PdacVerifyOptions = {}): boolean {
         sourceFile: d.sourceFile,
         expectedDigest: d.expectedDigest,
         actualDigest: d.actualDigest,
-        message: `Deriva criptográfica en ${d.sourceFile} citando ${d.targetId}`,
+        message: `Cryptographic drift in ${d.sourceFile} citing ${d.targetId}`,
       })),
     };
     console.log(JSON.stringify(payload, null, 2));
@@ -437,21 +437,21 @@ export function runVerifyPdac(options: PdacVerifyOptions = {}): boolean {
   }
 
   if (!options.silent) {
-    console.log(`  Nodos PDaC en línea base: ${pc.bold(String(result.totalNodes))}`);
-    console.log(`  Citaciones evaluadas:     ${pc.bold(String(result.totalEdges))}`);
-    console.log(`  Derivas criptográficas:   ${result.drifts.length > 0 ? pc.red(String(result.drifts.length)) : pc.green('0')}`);
+    console.log(`  PDaC baseline nodes:    ${pc.bold(String(result.totalNodes))}`);
+    console.log(`  Evaluated citations:    ${pc.bold(String(result.totalEdges))}`);
+    console.log(`  Cryptographic drifts:   ${result.drifts.length > 0 ? pc.red(String(result.drifts.length)) : pc.green('0')}`);
 
     if (result.drifts.length > 0) {
-      console.log(pc.red('\n  Derivas detectadas (Estado: STALE):'));
+      console.log(pc.red('\n  Detected drifts (Status: STALE):'));
       for (const d of result.drifts) {
-        console.log(`    ${pc.red('✖')} En ${d.sourceFile} citando ${d.targetId}: digest desalineado.`);
+        console.log(`    ${pc.red('✖')} In ${d.sourceFile} citing ${d.targetId}: misaligned digest.`);
       }
     }
   }
 
   const isOk = result.success;
   if (!options.silent) {
-    console.log(isOk ? pc.green('\n✔ Grafo PDaC Libre de Deriva\n') : pc.red('\n✖ Deriva Criptográfica Detectada\n'));
+    console.log(isOk ? pc.green('\n✔ PDaC Graph Free of Drift\n') : pc.red('\n✖ Cryptographic Drift Detected\n'));
   }
   return isOk;
 }
@@ -465,7 +465,7 @@ export function runVerifySchemas(options: SchemasVerifyOptions = {}): boolean {
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
-    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verificando Conformidad con Esquemas JSON (Draft 2020-12)...')));
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verifying JSON Schemas Compliance (Draft 2020-12)...')));
   }
 
   const result = verifyArtifactsSchemas({ rootDir, targetPath: options.path });
@@ -493,21 +493,21 @@ export function runVerifySchemas(options: SchemasVerifyOptions = {}): boolean {
   }
 
   if (!options.silent) {
-    console.log(`  Artefactos evaluados:    ${pc.bold(String(result.totalEvaluated))}`);
-    console.log(`  Artefactos conformes:    ${pc.green(String(result.validCount))}`);
-    console.log(`  Infracciones de esquema: ${result.invalidCount > 0 ? pc.red(String(result.invalidCount)) : pc.green('0')}`);
+    console.log(`  Evaluated artifacts:    ${pc.bold(String(result.totalEvaluated))}`);
+    console.log(`  Compliant artifacts:    ${pc.green(String(result.validCount))}`);
+    console.log(`  Schema violations:      ${result.invalidCount > 0 ? pc.red(String(result.invalidCount)) : pc.green('0')}`);
 
     if (result.violations.length > 0) {
-      console.log(pc.red('\n  Infracciones detectadas frente a esquemas JSON:'));
+      console.log(pc.red('\n  Detected JSON schema violations:'));
       for (const v of result.violations) {
-        console.log(`    ${pc.red('✖')} [${v.id || v.filePath}] (${v.schemaId || 'esquema'}): ${v.message}`);
+        console.log(`    ${pc.red('✖')} [${v.id || v.filePath}] (${v.schemaId || 'schema'}): ${v.message}`);
       }
     }
   }
 
   const isOk = result.success;
   if (!options.silent) {
-    console.log(isOk ? pc.green('\n✔ Esquemas de Artefactos CONFORME (100%)\n') : pc.red('\n✖ Esquemas de Artefactos BLOQUEADO\n'));
+    console.log(isOk ? pc.green('\n✔ Artifact Schemas COMPLIANT (100%)\n') : pc.red('\n✖ Artifact Schemas BLOCKED\n'));
   }
   return isOk;
 }
@@ -522,7 +522,7 @@ export function runVerifyFriction(options: FrictionVerifyOptions = {}): boolean 
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
-    console.log(pc.bold(pc.cyan('\n🛡️  [AI-SDLC] Verificando Fricción Progresiva y Anti-Bypass Guardrails...')));
+    console.log(pc.bold(pc.cyan('\n🛡️  [AI-SDLC] Verifying Progressive Friction and Anti-Bypass Guardrails...')));
   }
 
   const result = verifyProgressiveFriction({
@@ -552,16 +552,16 @@ export function runVerifyFriction(options: FrictionVerifyOptions = {}): boolean 
   }
 
   if (!options.silent) {
-    console.log(`  Perfil detectado:        ${pc.magenta(result.profile)}`);
-    console.log(`  Archivos evaluados:      ${pc.bold(String(result.evaluatedFiles.length))}`);
+    console.log(`  Detected profile:        ${pc.magenta(result.profile)}`);
+    console.log(`  Evaluated files:         ${pc.bold(String(result.evaluatedFiles.length))}`);
     if (result.bypassedRules.length > 0) {
-      console.log(pc.red('\n  Infracciones Anti-Bypass detectadas:'));
+      console.log(pc.red('\n  Anti-Bypass violations detected:'));
       for (const rule of result.bypassedRules) {
         console.log(`    ${pc.red('✖')} ${rule}`);
       }
     }
     if (result.errors.length > 0) {
-      console.log(pc.red('\n  Errores de validación de perfil:'));
+      console.log(pc.red('\n  Profile validation errors:'));
       for (const err of result.errors) {
         console.log(`    ${pc.red('✖')} ${err}`);
       }
@@ -572,8 +572,8 @@ export function runVerifyFriction(options: FrictionVerifyOptions = {}): boolean 
   if (!options.silent) {
     console.log(
       isOk
-        ? pc.green('\n✔ Fricción Progresiva CONFORME (EXIT 0)\n')
-        : pc.red('\n✖ Fricción Progresiva BLOQUEADO (EXIT 1)\n')
+        ? pc.green('\n✔ Progressive Friction COMPLIANT (EXIT 0)\n')
+        : pc.red('\n✖ Progressive Friction BLOCKED (EXIT 1)\n')
     );
   }
   return isOk;
@@ -594,7 +594,7 @@ export function runVerifyDuplicates(options: DuplicatesVerifyOptions = {}): bool
     console.log(
       pc.bold(
         pc.cyan(
-          '\n🔍 [AI-SDLC] Verificando Requisitos Duplicados y Redundancia (Shift-Left Pre-Flight)...'
+          '\n🔍 [AI-SDLC] Verifying Duplicate Requirements and Redundancy (Shift-Left Pre-Flight)...'
         )
       )
     );
@@ -629,21 +629,21 @@ export function runVerifyDuplicates(options: DuplicatesVerifyOptions = {}): bool
   }
 
   if (!options.silent) {
-    console.log(`  Requisitos evaluados:    ${pc.bold(String(result.totalRequirements))}`);
+    console.log(`  Evaluated requirements:  ${pc.bold(String(result.totalRequirements))}`);
     console.log(
-      `  Errores de duplicidad:   ${result.errorCount > 0 ? pc.red(String(result.errorCount)) : pc.green('0')}`
+      `  Duplication errors:      ${result.errorCount > 0 ? pc.red(String(result.errorCount)) : pc.green('0')}`
     );
     console.log(
-      `  Advertencias:            ${result.warningCount > 0 ? pc.yellow(String(result.warningCount)) : pc.green('0')}`
+      `  Warnings:                ${result.warningCount > 0 ? pc.yellow(String(result.warningCount)) : pc.green('0')}`
     );
 
     if (result.issues.length > 0) {
-      console.log(pc.red('\n  Incidencias detectadas:'));
+      console.log(pc.red('\n  Detected issues:'));
       for (const issue of result.issues) {
         const icon = issue.severity === 'ERROR' ? pc.red('✖') : pc.yellow('⚠');
         const badge =
           issue.severity === 'ERROR' ? pc.red(`[${issue.type}]`) : pc.yellow(`[${issue.type}]`);
-        console.log(`    ${icon} ${badge} [${issue.id}] en ${issue.file}: ${issue.message}`);
+        console.log(`    ${icon} ${badge} [${issue.id}] in ${issue.file}: ${issue.message}`);
       }
     }
   }
@@ -652,8 +652,8 @@ export function runVerifyDuplicates(options: DuplicatesVerifyOptions = {}): bool
   if (!options.silent) {
     console.log(
       isOk
-        ? pc.green('\n✔ Verificación de Duplicados CONFORME (0 Colisiones)\n')
-        : pc.red('\n✖ Verificación de Duplicados BLOQUEADA (Colisiones Detectadas)\n')
+        ? pc.green('\n✔ Duplicates Verification COMPLIANT (0 Collisions)\n')
+        : pc.red('\n✖ Duplicates Verification BLOCKED (Collisions Detected)\n')
     );
   }
   return isOk;
@@ -677,7 +677,7 @@ export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean 
     console.log(
       pc.bold(
         pc.cyan(
-          '\n🔐 [AI-SDLC] Verificando Detección Determinista de Secretos y Credenciales (Gitleaks Gate)...'
+          '\n🔐 [AI-SDLC] Verifying Deterministic Secrets and Credentials Detection (Gitleaks Gate)...'
         )
       )
     );
@@ -715,16 +715,16 @@ export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean 
   }
 
   if (!options.silent) {
-    console.log(`  Archivos analizados:     ${pc.bold(String(result.totalFilesScanned))}`);
+    console.log(`  Analyzed files:          ${pc.bold(String(result.totalFilesScanned))}`);
     console.log(
-      `  Fugas de credenciales:   ${result.findingsCount > 0 ? pc.red(String(result.findingsCount)) : pc.green('0')}`
+      `  Credential leaks:        ${result.findingsCount > 0 ? pc.red(String(result.findingsCount)) : pc.green('0')}`
     );
     console.log(
-      `  Motor Gitleaks nativo:   ${result.scannedWithGitleaks ? pc.cyan('Activo / Integrado') : pc.dim('Escáner Determinista (@ai-sdlc/core)')}`
+      `  Native Gitleaks engine:  ${result.scannedWithGitleaks ? pc.cyan('Active / Integrated') : pc.dim('Deterministic Scanner (@ai-sdlc/core)')}`
     );
 
     if (result.findings.length > 0) {
-      console.log(pc.red('\n  Credenciales expuestas detectadas:'));
+      console.log(pc.red('\n  Detected exposed credentials:'));
       for (const f of result.findings) {
         console.log(
           `    ${pc.red('✖')} [${f.ruleId}] ${pc.bold(`${f.relPath}:${f.lineNumber}`)}: ${f.maskedMatch} - ${f.message}`
@@ -737,8 +737,8 @@ export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean 
   if (!options.silent) {
     console.log(
       isOk
-        ? pc.green('\n✔ Detección de Secretos CONFORME (0 Fugas de Credenciales)\n')
-        : pc.red('\n✖ Detección de Secretos BLOQUEADA (Código de Salida 4: Secreto Expuesto)\n')
+        ? pc.green('\n✔ Secrets Detection COMPLIANT (0 Credential Leaks)\n')
+        : pc.red('\n✖ Secrets Detection BLOCKED (Exit Code 4: Exposed Secret)\n')
     );
   }
   return isOk;
@@ -758,7 +758,7 @@ export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
     console.log(
       pc.bold(
         pc.cyan(
-          '\n🛡️  [AI-SDLC] Verificando Seguridad Shift-Left SAST (Inyecciones y OWASP Top 10)...'
+          '\n🛡️  [AI-SDLC] Verifying Shift-Left SAST Security (Injections & OWASP Top 10)...'
         )
       )
     );
@@ -793,13 +793,13 @@ export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
   }
 
   if (!options.silent) {
-    console.log(`  Archivos evaluados:      ${pc.bold(String(result.totalFilesScanned))}`);
+    console.log(`  Evaluated files:         ${pc.bold(String(result.totalFilesScanned))}`);
     console.log(
-      `  Vulnerabilidades SAST:   ${result.violationsCount > 0 ? pc.red(String(result.violationsCount)) : pc.green('0')}`
+      `  SAST vulnerabilities:    ${result.violationsCount > 0 ? pc.red(String(result.violationsCount)) : pc.green('0')}`
     );
 
     if (result.violations.length > 0) {
-      console.log(pc.red('\n  Vulnerabilidades detectadas:'));
+      console.log(pc.red('\n  Detected vulnerabilities:'));
       for (const v of result.violations) {
         console.log(
           `    ${pc.red('✖')} [${v.severity}] [${v.ruleId}] ${pc.bold(`${v.relPath}:${v.lineNumber}`)}: ${v.message}`
@@ -812,8 +812,8 @@ export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
   if (!options.silent) {
     console.log(
       isOk
-        ? pc.green('\n✔ Análisis SAST CONFORME (0 Vulnerabilidades Críticas)\n')
-        : pc.red('\n✖ Análisis SAST BLOQUEADO (Vulnerabilidades Detectadas)\n')
+        ? pc.green('\n✔ SAST Analysis COMPLIANT (0 Critical Vulnerabilities)\n')
+        : pc.red('\n✖ SAST Analysis BLOCKED (Vulnerabilities Detected)\n')
     );
   }
   return isOk;
@@ -896,7 +896,7 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
   const isSilent = Boolean(options.silent || useJson);
   if (!isSilent) {
     console.log(pc.bold(pc.magenta('================================================================')));
-    console.log(pc.bold(pc.magenta('          AI-SDLC: SUITE COMPLETA DE QUALITY GATES Y GOBIERNO    ')));
+    console.log(pc.bold(pc.magenta('          AI-SDLC: FULL QUALITY GATES AND GOVERNANCE SUITE      ')));
     console.log(pc.bold(pc.magenta('================================================================')));
   }
 
@@ -941,7 +941,7 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
 
     const violations = Object.entries(gatesSummary)
       .filter(([, g]) => !g.success)
-      .map(([name]) => ({ gate: name, message: `Gate ${name} no superó los criterios de verificación` }));
+      .map(([name]) => ({ gate: name, message: `Gate ${name} failed verification criteria` }));
 
     const payload: VerifyJsonPayload = {
       gate: 'all',
@@ -961,22 +961,22 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
 
   if (!options.silent) {
     console.log(pc.bold(pc.magenta('================================================================')));
-    console.log(pc.bold('RESUMEN DE EVALUACIÓN DE CI/CD:'));
-    console.log(`  1. Quality Gate (Complejidad/Mantenibilidad): ${okQuality ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  2. Trazabilidad 360° (RTM):                  ${okTrace ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  3. Gobierno y Modos de Autonomía:            ${okGov ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  4. Cobertura de Pruebas (Reqs & Tasks):      ${okTest ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  5. Licencias Open Source:                    ${okLic ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  6. PDaC & Deriva Criptográfica:              ${okPdac ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  7. Esquemas JSON de Artefactos:              ${okSchemas ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  8. Requisitos Duplicados (Shift-Left Gate):   ${okDuplicates ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  9. Seguridad Shift-Left (Secretos & SAST):   ${okSecurity ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(pc.bold('CI/CD EVALUATION SUMMARY:'));
+    console.log(`  1. Quality Gate (Complexity/Maintainability): ${okQuality ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  2. 360° Traceability (RTM):                  ${okTrace ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  3. Governance and Autonomy Modes:            ${okGov ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  4. Test Coverage (Reqs & Tasks):             ${okTest ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  5. Open Source Licenses:                     ${okLic ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  6. PDaC & Cryptographic Drift:               ${okPdac ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  7. Artifact JSON Schemas:                    ${okSchemas ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  8. Duplicate Requirements (Shift-Left Gate): ${okDuplicates ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  9. Shift-Left Security (Secrets & SAST):     ${okSecurity ? pc.green('PASSED') : pc.red('FAILED')}`);
     console.log(pc.bold(pc.magenta('================================================================')));
 
     if (allPassed) {
-      console.log(pc.bold(pc.green('\n✨ VEREDICTO FINAL: REPOSITORIO CONFORME CON EL ESTÁNDAR AI-SDLC (EXIT 0)\n')));
+      console.log(pc.bold(pc.green('\n✨ FINAL VERDICT: REPOSITORY COMPLIANT WITH AI-SDLC STANDARD (EXIT 0)\n')));
     } else {
-      console.log(pc.bold(pc.red('\n⛔ VEREDICTO FINAL: BLOQUEO POR INFRACCIONES DETECTADAS (EXIT 1)\n')));
+      console.log(pc.bold(pc.red('\n⛔ FINAL VERDICT: BLOCKED BY DETECTED VIOLATIONS (EXIT 1)\n')));
     }
   }
 

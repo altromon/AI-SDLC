@@ -1,32 +1,32 @@
 ---
-id: ACT-THREAT-NOMBRE-001
+id: ACT-THREAT-NAME-001
 type: threat-actor
-title: Perfil del Adversario o Amenaza
+title: Adversary or Threat Profile
 status: draft
 version: "1.0.0"
 schema-version: "1.0"
 threat-capability: advanced-persistent-threat # script-kiddie, advanced-persistent-threat, insider-threat, automated-botnet, supply-chain-attacker
 motivation: financial-gain # financial-gain, espionage, sabotage, data-theft, reputational-damage
 attack-surfaces:
-  - "Endpoints públicos de API REST"
-  - "Conexiones WebSocket sin mTLS"
+  - "Public REST API endpoints"
+  - "WebSocket connections without mTLS"
 supersedes: null
 superseded-by: null
 ---
 
-# ACT-THREAT-NOMBRE-001: Perfil del Adversario
+# ACT-THREAT-NAME-001: Adversary Profile
 
-## 1. Caracterización del Atacante
-Describe el perfil, nivel técnico, recursos disponibles y modus operandi habitual del adversario.
+## 1. Attacker Characterization
+Describes the adversary's profile, technical skill level, available resources, and typical modus operandi.
 
-## 2. Objetivos de Ataque
-- Qué activos de información o servicios pretende comprometer.
-- Impacto estimado en confidencialidad, integridad y disponibilidad.
+## 2. Attack Objectives
+- Which information assets or services the adversary seeks to compromise.
+- Estimated impact on confidentiality, integrity, and availability.
 
 ---
 
-## 3. Historial de Revisiones y Control de Versiones
+## 3. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-03 | Security Officer / Threat Modeler | Caracterización inicial del perfil de amenaza | CHG-SEC-001 |
+| **1.0.0** | 2026-09-03 | Security Officer / Threat Modeler | Initial threat profile characterization | CHG-SEC-001 |

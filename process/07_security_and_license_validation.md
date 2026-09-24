@@ -1,113 +1,113 @@
-# 07. Validación Determinista: Ciberseguridad, Licencias y Puertas de Calidad en CI/CD
+# 07. Deterministic Validation: Cybersecurity, Licenses, and CI/CD Quality Gates
 
-## 1. El Principio de Verificación Multinivel
+## 1. The Principle of Multilevel Verification
 
-En un flujo de desarrollo con agentes de IA, el código puede generarse a gran velocidad. Para mantener la integridad absoluta de la base de código, la validación se estructura en **dos capas complementarias**:
-1. **Capa Determinista (Puertas de CI/CD)**: Herramientas estáticas, linters y validadores algorítmicos que se ejecutan sin intervención de IA y con resultados reproducibles (mismo código, mismo veredicto).
-2. **Capa Semántica y Adversarial (Agentes Auditores)**: Agentes de IA especializados que examinan el código buscando vulnerabilidades lógicas, vectores de evasión y coherencia con la arquitectura.
+In an AI-agent driven development workflow, code can be produced at high velocity. To safeguard codebase integrity, validation is structured into **two complementary layers**:
+1. **Deterministic Layer (CI/CD Gates)**: Static tools, linters, and algorithmic validators executing without AI intervention, yielding reproducible outcomes (same code, same verdict).
+2. **Semantic and Adversarial Layer (Auditing Agents)**: Specialized AI agents that scrutinize code looking for business logic flaws, evasion vectors, and architectural consistency.
 
 ---
 
-## 2. Las 9 Puertas Deterministas de CI/CD (Pipeline Gates)
+## 2. The 9 Deterministic CI/CD Gates (Pipeline Gates)
 
-Todo Pull Request propuesto por un desarrollador humano o por un agente debe superar de forma obligatoria las siguientes 9 puertas automáticas:
+Every Pull Request submitted by a human engineer or an AI agent must pass the following 9 automated gates:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   PIPELINE DETERMINISTA DE CI/CD (9 GATES)             │
+│                   DETERMINISTIC CI/CD PIPELINE (9 GATES)               │
 └────────────────────────────────────────────────────────────────────────┘
 
- [GATE 1: RELEASE GATE DE CÓDIGO Y CALIDAD AST] (aisdlc verify quality)
-  └─► Mide Complejidad Ciclomática (<=10), Cognitiva (<=15) y Mantenibilidad (>=50) con AST real.
+ [GATE 1: CODE & AST QUALITY RELEASE GATE] (aisdlc verify quality)
+  └─► Measures Cyclomatic Complexity (<=10), Cognitive Complexity (<=15), and Maintainability (>=50) using real AST.
 
- [GATE 2: MATRIZ DE TRAZABILIDAD 360° DETERMINISTA] (aisdlc verify traceability)
-  └─► Comprueba la triangulación inquebrantable entre los paquetes de handoff PDaC (HOF-*),
-      las vistas de arquitectura arc42 / NAF v4 (CMP-*) y los escenarios BDD/Gherkin y tests.
+ [GATE 2: DETERMINISTIC 360° TRACEABILITY MATRIX] (aisdlc verify traceability)
+  └─► Verifies unbroken triangulation across PDaC handoff packages (HOF-*),
+      arc42 / NAF v4 architecture views (CMP-*), and BDD/Gherkin scenarios and test suites.
 
- [GATE 3: GOBIERNO DE TAREAS Y AUTONOMÍA] (aisdlc verify governance)
-  └─► Audita modos de autonomía (AUTONOMOUS, HUMAN_REVIEW_PLAN, HIGH_RISK_MANUAL) y verificación.
+ [GATE 3: TASK GOVERNANCE AND AUTONOMY] (aisdlc verify governance)
+  └─► Audits autonomy modes (AUTONOMOUS, HUMAN_REVIEW_PLAN, HIGH_RISK_MANUAL) and verification criteria.
 
- [GATE 4: AUDITORÍA DE PRUEBAS EN REQUISITOS Y TAREAS] (aisdlc verify testing)
-  └─► Comprueba mediante resolución inversa que el 100% de los requisitos cuenten con pruebas
-      físicas en disco (.feature etiquetadas o .spec citando los IDs) y comandos de verificación.
+ [GATE 4: TEST AUDIT ON REQUIREMENTS AND TASKS] (aisdlc verify testing)
+  └─► Verifies via reverse lookup that 100% of requirements have physical tests
+      on disk (tagged .feature or .spec citing IDs) and deterministic verification commands.
 
- [GATE 5: AUDITORÍA DE LICENCIAS OSS Y GENERACIÓN SBOM] (aisdlc verify licenses)
-  └─► Escaneo dinámico nativo de dependencias instaladas frente a license-policy.yaml.
-      Falla si hay licencias virales (AGPL) o comerciales no aprobadas. Genera SBOM CycloneDX 1.5.
+ [GATE 5: OSS LICENSE AUDIT AND SBOM GENERATION] (aisdlc verify licenses)
+  └─► Native dynamic scan of installed dependencies against license-policy.yaml.
+      Fails on viral (AGPL) or unapproved commercial licenses. Generates CycloneDX 1.5 SBOM.
 
- [GATE 6: INTEGRIDAD CRIPTOGRÁFICA Y DERIVA PDAC] (aisdlc verify pdac)
-  └─► Comprueba que los hashes SHA-256 de los requerimientos citados en handoffs coincidan.
+ [GATE 6: CRYPTOGRAPHIC INTEGRITY AND PDAC DRIFT] (aisdlc verify pdac)
+  └─► Verifies SHA-256 hashes of requirements cited in handoffs match canonical targets.
 
- [GATE 7: VALIDACIÓN DE ESQUEMAS Y GRAFO] (aisdlc verify schemas)
-  └─► Verifica que los archivos frontmatter respeten los esquemas canónicos JSON (Draft 2020-12).
+ [GATE 7: SCHEMA AND GRAPH VALIDATION] (aisdlc verify schemas)
+  └─► Verifies frontmatter files comply with canonical JSON schemas (Draft 2020-12).
 
- [GATE 8: PRE-FLIGHT DE DUPLICADOS Y COLISIONES] (aisdlc verify duplicates)
-  └─► Audita que los nuevos requisitos no colisionen en ID, textos normativos idénticos ni títulos.
+ [GATE 8: DUPLICATE AND COLLISION PRE-FLIGHT] (aisdlc verify duplicates)
+  └─► Audits new requirements for collisions in IDs, identical normative text, or duplicate titles.
 
- [GATE 9: SEGURIDAD SHIFT-LEFT: SECRETOS Y SAST] (aisdlc verify security)
-  └─► Cero tolerancia a credenciales, llaves API o tokens (Gitleaks Gate) y detección determinista
-      de vulnerabilidades OWASP generadas por IA (SQLi, exec, eval, SSRF, path traversal).
+ [GATE 9: SHIFT-LEFT SECURITY: SECRETS AND SAST] (aisdlc verify security)
+  └─► Zero-tolerance for credentials, API keys, or tokens (Gitleaks Gate) and deterministic
+      detection of AI-generated OWASP vulnerabilities (SQLi, exec, eval, SSRF, path traversal).
 ```
 
 ---
 
-## 3. Especificación Detallada de Seguridad Shift-Left
+## 3. Shift-Left Security Detailed Specification
 
-### 3.1 Gate 9: Detección Determinista de Secretos (`aisdlc verify secrets`)
+### 3.1 Gate 9: Deterministic Secret Detection (`aisdlc verify secrets`)
 
-El escaneo de secretos previene la fuga involuntaria de credenciales en el código fuente:
-- **Ámbito de Escaneo Flexible**: Permite escanear todo el árbol de trabajo o únicamente el diff incremental de Git (`--diff`, opcionalmente contra una rama base con `--base <rama>`).
-- **Motor Híbrido Zero-Dependencies**:
-  - Reglas deterministas para Claves Privadas RSA/EC/OpenSSH, tokens de GitHub, AWS Access Keys, OpenAI API Keys, Google API Keys, Slack Tokens, Stripe Keys, Bearer JWTs y asignaciones genéricas de tokens.
-  - Filtro heurístico de **Entropía de Shannon** para identificar cadenas con aleatoriedad sospechosa (umbral por defecto $\ge 4.5$).
-- **Integración con Gitleaks (`--gitleaks`)**: Delegación opcional en el binario oficial de `gitleaks` si está disponible en el entorno o en el CI runner.
-- **Enmascaramiento Seguro**: Los secretos nunca se imprimen en claro ni en consola ni en informes (`AKIA...` ➔ `AKIA***************`).
-- **Supresión Justificada**: Se permite ignorar falsos positivos específicos mediante el comentario en línea `// ai-sdlc:allow-secret`.
-- **Salida Formal**: Genera el informe `reports/SECRET_SCAN_REPORT.md` y emite **código de salida 4** en caso de infracciones.
+Secret scanning prevents inadvertent credential leaks into the codebase:
+- **Flexible Scan Scope**: Scan the entire working tree or strictly Git incremental diffs (`--diff`, optionally against a base branch using `--base <branch>`).
+- **Zero-Dependency Hybrid Engine**:
+  - Deterministic rules for RSA/EC/OpenSSH Private Keys, GitHub tokens, AWS Access Keys, OpenAI API Keys, Google API Keys, Slack Tokens, Stripe Keys, Bearer JWTs, and generic token assignments.
+  - Heuristic **Shannon Entropy** filter to flag strings with suspicious randomness (default threshold $\ge 4.5$).
+- **Gitleaks Integration (`--gitleaks`)**: Optional delegation to official `gitleaks` binary if available in the host environment or CI runner.
+- **Secure Masking**: Secrets are never printed in plain text in console logs or reports (`AKIA...` ➔ `AKIA***************`).
+- **Justified Suppression**: Specific false positives can be bypassed using the inline comment `// ai-sdlc:allow-secret`.
+- **Formal Output**: Generates `reports/SECRET_SCAN_REPORT.md` and exits with **exit code 4** on violations.
 
-### 3.2 Análisis Estático de Vulnerabilidades SAST (`aisdlc verify sast`)
+### 3.2 Static Application Security Testing SAST (`aisdlc verify sast`)
 
-Para erradicar patrones de código vulnerable comunes en código sintetizado por modelos de lenguaje (LLMs):
-- **Patrones Detectados**:
-  - *SQL Injection*: Concatenación directa de cadenas en consultas SQL sin sentencias parametrizadas (`SAST-001`).
-  - *Command Injection*: Ejecución de comandos del sistema operativo (`exec`, `execSync`, `spawn` con shell activo) con interpolación de variables (`SAST-002`).
-  - *Dynamic Code Evaluation*: Uso inseguro de `eval(...)` o constructores `new Function(...)` (`SAST-003`).
-  - *Server-Side Request Forgery (SSRF)*: Peticiones HTTP salientes donde la URL objetivo se construye directamente con entradas no sanitizadas (`SAST-004`).
-  - *Path Traversal*: Operaciones de sistema de archivos construidas mediante concatenación de rutas sin normalización ni comprobación de límites (`SAST-005`).
+To eradicate vulnerable code patterns common in LLM-synthesized code:
+- **Detected Patterns**:
+  - *SQL Injection*: Direct string concatenation in SQL queries without parameterized statements (`SAST-001`).
+  - *Command Injection*: OS command execution (`exec`, `execSync`, `spawn` with active shell) interpolating variables (`SAST-002`).
+  - *Dynamic Code Evaluation*: Insecure use of `eval(...)` or `new Function(...)` constructors (`SAST-003`).
+  - *Server-Side Request Forgery (SSRF)*: Outbound HTTP requests where target URLs are built directly from unsanitized input (`SAST-004`).
+  - *Path Traversal*: File system operations built with path concatenation without normalization or boundary checks (`SAST-005`).
   - *Prompt Injection (OWASP LLM01)*:
-    - **Concatenación Directa**: Interpolación directa de variables o entradas de usuario en llamadas a LLMs o plantillas de prompts sin delimitadores defensivos (`SAST-006`).
-    - **Jailbreak / System Override**: Firmas adversariales de evasión de restricciones de seguridad (*"ignore previous instructions"*, *"system override"*, *"DAN mode"*, rupturas de delimitadores `</system>`) (`SAST-007`).
-- **Cobertura Multilingüe Universal**: Escaneo determinista sobre lenguajes generalistas y plantillas: TypeScript/JavaScript (`.ts`, `.js`), Python (`.py`), C# (`.cs`), Java/Kotlin (`.java`, `.kt`, `.scala`), C/C++ (`.c`, `.cpp`, `.cc`), Go (`.go`), Rust (`.rs`), PHP (`.php`), Ruby (`.rb`), Swift (`.swift`) y plantillas `.prompt`.
-- **Runtime Guard (`detectPromptInjection`)**: Función utilitaria exportada por `@ai-sdlc/core` para evaluación programática en memoria antes de invocar a los modelos.
-- **Supresión Justificada**: Se permite ignorar advertencias mediante el comentario en línea `// ai-sdlc:allow-prompt-injection` o `// ai-sdlc:allow-sast`.
-- **Conector Opcional Semgrep (`--semgrep`)**: Ejecuta reglas corporativas de Semgrep sobre el repositorio si está disponible.
-- **Salida Formal**: Genera `reports/SAST_REPORT.md` y emite código de salida 1 en caso de vulnerabilidades detectadas.
+    - **Direct Concatenation**: Direct interpolation of variables or user input into LLM invocations or prompt templates without defensive delimiters (`SAST-006`).
+    - **Jailbreak / System Override**: Adversarial signatures designed to bypass safety boundaries (*"ignore previous instructions"*, *"system override"*, *"DAN mode"*, delimiter breaches `</system>`) (`SAST-007`).
+- **Universal Multilingual Coverage**: Deterministic scanning across general-purpose languages and templates: TypeScript/JavaScript (`.ts`, `.js`), Python (`.py`), C# (`.cs`), Java/Kotlin (`.java`, `.kt`, `.scala`), C/C++ (`.c`, `.cpp`, `.cc`), Go (`.go`), Rust (`.rs`), PHP (`.php`), Ruby (`.rb`), Swift (`.swift`), and `.prompt` templates.
+- **Runtime Guard (`detectPromptInjection`)**: Utility function exported by `@ai-sdlc/core` for in-memory programmatic evaluation prior to calling models.
+- **Justified Suppression**: Warnings can be suppressed via inline comment `// ai-sdlc:allow-prompt-injection` or `// ai-sdlc:allow-sast`.
+- **Optional Semgrep Connector (`--semgrep`)**: Runs enterprise Semgrep rules across the repository if Semgrep is installed.
+- **Formal Output**: Generates `reports/SAST_REPORT.md` and exits with exit code 1 if vulnerabilities are detected.
 
 ---
 
-## 4. La Capa de Auditoría Adversarial por Agentes de IA (`sec:audit`)
+## 4. Adversarial Audit Layer by AI Agents (`sec:audit`)
 
-Las herramientas estáticas tradicionales (SAST) son excelentes detectando patrones sintácticos conocidos (como una inyección SQL simple), pero fallan al detectar **fallos de lógica de negocio**, **escalados horizontales de privilegios** o **vectores de prompt injection**.
+Traditional static tools (SAST) excel at spotting known syntactic patterns (like a simple SQL injection), but struggle with **business logic vulnerabilities**, **horizontal privilege escalations**, or nuanced **prompt injection vectors**.
 
-Para cubrir este vacío, el pipeline invoca al **Agente Auditor de Seguridad (`agent-security-auditor`)**:
-- **Entrada**: El diff completo del Pull Request, los casos de abuso asociados (`ABUSE-*`), los requisitos de seguridad (`SEC-REQ-*`) y el diseño técnico (`design.md`).
-- **Análisis**:
-  - ¿Existe algún camino en el que un usuario no autenticado pueda forzar el endpoint?
-  - ¿Se están aplicando las validaciones de límites en el backend y no solo en el cliente?
-  - ¿Existen llamadas a modelos de lenguaje vulnerables a inyección indirecta de prompts?
-  - ¿Los mensajes de error filtran trazas de pila o información confidencial?
-- **Salida**: Un informe formal con clasificación CVSS v3.1 insertado como comentario en el Pull Request. Si se detectan riesgos críticos, el agente solicita cambios antes del merge.
+To fill this gap, the pipeline invokes the **Security Auditor Agent (`agent-security-auditor`)**:
+- **Input**: The Pull Request diff, associated abuse cases (`ABUSE-*`), security requirements (`SEC-REQ-*`), and technical design (`design.md`).
+- **Analysis**:
+  - Is there an execution path where an unauthenticated user can invoke this endpoint?
+  - Are boundary checks enforced on the backend and not solely on the client?
+  - Are there calls to language models vulnerable to indirect prompt injection?
+  - Do error messages leak stack traces or confidential information?
+- **Output**: A formal report with CVSS v3.1 scoring posted as a Pull Request comment. If critical risks are detected, the agent requests changes before merge.
 
 ---
 
-## 5. Códigos de Salida Estandarizados (Exit Codes)
+## 5. Standardized Exit Codes
 
-Toda herramienta y script de validación del proceso debe emitir los siguientes códigos de salida:
+All process validation tools and scripts must adhere to standard exit codes:
 
-| Código | Significado | Acción del Pipeline |
+| Code | Meaning | Pipeline Action |
 | :---: | :--- | :--- |
-| **0** | **Éxito (Pass)** | Todas las verificaciones y gates han sido superados. Listo para revisión humana. |
-| **1** | **Fallo Estructural / Pruebas** | Fallo en tests unitarios, errores sintácticos o vulnerabilidad crítica SAST. |
-| **2** | **Deriva de Citación (Stale)** | Un requerimiento o arquitectura canónica cambió. Se debe actualizar la spec. |
-| **3** | **Bloqueo Legal / Licencias** | Dependencia no permitida o requiere adquisición de licencia comercial. |
-| **4** | **Secreto Expuesto** | Credencial o certificado detectado por `verify secrets` en el repositorio o diff. |
+| **0** | **Success (Pass)** | All verifications and gates passed. Ready for human review. |
+| **1** | **Structural / Test Failure** | Unit test failure, syntax errors, or critical SAST vulnerability. |
+| **2** | **Citation Drift (Stale)** | A canonical requirement or architecture block changed. Update spec. |
+| **3** | **Legal / License Block** | Disallowed dependency or pending commercial acquisition request. |
+| **4** | **Exposed Secret** | Credential or certificate detected by `verify secrets` in repo or diff. |
