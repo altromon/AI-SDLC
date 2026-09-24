@@ -29,8 +29,8 @@ Este archivo define las reglas operativas y el mapeo de roles especializados par
   - Ejecutar `pnpm run verify:schemas` y `pnpm run verify:duplicates` antes de entregar el borrador.
 
 ### 2. `agent-threat-modeler` (Modelador de Amenazas y Seguridad)
-- **Misión**: Analizar casos de uso y modelar proactivamente adversarios, vectores de ataque STRIDE y mitigaciones OWASP ASVS.
-- **Entrada**: Casos de uso `UC-*` o requerimientos funcionales `FR-*`.
+- **Misión**: Analizar casos de uso y modelar proactivamente adversarios, vectores de ataque STRIDE y mitigaciones OWASP ASVS, tanto a nivel de producto como en el bucle de retorno de seguridad técnica sobre arquitectura.
+- **Entrada**: Casos de uso `UC-*`, requerimientos funcionales `FR-*` o componentes de arquitectura (`CMP-*`, diagramas Mermaid, ADRs).
 - **Salida**: Tríada de ciberseguridad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`) conforme a `schemas/security/`.
 - **Guardrails**:
   - `status` siempre inicia en `draft`.
@@ -54,13 +54,14 @@ Este archivo define las reglas operativas y el mapeo de roles especializados par
   - Hacer pasar en verde las pruebas entregadas por `agent-qa-engineer` sin modificarlas para acomodar el código.
   - Respetar los umbrales de `quality-policy.yaml`: CC $\le 10$, Cognitiva $\le 15$, MI $\ge 50$, LOC $\le 40$.
   - Ejecutar pre-vuelo con auto-fix: `pnpm run check:fix` y verificación completa: `pnpm run verify:all`.
+  - Al completar la implementación en verde, sugerir handoff a `agent-expert-user` para validación funcional post-desarrollo previa a la auditoría de seguridad.
 
-### 4. `agent-expert-user` (Usuario Experto y Evaluador de Dominio)
-- **Misión**: Contrastar diseño y especificaciones desde la óptica del operador final, definiendo el corte de MVP y catalogando el roadmap.
+### 5. `agent-expert-user` (Usuario Experto y Evaluador de Dominio)
+- **Misión**: Contrastar diseño y especificaciones (fase diseño) y validar funcionalmente el software terminado frente a `UC-*` y `FR-*` (fase post-desarrollo).
 - **Directrices**:
-  - Adoptar el perfil del actor primario bajo condiciones operativas de estrés y campo.
-  - Aplicar la discriminación bimodal: núcleo MVP estricto (YAGNI) vs. banco de sugerencias para roadmap.
-  - Generar el informe en formato canónico `templates/product/user-design-feedback.template.md`.
+  - Modo diseño (upstream): Adoptar el perfil del actor primario bajo condiciones operativas de estrés y campo, aplicando discriminación bimodal (núcleo MVP estricto vs. banco de sugerencias de roadmap en `templates/product/user-design-feedback.template.md`).
+  - Modo validación funcional (downstream / pre-PR): Contrastar exhaustivamente la interfaz y la ejecución CLI real frente a los criterios de aceptación `UC-*` y `FR-*` antes de la auditoría de seguridad pre-merge.
+  - Emitir bloque de handoff sugiriendo a `agent-security-auditor` si el resultado es conforme, o retorno a `agent-developer` ante desvíos funcionales.
 
 ---
 
