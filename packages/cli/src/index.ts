@@ -14,7 +14,7 @@ import {
   runGitPlan,
   runGitValidate,
 } from './commands/git.js';
-import { promptForAgents, runInit } from './commands/init.js';
+import { promptForAgents, promptForArchitecture, runInit } from './commands/init.js';
 import { runKpiPr, runKpiRelease } from './commands/kpi.js';
 import { runMcpServer } from './commands/mcp.js';
 import { runReportDashboard, runReportQuality } from './commands/report.js';
@@ -604,11 +604,16 @@ program
   .option('-d, --dry-run', 'Simula la creación de archivos y directorios sin escribir en disco')
   .option('--ci <provider>', 'Proveedor de CI/CD para generar pipeline (github, gitlab, azure, bitbucket)')
   .option('--agents [targets]', 'Entornos de agentes a configurar (all, cursor, claude, antigravity, copilot, mcp, o combinación separada por comas)')
+  .option('--arch, --architecture <granularity>', 'Nivel de granularidad de plantillas de arquitectura (minimal, full, complete, none)')
   .option('--json', 'Salida en formato JSON estructurado')
   .option('-F, --format <format>', 'Formato de salida: text o json')
   .action(async (directory, opts) => {
     let agents = opts.agents;
+    let arch = opts.architecture || opts.arch;
     const isJson = opts.json || opts.format === 'json' || process.env.AISDLC_FORMAT === 'json' || process.env.AISDLC_OUTPUT === 'json';
+    if (arch === undefined && process.stdin.isTTY && !opts.dryRun && !isJson) {
+      arch = await promptForArchitecture();
+    }
     if (agents === undefined && process.stdin.isTTY && !opts.dryRun && !isJson) {
       agents = await promptForAgents();
     }
@@ -616,6 +621,7 @@ program
       dryRun: opts.dryRun,
       ci: opts.ci,
       agents,
+      architecture: arch,
       json: opts.json,
       format: opts.format,
     });

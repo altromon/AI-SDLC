@@ -24,6 +24,7 @@ Este archivo define las reglas operativas y el mapeo de roles especializados par
 - **Salida**: Artefactos Markdown con frontmatter YAML conforme a `schemas/product/` (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`).
 - **Guardrails**:
   - `status` siempre inicia en `draft`.
+  - En `UC-*`, formular obligatoriamente la sección `1. Intención y Resultado` bajo la estructura en inglés: `As a <ACT-ID>... I want <acción>... To <resultado>...`.
   - Criterios Gherkin obligatorios con `@<ID> @automated @regression`.
   - Ejecutar `pnpm run verify:schemas` y `pnpm run verify:duplicates` antes de entregar el borrador.
 

@@ -18,8 +18,11 @@ superseded-by: null
 
 # UC-ACCION-001: Título Claro de la Interacción
 
-## 1. Intención y Resultado
-Describe el objetivo concreto que persigue el actor principal y el resultado observable tras completar la interacción.
+## 1. Intención y Resultado (User Story)
+
+- **As a**: [Primary actor defined in `primary-actor`, e.g. `ACT-NOMBRE-001`]
+- **I want**: [Concrete action, interaction, or capability requested from the system]
+- **To**: [Observable result, business value, or expected outcome]
 
 ## 2. Precondiciones
 - El actor debe estar autenticado con credenciales válidas.

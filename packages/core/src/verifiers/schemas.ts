@@ -394,13 +394,16 @@ export function verifyArtifactsSchemas(
   for (const file of filesToScan) {
     const relPath = path.relative(rootDir, file).replace(/\\/g, '/');
 
-    // Skip root-level markdown documents, process guides, reports, changesets
+    // Skip root-level markdown documents, process guides, reports, changesets, scratch, templates (unless explicitly targeted), and test temps
     if (
       relPath.startsWith('process/') ||
       relPath.startsWith('reports/') ||
       relPath.startsWith('.changeset/') ||
+      relPath.startsWith('scratch/') ||
       relPath.startsWith('node_modules/') ||
       relPath.startsWith('dist/') ||
+      (!options.targetPath && relPath.startsWith('templates/')) ||
+      relPath.startsWith('temp-') ||
       !relPath.includes('/')
     ) {
       continue;

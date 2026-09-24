@@ -189,6 +189,28 @@ AI-SDLC provee un conjunto completo y estandarizado de plantillas Markdown con *
 
 ---
 
+### 5.3 Modos de Granularidad de Arquitectura e Inicialización Automatizada (`aisdlc init`)
+
+Para evitar tener que copiar o borrar plantillas manualmente según la complejidad del proyecto, el comando de inicialización `aisdlc init` incorpora selección de granularidad arquitectónica (interactiva o mediante la opción `--arch, --architecture`):
+
+```bash
+# Inicialización interactiva (solicita seleccionar la granularidad por consola):
+npx aisdlc init
+
+# Inicialización con granularidad explícita (desatendida o CI/CD):
+npx aisdlc init --arch minimal    # [Recomendado] Solo componentes (CMP-*) y decisiones (ADR-*)
+npx aisdlc init --arch full       # Catálogo exhaustivo de 12 secciones arc42 + NAF v4 (13 plantillas)
+npx aisdlc init --arch none       # Sin plantillas de arquitectura (scripts, utilidades o libs simples)
+```
+
+| Nivel de Granularidad | Plantillas Desplegadas en `templates/architecture/` | Casos de Uso Recomendados | Cumplimiento RTM |
+|---|---|---|---|
+| **`minimal`** *(Por defecto)* | `component.template.md`, `adr.template.md` | Microservicios, APIs, librerías, SaaS estándar y desarrollo ágil. | **100% de Trazabilidad RTM**. Permite mapear `CMP-*` a `UC-*` y `FR-*`, y documentar `ADR-*` sin sobrecarga documental. |
+| **`full` / `complete`** | 13 plantillas completas (Secciones 1 a 12 arc42 + NAF v4) | Sistemas críticos (defensa, aeronáutica, banca/fintech, telecomunicaciones, plataformas multicontenedor). | Rigor formal exhaustivo en todas las perspectivas (Capacidades, Operacional, Despliegue, Riesgos). |
+| **`none`** | Ninguna plantilla desplegada en `templates/architecture/` | Herramientas internas de línea de comandos, scripts de soporte o utilidades sin arquitectura formal. | Proyectos exentos de modelado formal de componentes. |
+
+---
+
 ## 6. Trazabilidad 360° e Integración Canónica Post-Implementación
 
 Para garantizar que los modelos arquitectónicos no diverjan del software ejecutado ni del producto:

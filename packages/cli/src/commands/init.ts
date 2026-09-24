@@ -7,9 +7,35 @@ export interface InitCliOptions {
   dryRun?: boolean;
   ci?: string;
   agents?: string | boolean;
+  architecture?: string;
   silent?: boolean;
   json?: boolean;
   format?: string;
+}
+
+export async function promptForArchitecture(): Promise<string> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  console.log(pc.bold(pc.cyan('\n🏛️  [AI-SDLC] Nivel de Granularidad de Arquitectura:')));
+  console.log('  1) ' + pc.green('Mínimo / Baseline') + ' (Solo Componentes CMP-* y Decisiones ADR-*) ' + pc.yellow('[Recomendado para microservicios y CLI]'));
+  console.log('  2) ' + pc.cyan('Completo / arc42 + NAF v4') + ' (12 secciones completas de arquitectura)');
+  console.log('  3) ' + pc.gray('Ninguno') + ' (Sin plantillas de arquitectura)');
+
+  try {
+    const answer = await rl.question(
+      pc.bold('\n¿Qué nivel de granularidad de arquitectura deseas configurar? [1-3] (por defecto 1): ')
+    );
+    const trimmed = answer.trim().toLowerCase();
+    if (!trimmed || trimmed === '1' || trimmed === 'minimal') return 'minimal';
+    if (trimmed === '2' || trimmed === 'full' || trimmed === 'complete') return 'full';
+    if (trimmed === '3' || trimmed === 'none') return 'none';
+    return trimmed;
+  } finally {
+    rl.close();
+  }
 }
 
 export async function promptForAgents(): Promise<string> {
@@ -57,6 +83,7 @@ export function runInit(
     targetDir,
     ci: options.ci,
     agents: options.agents === 'none' ? false : options.agents,
+    architecture: options.architecture,
     dryRun: options.dryRun,
   });
 
@@ -110,6 +137,16 @@ export function runInit(
       console.log(pc.cyan(`\n  ✔ Agentes de IA configurados: ${pc.bold(result.agentsConfigured.join(', '))}`));
     }
 
+    if (result.architectureGranularity) {
+      const label =
+        result.architectureGranularity === 'full' || result.architectureGranularity === 'complete'
+          ? 'Completo (arc42 + NAF v4, 12 secciones)'
+          : result.architectureGranularity === 'minimal'
+          ? 'Mínimo / Baseline (CMP-* y ADR-*)'
+          : 'Ninguno';
+      console.log(pc.cyan(`\n  ✔ Granularidad de arquitectura: ${pc.bold(label)}`));
+    }
+
     if (options.dryRun) {
       console.log(`  ${pc.blue('DRY-RUN')} Instalar Git Hook: .git/hooks/prepare-commit-msg`);
     } else if (result.gitHookInstalled) {
@@ -132,6 +169,7 @@ export function runInit(
       filesCreated: result.filesCreated,
       ciProvider: result.ciProvider,
       agentsConfigured: result.agentsConfigured,
+      architectureGranularity: result.architectureGranularity,
       gitHookInstalled: result.gitHookInstalled,
       dryRun: Boolean(options.dryRun),
     };

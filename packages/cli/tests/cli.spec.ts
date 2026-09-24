@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import { runGitPlan, runGitValidate } from '../src/commands/git.js';
@@ -44,8 +45,34 @@ describe('@ai-sdlc/cli Command Suite', () => {
     expect(runInit('test-scaffold', { dryRun: true, ci: 'invalid-provider' })).toBe(false);
   });
 
+  it('should support architecture granularity options in init', () => {
+    const tempInitDir = fs.mkdtempSync(path.join(os.tmpdir(), 'temp-init-arch-'));
+    try {
+      const minimalTarget = path.join(tempInitDir, 'minimal-proj');
+      expect(runInit(minimalTarget, { architecture: 'minimal', silent: true })).toBe(true);
+      expect(fs.existsSync(path.join(minimalTarget, 'templates', 'architecture', 'component.template.md'))).toBe(true);
+      expect(fs.existsSync(path.join(minimalTarget, 'templates', 'architecture', 'adr.template.md'))).toBe(true);
+      expect(fs.existsSync(path.join(minimalTarget, 'templates', 'architecture', 'runtime-view.template.md'))).toBe(false);
+
+      const fullTarget = path.join(tempInitDir, 'full-proj');
+      expect(runInit(fullTarget, { architecture: 'full', silent: true })).toBe(true);
+      expect(fs.existsSync(path.join(fullTarget, 'templates', 'architecture', 'component.template.md'))).toBe(true);
+      expect(fs.existsSync(path.join(fullTarget, 'templates', 'architecture', 'runtime-view.template.md'))).toBe(true);
+      expect(fs.existsSync(path.join(fullTarget, 'templates', 'architecture', 'glossary.template.md'))).toBe(true);
+
+      const noneTarget = path.join(tempInitDir, 'none-proj');
+      expect(runInit(noneTarget, { architecture: 'none', silent: true })).toBe(true);
+      expect(fs.existsSync(path.join(noneTarget, 'templates', 'architecture'))).toBe(true);
+      expect(fs.readdirSync(path.join(noneTarget, 'templates', 'architecture'))).toHaveLength(0);
+
+      expect(runInit('invalid-arch-target', { dryRun: true, architecture: 'invalid', silent: true })).toBe(false);
+    } finally {
+      fs.rmSync(tempInitDir, { recursive: true, force: true });
+    }
+  });
+
   it('should deposit expected CI configuration files upon real init execution', () => {
-    const tempInitDir = fs.mkdtempSync(path.join(process.cwd(), 'temp-init-test-'));
+    const tempInitDir = fs.mkdtempSync(path.join(os.tmpdir(), 'temp-init-test-'));
     try {
       // Test GitLab CI scaffolding
       const gitlabTarget = path.join(tempInitDir, 'gitlab-proj');
@@ -76,7 +103,7 @@ describe('@ai-sdlc/cli Command Suite', () => {
   });
 
   it('should automatically install git hooks when .git exists upon init', () => {
-    const tempInitDir = fs.mkdtempSync(path.join(process.cwd(), 'temp-init-hooks-'));
+    const tempInitDir = fs.mkdtempSync(path.join(os.tmpdir(), 'temp-init-hooks-'));
     try {
       const gitDir = path.join(tempInitDir, '.git');
       fs.mkdirSync(gitDir, { recursive: true });
@@ -94,7 +121,7 @@ describe('@ai-sdlc/cli Command Suite', () => {
   });
 
   it('should not install git hook in dry-run mode', () => {
-    const tempInitDir = fs.mkdtempSync(path.join(process.cwd(), 'temp-init-dryrun-'));
+    const tempInitDir = fs.mkdtempSync(path.join(os.tmpdir(), 'temp-init-dryrun-'));
     try {
       const gitDir = path.join(tempInitDir, '.git');
       fs.mkdirSync(gitDir, { recursive: true });
@@ -110,7 +137,7 @@ describe('@ai-sdlc/cli Command Suite', () => {
   });
 
   it('should succeed when .git does not exist during init', () => {
-    const tempInitDir = fs.mkdtempSync(path.join(process.cwd(), 'temp-init-nogit-'));
+    const tempInitDir = fs.mkdtempSync(path.join(os.tmpdir(), 'temp-init-nogit-'));
     try {
       const res = runInit(tempInitDir);
       expect(res).toBe(true);
@@ -215,7 +242,7 @@ describe('@ai-sdlc/cli Command Suite', () => {
   });
 
   it('should verify artifact schemas via CLI command', () => {
-    const passed = runVerifySchemas({ silent: true });
+    const passed = runVerifySchemas({ silent: false });
     expect(passed).toBe(true);
   });
 

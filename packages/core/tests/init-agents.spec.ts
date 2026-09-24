@@ -4,12 +4,13 @@
  * Cites: FR-031-WORKFLOW-AGENT-HANDOFF-001
  */
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { initProject } from '../src/init/index.js';
 
 describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
-  const tempDir = path.join(process.cwd(), 'scratch', 'test-core-init-agents');
+  const tempDir = path.join(os.tmpdir(), 'test-core-init-agents');
 
   beforeEach(() => {
     if (fs.existsSync(tempDir)) {

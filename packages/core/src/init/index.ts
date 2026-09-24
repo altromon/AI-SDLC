@@ -16,6 +16,11 @@ import {
   STARTER_ANTIGRAVITY_MCP,
   STARTER_VSCODE_MCP,
 } from './agent-templates.js';
+import {
+  getArchitectureTemplates,
+  VALID_ARCHITECTURE_GRANULARITIES,
+  ArchitectureGranularity,
+} from './architecture-templates.js';
 
 export const VALID_CI_PROVIDERS = ['github', 'gitlab', 'azure', 'bitbucket'] as const;
 export type SupportedCiProvider = (typeof VALID_CI_PROVIDERS)[number];
@@ -537,6 +542,7 @@ jobs:
 `;
 
 export * from './agent-templates.js';
+export * from './architecture-templates.js';
 
 export const VALID_AGENT_TARGETS = ['cursor', 'claude', 'antigravity', 'copilot', 'mcp', 'all'] as const;
 export type AgentTarget = (typeof VALID_AGENT_TARGETS)[number];
@@ -546,6 +552,7 @@ export interface InitProjectOptions {
   targetDir?: string;
   ci?: string;
   agents?: string | boolean | string[];
+  architecture?: ArchitectureGranularity | string;
   dryRun?: boolean;
 }
 
@@ -556,6 +563,7 @@ export interface InitProjectResult {
   filesCreated: string[];
   ciProvider?: SupportedCiProvider;
   agentsConfigured: string[];
+  architectureGranularity?: ArchitectureGranularity;
   gitHookInstalled: boolean;
   error?: string;
 }
@@ -674,6 +682,23 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
     ciProvider = normalized as SupportedCiProvider;
   }
 
+  let archGranularity: ArchitectureGranularity = 'minimal';
+  if (options.architecture !== undefined && options.architecture !== null) {
+    const rawArch = String(options.architecture).trim().toLowerCase();
+    if (!VALID_ARCHITECTURE_GRANULARITIES.includes(rawArch as ArchitectureGranularity)) {
+      return {
+        success: false,
+        targetDir: destDir,
+        directoriesCreated: [],
+        filesCreated: [],
+        agentsConfigured: [],
+        gitHookInstalled: false,
+        error: `Nivel de granularidad de arquitectura no reconocido: '${options.architecture}'. Opciones válidas: ${VALID_ARCHITECTURE_GRANULARITIES.join(', ')}.`,
+      };
+    }
+    archGranularity = rawArch as ArchitectureGranularity;
+  }
+
   const directories = [
     'process',
     'schemas/product',
@@ -744,6 +769,14 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
 
   filesToWrite.push(...agentFiles);
 
+  const archTemplates = getArchitectureTemplates(archGranularity);
+  for (const tpl of archTemplates) {
+    filesToWrite.push({
+      relPath: path.join('templates', 'architecture', tpl.filename).replace(/\\/g, '/'),
+      content: tpl.content,
+    });
+  }
+
   const filesCreated = writeProjectFiles(destDir, filesToWrite, options.dryRun);
 
   let gitHookInstalled = false;
@@ -767,6 +800,7 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
     filesCreated,
     ciProvider,
     agentsConfigured,
+    architectureGranularity: archGranularity,
     gitHookInstalled,
   };
 }
