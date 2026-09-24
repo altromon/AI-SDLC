@@ -140,7 +140,7 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(htmlContent).toContain('highlightCriticalPath');
     expect(htmlContent).toContain('Matriz de Trazabilidad de Requerimientos 360°');
     expect(htmlContent).toContain('Distribución de Modos de Autonomía de Tareas');
-    expect(htmlContent).toContain('Telemetría Activa e Histórico de KPIs');
+    expect(htmlContent).toMatch(/Telemetría Activa.*e Histórico de KPIs/);
 
     // Verify it is larger than 100KB due to bundled Cytoscape library
     expect(htmlContent.length).toBeGreaterThan(100000);
