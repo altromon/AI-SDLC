@@ -826,20 +826,40 @@ Para simplificar la interacción y minimizar el número de pasos, el servidor MC
 
 ## 🤖 Guía Operativa para Agentes de IA
 
-1. **Lectura de Contexto mediante Citaciones**:
-   - Nunca asumas comportamientos ni inventes reglas. Lee los artefactos canónicos citados en la especificación (`SPEC-*`).
-2. **Respeto a los Guardrails de Seguridad**:
-   - Todo código generado debe cumplir con los principios OWASP Secure Coding.
-   - Si la tarea implementa un `SEC-REQ-*`, debes generar obligatoriamente la prueba automatizada correspondiente (`SEC-TEST-*`).
-3. **Inspección Previa de Licencias de Dependencias**:
-   - Antes de modificar manifiestos de paquetes (`package.json`, etc.), consulta la licencia del paquete.
-   - Si la licencia es GPL/AGPL (viral) o BSL/SSPL (comercial de pago), DETÉN la adición y notifica al usuario en el PR proponiendo una alternativa permisiva (MIT/Apache 2.0).
-4. **Instanciación y Evolución Arquitectural**:
-   - Al modelar nuevos módulos o servicios, copia la plantilla correspondiente desde `templates/architecture/` hacia `docs/architecture/` (o diseña la solución en `specs/changes/active/.../design.md` respetando la estructura arc42 / NAF v4).
-   - Completa rigurosamente el frontmatter YAML (`id`, `title`, `type`, `version`, `schema-version`, `status`, `implements-use-cases`, `satisfies-requirements`).
-   - Valida la integridad estructural con `npx aisdlc verify schemas --path docs/architecture` y confirma la resolución de dependencias mediante `npx aisdlc verify traceability`.
-5. **Validación Determinista**:
-   - Al finalizar, ejecuta los linters y verificadores de esquemas. Nunca intentes auto-aprobar o forzar el merge de un PR.
+### 1. Principios y Guardrails Innegociables
+1. **Lectura de Contexto mediante Citaciones**: Nunca asumas comportamientos ni inventes reglas. Lee los artefactos canónicos citados en la especificación (`SPEC-*`).
+2. **Respeto a los Guardrails de Seguridad**: Todo código generado debe cumplir con los principios OWASP Secure Coding. Si la tarea implementa un `SEC-REQ-*`, debes generar obligatoriamente la prueba automatizada correspondiente (`SEC-TEST-*`).
+3. **Inspección Previa de Licencias de Dependencias**: Antes de modificar manifiestos de paquetes (`package.json`, etc.), consulta la licencia del paquete frente a `license-policy.yaml`. Quedan prohibidas dependencias virales (`GPL`/`AGPL`) o comerciales de pago sin aprobación previa.
+4. **Instanciación y Evolución Arquitectural**: Al modelar nuevos módulos o servicios, copia la plantilla correspondiente desde `templates/architecture/` hacia `docs/architecture/` (o diseña en `specs/changes/active/.../design.md`). Completa rigurosamente el frontmatter YAML y valida con `npx aisdlc verify schemas` y `npx aisdlc verify traceability`.
+5. **Validación Determinista y Cero Auto-Aprobación**: Al finalizar, ejecuta los linters y verificadores de esquemas (`pnpm run check:fix` y `pnpm run verify:all`). Nunca intentes auto-aprobar o forzar el merge de un PR: la aprobación y fusión es prerrogativa humana exclusiva.
+
+### 2. Catálogo Canónico de Agentes Especializados (10 Roles)
+
+AI-SDLC define 10 roles especializados con responsabilidades demarcadas, contratos de entrada/salida y compuertas deterministas (ver detalle canónico en [process/09_agent_protocols.md](process/09_agent_protocols.md) y [process/01_governance_and_roles.md](process/01_governance_and_roles.md)):
+
+| Rol de Agente | Especialidad / Misión | Entregables Principales | Guardrails Críticos |
+| :--- | :--- | :--- | :--- |
+| **`agent-product-analyst`** | Analista de Producto y Scribe PDaC | `ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*` en `specs/product/` | `status: draft`, estructura Gherkin obligatoria, sin asunciones. |
+| **`agent-threat-modeler`** | Modelado de Amenazas y Shift-Left Security | `ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`, `SEC-ENC-*` | STRIDE / ASVS, pruebas negativas, bucle de retorno de seguridad técnica. |
+| **`agent-system-architect`** | Arquitecto de Sistemas arc42 / NAF v4 | `CMP-*`, diagramas Mermaid, registros `ADR-*` | Citación de `implements-use-cases` y `satisfies-requirements`; retorno a threat modeler. |
+| **`agent-qa-engineer`** | Ingeniero de QA y SDET | Suites BDD en ROJO (`nominal`, `límite`, `fuera de rango`) | **Cero código de producción**; bloqueo si falta límite o fuera de rango. |
+| **`agent-developer`** | Desarrollador de Software | Código en verde (`src/`), tests unitarios, TDD | Umbrales `quality-policy.yaml` (CC $\le 10$, MI $\ge 50$); handoff post-desarrollo. |
+| **`agent-expert-user`** | Usuario Experto y Evaluador de Dominio | Feedback MVP (diseño) / Atestación funcional (post-dev) | Bimodal: MVP estricto upstream vs. validación funcional CLI/UI downstream. |
+| **`agent-security-auditor`** | Auditor Adversarial de Código (Pre-Merge) | Informe CVSS v3.1, auditoría SAST / secretos | Mentalidad atacante; bloqueo de PRs ante vulnerabilidades críticas o altas. |
+| **`agent-compliance-checker`** | Auditor de Licencias y Propiedad Intelectual | Dictamen de compatibilidad legal de dependencias | Verificación SPDX contra `license-policy.yaml`; bloqueo de virales/comerciales. |
+| **`agent-code-reviewer`** | Revisor Técnico y Arquitectónico (Pre-Merge) | Auditoría Clean Code, SOLID, DRY, YAGNI, AST | Umbrales CC $\le 10$, MI $\ge 50$; categorización `[BLOQUEANTE]` vs `[SUGERENCIA]`. |
+| **`agent-devops`** | Ingeniero de Automatización e Infraestructura | `.github/workflows/`, Dockerfiles, IaC, scripts | **NO INVASIÓN**: Prohibido modificar código de aplicación en `src/`. |
+
+### 3. La Tríada de Auditoría Pre-Merge
+Antes de someter cualquier Pull Request a la aprobación humana del Tech Lead, tres agentes especializados auditan concurrentemente el diff:
+1. **`agent-code-reviewer`**: Audita la salud técnica, legibilidad, patrones de diseño, ausencia de deuda técnica y respeto a las métricas de complejidad AST.
+2. **`agent-security-auditor`**: Examina la superficie de ataque, vectores de inyección, sanitización y controles criptográficos.
+3. **`agent-compliance-checker`**: Audita manifiestos, bloquea licencias incompatibles y verifica el SBOM.
+
+### 4. Automatización e Infraestructura: `agent-devops` y Guardrail de No Invasión
+El agente `agent-devops` asume la evolución y mantenimiento de pipelines de CI/CD, imágenes de contenedor y scripts de infraestructura. Opera bajo un **guardrail de no invasión estricto**:
+- **Ámbito permitido**: `.github/workflows/`, `Dockerfile*`, `docker-compose*.yml`, manifiestos IaC y `scripts/`.
+- **Ámbito prohibido**: Prohibido terminantemente modificar o refactorizar archivos de código fuente de la aplicación (`src/`, `packages/*/src/app/`). La lógica de negocio es competencia exclusiva de `agent-developer`.
 
 ### Integración Nativa por Entorno de IA
 
