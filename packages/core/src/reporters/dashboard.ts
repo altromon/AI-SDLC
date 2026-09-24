@@ -6,6 +6,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { execFileSync } from 'child_process';
 import {
   CytoscapeEdgeData,
   CytoscapeElement,
@@ -240,10 +241,54 @@ export function collectDashboardMetrics(rootDir: string) {
   const history = collectHistoricalKpis(rootDir);
 
   let activePrKpi = null;
+  let activeBranch = 'HEAD';
   try {
-    activePrKpi = aggregatePrKpis('main', 'HEAD', { cwd: rootDir });
+    try {
+      activeBranch = execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
+        cwd: rootDir,
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+      }).trim();
+    } catch {
+      activeBranch = 'HEAD';
+    }
+
+    const isDefaultBranch = activeBranch === 'main' || activeBranch === 'master';
+    if (isDefaultBranch) {
+      let base = 'HEAD~20';
+      try {
+        const count = parseInt(
+          execFileSync('git', ['rev-list', '--count', 'HEAD'], {
+            cwd: rootDir,
+            encoding: 'utf-8',
+            stdio: ['pipe', 'pipe', 'pipe'],
+          }).trim(),
+          10
+        );
+        if (count <= 20) {
+          const rootCommit = execFileSync('git', ['rev-list', '--max-parents=0', 'HEAD'], {
+            cwd: rootDir,
+            encoding: 'utf-8',
+            stdio: ['pipe', 'pipe', 'pipe'],
+          }).trim().split('\n')[0];
+          base = rootCommit;
+        }
+      } catch {
+        base = 'HEAD~1';
+      }
+      activePrKpi = aggregatePrKpis(base, 'HEAD', { cwd: rootDir });
+    } else {
+      activePrKpi = aggregatePrKpis('main', 'HEAD', { cwd: rootDir });
+      if (activePrKpi.totalCommits === 0) {
+        try {
+          activePrKpi = aggregatePrKpis('HEAD~1', 'HEAD', { cwd: rootDir });
+        } catch {
+          // Keep 0 commits if unable
+        }
+      }
+    }
   } catch {
-    // Graceful fallback if git range main..HEAD is unavailable
+    // Graceful fallback if git range is unavailable
   }
 
   return {
@@ -253,6 +298,7 @@ export function collectDashboardMetrics(rootDir: string) {
     trace,
     history,
     activePrKpi,
+    activeBranch,
   };
 }
 
@@ -533,6 +579,56 @@ export function renderDashboardHtml(
             <span class="value">$${metricsData.activePrKpi.estimatedCostUsd.toFixed(2)}</span>
             <span class="subtitle">USD ponderado</span>
           </div>
+        </div>
+
+        <div class="chart-container">
+          <h3>Desglose de Telemetría por Autor y Modelo (${metricsData.activeBranch || 'HEAD'})</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Entidad / Modelo</th>
+                <th>Tipo</th>
+                <th>Commits</th>
+                <th>Líneas (+/-)</th>
+                <th>Tiempo Activo</th>
+                <th>Tokens Consumidos</th>
+                <th>Coste Estimado ($ USD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${metricsData.activePrKpi.humanSummary.commits > 0 ? `
+              <tr>
+                <td><strong>Humano (Desarrollador)</strong></td>
+                <td><span class="badge" style="background:#334155;">HUMAN</span></td>
+                <td>${metricsData.activePrKpi.humanSummary.commits}</td>
+                <td>+${metricsData.activePrKpi.humanSummary.linesAdded} / -${metricsData.activePrKpi.humanSummary.linesDeleted}</td>
+                <td>${Math.round(metricsData.activePrKpi.humanSummary.activeTimeSeconds / 60)}m</td>
+                <td>0</td>
+                <td>—</td>
+              </tr>
+              ` : ''}
+              ${Object.entries(metricsData.activePrKpi.byModel).map(([model, summary]: [string, any]) => `
+              <tr>
+                <td><strong><code>${model}</code></strong></td>
+                <td><span class="badge badge-green">AGENT</span></td>
+                <td>${summary.commits}</td>
+                <td>+${summary.linesAdded} / -${summary.linesDeleted}</td>
+                <td>${Math.round(summary.activeTimeSeconds / 60)}m</td>
+                <td>${(summary.promptTokens + summary.completionTokens).toLocaleString('en-US')}</td>
+                <td>$${summary.estimatedCostUsd.toFixed(2)}</td>
+              </tr>
+              `).join('')}
+              <tr style="font-weight: bold; background: rgba(255,255,255,0.05);">
+                <td>TOTAL RAMA</td>
+                <td>—</td>
+                <td>${metricsData.activePrKpi.totalCommits}</td>
+                <td>+${metricsData.activePrKpi.linesAdded} / -${metricsData.activePrKpi.linesDeleted}</td>
+                <td>${Math.round(metricsData.activePrKpi.totalActiveTimeSeconds / 60)}m</td>
+                <td>${metricsData.activePrKpi.totalTokens.toLocaleString('en-US')}</td>
+                <td>$${metricsData.activePrKpi.estimatedCostUsd.toFixed(2)} USD</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         ` : ''}
 

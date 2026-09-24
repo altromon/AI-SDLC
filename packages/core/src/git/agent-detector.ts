@@ -17,7 +17,9 @@ export interface AuthorIdentity {
 }
 
 const AGENT_ENV_MAPPINGS: Array<{ envKey: string; defaultModel: string; source: string }> = [
-  { envKey: 'ANTIGRAVITY_AGENT_ID', defaultModel: 'antigravity-agent', source: 'antigravity' },
+  { envKey: 'ANTIGRAVITY_AGENT', defaultModel: 'gemini-3.8-flash', source: 'antigravity' },
+  { envKey: 'ANTIGRAVITY_CONVERSATION_ID', defaultModel: 'gemini-3.8-flash', source: 'antigravity' },
+  { envKey: 'ANTIGRAVITY_AGENT_ID', defaultModel: 'gemini-3.8-flash', source: 'antigravity' },
   { envKey: 'CORTEX_SESSION_ID', defaultModel: 'antigravity-agent', source: 'cortex' },
   { envKey: 'CLAUDE_CODE', defaultModel: 'claude-3-7-sonnet', source: 'claude-code' },
   { envKey: 'CLAUDE_AGENT', defaultModel: 'claude-3-7-sonnet', source: 'claude-agent' },
@@ -28,6 +30,7 @@ const AGENT_ENV_MAPPINGS: Array<{ envKey: string; defaultModel: string; source: 
   { envKey: 'GITHUB_COPILOT_AGENT', defaultModel: 'github-copilot', source: 'copilot' },
   { envKey: 'COPILOT_AGENT_NAME', defaultModel: 'github-copilot', source: 'copilot' },
   { envKey: 'AIDER_MODEL', defaultModel: 'aider-agent', source: 'aider' },
+  { envKey: 'GEMINI_CLI', defaultModel: 'gemini-1.5-pro', source: 'gemini' },
   { envKey: 'AI_AGENT_NAME', defaultModel: 'agent-developer', source: 'ai-sdlc-agent' },
   { envKey: 'AI_MODEL', defaultModel: 'agent-developer', source: 'ai-sdlc-model' },
 ];

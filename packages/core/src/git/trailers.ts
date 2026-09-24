@@ -136,6 +136,43 @@ function evaluateIsBugFix(subject: string, parentRef?: string): boolean {
 }
 
 /**
+ * Infers or estimates missing KPI metrics (tokens and active development time)
+ * when not explicitly declared in commit trailers.
+ */
+export function inferMissingTrailers(
+  trailers: CommitTrailers,
+  linesAdded: number,
+  linesDeleted: number
+): CommitTrailers {
+  const result: CommitTrailers = { ...trailers };
+  const linesChanged = linesAdded + linesDeleted;
+
+  if (result.authorType === 'agent') {
+    // If prompt and completion tokens are 0, estimate based on lines changed
+    if (result.promptTokens === 0 && result.completionTokens === 0) {
+      if (linesChanged > 0) {
+        result.completionTokens = Math.max(linesAdded * 10, 50);
+        result.promptTokens = Math.max(2500 + linesChanged * 25, 3000);
+      } else {
+        result.completionTokens = 0;
+        result.promptTokens = 1000;
+      }
+    }
+    // If active time is 0, estimate based on lines changed
+    if (result.activeTimeSeconds === 0) {
+      result.activeTimeSeconds = linesChanged > 0 ? Math.round(30 + linesChanged * 0.5) : 30;
+    }
+  } else {
+    // Human developer: tokens are always 0, estimate active development time
+    if (result.activeTimeSeconds === 0) {
+      result.activeTimeSeconds = linesChanged > 0 ? Math.round(180 + linesChanged * 2) : 120;
+    }
+  }
+
+  return result;
+}
+
+/**
  * Extracts all commit records and their KPIs in a git revision range (e.g. main..HEAD).
  */
 export function extractCommitKpisFromRange(
@@ -146,14 +183,15 @@ export function extractCommitKpisFromRange(
   const cwd = options.cwd || process.cwd();
   const format = '---AI_SDLC_COMMIT---%n%H%x1f%an%x1f%ae%x1f%aI%x1f%s%n%B%n---AI_SDLC_BODY_END---';
   let rawOutput = '';
+  const rangeArg = baseRef ? `${baseRef}..${headRef}` : headRef;
   try {
     rawOutput = execFileSync(
       'git',
-      ['log', `${baseRef}..${headRef}`, `--format=${format}`, '--numstat'],
+      ['log', rangeArg, `--format=${format}`, '--numstat'],
       { cwd, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
     );
   } catch {
-    if (!baseRef.includes('/')) {
+    if (baseRef && !baseRef.includes('/')) {
       try {
         rawOutput = execFileSync(
           'git',
@@ -180,8 +218,9 @@ export function extractCommitKpisFromRange(
     const date = fields[3];
     const subject = fields[4];
 
-    const trailers = parseCommitTrailers(chunk.body);
+    const rawTrailers = parseCommitTrailers(chunk.body);
     const { added, deleted } = sumNumstatLines(chunk.numstatLines);
+    const trailers = inferMissingTrailers(rawTrailers, added, deleted);
     const isBugFix = evaluateIsBugFix(subject, trailers.parentRef);
 
     records.push({
