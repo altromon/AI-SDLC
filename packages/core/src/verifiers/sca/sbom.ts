@@ -94,16 +94,38 @@ function safeWriteFileSync(filePath: string, content: string): void {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  let attempts = 5;
+  let attempts = 10;
   while (attempts > 0) {
     try {
-      fs.writeFileSync(filePath, content, 'utf-8');
+      const tempPath = `${filePath}.${process.pid}.${Math.random().toString(36).substring(2)}.tmp`;
+      fs.writeFileSync(tempPath, content, 'utf-8');
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.rmSync(filePath, { force: true });
+        }
+        fs.renameSync(tempPath, filePath);
+      } catch {
+        try {
+          fs.copyFileSync(tempPath, filePath);
+          fs.unlinkSync(tempPath);
+        } catch {
+          // ignore fallback error
+        }
+      }
       return;
-    } catch (err) {
+    } catch {
       attempts--;
-      if (attempts === 0) throw err;
+      if (attempts === 0) {
+        try {
+          fs.writeFileSync(filePath, content, 'utf-8');
+        } catch {
+          // Ignore transient lock error if another worker already wrote the report
+        }
+        return;
+      }
+      const delay = Math.floor(Math.random() * 50) + 50;
       const start = Date.now();
-      while (Date.now() - start < 100) {
+      while (Date.now() - start < delay) {
         // wait
       }
     }

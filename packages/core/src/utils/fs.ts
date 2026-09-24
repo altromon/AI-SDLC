@@ -23,7 +23,7 @@ export function walkMdFiles(
       const fullPath = path.join(dir, file);
       try {
         if (fs.statSync(fullPath).isDirectory()) {
-          if (!excludeDirs.includes(file)) {
+          if (!excludeDirs.includes(file) && !file.startsWith('temp-') && !file.startsWith('.temp-')) {
             walkMdFiles(fullPath, fileList, excludeDirs);
           }
         } else if (file.endsWith('.md')) {

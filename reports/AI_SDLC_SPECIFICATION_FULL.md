@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-09-24 08:14:22 UTC` | *Módulos Integrados:* `13`  
+> *Fecha de Compilación:* `2026-09-24 09:31:30 UTC` | *Módulos Integrados:* `13`  
 
 ---
 
@@ -138,6 +138,7 @@
   - [5. Catálogo Canónico de Plantillas de Arquitectura (`templates/architecture/`)](#cap-05-architecture-arc42-nafv4-5-catalogo-canonico-de-plantillas-de-arquitectura-templatesarchitecture)
     - [5.1 Matriz de Plantillas y Artefactos](#cap-05-architecture-arc42-nafv4-51-matriz-de-plantillas-y-artefactos)
     - [5.2 Guía de Uso e Instanciación en Proyectos](#cap-05-architecture-arc42-nafv4-52-guia-de-uso-e-instanciacion-en-proyectos)
+    - [5.3 Modos de Granularidad de Arquitectura e Inicialización Automatizada (`aisdlc init`)](#cap-05-architecture-arc42-nafv4-53-modos-de-granularidad-de-arquitectura-e-inicializacion-automatizada-aisdlc-init)
   - [6. Trazabilidad 360° e Integración Canónica Post-Implementación](#cap-05-architecture-arc42-nafv4-6-trazabilidad-360-e-integracion-canonica-post-implementacion)
 
 - [**06. Entrega e Implementación: Spec-Driven Development (SDD)**](#cap-06-spec-driven-development) *(Fuente: `process/06_spec_driven_development.md`)*
@@ -478,7 +479,7 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc report quality` | `pnpm run report:quality` | **Reporting Formal** | Genera informe detallado de métricas en `reports/QUALITY_REPORT.md` |
 | `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Catálogo de Producto** | Genera catálogo consolidado de requerimientos en `reports/ACTIVE_REQUIREMENTS.md` |
 | `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | **Dossier Maestro** | Compila documentación y manuales con TOC interactiva en `reports/AI_SDLC_SPECIFICATION_FULL.md` |
-| `npx aisdlc init [dir] [--ci <provider>]` | - | **Inicialización** | Inicializa un nuevo repo con carpetas, esquemas, políticas y pipeline CI/CD (`github`, `gitlab`, `azure`, `bitbucket`) |
+| `npx aisdlc init [dir] [--ci <prov>] [--arch <minimal|full|none>]` | - | **Inicialización** | Inicializa un nuevo repo con carpetas, esquemas, políticas, pipeline CI/CD y plantillas de arquitectura seleccionadas (`minimal`, `full`, `none`) |
 | `npx aisdlc mcp` / `npx @ai-sdlc/mcp` | `pnpm run mcp` | **Servidor MCP Nativo** | Arranca el servidor Model Context Protocol sobre `stdio` con 20 herramientas tipadas (incluyendo `new`, `verify`, `report`) y 5 recursos canónicos |
 
 
@@ -1148,8 +1149,8 @@ Para simplificar la interacción y minimizar el número de pasos, el servidor MC
    - Modela actores maliciosos (`ACT-THREAT-*`) y casos de abuso (`ABUSE-*`).
    - Define requisitos de seguridad (`SEC-REQ-*`) y restricciones Zero Trust antes de diseñar la solución técnica.
 3. **Modelar la Arquitectura arc42 / NAF v4**:
-   - Utiliza el catálogo canónico de 12 plantillas en `templates/architecture/` para instanciar la documentación técnica en `docs/architecture/` (detallado en [process/05_architecture_arc42_nafv4.md](process/05_architecture_arc42_nafv4.md)).
-   - Modela contexto y alcance (`context-and-scope`), caja blanca L1 (`level-1-whitebox`), componentes (`component`), vistas de ejecución (`runtime-view`), topología con enclaves (`deployment-view`), decisiones inmutables (`adr`), árbol de calidad (`quality-requirements`) y matriz de riesgos (`risks-and-technical-debt`).
+   - Utiliza las plantillas desplegadas en `templates/architecture/` según la granularidad seleccionada al inicializar (`aisdlc init --arch minimal|full|none`, detallado en [process/05_architecture_arc42_nafv4.md](process/05_architecture_arc42_nafv4.md)).
+   - En proyectos estándar (`minimal`), modela componentes (`component.template.md` ➔ `CMP-*`) y decisiones inmutables (`adr.template.md` ➔ `ADR-*`). En sistemas críticos (`full`), cubre las 12 secciones completas de arc42 y perspectivas NAF v4.
    - Cada componente (`CMP-*`) debe citar explícitamente los casos de uso (`implements-use-cases`) y requerimientos (`satisfies-requirements`) que implementa para asegurar la trazabilidad 360°.
 4. **Verificar Cumplimiento de Licencias**:
    - Consulta `license-policy.yaml`. Si se necesita una librería comercial o dual, tramita la solicitud formal (`ADR-LIC-*`).
@@ -2336,6 +2337,30 @@ AI-SDLC provee un conjunto completo y estandarizado de plantillas Markdown con *
    # Validar trazabilidad 360° RTM (Upstream -> Midstream -> Downstream)
    npx aisdlc verify traceability
    ```
+
+---
+
+<a id="cap-05-architecture-arc42-nafv4-53-modos-de-granularidad-de-arquitectura-e-inicializacion-automatizada-aisdlc-init"></a>
+
+### 5.3 Modos de Granularidad de Arquitectura e Inicialización Automatizada (`aisdlc init`)
+
+Para evitar tener que copiar o borrar plantillas manualmente según la complejidad del proyecto, el comando de inicialización `aisdlc init` incorpora selección de granularidad arquitectónica (interactiva o mediante la opción `--arch, --architecture`):
+
+```bash
+# Inicialización interactiva (solicita seleccionar la granularidad por consola):
+npx aisdlc init
+
+# Inicialización con granularidad explícita (desatendida o CI/CD):
+npx aisdlc init --arch minimal    # [Recomendado] Solo componentes (CMP-*) y decisiones (ADR-*)
+npx aisdlc init --arch full       # Catálogo exhaustivo de 12 secciones arc42 + NAF v4 (13 plantillas)
+npx aisdlc init --arch none       # Sin plantillas de arquitectura (scripts, utilidades o libs simples)
+```
+
+| Nivel de Granularidad | Plantillas Desplegadas en `templates/architecture/` | Casos de Uso Recomendados | Cumplimiento RTM |
+|---|---|---|---|
+| **`minimal`** *(Por defecto)* | `component.template.md`, `adr.template.md` | Microservicios, APIs, librerías, SaaS estándar y desarrollo ágil. | **100% de Trazabilidad RTM**. Permite mapear `CMP-*` a `UC-*` y `FR-*`, y documentar `ADR-*` sin sobrecarga documental. |
+| **`full` / `complete`** | 13 plantillas completas (Secciones 1 a 12 arc42 + NAF v4) | Sistemas críticos (defensa, aeronáutica, banca/fintech, telecomunicaciones, plataformas multicontenedor). | Rigor formal exhaustivo en todas las perspectivas (Capacidades, Operacional, Despliegue, Riesgos). |
+| **`none`** | Ninguna plantilla desplegada en `templates/architecture/` | Herramientas internas de línea de comandos, scripts de soporte o utilidades sin arquitectura formal. | Proyectos exentos de modelado formal de componentes. |
 
 ---
 

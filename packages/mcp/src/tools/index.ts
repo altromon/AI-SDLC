@@ -83,6 +83,10 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
         .string()
         .optional()
         .describe('Entornos de agentes de IA a configurar (ej. "all", "cursor", "claude", "antigravity", "copilot", "mcp")'),
+      architecture: z
+        .enum(['minimal', 'full', 'complete', 'none'])
+        .optional()
+        .describe('Nivel de granularidad de plantillas de arquitectura ("minimal" para CMP y ADR, "full" para 12 secciones arc42/NAF, "none" para omitir)'),
     },
     async (params) => {
       try {
@@ -91,6 +95,7 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
           targetDir: params.targetDir,
           ci: params.ci,
           agents: params.agents,
+          architecture: params.architecture,
           dryRun: params.dryRun,
         });
         return formatResponse(result, !result.success);

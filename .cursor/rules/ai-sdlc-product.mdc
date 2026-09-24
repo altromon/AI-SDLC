@@ -23,4 +23,5 @@ Todo artefacto generado o modificado debe seguir la nomenclatura canónica y sat
 - **Estado Inicial**: Todo nuevo artefacto inicia obligatoriamente en `status: draft`. Prohibido crear artefactos directamente en `active` o `approved`.
 - **Criterios de Aceptación Gherkin**: En todo requerimiento `FR-*`, incluye un bloque ```gherkin con etiquetas `@<ID> @automated @regression` y al menos un `Scenario Outline` con tabla de datos `Examples`.
 - **Mitigaciones de Seguridad**: Todo `SEC-REQ-*` debe incluir pruebas negativas en Gherkin (`@security @mitigation`).
+- **Casos de Uso (User Story en inglés)**: En todo `UC-*`, la sección `1. Intención y Resultado` debe redactarse obligatoriamente bajo la estructura estandarizada en inglés: `As a <ACT-ID>... I want <acción>... To <resultado>...`.
 - **Validación Determinista**: Ejecuta `pnpm run verify:schemas` y `pnpm run verify:duplicates` antes de presentar el borrador al revisor humano.

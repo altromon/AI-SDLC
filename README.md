@@ -206,7 +206,7 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc report quality` | `pnpm run report:quality` | **Reporting Formal** | Genera informe detallado de métricas en `reports/QUALITY_REPORT.md` |
 | `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Catálogo de Producto** | Genera catálogo consolidado de requerimientos en `reports/ACTIVE_REQUIREMENTS.md` |
 | `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | **Dossier Maestro** | Compila documentación y manuales con TOC interactiva en `reports/AI_SDLC_SPECIFICATION_FULL.md` |
-| `npx aisdlc init [dir] [--ci <provider>]` | - | **Inicialización** | Inicializa un nuevo repo con carpetas, esquemas, políticas y pipeline CI/CD (`github`, `gitlab`, `azure`, `bitbucket`) |
+| `npx aisdlc init [dir] [--ci <prov>] [--arch <minimal|full|none>]` | - | **Inicialización** | Inicializa un nuevo repo con carpetas, esquemas, políticas, pipeline CI/CD y plantillas de arquitectura seleccionadas (`minimal`, `full`, `none`) |
 | `npx aisdlc mcp` / `npx @ai-sdlc/mcp` | `pnpm run mcp` | **Servidor MCP Nativo** | Arranca el servidor Model Context Protocol sobre `stdio` con 20 herramientas tipadas (incluyendo `new`, `verify`, `report`) y 5 recursos canónicos |
 
 
@@ -814,8 +814,8 @@ Para simplificar la interacción y minimizar el número de pasos, el servidor MC
    - Modela actores maliciosos (`ACT-THREAT-*`) y casos de abuso (`ABUSE-*`).
    - Define requisitos de seguridad (`SEC-REQ-*`) y restricciones Zero Trust antes de diseñar la solución técnica.
 3. **Modelar la Arquitectura arc42 / NAF v4**:
-   - Utiliza el catálogo canónico de 12 plantillas en `templates/architecture/` para instanciar la documentación técnica en `docs/architecture/` (detallado en [process/05_architecture_arc42_nafv4.md](process/05_architecture_arc42_nafv4.md)).
-   - Modela contexto y alcance (`context-and-scope`), caja blanca L1 (`level-1-whitebox`), componentes (`component`), vistas de ejecución (`runtime-view`), topología con enclaves (`deployment-view`), decisiones inmutables (`adr`), árbol de calidad (`quality-requirements`) y matriz de riesgos (`risks-and-technical-debt`).
+   - Utiliza las plantillas desplegadas en `templates/architecture/` según la granularidad seleccionada al inicializar (`aisdlc init --arch minimal|full|none`, detallado en [process/05_architecture_arc42_nafv4.md](process/05_architecture_arc42_nafv4.md)).
+   - En proyectos estándar (`minimal`), modela componentes (`component.template.md` ➔ `CMP-*`) y decisiones inmutables (`adr.template.md` ➔ `ADR-*`). En sistemas críticos (`full`), cubre las 12 secciones completas de arc42 y perspectivas NAF v4.
    - Cada componente (`CMP-*`) debe citar explícitamente los casos de uso (`implements-use-cases`) y requerimientos (`satisfies-requirements`) que implementa para asegurar la trazabilidad 360°.
 4. **Verificar Cumplimiento de Licencias**:
    - Consulta `license-policy.yaml`. Si se necesita una librería comercial o dual, tramita la solicitud formal (`ADR-LIC-*`).
