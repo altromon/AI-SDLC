@@ -21,7 +21,7 @@ export function runGherkinExtract(options: GherkinExtractCliOptions = {}): boole
   const isSilent = Boolean(options.silent || useJson);
 
   if (!isSilent) {
-    console.log(pc.bold(pc.cyan('\n🥒 [AI-SDLC] Extrayendo escenarios Gherkin a archivos .feature...')));
+    console.log(pc.bold(pc.cyan('\n🥒 [AI-SDLC] Extracting Gherkin scenarios to .feature files...')));
   }
 
   const result = extractGherkinFeatures({
@@ -31,14 +31,14 @@ export function runGherkinExtract(options: GherkinExtractCliOptions = {}): boole
   });
 
   if (!isSilent) {
-    console.log(`  Archivos .feature generados: ${pc.bold(String(result.features.length))}`);
-    console.log(`  Escenarios totales:          ${pc.bold(String(result.totalScenarios))}`);
+    console.log(`  Generated .feature files:    ${pc.bold(String(result.features.length))}`);
+    console.log(`  Total scenarios:             ${pc.bold(String(result.totalScenarios))}`);
 
     for (const f of result.features) {
-      console.log(`    ${pc.green('✔')} ${pc.bold(f.featureName)} ➔ ${f.outputFile} (${f.scenarioCount} escenarios)`);
+      console.log(`    ${pc.green('✔')} ${pc.bold(f.featureName)} ➔ ${f.outputFile} (${f.scenarioCount} scenarios)`);
     }
 
-    console.log(pc.green('\n✔ Sincronización BDD completada exitosamente.\n'));
+    console.log(pc.green('\n✔ BDD synchronization completed successfully.\n'));
   }
 
   if (useJson) {

@@ -1,7 +1,7 @@
 ---
 id: ARCH-DEP-001
 type: deployment-view
-title: "07. Vista de Despliegue e Infraestructura"
+title: "07. Deployment and Infrastructure View"
 status: proposed # proposed, accepted, deprecated, superseded
 version: "1.0.0"
 schema-version: "1.0"
@@ -17,55 +17,55 @@ supersedes: null
 superseded-by: null
 ---
 
-# 07. Vista de Despliegue (arc42 Sec. 7 / NAF Resource Deployment)
+# 07. Deployment View (arc42 Sec. 7 / NAF Resource Deployment)
 
-## 1. Topología de Infraestructura y Enclaves de Red
-Mapea la distribución física y lógica de los componentes sobre nodos de computación, clusters Kubernetes, zonas de disponibilidad y enclaves de seguridad segmentados.
+## 1. Infrastructure Topology and Network Enclaves
+Maps physical and logical component distribution across compute nodes, Kubernetes clusters, availability zones, and segmented security enclaves.
 
-### 1.1 Diagrama de Topología de Despliegue
+### 1.1 Deployment Topology Diagram
 ```mermaid
 graph TD
-    subgraph Internet["Internet Pública"]
-        Users[Clientes / Navegadores]
+    subgraph Internet["Public Internet"]
+        Users[Clients / Browsers]
     end
 
-    subgraph EnclaveDMZ["Enclave: SEC-ENC-DMZ-001 (Red Perimetral)"]
+    subgraph EnclaveDMZ["Enclave: SEC-ENC-DMZ-001 (Perimeter Network)"]
         WAF[WAF / Reverse Proxy]
         IngestService["Pod: CMP-INGEST-001 (Node.js LTS)"]
     end
 
-    subgraph EnclaveInternal["Enclave: SEC-ENC-INTERNAL-002 (Red Privada)"]
+    subgraph EnclaveInternal["Enclave: SEC-ENC-INTERNAL-002 (Private Network)"]
         CoreService["Pod: CMP-CORE-001 (Worker Pool)"]
-        DB[(Cluster DB: PostgreSQL / Storage)]
+        DB[(DB Cluster: PostgreSQL / Storage)]
     end
 
     Users -->|HTTPS / TLS 1.3| WAF
     WAF -->|mTLS| IngestService
-    IngestService -->|Red Interna Aislada| CoreService
-    CoreService -->|Conexión Cifrada / TLS| DB
+    IngestService -->|Isolated Internal Network| CoreService
+    CoreService -->|Encrypted Connection / TLS| DB
 ```
 
 ---
 
-## 2. Inventario de Nodos y Recursos de Ejecución (`RES-*` / `DEP-*`)
+## 2. Node and Execution Resources Inventory (`RES-*` / `DEP-*`)
 
-| ID Recurso | Tipo de Nodo | Enclave Asociado | CPU / RAM Mínima | Componentes Desplegados |
+| Resource ID | Node Type | Associated Enclave | Min CPU / RAM | Deployed Components |
 | :--- | :--- | :--- | :--- | :--- |
 | `RES-NODE-DMZ-01` | VM / Kubernetes Node | `SEC-ENC-DMZ-001` | 2 vCPU / 4 GB | `CMP-INGEST-001` |
 | `RES-NODE-CORE-01`| VM / Worker Node | `SEC-ENC-INTERNAL-002` | 4 vCPU / 8 GB | `CMP-CORE-001` |
-| `RES-NODE-DB-01`  | Instancia Gestionada | `SEC-ENC-INTERNAL-002` | 4 vCPU / 16 GB | Almacenamiento Inmutable |
+| `RES-NODE-DB-01`  | Managed Instance | `SEC-ENC-INTERNAL-002` | 4 vCPU / 16 GB | Immutable Storage |
 
 ---
 
-## 3. Políticas de Red y Aislamiento de Tráfico
-- **Control Perimetral**: El acceso externo está restringido exclusivamente al puerto 443 a través del WAF.
-- **Aislamiento Lateral**: La red perimetral (`SEC-ENC-DMZ-001`) no tiene visibilidad directa sobre la base de datos interna.
-- **Canales Cifrados**: Todas las conexiones inter-nodo operan bajo mTLS con certificados emitidos por la CA interna.
+## 3. Network Policies and Traffic Isolation
+- **Perimeter Control**: External access strictly restricted to port 443 via WAF.
+- **Lateral Isolation**: Perimeter network (`SEC-ENC-DMZ-001`) has no direct visibility into internal database.
+- **Encrypted Channels**: All inter-node connections operate under mTLS with certificates issued by internal CA.
 
 ---
 
-## 4. Historial de Revisiones y Control de Versiones
+## 4. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de vista de despliegue | CHG-ARCH-001 |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial deployment view definition | CHG-ARCH-001 |

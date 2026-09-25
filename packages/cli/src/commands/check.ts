@@ -35,10 +35,10 @@ export function runAutoFix(rootDir: string, silent?: boolean): { gherkinCount: n
 
   if (!silent) {
     if (gherkinRes.features.length > 0) {
-      console.log(`  ${pc.cyan('🔧 [AUTO-FIX]')} Sincronizados ${pc.bold(String(gherkinRes.features.length))} archivos .feature (${gherkinRes.totalScenarios} escenarios).`);
+      console.log(`  ${pc.cyan('🔧 [AUTO-FIX]')} Synchronized ${pc.bold(String(gherkinRes.features.length))} .feature files (${gherkinRes.totalScenarios} scenarios).`);
     }
     if (pdacRes.syncedCount > 0) {
-      console.log(`  ${pc.cyan('🔧 [AUTO-FIX]')} Sincronizados ${pc.bold(String(pdacRes.syncedCount))} digests SHA-256 en ${pdacRes.updatedFiles.length} archivos.`);
+      console.log(`  ${pc.cyan('🔧 [AUTO-FIX]')} Synchronized ${pc.bold(String(pdacRes.syncedCount))} SHA-256 digests across ${pdacRes.updatedFiles.length} files.`);
     }
   }
 
@@ -49,24 +49,24 @@ export function auditGherkinGate(rootDir: string, wasAutoFixed: boolean): Prefli
   const syncCheck = checkGherkinInSync({ rootDir });
   if (wasAutoFixed) {
     return {
-      name: 'Sincronización BDD (Gherkin -> .feature)',
+      name: 'BDD Synchronization (Gherkin -> .feature)',
       status: 'FIXED',
-      message: `${syncCheck.totalFeatures} especificaciones sincronizadas automáticamente`,
+      message: `${syncCheck.totalFeatures} specifications automatically synchronized`,
     };
   }
   if (!syncCheck.inSync) {
     const totalOut = syncCheck.missingFiles.length + syncCheck.outOfSyncFiles.length;
     return {
-      name: 'Sincronización BDD (Gherkin -> .feature)',
+      name: 'BDD Synchronization (Gherkin -> .feature)',
       status: 'FAILED',
-      message: `${totalOut} archivo(s) .feature desfasados o faltantes`,
-      remediation: "Ejecuta 'aisdlc check --fix' para extraer y regenerar los archivos .feature.",
+      message: `${totalOut} out-of-sync or missing .feature file(s)`,
+      remediation: "Run 'aisdlc check --fix' to extract and regenerate .feature files.",
     };
   }
   return {
-    name: 'Sincronización BDD (Gherkin -> .feature)',
+    name: 'BDD Synchronization (Gherkin -> .feature)',
     status: 'PASSED',
-    message: `${syncCheck.totalFeatures} especificaciones al día en disco`,
+    message: `${syncCheck.totalFeatures} specifications up to date on disk`,
   };
 }
 
@@ -74,16 +74,16 @@ export function auditPdacGate(rootDir: string, wasAutoFixed: boolean): Preflight
   const res = verifyPdacGraph({ rootDir });
   if (res.success) {
     return {
-      name: 'Integridad PDaC y Deriva SHA-256',
+      name: 'PDaC Integrity & SHA-256 Drift',
       status: wasAutoFixed ? 'FIXED' : 'PASSED',
-      message: `${res.totalNodes} nodos y ${res.totalEdges} citaciones criptográficamente alineadas`,
+      message: `${res.totalNodes} nodes and ${res.totalEdges} citations cryptographically aligned`,
     };
   }
   return {
-    name: 'Integridad PDaC y Deriva SHA-256',
+    name: 'PDaC Integrity & SHA-256 Drift',
     status: 'FAILED',
-    message: `${res.drifts.length} deriva(s) de digest detectada(s) (STALE)`,
-    remediation: "Ejecuta 'aisdlc check --fix' para sincronizar automáticamente los digests de las citaciones.",
+    message: `${res.drifts.length} digest drift(s) detected (STALE)`,
+    remediation: "Run 'aisdlc check --fix' to automatically synchronize citation digests.",
   };
 }
 
@@ -91,18 +91,18 @@ export function auditQualityGate(rootDir: string): PreflightGateSummary {
   const res = verifyQualityGate({ rootDir });
   if (res.success) {
     return {
-      name: 'Quality Gate (Complejidad y Mantenibilidad)',
+      name: 'Quality Gate (Complexity & Maintainability)',
       status: 'PASSED',
-      message: `${res.passCount}/${res.totalFunctions} funciones conformes (CC <= 10, LOC <= 40)`,
+      message: `${res.passCount}/${res.totalFunctions} compliant functions (CC <= 10, LOC <= 40)`,
     };
   }
   const firstFail = res.results.find((r) => r.status === 'FAIL');
-  const detail = firstFail ? ` (ej. ${firstFail.functionName}: ${firstFail.violations.join(', ')})` : '';
+  const detail = firstFail ? ` (e.g. ${firstFail.functionName}: ${firstFail.violations.join(', ')})` : '';
   return {
-    name: 'Quality Gate (Complejidad y Mantenibilidad)',
+    name: 'Quality Gate (Complexity & Maintainability)',
     status: 'FAILED',
-    message: `${res.failCount} función(es) superan los umbrales de calidad${detail}`,
-    remediation: 'Refactoriza las funciones infractoras reduciendo ramas condicionales y líneas de código.',
+    message: `${res.failCount} function(s) exceed quality thresholds${detail}`,
+    remediation: 'Refactor offending functions by reducing conditional branches and lines of code.',
   };
 }
 
@@ -110,17 +110,17 @@ export function auditTraceabilityGate(rootDir: string): PreflightGateSummary {
   const res = verifyTraceability({ rootDir });
   if (res.success) {
     return {
-      name: 'Trazabilidad 360° (RTM Inversa)',
+      name: '360° Traceability (Reverse RTM)',
       status: 'PASSED',
-      message: `${res.totalRequirements} requerimientos con cobertura 360° (0 huérfanos)`,
+      message: `${res.totalRequirements} requirements with 360° coverage (0 orphans)`,
     };
   }
   const orphanIds = res.orphans.map((o) => o.id).slice(0, 3).join(', ');
   return {
-    name: 'Trazabilidad 360° (RTM Inversa)',
+    name: '360° Traceability (Reverse RTM)',
     status: 'FAILED',
-    message: `${res.orphanCount} requerimiento(s) huérfano(s) (${orphanIds})`,
-    remediation: 'Conecta los requisitos huérfanos con sus componentes en arc42 o suites de pruebas.',
+    message: `${res.orphanCount} orphan requirement(s) (${orphanIds})`,
+    remediation: 'Link orphan requirements to their components in arc42 or test suites.',
   };
 }
 
@@ -128,16 +128,16 @@ export function auditGovernanceGate(rootDir: string): PreflightGateSummary {
   const res = verifyTasksGovernance({ rootDir });
   if (res.success) {
     return {
-      name: 'Gobierno de Tareas y Clasificación de Autonomía',
+      name: 'Tasks Governance & Autonomy Classification',
       status: 'PASSED',
-      message: `${res.totalTasks} tareas auditadas y conformes con modos de autonomía`,
+      message: `${res.totalTasks} tasks audited and compliant with autonomy modes`,
     };
   }
   return {
-    name: 'Gobierno de Tareas y Clasificación de Autonomía',
+    name: 'Tasks Governance & Autonomy Classification',
     status: 'FAILED',
-    message: `${res.violations.length} infracción(es) de gobierno detectadas`,
-    remediation: 'Revisa tasks.md para asignar criterios verificables y modos de autonomía válidos.',
+    message: `${res.violations.length} governance violation(s) detected`,
+    remediation: 'Review tasks.md to assign verifiable criteria and valid autonomy modes.',
   };
 }
 
@@ -145,16 +145,16 @@ export function auditTestingGate(rootDir: string): PreflightGateSummary {
   const res = verifyTestingCoverage({ rootDir });
   if (res.success) {
     return {
-      name: 'Cobertura de Pruebas en Requisitos y Tareas',
+      name: 'Test Coverage in Requirements & Tasks',
       status: 'PASSED',
-      message: `${res.passedRequirements}/${res.totalRequirements} reqs y ${res.passedTasks}/${res.totalTasks} tareas verificadas`,
+      message: `${res.passedRequirements}/${res.totalRequirements} reqs and ${res.passedTasks}/${res.totalTasks} tasks verified`,
     };
   }
   return {
-    name: 'Cobertura de Pruebas en Requisitos y Tareas',
+    name: 'Test Coverage in Requirements & Tasks',
     status: 'FAILED',
-    message: `${res.failedRequirements} req(s) y ${res.failedTasks} tarea(s) sin pruebas verificables`,
-    remediation: 'Añade pruebas ejecutables (.spec o .feature) para los requerimientos y tareas pendientes.',
+    message: `${res.failedRequirements} req(s) and ${res.failedTasks} task(s) without verifiable tests`,
+    remediation: 'Add executable tests (.spec or .feature) for pending requirements and tasks.',
   };
 }
 
@@ -162,17 +162,17 @@ export function auditLicensesGate(rootDir: string): PreflightGateSummary {
   const res = verifyLicenses({ rootDir });
   if (res.success) {
     return {
-      name: 'Gobernanza de Licencias Open Source',
+      name: 'Open Source License Governance',
       status: 'PASSED',
-      message: `${res.permittedCount} dependencias conformes con license-policy.yaml`,
+      message: `${res.permittedCount} dependencies compliant with license-policy.yaml`,
     };
   }
   const badPkgs = res.violations.map((v) => `${v.packageName} (${v.license})`).slice(0, 2).join(', ');
   return {
-    name: 'Gobernanza de Licencias Open Source',
+    name: 'Open Source License Governance',
     status: 'FAILED',
-    message: `${res.violations.length} licencia(s) prohibida(s) detectada(s): ${badPkgs}`,
-    remediation: 'Reemplaza los paquetes con licencias restringidas o solicita aprobación en license-policy.yaml.',
+    message: `${res.violations.length} prohibited license(s) detected: ${badPkgs}`,
+    remediation: 'Replace packages with restricted licenses or request approval in license-policy.yaml.',
   };
 }
 
@@ -180,17 +180,17 @@ export function auditSchemasGate(rootDir: string): PreflightGateSummary {
   const res = verifyArtifactsSchemas({ rootDir });
   if (res.success) {
     return {
-      name: 'Conformidad con Esquemas JSON (Draft 2020-12)',
+      name: 'JSON Schemas Compliance (Draft 2020-12)',
       status: 'PASSED',
-      message: `${res.validCount}/${res.totalEvaluated} artefactos conformes con sus esquemas`,
+      message: `${res.validCount}/${res.totalEvaluated} artifacts compliant with their schemas`,
     };
   }
-  const firstViolation = res.violations[0]?.message || 'Estructura inválida';
+  const firstViolation = res.violations[0]?.message || 'Invalid structure';
   return {
-    name: 'Conformidad con Esquemas JSON (Draft 2020-12)',
+    name: 'JSON Schemas Compliance (Draft 2020-12)',
     status: 'FAILED',
-    message: `${res.invalidCount} artefacto(s) no cumplen el esquema JSON: ${firstViolation}`,
-    remediation: "Ejecuta 'aisdlc verify schemas' para auditar y subsana los campos obligatorios.",
+    message: `${res.invalidCount} artifact(s) do not comply with JSON schema: ${firstViolation}`,
+    remediation: "Run 'aisdlc verify schemas' to audit and fix required fields.",
   };
 }
 
@@ -198,18 +198,18 @@ export function auditSecretsGate(rootDir: string): PreflightGateSummary {
   const res = verifySecrets({ rootDir });
   if (res.success) {
     return {
-      name: 'Detección de Secretos y Credenciales (Gitleaks Gate)',
+      name: 'Secrets and Credentials Detection (Gitleaks Gate)',
       status: 'PASSED',
-      message: `${res.totalFilesScanned} archivos limpios (0 secretos ni credenciales expuestas)`,
+      message: `${res.totalFilesScanned} clean files (0 secrets or exposed credentials)`,
     };
   }
   const firstFinding = res.findings[0];
-  const findingMsg = firstFinding ? ` (ej. ${firstFinding.ruleId} en ${firstFinding.relPath}:${firstFinding.lineNumber})` : '';
+  const findingMsg = firstFinding ? ` (e.g. ${firstFinding.ruleId} in ${firstFinding.relPath}:${firstFinding.lineNumber})` : '';
   return {
-    name: 'Detección de Secretos y Credenciales (Gitleaks Gate)',
+    name: 'Secrets and Credentials Detection (Gitleaks Gate)',
     status: 'FAILED',
-    message: `${res.findingsCount} credencial(es) o clave(s) expuesta(s)${findingMsg}`,
-    remediation: 'Revoca los tokens expuestos, almacénalos en variables de entorno o usa // ai-sdlc:allow-secret.',
+    message: `${res.findingsCount} exposed credential(s) or key(s)${findingMsg}`,
+    remediation: 'Revoke exposed tokens, store them in environment variables, or use // ai-sdlc:allow-secret.',
   };
 }
 
@@ -219,27 +219,27 @@ export function auditSecurityGate(rootDir: string): PreflightGateSummary {
 
   if (secRes.success && sastRes.success) {
     return {
-      name: 'Seguridad Shift-Left (Secretos Gitleaks y SAST)',
+      name: 'Shift-Left Security (Gitleaks Secrets & SAST)',
       status: 'PASSED',
-      message: `${secRes.totalFilesScanned} archivos limpios (0 secretos, 0 vulnerabilidades)`,
+      message: `${secRes.totalFilesScanned} clean files (0 secrets, 0 vulnerabilities)`,
     };
   }
 
   const errors: string[] = [];
   if (!secRes.success) {
     const f = secRes.findings[0];
-    errors.push(`${secRes.findingsCount} secreto(s) (ej. ${f.ruleId} en ${f.relPath}:${f.lineNumber})`);
+    errors.push(`${secRes.findingsCount} secret(s) (e.g. ${f.ruleId} in ${f.relPath}:${f.lineNumber})`);
   }
   if (!sastRes.success) {
     const v = sastRes.violations[0];
-    errors.push(`${sastRes.violationsCount} fallo(s) SAST (ej. ${v.ruleId} en ${v.relPath}:${v.lineNumber})`);
+    errors.push(`${sastRes.violationsCount} SAST violation(s) (e.g. ${v.ruleId} in ${v.relPath}:${v.lineNumber})`);
   }
 
   return {
-    name: 'Seguridad Shift-Left (Secretos Gitleaks y SAST)',
+    name: 'Shift-Left Security (Gitleaks Secrets & SAST)',
     status: 'FAILED',
     message: errors.join('; '),
-    remediation: "Ejecuta 'aisdlc verify security' y corrige las credenciales o patrones vulnerables.",
+    remediation: "Run 'aisdlc verify security' and resolve credentials or vulnerable patterns.",
   };
 }
 
@@ -250,13 +250,13 @@ export function renderDashboard(
   digestsCount: number
 ): void {
   console.log(pc.bold(pc.cyan('\n==============================================================================')));
-  console.log(pc.bold(pc.cyan('             AI-SDLC: DASHBOARD CONSOLIDADO DE PRE-VUELO (aisdlc check)       ')));
+  console.log(pc.bold(pc.cyan('             AI-SDLC: CONSOLIDATED PRE-FLIGHT DASHBOARD (aisdlc check)        ')));
   console.log(pc.bold(pc.cyan('==============================================================================\n')));
 
   if (autoFixExecuted) {
-    console.log(pc.bold(`  ${pc.magenta('MODO AUTO-FIX ACTIVO:')} Se aplicaron sincronizaciones previas no destructivas:`));
-    console.log(`    - Escenarios Gherkin sincronizados: ${pc.bold(String(gherkinCount))}`);
-    console.log(`    - Digests SHA-256 sincronizados:    ${pc.bold(String(digestsCount))}\n`);
+    console.log(pc.bold(`  ${pc.magenta('AUTO-FIX MODE ACTIVE:')} Non-destructive preliminary syncs applied:`));
+    console.log(`    - Gherkin scenarios synchronized: ${pc.bold(String(gherkinCount))}`);
+    console.log(`    - SHA-256 digests synchronized:    ${pc.bold(String(digestsCount))}\n`);
   }
 
   for (const gate of gates) {
@@ -274,16 +274,16 @@ export function renderDashboard(
   const failedGates = gates.filter((g) => g.status === 'FAILED');
   if (failedGates.length > 0) {
     console.log(pc.bold(pc.red('\n------------------------------------------------------------------------------')));
-    console.log(pc.bold(pc.red('  ACCIONES REQUERIDAS PARA SUBSANAR ERRORES BLOQUEANTES:')));
+    console.log(pc.bold(pc.red('  REQUIRED ACTIONS TO RESOLVE BLOCKING ERRORS:')));
     console.log(pc.bold(pc.red('------------------------------------------------------------------------------')));
     failedGates.forEach((g, idx) => {
       console.log(`  ${pc.bold(String(idx + 1))}. ${pc.yellow(g.name)}:`);
-      console.log(`     👉 ${pc.bold(g.remediation || 'Revisa los archivos afectados.')}`);
+      console.log(`     👉 ${pc.bold(g.remediation || 'Review affected files.')}`);
     });
-    console.log(pc.bold(pc.red('\n⛔ VEREDICTO: PRE-VUELO BLOQUEADO (EXIT 1)\n')));
+    console.log(pc.bold(pc.red('\n⛔ VERDICT: PRE-FLIGHT BLOCKED (EXIT 1)\n')));
   } else {
     console.log(pc.bold(pc.green('\n==============================================================================')));
-    console.log(pc.bold(pc.green('✨ VEREDICTO: PRE-VUELO APROBADO (EXIT 0) - Repositorio listo para Pull Request')));
+    console.log(pc.bold(pc.green('✨ VERDICT: PRE-FLIGHT PASSED (EXIT 0) - Repository ready for Pull Request')));
     console.log(pc.bold(pc.green('==============================================================================\n')));
   }
 }

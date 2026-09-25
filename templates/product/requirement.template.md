@@ -1,22 +1,22 @@
 ---
-# Prefijos válidos: FR- (Funcional), QR- (Calidad), CON- (Restricción)
-id: FR-FUNCIONALIDAD-001
+# Valid prefixes: FR- (Functional), QR- (Quality), CON- (Constraint)
+id: FR-FEATURE-001
 type: requirement
-title: Título Conciso del Requerimiento
+title: Concise Requirement Title
 status: draft
 version: "1.0.0"
 schema-version: "1.0"
 category: functional # functional, quality, constraint
 
-# 1. TRAZABILIDAD A PRODUCTO (Upstream)
+# 1. PRODUCT TRACEABILITY (Upstream)
 derives-from:
-  - UC-ACCION-001
+  - UC-ACTION-001
 
-# 2. MÉTODO Y CRITERIOS DE ACEPTACIÓN
+# 2. METHOD AND ACCEPTANCE CRITERIA
 verifiable-by: cucumber-bdd # cucumber-bdd, automated-unit-test, integration-test, performance-benchmark
 acceptance-format: gherkin # gherkin, declarative-prose
 cucumber-tags:
-  - "@FR-FUNCIONALIDAD-001"
+  - "@FR-FEATURE-001"
   - "@automated"
   - "@regression"
 
@@ -24,60 +24,60 @@ supersedes: null
 superseded-by: null
 ---
 
-# FR-FUNCIONALIDAD-001: Título Conciso del Requerimiento
+# FR-FEATURE-001: Concise Requirement Title
 
-## 1. Enunciado Normativo
-El sistema DEBE [descripción inequívoca y atómica del comportamiento esperado bajo condiciones específicas].
+## 1. Normative Statement
+The system MUST [unambiguous and atomic description of expected behavior under specific conditions].
 
 ---
 
-## 2. Trazabilidad Ascendente (Upstream)
+## 2. Upstream Traceability
 
-| Dimensión | Enlace / Artefacto | Tipo de Relación | Estado |
+| Dimension | Link / Artifact | Relationship Type | Status |
 | :--- | :--- | :--- | :--- |
-| **Producto (Upstream)** | `UC-ACCION-001` | Derivado de Caso de Uso | Validado |
+| **Product (Upstream)** | `UC-ACTION-001` | Derived from Use Case | Validated |
 
-> *Nota: La trazabilidad hacia Arquitectura y Pruebas se mantiene de forma inversa; los servicios declaran `satisfies-requirements` y las suites de prueba etiquetan o citan este requerimiento.*
+> *Note: Traceability toward Architecture and Testing is maintained inversely; services declare `satisfies-requirements` and test suites tag or reference this requirement.*
 
 ---
 
-## 3. Criterios de Aceptación en Formato Gherkin (Cucumber)
+## 3. Acceptance Criteria in Gherkin (Cucumber) Format
 
 ```gherkin
-@FR-FUNCIONALIDAD-001 @automated @regression
-Feature: Título Conciso del Requerimiento
-  Como [actor principal / rol de usuario]
-  Quiero [capacidad funcional del sistema]
-  Para [obtener el beneficio o valor de negocio esperado]
+@FR-FEATURE-001 @automated @regression
+Feature: Concise Requirement Title
+  As a [primary actor / user role]
+  I want [functional system capability]
+  So that [obtain expected business benefit or value]
 
   Background:
-    Given el sistema se encuentra en estado operativo
-    And el actor se encuentra autenticado con permisos válidos
+    Given the system is in operational state
+    And the actor is authenticated with valid permissions
 
-  Scenario: Flujo nominal exitoso
-    Given el sistema tiene la precondición inicial configurada
-    When el actor envía una solicitud con parámetros válidos
-    Then el sistema procesa la operación satisfactoriamente
-    And el estado del recurso se actualiza a "ACTIVO"
-    And se emite el evento de dominio correspondiente
+  Scenario: Successful nominal flow
+    Given the system has initial precondition configured
+    When the actor submits a request with valid parameters
+    Then the system processes the operation successfully
+    And the resource status updates to "ACTIVE"
+    And the corresponding domain event is emitted
 
-  Scenario Outline: Validación de reglas de negocio y casos de borde
-    Given una entrada de datos con el valor "<entrada>"
-    When se procesa la validación del requerimiento
-    Then la respuesta debe retornar el código de estado "<codigo_estado>"
-    And el mensaje descriptivo debe ser "<mensaje>"
+  Scenario Outline: Business rule validation and edge cases
+    Given data input with value "<input>"
+    When requirement validation is processed
+    Then the response must return status code "<status_code>"
+    And the descriptive message must be "<message>"
 
     Examples:
-      | entrada        | codigo_estado | mensaje                 |
-      | valor_correcto | 200           | OPERACION_EXITOSA       |
-      | valor_invalido | 400           | ERROR_PARAMETRO_INVALIDO|
-      | limite_excedido| 422           | ERROR_LIMITE_SUPERADO   |
+      | input          | status_code | message                 |
+      | correct_value  | 200         | SUCCESSFUL_OPERATION    |
+      | invalid_value  | 400         | ERROR_INVALID_PARAMETER |
+      | limit_exceeded | 422         | ERROR_LIMIT_EXCEEDED    |
 ```
 
 ---
 
-## 4. Historial de Revisiones y Control de Versiones
+## 4. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-03 | Product Owner / QA | Especificación inicial con trazabilidad completa 360° | CHG-INIT-001 |
+| **1.0.0** | 2026-09-03 | Product Owner / QA | Initial specification with complete 360° traceability | CHG-INIT-001 |

@@ -1,7 +1,7 @@
 ---
 id: ARCH-L1-WHITEBOX-001
 type: building-blocks-level-1
-title: "05. Vista de Bloques Nivel 1: Caja Blanca General"
+title: "05. Level 1 Building Blocks: Overall Whitebox"
 status: proposed # proposed, accepted, deprecated, superseded
 version: "1.0.0"
 schema-version: "1.0"
@@ -11,57 +11,57 @@ bounded-contexts:
   - "Core Domain Context"
   - "Supporting Context"
 contains-components:
-  - CMP-NOMBRE-001
-  - CMP-NOMBRE-002
+  - CMP-NAME-001
+  - CMP-NAME-002
 supersedes: null
 superseded-by: null
 ---
 
-# 05. Vista de Bloques de Construcción: Nivel 1 Whitebox (arc42 Sec. 5 / NAF Services & Systems)
+# 05. Building Blocks View: Level 1 Whitebox (arc42 Sec. 5 / NAF Services & Systems)
 
-## 1. Descomposición General del Sistema (Nivel 1)
-Presenta la descomposición del sistema en subsistemas principales, contenedores de ejecución y Bounded Contexts de dominio.
+## 1. Overall System Decomposition (Level 1)
+Presents system decomposition into major subsystems, execution containers, and domain Bounded Contexts.
 
-### 1.1 Diagrama de Caja Blanca de Nivel 1
+### 1.1 Level 1 Whitebox Diagram
 ```mermaid
 graph TD
-    subgraph BoundedContext_Core["Bounded Context: Dominio Principal"]
-        CMP_INGEST["CMP-INGEST: Ingesta de Datos"]
-        CMP_ENGINE["CMP-ENGINE: Motor de Reglas"]
+    subgraph BoundedContext_Core["Bounded Context: Core Domain"]
+        CMP_INGEST["CMP-INGEST: Data Ingestion"]
+        CMP_ENGINE["CMP-ENGINE: Rules Engine"]
     end
 
-    subgraph BoundedContext_Audit["Bounded Context: Auditoría y Telemetría"]
-        CMP_OBSERVABILITY["CMP-OBS: Monitorización y Métricas"]
-        CMP_STORAGE["CMP-STORAGE: Almacenamiento Inmutable"]
+    subgraph BoundedContext_Audit["Bounded Context: Auditing & Telemetry"]
+        CMP_OBSERVABILITY["CMP-OBS: Monitoring & Metrics"]
+        CMP_STORAGE["CMP-STORAGE: Immutable Storage"]
     end
 
-    Actor[Cliente / Usuario] -->|Protocolo Externo| CMP_INGEST
-    CMP_INGEST -->|Evento Interno / IPC| CMP_ENGINE
-    CMP_ENGINE -->|Trazas / Auditoría| CMP_STORAGE
+    Actor[Client / User] -->|External Protocol| CMP_INGEST
+    CMP_INGEST -->|Internal Event / IPC| CMP_ENGINE
+    CMP_ENGINE -->|Traces / Auditing| CMP_STORAGE
     CMP_OBSERVABILITY -.->|Scrape / Polling| CMP_ENGINE
 ```
 
 ---
 
-## 2. Catálogo de Bounded Contexts y Componentes Raíz
+## 2. Bounded Contexts and Root Components Catalog
 
-| Bounded Context | Componente ID | Tipo de Implementación | Responsabilidad Principal |
+| Bounded Context | Component ID | Implementation Type | Primary Responsibility |
 | :--- | :--- | :---: | :--- |
-| **Dominio Principal** | `CMP-INGEST` | `service` | Terminación TLS, validación sintáctica de cargas y filtrado |
-| **Dominio Principal** | `CMP-ENGINE` | `service` | Evaluación de reglas de negocio y cálculo determinista |
-| **Auditoría** | `CMP-STORAGE` | `composite` | Persistencia y trazabilidad inmutable de eventos |
+| **Core Domain** | `CMP-INGEST` | `service` | TLS termination, syntactic payload validation, and filtering |
+| **Core Domain** | `CMP-ENGINE` | `service` | Business rules evaluation and deterministic computation |
+| **Auditing** | `CMP-STORAGE` | `composite` | Event persistence and immutable traceability |
 
 ---
 
-## 3. Descomposición Recursiva en Niveles Inferiores
-Cada contenedor o subsistema listado se detalla en su propia especificación de componente (`CMP-*.md`) conforme a `templates/architecture/component.template.md`:
-- **Nivel 2 (Subsistemas / Contenedores)**: Servicios autónomos, microservicios, daemons.
-- **Nivel 3 (Unidades de Ejecución)**: DLLs, plugins nativos (.so, .dylib), funciones puras de dominio.
+## 3. Recursive Decomposition into Sub-Levels
+Each listed container or subsystem is detailed in its own component specification (`CMP-*.md`) conforming to `templates/architecture/component.template.md`:
+- **Level 2 (Subsystems / Containers)**: Autonomous services, microservices, daemons.
+- **Level 3 (Execution Units)**: DLLs, native plugins (.so, .dylib), pure domain functions.
 
 ---
 
-## 4. Historial de Revisiones y Control de Versiones
+## 4. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de caja blanca L1 | CHG-ARCH-001 |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial L1 whitebox definition | CHG-ARCH-001 |

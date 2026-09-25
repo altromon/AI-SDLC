@@ -72,7 +72,7 @@
               "AMBIGUOUS",
               "HIGH_RISK_MANUAL"
             ],
-            "description": "Modo de gobierno y supervisión humana del agente de IA."
+            "description": "AI agent human governance and supervision mode."
           },
           "verification": {
             "type": "object",

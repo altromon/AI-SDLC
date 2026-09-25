@@ -1,37 +1,36 @@
 ---
-description: Directrices canónicas globales, 5 mandamientos inquebrantables y pre-vuelo de AI-SDLC
+description: Global canonical directives, 5 unbreakable commandments, and AI-SDLC pre-flight
 globs: *
 alwaysApply: true
 ---
 
-# Reglas Globales AI-SDLC (Core)
+# Global AI-SDLC Rules (Core)
 
-Referencia canónica: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) y [`process/01_governance_and_roles.md`](process/01_governance_and_roles.md).
+Canonical Reference: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) and [`process/01_governance_and_roles.md`](process/01_governance_and_roles.md).
 
-## 1. Los 5 Mandamientos Inquebrantables de los Agentes
-Todo agente que opere en este repositorio debe acatar estrictamente los siguientes guardrails:
-1. **PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: No apruebes PRs ni realices merges directos a ramas protegidas (`main`, `release/*`). La aprobación es exclusiva de revisores humanos.
-2. **PROHIBIDO INVENTAR DECISIONES DE PRODUCTO O ARQUITECTURA**: Ante cualquier ambigüedad, formula preguntas abiertas (`open-questions`). No asumas requerimientos no documentados.
-3. **PROHIBIDO INTRODUCIR DEPENDENCIAS SIN INSPECCIÓN DE LICENCIA**: Verifica siempre `license-policy.yaml`. Prohibidas dependencias virales (GPL/AGPL) o comerciales de pago (BSL/SSPL) sin aprobación explícita.
-4. **PROHIBIDO IGNORAR LA CIBERSEGURIDAD (SECURITY-BY-DEFAULT)**: Valida entradas, aplica mínimo privilegio y acompaña todo cambio con pruebas de seguridad (`SEC-TEST-*`). Prohibido suprimir linters o tests para forzar el paso en verde.
-5. **OBLIGACIÓN DE CITACIÓN CRIPTOGRÁFICA**: Vincula especificaciones con identificadores inmutables y hashes SHA-256 normalizados en Unix LF.
+## 1. The 5 Unbreakable Commandments of Agents | Los 5 Mandamientos Inquebrantables de los Agentes
+Every agent operating in this repository must strictly observe the following guardrails:
+1. **FORBIDDEN TO AUTO-APPROVE OR AUTO-MERGE | PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: Do not approve PRs or execute direct merges to protected branches (`main`, `release/*`). Approval is exclusively reserved for human reviewers.
+2. **FORBIDDEN TO INVENT PRODUCT OR ARCHITECTURE DECISIONS**: When facing ambiguity, formulate open questions (`open-questions`). Never assume undocumented requirements.
+3. **FORBIDDEN TO INTRODUCE DEPENDENCIES WITHOUT LICENSE INSPECTION**: Always verify `license-policy.yaml`. Viral dependencies (GPL/AGPL) or commercial paid dependencies (BSL/SSPL) are strictly forbidden without explicit human approval.
+4. **FORBIDDEN TO IGNORE CYBERSECURITY (SECURITY-BY-DEFAULT)**: Validate inputs, apply least privilege, and accompany every change with security tests (`SEC-TEST-*`). Suppressing linters or tests to force a green pipeline is prohibited.
+5. **MANDATORY CRYPTOGRAPHIC CITATION**: Link specifications using immutable identifiers and Unix LF-normalized SHA-256 hashes.
 
-## 2. Comandos de Verificación Pre-Vuelo
-Antes de finalizar cambios o proponer commits:
-- Pre-vuelo con auto-fix: `pnpm run check:fix` (o `npx aisdlc check --fix`)
-- Verificación completa: `pnpm run verify:all` (o `npx aisdlc verify all`)
-- Pruebas unitarias: `pnpm test`
-- Tipado estricto: `pnpm run typecheck`
+## 2. Pre-Flight Verification Commands
+Before finalizing changes or proposing commits:
+- Pre-flight with auto-fix: `pnpm run check:fix` (or `npx aisdlc check --fix`)
+- Full verification: `pnpm run verify:all` (or `npx aisdlc verify all`)
+- Unit tests: `pnpm test`
+- Strict typing: `pnpm run typecheck`
 
-## 3. Jerarquía Git de 4 Tiers
-- Tier 1: `main` (Producción)
-- Tier 2: `release/vX.Y.Z` (Release congelada)
-- Tier 3: `feat/<FEAT-ID>-<slug>` / `bug/<BUG-ID>-<slug>` (Funcionalidad)
-- Tier 4: `task/<PARENT-ID>/<TSK-ID>-<slug>` (Tarea atómica)
+## 3. Git 4-Tier Hierarchy
+- Tier 1: `main` (Production)
+- Tier 2: `release/vX.Y.Z` (Frozen release)
+- Tier 3: `feat/<FEAT-ID>-<slug>` / `bug/<BUG-ID>-<slug>` (Feature)
+- Tier 4: `task/<PARENT-ID>/<TSK-ID>-<slug>` (Atomic task)
 
-## 4. Protocolo de Workflow Handoff y Ventana de Acción Humana
-- **Activación Condicional**:
-  * 🟢 **`AUTONOMOUS`** (o supervisión en PR/CI): **OMITIDO**. No solicitar ni emitir handoff interactivo.
-  * 🟡 **Autonomía $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **OBLIGATORIO**. Emitir bloque de Workflow Handoff conforme a [`templates/workflow/agent-handoff.template.md`](templates/workflow/agent-handoff.template.md) y **DETENERSE**.
-- **Contenido**: Declarar entregables completados, recomendar siguiente(s) rol(es), proveer prompt sugerido de invocación y **mantener abierta la ventana para que el usuario humano tome acción** (revisar, editar a mano, pausar/desviar o delegar).
-
+## 4. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
+- **Conditional Activation**:
+  * 🟢 **`AUTONOMOUS`** (or PR/CI supervision): **OMITTED**. Do not request or emit interactive handoff.
+  * 🟡 **Autonomy $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **MANDATORY**. Emit Workflow Handoff block compliant with [`templates/workflow/agent-handoff.template.md`](templates/workflow/agent-handoff.template.md) and **STOP**.
+- **Content**: Declare completed deliverables, recommend next role(s), provide suggested invocation prompt, and **keep the Human Action Window open for the human user to take action** (review, edit by hand, pause/reroute, or delegate).

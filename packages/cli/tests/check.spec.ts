@@ -71,12 +71,12 @@ describe('@ai-sdlc/cli check command and auto-fix suite', () => {
     const result = executePreflightCheck({ root: tempDir, fix: false, silent: true });
     expect(result.success).toBe(false);
 
-    const bddGate = result.gates.find((g) => g.name.includes('Sincronización BDD'));
+    const bddGate = result.gates.find((g) => g.name.includes('BDD Synchronization') || g.name.includes('Sincronización BDD'));
     expect(bddGate).toBeDefined();
     expect(bddGate?.status).toBe('FAILED');
     expect(bddGate?.remediation).toContain('aisdlc check --fix');
 
-    const pdacGate = result.gates.find((g) => g.name.includes('Integridad PDaC'));
+    const pdacGate = result.gates.find((g) => g.name.includes('PDaC Integrity') || g.name.includes('Integridad PDaC'));
     expect(pdacGate).toBeDefined();
     expect(pdacGate?.status).toBe('FAILED');
     expect(pdacGate?.remediation).toContain('aisdlc check --fix');
@@ -139,10 +139,10 @@ describe('@ai-sdlc/cli check command and auto-fix suite', () => {
     expect(updatedSpec).toContain(expectedDigest);
 
     // Verify gates reflect the fix
-    const bddGate = result.gates.find((g) => g.name.includes('Sincronización BDD'));
+    const bddGate = result.gates.find((g) => g.name.includes('BDD Synchronization') || g.name.includes('Sincronización BDD'));
     expect(bddGate?.status).toBe('FIXED');
 
-    const pdacGate = result.gates.find((g) => g.name.includes('Integridad PDaC'));
+    const pdacGate = result.gates.find((g) => g.name.includes('PDaC Integrity') || g.name.includes('Integridad PDaC'));
     expect(pdacGate?.status).toBe('FIXED');
   });
 

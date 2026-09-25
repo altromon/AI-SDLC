@@ -23,7 +23,7 @@ export function registerAllResources(server: McpServer, options: RegisterResourc
       const policyPath = path.join(rootDir, 'quality-policy.yaml');
       const text = fs.existsSync(policyPath)
         ? fs.readFileSync(policyPath, 'utf-8')
-        : '# quality-policy.yaml no encontrado en la raíz del proyecto';
+        : '# quality-policy.yaml not found at project root';
       return {
         contents: [
           {
@@ -44,7 +44,7 @@ export function registerAllResources(server: McpServer, options: RegisterResourc
       const policyPath = path.join(rootDir, 'license-policy.yaml');
       const text = fs.existsSync(policyPath)
         ? fs.readFileSync(policyPath, 'utf-8')
-        : '# license-policy.yaml no encontrado en la raíz del proyecto';
+        : '# license-policy.yaml not found at project root';
       return {
         contents: [
           {

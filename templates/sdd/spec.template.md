@@ -1,17 +1,17 @@
-# Especificación de Entrega: CHG-NOMBRE-001
+# Delivery Specification: CHG-NAME-001
 
-## 1. Escenarios de Comportamiento Funcional
+## 1. Functional Behavior Scenarios
 
-### Escenario 1: Flujo Exitoso
-- **GIVEN**: El cliente ha establecido una sesión autenticada.
-- **WHEN**: Envía una carga de datos válida conforme a la especificación.
-- **THEN**: El servidor responde con código 200 OK y persiste los datos.
+### Scenario 1: Successful Flow
+- **GIVEN**: Client has established an authenticated session.
+- **WHEN**: Sends a valid data payload conforming to the specification.
+- **THEN**: Server responds with status code 200 OK and persists data.
 
 ---
 
-## 2. Escenarios de Ciberseguridad y Mitigación (Abuse Scenarios)
+## 2. Cybersecurity and Mitigation Scenarios (Abuse Scenarios)
 
-### Escenario 2: Intento de Suplantación o Payload No Autenticado
-- **GIVEN**: Un actor malicioso intenta enviar datos sin certificado mTLS o con token falso.
-- **WHEN**: La conexión intenta abrir el socket o enviar datos.
-- **THEN**: El handshake es abortado de inmediato por el gateway y se registra una alerta de seguridad (SEC-TEST-001).
+### Scenario 2: Spoofing Attempt or Unauthenticated Payload
+- **GIVEN**: Malicious actor attempts to send data without an mTLS certificate or with a forged token.
+- **WHEN**: Connection attempts to open the socket or transmit data.
+- **THEN**: Handshake is aborted immediately by the gateway and a security alert is recorded (SEC-TEST-001).

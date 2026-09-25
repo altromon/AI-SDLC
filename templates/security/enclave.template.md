@@ -1,15 +1,15 @@
 ---
-id: SEC-ENC-NOMBRE-001
+id: SEC-ENC-NAME-001
 type: security-enclave
-title: Título del Enclave de Seguridad Zero Trust
+title: Zero Trust Security Enclave Title
 status: draft
 version: "1.0.0"
 schema-version: "1.0"
-trust-zone: trusted # untrusted, semi-trusted, trusted, highly-trusted
+trust-zone: trusted # untrusted, semi-trusted, trusted, highly-trusted, dmz, zero-trust-boundary
 perimeter-rules:
-  - "Autenticación mutua obligatoria mediante TLS 1.3 (mTLS)"
-  - "Validación de tokens criptográficos con expiración máxima de 5 minutos"
-  - "Aislamiento de red mediante reglas de firewall y namespaces restringidos"
+  - "Mandatory mutual authentication via TLS 1.3 (mTLS)"
+  - "Cryptographic token validation with maximum 5-minute expiry"
+  - "Network isolation via firewall rules and restricted namespaces"
 allowed-inbound:
   - CMP-GATEWAY-001
 allowed-outbound:
@@ -21,42 +21,42 @@ supersedes: null
 superseded-by: null
 ---
 
-# SEC-ENC-NOMBRE-001: Título del Enclave de Seguridad Zero Trust
+# SEC-ENC-NAME-001: Zero Trust Security Enclave Title
 
-## 1. Definición y Propósito del Enclave
-Descripción de la frontera de confianza, los activos protegidos dentro del enclave y el principio de mínimo privilegio aplicado.
+## 1. Enclave Definition and Purpose
+Description of trust boundary, assets protected inside the enclave, and applied least-privilege principle.
 
-## 2. Zona de Confianza y Reglas Perimetrales
+## 2. Trust Zone and Perimeter Rules
 
-| Parámetro | Valor | Justificación de Seguridad |
+| Parameter | Value | Security Justification |
 | :--- | :--- | :--- |
-| **Zona de Confianza** | `trusted` | Segmento con acceso a datos sensibles y servicios de lógica crítica. |
-| **Autenticación** | `mtls` | Criptografía asimétrica obligatoria en todos los puntos de entrada. |
+| **Trust Zone** | `trusted` | Segment with access to sensitive data and critical logic services. |
+| **Authentication** | `mtls` | Mandatory asymmetric cryptography at all ingress points. |
 
-### Reglas Perimetrales
-1. **Control de Flujo Inbound**: Solo los componentes explícitamente autorizados pueden iniciar conexión.
-2. **Control de Flujo Outbound**: Salidas restringidas exclusivamente a dependencias necesarias para la operación.
-3. **Validación Continua**: Toda petición entrante es verificada criptográficamente con independencia de la procedencia de red.
+### Perimeter Rules
+1. **Inbound Flow Control**: Only explicitly authorized components may initiate connections.
+2. **Outbound Flow Control**: Outbound traffic restricted exclusively to dependencies required for operation.
+3. **Continuous Validation**: Every incoming request is cryptographically verified regardless of network origin.
 
 ---
 
-## 3. Matriz de Conectividad Autorizada
+## 3. Authorized Connectivity Matrix
 
-| Dirección | Identificador de Entidad | Tipo | Protocolo / Canal |
+| Direction | Entity Identifier | Type | Protocol / Channel |
 | :--- | :--- | :--- | :--- |
-| **Inbound** | `CMP-GATEWAY-001` | Componente | gRPC sobre mTLS (puerto seguro) |
-| **Outbound** | `CMP-DATABASE-001` | Componente | TCP cifrado con credenciales de enclave |
+| **Inbound** | `CMP-GATEWAY-001` | Component | gRPC over mTLS (secure port) |
+| **Outbound** | `CMP-DATABASE-001` | Component | TCP encrypted with enclave credentials |
 
 ---
 
-## 4. Requisitos de Seguridad Vinculados
+## 4. Linked Security Requirements
 
-- `SEC-REQ-AUTH-001`: Control de acceso y cifrado perimetral.
+- `SEC-REQ-AUTH-001`: Access control and perimeter encryption.
 
 ---
 
-## 5. Historial de Revisiones
+## 5. Revision History
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-23 | Security Architect | Creación inicial del enclave de seguridad Zero Trust | CHG-INIT-001 |
+| **1.0.0** | 2026-09-23 | Security Architect | Initial Zero Trust security enclave creation | CHG-INIT-001 |

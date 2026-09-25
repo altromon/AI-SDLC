@@ -1,27 +1,27 @@
 ---
-description: Directivas para edición de especificaciones SDD, artefactos ProductShape y Ciberseguridad
+description: Directives for SDD specifications, ProductShape artifacts, and Cybersecurity
 globs: specs/**, templates/**
 alwaysApply: false
 ---
 
-# Directrices para Producto y Especificaciones SDD
+# Directives for Product and SDD Specifications
 
-Referencia canónica: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) y [`process/02_product_definition.md`](process/02_product_definition.md).
+Canonical Reference: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) and [`process/02_product_definition.md`](process/02_product_definition.md).
 
-## 1. Taxonomía de Identificadores y Esquemas JSON
-Todo artefacto generado o modificado debe seguir la nomenclatura canónica y satisfacer su esquema en `schemas/`:
-- Actores de Producto: `ACT-[SUFIJO]` (`schemas/product/actor.schema.json`)
-- Casos de Uso: `UC-[SUFIJO]` (`schemas/product/use-case.schema.json`)
-- Requerimientos Funcionales: `FR-[SUFIJO]-[NUM3]` (`schemas/product/requirement.schema.json`)
-- Requerimientos de Calidad: `QR-[SUFIJO]` (`schemas/product/requirement.schema.json`)
-- Reglas de Negocio: `BR-[SUFIJO]` (`schemas/product/business-rule.schema.json`)
-- Actores de Amenaza: `ACT-THREAT-[SUFIJO]` (`schemas/security/threat-actor.schema.json`)
-- Casos de Abuso: `ABUSE-[SUFIJO]` (`schemas/security/abuse-case.schema.json`)
-- Requisitos de Seguridad: `SEC-REQ-[SUFIJO]` (`schemas/security/security-req.schema.json`)
+## 1. Identifier Taxonomy and JSON Schemas
+Every generated or modified artifact must follow canonical naming and satisfy its schema in `schemas/`:
+- Product Actors: `ACT-[SUFFIX]` (`schemas/product/actor.schema.json`)
+- Use Cases: `UC-[SUFFIX]` (`schemas/product/use-case.schema.json`)
+- Functional Requirements: `FR-[SUFFIX]-[NUM3]` (`schemas/product/requirement.schema.json`)
+- Quality Requirements: `QR-[SUFFIX]` (`schemas/product/requirement.schema.json`)
+- Business Rules: `BR-[SUFFIX]` (`schemas/product/business-rule.schema.json`)
+- Threat Actors: `ACT-THREAT-[SUFFIX]` (`schemas/security/threat-actor.schema.json`)
+- Abuse Cases: `ABUSE-[SUFFIX]` (`schemas/security/abuse-case.schema.json`)
+- Security Requirements: `SEC-REQ-[SUFFIX]` (`schemas/security/security-req.schema.json`)
 
-## 2. Reglas del Protocolo "AI as Scribe"
-- **Estado Inicial**: Todo nuevo artefacto inicia obligatoriamente en `status: draft`. Prohibido crear artefactos directamente en `active` o `approved`.
-- **Criterios de Aceptación Gherkin**: En todo requerimiento `FR-*`, incluye un bloque ```gherkin con etiquetas `@<ID> @automated @regression` y al menos un `Scenario Outline` con tabla de datos `Examples`.
-- **Mitigaciones de Seguridad**: Todo `SEC-REQ-*` debe incluir pruebas negativas en Gherkin (`@security @mitigation`).
-- **Casos de Uso (User Story en inglés)**: En todo `UC-*`, la sección `1. Intención y Resultado` debe redactarse obligatoriamente bajo la estructura estandarizada en inglés: `As a <ACT-ID>... I want <acción>... To <resultado>...`.
-- **Validación Determinista**: Ejecuta `pnpm run verify:schemas` y `pnpm run verify:duplicates` antes de presentar el borrador al revisor humano.
+## 2. "AI as Scribe" Protocol Rules
+- **Initial Status**: Every new artifact mandatorily starts in `status: draft`. Creating artifacts directly in `active` or `approved` is forbidden.
+- **Gherkin Acceptance Criteria**: In every `FR-*` requirement, include a ```gherkin block with tags `@<ID> @automated @regression` and at least one `Scenario Outline` with an `Examples` data table.
+- **Security Mitigations**: Every `SEC-REQ-*` must include negative tests in Gherkin (`@security @mitigation`).
+- **Use Cases (User Story Structure)**: In every `UC-*`, section `1. Intent and Outcome` must be structured under the standard English format: `As a <ACT-ID>... I want <action>... To <outcome>...`.
+- **Deterministic Validation**: Run `pnpm run verify:schemas` and `pnpm run verify:duplicates` before presenting the draft to the human reviewer.

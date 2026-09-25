@@ -1,7 +1,7 @@
 ---
 id: ARCH-GLOSS-001
 type: architecture-glossary
-title: "12. Glosario de Arquitectura y Taxonomía de Términos"
+title: "12. Architecture Glossary and Terms Taxonomy"
 status: proposed # proposed, accepted, deprecated, superseded
 version: "1.0.0"
 schema-version: "1.0"
@@ -16,34 +16,34 @@ supersedes: null
 superseded-by: null
 ---
 
-# 12. Glosario de Arquitectura (arc42 Sec. 12 / NAF Taxonomy)
+# 12. Architecture Glossary (arc42 Sec. 12 / NAF Taxonomy)
 
-## 1. Términos Canónicos del Dominio (`TERM-*`)
-Enlaces y definiciones oficiales de los términos de negocio y dominio del producto:
+## 1. Canonical Domain Terms (`TERM-*`)
+Official definitions and references for business and product domain terms:
 
-| Término / ID | Definición Canónica | Bounded Context de Referencia |
+| Term / ID | Canonical Definition | Reference Bounded Context |
 | :--- | :--- | :--- |
-| `TERM-ENCLAVE-001` | Zona de red aislada lógica o físicamente con políticas de acceso y cifrado estrictas | Arquitectura / Ciberseguridad |
-| `TERM-HANDOFF-001` | Contrato canónico inmutable de traspaso de contexto entre agentes de desarrollo e ingeniería | Gobernanza AI-SDLC |
-| `TERM-PDAC-001`    | Product-Definition-as-Code: modelado de producto y trazabilidad 360° en repositorios Git | Motor Central |
+| `TERM-ENCLAVE-001` | Logically or physically isolated network zone with strict access and encryption policies | Architecture / Cybersecurity |
+| `TERM-HANDOFF-001` | Immutable canonical context handoff contract between development and engineering agents | AI-SDLC Governance |
+| `TERM-PDAC-001`    | Product-Definition-as-Code: product modeling and 360° traceability in Git repositories | Core Engine |
 
 ---
 
-## 2. Abreviaturas y Acrónimos Técnicos
-Glosario de conceptos arquitectónicos empleados a lo largo de la documentación del sistema:
+## 2. Technical Abbreviations and Acronyms
+Glossary of architectural concepts used across system documentation:
 
-| Acrónimo | Significado Completo | Definición en el Contexto del Sistema |
+| Acronym | Full Meaning | Definition in System Context |
 | :--- | :--- | :--- |
-| **arc42** | Architecture Communication Template | Estándar modular para documentar y comunicar arquitecturas de software |
-| **NAF v4** | NATO Architecture Framework v4 | Marco de arquitectura empresarial para sistemas interoperables y críticos |
-| **ADR** | Architecture Decision Record | Registro inmutable de una decisión arquitectónica significativa |
-| **mTLS** | Mutual Transport Layer Security | Autenticación bidireccional mediante certificados criptográficos |
-| **RTM** | Requirements Traceability Matrix | Matriz de trazabilidad 360° entre requisitos, código y pruebas |
+| **arc42** | Architecture Communication Template | Modular standard to document and communicate software architectures |
+| **NAF v4** | NATO Architecture Framework v4 | Enterprise architecture framework for critical, interoperable systems |
+| **ADR** | Architecture Decision Record | Immutable record of a significant architectural decision |
+| **mTLS** | Mutual Transport Layer Security | Bidirectional cryptographic certificate authentication |
+| **RTM** | Requirements Traceability Matrix | 360° traceability matrix between requirements, code, and tests |
 
 ---
 
-## 3. Historial de Revisiones y Control de Versiones
+## 3. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial del glosario de arquitectura | CHG-ARCH-001 |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial architecture glossary definition | CHG-ARCH-001 |

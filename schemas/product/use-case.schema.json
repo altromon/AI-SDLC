@@ -16,11 +16,11 @@
     "version": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
-      "description": "Versión semántica del caso de uso (SemVer)."
+      "description": "Use case semantic version (SemVer)."
     },
     "schema-version": {
       "type": "string",
-      "description": "Versión del esquema de la plantilla."
+      "description": "Template schema version."
     },
     "title": {
       "type": "string",

@@ -25,7 +25,7 @@
     "version": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
-      "description": "Versión del componente de arquitectura (SemVer)."
+      "description": "Architecture component semantic version (SemVer)."
     },
     "schema-version": {
       "type": "string"
@@ -41,21 +41,21 @@
     "level": {
       "type": "integer",
       "minimum": 1,
-      "description": "Nivel jerárquico de arquitectura (1: Bounded Context / Sistema Raíz, 2: Subsistema / Contenedor, 3: Unidad Ejecutable / DLL / Función)."
+      "description": "Hierarchical architecture level (1: Bounded Context / Root System, 2: Subsystem / Container, 3: Executable Unit / DLL / Function)."
     },
     "bounded-context": {
       "type": "string",
-      "description": "Nombre del Bounded Context en Domain-Driven Design (DDD) al que pertenece el componente."
+      "description": "Domain-Driven Design (DDD) Bounded Context name this component belongs to."
     },
     "parent-component": {
       "type": ["string", "null"],
       "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$",
-      "description": "Identificador del componente padre (nulo si es Nivel 1)."
+      "description": "Parent component identifier (null if Level 1)."
     },
     "implementation-type": {
       "type": "string",
       "enum": ["service", "dll", "function", "composite"],
-      "description": "Paradigma de implementación técnica: servicio distribuido (service), biblioteca dinámica/nativa (dll), módulo o función in-process (function), o agrupador lógico/Bounded Context (composite)."
+      "description": "Technical implementation paradigm: distributed service (service), dynamic/native library (dll), in-process module/function (function), or logical aggregator/Bounded Context (composite)."
     },
     "implements-use-cases": {
       "type": "array",
@@ -75,7 +75,7 @@
     "hosted-in-enclave": {
       "type": "string",
       "pattern": "^SEC-ENC-[A-Z0-9]+(-[A-Z0-9]+)*$",
-      "description": "Enclave de seguridad donde reside el componente (opcional para DLLs o funciones in-process)."
+      "description": "Security enclave where the component resides (optional for DLLs or in-process functions)."
     },
     "interfaces": {
       "type": "array",

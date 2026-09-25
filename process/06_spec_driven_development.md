@@ -1,157 +1,155 @@
-# 06. Entrega e Implementación: Spec-Driven Development (SDD)
+# 06. Delivery and Implementation: Spec-Driven Development (SDD)
 
-## 1. El Puente entre la Definición y el Código
+## 1. The Bridge Between Definition and Code
 
-Spec-Driven Development (SDD) es el estándar que garantiza que **los agentes de IA nunca escriban código directamente a partir de ideas ambiguas o prompts desestructurados**. 
+Spec-Driven Development (SDD) is the standard ensuring that **AI agents never write code directly from ambiguous ideas or unstructured prompts**.
 
-Un incremento SDD responde a una pregunta delimitada:
-> *¿Cómo modifica este incremento específico el software para cumplir con los requerimientos aprobados?*
+An SDD increment answers a well-bounded question:
+> *How does this specific increment modify the software to fulfill the approved requirements?*
 
-El incremento SDD **hereda y cita** la línea base canónica (Producto, Arquitectura y Ciberseguridad), establece el diseño concreto de implementación y define tareas atómicas ejecutables por agentes.
+The SDD increment **inherits and cites** the canonical baseline (Product, Architecture, and Cybersecurity), establishes the concrete implementation design, and defines atomic tasks executable by agents.
 
 ---
 
-## 2. Anatomía de un Incremento SDD (Spec-Delta)
+## 2. Anatomy of an SDD Increment (Spec-Delta)
 
-Cada cambio de entrega se organiza en un directorio aislado (`specs/changes/active/<change-id>/`) con cuatro documentos canónicos y su archivo de acompañamiento (*sidecar*):
+Each delivery change is organized in an isolated directory (`specs/changes/active/<change-id>/`) with four canonical documents and its sidecar file:
 
 ```
 specs/changes/active/chg-001-telemetry-stream/
-├── proposal.md       # Motivación, alcance del incremento y enlaces canónicos
-├── spec.md           # Requisitos de la entrega y escenarios de prueba
-├── design.md         # Decisiones de bajo nivel, APIs y estructuras de datos
-├── tasks.md          # Lista secuencial de tareas atómicas para agentes
-└── handoff.yaml      # Sidecar canónico PDaC (HOF-*) con subgrafo y citaciones SHA-256
+├── proposal.md       # Motivation, increment scope, and canonical links
+├── spec.md           # Delivery requirements and test scenarios
+├── design.md         # Low-level decisions, APIs, and data structures
+├── tasks.md          # Sequential list of atomic tasks for agents
+└── handoff.yaml      # Canonical PDaC sidecar (HOF-*) with subgraph and SHA-256 citations
 ```
 
-> **Andamiaje Automatizado (Scaffolding):**
-> En lugar de crear carpetas y copiar plantillas manualmente, el comando compuesto:
+> **Automated Scaffolding:**
+> Rather than manually creating folders and copying templates, the composite command:
 > ```bash
-> npx aisdlc change new "<Nombre>" [--from <ID>]
+> npx aisdlc change new "<Name>" [--from <ID>]
 > ```
-> (o su alias `npx aisdlc sdd new ...`) genera deterministamente la estructura completa, calcula el correlativo incremental (`chg-XXX-...`), resuelve o crea los requerimientos citados calculando sus hashes SHA-256 reales, y deposita el sidecar `handoff.yaml` validado contra sus esquemas JSON.
-
+> (or its alias `npx aisdlc sdd new ...`) deterministically generates the complete structure, computes the incremental sequence (`chg-XXX-...`), resolves or creates cited requirements calculating their real SHA-256 hashes, and deposits the `handoff.yaml` sidecar validated against JSON schemas.
 
 ### 1. `proposal.md`
-- Justificación del cambio, valor aportado y análisis de impacto.
-- **Citaciones Obligatorias**: IDs y digests de los casos de uso (`UC-*`), requerimientos (`FR-*`), requisitos de seguridad (`SEC-REQ-*`) y bloques de arquitectura (`SRV-*`) involucrados.
+- Change rationale, delivered value, and impact analysis.
+- **Mandatory Citations**: IDs and digests of involved use cases (`UC-*`), functional requirements (`FR-*`), security requirements (`SEC-REQ-*`), and architecture building blocks (`SRV-*`).
 
 ### 2. `spec.md`
-- Comportamiento esperado detallado mediante especificaciones ejecutables (formato Given-When-Then / Gherkin o escenarios de aserción).
-- Incluye explícitamente **escenarios de mitigación de seguridad** derivados de los casos de abuso (`ABUSE-*`).
+- Detailed expected behavior using executable specifications (Given-When-Then / Gherkin format or assertion scenarios).
+- Explicitly includes **security mitigation scenarios** derived from abuse cases (`ABUSE-*`).
 
 ### 3. `design.md`
-- Mapeo directo a los bloques de arquitectura arc42 / NAF v4 (`SRV-*`, `SYS-*`).
-- Firma de interfaces, modelos de datos, manejo de errores, endpoints y selección de librerías permitidas por `license-policy.yaml`.
+- Direct mapping to arc42 / NAF v4 architecture blocks (`SRV-*`, `SYS-*`).
+- Interface signatures, data models, error handling, endpoints, and library selection permitted by `license-policy.yaml`.
 
 ### 4. `tasks.md`
-- Desglose estructurado de **tareas atómicas y 100% verificables** validadas por `schemas/sdd/tasks.schema.json`.
-- Cada tarea declara obligatoriamente:
-  1. **Nivel de Complejidad y Riesgo**: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`.
-  2. **Modo de Autonomía Humana**:
-     - `AUTONOMOUS`: Plan y ejecución autónoma por el agente de IA.
-     - `HUMAN_REVIEW_PLAN`: El agente elabora el plan y se detiene; requiere aprobación humana previa antes de codificar.
-     - `AMBIGUOUS`: Tarea bloqueada por falta de requisitos o ambigüedad; requiere refinamiento previo con el usuario.
-     - `HIGH_RISK_MANUAL`: Tarea de riesgo crítico (migraciones destructivas, credenciales); ejecución reservada exclusivamente a ingenieros humanos.
-  3. **Criterio de Verificación Concreto**: Comando determinista o prueba objetiva para dar la tarea por completada (`npm test`, `npx cucumber-js`, `npx tsx scripts/verify-quality-gate.ts`).
-- Auditado automáticamente por [`scripts/verify-tasks-governance.ts`](file:///c:/Users/reypo/Documents/Workspace/AI-SDLC/scripts/verify-tasks-governance.ts).
+- Structured breakdown of **atomic and 100% verifiable tasks** validated by `schemas/sdd/tasks.schema.json`.
+- Each task mandatorily declares:
+  1. **Complexity and Risk Level**: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`.
+  2. **Human Autonomy Mode**:
+     - `AUTONOMOUS`: Autonomous planning and execution by the AI agent.
+     - `HUMAN_REVIEW_PLAN`: The agent creates the plan and pauses; requires human approval prior to coding.
+     - `AMBIGUOUS`: Task blocked due to missing requirements or ambiguity; requires prior refinement with user.
+     - `HIGH_RISK_MANUAL`: Critical risk task (destructive migrations, credentials); execution reserved exclusively to human engineers.
+  3. **Concrete Verification Criterion**: Deterministic command or objective test marking the task complete (`npm test`, `npx cucumber-js`, `npx tsx scripts/verify-quality-gate.ts`).
+- Automatically audited by [`scripts/verify-tasks-governance.ts`](file:///c:/Users/reypo/Documents/Workspace/AI-SDLC/scripts/verify-tasks-governance.ts).
 
 ---
 
-## 3. Inyección de Contexto Quirúrgica para Agentes de IA
+## 3. Surgical Context Injection for AI Agents
 
-Uno de los mayores causantes de alucinaciones en agentes de codificación es la sobrecarga o contaminación de contexto ("dumping" de todo el repositorio). 
+A primary root cause of hallucinations in coding agents is context overload or contamination ("repo dumping").
 
-El modelo de citaciones del AI-SDLC permite una **inyección quirúrgica**:
-1. El agente programador recibe **únicamente**:
-   - El archivo `spec.md` y `design.md` de la tarea actual.
-   - El extracto canónico verificado de los artefactos citados (`FR-*`, `SEC-REQ-*`, `SRV-*`).
-   - La política de licencias `license-policy.yaml`.
-2. El agente no necesita buscar en cientos de archivos dispersos ni inferir requisitos; su universo operativo está estrictamente acotado y acoplado por hashes criptográficos.
+The AI-SDLC citation model enables **surgical context injection**:
+1. The developer agent receives **only**:
+   - The current task's `spec.md` and `design.md`.
+   - The verified canonical extract of cited artifacts (`FR-*`, `SEC-REQ-*`, `SRV-*`).
+   - The licensing policy `license-policy.yaml`.
+2. The agent never needs to search hundreds of scattered files or guess requirements; its operational context is strictly bounded and cryptographically coupled by hashes.
 
 ---
 
-## 4. Ciclo de Ejecución de una Entrega SDD
+## 4. SDD Delivery Execution Lifecycle
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Dev as Tech Lead (Humano)
-    participant SpecAgent as Agente Redactor SDD
-    participant Gate as Validador Determinista
-    participant CodeAgent as Agente Desarrollador
-    participant QA as Agente QA / Tests
+    actor Dev as Tech Lead (Human)
+    participant SpecAgent as SDD Author Agent
+    participant Gate as Deterministic Validator
+    participant CodeAgent as Developer Agent
+    participant QA as QA / Test Agent
 
-    Dev->>SpecAgent: Solicitar incremento para UC-001 y SEC-REQ-001
-    SpecAgent->>Gate: Validar citaciones (prodshape verify)
-    Gate-->>SpecAgent: Citaciones vigentes (status: current)
-    SpecAgent->>Dev: Presentar proposal.md, spec.md y tasks.md
-    Dev->>Dev: Revisión y aprobación humana de la especificación
-    Dev->>CodeAgent: Asignar tarea 1: Implementar pruebas y lógica
-    CodeAgent->>CodeAgent: Escribir código + SEC-TEST-*
-    CodeAgent->>QA: Solicitar validación
-    QA->>Gate: Ejecutar SAST + Escaneo de Licencias + Tests
-    Gate-->>Dev: Pipeline en Verde (100% aprobado)
-    Dev->>Dev: Merge final del Pull Request
+    Dev->>SpecAgent: Request increment for UC-001 and SEC-REQ-001
+    SpecAgent->>Gate: Validate citations (prodshape verify)
+    Gate-->>SpecAgent: Citations up-to-date (status: current)
+    SpecAgent->>Dev: Present proposal.md, spec.md, and tasks.md
+    Dev->>Dev: Human review and approval of specification
+    Dev->>CodeAgent: Assign task 1: Implement tests and logic
+    CodeAgent->>CodeAgent: Write code + SEC-TEST-*
+    CodeAgent->>QA: Request validation
+    QA->>Gate: Run SAST + License Scan + Tests
+    Gate-->>Dev: Pipeline Green (100% passed)
+    Dev->>Dev: Final Pull Request merge
 ```
 
 ---
 
-## 5. Integración Automatizada de Requerimientos con Cucumber (BDD)
+## 5. Automated Requirements Integration with Cucumber (BDD)
 
-Para que los requerimientos no sean texto pasivo, el AI-SDLC adopta la sintaxis **Gherkin** como estándar nativo de criterios de aceptación:
+To keep requirements from becoming passive documentation, AI-SDLC adopts **Gherkin** syntax as its native standard for acceptance criteria:
 
-1. **Especificación en Markdown**:
-   - Cada requerimiento (`FR-*`, `QR-*`, `SEC-REQ-*`) incluye un bloque ````gherkin ... ```` con etiquetas (`@FR-001`, `@automated`, `@smoke`).
-2. **Extracción Automatizada por Convención**:
-   - Mediante el extractor determinista `npx aisdlc gherkin extract --all` o el comando unificado de pre-vuelo `npx aisdlc check --fix`, el framework genera o sincroniza archivos `.feature` de Cucumber en `tests/features/` siguiendo convenciones de subcarpeta (ej. `tests/features/product/<id>.feature`), sin requerir rutas físicas acopladas dentro del requerimiento Markdown.
-3. **Ejecución y Cierre de Ciclo**:
-   - Los agentes desarrolladores y de QA generan los step definitions correspondientes en Cucumber.js / Cucumber-JVM.
-   - El pipeline de CI/CD ejecuta `cucumber-js` como una puerta de paso obligatoria, garantizando que el software implementado satisface exactamente los escenarios definidos en el producto.
-4. **Verificación Pre-Vuelo Obligatoria (`aisdlc check --fix`)**:
-   - Antes de abrir un Pull Request, el desarrollador o agente ejecuta `npx aisdlc check --fix` para extraer automáticamente los escenarios desfasados, sincronizar digests de citaciones PDaC y verificar el paso de todos los Quality Gates en un único dashboard de consola.
+1. **Specification in Markdown**:
+   - Each requirement (`FR-*`, `QR-*`, `SEC-REQ-*`) includes a ````gherkin ... ```` block with tags (`@FR-001`, `@automated`, `@smoke`).
+2. **Automated Extraction by Convention**:
+   - Using the deterministic extractor `npx aisdlc gherkin extract --all` or the unified pre-flight command `npx aisdlc check --fix`, the framework extracts or synchronizes Cucumber `.feature` files in `tests/features/` following folder conventions (e.g., `tests/features/product/<id>.feature`), without requiring tightly coupled physical paths in Markdown requirements.
+3. **Execution and Closing the Loop**:
+   - Developer and QA agents generate corresponding step definitions in Cucumber.js / Cucumber-JVM.
+   - The CI/CD pipeline runs `cucumber-js` as a mandatory quality gate, guaranteeing that implemented software exactly satisfies product scenarios.
+4. **Mandatory Pre-Flight Verification (`aisdlc check --fix`)**:
+   - Prior to opening a Pull Request, the developer or agent runs `npx aisdlc check --fix` to automatically extract outdated scenarios, synchronize PDaC citation digests, and verify all Quality Gates pass in a single console dashboard.
 
 ---
 
-## 6. Adaptadores Formales para Ecosistemas SDD (OpenSpec y Spec Kit)
+## 6. Formal Adapters for SDD Ecosystems (OpenSpec and Spec Kit)
 
-AI-SDLC estructura su carpeta `specs/` conectándola con herramientas reconocidas de Spec-Driven Development (OpenSpec y GitHub Spec Kit), depositando el subgrafo del producto como archivos de acompañamiento (*sidecars*) dentro del espacio de trabajo del cambio:
+AI-SDLC structures its `specs/` directory connecting to established Spec-Driven Development ecosystems (OpenSpec and GitHub Spec Kit), depositing the product subgraph as sidecar files within the change workspace:
 
-1. **Integración con OpenSpec y Spec Kit**:
-   - Utiliza adaptadores formales (`OpenSpecAdapter` y `SpecKitAdapter`, compatibles conceptualmente con `@prodshape/integration-openspec` y `@prodshape/integration-speckit`) para depositar `handoff.yaml` dentro de `specs/changes/active/<change-id>/` o `specs/<change-id>/`.
-   - Cada archivo `handoff.yaml` encapsula el subgrafo inmutable de entrega emitido por PDaC, con prefijo `HOF-*` (ej. `HOF-001-TELEMETRY-INGESTION`), declarando requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`), casos de uso (`UC-*`), reglas de negocio (`BR-*`) y citaciones con digests SHA-256.
+1. **OpenSpec and Spec Kit Integration**:
+   - Employs formal adapters (`OpenSpecAdapter` and `SpecKitAdapter`, conceptually compatible with `@prodshape/integration-openspec` and `@prodshape/integration-speckit`) to deposit `handoff.yaml` inside `specs/changes/active/<change-id>/` or `specs/<change-id>/`.
+   - Each `handoff.yaml` file encapsulates the immutable delivery subgraph emitted by PDaC, prefixed with `HOF-*` (e.g., `HOF-001-TELEMETRY-INGESTION`), declaring requirements (`FR-*`, `QR-*`, `SEC-REQ-*`), use cases (`UC-*`), business rules (`BR-*`), and citations with SHA-256 digests.
 
-2. **Trazabilidad 360° Automatizada mediante Resolución Inversa (Inverted Traceability)**:
-   - El verificador `aisdlc verify traceability` y `scripts/verify-traceability.ts` erradica análisis textuales frágiles basados en heurísticas de cadenas y desacopla los requerimientos de la implementación concreta. Comprueba rigurosamente la cobertura completa en tres dimensiones mediante resolución inversa (*Reverse Lookup*):
-     - **Producto (Upstream)**: Todo requerimiento declara sus dependencias ascendentes (`derives-from: [UC-*]`, `mitigates: [ABUSE-*]`) y proviene formalmente de un paquete `HOF-*` emitido por el handoff de PDaC.
-     - **Arquitectura (Midstream)**: Vistas de arquitectura arc42 / NAF v4 donde los servicios (`SRV-*`) declaran explícitamente `satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`.
-     - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) con escenarios etiquetados con `@<reqId>` y suites de código (`.spec.*`, benchmarks) que citan los identificadores de requerimiento.
-   - Ningún requerimiento almacena punteros hacia abajo, blindando la especificación canónica contra derivas criptográficas de hash SHA-256 cuando se modifican o reorganizan tests y servicios.
+2. **Automated 360° Traceability via Inverted Lookup**:
+   - The `aisdlc verify traceability` verifier and `scripts/verify-traceability.ts` eradicate brittle string-matching heuristics and decouple requirements from concrete implementation. They rigorously verify complete coverage across three dimensions via reverse lookup:
+     - **Product (Upstream)**: Every requirement declares upstream dependencies (`derives-from: [UC-*]`, `mitigates: [ABUSE-*]`) and formally originates from a `HOF-*` package emitted by PDaC handoff.
+     - **Architecture (Midstream)**: arc42 / NAF v4 architecture views where services (`SRV-*`) explicitly declare `satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`.
+     - **Testing (Downstream)**: BDD/Gherkin suites (`.feature`) with scenarios tagged `@<reqId>` and test code suites (`.spec.*`, benchmarks) citing requirement IDs.
+   - No requirement stores downstream pointers, shielding the canonical specification from SHA-256 hash drift when tests or services are refactored or reorganized.
 
-3. **Integración Canónica Post-Implementación y Automatización en CI/CD**:
-   - Una vez concluida la implementación del cambio y verificado que todas las tareas en `tasks.md` están `COMPLETED`:
-     - Los requerimientos asociados en `specs/product/` se promueven a estado `active` y se les añade entrada en el historial de revisiones referenciando el `changeId`.
-     - Las especificaciones de arquitectura en `specs/architecture/` actualizan sus mapas de dependencias y servicios que satisfacen los requerimientos (`satisfies-requirements`).
-     - El directorio del cambio se archiva de forma atómica a `specs/changes/completed/<change-id>/`.
-     - Si existe una propuesta de especificación (`proposal.md`), su estado se actualiza a `applied`.
-   - **Automatización Desatendida en CI/CD (`.github/workflows/sdd-integrate-on-merge.yml`)**:
-     - Para evitar desalineaciones por omisión humana previa al merge, el framework traslada la responsabilidad de la integración canónica al pipeline de CI/CD tras la fusión del Pull Request hacia `main` o ramas de versión `release/*`.
-     - **Motor de Detección Automática**: Correlaciona deterministamente el cambio activo analizando en orden jerárquico: la rama origen del PR (`headRef`), el título y cuerpo del PR (`CHG-*`), los archivos modificados bajo `specs/changes/active/`, o la existencia de un único cambio activo con tareas completadas.
-     - **Seguridad y Trazabilidad Git**: Se ejecuta mediante GitHub Actions con permisos de mínimos privilegios (`contents: write`). El bot (`github-actions[bot]`) realiza commit y push automatizado con formato convencional `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
-     - **Experiencia de Desarrollo**: Los ingenieros y agentes no necesitan ejecutar manualmente `sdd integrate` antes de abrir el PR; una vez fusionado el PR, basta con ejecutar `git pull` en la copia local para obtener el catálogo canónico actualizado.
+3. **Post-Implementation Canonical Integration and CI/CD Automation**:
+   - Once change implementation finishes and all tasks in `tasks.md` are verified `COMPLETED`:
+     - Associated requirements in `specs/product/` are promoted to `active` status and receive a revision history entry referencing `changeId`.
+     - Architecture specifications in `specs/architecture/` update their dependency maps and services satisfying requirements (`satisfies-requirements`).
+     - The change directory is atomically archived to `specs/changes/completed/<change-id>/`.
+     - If a specification proposal exists (`proposal.md`), its status is updated to `applied`.
+   - **Unattended CI/CD Automation (`.github/workflows/sdd-integrate-on-merge.yml`)**:
+     - To avoid misalignment from human omission prior to merge, the framework shifts canonical integration responsibility to the CI/CD pipeline following Pull Request merge into `main` or release branches (`release/*`).
+     - **Automatic Detection Engine**: Deterministically identifies the active change analyzing hierarchically: PR source branch (`headRef`), PR title and body (`CHG-*`), modified files under `specs/changes/active/`, or the existence of a single active change with completed tasks.
+     - **Git Security and Traceability**: Runs via GitHub Actions under least privilege permissions (`contents: write`). The bot (`github-actions[bot]`) makes an automated commit and push using conventional commits format `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
+     - **Developer Experience**: Engineers and agents do not need to manually run `sdd integrate` before opening a PR; once merged, running `git pull` locally synchronizes the updated canonical catalog.
 
-4. **Comandos CLI Operativos**:
-   - `npx aisdlc check [--fix] [--json]`: Ejecuta la suite consolidada de pre-vuelo sobre todos los Quality Gates con auto-fix no destructivo opcional.
-   - `npx aisdlc change new "<nombre>" [--from <id>] [--profile <patch|standard|critical>] [--json]`: Genera el andamiaje completo de un nuevo cambio SDD con las 4 plantillas y el sidecar `handoff.yaml`.
-   - `npx aisdlc sdd new "<nombre>"`: Alias conveniente de `change new`.
-   - `npx aisdlc sdd deposit --change <id> [--framework <openspec|speckit>] [--requirements <reqs>] [--json]`: Deposita el sidecar `handoff.yaml` en el cambio activo.
-   - `npx aisdlc sdd verify [--json]`: Audita la conformidad de todos los espacios de trabajo y sidecars de handoff, ejecutando la compuerta pre-vuelo de duplicados.
-   - `npx aisdlc sdd integrate [--change <id>] [--auto] [--json]`: Integra y promueve el cambio completado a las especificaciones canónicas (soporta resolución manual o automática).
-   - `npx aisdlc gherkin extract [--all] [--path <path>] [--json]`: Extrae y sincroniza escenarios BDD Gherkin a archivos `.feature` en disco.
-   - `npx aisdlc init [directory] [--dry-run] [--ci <provider>] [--agents <list>] [--json]`: Inicializa la gobernanza, esquemas y políticas en un nuevo repositorio.
-   - `npx aisdlc verify all [--json]`: Ejecuta los 9 Quality Gates deterministas emitiendo resumen estructurado o texto humano.
+4. **Operational CLI Commands**:
+   - `npx aisdlc check [--fix] [--json]`: Executes the consolidated pre-flight suite across all Quality Gates with optional non-destructive auto-fix.
+   - `npx aisdlc change new "<name>" [--from <id>] [--profile <patch|standard|critical>] [--json]`: Generates complete scaffolding for a new SDD change with the 4 templates and `handoff.yaml` sidecar.
+   - `npx aisdlc sdd new "<name>"`: Convenient alias for `change new`.
+   - `npx aisdlc sdd deposit --change <id> [--framework <openspec|speckit>] [--requirements <reqs>] [--json]`: Deposits the `handoff.yaml` sidecar into the active change.
+   - `npx aisdlc sdd verify [--json]`: Audits conformity of all workspaces and handoff sidecars, running the duplicate pre-flight gate.
+   - `npx aisdlc sdd integrate [--change <id>] [--auto] [--json]`: Integrates and promotes the completed change into canonical specifications (supports manual or auto-detection).
+   - `npx aisdlc gherkin extract [--all] [--path <path>] [--json]`: Extracts and synchronizes Gherkin BDD scenarios to `.feature` files on disk.
+   - `npx aisdlc init [directory] [--dry-run] [--ci <provider>] [--agents <list>] [--json]`: Initializes governance, schemas, and policies in a new repository.
+   - `npx aisdlc verify all [--json]`: Executes all 9 deterministic Quality Gates outputting structured JSON or human-readable summary.
 
-5. **Consumo Programático y Automatizado por Agentes de IA (`--json` y `AISDLC_FORMAT=json`)**:
-   - **Salida JSON Pura Sin Caracteres de Escape**: Todos los comandos (`check`, `sdd *`, `gherkin extract`, `init`, `verify *`) soportan el flag `--json` o `-F, --format json`, suprimiendo de forma estricta colores y secuencias de escape ANSI (`picocolors`).
-   - **Variable de Entorno Global**: Configurar `export AISDLC_FORMAT=json` (o `AISDLC_OUTPUT=json`) activa la emisión JSON estructurada en todas las invocaciones de la CLI de manera transparente, permitiendo que orquestadores, agentes desatendidos y pipelines CI/CD consuman payloads parseables mediante `JSON.parse()` con códigos de salida estandarizados (0 = éxito, 1 = bloqueo/violación).
-
+5. **Programmatic Consumption by AI Agents (`--json` and `AISDLC_FORMAT=json`)**:
+   - **Pure JSON Output Without Escape Characters**: All commands (`check`, `sdd *`, `gherkin extract`, `init`, `verify *`) support `--json` or `-F, --format json`, strictly suppressing ANSI color codes (`picocolors`).
+   - **Global Environment Variable**: Setting `export AISDLC_FORMAT=json` (or `AISDLC_OUTPUT=json`) activates structured JSON output across all CLI invocations transparently, allowing orchestrators, autonomous agents, and CI/CD pipelines to consume parseable payloads via `JSON.parse()` with standardized exit codes (0 = success, 1 = failure/violation).

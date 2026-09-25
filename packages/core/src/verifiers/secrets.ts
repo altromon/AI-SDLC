@@ -500,12 +500,12 @@ export function verifySecrets(options: SecretVerifierOptions = {}): SecretVerifi
 export function generateSecretsReportMarkdown(result: SecretVerifierResult): string {
   const isOk = result.success;
   const lines: string[] = [
-    `# 🔐 Auditoría Determinista de Secretos y Credenciales (Gitleaks Gate)`,
+    `# 🔐 Deterministic Secrets and Credentials Audit (Gitleaks Gate)`,
     ``,
-    `> **Fecha de Evaluación:** ${new Date().toISOString()}`,
-    `> **Veredicto:** ${isOk ? '✅ CONFORME (Sin secretos ni credenciales expuestas)' : `❌ BLOQUEADO (${result.findingsCount} credenciales expuestas detectadas)`}`,
-    `> **Archivos Auditados:** ${result.totalFilesScanned} | **Infracciones de Seguridad:** ${result.findingsCount}`,
-    `> **Motor Gitleaks Nativo:** ${result.scannedWithGitleaks ? '🟢 Activo / Integrado' : '⚪ Escáner Determinista Nativo (@ai-sdlc/core)'}`,
+    `> **Evaluation Date:** ${new Date().toISOString()}`,
+    `> **Verdict:** ${isOk ? '✅ COMPLIANT (No exposed secrets or credentials)' : `❌ BLOCKED (${result.findingsCount} exposed credentials detected)`}`,
+    `> **Audited Files:** ${result.totalFilesScanned} | **Security Violations:** ${result.findingsCount}`,
+    `> **Native Gitleaks Engine:** ${result.scannedWithGitleaks ? '🟢 Active / Integrated' : '⚪ Deterministic Native Scanner (@ai-sdlc/core)'}`,
     ``,
     `---`,
   ];
@@ -513,17 +513,17 @@ export function generateSecretsReportMarkdown(result: SecretVerifierResult): str
   if (result.findings.length === 0) {
     lines.push(
       ``,
-      `## Resumen de Conformidad`,
+      `## Compliance Summary`,
       ``,
-      `El repositorio y los diffs analizados están libres de claves privadas, tokens de API de proveedores Cloud/SaaS (AWS, GitHub, Google, OpenAI, Slack, Stripe), JWTs en texto plano o secretos con alta entropía.`,
-      `El Quality Gate de seguridad de credenciales se considera APROBADO (EXIT 0).`
+      `The repository and analyzed diffs are free of private keys, Cloud/SaaS provider API tokens (AWS, GitHub, Google, OpenAI, Slack, Stripe), plaintext JWTs, or high-entropy secrets.`,
+      `Credentials security Quality Gate is APPROVED (EXIT 0).`
     );
   } else {
     lines.push(
       ``,
-      `## Detalle de Fugas de Secretos Detectadas`,
+      `## Detected Secret Leaks Detail`,
       ``,
-      `| Severidad | Regla | Tipo | Archivo:Línea | Token (Enmascarado) | Detalle |`,
+      `| Severity | Rule | Type | File:Line | Token (Masked) | Details |`,
       `| :---: | :--- | :--- | :--- | :--- | :--- |`
     );
 
@@ -535,12 +535,12 @@ export function generateSecretsReportMarkdown(result: SecretVerifierResult): str
 
     lines.push(
       ``,
-      `## 🚨 Protocolo de Remediación Obligatoria (Código de Salida 4)`,
+      `## 🚨 Mandatory Remediation Protocol (Exit Code 4)`,
       ``,
-      `1. **Revocación Inmediata**: Cualquier credencial o token detectado arriba debe considerarse comprometido y revocarse de inmediato en el proveedor respectivo.`,
-      `2. **Rotación y Almacenamiento Seguro**: Migrar las credenciales a variables de entorno protegidas o servicios de gestión de secretos (Vault, AWS Secrets Manager, GitHub Secrets).`,
-      `3. **Purga del Historial Git**: Si el secreto fue comiteado, purgarlo del historial con \`git filter-repo\` o herramientas BFG antes de fusionar.`,
-      `4. **Falsos Positivos**: Para datos de prueba legítimos o cadenas no secretas, añadir el comentario \`// ai-sdlc:allow-secret\` en la línea infractora o registrar la ruta en \`.secretsignore\`.`
+      `1. **Immediate Revocation**: Any credential or token detected above must be considered compromised and immediately revoked at the respective provider.`,
+      `2. **Rotation and Secure Storage**: Migrate credentials to protected environment variables or secrets management vaults (Vault, AWS Secrets Manager, GitHub Secrets).`,
+      `3. **Git History Purge**: If the secret was committed, purge it from Git history with \`git filter-repo\` or BFG before merging.`,
+      `4. **False Positives**: For legitimate test fixtures or non-secret strings, add \`// ai-sdlc:allow-secret\` on the offending line or add the path to \`.secretsignore\`.`
     );
   }
 

@@ -81,7 +81,7 @@ default_action: "DENY"
 categories:
   permissive_free:
     action: "ALLOW"
-    description: "Licencias de libre uso comercial. Solo requieren atribución."
+    description: "Permissive commercial use licenses. Attribution only required."
     spdx_identifiers:
       - "MIT"
       - "Apache-2.0"
@@ -94,7 +94,7 @@ categories:
 
   weak_copyleft_conditional:
     action: "REVIEW_REQUIRED"
-    description: "Permitidas únicamente como librerías dinámicas desacopladas."
+    description: "Allowed only as dynamically linked decoupled libraries."
     spdx_identifiers:
       - "LGPL-2.1-only"
       - "LGPL-3.0-only"
@@ -102,7 +102,7 @@ categories:
 
   strong_copyleft_viral:
     action: "DENY"
-    description: "Prohibidas por efecto viral que obliga a publicar el código fuente."
+    description: "Forbidden due to viral copyleft forcing source code disclosure."
     spdx_identifiers:
       - "GPL-2.0-only"
       - "GPL-3.0-only"
@@ -111,7 +111,7 @@ categories:
 
   commercial_acquisition_required:
     action: "COMMERCIAL_APPROVAL_REQUIRED"
-    description: "Código fuente disponible pero exige pago comercial en SaaS."
+    description: "Source-available code requiring commercial license for SaaS deployment."
     spdx_identifiers:
       - "SSPL-1.0"
       - "BSL-1.1"
@@ -131,13 +131,13 @@ tasks:
       command-or-criteria: "pnpm test"
 ---
 
-# Plan de Tareas: Componente
+# Task Plan: Component
 `;
 
 export const STARTER_REQUIREMENT_TEMPLATE = `---
 id: "FR-SAMPLE-001"
 type: "requirement"
-title: "Funcionalidad de Ejemplo"
+title: "Sample Feature"
 status: "active"
 version: "1.0.0"
 category: "functional"
@@ -149,7 +149,7 @@ cucumber-tags:
   - "@FR-SAMPLE-001"
 ---
 
-# Requerimiento: Funcionalidad de Ejemplo
+# Requirement: Sample Feature
 
 \`\`\`gherkin
 Feature: Sample Feature
@@ -160,37 +160,37 @@ Feature: Sample Feature
 \`\`\`
 `;
 
-export const STARTER_WORKFLOW_HANDOFF_TEMPLATE = `# Plantilla de Traspaso de Flujo de Trabajo (Workflow Handoff)
+export const STARTER_WORKFLOW_HANDOFF_TEMPLATE = `# Workflow Handoff Template
 
-> **Referencia canónica:** [\`process/09_agent_protocols.md\`](../../process/09_agent_protocols.md) y [\`process/01_governance_and_roles.md\`](../../process/01_governance_and_roles.md).
+> **Canonical reference:** [\`process/09_agent_protocols.md\`](../../process/09_agent_protocols.md) and [\`process/01_governance_and_roles.md\`](../../process/01_governance_and_roles.md).
 >
-> **Criterio de Activación por Modo de Autonomía:**
-> - 🟢 **\`AUTONOMOUS\` (o supervisión exclusiva al final en PR/CI):** OMITIDO. El agente ejecuta y entrega sin interrumpir al usuario con este bloque de handoff.
-> - 🟡 **\`HUMAN_REVIEW_PLAN\` | 🟠 \`AMBIGUOUS\` | 🔴 \`HIGH_RISK_MANUAL\`:** OBLIGATORIO. Al culminar la fase o propuesta, el agente emite este bloque y **se detiene**, otorgando visibilidad al usuario y cediendo el control.
+> **Activation Criterion by Autonomy Mode:**
+> - 🟢 **\`AUTONOMOUS\` (or exclusive supervision at the end in PR/CI):** OMITTED. The agent executes and delivers without interrupting the user with this handoff block.
+> - 🟡 **\`HUMAN_REVIEW_PLAN\` | 🟠 \`AMBIGUOUS\` | 🔴 \`HIGH_RISK_MANUAL\`:** MANDATORY. Upon completing the phase or proposal, the agent emits this block and **halts**, granting visibility to the user and relinquishing control.
 
 ---
 
-### 🔄 Handoff de Flujo de Trabajo (Workflow Handoff)
+### 🔄 Workflow Handoff
 
-- **Fase / Actividad Completada**: \`[Fase actual, ej. Definición de Producto / Threat Modeling / Arquitectura / Implementación SDD]\`
-- **Rol Actuante**: \`[agent-product-analyst | agent-threat-modeler | agent-system-architect | agent-developer | agent-expert-user | agent-security-auditor | agent-compliance-checker]\`
-- **Modo de Autonomía de la Tarea**: \`[HUMAN_REVIEW_PLAN | AMBIGUOUS | HIGH_RISK_MANUAL]\`
-- **Entregables Producidos**:
-  - [x] \`[Ruta o ID del artefacto generado, ej. specs/product/uc-mission.md]\`
-  - [x] \`[Ruta o ID del artefacto generado, ej. quality-report.md]\`
+- **Completed Phase / Activity**: \`[Current phase, e.g. Product Definition / Threat Modeling / Architecture / SDD Implementation]\`
+- **Acting Role**: \`[agent-product-analyst | agent-threat-modeler | agent-system-architect | agent-developer | agent-expert-user | agent-security-auditor | agent-compliance-checker]\`
+- **Task Autonomy Mode**: \`[HUMAN_REVIEW_PLAN | AMBIGUOUS | HIGH_RISK_MANUAL]\`
+- **Produced Deliverables**:
+  - [x] \`[Path or ID of generated artifact, e.g. specs/product/uc-mission.md]\`
+  - [x] \`[Path or ID of generated artifact, e.g. quality-report.md]\`
 
-- **Siguiente(s) Rol(es) Recomendado(s) en el Flujo**:
-  - \`[Nombre del rol sugerido, ej. agent-threat-modeler]\`: \`[Motivación técnica, ej. Modelar adversarios STRIDE y mitigar casos de abuso]\`
-  - *(Opcional)* \`[Rol alternativo, ej. agent-expert-user]\`: \`[Motivación técnica, ej. Evaluar experiencia de usuario y corte de MVP]\`
+- **Recommended Next Role(s) in Workflow**:
+  - \`[Suggested role name, e.g. agent-threat-modeler]\`: \`[Technical rationale, e.g. Model STRIDE adversaries and mitigate abuse cases]\`
+  - *(Optional)* \`[Alternative role, e.g. agent-expert-user]\`: \`[Technical rationale, e.g. Evaluate UX and MVP boundary]\`
 
-- **Prompt Sugerido de Invocación**:
-  > "Actúa como \`[siguiente-rol]\` y continúa con la fase de \`[fase siguiente]\` sobre los entregables generados: \`[artefactos clave]\`."
+- **Suggested Invocation Prompt**:
+  > "Act as \`[next-role]\` and proceed with the \`[next phase]\` phase on the generated deliverables: \`[key artifacts]\`."
 
-- **Ventana de Acción Humana (Prioridad y Soberanía del Usuario)**:
-  - ✋ **Revisar y Validar**: Examina los artefactos generados y valida si cumplen con la visión antes de avanzar.
-  - ✏️ **Modificar Directamente**: Edita requerimientos, código o criterios de aceptación a tu criterio en cualquier momento.
-  - 🛑 **Pausar, Desviar o Descartar**: Puedes congelar el flujo, redirigirlo hacia otro objetivo o descartar la propuesta.
-  - ▶️ **Delegar en el Siguiente Agente**: Si estás conforme con el resultado, ejecuta el prompt sugerido para continuar la cadena.
+- **Human Action Window (User Sovereignty and Priority)**:
+  - ✋ **Review and Validate**: Inspect generated artifacts and validate alignment with project vision before proceeding.
+  - ✏️ **Edit Directly**: Modify requirements, code, or acceptance criteria directly at any time.
+  - 🛑 **Pause, Divert, or Discard**: Freeze workflow, redirect toward another goal, or discard proposal.
+  - ▶️ **Delegate to Next Agent**: If satisfied with output, execute suggested prompt to continue the chain.
 
 ---
 `;
@@ -472,7 +472,7 @@ on:
   workflow_dispatch:
     inputs:
       change_id:
-        description: 'ID del cambio SDD a integrar manualmente (ej. chg-001-telemetry)'
+        description: 'Manual SDD change ID to integrate (e.g. chg-001-telemetry)'
         required: false
         type: string
 
@@ -535,9 +535,9 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "chore(sdd): integrate changes into canonical baseline [skip ci]"
             git push
-            echo "✔ Integración canónica commiteada y sincronizada en el repositorio."
+            echo "✔ Canonical integration committed and synchronized in repository."
           else
-            echo "ℹ No se generaron modificaciones pendientes en el working tree."
+            echo "ℹ No pending modifications generated in working tree."
           fi
 `;
 
@@ -676,7 +676,7 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
         filesCreated: [],
         agentsConfigured: [],
         gitHookInstalled: false,
-        error: `Proveedor CI no reconocido: '${options.ci}'. Opciones válidas: ${VALID_CI_PROVIDERS.join(', ')}.`,
+        error: `Unrecognized CI provider: '${options.ci}'. Valid options: ${VALID_CI_PROVIDERS.join(', ')}.`,
       };
     }
     ciProvider = normalized as SupportedCiProvider;
@@ -693,7 +693,7 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
         filesCreated: [],
         agentsConfigured: [],
         gitHookInstalled: false,
-        error: `Nivel de granularidad de arquitectura no reconocido: '${options.architecture}'. Opciones válidas: ${VALID_ARCHITECTURE_GRANULARITIES.join(', ')}.`,
+        error: `Unrecognized architecture granularity level: '${options.architecture}'. Valid options: ${VALID_ARCHITECTURE_GRANULARITIES.join(', ')}.`,
       };
     }
     archGranularity = rawArch as ArchitectureGranularity;

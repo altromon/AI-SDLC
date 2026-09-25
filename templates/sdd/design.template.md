@@ -1,39 +1,39 @@
 ---
-id: DSG-CHG-NOMBRE-001
+id: DSG-CHG-NAME-001
 type: spec-design
-change-id: CHG-NOMBRE-001
-title: "Diseño Técnico: Nombre Conciso del Incremento de Entrega"
+change-id: CHG-NAME-001
+title: "Technical Design: Concise Delivery Increment Title"
 version: "1.0.0"
 schema-version: "1.0"
-handoff: "HOF-CHG-NOMBRE-001"
-architecture-component: "CMP-NOMBRE-001"
+handoff: "HOF-CHG-NAME-001"
+architecture-component: "CMP-NAME-001"
 enclave: "SEC-ENC-DMZ"
 status: draft
 citations:
-  - id: "UC-ACCION-001"
+  - id: "UC-ACTION-001"
     digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
-    comment: "Caso de uso que motiva este incremento."
+    comment: "Use case driving this increment."
   - id: "FR-001"
     digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
-    comment: "Requerimiento funcional asociado."
+    comment: "Associated functional requirement."
 ---
 
-# Diseño Técnico: CHG-NOMBRE-001
+# Technical Design: CHG-NAME-001
 
-## 1. Mapeo Arquitectónico y Enclave Zero Trust
-Define el componente arquitectónico asociado y el enclave de seguridad correspondiente.
+## 1. Architectural Mapping and Zero Trust Enclave
+Defines the associated architectural component and corresponding security enclave.
 
-## 2. Contratos de Datos e Interfaces
-Detalla las interfaces, DTOs y tipos TypeScript o esquemas de datos.
+## 2. Data Contracts and Interfaces
+Details interfaces, DTOs, TypeScript types, or data schemas.
 
-## 3. Protocolos de Manejo de Errores y Mitigación
-Especifica la gestión de excepciones, códigos de error y respuestas ante fallos.
+## 3. Error Handling and Mitigation Protocols
+Specifies exception handling, error codes, and failure responses.
 
-## 4. Conformidad con la Política de Licencias (`license-policy.yaml`)
-Lista las librerías o dependencias externas y confirma su compatibilidad con la política de licencias.
+## 4. License Policy Compliance (`license-policy.yaml`)
+Lists external libraries or dependencies and confirms compatibility with the license policy.
 
-## 5. Historial de Revisiones
+## 5. Revision History
 
-| Versión | Fecha | Autor | Descripción del Cambio | Referencia |
+| Version | Date | Author | Change Description | Reference |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | YYYY-MM-DD | Nombre del Autor | Diseño técnico formal inicial | CHG-NOMBRE-001 |
+| **1.0.0** | YYYY-MM-DD | Author Name | Initial formal technical design | CHG-NAME-001 |

@@ -246,14 +246,14 @@ describe('Inverted Traceability Engine (No Downward Frontmatter)', () => {
 
     const fr = result.rows.find((r) => r.id === 'FR-FIXTURE-001');
     expect(fr).toBeDefined();
-    expect(fr?.archStatus).toBe('CONFORME');
-    expect(fr?.testStatus).toBe('CONFORME');
+    expect(fr?.archStatus).toBe('COMPLIANT');
+    expect(fr?.testStatus).toBe('COMPLIANT');
     expect(fr?.archTraces).toContain('CMP-FIXTURE-01');
 
     const qr = result.rows.find((r) => r.id === 'QR-FIXTURE-001');
     expect(qr).toBeDefined();
-    expect(qr?.archStatus).toBe('CONFORME');
-    expect(qr?.testStatus).toBe('CONFORME');
+    expect(qr?.archStatus).toBe('COMPLIANT');
+    expect(qr?.testStatus).toBe('COMPLIANT');
   });
 
   it('should audit testing coverage via reverse-lookup without downward fields in requirements', () => {
@@ -278,7 +278,7 @@ describe('Inverted Traceability Engine (No Downward Frontmatter)', () => {
 
     // Verify CMP-FIXTURE-01 is detected as an architectural component
     const fr = result.rows.find((r) => r.id === 'FR-FIXTURE-001');
-    expect(fr?.archStatus).toBe('CONFORME');
+    expect(fr?.archStatus).toBe('COMPLIANT');
     expect(fr?.archTraces).toContain('CMP-FIXTURE-01');
   });
 });

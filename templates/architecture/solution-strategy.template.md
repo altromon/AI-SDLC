@@ -1,7 +1,7 @@
 ---
 id: ARCH-STRAT-001
 type: solution-strategy
-title: "04. Estrategia de Solución de Arquitectura"
+title: "04. Architecture Solution Strategy"
 status: proposed # proposed, accepted, deprecated, superseded
 version: "1.0.0"
 schema-version: "1.0"
@@ -14,38 +14,38 @@ supersedes: null
 superseded-by: null
 ---
 
-# 04. Estrategia de Solución (arc42 Sec. 4 / NAF Strategy)
+# 04. Solution Strategy (arc42 Sec. 4 / NAF Strategy)
 
-## 1. Decisiones Estructurales Fundamentales (`STRAT-*`)
-Describe las elecciones globales que dan forma al sistema y cómo responden a los objetivos prioritarios de calidad:
+## 1. Fundamental Structural Decisions (`STRAT-*`)
+Describes global choices shaping the system and how they address priority quality goals:
 
-| ID Estrategia | Patrón / Decisión Fundamental | Justificación Técnica y Trade-offs |
+| Strategy ID | Fundamental Pattern / Decision | Technical Rationale & Trade-offs |
 | :--- | :--- | :--- |
-| `STRAT-ARCH-001` | Arquitectura Hexagonal / Puertos y Adaptadores | Aislamiento estricto de la lógica de dominio frente a frameworks de I/O |
-| `STRAT-COMM-002` | Comunicación Asíncrona basada en Eventos | Desacoplamiento temporal entre ingesta rápida y procesamiento batch |
-| `STRAT-SEC-003` | Verificación de Confianza Cero (Zero Trust) | Todo canal interno valida identidad mediante mTLS y tokens de alcance corto |
+| `STRAT-ARCH-001` | Hexagonal Architecture / Ports and Adapters | Strict isolation of domain logic from I/O frameworks |
+| `STRAT-COMM-002` | Event-Driven Asynchronous Communication | Temporal decoupling between fast ingestion and batch processing |
+| `STRAT-SEC-003` | Zero Trust Verification | Every internal channel validates identity using mTLS and short-lived tokens |
 
 ---
 
-## 2. Descomposición y Principios de Diseño
-- **Domain-Driven Design (DDD)**: Identificación de Bounded Contexts independientes con esquemas canónicos desacoplados.
-- **Inmutabilidad y Determinismo**: Estados reproducibles, hashing criptográfico de entradas y salidas (PDaC).
-- **Tratamiento de Errores y Degradación Elegante**: Patrón Circuit Breaker y colas de reintento Dead-Letter-Queue (DLQ).
+## 2. Decomposition and Design Principles
+- **Domain-Driven Design (DDD)**: Identification of independent Bounded Contexts with decoupled canonical schemas.
+- **Immutability and Determinism**: Reproducible states, cryptographic hashing of inputs and outputs (PDaC).
+- **Error Handling and Graceful Degradation**: Circuit Breaker pattern and Dead-Letter-Queue (DLQ) retry mechanisms.
 
 ---
 
-## 3. Matriz de Cumplimiento de Objetivos de Calidad
-Mapeo de estrategias frente a los requerimientos no funcionales (`QR-*`):
+## 3. Quality Goals Fulfillment Matrix
+Mapping of strategies against non-functional requirements (`QR-*`):
 
-| Objetivo de Calidad | Decisión / Estrategia Adoptada | Mecanismo de Garantía |
+| Quality Goal | Adopted Decision / Strategy | Guarantee Mechanism |
 | :--- | :--- | :--- |
-| `QR-LATENCY-REALTIME` | Ingesta binaria Zero-Copy y colas de memoria | Buffer estático y pools de conexiones HTTP/2 |
-| `QR-AVAILABILITY-HIGH` | Despliegue multi-zona sin estado (stateless) | Escalado horizontal automático con Health Checks |
+| `QR-LATENCY-REALTIME` | Zero-Copy binary ingestion and in-memory queues | Static buffers and HTTP/2 connection pooling |
+| `QR-AVAILABILITY-HIGH` | Stateless multi-zone deployment | Automated horizontal autoscaling with Health Checks |
 
 ---
 
-## 4. Historial de Revisiones y Control de Versiones
+## 4. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de la estrategia de solución | CHG-ARCH-001 |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial solution strategy definition | CHG-ARCH-001 |

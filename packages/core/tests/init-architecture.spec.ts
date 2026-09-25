@@ -99,7 +99,7 @@ describe('Core initProject: Architecture Granularity Suite', () => {
   it('rejects unrecognized architecture granularity with descriptive error', () => {
     const result = initProject({ targetDir: tempDir, architecture: 'ultra-complex' as any });
     expect(result.success).toBe(false);
-    expect(result.error).toContain("Nivel de granularidad de arquitectura no reconocido: 'ultra-complex'");
+    expect(result.error).toContain("Unrecognized architecture granularity level: 'ultra-complex'");
     expect(result.error).toContain('minimal, full, complete, none');
   });
 

@@ -226,16 +226,16 @@ function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
 function evaluateViolations(fn: FunctionMetrics, policy: QualityPolicy): string[] {
   const violations: string[] = [];
   if (fn.cyclomatic > policy.max_cyclomatic) {
-    violations.push(`Complejidad Ciclomática ${fn.cyclomatic} excede umbral de ${policy.max_cyclomatic}`);
+    violations.push(`Cyclomatic Complexity ${fn.cyclomatic} exceeds threshold of ${policy.max_cyclomatic}`);
   }
   if (fn.cognitive > policy.max_cognitive) {
-    violations.push(`Complejidad Cognitiva ${fn.cognitive} excede umbral de ${policy.max_cognitive}`);
+    violations.push(`Cognitive Complexity ${fn.cognitive} exceeds threshold of ${policy.max_cognitive}`);
   }
   if (fn.maintainability < policy.min_maintainability) {
-    violations.push(`Índice de Mantenibilidad ${fn.maintainability} inferior al mínimo de ${policy.min_maintainability}`);
+    violations.push(`Maintainability Index ${fn.maintainability} below minimum of ${policy.min_maintainability}`);
   }
   if (fn.loc > policy.max_function_lines) {
-    violations.push(`Líneas de función ${fn.loc} excede el máximo de ${policy.max_function_lines}`);
+    violations.push(`Function lines ${fn.loc} exceeds maximum of ${policy.max_function_lines}`);
   }
   if (fn.codeSmells.length > 0) {
     violations.push(...fn.codeSmells);

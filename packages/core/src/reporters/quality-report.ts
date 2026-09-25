@@ -36,7 +36,7 @@ export function detectLanguage(filePath: string): string {
     case '.c':
       return 'C/C++';
     default:
-      return 'Desconocido';
+      return 'Unknown';
   }
 }
 
@@ -85,31 +85,31 @@ export function generateQualityReport(options: QualityReportOptions = {}): Quali
   const verdict = gateResult.success ? 'PASS' : 'FAIL';
 
   const lines: string[] = [
-    `# 📊 Informe Formal de Calidad y Release Gate (AI-SDLC)`,
+    `# 📊 Formal Quality and Release Gate Report (AI-SDLC)`,
     ``,
-    `> **Fecha de Generación:** ${new Date().toISOString()}`,
-    `> **Veredicto Release Gate:** ${verdict === 'PASS' ? '🟢 APROBADO (RELEASE READY)' : '🔴 BLOQUEADO (VIOLACIONES DETECTADAS)'}`,
-    `> **Calificación Global:** **\`${globalRating}\`** (Índice MI: ${avgMaintainability}/100, CC Promedio: ${avgCyclomatic})`,
+    `> **Generation Date:** ${new Date().toISOString()}`,
+    `> **Release Gate Verdict:** ${verdict === 'PASS' ? '🟢 APPROVED (RELEASE READY)' : '🔴 BLOCKED (VIOLATIONS DETECTED)'}`,
+    `> **Global Rating:** **\`${globalRating}\`** (MI Index: ${avgMaintainability}/100, Average CC: ${avgCyclomatic})`,
     ``,
     `---`,
     ``,
-    `## 1. Resumen Ejecutivo de Métricas`,
+    `## 1. Executive Metric Summary`,
     ``,
-    `| Métrica Clave | Valor Medido | Umbral de Política | Cumplimiento |`,
+    `| Key Metric | Measured Value | Policy Threshold | Compliance |`,
     `| :--- | :---: | :---: | :---: |`,
-    `| **Archivos Analizados** | \`${totalFiles}\` | N/A | ℹ️ |`,
-    `| **Funciones Evaluadas** | \`${totalFunctions}\` | N/A | ℹ️ |`,
-    `| **Líneas de Código (LOC)** | \`${totalLoc}\` | N/A | ℹ️ |`,
-    `| **Complejidad Ciclomática (Promedio)** | \`${avgCyclomatic}\` | $\\le ${gateResult.policy.max_cyclomatic}$ | ${avgCyclomatic <= gateResult.policy.max_cyclomatic ? '✅ CONFORME' : '❌ EXCEDIDO'} |`,
-    `| **Complejidad Cognitiva (Promedio)** | \`${avgCognitive}\` | $\\le ${gateResult.policy.max_cognitive}$ | ${avgCognitive <= gateResult.policy.max_cognitive ? '✅ CONFORME' : '❌ EXCEDIDO'} |`,
-    `| **Índice de Mantenibilidad (SEI MI)** | \`${avgMaintainability} / 100\` | $\\ge ${gateResult.policy.min_maintainability}$ | ${avgMaintainability >= gateResult.policy.min_maintainability ? '✅ CONFORME' : '❌ INSUFICIENTE'} |`,
-    `| **Funciones en Violación** | \`${gateResult.failCount}\` | $0$ (Modo ${gateResult.policy.enforce_mode}) | ${gateResult.failCount === 0 ? '✅ 0 VIOLACIONES' : '❌ BLOQUEADO'} |`,
+    `| **Analyzed Files** | \`${totalFiles}\` | N/A | ℹ️ |`,
+    `| **Evaluated Functions** | \`${totalFunctions}\` | N/A | ℹ️ |`,
+    `| **Lines of Code (LOC)** | \`${totalLoc}\` | N/A | ℹ️ |`,
+    `| **Cyclomatic Complexity (Average)** | \`${avgCyclomatic}\` | $\\le ${gateResult.policy.max_cyclomatic}$ | ${avgCyclomatic <= gateResult.policy.max_cyclomatic ? '✅ COMPLIANT' : '❌ EXCEEDED'} |`,
+    `| **Cognitive Complexity (Average)** | \`${avgCognitive}\` | $\\le ${gateResult.policy.max_cognitive}$ | ${avgCognitive <= gateResult.policy.max_cognitive ? '✅ COMPLIANT' : '❌ EXCEEDED'} |`,
+    `| **Maintainability Index (SEI MI)** | \`${avgMaintainability} / 100\` | $\\ge ${gateResult.policy.min_maintainability}$ | ${avgMaintainability >= gateResult.policy.min_maintainability ? '✅ COMPLIANT' : '❌ INSUFFICIENT'} |`,
+    `| **Functions in Violation** | \`${gateResult.failCount}\` | $0$ (Mode ${gateResult.policy.enforce_mode}) | ${gateResult.failCount === 0 ? '✅ 0 VIOLATIONS' : '❌ BLOCKED'} |`,
     ``,
     `---`,
     ``,
-    `## 2. Desglose Políglota por Ecosistema de Lenguaje`,
+    `## 2. Polyglot Breakdown by Language Ecosystem`,
     ``,
-    `| Lenguaje | Funciones | LOC Total | MI Promedio | CC Promedio | Calificación |`,
+    `| Language | Functions | Total LOC | Average MI | Average CC | Rating |`,
     `| :--- | :---: | :---: | :---: | :---: | :---: |`,
   ];
 
@@ -126,7 +126,7 @@ export function generateQualityReport(options: QualityReportOptions = {}): Quali
     lines.push('');
     lines.push('---');
     lines.push('');
-    lines.push('## 3. Registro de Infracciones del Quality Gate');
+    lines.push('## 3. Quality Gate Violations Log');
     lines.push('');
     lines.push(...violationsList);
   }
@@ -134,10 +134,10 @@ export function generateQualityReport(options: QualityReportOptions = {}): Quali
   lines.push('');
   lines.push('---');
   lines.push('');
-  lines.push('## 4. Criterios de Evaluación y Estándares');
-  lines.push('- **McCabe Cyclomatic Complexity (CC)**: Número de caminos linealmente independientes.');
-  lines.push('- **Maintainability Index (SEI MI)**: Fórmula normalizada [0 - 100] combinando Halstead Volume, CC y LOC.');
-  lines.push('- **Clean Code Guardrails**: Prohibición de tipado `any` implícito, límites de extensión por función ($\le 40$ líneas) y cero supresiones no justificadas.');
+  lines.push('## 4. Evaluation Criteria and Standards');
+  lines.push('- **McCabe Cyclomatic Complexity (CC)**: Number of linearly independent paths.');
+  lines.push('- **Maintainability Index (SEI MI)**: Normalized formula [0 - 100] combining Halstead Volume, CC, and LOC.');
+  lines.push('- **Clean Code Guardrails**: Prohibition of implicit `any` typing, function length limits ($\le 40$ lines), and zero unjustified suppressions.');
 
   const markdown = lines.join('\n');
 

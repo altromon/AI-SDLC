@@ -2,31 +2,765 @@
  * AI-SDLC: Starter templates for System Architecture (arc42 + NAF v4)
  */
 
-export const STARTER_ARCH_ADR = "---\r\nid: ADR-001-NOMBRE-DECISION\r\ntype: architecture-decision-record\r\ntitle: Título Claro de la Decisión Técnica\r\nstatus: proposed # proposed, accepted, rejected, deprecated, superseded\r\nversion: \"1.0.0\"\r\nschema-version: \"1.0\"\r\ndeciders:\r\n  - \"Nombre del Arquitecto Lead\"\r\n  - \"Nombre del Tech Lead\"\r\ndecision-date: \"2026-09-03\"\r\naffects-components:\r\n  - CMP-NOMBRE-001\r\nsupersedes: null\r\nsuperseded-by: null\r\n---\r\n\r\n# ADR-001: Título Claro de la Decisión Técnica\r\n\r\n## 1. Contexto y Planteamiento del Problema\r\nDescribe el contexto tecnológico, los requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`) que motivan la decisión y las fuerzas en tensión (rendimiento, coste, complejidad, cumplimiento de licencias).\r\n\r\n## 2. Opciones Tecnológicas Consideradas\r\n1. **Opción A**: [Ventajas y desventajas, régimen de licencia OSS].\r\n2. **Opción B**: [Ventajas y desventajas, régimen de licencia OSS].\r\n\r\n## 3. Decisión Adoptada\r\nElegimos la **Opción [A/B]** porque [justificación técnica y de negocio sólida].\r\n\r\n## 4. Consecuencias\r\n- **Positivas**: Reducción de latencia, conformidad con `license-policy.yaml`.\r\n- **Negativas / Compromisos (Trade-offs)**: Mayor consumo de memoria inicial o necesidad de instrumentación adicional.\r\n\r\n---\r\n\r\n## 5. Historial de Revisiones y Control de Versiones\r\n\r\n| Versión | Fecha | Decisores | Estado de la Decisión | Referencia (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Lead Architect & Tech Lead | Propuesta formal de la decisión | CHG-ARCH-001 |\r\n";
+export const STARTER_ARCH_ADR = `---
+id: ADR-001-DECISION-NAME
+type: architecture-decision-record
+title: Clear Title of Technical Decision
+status: proposed # proposed, accepted, rejected, deprecated, superseded
+version: "1.0.0"
+schema-version: "1.0"
+deciders:
+  - "Lead Architect Name"
+  - "Tech Lead Name"
+decision-date: "2026-09-03"
+affects-components:
+  - CMP-NAME-001
+supersedes: null
+superseded-by: null
+---
 
-export const STARTER_ARCH_ARCHITECTURE_CONSTRAINTS = "---\nid: ARCH-CONSTR-001\ntype: architecture-constraints\ntitle: \"02. Restricciones de Arquitectura\"\nstatus: proposed # proposed, accepted, deprecated, superseded\nversion: \"1.0.0\"\nschema-version: \"1.0\"\narc42-section: 2\nnaf-perspective: \"Architecture Constraints\"\nconstraints:\n  - CON-TECH-001\n  - ACON-ORG-001\nlicense-policy: \"license-policy.yaml\"\nsupersedes: null\nsuperseded-by: null\n---\n\n# 02. Restricciones de Arquitectura (arc42 Sec. 2 / NAF Constraints)\n\n## 1. Restricciones Técnicas Innegociables (`CON-*`)\nLimitaciones impuestas por hardware, software base, sistemas operativos, protocolos de red o compatibilidad binaria:\n\n| ID Restricción | Nombre de la Restricción | Descripción y Justificación Técnica |\n| :--- | :--- | :--- |\n| `CON-TECH-001` | Compatibilidad Multiplataforma | Soporte obligatorio para Linux x86_64, ARM64 y Windows Server |\n| `CON-TECH-002` | Runtime y Toolchain Fijada | Ejecución sobre Node.js LTS 20+ y empaquetado determinista con pnpm |\n| `CON-TECH-003` | Cero Memoria Dinámica Descontrolada | Límite máximo de consumo de 512 MB por proceso en contenedores |\n\n---\n\n## 2. Restricciones Organizativas y de Proceso (`ACON-*`)\nReglas de gobernanza, normativas institucionales y convenios de equipo:\n\n| ID Restricción | Nombre | Directiva Vinculante |\n| :--- | :--- | :--- |\n| `ACON-ORG-001` | Gobernanza Git en 4 Tiers | Flujo estricto: task ➔ feat ➔ release ➔ main |\n| `ACON-ORG-002` | Soberanía Humana Innegociable | Prohibición estricta de auto-aprobación desatendida de PRs por IA |\n\n---\n\n## 3. Conformidad de Licencias Open Source (`LIC-POL-*`)\nConforme a `license-policy.yaml`:\n- **Permisivas (ALLOW)**: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC.\n- **Copyleft Débil (REVIEW_REQUIRED)**: LGPL-2.1+, MPL-2.0 (restringidas a enlace dinámico desacoplado).\n- **Copyleft Fuerte / Viral (DENY)**: GPLv2, GPLv3, AGPLv3 (estrictamente prohibidas en el árbol de dependencias).\n\n---\n\n## 4. Historial de Revisiones y Control de Versiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de restricciones | CHG-ARCH-001 |\n";
+# ADR-001: Clear Title of Technical Decision
 
-export const STARTER_ARCH_COMPONENT = "---\r\nid: CMP-NOMBRE-001\r\ntype: component\r\ntitle: Nombre del Componente de Arquitectura\r\nstatus: proposed # proposed, accepted, deprecated, retired\r\nversion: \"1.0.0\"\r\nschema-version: \"1.0\"\r\nlevel: 1 # 1: Bounded Context / Sistema Raíz, 2: Subsistema / Contenedor, 3: Unidad Ejecutable / DLL / Función\r\nbounded-context: \"Nombre del Bounded Context\" # Contexto delimitado en DDD\r\nparent-component: null # null para Nivel 1; ID del componente padre (CMP-PADRE-001) para Nivel > 1\r\nimplementation-type: service # service | dll | function | composite\r\nimplements-use-cases:\r\n  - UC-ACCION-001\r\nsatisfies-requirements:\r\n  - FR-FUNCIONALIDAD-001\r\n  - SEC-REQ-CONTROL-001\r\nhosted-in-enclave: SEC-ENC-DMZ-001 # Opcional: obligatorio solo si opera en enclave de red físico/lógico\r\ninterfaces:\r\n  # Según implementation-type:\r\n  # - service: REST/HTTP, gRPC, WebSocket, Kafka, MQTT, IPC\r\n  # - dll: C-ABI, Native-ABI, FFI\r\n  # - function: Function-Call, In-Process API, CLI, GUI\r\n  - name: \"API / Contrato de Interfaz\"\r\n    protocol: \"WebSocket\"\r\n    contract-spec: \"docs/architecture/08_cross_cutting/data_models/ingestion_asyncapi.yaml\"\r\nsupersedes: null\r\nsuperseded-by: null\r\n---\r\n\r\n# CMP-NOMBRE-001: Nombre del Componente de Arquitectura\r\n\r\n## 1. Propósito, Responsabilidad y Bounded Context\r\nDefine la responsabilidad única del componente, su alineación con el Bounded Context de dominio y su nivel de abstracción dentro de la arquitectura general.\r\n\r\n## 2. Diagrama de Estructura y Conectividad (arc42 Sec. 5 / NAF v4)\r\n```mermaid\r\ngraph TD\r\n    Client[Actor / Cliente Externo] -->|Protocolo / Interfaz| CMP[CMP-NOMBRE-001]\r\n    CMP -->|In-Process / Red / C-ABI| SubModule[Subcomponente o Persistencia]\r\n```\r\n\r\n## 3. Contratos de Interfaz y Políticas de Ejecución\r\n- **Mecanismo de Ejecución**: Especificación del ciclo de vida (servicio autónomo, carga dinámica mediante `LoadLibrary`/`dlopen` si es DLL, o invocación funcional directa).\r\n- **Tolerancia a Fallos y Rendimiento**: Límites de memoria, latencia objetivo, concurrencia o aislamiento de fallos.\r\n\r\n---\r\n\r\n## 4. Historial de Revisiones y Control de Versiones\r\n\r\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-14 | Lead Architect | Definición inicial de la arquitectura del componente | CHG-ARCH-001 |\r\n";
+## 1. Context and Problem Statement
+Describe the technological context, requirements (\`FR-*\`, \`QR-*\`, \`SEC-REQ-*\`) driving the decision, and forces in tension (performance, cost, complexity, license compliance).
 
-export const STARTER_ARCH_CONTEXT_AND_SCOPE = "---\nid: ARCH-CTX-001\ntype: context-and-scope\ntitle: \"03. Contexto y Alcance del Sistema\"\nstatus: proposed # proposed, accepted, deprecated, superseded\nversion: \"1.0.0\"\nschema-version: \"1.0\"\narc42-section: 3\nnaf-perspective: \"Operational Perspective\"\noperational-exchanges:\n  - OIE-CANAL-001\ncontext-boundaries:\n  - CTX-PERIMETER-001\nsupersedes: null\nsuperseded-by: null\n---\n\n# 03. Contexto y Alcance (arc42 Sec. 3 / NAF Operational)\n\n## 1. Contexto de Negocio (Business Context)\nModela los límites conceptuales del sistema respecto a los usuarios, sistemas externos colaboradores y fuentes de datos externas.\n\n### 1.1 Diagrama de Contexto de Negocio\n```mermaid\ngraph LR\n    User[Actor / Usuario Final] -->|Petición de Servicio| System([Sistema AI-SDLC])\n    System -->|Consulta / Enriquecimiento| ExtService[Sistema Externo / API Partner]\n    System -->|Registro de Auditoría| SIEM[Sistema SIEM / Auditoría]\n```\n\n### 1.2 Intercambios de Información Operativa (`OIE-*`)\n| ID Intercambio | Origen / Destino | Carga Útil / Mensaje | Protocolo / Canal | Formato |\n| :--- | :--- | :--- | :--- | :--- |\n| `OIE-COMM-001` | Usuario ➔ Sistema | Solicitud de Operación | HTTPS / REST | JSON (Schema v1) |\n| `OIE-NOTIF-002`| Sistema ➔ Usuario | Eventos y Notificaciones | WebSocket / WSS | JSON Streaming |\n| `OIE-AUDIT-003`| Sistema ➔ SIEM | Trazas Inmutables de Auditoría | Syslog / TLS | RFC 5424 |\n\n---\n\n## 2. Contexto Técnico e Infraestructura Perimetral\nModela los canales físicos y lógicos que cruzan la frontera del sistema (redes DMZ, balanceadores, cortafuegos y proxies inversos).\n\n### 2.1 Diagrama de Contexto Técnico\n```mermaid\ngraph TD\n    Client[Cliente / Navegador / App] -->|TLS 1.3 / Port 443| LB[Reverse Proxy / WAF]\n    LB -->|mTLS / Red Interna DMZ| Gateway[API Gateway / Ingestión]\n    Gateway -->|gRPC / IPC| Core[Servicios de Dominio]\n```\n\n---\n\n## 3. Historial de Revisiones y Control de Versiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de contexto y alcance | CHG-ARCH-001 |\n";
+## 2. Considered Technology Options
+1. **Option A**: [Pros and cons, OSS license regime].
+2. **Option B**: [Pros and cons, OSS license regime].
 
-export const STARTER_ARCH_CROSS_CUTTING_CONCEPTS = "---\nid: ARCH-CROSS-001\ntype: cross-cutting-concepts\ntitle: \"08. Conceptos Transversales de Arquitectura\"\nstatus: proposed # proposed, accepted, deprecated, superseded\nversion: \"1.0.0\"\nschema-version: \"1.0\"\narc42-section: 8\nnaf-perspective: \"Information & Security\"\ndata-models:\n  - DATA-MODEL-001\nsecurity-enclaves:\n  - SEC-ENC-DMZ-001\nsecurity-policies:\n  - SEC-POL-TLS-001\nsupersedes: null\nsuperseded-by: null\n---\n\n# 08. Conceptos Transversales (arc42 Sec. 8 / NAF Information & Security)\n\n## 1. Concepto de Seguridad Transversal y Modelo Zero Trust\nDescribe el enfoque global de seguridad, autenticación, autorización y aislamiento en enclaves (`SEC-ENC-*`):\n\n### 1.1 Identidad y Autenticación de Máquina a Máquina (M2M)\n- Toda comunicación entre servicios requiere autenticación mutua (mTLS) con certificados x509 rotados periódicamente.\n- Las claves privadas están custodiadas en enclaves seguros (TPM, HSM o gestores de secretos centralizados).\n\n### 1.2 Políticas de Seguridad Vinculantes (`SEC-POL-*`)\n| ID Política | Ámbito | Descripción del Control |\n| :--- | :--- | :--- |\n| `SEC-POL-TLS-001` | Comunicaciones en Red | TLS 1.3 mandatorio con suites de cifrado modernas (ECDHE-ECDSA-AES256-GCM) |\n| `SEC-POL-ZERO-LEAK`| Datos en Reposo | Cifrado AES-256 en volumen y enmascaramiento estricto de PII en logs |\n\n---\n\n## 2. Modelos de Datos y Esquemas Transversales (`DATA-*`)\nEspecifica los esquemas de intercambio e interfaces canónicas:\n\n| ID Modelo | Formato / Esquema | Ruta de la Especificación | Propósito |\n| :--- | :--- | :--- | :--- |\n| `DATA-SCHEMA-001` | JSON Schema / OpenAPI 3.1 | `docs/architecture/08_cross_cutting/data_models/api.json` | Contrato de API externa |\n| `DATA-EVENT-002`  | AsyncAPI / Protobuf | `docs/architecture/08_cross_cutting/data_models/events.yaml`| Eventos asíncronos internos |\n\n---\n\n## 3. Observabilidad, Métricas y Auditoría Inmutable\n- **Trazabilidad Distribuida**: Inyección de encabezados W3C Trace Context (`traceparent`) a través de OpenTelemetry.\n- **Métricas Operativas**: Exposición de métricas RED (Rate, Errors, Duration) en formato Prometheus.\n- **Logs Estructurados**: Formato JSON determinista con campos obligatorios (`timestamp`, `level`, `trace_id`, `component_id`).\n\n---\n\n## 4. Historial de Revisiones y Control de Versiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de conceptos transversales | CHG-ARCH-001 |\n";
+## 3. Decision Outcome
+Chosen **Option [A/B]** because [solid technical and business justification].
 
-export const STARTER_ARCH_DEPLOYMENT_VIEW = "---\nid: ARCH-DEP-001\ntype: deployment-view\ntitle: \"07. Vista de Despliegue e Infraestructura\"\nstatus: proposed # proposed, accepted, deprecated, superseded\nversion: \"1.0.0\"\nschema-version: \"1.0\"\narc42-section: 7\nnaf-perspective: \"Resource / Deployment\"\ndeployment-nodes:\n  - RES-NODE-001\n  - RES-CLUSTER-002\nenclaves-mapped:\n  - SEC-ENC-DMZ-001\n  - SEC-ENC-INTERNAL-002\nsupersedes: null\nsuperseded-by: null\n---\n\n# 07. Vista de Despliegue (arc42 Sec. 7 / NAF Resource Deployment)\n\n## 1. Topología de Infraestructura y Enclaves de Red\nMapea la distribución física y lógica de los componentes sobre nodos de computación, clusters Kubernetes, zonas de disponibilidad y enclaves de seguridad segmentados.\n\n### 1.1 Diagrama de Topología de Despliegue\n```mermaid\ngraph TD\n    subgraph Internet[\"Internet Pública\"]\n        Users[Clientes / Navegadores]\n    end\n\n    subgraph EnclaveDMZ[\"Enclave: SEC-ENC-DMZ-001 (Red Perimetral)\"]\n        WAF[WAF / Reverse Proxy]\n        IngestService[\"Pod: CMP-INGEST-001 (Node.js LTS)\"]\n    end\n\n    subgraph EnclaveInternal[\"Enclave: SEC-ENC-INTERNAL-002 (Red Privada)\"]\n        CoreService[\"Pod: CMP-CORE-001 (Worker Pool)\"]\n        DB[(Cluster DB: PostgreSQL / Storage)]\n    end\n\n    Users -->|HTTPS / TLS 1.3| WAF\n    WAF -->|mTLS| IngestService\n    IngestService -->|Red Interna Aislada| CoreService\n    CoreService -->|Conexión Cifrada / TLS| DB\n```\n\n---\n\n## 2. Inventario de Nodos y Recursos de Ejecución (`RES-*` / `DEP-*`)\n\n| ID Recurso | Tipo de Nodo | Enclave Asociado | CPU / RAM Mínima | Componentes Desplegados |\n| :--- | :--- | :--- | :--- | :--- |\n| `RES-NODE-DMZ-01` | VM / Kubernetes Node | `SEC-ENC-DMZ-001` | 2 vCPU / 4 GB | `CMP-INGEST-001` |\n| `RES-NODE-CORE-01`| VM / Worker Node | `SEC-ENC-INTERNAL-002` | 4 vCPU / 8 GB | `CMP-CORE-001` |\n| `RES-NODE-DB-01`  | Instancia Gestionada | `SEC-ENC-INTERNAL-002` | 4 vCPU / 16 GB | Almacenamiento Inmutable |\n\n---\n\n## 3. Políticas de Red y Aislamiento de Tráfico\n- **Control Perimetral**: El acceso externo está restringido exclusivamente al puerto 443 a través del WAF.\n- **Aislamiento Lateral**: La red perimetral (`SEC-ENC-DMZ-001`) no tiene visibilidad directa sobre la base de datos interna.\n- **Canales Cifrados**: Todas las conexiones inter-nodo operan bajo mTLS con certificados emitidos por la CA interna.\n\n---\n\n## 4. Historial de Revisiones y Control de Versiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de vista de despliegue | CHG-ARCH-001 |\n";
+## 4. Consequences
+- **Positive**: Latency reduction, compliance with \`license-policy.yaml\`.
+- **Negative / Trade-offs**: Higher initial memory footprint or additional instrumentation needed.
 
-export const STARTER_ARCH_GLOSSARY = "---\nid: ARCH-GLOSS-001\ntype: architecture-glossary\ntitle: \"12. Glosario de Arquitectura y Taxonomía de Términos\"\nstatus: proposed # proposed, accepted, deprecated, superseded\nversion: \"1.0.0\"\nschema-version: \"1.0\"\narc42-section: 12\nnaf-perspective: \"Taxonomy & Terms\"\ncites-domain-terms:\n  - TERM-TELEMETRY-001\n  - TERM-ENCLAVE-001\ncites-bounded-contexts:\n  - BC-CORE-GOVERNANCE\nsupersedes: null\nsuperseded-by: null\n---\n\n# 12. Glosario de Arquitectura (arc42 Sec. 12 / NAF Taxonomy)\n\n## 1. Términos Canónicos del Dominio (`TERM-*`)\nEnlaces y definiciones oficiales de los términos de negocio y dominio del producto:\n\n| Término / ID | Definición Canónica | Bounded Context de Referencia |\n| :--- | :--- | :--- |\n| `TERM-ENCLAVE-001` | Zona de red aislada lógica o físicamente con políticas de acceso y cifrado estrictas | Arquitectura / Ciberseguridad |\n| `TERM-HANDOFF-001` | Contrato canónico inmutable de traspaso de contexto entre agentes de desarrollo e ingeniería | Gobernanza AI-SDLC |\n| `TERM-PDAC-001`    | Product-Definition-as-Code: modelado de producto y trazabilidad 360° en repositorios Git | Motor Central |\n\n---\n\n## 2. Abreviaturas y Acrónimos Técnicos\nGlosario de conceptos arquitectónicos empleados a lo largo de la documentación del sistema:\n\n| Acrónimo | Significado Completo | Definición en el Contexto del Sistema |\n| :--- | :--- | :--- |\n| **arc42** | Architecture Communication Template | Estándar modular para documentar y comunicar arquitecturas de software |\n| **NAF v4** | NATO Architecture Framework v4 | Marco de arquitectura empresarial para sistemas interoperables y críticos |\n| **ADR** | Architecture Decision Record | Registro inmutable de una decisión arquitectónica significativa |\n| **mTLS** | Mutual Transport Layer Security | Autenticación bidireccional mediante certificados criptográficos |\n| **RTM** | Requirements Traceability Matrix | Matriz de trazabilidad 360° entre requisitos, código y pruebas |\n\n---\n\n## 3. Historial de Revisiones y Control de Versiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial del glosario de arquitectura | CHG-ARCH-001 |\n";
+---
 
-export const STARTER_ARCH_INTRODUCTION_AND_GOALS = "---\nid: ARCH-INTRO-001\ntype: architecture-introduction\ntitle: \"01. Introducción y Objetivos del Sistema\"\nstatus: proposed # proposed, accepted, deprecated, superseded\nversion: \"1.0.0\"\nschema-version: \"1.0\"\narc42-section: 1\nnaf-perspective: \"Enterprise & Capability\"\ncites-product-actors:\n  - ACT-NOMBRE-001\ncites-quality-goals:\n  - QR-LATENCY-001\n  - QR-AVAILABILITY-001\ncites-use-cases:\n  - UC-PRINCIPAL-001\nsupersedes: null\nsuperseded-by: null\n---\n\n# 01. Introducción y Objetivos del Sistema (arc42 Sec. 1 / NAF Enterprise)\n\n## 1. Visión del Sistema y Resumen Ejecutivo\nDescribe la misión fundamental del sistema, el problema de negocio que resuelve y el valor entregado a los usuarios y a la organización.\n\n### 1.1 Declaración de Misión\n> *El sistema [Nombre del Sistema] proporciona la capacidad de [misión clave] para [audiencia objetivo], garantizando [garantías clave de seguridad, rendimiento o fiabilidad].*\n\n---\n\n## 2. Objetivos de Calidad Prioritarios (Cita canónica ProductShape)\nLista los 3 a 5 objetivos de calidad más críticos para la arquitectura, enlazando directamente con los requerimientos no funcionales (`QR-*`) definidos en ProductShape:\n\n| Prioridad | Objetivo de Calidad | ID Requerimiento | Motivación Arquitectónica |\n| :---: | :--- | :--- | :--- |\n| **1** | Alta Disponibilidad y Resiliencia | `QR-AVAILABILITY-001` | Arquitectura desacoplada, redundancia activa y failover automático |\n| **2** | Latencia en Tiempo Real / Rendimiento | `QR-LATENCY-001` | Pipeline de procesamiento asíncrono, colas de baja latencia |\n| **3** | Seguridad Zero Trust | `SEC-REQ-AUTH-001` | Autenticación mTLS estricta y aislamiento en enclaves |\n\n---\n\n## 3. Matriz de Stakeholders y Actores Principales\nMapeo de los interesados del sistema con sus expectativas arquitectónicas:\n\n| Rol / Stakeholder | ID Actor | Expectativas Arquitectónicas |\n| :--- | :--- | :--- |\n| **Operadores del Sistema** | `ACT-OPERATOR-001` | Paneles de observabilidad, alertas tempranas y auditoría |\n| **Usuarios Finales** | `ACT-USER-001` | Tiempos de respuesta consistentes e interfaces seguras |\n| **Equipo de Seguridad** | `ACT-SEC-AUDITOR` | Cero filtración de secretos y registro inmutable de accesos |\n\n---\n\n## 4. Historial de Revisiones y Control de Versiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de objetivos de arquitectura | CHG-ARCH-001 |\n";
+## 5. Revision History and Version Control
 
-export const STARTER_ARCH_LEVEL_1_WHITEBOX = "---\nid: ARCH-L1-WHITEBOX-001\ntype: building-blocks-level-1\ntitle: \"05. Vista de Bloques Nivel 1: Caja Blanca General\"\nstatus: proposed # proposed, accepted, deprecated, superseded\nversion: \"1.0.0\"\nschema-version: \"1.0\"\narc42-section: 5\nnaf-perspective: \"Services & Systems (Level 1)\"\nbounded-contexts:\n  - \"Core Domain Context\"\n  - \"Supporting Context\"\ncontains-components:\n  - CMP-NOMBRE-001\n  - CMP-NOMBRE-002\nsupersedes: null\nsuperseded-by: null\n---\n\n# 05. Vista de Bloques de Construcción: Nivel 1 Whitebox (arc42 Sec. 5 / NAF Services & Systems)\n\n## 1. Descomposición General del Sistema (Nivel 1)\nPresenta la descomposición del sistema en subsistemas principales, contenedores de ejecución y Bounded Contexts de dominio.\n\n### 1.1 Diagrama de Caja Blanca de Nivel 1\n```mermaid\ngraph TD\n    subgraph BoundedContext_Core[\"Bounded Context: Dominio Principal\"]\n        CMP_INGEST[\"CMP-INGEST: Ingesta de Datos\"]\n        CMP_ENGINE[\"CMP-ENGINE: Motor de Reglas\"]\n    end\n\n    subgraph BoundedContext_Audit[\"Bounded Context: Auditoría y Telemetría\"]\n        CMP_OBSERVABILITY[\"CMP-OBS: Monitorización y Métricas\"]\n        CMP_STORAGE[\"CMP-STORAGE: Almacenamiento Inmutable\"]\n    end\n\n    Actor[Cliente / Usuario] -->|Protocolo Externo| CMP_INGEST\n    CMP_INGEST -->|Evento Interno / IPC| CMP_ENGINE\n    CMP_ENGINE -->|Trazas / Auditoría| CMP_STORAGE\n    CMP_OBSERVABILITY -.->|Scrape / Polling| CMP_ENGINE\n```\n\n---\n\n## 2. Catálogo de Bounded Contexts y Componentes Raíz\n\n| Bounded Context | Componente ID | Tipo de Implementación | Responsabilidad Principal |\n| :--- | :--- | :---: | :--- |\n| **Dominio Principal** | `CMP-INGEST` | `service` | Terminación TLS, validación sintáctica de cargas y filtrado |\n| **Dominio Principal** | `CMP-ENGINE` | `service` | Evaluación de reglas de negocio y cálculo determinista |\n| **Auditoría** | `CMP-STORAGE` | `composite` | Persistencia y trazabilidad inmutable de eventos |\n\n---\n\n## 3. Descomposición Recursiva en Niveles Inferiores\nCada contenedor o subsistema listado se detalla en su propia especificación de componente (`CMP-*.md`) conforme a `templates/architecture/component.template.md`:\n- **Nivel 2 (Subsistemas / Contenedores)**: Servicios autónomos, microservicios, daemons.\n- **Nivel 3 (Unidades de Ejecución)**: DLLs, plugins nativos (.so, .dylib), funciones puras de dominio.\n\n---\n\n## 4. Historial de Revisiones y Control de Versiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de caja blanca L1 | CHG-ARCH-001 |\n";
+| Version | Date | Deciders | Decision Status | Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-03 | Lead Architect & Tech Lead | Formal decision proposal | CHG-ARCH-001 |
+`;
 
-export const STARTER_ARCH_QUALITY_REQUIREMENTS = "---\nid: ARCH-QUAL-001\ntype: quality-requirements\ntitle: \"10. Requerimientos de Calidad y Árbol de Calidad\"\nstatus: proposed # proposed, accepted, deprecated, superseded\nversion: \"1.0.0\"\nschema-version: \"1.0\"\narc42-section: 10\nnaf-perspective: \"Quality Perspective\"\ncites-quality-requirements:\n  - QR-LATENCY-001\n  - QR-AVAILABILITY-001\n  - QR-MAINTAINABILITY-001\nsupersedes: null\nsuperseded-by: null\n---\n\n# 10. Requerimientos de Calidad (arc42 Sec. 10 / NAF Quality)\n\n## 1. Árbol de Calidad (Quality Tree)\nEstructura jerárquica de los atributos de calidad clave del sistema según la norma ISO/IEC 25010:\n\n```mermaid\ngraph TD\n    QualityTree[Calidad del Sistema] --> Performance[Eficiencia de Desempeño]\n    QualityTree --> Reliability[Fiabilidad y Resiliencia]\n    QualityTree --> Security[Seguridad Zero Trust]\n    QualityTree --> Maintainability[Mantenibilidad As-Code]\n\n    Performance --> P1[Latencia en Tiempo Real: QR-LATENCY-001]\n    Reliability --> R1[Disponibilidad 99.99%: QR-AVAILABILITY-001]\n    Security --> S1[Autenticación Estricta: SEC-REQ-AUTH-001]\n    Maintainability --> M1[Complejidad Ciclomática <= 10: quality-policy.yaml]\n```\n\n---\n\n## 2. Escenarios de Calidad Evaluables (Quality Scenarios)\nDefinición de escenarios concretos con estímulo, entorno, respuesta y medida:\n\n| ID Requerimiento | Atributo ISO | Estímulo y Entorno | Respuesta del Sistema | Medida Objetiva |\n| :--- | :--- | :--- | :--- | :--- |\n| `QR-LATENCY-001` | Rendimiento | Carga pico de 10,000 req/s | Procesamiento y persistencia en cola | Latencia p95 < 50ms |\n| `QR-AVAILABILITY-001` | Fiabilidad | Caída abrupta de 1 nodo trabajador | Redistribución automática de pods | Pérdida de servicio = 0s |\n| `QR-MAINTAINABILITY-001`| Mantenibilidad | Refactorización de submódulos | Ejecución de Release Gates deterministas | CC $\\le 10$, LOC $\\le 40$ |\n\n---\n\n## 3. Historial de Revisiones y Control de Versiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial del árbol de calidad | CHG-ARCH-001 |\n";
+export const STARTER_ARCH_ARCHITECTURE_CONSTRAINTS = `---
+id: ARCH-CONSTR-001
+type: architecture-constraints
+title: "02. Architecture Constraints"
+status: proposed # proposed, accepted, deprecated, superseded
+version: "1.0.0"
+schema-version: "1.0"
+arc42-section: 2
+naf-perspective: "Architecture Constraints"
+constraints:
+  - CON-TECH-001
+  - ACON-ORG-001
+license-policy: "license-policy.yaml"
+supersedes: null
+superseded-by: null
+---
 
-export const STARTER_ARCH_RISKS_AND_TECHNICAL_DEBT = "---\nid: ARCH-RISK-001\ntype: risks-and-technical-debt\ntitle: \"11. Riesgos de Arquitectura y Deuda Técnica\"\nstatus: proposed # proposed, accepted, deprecated, superseded\nversion: \"1.0.0\"\nschema-version: \"1.0\"\narc42-section: 11\nnaf-perspective: \"Risk & Technical Debt\"\nrisks:\n  - RSK-SCALE-001\n  - RSK-DEP-002\nsupersedes: null\nsuperseded-by: null\n---\n\n# 11. Riesgos y Deuda Técnica (arc42 Sec. 11 / NAF Risk & Debt)\n\n## 1. Matriz de Riesgos Arquitectónicos (`RSK-*`)\nEvaluación y seguimiento de los riesgos técnicos identificados en el sistema:\n\n| ID Riesgo | Descripción del Riesgo | Probabilidad | Impacto | Estrategia de Mitigación |\n| :--- | :--- | :---: | :---: | :--- |\n| `RSK-SCALE-001` | Cuello de botella en la base de datos central ante picos de telemetría | Media | Alto | Implementación de particionamiento horizontal y caché de segundo nivel |\n| `RSK-DEP-002`   | Desactualización de librerías criptográficas en runtime | Baja | Crítico | Auditoría SCA automatizada en CI con escaneo diario de vulnerabilidades |\n| `RSK-MEM-003`   | Degradación por acumulación de buffers en ingesta | Media | Medio | Monitorización continua de métricas de heap y reinicio determinista |\n\n---\n\n## 2. Registro de Deuda Técnica y Compromisos Asumidos\nDocumentación de atajos temporales, decisiones provisionales o refactorizaciones pendientes:\n\n| Elemento de Deuda | Componente Afectado | Justificación del Compromiso | Plan de Cancelación / Refactor |\n| :--- | :--- | :--- | :--- |\n| Serialización JSON en lugar de binario | `CMP-INGEST-001` | Rápido lanzamiento inicial de MVP | Migración planificada a Protobuf en release v2.0 |\n| Mock manual en tests de integración | `packages/core` | Evitar dependencia de broker externo en CI | Adopción de contenedores herméticos testcontainers |\n\n---\n\n## 3. Historial de Revisiones y Control de Versiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de riesgos y deuda técnica | CHG-ARCH-001 |\n";
+# 02. Architecture Constraints (arc42 Sec. 2 / NAF Constraints)
 
-export const STARTER_ARCH_RUNTIME_VIEW = "---\nid: ARCH-RUN-001\ntype: runtime-view\ntitle: \"06. Vista de Ejecución y Comportamiento Dinámico\"\nstatus: proposed # proposed, accepted, deprecated, superseded\nversion: \"1.0.0\"\nschema-version: \"1.0\"\narc42-section: 6\nnaf-perspective: \"Behaviour & Sequences\"\nsequences:\n  - SEQ-NOMINAL-001\n  - SEQ-DEGRADED-002\nflows:\n  - FLW-LIFECYCLE-001\nsatisfies-requirements:\n  - FR-FUNCIONALIDAD-001\n  - SEC-REQ-AUTH-001\nsupersedes: null\nsuperseded-by: null\n---\n\n# 06. Vista de Ejecución / Runtime (arc42 Sec. 6 / NAF Behaviour)\n\n## 1. Escenario Nominal: Flujo Principal de Negocio (`SEQ-NOMINAL-001`)\nDescribe la orquestación e interacción secuencial de componentes ante una solicitud típica de usuario o evento del sistema:\n\n```mermaid\nsequenceDiagram\n    autonumber\n    actor Client as Cliente Externo (ACT-CLIENT-001)\n    participant Gateway as API Gateway (CMP-GATEWAY-001)\n    participant Core as Motor de Dominio (CMP-CORE-001)\n    participant Storage as Persistencia / DB (CMP-STORAGE-001)\n\n    Client->>Gateway: POST /api/v1/recurso (Token Bearer / mTLS)\n    Gateway->>Gateway: Validar esquema de entrada y autenticación\n    alt Validación Fallida\n        Gateway-->>Client: 400 Bad Request / 401 Unauthorized\n    else Entrada Válida\n        Gateway->>Core: Invocación in-process / gRPC\n        Core->>Core: Ejecución de reglas de negocio\n        Core->>Storage: Transacción determinista (INSERT / UPDATE)\n        Storage-->>Core: Confirmación (ACK)\n        Core-->>Gateway: Resultado de negocio\n        Gateway-->>Client: 200 OK con payload de respuesta\n    end\n```\n\n---\n\n## 2. Escenario de Seguridad / Mitigación de Abusos (`SEQ-SEC-002`)\nModela el comportamiento y el aislamiento ante intentos maliciosos o cargas anómalas:\n\n```mermaid\nsequenceDiagram\n    autonumber\n    actor Attacker as Actor Amenaza (ACT-THREAT-001)\n    participant DMZ as Gateway de Ingesta (SEC-ENC-DMZ-001)\n    participant SIEM as Auditoría y SIEM (CMP-AUDIT-001)\n\n    Attacker->>DMZ: Petición anómala (sin credenciales o con payload excesivo)\n    DMZ->>DMZ: Detección por filtro de validación estricta\n    DMZ->>SIEM: Registrar evento de anomalía con IP y fingerprint\n    DMZ-->>Attacker: 403 Forbidden / Conexión abortada\n```\n\n---\n\n## 3. Matriz de Escenarios Dinámicos y Requerimientos Asociados\n\n| ID Escenario | Tipo | Requerimientos Satisfechos | Componentes Participantes |\n| :--- | :---: | :--- | :--- |\n| `SEQ-NOMINAL-001` | Nominal | `FR-FUNCIONALIDAD-001` | `CMP-GATEWAY-001`, `CMP-CORE-001` |\n| `SEQ-SEC-002` | Seguridad | `SEC-REQ-AUTH-001` | `CMP-GATEWAY-001`, `CMP-AUDIT-001` |\n\n---\n\n## 4. Historial de Revisiones y Control de Versiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de vistas de ejecución | CHG-ARCH-001 |\n";
+## 1. Non-Negotiable Technical Constraints (\`CON-*\`)
+Limitations imposed by hardware, underlying platform, operating systems, network protocols, or binary compatibility:
 
-export const STARTER_ARCH_SOLUTION_STRATEGY = "---\nid: ARCH-STRAT-001\ntype: solution-strategy\ntitle: \"04. Estrategia de Solución de Arquitectura\"\nstatus: proposed # proposed, accepted, deprecated, superseded\nversion: \"1.0.0\"\nschema-version: \"1.0\"\narc42-section: 4\nnaf-perspective: \"Service & Resource Strategy\"\nstrategies:\n  - STRAT-ARCH-001\n  - STRAT-DATA-001\nsupersedes: null\nsuperseded-by: null\n---\n\n# 04. Estrategia de Solución (arc42 Sec. 4 / NAF Strategy)\n\n## 1. Decisiones Estructurales Fundamentales (`STRAT-*`)\nDescribe las elecciones globales que dan forma al sistema y cómo responden a los objetivos prioritarios de calidad:\n\n| ID Estrategia | Patrón / Decisión Fundamental | Justificación Técnica y Trade-offs |\n| :--- | :--- | :--- |\n| `STRAT-ARCH-001` | Arquitectura Hexagonal / Puertos y Adaptadores | Aislamiento estricto de la lógica de dominio frente a frameworks de I/O |\n| `STRAT-COMM-002` | Comunicación Asíncrona basada en Eventos | Desacoplamiento temporal entre ingesta rápida y procesamiento batch |\n| `STRAT-SEC-003` | Verificación de Confianza Cero (Zero Trust) | Todo canal interno valida identidad mediante mTLS y tokens de alcance corto |\n\n---\n\n## 2. Descomposición y Principios de Diseño\n- **Domain-Driven Design (DDD)**: Identificación de Bounded Contexts independientes con esquemas canónicos desacoplados.\n- **Inmutabilidad y Determinismo**: Estados reproducibles, hashing criptográfico de entradas y salidas (PDaC).\n- **Tratamiento de Errores y Degradación Elegante**: Patrón Circuit Breaker y colas de reintento Dead-Letter-Queue (DLQ).\n\n---\n\n## 3. Matriz de Cumplimiento de Objetivos de Calidad\nMapeo de estrategias frente a los requerimientos no funcionales (`QR-*`):\n\n| Objetivo de Calidad | Decisión / Estrategia Adoptada | Mecanismo de Garantía |\n| :--- | :--- | :--- |\n| `QR-LATENCY-REALTIME` | Ingesta binaria Zero-Copy y colas de memoria | Buffer estático y pools de conexiones HTTP/2 |\n| `QR-AVAILABILITY-HIGH` | Despliegue multi-zona sin estado (stateless) | Escalado horizontal automático con Health Checks |\n\n---\n\n## 4. Historial de Revisiones y Control de Versiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de la estrategia de solución | CHG-ARCH-001 |\n";
+| Constraint ID | Constraint Name | Description and Technical Rationale |
+| :--- | :--- | :--- |
+| \`CON-TECH-001\` | Cross-Platform Compatibility | Mandatory support for Linux x86_64, ARM64, and Windows Server |
+| \`CON-TECH-002\` | Fixed Runtime and Toolchain | Execution on Node.js LTS 20+ and deterministic packaging with pnpm |
+| \`CON-TECH-003\` | Controlled Dynamic Memory | 512 MB maximum memory consumption limit per containerized process |
+
+---
+
+## 2. Organizational and Process Constraints (\`ACON-*\`)
+Governance rules, organizational standards, and team conventions:
+
+| Constraint ID | Name | Binding Directive |
+| :--- | :--- | :--- |
+| \`ACON-ORG-001\` | 4-Tier Git Governance | Strict flow: task ➔ feat ➔ release ➔ main |
+| \`ACON-ORG-002\` | Inalienable Human Sovereignty | Strict ban on unattended AI auto-approval of PRs |
+
+---
+
+## 3. Open Source License Compliance (\`LIC-POL-*\`)
+In accordance with \`license-policy.yaml\`:
+- **Permissive (ALLOW)**: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC.
+- **Weak Copyleft (REVIEW_REQUIRED)**: LGPL-2.1+, MPL-2.0 (restricted to dynamically linked decoupled libraries).
+- **Strong Copyleft / Viral (DENY)**: GPLv2, GPLv3, AGPLv3 (strictly prohibited in dependency tree).
+
+---
+
+## 4. Revision History and Version Control
+
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial constraints definition | CHG-ARCH-001 |
+`;
+
+export const STARTER_ARCH_COMPONENT = `---
+id: CMP-NAME-001
+type: component
+title: Architecture Component Name
+status: proposed # proposed, accepted, deprecated, retired
+version: "1.0.0"
+schema-version: "1.0"
+level: 1 # 1: Bounded Context / Root System, 2: Subsystem / Container, 3: Executable Unit / DLL / Function
+bounded-context: "Bounded Context Name" # Domain bounded context in DDD
+parent-component: null # null for Level 1; parent component ID (CMP-PARENT-001) for Level > 1
+implementation-type: service # service | dll | function | composite
+implements-use-cases:
+  - UC-ACTION-001
+satisfies-requirements:
+  - FR-FEATURE-001
+  - SEC-REQ-CONTROL-001
+hosted-in-enclave: SEC-ENC-DMZ-001 # Optional: mandatory only if operating in physical/logical network enclave
+interfaces:
+  # By implementation-type:
+  # - service: REST/HTTP, gRPC, WebSocket, Kafka, MQTT, IPC
+  # - dll: C-ABI, Native-ABI, FFI
+  # - function: Function-Call, In-Process API, CLI, GUI
+  - name: "API / Interface Contract"
+    protocol: "WebSocket"
+    contract-spec: "docs/architecture/08_cross_cutting/data_models/ingestion_asyncapi.yaml"
+supersedes: null
+superseded-by: null
+---
+
+# CMP-NAME-001: Architecture Component Name
+
+## 1. Purpose, Responsibility, and Bounded Context
+Defines the single responsibility of the component, its domain Bounded Context alignment, and abstraction level within the overall architecture.
+
+## 2. Structure and Connectivity Diagram (arc42 Sec. 5 / NAF v4)
+\`\`\`mermaid
+graph TD
+    Client[Actor / External Client] -->|Protocol / Interface| CMP[CMP-NAME-001]
+    CMP -->|In-Process / Network / C-ABI| SubModule[Subcomponent or Persistence]
+\`\`\`
+
+## 3. Interface Contracts and Execution Policies
+- **Execution Mechanism**: Lifecycle specification (autonomous daemon/service, dynamic loading via \`LoadLibrary\`/\`dlopen\` if DLL, or direct function invocation).
+- **Fault Tolerance and Performance**: Memory bounds, target latency, concurrency, or failure isolation.
+
+---
+
+## 4. Revision History and Version Control
+
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-14 | Lead Architect | Initial component architecture definition | CHG-ARCH-001 |
+`;
+
+export const STARTER_ARCH_CONTEXT_AND_SCOPE = `---
+id: ARCH-CTX-001
+type: context-and-scope
+title: "03. System Context and Scope"
+status: proposed # proposed, accepted, deprecated, superseded
+version: "1.0.0"
+schema-version: "1.0"
+arc42-section: 3
+naf-perspective: "Operational Perspective"
+operational-exchanges:
+  - OIE-CHANNEL-001
+context-boundaries:
+  - CTX-PERIMETER-001
+supersedes: null
+superseded-by: null
+---
+
+# 03. Context and Scope (arc42 Sec. 3 / NAF Operational)
+
+## 1. Business Context
+Models conceptual boundaries of the system with respect to users, collaborating external systems, and external data sources.
+
+### 1.1 Business Context Diagram
+\`\`\`mermaid
+graph LR
+    User[Actor / End User] -->|Service Request| System([AI-SDLC System])
+    System -->|Query / Enrichment| ExtService[External System / Partner API]
+    System -->|Audit Record| SIEM[SIEM / Audit System]
+\`\`\`
+
+### 1.2 Operational Information Exchanges (\`OIE-*\`)
+| Exchange ID | Source / Target | Payload / Message | Protocol / Channel | Format |
+| :--- | :--- | :--- | :--- | :--- |
+| \`OIE-COMM-001\` | User ➔ System | Operation Request | HTTPS / REST | JSON (Schema v1) |
+| \`OIE-NOTIF-002\`| System ➔ User | Events and Notifications | WebSocket / WSS | JSON Streaming |
+| \`OIE-AUDIT-003\`| System ➔ SIEM | Immutable Audit Trails | Syslog / TLS | RFC 5424 |
+
+---
+
+## 2. Technical Context and Perimeter Infrastructure
+Models physical and logical channels crossing system boundaries (DMZ networks, load balancers, firewalls, and reverse proxies).
+
+### 2.1 Technical Context Diagram
+\`\`\`mermaid
+graph TD
+    Client[Client / Browser / App] -->|TLS 1.3 / Port 443| LB[Reverse Proxy / WAF]
+    LB -->|mTLS / DMZ Internal Network| Gateway[API Gateway / Ingestion]
+    Gateway -->|gRPC / IPC| Core[Domain Services]
+\`\`\`
+
+---
+
+## 3. Revision History and Version Control
+
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial context and scope definition | CHG-ARCH-001 |
+`;
+
+export const STARTER_ARCH_CROSS_CUTTING_CONCEPTS = `---
+id: ARCH-CROSS-001
+type: cross-cutting-concepts
+title: "08. Cross-Cutting Concepts"
+status: proposed # proposed, accepted, deprecated, superseded
+version: "1.0.0"
+schema-version: "1.0"
+arc42-section: 8
+naf-perspective: "Information & Security"
+data-models:
+  - DATA-MODEL-001
+security-enclaves:
+  - SEC-ENC-DMZ-001
+security-policies:
+  - SEC-POL-TLS-001
+supersedes: null
+superseded-by: null
+---
+
+# 08. Cross-Cutting Concepts (arc42 Sec. 8 / NAF Information & Security)
+
+## 1. Cross-Cutting Security Concept and Zero Trust Model
+Describes global security approach, authentication, authorization, and enclave isolation (\`SEC-ENC-*\`):
+
+### 1.1 Machine-to-Machine (M2M) Identity and Authentication
+- All inter-service communication requires mutual authentication (mTLS) with regularly rotated x509 certificates.
+- Private keys are safeguarded in secure enclaves (TPM, HSM, or centralized secret vaults).
+
+### 1.2 Binding Security Policies (\`SEC-POL-*\`)
+| Policy ID | Scope | Control Description |
+| :--- | :--- | :--- |
+| \`SEC-POL-TLS-001\` | Network Communications | Mandatory TLS 1.3 with modern cipher suites (ECDHE-ECDSA-AES256-GCM) |
+| \`SEC-POL-ZERO-LEAK\`| Data at Rest | AES-256 volume encryption and strict PII log masking |
+
+---
+
+## 2. Cross-Cutting Data Models and Schemas (\`DATA-*\`)
+Specifies exchange schemas and canonical interfaces:
+
+| Model ID | Format / Schema | Specification Path | Purpose |
+| :--- | :--- | :--- | :--- |
+| \`DATA-SCHEMA-001\` | JSON Schema / OpenAPI 3.1 | \`docs/architecture/08_cross_cutting/data_models/api.json\` | External API contract |
+| \`DATA-EVENT-002\`  | AsyncAPI / Protobuf | \`docs/architecture/08_cross_cutting/data_models/events.yaml\`| Internal async events |
+
+---
+
+## 3. Observability, Metrics, and Immutable Auditing
+- **Distributed Tracing**: W3C Trace Context (\`traceparent\`) injection via OpenTelemetry.
+- **Operational Metrics**: Prometheus RED metrics exposition (Rate, Errors, Duration).
+- **Structured Logging**: Deterministic JSON format with mandatory fields (\`timestamp\`, \`level\`, \`trace_id\`, \`component_id\`).
+
+---
+
+## 4. Revision History and Version Control
+
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial cross-cutting concepts definition | CHG-ARCH-001 |
+`;
+
+export const STARTER_ARCH_DEPLOYMENT_VIEW = `---
+id: ARCH-DEP-001
+type: deployment-view
+title: "07. Deployment and Infrastructure View"
+status: proposed # proposed, accepted, deprecated, superseded
+version: "1.0.0"
+schema-version: "1.0"
+arc42-section: 7
+naf-perspective: "Resource / Deployment"
+deployment-nodes:
+  - RES-NODE-001
+  - RES-CLUSTER-002
+enclaves-mapped:
+  - SEC-ENC-DMZ-001
+  - SEC-ENC-INTERNAL-002
+supersedes: null
+superseded-by: null
+---
+
+# 07. Deployment View (arc42 Sec. 7 / NAF Resource Deployment)
+
+## 1. Infrastructure Topology and Network Enclaves
+Maps physical and logical component distribution across compute nodes, Kubernetes clusters, availability zones, and segmented security enclaves.
+
+### 1.1 Deployment Topology Diagram
+\`\`\`mermaid
+graph TD
+    subgraph Internet["Public Internet"]
+        Users[Clients / Browsers]
+    end
+
+    subgraph EnclaveDMZ["Enclave: SEC-ENC-DMZ-001 (Perimeter Network)"]
+        WAF[WAF / Reverse Proxy]
+        IngestService["Pod: CMP-INGEST-001 (Node.js LTS)"]
+    end
+
+    subgraph EnclaveInternal["Enclave: SEC-ENC-INTERNAL-002 (Private Network)"]
+        CoreService["Pod: CMP-CORE-001 (Worker Pool)"]
+        DB[(DB Cluster: PostgreSQL / Storage)]
+    end
+
+    Users -->|HTTPS / TLS 1.3| WAF
+    WAF -->|mTLS| IngestService
+    IngestService -->|Isolated Internal Network| CoreService
+    CoreService -->|Encrypted Connection / TLS| DB
+\`\`\`
+
+---
+
+## 2. Node and Execution Resources Inventory (\`RES-*\` / \`DEP-*\`)
+
+| Resource ID | Node Type | Associated Enclave | Min CPU / RAM | Deployed Components |
+| :--- | :--- | :--- | :--- | :--- |
+| \`RES-NODE-DMZ-01\` | VM / Kubernetes Node | \`SEC-ENC-DMZ-001\` | 2 vCPU / 4 GB | \`CMP-INGEST-001\` |
+| \`RES-NODE-CORE-01\`| VM / Worker Node | \`SEC-ENC-INTERNAL-002\` | 4 vCPU / 8 GB | \`CMP-CORE-001\` |
+| \`RES-NODE-DB-01\`  | Managed Instance | \`SEC-ENC-INTERNAL-002\` | 4 vCPU / 16 GB | Immutable Storage |
+
+---
+
+## 3. Network Policies and Traffic Isolation
+- **Perimeter Control**: External access strictly restricted to port 443 via WAF.
+- **Lateral Isolation**: Perimeter network (\`SEC-ENC-DMZ-001\`) has no direct visibility into internal database.
+- **Encrypted Channels**: All inter-node connections operate under mTLS with certificates issued by internal CA.
+
+---
+
+## 4. Revision History and Version Control
+
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial deployment view definition | CHG-ARCH-001 |
+`;
+
+export const STARTER_ARCH_GLOSSARY = `---
+id: ARCH-GLOSS-001
+type: architecture-glossary
+title: "12. Architecture Glossary and Terms Taxonomy"
+status: proposed # proposed, accepted, deprecated, superseded
+version: "1.0.0"
+schema-version: "1.0"
+arc42-section: 12
+naf-perspective: "Taxonomy & Terms"
+cites-domain-terms:
+  - TERM-TELEMETRY-001
+  - TERM-ENCLAVE-001
+cites-bounded-contexts:
+  - BC-CORE-GOVERNANCE
+supersedes: null
+superseded-by: null
+---
+
+# 12. Architecture Glossary (arc42 Sec. 12 / NAF Taxonomy)
+
+## 1. Canonical Domain Terms (\`TERM-*\`)
+Official definitions and references for business and product domain terms:
+
+| Term / ID | Canonical Definition | Reference Bounded Context |
+| :--- | :--- | :--- |
+| \`TERM-ENCLAVE-001\` | Logically or physically isolated network zone with strict access and encryption policies | Architecture / Cybersecurity |
+| \`TERM-HANDOFF-001\` | Immutable canonical context handoff contract between development and engineering agents | AI-SDLC Governance |
+| \`TERM-PDAC-001\`    | Product-Definition-as-Code: product modeling and 360° traceability in Git repositories | Core Engine |
+
+---
+
+## 2. Technical Abbreviations and Acronyms
+Glossary of architectural concepts used across system documentation:
+
+| Acronym | Full Meaning | Definition in System Context |
+| :--- | :--- | :--- |
+| **arc42** | Architecture Communication Template | Modular standard to document and communicate software architectures |
+| **NAF v4** | NATO Architecture Framework v4 | Enterprise architecture framework for critical, interoperable systems |
+| **ADR** | Architecture Decision Record | Immutable record of a significant architectural decision |
+| **mTLS** | Mutual Transport Layer Security | Bidirectional cryptographic certificate authentication |
+| **RTM** | Requirements Traceability Matrix | 360° traceability matrix between requirements, code, and tests |
+
+---
+
+## 3. Revision History and Version Control
+
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial architecture glossary definition | CHG-ARCH-001 |
+`;
+
+export const STARTER_ARCH_INTRODUCTION_AND_GOALS = `---
+id: ARCH-INTRO-001
+type: architecture-introduction
+title: "01. Introduction and System Goals"
+status: proposed # proposed, accepted, deprecated, superseded
+version: "1.0.0"
+schema-version: "1.0"
+arc42-section: 1
+naf-perspective: "Enterprise & Capability"
+cites-product-actors:
+  - ACT-NAME-001
+cites-quality-goals:
+  - QR-LATENCY-001
+  - QR-AVAILABILITY-001
+cites-use-cases:
+  - UC-MAIN-001
+supersedes: null
+superseded-by: null
+---
+
+# 01. Introduction and System Goals (arc42 Sec. 1 / NAF Enterprise)
+
+## 1. System Vision and Executive Summary
+Describes core system mission, the business problem it solves, and value delivered to users and organization.
+
+### 1.1 Mission Statement
+> *The [System Name] system provides [key capability] for [target audience], guaranteeing [key security, performance, or reliability guarantees].*
+
+---
+
+## 2. Priority Quality Goals (Canonical ProductShape Citations)
+Lists top 3 to 5 critical quality goals, linking directly to non-functional requirements (\`QR-*\`) defined in ProductShape:
+
+| Priority | Quality Goal | Requirement ID | Architectural Rationale |
+| :---: | :--- | :--- | :--- |
+| **1** | High Availability and Resilience | \`QR-AVAILABILITY-001\` | Decoupled architecture, active redundancy, and automated failover |
+| **2** | Real-Time Latency / Performance | \`QR-LATENCY-001\` | Asynchronous processing pipeline, low-latency queues |
+| **3** | Zero Trust Security | \`SEC-REQ-AUTH-001\` | Strict mTLS authentication and enclave isolation |
+
+---
+
+## 3. Stakeholder and Primary Actors Matrix
+Mapping of system stakeholders with architectural expectations:
+
+| Role / Stakeholder | Actor ID | Architectural Expectations |
+| :--- | :--- | :--- |
+| **System Operators** | \`ACT-OPERATOR-001\` | Observability dashboards, early alerting, and auditability |
+| **End Users** | \`ACT-USER-001\` | Consistent response times and secure interfaces |
+| **Security Team** | \`ACT-SEC-AUDITOR\` | Zero secrets leakage and immutable access logging |
+
+---
+
+## 4. Revision History and Version Control
+
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial architecture goals definition | CHG-ARCH-001 |
+`;
+
+export const STARTER_ARCH_LEVEL_1_WHITEBOX = `---
+id: ARCH-L1-WHITEBOX-001
+type: building-blocks-level-1
+title: "05. Level 1 Building Blocks: Overall Whitebox"
+status: proposed # proposed, accepted, deprecated, superseded
+version: "1.0.0"
+schema-version: "1.0"
+arc42-section: 5
+naf-perspective: "Services & Systems (Level 1)"
+bounded-contexts:
+  - "Core Domain Context"
+  - "Supporting Context"
+contains-components:
+  - CMP-NAME-001
+  - CMP-NAME-002
+supersedes: null
+superseded-by: null
+---
+
+# 05. Building Blocks View: Level 1 Whitebox (arc42 Sec. 5 / NAF Services & Systems)
+
+## 1. Overall System Decomposition (Level 1)
+Presents system decomposition into major subsystems, execution containers, and domain Bounded Contexts.
+
+### 1.1 Level 1 Whitebox Diagram
+\`\`\`mermaid
+graph TD
+    subgraph BoundedContext_Core["Bounded Context: Core Domain"]
+        CMP_INGEST["CMP-INGEST: Data Ingestion"]
+        CMP_ENGINE["CMP-ENGINE: Rules Engine"]
+    end
+
+    subgraph BoundedContext_Audit["Bounded Context: Auditing & Telemetry"]
+        CMP_OBSERVABILITY["CMP-OBS: Monitoring & Metrics"]
+        CMP_STORAGE["CMP-STORAGE: Immutable Storage"]
+    end
+
+    Actor[Client / User] -->|External Protocol| CMP_INGEST
+    CMP_INGEST -->|Internal Event / IPC| CMP_ENGINE
+    CMP_ENGINE -->|Traces / Auditing| CMP_STORAGE
+    CMP_OBSERVABILITY -.->|Scrape / Polling| CMP_ENGINE
+\`\`\`
+
+---
+
+## 2. Bounded Contexts and Root Components Catalog
+
+| Bounded Context | Component ID | Implementation Type | Primary Responsibility |
+| :--- | :--- | :---: | :--- |
+| **Core Domain** | \`CMP-INGEST\` | \`service\` | TLS termination, syntactic payload validation, and filtering |
+| **Core Domain** | \`CMP-ENGINE\` | \`service\` | Business rules evaluation and deterministic computation |
+| **Auditing** | \`CMP-STORAGE\` | \`composite\` | Event persistence and immutable traceability |
+
+---
+
+## 3. Recursive Decomposition into Sub-Levels
+Each listed container or subsystem is detailed in its own component specification (\`CMP-*.md\`) conforming to \`templates/architecture/component.template.md\`:
+- **Level 2 (Subsystems / Containers)**: Autonomous services, microservices, daemons.
+- **Level 3 (Execution Units)**: DLLs, native plugins (.so, .dylib), pure domain functions.
+
+---
+
+## 4. Revision History and Version Control
+
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial L1 whitebox definition | CHG-ARCH-001 |
+`;
+
+export const STARTER_ARCH_QUALITY_REQUIREMENTS = `---
+id: ARCH-QUAL-001
+type: quality-requirements
+title: "10. Quality Requirements and Quality Tree"
+status: proposed # proposed, accepted, deprecated, superseded
+version: "1.0.0"
+schema-version: "1.0"
+arc42-section: 10
+naf-perspective: "Quality Perspective"
+cites-quality-requirements:
+  - QR-LATENCY-001
+  - QR-AVAILABILITY-001
+  - QR-MAINTAINABILITY-001
+supersedes: null
+superseded-by: null
+---
+
+# 10. Quality Requirements (arc42 Sec. 10 / NAF Quality)
+
+## 1. Quality Tree
+Hierarchical structure of key system quality attributes based on ISO/IEC 25010:
+
+\`\`\`mermaid
+graph TD
+    QualityTree[System Quality] --> Performance[Performance Efficiency]
+    QualityTree --> Reliability[Reliability & Resilience]
+    QualityTree --> Security[Zero Trust Security]
+    QualityTree --> Maintainability[As-Code Maintainability]
+
+    Performance --> P1[Real-Time Latency: QR-LATENCY-001]
+    Reliability --> R1[99.99% Availability: QR-AVAILABILITY-001]
+    Security --> S1[Strict Authentication: SEC-REQ-AUTH-001]
+    Maintainability --> M1[Cyclomatic Complexity <= 10: quality-policy.yaml]
+\`\`\`
+
+---
+
+## 2. Assessable Quality Scenarios
+Definition of concrete scenarios with stimulus, environment, response, and measure:
+
+| Requirement ID | ISO Attribute | Stimulus and Environment | System Response | Objective Measure |
+| :--- | :--- | :--- | :--- | :--- |
+| \`QR-LATENCY-001\` | Performance | Peak load of 10,000 req/s | Processing and queuing persistence | p95 latency < 50ms |
+| \`QR-AVAILABILITY-001\` | Reliability | Abrupt crash of 1 worker node | Automatic pod redistribution | Service downtime = 0s |
+| \`QR-MAINTAINABILITY-001\`| Maintainability | Submodule refactoring | Deterministic Release Gates execution | CC $\\le 10$, LOC $\\le 40$ |
+
+---
+
+## 3. Revision History and Version Control
+
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial quality tree definition | CHG-ARCH-001 |
+`;
+
+export const STARTER_ARCH_RISKS_AND_TECHNICAL_DEBT = `---
+id: ARCH-RISK-001
+type: risks-and-technical-debt
+title: "11. Architecture Risks and Technical Debt"
+status: proposed # proposed, accepted, deprecated, superseded
+version: "1.0.0"
+schema-version: "1.0"
+arc42-section: 11
+naf-perspective: "Risk & Technical Debt"
+risks:
+  - RSK-SCALE-001
+  - RSK-DEP-002
+supersedes: null
+superseded-by: null
+---
+
+# 11. Risks and Technical Debt (arc42 Sec. 11 / NAF Risk & Debt)
+
+## 1. Architectural Risks Matrix (\`RSK-*\`)
+Assessment and tracking of identified technical risks:
+
+| Risk ID | Risk Description | Probability | Impact | Mitigation Strategy |
+| :--- | :--- | :---: | :---: | :--- |
+| \`RSK-SCALE-001\` | Database bottleneck during telemetry bursts | Medium | High | Horizontal partitioning and second-level cache |
+| \`RSK-DEP-002\`   | Stale cryptographic runtime dependencies | Low | Critical | Automated SCA auditing in CI with daily scanning |
+| \`RSK-MEM-003\`   | Memory degradation due to ingestion buffer accumulation | Medium | Medium | Continuous heap metrics monitoring and deterministic restarts |
+
+---
+
+## 2. Technical Debt and Incurred Compromises Log
+Documentation of temporary shortcuts, provisional decisions, or pending refactorings:
+
+| Debt Item | Affected Component | Trade-off Justification | Payoff / Refactoring Plan |
+| :--- | :--- | :--- | :--- |
+| JSON serialization instead of binary | \`CMP-INGEST-001\` | Fast initial MVP delivery | Planned migration to Protobuf in release v2.0 |
+| Manual mock in integration tests | \`packages/core\` | Avoid external broker dependency in CI | Adoption of hermetic testcontainers |
+
+---
+
+## 3. Revision History and Version Control
+
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial risks and technical debt definition | CHG-ARCH-001 |
+`;
+
+export const STARTER_ARCH_RUNTIME_VIEW = `---
+id: ARCH-RUN-001
+type: runtime-view
+title: "06. Runtime View and Dynamic Behavior"
+status: proposed # proposed, accepted, deprecated, superseded
+version: "1.0.0"
+schema-version: "1.0"
+arc42-section: 6
+naf-perspective: "Behaviour & Sequences"
+sequences:
+  - SEQ-NOMINAL-001
+  - SEQ-DEGRADED-002
+flows:
+  - FLW-LIFECYCLE-001
+satisfies-requirements:
+  - FR-FEATURE-001
+  - SEC-REQ-AUTH-001
+supersedes: null
+superseded-by: null
+---
+
+# 06. Runtime View (arc42 Sec. 6 / NAF Behaviour)
+
+## 1. Nominal Scenario: Main Business Flow (\`SEQ-NOMINAL-001\`)
+Describes sequence orchestration and component interactions for a typical user request or system event:
+
+\`\`\`mermaid
+sequenceDiagram
+    autonumber
+    actor Client as External Client (ACT-CLIENT-001)
+    participant Gateway as API Gateway (CMP-GATEWAY-001)
+    participant Core as Domain Engine (CMP-CORE-001)
+    participant Storage as Persistence / DB (CMP-STORAGE-001)
+
+    Client->>Gateway: POST /api/v1/resource (Bearer Token / mTLS)
+    Gateway->>Gateway: Validate input schema and authentication
+    alt Validation Failed
+        Gateway-->>Client: 400 Bad Request / 401 Unauthorized
+    else Valid Input
+        Gateway->>Core: In-process invocation / gRPC
+        Core->>Core: Execute business rules
+        Core->>Storage: Deterministic transaction (INSERT / UPDATE)
+        Storage-->>Core: Confirmation (ACK)
+        Core-->>Gateway: Business result
+        Gateway-->>Client: 200 OK with response payload
+    end
+\`\`\`
+
+---
+
+## 2. Security Scenario / Abuse Mitigation (\`SEQ-SEC-002\`)
+Models behavior and isolation under malicious attempts or anomalous loads:
+
+\`\`\`mermaid
+sequenceDiagram
+    autonumber
+    actor Attacker as Threat Actor (ACT-THREAT-001)
+    participant DMZ as Ingestion Gateway (SEC-ENC-DMZ-001)
+    participant SIEM as Audit and SIEM (CMP-AUDIT-001)
+
+    Attacker->>DMZ: Anomalous request (missing credentials or oversized payload)
+    DMZ->>DMZ: Detected by strict validation filter
+    DMZ->>SIEM: Log anomaly event with IP and fingerprint
+    DMZ-->>Attacker: 403 Forbidden / Connection aborted
+\`\`\`
+
+---
+
+## 3. Dynamic Scenarios and Associated Requirements Matrix
+
+| Scenario ID | Type | Satisfied Requirements | Participating Components |
+| :--- | :---: | :--- | :--- |
+| \`SEQ-NOMINAL-001\` | Nominal | \`FR-FEATURE-001\` | \`CMP-GATEWAY-001\`, \`CMP-CORE-001\` |
+| \`SEQ-SEC-002\` | Security | \`SEC-REQ-AUTH-001\` | \`CMP-GATEWAY-001\`, \`CMP-AUDIT-001\` |
+
+---
+
+## 4. Revision History and Version Control
+
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial runtime views definition | CHG-ARCH-001 |
+`;
+
+export const STARTER_ARCH_SOLUTION_STRATEGY = `---
+id: ARCH-STRAT-001
+type: solution-strategy
+title: "04. Architecture Solution Strategy"
+status: proposed # proposed, accepted, deprecated, superseded
+version: "1.0.0"
+schema-version: "1.0"
+arc42-section: 4
+naf-perspective: "Service & Resource Strategy"
+strategies:
+  - STRAT-ARCH-001
+  - STRAT-DATA-001
+supersedes: null
+superseded-by: null
+---
+
+# 04. Solution Strategy (arc42 Sec. 4 / NAF Strategy)
+
+## 1. Fundamental Structural Decisions (\`STRAT-*\`)
+Describes global choices shaping the system and how they address priority quality goals:
+
+| Strategy ID | Fundamental Pattern / Decision | Technical Rationale & Trade-offs |
+| :--- | :--- | :--- |
+| \`STRAT-ARCH-001\` | Hexagonal Architecture / Ports and Adapters | Strict isolation of domain logic from I/O frameworks |
+| \`STRAT-COMM-002\` | Event-Driven Asynchronous Communication | Temporal decoupling between fast ingestion and batch processing |
+| \`STRAT-SEC-003\` | Zero Trust Verification | Every internal channel validates identity using mTLS and short-lived tokens |
+
+---
+
+## 2. Decomposition and Design Principles
+- **Domain-Driven Design (DDD)**: Identification of independent Bounded Contexts with decoupled canonical schemas.
+- **Immutability and Determinism**: Reproducible states, cryptographic hashing of inputs and outputs (PDaC).
+- **Error Handling and Graceful Degradation**: Circuit Breaker pattern and Dead-Letter-Queue (DLQ) retry mechanisms.
+
+---
+
+## 3. Quality Goals Fulfillment Matrix
+Mapping of strategies against non-functional requirements (\`QR-*\`):
+
+| Quality Goal | Adopted Decision / Strategy | Guarantee Mechanism |
+| :--- | :--- | :--- |
+| \`QR-LATENCY-REALTIME\` | Zero-Copy binary ingestion and in-memory queues | Static buffers and HTTP/2 connection pooling |
+| \`QR-AVAILABILITY-HIGH\` | Stateless multi-zone deployment | Automated horizontal autoscaling with Health Checks |
+
+---
+
+## 4. Revision History and Version Control
+
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial solution strategy definition | CHG-ARCH-001 |
+`;
 
 export interface ArchTemplateDef {
   filename: string;
@@ -60,9 +794,12 @@ export function getArchitectureTemplates(
   if (normalized === 'none') {
     return [];
   }
-  const isFull = normalized === 'full' || normalized === 'complete';
-  return ALL_ARCHITECTURE_TEMPLATES
-    .filter((t) => isFull || t.isMinimal)
-    .map((t) => ({ filename: t.filename, content: t.content }));
+  if (normalized === 'full' || normalized === 'complete') {
+    return ALL_ARCHITECTURE_TEMPLATES.map((t) => ({ filename: t.filename, content: t.content }));
+  }
+  // Default to minimal
+  return ALL_ARCHITECTURE_TEMPLATES.filter((t) => t.isMinimal).map((t) => ({
+    filename: t.filename,
+    content: t.content,
+  }));
 }
-

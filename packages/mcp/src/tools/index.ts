@@ -59,34 +59,34 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   const baseRoot = options.rootDir || process.cwd();
 
   // ============================================================================
-  // 1. HERRAMIENTAS RESUMEN (Summary Tools)
+  // 1. SUMMARY TOOLS (Consolidated Entrypoints)
   // ============================================================================
 
-  // Tool: new (Inicializar nuevo proyecto o configurar repo existente)
+  // Tool: new (Initialize new project or configure existing repo)
   server.tool(
     'new',
-    'Inicializa un nuevo proyecto o configura la estructura y gobernanza AI-SDLC en un repositorio existente (políticas, plantillas, hooks y CI opcional).',
+    'Initializes a new project or configures AI-SDLC governance and structure in an existing repository (policies, templates, hooks, and optional CI).',
     {
       targetDir: z
         .string()
         .optional()
-        .describe("Directorio objetivo donde inicializar la estructura AI-SDLC (por defecto '.')"),
+        .describe("Target directory to initialize AI-SDLC structure (defaults to '.')"),
       ci: z
         .enum(['github', 'gitlab', 'azure', 'bitbucket'])
         .optional()
-        .describe('Proveedor de CI/CD para el que generar workflows y pipelines'),
+        .describe('CI/CD provider to generate workflows and pipelines for'),
       dryRun: z
         .boolean()
         .optional()
-        .describe('Si es true, simula la creación sin escribir archivos en disco'),
+        .describe('If true, simulates creation without writing files to disk'),
       agents: z
         .string()
         .optional()
-        .describe('Entornos de agentes de IA a configurar (ej. "all", "cursor", "claude", "antigravity", "copilot", "mcp")'),
+        .describe('AI agent environments to configure (e.g. "all", "cursor", "claude", "antigravity", "copilot", "mcp")'),
       architecture: z
         .enum(['minimal', 'full', 'complete', 'none'])
         .optional()
-        .describe('Nivel de granularidad de plantillas de arquitectura ("minimal" para CMP y ADR, "full" para 12 secciones arc42/NAF, "none" para omitir)'),
+        .describe('Architecture template granularity level ("minimal" for CMP and ADR, "full" for 12 arc42/NAF sections, "none" to skip)'),
     },
     async (params) => {
       try {
@@ -105,12 +105,12 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
     }
   );
 
-  // Tool: verify (Ejecución consolidada de todos los Quality Gates)
+  // Tool: verify (Consolidated execution of all Quality Gates)
   server.tool(
     'verify',
-    'Ejecuta de forma consolidada la totalidad de los 9 Quality Gates deterministas de AI-SDLC y devuelve el estado integral del repositorio.',
+    'Executes all 9 deterministic AI-SDLC Quality Gates in a consolidated run and returns overall repository health.',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto (opcional)'),
+      root: z.string().optional().describe('Project root directory (optional)'),
     },
     async (params) => {
       try {
@@ -127,15 +127,15 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
         const sast = verifySast({ rootDir: root });
 
         const gates = [
-          { name: 'quality', success: qg.success, summary: `${qg.passCount}/${qg.totalFunctions} funciones conformes` },
-          { name: 'traceability', success: tr.success, summary: `${tr.orphanCount} requerimientos huérfanos` },
-          { name: 'governance', success: gv.success, summary: `${gv.totalTasks} tareas auditadas` },
-          { name: 'testing', success: tc.success, summary: `${tc.passedRequirements}/${tc.totalRequirements} reqs cubiertos` },
-          { name: 'licenses', success: lc.success, summary: `${lc.totalEvaluated} dependencias analizadas` },
-          { name: 'pdac', success: pd.success, summary: `${pd.totalNodes} nodos alineados` },
-          { name: 'schemas', success: sc.success, summary: `${sc.validCount}/${sc.totalEvaluated} artefactos válidos` },
-          { name: 'duplicates', success: dp.success, summary: `${dp.errorCount} errores, ${dp.warningCount} avisos` },
-          { name: 'security', success: sec.success && sast.success, summary: `${sec.findingsCount} secretos, ${sast.violationsCount} SAST` },
+          { name: 'quality', success: qg.success, summary: `${qg.passCount}/${qg.totalFunctions} compliant functions` },
+          { name: 'traceability', success: tr.success, summary: `${tr.orphanCount} orphan requirements` },
+          { name: 'governance', success: gv.success, summary: `${gv.totalTasks} audited tasks` },
+          { name: 'testing', success: tc.success, summary: `${tc.passedRequirements}/${tc.totalRequirements} covered requirements` },
+          { name: 'licenses', success: lc.success, summary: `${lc.totalEvaluated} analyzed dependencies` },
+          { name: 'pdac', success: pd.success, summary: `${pd.totalNodes} aligned nodes` },
+          { name: 'schemas', success: sc.success, summary: `${sc.validCount}/${sc.totalEvaluated} valid artifacts` },
+          { name: 'duplicates', success: dp.success, summary: `${dp.errorCount} errors, ${dp.warningCount} warnings` },
+          { name: 'security', success: sec.success && sast.success, summary: `${sec.findingsCount} secrets, ${sast.violationsCount} SAST` },
         ];
 
         const allPassed = gates.every((g) => g.success);
@@ -153,17 +153,17 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
     }
   );
 
-  // Tool: report (Generar todos los informes a la vez)
+  // Tool: report (Generate all reports combined)
   server.tool(
     'report',
-    'Genera de forma combinada todos los informes de AI-SDLC: dashboard web interactivo con grafo PDaC (HTML) e informe formal de calidad (Markdown).',
+    'Generates all AI-SDLC reports combined: interactive web dashboard with PDaC graph (HTML) and formal code quality report (Markdown).',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      root: z.string().optional().describe('Project root directory'),
       dashboardOutput: z
         .string()
         .optional()
-        .describe("Ruta de salida para dashboard HTML (por defecto 'reports/dashboard.html')"),
-      qualityPolicy: z.string().optional().describe('Ruta a quality-policy.yaml'),
+        .describe("Output path for HTML dashboard (defaults to 'reports/dashboard.html')"),
+      qualityPolicy: z.string().optional().describe('Path to quality-policy.yaml'),
     },
     async (params) => {
       try {
@@ -199,21 +199,21 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   );
 
   // ============================================================================
-  // 2. HERRAMIENTAS SDD (Scaffolding, Sync, Integration)
+  // 2. SDD TOOLS (Scaffolding, Sync, Integration)
   // ============================================================================
 
   // Tool: sdd_change_new
   server.tool(
     'sdd_change_new',
-    'Crea el andamiaje determinista completo de un nuevo cambio SDD (proposal, spec, design, tasks, handoff.yaml).',
+    'Creates the full deterministic scaffolding for a new SDD change (proposal, spec, design, tasks, handoff.yaml).',
     {
-      name: z.string().describe('Nombre descriptivo del incremento o feature SDD'),
-      id: z.string().optional().describe('Identificador explícito del cambio (ej. chg-002-mi-cambio)'),
-      profile: z.enum(['patch', 'standard', 'critical']).optional().describe('Perfil de riesgo del cambio'),
-      framework: z.enum(['openspec', 'speckit']).optional().describe('Framework SDD adoptado'),
-      author: z.string().optional().describe('Nombre del autor o agente de desarrollo'),
-      from: z.array(z.string()).optional().describe('Identificadores de requisitos existentes a citar'),
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      name: z.string().describe('Descriptive name of the SDD increment or feature'),
+      id: z.string().optional().describe('Explicit change identifier (e.g. chg-002-my-change)'),
+      profile: z.enum(['patch', 'standard', 'critical']).optional().describe('Risk profile of the change'),
+      framework: z.enum(['openspec', 'speckit']).optional().describe('Adopted SDD framework'),
+      author: z.string().optional().describe('Author or development agent name'),
+      from: z.array(z.string()).optional().describe('Existing requirement IDs to cite'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -237,9 +237,9 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: sdd_check_fix
   server.tool(
     'sdd_check_fix',
-    'Sincroniza deterministamente escenarios Gherkin a archivos .feature y actualiza digests SHA-256 PDaC sin alterar el código fuente.',
+    'Deterministically synchronizes Gherkin scenarios to .feature files and updates PDaC SHA-256 digests without touching source code.',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -267,14 +267,14 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: sdd_deposit
   server.tool(
     'sdd_deposit',
-    'Deposita o regenera el sidecar canónico de acompañamiento handoff.yaml (HOF-*) en un cambio SDD activo.',
+    'Deposits or regenerates the canonical handoff.yaml (HOF-*) sidecar in an active SDD change.',
     {
-      change: z.string().describe('Identificador del cambio activo (ej. chg-001-telemetry)'),
-      title: z.string().optional().describe('Título formal del handoff PDaC'),
-      framework: z.enum(['openspec', 'speckit']).optional().describe('Framework SDD'),
-      requirements: z.array(z.string()).optional().describe('Lista de IDs de requerimientos funcionales'),
-      useCases: z.array(z.string()).optional().describe('Lista de IDs de casos de uso'),
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      change: z.string().describe('Active change identifier (e.g. chg-001-telemetry)'),
+      title: z.string().optional().describe('Formal title of the PDaC handoff'),
+      framework: z.enum(['openspec', 'speckit']).optional().describe('SDD framework'),
+      requirements: z.array(z.string()).optional().describe('List of functional requirement IDs'),
+      useCases: z.array(z.string()).optional().describe('List of use case IDs'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -282,7 +282,7 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
         const handoff: ProductHandoff = {
           id: `HOF-${params.change.toUpperCase()}`,
           type: 'handoff',
-          title: params.title || `Handoff PDaC para ${params.change}`,
+          title: params.title || `PDaC Handoff for ${params.change}`,
           changeId: params.change,
           version: '1.0.0',
           createdAt: new Date().toISOString(),
@@ -314,12 +314,12 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: sdd_integrate
   server.tool(
     'sdd_integrate',
-    'Integra y promueve un cambio SDD completado a la línea base canónica y archiva su directorio a completed/.',
+    'Integrates and promotes a completed SDD change to the canonical baseline and archives its directory to completed/.',
     {
-      change: z.string().optional().describe('Identificador del cambio a integrar'),
-      auto: z.boolean().optional().describe('Detectar automáticamente el cambio activo completado'),
-      author: z.string().optional().describe('Autor de la integración'),
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      change: z.string().optional().describe('Identifier of the change to integrate'),
+      auto: z.boolean().optional().describe('Automatically detect the active completed change'),
+      author: z.string().optional().describe('Integration author'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -340,10 +340,10 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: get_active_handoff
   server.tool(
     'get_active_handoff',
-    'Consulta en memoria el subgrafo PDaC y el contenido de un cambio activo para inyección quirúrgica de contexto en el agente.',
+    'Queries in-memory PDaC subgraph and contents of an active change for surgical context injection into the agent.',
     {
-      change: z.string().describe('Identificador del cambio SDD activo (ej. chg-028-native-mcp-server)'),
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      change: z.string().describe('Active SDD change identifier (e.g. chg-028-native-mcp-server)'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -354,7 +354,7 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
 
         if (!fs.existsSync(targetDir)) {
           return formatResponse(
-            { success: false, error: `No se encontró el cambio SDD '${params.change}'.` },
+            { success: false, error: `SDD change '${params.change}' not found.` },
             true
           );
         }
@@ -382,18 +382,18 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   );
 
   // ============================================================================
-  // 3. HERRAMIENTAS DE VERIFICACIÓN INDIVIDUAL (Granular Verification)
+  // 3. GRANULAR VERIFICATION TOOLS
   // ============================================================================
 
   // Tool: verify_quality
   server.tool(
     'verify_quality',
-    'Evalúa la complejidad ciclomática, cognitiva, mantenibilidad y longitud de funciones frente a quality-policy.yaml.',
+    'Evaluates cyclomatic complexity, cognitive complexity, maintainability index, and function length against quality-policy.yaml.',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
-      maxCyclomatic: z.number().optional().describe('Umbral máximo CC (por defecto de policy)'),
-      maxCognitive: z.number().optional().describe('Umbral máximo complejidad cognitiva'),
-      minMaintainability: z.number().optional().describe('Umbral mínimo MI'),
+      root: z.string().optional().describe('Project root directory'),
+      maxCyclomatic: z.number().optional().describe('Maximum CC threshold (defaults to policy)'),
+      maxCognitive: z.number().optional().describe('Maximum cognitive complexity threshold'),
+      minMaintainability: z.number().optional().describe('Minimum maintainability index (MI) threshold'),
     },
     async (params) => {
       try {
@@ -416,9 +416,9 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: verify_schemas
   server.tool(
     'verify_schemas',
-    'Valida los artefactos Markdown de especificación frente a los JSON Schemas canónicos (Draft 2020-12).',
+    'Validates specification Markdown artifacts against canonical JSON Schemas (Draft 2020-12).',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -434,10 +434,10 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: verify_security
   server.tool(
     'verify_security',
-    'Ejecuta escaneo determinista de secretos (Gitleaks) y análisis estático SAST (inyección de comandos, SQLi, SSRF).',
+    'Executes deterministic secret scanning (Gitleaks) and SAST static analysis (command injection, SQLi, SSRF).',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
-      minSeverity: z.enum(['CRITICAL', 'HIGH', 'MEDIUM']).optional().describe('Severidad mínima SAST'),
+      root: z.string().optional().describe('Project root directory'),
+      minSeverity: z.enum(['CRITICAL', 'HIGH', 'MEDIUM']).optional().describe('Minimum SAST severity threshold'),
     },
     async (params) => {
       try {
@@ -472,9 +472,9 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: verify_traceability
   server.tool(
     'verify_traceability',
-    'Audita la matriz de trazabilidad 360° inversa (Upstream PDaC, Midstream arc42, Downstream BDD/tests).',
+    'Audits the 360° inverted traceability matrix (Upstream PDaC, Midstream arc42, Downstream BDD/tests).',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -490,9 +490,9 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: verify_governance
   server.tool(
     'verify_governance',
-    'Audita el cumplimiento del gobierno de tareas y modos de autonomía humana (AUTONOMOUS, HUMAN_REVIEW_PLAN, etc.).',
+    'Audits task governance compliance and human autonomy classification modes (AUTONOMOUS, HUMAN_REVIEW_PLAN, etc.).',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -508,9 +508,9 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: verify_testing
   server.tool(
     'verify_testing',
-    'Audita que el 100% de los requisitos y tareas cuentan con pruebas verificables en disco.',
+    'Audits that 100% of requirements and tasks have verifiable tests on disk.',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -526,11 +526,11 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: verify_licenses
   server.tool(
     'verify_licenses',
-    'Audita el cumplimiento de licencias Open Source frente a license-policy.yaml.',
+    'Audits Open Source license compliance against license-policy.yaml.',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
-      policy: z.string().optional().describe('Ruta a license-policy.yaml'),
-      depth: z.enum(['direct', 'transitive']).optional().describe('Profundidad de escaneo'),
+      root: z.string().optional().describe('Project root directory'),
+      policy: z.string().optional().describe('Path to license-policy.yaml'),
+      depth: z.enum(['direct', 'transitive']).optional().describe('Scanning depth'),
     },
     async (params) => {
       try {
@@ -550,9 +550,9 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: verify_duplicates
   server.tool(
     'verify_duplicates',
-    'Audita colisiones de identificadores, enunciados normativos redundantes y solapamientos de especificaciones.',
+    'Audits identifier collisions, redundant normative statements, and specification overlaps.',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -568,11 +568,11 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: verify_friction
   server.tool(
     'verify_friction',
-    'Evalúa las reglas de fricción progresiva y guardrails anti-bypass (impide que cambios con perfil patch modifiquen rutas protegidas de seguridad, esquemas o arquitectura).',
+    'Evaluates progressive friction rules and anti-bypass guardrails (prevents patch-profile changes from modifying protected security, schema, or architecture paths).',
     {
-      change: z.string().optional().describe('Identificador del cambio SDD activo o ruta de spec (opcional)'),
-      diffFiles: z.array(z.string()).optional().describe('Lista opcional de rutas de archivos modificados a auditar frente a guardrails'),
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      change: z.string().optional().describe('Active SDD change identifier or spec path (optional)'),
+      diffFiles: z.array(z.string()).optional().describe('Optional list of modified file paths to audit against guardrails'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -592,10 +592,10 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: verify_pdac
   server.tool(
     'verify_pdac',
-    'Audita el grafo de producto (Product Definition as Code) y verifica de forma determinista la ausencia de derivas criptográficas (digests SHA-256) en citaciones.',
+    'Audits the product graph (Product Definition as Code) and deterministically verifies the absence of cryptographic drift (SHA-256 digests) in citations.',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
-      autoSync: z.boolean().optional().describe('Si es true, sincroniza y recalcula automáticamente los digests desfasados en disco'),
+      root: z.string().optional().describe('Project root directory'),
+      autoSync: z.boolean().optional().describe('If true, automatically synchronizes and recalculates stale digests on disk'),
     },
     async (params) => {
       try {
@@ -613,17 +613,17 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   );
 
   // ============================================================================
-  // 4. HERRAMIENTAS DE REPORTING Y TELEMETRÍA (Reports & Telemetry)
+  // 4. REPORTING AND TELEMETRY TOOLS (Reports & Telemetry)
   // ============================================================================
 
   // Tool: report_dashboard
   server.tool(
     'report_dashboard',
-    'Genera el dashboard web interactivo y grafo Cytoscape.js de la matriz RTM / PDaC en reports/dashboard.html.',
+    'Generates the interactive web dashboard and Cytoscape.js graph of the RTM / PDaC matrix at reports/dashboard.html.',
     {
-      output: z.string().optional().describe('Ruta del archivo HTML de salida'),
-      title: z.string().optional().describe('Título del dashboard web'),
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      output: z.string().optional().describe('Path to the output HTML file'),
+      title: z.string().optional().describe('Title of the web dashboard'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -643,11 +643,11 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: report_quality
   server.tool(
     'report_quality',
-    'Genera el informe formal políglota de calidad de código en reports/QUALITY_REPORT.md.',
+    'Generates the formal polyglot code quality report at reports/QUALITY_REPORT.md.',
     {
-      policy: z.string().optional().describe('Ruta a quality-policy.yaml'),
-      mode: z.enum(['STRICT', 'PERMISSIVE']).optional().describe('Modo de cumplimiento'),
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      policy: z.string().optional().describe('Path to quality-policy.yaml'),
+      mode: z.enum(['STRICT', 'PERMISSIVE']).optional().describe('Enforcement compliance mode'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -667,11 +667,11 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: kpi_pr
   server.tool(
     'kpi_pr',
-    'Calcula la agregación de KPIs y telemetría de commits (humano vs. agentes) para un Pull Request.',
+    'Calculates commit KPI aggregation and telemetry (human vs. AI agents) for a Pull Request.',
     {
-      base: z.string().optional().describe('Rama base de comparación (por defecto main)'),
-      head: z.string().optional().describe('Rama origen o HEAD (por defecto HEAD)'),
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      base: z.string().optional().describe('Base branch for comparison (defaults to main)'),
+      head: z.string().optional().describe('Head branch or commit (defaults to HEAD)'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -687,13 +687,13 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: kpi_release
   server.tool(
     'kpi_release',
-    'Calcula el informe consolidado de KPIs de Release (Defect Injection Rate, ratio de retrabajo, volumen KLoC, tiempos y costes de tokens entre humano y modelos de IA).',
+    'Calculates consolidated Release KPIs (Defect Injection Rate, rework ratio, KLoC volume, time, and token costs between human and AI models).',
     {
-      release: z.string().describe('Nombre de la rama de release a auditar (ej. release/v1.0.0)'),
-      base: z.string().optional().describe('Rama base de comparación (por defecto main)'),
-      outputDir: z.string().optional().describe('Directorio opcional donde generar los informes Markdown y JSON'),
-      writeReports: z.boolean().optional().describe('Si es true, genera los archivos de reporte en disco'),
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      release: z.string().describe('Name of the release branch to audit (e.g. release/v1.0.0)'),
+      base: z.string().optional().describe('Base branch for comparison (defaults to main)'),
+      outputDir: z.string().optional().describe('Optional directory where Markdown and JSON reports will be generated'),
+      writeReports: z.boolean().optional().describe('If true, writes report files to disk'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {
@@ -716,9 +716,9 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: git_detect_author
   server.tool(
     'git_detect_author',
-    'Detecta de forma universal e independiente de IDE si el autor actual es humano o un agente de IA.',
+    'Universally and IDE-independently detects whether the current author is human or an AI agent.',
     {
-      root: z.string().optional().describe('Directorio raíz del proyecto'),
+      root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
       try {

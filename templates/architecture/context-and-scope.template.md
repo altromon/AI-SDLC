@@ -1,57 +1,57 @@
 ---
 id: ARCH-CTX-001
 type: context-and-scope
-title: "03. Contexto y Alcance del Sistema"
+title: "03. System Context and Scope"
 status: proposed # proposed, accepted, deprecated, superseded
 version: "1.0.0"
 schema-version: "1.0"
 arc42-section: 3
 naf-perspective: "Operational Perspective"
 operational-exchanges:
-  - OIE-CANAL-001
+  - OIE-CHANNEL-001
 context-boundaries:
   - CTX-PERIMETER-001
 supersedes: null
 superseded-by: null
 ---
 
-# 03. Contexto y Alcance (arc42 Sec. 3 / NAF Operational)
+# 03. Context and Scope (arc42 Sec. 3 / NAF Operational)
 
-## 1. Contexto de Negocio (Business Context)
-Modela los límites conceptuales del sistema respecto a los usuarios, sistemas externos colaboradores y fuentes de datos externas.
+## 1. Business Context
+Models conceptual boundaries of the system with respect to users, collaborating external systems, and external data sources.
 
-### 1.1 Diagrama de Contexto de Negocio
+### 1.1 Business Context Diagram
 ```mermaid
 graph LR
-    User[Actor / Usuario Final] -->|Petición de Servicio| System([Sistema AI-SDLC])
-    System -->|Consulta / Enriquecimiento| ExtService[Sistema Externo / API Partner]
-    System -->|Registro de Auditoría| SIEM[Sistema SIEM / Auditoría]
+    User[Actor / End User] -->|Service Request| System([AI-SDLC System])
+    System -->|Query / Enrichment| ExtService[External System / Partner API]
+    System -->|Audit Record| SIEM[SIEM / Audit System]
 ```
 
-### 1.2 Intercambios de Información Operativa (`OIE-*`)
-| ID Intercambio | Origen / Destino | Carga Útil / Mensaje | Protocolo / Canal | Formato |
+### 1.2 Operational Information Exchanges (`OIE-*`)
+| Exchange ID | Source / Target | Payload / Message | Protocol / Channel | Format |
 | :--- | :--- | :--- | :--- | :--- |
-| `OIE-COMM-001` | Usuario ➔ Sistema | Solicitud de Operación | HTTPS / REST | JSON (Schema v1) |
-| `OIE-NOTIF-002`| Sistema ➔ Usuario | Eventos y Notificaciones | WebSocket / WSS | JSON Streaming |
-| `OIE-AUDIT-003`| Sistema ➔ SIEM | Trazas Inmutables de Auditoría | Syslog / TLS | RFC 5424 |
+| `OIE-COMM-001` | User ➔ System | Operation Request | HTTPS / REST | JSON (Schema v1) |
+| `OIE-NOTIF-002`| System ➔ User | Events and Notifications | WebSocket / WSS | JSON Streaming |
+| `OIE-AUDIT-003`| System ➔ SIEM | Immutable Audit Trails | Syslog / TLS | RFC 5424 |
 
 ---
 
-## 2. Contexto Técnico e Infraestructura Perimetral
-Modela los canales físicos y lógicos que cruzan la frontera del sistema (redes DMZ, balanceadores, cortafuegos y proxies inversos).
+## 2. Technical Context and Perimeter Infrastructure
+Models physical and logical channels crossing system boundaries (DMZ networks, load balancers, firewalls, and reverse proxies).
 
-### 2.1 Diagrama de Contexto Técnico
+### 2.1 Technical Context Diagram
 ```mermaid
 graph TD
-    Client[Cliente / Navegador / App] -->|TLS 1.3 / Port 443| LB[Reverse Proxy / WAF]
-    LB -->|mTLS / Red Interna DMZ| Gateway[API Gateway / Ingestión]
-    Gateway -->|gRPC / IPC| Core[Servicios de Dominio]
+    Client[Client / Browser / App] -->|TLS 1.3 / Port 443| LB[Reverse Proxy / WAF]
+    LB -->|mTLS / DMZ Internal Network| Gateway[API Gateway / Ingestion]
+    Gateway -->|gRPC / IPC| Core[Domain Services]
 ```
 
 ---
 
-## 3. Historial de Revisiones y Control de Versiones
+## 3. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de contexto y alcance | CHG-ARCH-001 |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial context and scope definition | CHG-ARCH-001 |
