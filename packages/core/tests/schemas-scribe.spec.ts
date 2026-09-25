@@ -598,9 +598,10 @@ unknown-extra-property: "disallowed"
     const secReqPath = path.join(repoRoot, 'security', 'requirements', 'SEC-REQ-DETERMINISTIC-VERIFY.md');
     expect(fs.existsSync(secReqPath)).toBe(true);
     const content = fs.readFileSync(secReqPath, 'utf-8');
-    const { frontmatter } = extractFrontmatter(content);
-    expect(frontmatter.id).toBe('SEC-REQ-DETERMINISTIC-VERIFY');
-    const res = validateArtifactSchema(frontmatter, 'security-requirement', repoRoot);
+    const frontmatter = extractFrontmatter(content);
+    expect(frontmatter).not.toBeNull();
+    expect((frontmatter as any).id).toBe('SEC-REQ-DETERMINISTIC-VERIFY');
+    const res = validateArtifactSchema(frontmatter!, 'security-requirement', repoRoot);
     expect(res.valid).toBe(true);
     expect(computeCanonicalSha256(content)).toBeDefined();
   });
