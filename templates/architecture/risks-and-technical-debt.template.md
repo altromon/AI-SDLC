@@ -1,7 +1,7 @@
 ---
 id: ARCH-RISK-001
 type: risks-and-technical-debt
-title: "11. Riesgos de Arquitectura y Deuda Técnica"
+title: "11. Architecture Risks and Technical Debt"
 status: proposed # proposed, accepted, deprecated, superseded
 version: "1.0.0"
 schema-version: "1.0"
@@ -14,31 +14,31 @@ supersedes: null
 superseded-by: null
 ---
 
-# 11. Riesgos y Deuda Técnica (arc42 Sec. 11 / NAF Risk & Debt)
+# 11. Risks and Technical Debt (arc42 Sec. 11 / NAF Risk & Debt)
 
-## 1. Matriz de Riesgos Arquitectónicos (`RSK-*`)
-Evaluación y seguimiento de los riesgos técnicos identificados en el sistema:
+## 1. Architectural Risks Matrix (`RSK-*`)
+Assessment and tracking of identified technical risks:
 
-| ID Riesgo | Descripción del Riesgo | Probabilidad | Impacto | Estrategia de Mitigación |
+| Risk ID | Risk Description | Probability | Impact | Mitigation Strategy |
 | :--- | :--- | :---: | :---: | :--- |
-| `RSK-SCALE-001` | Cuello de botella en la base de datos central ante picos de telemetría | Media | Alto | Implementación de particionamiento horizontal y caché de segundo nivel |
-| `RSK-DEP-002`   | Desactualización de librerías criptográficas en runtime | Baja | Crítico | Auditoría SCA automatizada en CI con escaneo diario de vulnerabilidades |
-| `RSK-MEM-003`   | Degradación por acumulación de buffers en ingesta | Media | Medio | Monitorización continua de métricas de heap y reinicio determinista |
+| `RSK-SCALE-001` | Database bottleneck during telemetry bursts | Medium | High | Horizontal partitioning and second-level cache |
+| `RSK-DEP-002`   | Stale cryptographic runtime dependencies | Low | Critical | Automated SCA auditing in CI with daily scanning |
+| `RSK-MEM-003`   | Memory degradation due to ingestion buffer accumulation | Medium | Medium | Continuous heap metrics monitoring and deterministic restarts |
 
 ---
 
-## 2. Registro de Deuda Técnica y Compromisos Asumidos
-Documentación de atajos temporales, decisiones provisionales o refactorizaciones pendientes:
+## 2. Technical Debt and Incurred Compromises Log
+Documentation of temporary shortcuts, provisional decisions, or pending refactorings:
 
-| Elemento de Deuda | Componente Afectado | Justificación del Compromiso | Plan de Cancelación / Refactor |
+| Debt Item | Affected Component | Trade-off Justification | Payoff / Refactoring Plan |
 | :--- | :--- | :--- | :--- |
-| Serialización JSON en lugar de binario | `CMP-INGEST-001` | Rápido lanzamiento inicial de MVP | Migración planificada a Protobuf en release v2.0 |
-| Mock manual en tests de integración | `packages/core` | Evitar dependencia de broker externo en CI | Adopción de contenedores herméticos testcontainers |
+| JSON serialization instead of binary | `CMP-INGEST-001` | Fast initial MVP delivery | Planned migration to Protobuf in release v2.0 |
+| Manual mock in integration tests | `packages/core` | Avoid external broker dependency in CI | Adoption of hermetic testcontainers |
 
 ---
 
-## 3. Historial de Revisiones y Control de Versiones
+## 3. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-24 | Lead Architect | Definición inicial de riesgos y deuda técnica | CHG-ARCH-001 |
+| **1.0.0** | 2026-09-24 | Lead Architect | Initial risks and technical debt definition | CHG-ARCH-001 |

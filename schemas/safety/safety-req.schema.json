@@ -26,7 +26,7 @@
     "version": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
-      "description": "Versión semántica del requisito de safety (SemVer)."
+      "description": "Safety requirement semantic version (SemVer)."
     },
     "schema-version": {
       "type": "string"
@@ -50,11 +50,11 @@
         "propulsion",
         "telemetry"
       ],
-      "description": "Dominio de seguridad operacional."
+      "description": "Operational safety domain."
     },
     "safety-integrity-level": {
       "type": "string",
-      "description": "Nivel de integridad de seguridad (ej. DAL-A..D, ASIL-A..D, SIL-1..4)."
+      "description": "Safety integrity level (e.g. DAL-A..D, ASIL-A..D, SIL-1..4)."
     },
     "mitigates-hazard": {
       "type": "array",
@@ -63,15 +63,15 @@
         "type": "string",
         "pattern": "^HAZ-[A-Z0-9]+(-[A-Z0-9]+)*$"
       },
-      "description": "Peligros operacionales mitigados por el control de safety."
+      "description": "Operational hazards mitigated by safety control."
     },
     "fail-safe-action": {
       "type": "string",
-      "description": "Acción automática o maniobra de contingencia para entrar en estado seguro."
+      "description": "Automatic action or contingency maneuver to enter safe state."
     },
     "fault-tolerance-time-ms": {
       "type": "number",
-      "description": "Tiempo límite de tolerancia a fallos en milisegundos (FTTI)."
+      "description": "Fault tolerance time interval limit in milliseconds (FTTI)."
     },
     "acceptance-format": {
       "type": "string",

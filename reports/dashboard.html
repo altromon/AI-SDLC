@@ -256,9 +256,9 @@
 <body>
   <header>
     <div class="brand">
-      <h1>AI-SDLC // DASHBOARD INTERACTIVO</h1>
+      <h1>AI-SDLC // INTERACTIVE DASHBOARD</h1>
       <span class="badge badge-green">
-        100% CONFORME
+        100% COMPLIANT
       </span>
     </div>
     <div style="font-size: 0.75rem; color: var(--text-muted);">
@@ -267,10 +267,10 @@
   </header>
 
   <nav class="tabs">
-    <button class="tab-btn active" onclick="switchTab('graph')">🌐 Grafo PDaC / RTM</button>
-    <button class="tab-btn" onclick="switchTab('rtm')">📋 Matriz RTM 360°</button>
-    <button class="tab-btn" onclick="switchTab('quality')">📊 Calidad & Gobernanza</button>
-    <button class="tab-btn" onclick="switchTab('kpis')">📈 Telemetría & Histórico KPIs</button>
+    <button class="tab-btn active" onclick="switchTab('graph')">🌐 PDaC / RTM Graph</button>
+    <button class="tab-btn" onclick="switchTab('rtm')">📋 360° RTM Matrix</button>
+    <button class="tab-btn" onclick="switchTab('quality')">📊 Quality & Governance</button>
+    <button class="tab-btn" onclick="switchTab('kpis')">📈 Telemetry & Historical KPIs</button>
   </nav>
 
   <main>
@@ -306,43 +306,43 @@
           <div class="tool-row">
             <button class="tool-btn" onclick="cyZoom(0.2)">Zoom +</button>
             <button class="tool-btn" onclick="cyZoom(-0.2)">Zoom -</button>
-            <button class="tool-btn" onclick="cy.fit(30)">Centrar</button>
-            <button class="tool-btn" onclick="resetHighlight()">Limpiar</button>
+            <button class="tool-btn" onclick="cy.fit(30)">Center</button>
+            <button class="tool-btn" onclick="resetHighlight()">Reset</button>
           </div>
           <div class="tool-row">
             <select id="layout-select" class="tool-select" onchange="applyLayout(this.value)">
-              <option value="breadthfirst">Jerárquico (Capas)</option>
-              <option value="cose">Fuerza dirigida (COSE)</option>
-              <option value="concentric">Concéntrico</option>
+              <option value="breadthfirst">Hierarchical (Layers)</option>
+              <option value="cose">Force-directed (COSE)</option>
+              <option value="concentric">Concentric</option>
               <option value="circle">Circular</option>
             </select>
           </div>
           <div class="tool-row">
             <select id="layer-filter" class="tool-select" onchange="filterLayer(this.value)">
-              <option value="all">Todas las Capas</option>
-              <option value="product">Capa 1: Producto (Upstream)</option>
-              <option value="requirement">Capa 2: Requerimientos</option>
-              <option value="architecture">Capa 3: Arquitectura (Midstream)</option>
-              <option value="test">Capa 4: Pruebas (Downstream)</option>
+              <option value="all">All Layers</option>
+              <option value="product">Layer 1: Product (Upstream)</option>
+              <option value="requirement">Layer 2: Requirements</option>
+              <option value="architecture">Layer 3: Architecture (Midstream)</option>
+              <option value="test">Layer 4: Testing (Downstream)</option>
             </select>
           </div>
           <div class="tool-row">
             <select id="status-filter" class="tool-select" onchange="filterStatus(this.value)">
-              <option value="all">Todos los Estados</option>
-              <option value="CONFORME">Solo Conformes (Verde)</option>
-              <option value="issues">Solo Huérfanos / Deriva (Rojo)</option>
+              <option value="all">All Statuses</option>
+              <option value="COMPLIANT">Only Compliant (Green)</option>
+              <option value="issues">Only Orphans / Drift (Red)</option>
             </select>
           </div>
           <div class="tool-row">
-            <input type="text" id="node-search" class="tool-input" placeholder="Buscar ID de nodo..." oninput="searchNode(this.value)">
+            <input type="text" id="node-search" class="tool-input" placeholder="Search node ID..." oninput="searchNode(this.value)">
           </div>
         </div>
         <div id="cy"></div>
       </div>
       <aside class="sidebar" id="node-details">
-        <h2>Detalle del Nodo</h2>
+        <h2>Node Details</h2>
         <div id="sidebar-content" style="display: flex; flex-direction: column; gap: 12px;">
-          <p style="color: var(--text-muted); font-size: 0.8rem;">Haz clic en cualquier nodo del grafo para inspeccionar su camino crítico y trazabilidad completa.</p>
+          <p style="color: var(--text-muted); font-size: 0.8rem;">Click on any graph node to inspect its critical path and full traceability.</p>
         </div>
       </aside>
     </div>
@@ -350,16 +350,16 @@
     <!-- TAB 2: RTM TABLE -->
     <div id="tab-rtm" class="tab-panel">
       <div class="content-container">
-        <h2>Matriz de Trazabilidad de Requerimientos 360°</h2>
+        <h2>360° Requirements Traceability Matrix</h2>
         <table class="data-table">
           <thead>
             <tr>
-              <th>ID Requerimiento</th>
-              <th>Título</th>
-              <th>Producto (Upstream)</th>
-              <th>Arquitectura (Midstream)</th>
-              <th>Pruebas (Downstream)</th>
-              <th>Estado Global</th>
+              <th>Requirement ID</th>
+              <th>Title</th>
+              <th>Product (Upstream)</th>
+              <th>Architecture (Midstream)</th>
+              <th>Testing (Downstream)</th>
+              <th>Global Status</th>
             </tr>
           </thead>
           <tbody>
@@ -370,7 +370,7 @@
                 <td><code>UC-025-STRUCTURED-JSON-VERIFY</code></td>
                 <td><code>CMP-CLI, CMP-CORE, CMP-CLI.md, CMP-CORE.md</code></td>
                 <td><code>packages/cli/tests/verify-json.spec.ts</code></td>
-                <td><span class="badge badge-green">CONFORME</span></td>
+                <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
               <tr onclick="focusNode('FR-026-AGENT-NATIVE-CONFIGS-001')" onmouseenter="startRowTooltip(event, 'FR-026-AGENT-NATIVE-CONFIGS-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
@@ -379,7 +379,7 @@
                 <td><code>UC-026-AGENT-NATIVE-CONFIGS</code></td>
                 <td><code>CMP-CORE, CMP-CORE.md</code></td>
                 <td><code>packages/core/tests/agent-native-configs-drift.spec.ts</code></td>
-                <td><span class="badge badge-green">CONFORME</span></td>
+                <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
               <tr onclick="focusNode('FR-027-ENV-OUTPUT-JSON-001')" onmouseenter="startRowTooltip(event, 'FR-027-ENV-OUTPUT-JSON-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
@@ -388,7 +388,7 @@
                 <td><code>UC-027-ENV-OUTPUT-JSON</code></td>
                 <td><code>CMP-CLI, CMP-CORE, CMP-CLI.md</code></td>
                 <td><code>packages/cli/tests/verify-json.spec.ts</code></td>
-                <td><span class="badge badge-green">CONFORME</span></td>
+                <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
               <tr onclick="focusNode('FR-028-NATIVE-MCP-SERVER-001')" onmouseenter="startRowTooltip(event, 'FR-028-NATIVE-MCP-SERVER-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
@@ -397,7 +397,7 @@
                 <td><code>UC-028-NATIVE-MCP-SERVER</code></td>
                 <td><code>CMP-MCP-SERVER, CMP-CORE, CMP-MCP-SERVER.md</code></td>
                 <td><code>packages/cli/tests/change-new.spec.ts, packages/core/tests/sdd-adapters.spec.ts, packages/mcp/tests/mcp-server.spec.ts</code></td>
-                <td><span class="badge badge-green">CONFORME</span></td>
+                <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
               <tr onclick="focusNode('FR-029-EXPERT-USER-AGENT-001')" onmouseenter="startRowTooltip(event, 'FR-029-EXPERT-USER-AGENT-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
@@ -406,7 +406,7 @@
                 <td><code>UC-029-EXPERT-USER-AGENT</code></td>
                 <td><code>CMP-CORE, CMP-CORE.md</code></td>
                 <td><code>packages/core/tests/init-agents.spec.ts</code></td>
-                <td><span class="badge badge-green">CONFORME</span></td>
+                <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
               <tr onclick="focusNode('FR-030-INIT-AGENT-SCAFFOLDING-001')" onmouseenter="startRowTooltip(event, 'FR-030-INIT-AGENT-SCAFFOLDING-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
@@ -415,7 +415,7 @@
                 <td><code>UC-030-INIT-AGENT-SCAFFOLDING</code></td>
                 <td><code>CMP-CLI, CMP-CORE, CMP-CLI.md, CMP-CORE.md</code></td>
                 <td><code>packages/core/tests/init-agents.spec.ts</code></td>
-                <td><span class="badge badge-green">CONFORME</span></td>
+                <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
               <tr onclick="focusNode('FR-031-WORKFLOW-AGENT-HANDOFF-001')" onmouseenter="startRowTooltip(event, 'FR-031-WORKFLOW-AGENT-HANDOFF-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
@@ -424,7 +424,7 @@
                 <td><code>UC-031-WORKFLOW-AGENT-HANDOFF</code></td>
                 <td><code>CMP-CORE, CMP-CORE.md</code></td>
                 <td><code>packages/core/tests/init-agents.spec.ts</code></td>
-                <td><span class="badge badge-green">CONFORME</span></td>
+                <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
               <tr onclick="focusNode('FR-033-ARCHITECTURE-TEMPLATES-001')" onmouseenter="startRowTooltip(event, 'FR-033-ARCHITECTURE-TEMPLATES-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
@@ -433,7 +433,7 @@
                 <td><code>UC-033-ARCHITECTURE-TEMPLATES</code></td>
                 <td><code>CMP-CORE, CMP-CORE.md</code></td>
                 <td><code>packages/core/tests/architecture-templates.spec.ts, packages/core/tests/init-architecture.spec.ts</code></td>
-                <td><span class="badge badge-green">CONFORME</span></td>
+                <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
           </tbody>
@@ -448,34 +448,34 @@
           <div class="metric-card">
             <span class="title">Release Gate</span>
             <span class="value" style="color: var(--accent-emerald);">PASS</span>
-            <span class="subtitle">0 funciones violando política</span>
+            <span class="subtitle">0 policy-violating functions</span>
           </div>
           <div class="metric-card">
-            <span class="title">Mantenibilidad (SEI MI)</span>
+            <span class="title">Maintainability (SEI MI)</span>
             <span class="value">72 / 100</span>
-            <span class="subtitle">Umbral mínimo: 50</span>
+            <span class="subtitle">Minimum threshold: 50</span>
           </div>
           <div class="metric-card">
-            <span class="title">Complejidad Ciclomática</span>
+            <span class="title">Cyclomatic Complexity</span>
             <span class="value">1.5</span>
-            <span class="subtitle">Umbral máximo: 10</span>
+            <span class="subtitle">Maximum threshold: 10</span>
           </div>
           <div class="metric-card">
-            <span class="title">Cobertura BDD Requisitos</span>
+            <span class="title">Requirements BDD Coverage</span>
             <span class="value">100%</span>
-            <span class="subtitle">8 / 8 verificados</span>
+            <span class="subtitle">8 / 8 verified</span>
           </div>
         </div>
 
         <div class="chart-container">
-          <h3>Distribución de Modos de Autonomía de Tareas (Gobernanza)</h3>
+          <h3>Task Autonomy Modes Distribution (Governance)</h3>
           <table class="data-table">
             <thead>
               <tr>
-                <th>Modo de Autonomía</th>
-                <th>Semáforo</th>
-                <th>Cantidad</th>
-                <th>Rol Agente / Intervención Requerida</th>
+                <th>Autonomy Mode</th>
+                <th>Status</th>
+                <th>Count</th>
+                <th>Agent Role / Required Intervention</th>
               </tr>
             </thead>
             <tbody>
@@ -483,25 +483,25 @@
                 <td><code>AUTONOMOUS</code></td>
                 <td>🟢</td>
                 <td><strong>17</strong></td>
-                <td>Planificación y codificación autónoma. Revisión en PR.</td>
+                <td>Autonomous planning and coding. Asynchronous PR review.</td>
               </tr>
               <tr>
                 <td><code>HUMAN_REVIEW_PLAN</code></td>
                 <td>🟡</td>
                 <td><strong>6</strong></td>
-                <td>Plan detallado aprobado antes de codificar.</td>
+                <td>Detailed plan approved before coding.</td>
               </tr>
               <tr>
                 <td><code>AMBIGUOUS</code></td>
                 <td>🟠</td>
                 <td><strong>0</strong></td>
-                <td>Detenido: Refinamiento requerido con Product Owner.</td>
+                <td>Halted: Refinement required with Product Owner.</td>
               </tr>
               <tr>
                 <td><code>HIGH_RISK_MANUAL</code></td>
                 <td>🔴</td>
                 <td><strong>0</strong></td>
-                <td>Ejecución directa por ingenieros humanos.</td>
+                <td>Direct execution by human engineers.</td>
               </tr>
             </tbody>
           </table>
@@ -512,7 +512,7 @@
     <!-- TAB 4: TELEMETRY & HISTORICAL KPIS -->
     <div id="tab-kpis" class="tab-panel">
       <div class="content-container">
-        <h2>Telemetría Activa e Histórico de KPIs</h2>
+        <h2>Active Telemetry and KPI History</h2>
         
         <div class="grid-cards">
           <div class="metric-card">
@@ -542,13 +542,13 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th>Entidad / Modelo</th>
-                <th>Tipo</th>
+                <th>Entity / Model</th>
+                <th>Type</th>
                 <th>Commits</th>
-                <th>Líneas (+/-)</th>
-                <th>Tiempo Activo</th>
-                <th>Tokens Consumidos</th>
-                <th>Coste Estimado ($ USD)</th>
+                <th>Lines (+/-)</th>
+                <th>Active Time</th>
+                <th>Consumed Tokens</th>
+                <th>Estimated Cost ($ USD)</th>
               </tr>
             </thead>
             <tbody>
@@ -575,7 +575,7 @@
               </tr>
               
               <tr style="font-weight: bold; background: rgba(255,255,255,0.05);">
-                <td>TOTAL RAMA</td>
+                <td>TOTAL BRANCH</td>
                 <td>—</td>
                 <td>15</td>
                 <td>+4674 / -335</td>
@@ -589,11 +589,11 @@
         
 
         <div class="chart-container">
-          <h3>Histórico Consolidado de Releases</h3>
+          <h3>Consolidated Release History</h3>
           
           <p style="color: var(--text-muted); font-size: 0.85rem;">
-            No se registran aún informes de release consolidados en <code>reports/releases/*.kpis.json</code>.
-            Utiliza el comando <code>aisdlc kpi release --release &lt;rama&gt;</code> para consolidar métricas de entrega.
+            No consolidated release reports recorded yet in <code>reports/releases/*.kpis.json</code>.
+            Use the command <code>aisdlc kpi release --release &lt;branch&gt;</code> to consolidate delivery metrics.
           </p>
           
         </div>
@@ -971,18 +971,19 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
 
     function showNodeDetails(data) {
       var sidebar = document.getElementById('sidebar-content');
-      var html = '<div class="sidebar-field"><strong>ID / Identificador:</strong> <code>' + data.id + '</code></div>';
-      html += '<div class="sidebar-field"><strong>Título:</strong> ' + (data.title || data.label) + '</div>';
-      html += '<div class="sidebar-field"><strong>Capa / Tipo:</strong> <span class="badge" style="background:#334155;">' + data.layer.toUpperCase() + ' (' + data.type + ')</span></div>';
-      html += '<div class="sidebar-field"><strong>Estado:</strong> <span class="badge ' + (data.status === 'CONFORME' ? 'badge-green' : 'badge-amber') + '">' + data.status + '</span></div>';
+      var isConform = data.status === 'COMPLIANT' || data.status === 'CONFORME';
+      var html = '<div class="sidebar-field"><strong>ID / Identifier:</strong> <code>' + data.id + '</code></div>';
+      html += '<div class="sidebar-field"><strong>Title:</strong> ' + (data.title || data.label) + '</div>';
+      html += '<div class="sidebar-field"><strong>Layer / Type:</strong> <span class="badge" style="background:#334155;">' + data.layer.toUpperCase() + ' (' + data.type + ')</span></div>';
+      html += '<div class="sidebar-field"><strong>Status:</strong> <span class="badge ' + (isConform ? 'badge-green' : 'badge-amber') + '">' + data.status + '</span></div>';
       if (data.filePath) {
-        html += '<div class="sidebar-field"><strong>Archivo Físico:</strong> <code>' + data.filePath + '</code></div>';
+        html += '<div class="sidebar-field"><strong>Physical File:</strong> <code>' + data.filePath + '</code></div>';
       }
       if (data.upstream && data.upstream.length > 0) {
-        html += '<div class="sidebar-field"><strong>Trazas Upstream (Producto):</strong> ' + data.upstream.join(', ') + '</div>';
+        html += '<div class="sidebar-field"><strong>Upstream Traces (Product):</strong> ' + data.upstream.join(', ') + '</div>';
       }
       if (data.downstream && data.downstream.length > 0) {
-        html += '<div class="sidebar-field"><strong>Trazas Downstream (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
+        html += '<div class="sidebar-field"><strong>Downstream Traces (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
       }
       sidebar.innerHTML = html;
     }
@@ -1009,14 +1010,14 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
       if (!cy) return;
       if (status === 'all') {
         cy.elements().show();
-      } else if (status === 'CONFORME') {
+      } else if (status === 'COMPLIANT' || status === 'CONFORME') {
         cy.elements().hide();
-        var nodes = cy.nodes('.status-conforme');
+        var nodes = cy.nodes('.status-compliant, .status-conforme');
         nodes.show();
         nodes.connectedEdges().show();
       } else {
         cy.elements().hide();
-        var nodes = cy.nodes('.status-huérfano, .status-drift');
+        var nodes = cy.nodes('.status-orphan, .status-huérfano, .status-drift');
         nodes.show();
         nodes.connectedEdges().show();
       }

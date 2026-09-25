@@ -117,30 +117,30 @@ export function generatePdacReportMarkdown(
 ): string {
   const isOk = drifts.length === 0 && unresolvedCount === 0;
   const lines: string[] = [
-    `# 🔒 Matriz Criptográfica PDaC y Detección de Deriva (Anti-Drift)`,
+    `# 🔒 PDaC Cryptographic Matrix and Drift Detection (Anti-Drift)`,
     ``,
-    `> **Fecha de Evaluación:** ${new Date().toISOString()}`,
-    `> **Veredicto:** ${isOk ? '✅ ALINEADO (0 Derivas criptográficas detectadas)' : `❌ DERIVA DETECTADA (${drifts.length} Desalineaciones de digest)`}`,
+    `> **Evaluation Date:** ${new Date().toISOString()}`,
+    `> **Verdict:** ${isOk ? '✅ ALIGNED (0 Cryptographic drifts detected)' : `❌ DRIFT DETECTED (${drifts.length} Digest misalignments)`}`,
     ``,
     `---`,
     ``,
-    `## 1. Nodos de la Línea Base Canónica (${nodes.length})`,
+    `## 1. Canonical Baseline Nodes (${nodes.length})`,
     ``,
-    `| ID Artefacto | Tipo | Título | SHA-256 Digest (Línea Base) |`,
+    `| Artifact ID | Type | Title | SHA-256 Digest (Baseline) |`,
     `| :--- | :--- | :--- | :--- |`,
   ];
 
   for (const n of nodes) {
-    lines.push(`| **\`${n.id}\`** | \`${n.type}\` | ${n.title || 'Sin título'} | \`sha256:${n.digest.substring(0, 16)}...\` |`);
+    lines.push(`| **\`${n.id}\`** | \`${n.type}\` | ${n.title || 'Untitled'} | \`sha256:${n.digest.substring(0, 16)}...\` |`);
   }
 
   if (drifts.length > 0) {
     lines.push('');
     lines.push('---');
     lines.push('');
-    lines.push('## 2. Derivas Criptográficas Detectadas (Estado: STALE)');
+    lines.push('## 2. Cryptographic Drifts Detected (Status: STALE)');
     lines.push('');
-    lines.push('| Archivo Consumidor | ID Citado | Digest Esperado en Spec | Digest Actual en Línea Base |');
+    lines.push('| Consumer File | Cited ID | Expected Digest in Spec | Actual Digest in Baseline |');
     lines.push('| :--- | :--- | :--- | :--- |');
     for (const d of drifts) {
       lines.push(

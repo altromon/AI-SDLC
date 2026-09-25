@@ -92,7 +92,7 @@ export function verifyProgressiveFriction(
 
       if (isPathProtectedFromPatch(relPath)) {
         violations.push(
-          `[ANTI-PATCH-BYPASS] El archivo '${relPath}' corresponde a una ruta protegida (seguridad, esquemas, decisiones arquitectónicas o políticas maestras). Un cambio con perfil 'patch' tiene estrictamente prohibido alterar estas rutas. Debe reclasificarse a 'standard' o 'critical'.`
+          `[ANTI-PATCH-BYPASS] File '${relPath}' is a protected path (security, schemas, architectural decisions, or master policies). Changes with 'patch' profile are strictly prohibited from modifying these paths. Must be reclassified to 'standard' or 'critical'.`
         );
       }
     }
@@ -102,22 +102,22 @@ export function verifyProgressiveFriction(
   const success = !bypassed;
 
   const reportMarkdown = [
-    `# 🛡️ Informe de Fricción Progresiva y Verificación Anti-Bypass`,
+    `# 🛡️ Progressive Friction and Anti-Bypass Verification Report`,
     ``,
-    `> **Fecha:** ${new Date().toISOString()}`,
-    `> **Perfil Evaluado:** \`${profile.toUpperCase()}\``,
-    `> **Veredicto:** ${success ? 'CONFORME ✅' : 'BLOQUEADO ❌'}`,
+    `> **Date:** ${new Date().toISOString()}`,
+    `> **Evaluated Profile:** \`${profile.toUpperCase()}\``,
+    `> **Verdict:** ${success ? 'COMPLIANT ✅' : 'BLOCKED ❌'}`,
     ``,
     `---`,
     ``,
-    `## 1. Evaluación de Rutas Modificadas (${modifiedFiles.length} archivos)`,
+    `## 1. Evaluation of Modified Paths (${modifiedFiles.length} files)`,
     ``,
   ];
 
   if (violations.length === 0) {
-    reportMarkdown.push(`✔ No se han detectado violaciones del guardrail Anti-Patch Bypass.`);
+    reportMarkdown.push(`✔ No Anti-Patch Bypass guardrail violations detected.`);
   } else {
-    reportMarkdown.push(`### Infracciones Detectadas:`);
+    reportMarkdown.push(`### Detected Violations:`);
     for (const v of violations) {
       reportMarkdown.push(`- ❌ ${v}`);
     }

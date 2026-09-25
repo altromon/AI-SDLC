@@ -1,29 +1,29 @@
 ---
-description: Directivas de calidad de código, arquitectura, TDD y límites de complejidad
+description: Directives for code quality, architecture, TDD, and complexity limits
 globs: packages/**, src/**, scripts/**, tests/**
 alwaysApply: false
 ---
 
-# Directrices de Calidad de Código y Arquitectura
+# Code Quality and Architecture Directives
 
-Referencia canónica: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) y [`process/10_quality_management_and_release_gates.md`](process/10_quality_management_and_release_gates.md).
+Canonical Reference: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) and [`process/10_quality_management_and_release_gates.md`](process/10_quality_management_and_release_gates.md).
 
-## 1. Umbrales de Calidad Innegociables (`quality-policy.yaml`)
-- **Complejidad Ciclomática (CC)**: $\le 10$ por función (alerta preventiva si $> 7$).
-- **Complejidad Cognitiva**: $\le 15$ por función (alerta si $> 10$).
-- **Índice de Mantenibilidad (MI)**: $\ge 50$ (mínimo objetivo $\ge 65$).
-- **Longitud de Función**: $\le 40$ líneas (alerta si $> 30$).
-- Si una función excede estos límites, descompón la lógica en funciones auxiliares cohesivas antes de finalizar la tarea.
+## 1. Non-Negotiable Quality Thresholds (`quality-policy.yaml`)
+- **Cyclomatic Complexity (CC) | Complejidad Ciclomática**: $\le 10$ per function (warning if $> 7$).
+- **Cognitive Complexity**: $\le 15$ per function (warning if $> 10$).
+- **Maintainability Index (MI) | Índice de Mantenibilidad**: $\ge 50$ (target minimum $\ge 65$).
+- **Function Length**: $\le 40$ lines (warning if $> 30$).
+- If a function exceeds these limits, decompose logic into cohesive helper functions before completing the task.
 
-## 2. Metodología TDD y Pruebas Unitarias
-- Aplica Test-Driven Development: genera las pruebas unitarias antes o en paralelo a la lógica del componente.
-- Etiqueta las pruebas vinculadas a requerimientos con comentarios de cabecera citando el ID (`FR-*` o `SEC-REQ-*`) para habilitar la trazabilidad inversa.
-- Prohibido suprimir tipos (`any`), reglas de linter (`eslint-disable`) o tests unitarios para forzar que el pipeline pase.
+## 2. TDD Methodology and Unit Testing
+- Apply Test-Driven Development (TDD): generate unit tests before or alongside component logic.
+- Tag tests linked to requirements with header comments citing the ID (`FR-*` or `SEC-REQ-*`) to enable reverse traceability.
+- Suppressing types (`any`), linter rules (`eslint-disable`), or unit tests to force a green pipeline is strictly forbidden.
 
-## 3. Política de Licencias Open Source (`license-policy.yaml`)
-- Antes de agregar cualquier dependencia en `package.json`, verifica su identificador SPDX.
-- Solo se permiten dependencias permisivas (`MIT`, `Apache-2.0`, `BSD-2/3-Clause`, `ISC`).
-- Prohibidas licencias virales (`GPL`, `AGPL`) o comerciales sin aprobación (`BSL`, `SSPL`).
+## 3. Open Source License Policy (`license-policy.yaml`)
+- Before adding any dependency to `package.json`, verify its SPDX identifier.
+- Only permissive dependencies are allowed (`MIT`, `Apache-2.0`, `BSD-2/3-Clause`, `ISC`).
+- Viral licenses (`GPL`, `AGPL`) or commercial licenses without approval (`BSL`, `SSPL`) are forbidden.
 
-## 4. Salida Estructurada `--json`
-- Cualquier extensión a los comandos de CLI debe preservar la compatibilidad con el flag `--json` y suprimir códigos de escape ANSI cuando este flag esté presente.
+## 4. Structured `--json` Output
+- Any extension to CLI commands must maintain compatibility with the `--json` flag and suppress ANSI escape codes when this flag is present.

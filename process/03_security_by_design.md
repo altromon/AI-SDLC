@@ -1,30 +1,30 @@
-# 03. Ciberseguridad Shift-Left: Security-by-Design as Code
+# 03. Shift-Left Cybersecurity: Security-by-Design as Code
 
-## 1. Visión y Enfoque Shift-Left
+## 1. Vision and Shift-Left Approach
 
-En los sistemas modernos y en particular en aquellos asistidos por agentes autónomos, la seguridad no puede relegarse a una auditoría estática previa a producción. **La ciberseguridad debe ser modelada de forma nativa desde la fase de definición del producto y la arquitectura (Security-by-Design as Code)**.
+In modern systems, and specifically those assisted by autonomous agents, security cannot be relegated to static pre-production audits. **Cybersecurity must be natively modeled from the product definition and architecture phase (Security-by-Design as Code)**.
 
-Todo sistema define quién lo usa legítimamente (`ACT-*`); en AI-SDLC es **obligatorio** modelar también quién intenta atacarlo o vulnerarlo (`ACT-THREAT-*`), cómo lo intenta (`ABUSE-*`) y qué controles formales lo impiden (`SEC-REQ-*`).
+Every system defines who uses it legitimately (`ACT-*`); in AI-SDLC it is **mandatory** to also model who attempts to attack or compromise it (`ACT-THREAT-*`), how they attempt it (`ABUSE-*`), and what formal controls prevent it (`SEC-REQ-*`).
 
 ---
 
-## 2. Familias de Artefactos de Ciberseguridad
+## 2. Cybersecurity Artifact Families
 
 ```
            ┌───────────────────────┐
            │ THREAT ACTOR (ACT-THREAT) │
            └───────────┬───────────┘
-                       │ ejecuta
+                       │ executes
                        ▼
            ┌───────────────────────┐
-           │   ABUSE CASE (ABUSE)  │ ◄──── amenaza sobre ──── USE CASE (UC)
+           │   ABUSE CASE (ABUSE)  │ ◄──── threat against ──── USE CASE (UC)
            └───────────┬───────────┘
-                       │ clasificado por
+                       │ classified by
                        ▼
            ┌───────────────────────┐
            │ THREAT MODEL (THREAT) │ (STRIDE / ASVS / MITRE)
            └───────────┬───────────┘
-                       │ mitigado por
+                       │ mitigated by
                        ▼
         ┌─────────────────────────────┐
         │ SECURITY REQUIREMENT (SEC)  │
@@ -34,58 +34,58 @@ Todo sistema define quién lo usa legítimamente (`ACT-*`); en AI-SDLC es **obli
        ▼                               ▼
 ┌─────────────────────────┐     ┌─────────────────────────┐
 │ ARCHITECTURE CONTROLS   │     │ SECURITY TESTS          │
-│ (arc42 Sec. 8 / SEC-ENC)│     │ (SEC-TEST-* en CI/CD)   │
+│ (arc42 Sec. 8 / SEC-ENC)│     │ (SEC-TEST-* in CI/CD)   │
 └─────────────────────────┘     └─────────────────────────┘
 ```
 
-### 1. Actores Maliciosos (`ACT-THREAT-*`)
-- Caracterización del adversario: atacante no autenticado en internet, usuario interno malicioso con privilegios limitados, atacante en la cadena de suministro, etc.
-- Atributos: motivación, nivel de recursos, vectores de acceso potenciales.
+### 1. Threat Actors (`ACT-THREAT-*`)
+- Adversary characterization: unauthenticated internet attacker, malicious insider with limited privileges, supply-chain attacker, etc.
+- Attributes: motivation, resource level, potential access vectors.
 
-### 2. Casos de Abuso y Maluso (`ABUSE-*`)
-- Escenarios deliberados de explotación o comportamiento anómalo que atentan contra la confidencialidad, integridad, disponibilidad o autenticidad del producto.
-- Todo `ABUSE-*` debe declarar a qué caso de uso legítimo (`targets-use-case: UC-*`) intenta explotar o desviar.
+### 2. Abuse Cases (`ABUSE-*`)
+- Deliberate exploitation scenarios or anomalous behaviors targeting product confidentiality, integrity, availability, or authenticity.
+- Every `ABUSE-*` must declare which legitimate use case (`targets-use-case: UC-*`) it attempts to exploit or subvert.
 
-### 3. Modelado de Amenazas STRIDE / OWASP ASVS (`THREAT-*`)
-- Clasificación estructurada del vector de ataque:
-  - **S**poofing (Suplantación de identidad).
-  - **T**ampering (Manipulación no autorizada de datos).
-  - **R**epudiation (Repudio de acciones realizadas).
-  - **I**nformation Disclosure (Fuga de información confidencial).
-  - **D**enial of Service (Denegación de servicio / agotamiento de recursos).
-  - **E**levation of Privilege (Escalado de privilegios).
-- Mapeo directo a los niveles de verificación de OWASP ASVS (L1, L2, L3) o CWEs conocidos.
+### 3. Threat Modeling STRIDE / OWASP ASVS (`THREAT-*`)
+- Structured classification of attack vectors:
+  - **S**poofing (Identity spoofing).
+  - **T**ampering (Unauthorized data manipulation).
+  - **R**epudiation (Repudiating executed actions).
+  - **I**nformation Disclosure (Confidential data leakage).
+  - **D**enial of Service (Service exhaustion / resource depletion).
+  - **E**levation of Privilege (Privilege escalation).
+- Direct mapping to OWASP ASVS verification levels (L1, L2, L3) or known CWEs.
 
-### 4. Requisitos de Seguridad (`SEC-REQ-*`)
-- Requerimientos técnicos y normativos derivados directamente para neutralizar un `ABUSE-*`.
-- Ejemplos: Autenticación mTLS obligatoria, rotación de claves cada 90 días, cifrado en reposo AES-GCM-256, sanitización estricta de prompts/entradas, rate-limiting distribuido.
+### 4. Security Requirements (`SEC-REQ-*`)
+- Technical and normative requirements derived directly to neutralize an `ABUSE-*`.
+- Examples: Mandatory mTLS authentication, 90-day key rotation, AES-GCM-256 encryption at rest, strict prompt/input sanitization, distributed rate-limiting.
 
-### 5. Políticas y Enclaves de Confianza (`SEC-POL-*`, `SEC-ENC-*`)
-- Fronteras de seguridad arquitectónicas: redes perimetrales (DMZ), zonas de datos confidenciales, enclaves seguros con autenticación mutua, y políticas Zero Trust de mínimos privilegios.
-
----
-
-## 3. Trazabilidad Criptográfica de la Mitigación
-
-Para garantizar que ninguna amenaza quede sin mitigar:
-1. **Regla de Grafo Obligatoria**:
-   - Todo `ABUSE-*` debe estar vinculado a al menos un `SEC-REQ-*` mediante la relación `mitigated-by`.
-2. **Regla de Implementación**:
-   - Toda especificación de entrega (`SPEC-*`) que implemente un servicio o componente debe citar los `SEC-REQ-*` aplicables.
-3. **Regla de Verificación (Threat-to-Test) y Trazabilidad Invertida**:
-   - Todo `SEC-REQ-*` implementado debe contar con al menos una prueba automatizada (`SEC-TEST-*`, `.spec.ts` o `.feature`) que valide activamente el rechazo del ataque o el cumplimiento del control criptográfico.
-   - Siguiendo el modelo de trazabilidad invertida, el archivo `SEC-REQ-*` no almacena rutas de pruebas; son los archivos de prueba los que etiquetan (`@SEC-REQ-*`) o citan el requisito en sus comentarios de cabecera, permitiendo la resolución inversa y preservando la inmutabilidad criptográfica de la especificación de seguridad.
+### 5. Policies and Trust Enclaves (`SEC-POL-*`, `SEC-ENC-*`)
+- Architectural security boundaries: perimeter networks (DMZ), confidential data zones, secure enclaves with mutual authentication, and least-privilege Zero Trust policies.
 
 ---
 
-## 4. Estructura de Carpetas de Seguridad
+## 3. Cryptographic Mitigation Traceability
+
+To guarantee no threat remains unmitigated:
+1. **Mandatory Graph Rule**:
+   - Every `ABUSE-*` must be linked to at least one `SEC-REQ-*` via `mitigated-by`.
+2. **Implementation Rule**:
+   - Every delivery specification (`SPEC-*`) implementing a service or component must cite applicable `SEC-REQ-*`.
+3. **Verification Rule (Threat-to-Test) and Inverted Traceability**:
+   - Every implemented `SEC-REQ-*` must have at least one automated test (`SEC-TEST-*`, `.spec.ts`, or `.feature`) actively validating attack rejection or cryptographic control compliance.
+   - Following the inverted traceability model, the `SEC-REQ-*` file stores no test paths; test files tag (`@SEC-REQ-*`) or cite the requirement in their headers, enabling reverse lookup and preserving the cryptographic immutability of the security specification.
+
+---
+
+## 4. Security Directory Structure
 
 ```text
 docs/security/
 ├── actors/                               # ACT-THREAT-*.md
 ├── abuse-cases/                          # ABUSE-*.md
-├── threats/                              # THREAT-*.md (Modelado STRIDE/ASVS)
+├── threats/                              # THREAT-*.md (STRIDE/ASVS modeling)
 ├── requirements/                         # SEC-REQ-*.md
-├── policies/                             # SEC-POL-*.md (Políticas Zero Trust, etc.)
-└── enclaves/                             # SEC-ENC-*.md (Fronteras y enclaves de confianza)
+├── policies/                             # SEC-POL-*.md (Zero Trust policies, etc.)
+└── enclaves/                             # SEC-ENC-*.md (Trust boundaries & enclaves)
 ```

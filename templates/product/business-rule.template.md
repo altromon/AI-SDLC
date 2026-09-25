@@ -1,31 +1,31 @@
 ---
-id: BR-DOMINIO-001
+id: BR-DOMAIN-001
 type: business-rule
-title: Nombre de la Regla de Negocio
+title: Business Rule Name
 status: draft
 version: "1.0.0"
 schema-version: "1.0"
 enforcement-level: strict-invariant # strict-invariant, override-with-approval, guideline
-defined-in: BC-CONTEXTO-001
+defined-in: BC-CONTEXT-001
 uses-terms:
-  - TERM-TERMINO-001
+  - TERM-TERM-001
 supersedes: null
 superseded-by: null
 ---
 
-# BR-DOMINIO-001: Nombre de la Regla de Negocio
+# BR-DOMAIN-001: Business Rule Name
 
-## 1. Definición de la Regla
-Establece de manera formal el invariante de negocio que no puede violarse bajo ninguna circunstancia.
+## 1. Rule Definition
+Formally establishes the business invariant that must not be violated under any circumstance.
 
-## 2. Razón de Negocio y Consecuencias
-- **Por qué existe**: Justificación económica, regulatoria o técnica de la restricción.
-- **Acción ante violación**: Rechazo inmediato de la transacción con código de error formal.
+## 2. Business Rationale and Consequences
+- **Why it exists**: Economic, regulatory, or technical justification for the constraint.
+- **Action upon violation**: Immediate transaction rejection with a formal error code.
 
 ---
 
-## 3. Historial de Revisiones y Control de Versiones
+## 3. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-03 | Product Owner / Analista | Definición inicial de la regla de negocio | CHG-INIT-001 |
+| **1.0.0** | 2026-09-03 | Product Owner / Analyst | Initial business rule definition | CHG-INIT-001 |

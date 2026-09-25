@@ -183,7 +183,7 @@ export function evaluateSingleDependency(dep: ScannedDependency, policy: License
       version: dep.version,
       license: 'UNKNOWN',
       category: 'UNRECOGNIZED',
-      reason: `Licencia desconocida o no identificada para "${dep.name}". Se requiere resolución formal de licencia.`,
+      reason: `Unknown or unidentified license for "${dep.name}". Formal license resolution required.`,
     };
   }
 
@@ -195,7 +195,7 @@ export function evaluateSingleDependency(dep: ScannedDependency, policy: License
       version: dep.version,
       license: lic,
       category: 'BLOCKED',
-      reason: `Licencia "${lic}" está clasificada como Copyleft Fuerte / Viral. Prohibida en código o SaaS comercial.`,
+      reason: `License "${lic}" is classified as Strong Copyleft / Viral. Prohibited in commercial code or SaaS.`,
     };
   }
 
@@ -208,7 +208,7 @@ export function evaluateSingleDependency(dep: ScannedDependency, policy: License
       version: dep.version,
       license: lic,
       category: 'RESTRICTED',
-      reason: `Licencia "${lic}" requiere aprobación expresa comercial o de arquitectura en license-policy.yaml.`,
+      reason: `License "${lic}" requires explicit commercial or architecture approval in license-policy.yaml.`,
     };
   }
 
@@ -221,7 +221,7 @@ export function evaluateSingleDependency(dep: ScannedDependency, policy: License
     version: dep.version,
     license: lic,
     category: 'UNRECOGNIZED',
-    reason: `Licencia "${lic}" no se encuentra registrada en las categorías permitidas de license-policy.yaml.`,
+    reason: `License "${lic}" is not registered in the permitted categories of license-policy.yaml.`,
   };
 }
 
@@ -233,41 +233,41 @@ export function generateLicenseReportMarkdown(
 ): string {
   const isOk = violations.length === 0;
   const lines: string[] = [
-    `# 📜 Auditoría de Cumplimiento de Licencias Open Source (SCA Dinámico)`,
+    `# 📜 Open Source License Compliance Audit (Dynamic SCA)`,
     ``,
-    `> **Fecha de Verificación:** ${new Date().toISOString()}`,
-    `> **Estado:** ${isOk ? '✅ CONFORME (100% Licencias Permitidas / Autorizadas)' : `❌ NO CONFORME (${violations.length} Violaciones Detectadas)`}`,
-    `> **Total Dependencias Auditadas:** ${dependencies.length}`,
-    sbomPath ? `> **SBOM CycloneDX Generado:** \`${sbomPath}\`` : '',
+    `> **Verification Date:** ${new Date().toISOString()}`,
+    `> **Status:** ${isOk ? '✅ COMPLIANT (100% Permitted / Authorized Licenses)' : `❌ NON-COMPLIANT (${violations.length} Violations Detected)`}`,
+    `> **Total Audited Dependencies:** ${dependencies.length}`,
+    sbomPath ? `> **Generated CycloneDX SBOM:** \`${sbomPath}\`` : '',
     ``,
     `---`,
     ``,
-    `## 1. Resumen de Dependencias Evaluadas`,
+    `## 1. Evaluated Dependencies Summary`,
     ``,
-    `| Paquete | Versión | Licencia SPDX | Tipo | Veredicto AI-SDLC |`,
+    `| Package | Version | SPDX License | Type | AI-SDLC Verdict |`,
     `| :--- | :--- | :---: | :---: | :---: |`,
   ];
 
   for (const dep of dependencies) {
     const violation = violations.find((v) => v.packageName === dep.name);
-    const verdict = violation ? `❌ ${violation.category}` : '✅ PERMITIDA';
-    const depType = dep.isDirect ? 'Directa' : 'Transitiva';
+    const verdict = violation ? `❌ ${violation.category}` : '✅ PERMITTED';
+    const depType = dep.isDirect ? 'Direct' : 'Transitive';
     lines.push(`| **\`${dep.name}\`** | \`${dep.version}\` | \`${dep.spdxLicense}\` | ${depType} | ${verdict} |`);
   }
 
   if (violations.length > 0) {
-    lines.push('', '---', '', '## 2. Infracciones y Alertas de Licencias', '');
-    lines.push('| Paquete | Licencia | Categoría | Detalle de la Infracción |');
+    lines.push('', '---', '', '## 2. License Violations and Alerts', '');
+    lines.push('| Package | License | Category | Violation Details |');
     lines.push('| :--- | :---: | :---: | :--- |');
     for (const v of violations) {
       lines.push(`| **\`${v.packageName}\`** | \`${v.license}\` | \`${v.category}\` | ${v.reason} |`);
     }
   }
 
-  lines.push('', '---', '', '## 3. Políticas SPDX Activas');
-  lines.push(`- **Permisivas (${policy.permitted.length}):** \`${policy.permitted.slice(0, 8).join('`, `')}${policy.permitted.length > 8 ? '...' : ''}\``);
-  lines.push(`- **Restringidas (${policy.restricted.length}):** \`${policy.restricted.join('`, `')}\``);
-  lines.push(`- **Bloqueadas/Virales (${policy.blocked.length}):** \`${policy.blocked.join('`, `')}\``);
+  lines.push('', '---', '', '## 3. Active SPDX Policies');
+  lines.push(`- **Permissive (${policy.permitted.length}):** \`${policy.permitted.slice(0, 8).join('`, `')}${policy.permitted.length > 8 ? '...' : ''}\``);
+  lines.push(`- **Restricted (${policy.restricted.length}):** \`${policy.restricted.join('`, `')}\``);
+  lines.push(`- **Blocked/Viral (${policy.blocked.length}):** \`${policy.blocked.join('`, `')}\``);
 
   return lines.filter(Boolean).join('\n');
 }

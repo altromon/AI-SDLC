@@ -48,8 +48,8 @@ describe('Pull Request KPI Aggregator and Formatter', () => {
 
     expect(md).toContain(KPI_SUMMARY_START_TAG);
     expect(md).toContain(KPI_SUMMARY_END_TAG);
-    expect(md).toContain('Humano');
-    expect(md).toContain('Agente (claude-3-7-sonnet)');
+    expect(md).toContain('Human');
+    expect(md).toContain('Agent (claude-3-7-sonnet)');
     expect(md).toContain('+350 / -40');
     expect(md).toContain('28,000 tokens');
     expect(md).toContain('$0.12 USD');

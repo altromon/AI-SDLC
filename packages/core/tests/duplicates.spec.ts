@@ -17,7 +17,7 @@ describe('AI-SDLC Duplicate Requirements Verifier Suite', () => {
     expect(result.success).toBe(true);
     expect(result.errorCount).toBe(0);
     expect(result.totalRequirements).toBeGreaterThanOrEqual(1);
-    expect(result.reportMarkdown).toContain('CONFORME');
+    expect(result.reportMarkdown).toContain('COMPLIANT');
   });
 
   it('should calculate title tokenization and Jaccard similarity correctly', () => {

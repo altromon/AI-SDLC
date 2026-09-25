@@ -24,7 +24,7 @@
     "version": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
-      "description": "Versión semántica del término (SemVer)."
+      "description": "Term semantic version (SemVer)."
     },
     "schema-version": {
       "type": "string"
@@ -32,7 +32,7 @@
     "title": {
       "type": "string",
       "minLength": 2,
-      "description": "Nombre canónico del término en el lenguaje ubicuo del dominio."
+      "description": "Canonical name of the term in the domain ubiquitous language."
     },
     "status": {
       "type": "string",
@@ -41,25 +41,25 @@
     "definition": {
       "type": "string",
       "minLength": 10,
-      "description": "Definición precisa y no ambigua del término en el contexto del dominio."
+      "description": "Precise and unambiguous definition of the term in the domain context."
     },
     "bounded-context": {
       "type": "string",
-      "description": "Bounded context de DDD al que pertenece este término (ej. FlightControl, Telemetry, Billing)."
+      "description": "DDD Bounded Context this term belongs to (e.g. FlightControl, Telemetry, Billing)."
     },
     "synonyms": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Sinónimos o términos alternativos usados coloquialmente que se mapean a este término canónico."
+      "description": "Synonyms or alternative terms used colloquially that map to this canonical term."
     },
     "anti-terms": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Términos incorrectos o ambiguos que NO deben usarse para referirse a este concepto."
+      "description": "Incorrect or ambiguous terms that MUST NOT be used for this concept."
     },
     "related-terms": {
       "type": "array",
@@ -67,7 +67,7 @@
         "type": "string",
         "pattern": "^TERM-[A-Z0-9]+(-[A-Z0-9]+)*$"
       },
-      "description": "Términos del glosario relacionados semánticamente."
+      "description": "Glossary terms semantically related."
     },
     "supersedes": {
       "type": ["string", "null"]

@@ -1,59 +1,59 @@
 ---
-id: JRN-NOMBRE-001
+id: JRN-NAME-001
 type: journey
-title: Título Descriptivo del Journey de Usuario u Operador
+title: Descriptive User or Operator Journey Title
 status: draft
 version: "1.0.0"
 schema-version: "1.0"
-persona: ACT-OPERADOR-001
+persona: ACT-OPERATOR-001
 stages:
-  - "Descubrimiento y Planificación"
-  - "Configuración y Pre-vuelo"
-  - "Ejecución de Misión"
-  - "Análisis Posterior y Cierre"
+  - "Discovery and Planning"
+  - "Configuration and Pre-flight"
+  - "Mission Execution"
+  - "Post-Analysis and Wrap-up"
 touchpoints:
-  - "Portal web de planificación de misiones"
-  - "Estación de control en tierra (GCS)"
-  - "Panel de telemetría en tiempo real"
-  - "Exportador de reportes de vuelo"
+  - "Mission planning web portal"
+  - "Ground control station (GCS)"
+  - "Real-time telemetry dashboard"
+  - "Flight report exporter"
 related-use-cases:
-  - UC-PLANIFICAR-MISION-001
-  - UC-MONITOREAR-VUELO-001
+  - UC-PLAN-MISSION-001
+  - UC-MONITOR-FLIGHT-001
 pain-points:
-  - "Latencia en la carga de mapas de navegación sin conexión"
-  - "Complejidad en la reconciliación manual de planes de vuelo"
+  - "Latency when loading offline navigation maps"
+  - "Complexity in manual flight plan reconciliation"
 supersedes: null
 superseded-by: null
 ---
 
-# JRN-NOMBRE-001: Título Descriptivo del Journey de Usuario u Operador
+# JRN-NAME-001: Descriptive User or Operator Journey Title
 
-## 1. Perfil del Actor / Persona Principal
-- **Actor Protagonista**: `ACT-OPERADOR-001`
-- **Objetivo Principal**: Completar el flujo operativo con alta eficiencia, seguridad y visibilidad en tiempo real.
+## 1. Actor / Primary Persona Profile
+- **Protagonist Actor**: `ACT-OPERATOR-001`
+- **Main Goal**: Complete operational workflow with high efficiency, safety, and real-time visibility.
 
 ---
 
-## 2. Mapa de Etapas del Journey
+## 2. Journey Stages Map
 
-| Etapa | Objetivo del Usuario | Puntos de Contacto (Touchpoints) | Fricciones / Pain Points |
+| Stage | User Goal | Touchpoints | Frictions / Pain Points |
 | :--- | :--- | :--- | :--- |
-| **1. Descubrimiento y Planificación** | Diseñar la ruta y validar restricciones operativas | Portal web de planificación de misiones | Complejidad en la reconciliación manual de planes de vuelo |
-| **2. Configuración y Pre-vuelo** | Verificar estado de los subsistemas y enlace | Estación de control en tierra (GCS) | Latencia en la carga de mapas de navegación sin conexión |
-| **3. Ejecución de Misión** | Supervisar telemetría y responder a alertas | Panel de telemetría en tiempo real | Ninguna detectada en flujo nominal |
-| **4. Análisis Posterior y Cierre** | Exportar logs de misión y métricas de desempeño | Exportador de reportes de vuelo | Tiempos de consolidación de telemetría |
+| **1. Discovery and Planning** | Design route and validate operational constraints | Mission planning web portal | Complexity in manual flight plan reconciliation |
+| **2. Configuration and Pre-flight** | Verify subsystem health and link integrity | Ground control station (GCS) | Latency when loading offline navigation maps |
+| **3. Mission Execution** | Supervise telemetry and respond to alerts | Real-time telemetry dashboard | None detected in nominal flow |
+| **4. Post-Analysis and Wrap-up** | Export mission logs and performance metrics | Flight report exporter | Telemetry consolidation latency |
 
 ---
 
-## 3. Trazabilidad a Casos de Uso y Producto
+## 3. Traceability to Use Cases and Product
 
-- `UC-PLANIFICAR-MISION-001`: Planificación y validación de corredores seguros.
-- `UC-MONITOREAR-VUELO-001`: Ingesta y visualización de telemetría en tiempo real.
+- `UC-PLAN-MISSION-001`: Planning and validation of safe corridors.
+- `UC-MONITOR-FLIGHT-001`: Ingestion and visualization of real-time telemetry.
 
 ---
 
-## 4. Historial de Revisiones
+## 4. Revision History
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-23 | Product Manager / UX Lead | Definición inicial del journey del operador | CHG-INIT-001 |
+| **1.0.0** | 2026-09-23 | Product Manager / UX Lead | Initial operator journey definition | CHG-INIT-001 |

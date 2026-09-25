@@ -1,57 +1,57 @@
 ---
-id: HAZ-NOMBRE-001
+id: HAZ-NAME-001
 type: hazard
-title: Título Descriptivo del Peligro Operacional
+title: Descriptive Operational Hazard Title
 status: draft
 version: "1.0.0"
 schema-version: "1.0"
 severity: critical # catastrophic, critical, major, minor, negligible
 probability: remote # frequent, probable, occasional, remote, improbable, extremely-improbable
-fault-tolerance-time-ms: 250 # FTTI: Tiempo máximo de tolerancia a fallos en milisegundos
+fault-tolerance-time-ms: 250 # FTTI: Fault tolerance time interval in milliseconds
 
-# Requisitos de Safety que mitigan este peligro (Downstream)
+# Safety requirements mitigating this hazard (Downstream)
 mitigated-by:
-  - SAF-REQ-NOMBRE-001
+  - SAF-REQ-NAME-001
 
-hazardous-condition: "Descripción de la condición operacional anómala o fallo que genera el peligro."
-potential-effect: "Pérdida de control operacional, daño estructural o colisión no intencionada."
+hazardous-condition: "Description of the anomalous operational condition or failure generating the hazard."
+potential-effect: "Loss of operational control, structural damage, or unintended collision."
 supersedes: null
 superseded-by: null
 ---
 
-# HAZ-NOMBRE-001: Título Descriptivo del Peligro Operacional
+# HAZ-NAME-001: Descriptive Operational Hazard Title
 
-## 1. Definición del Peligro Operacional
-Descripción detallada y concisa de la condición operativa no deseada que representa un riesgo para la misión, el sistema o el entorno físico.
+## 1. Operational Hazard Definition
+Detailed and concise description of the unintended operational condition representing a risk to the mission, the system, or the physical environment.
 
-## 2. Clasificación de Severidad y Probabilidad
+## 2. Severity and Probability Classification
 
-| Parámetro | Clasificación | Justificación Técnica |
+| Parameter | Classification | Technical Justification |
 | :--- | :--- | :--- |
-| **Severidad** | `critical` | Potencial daño significativo a la aeronave o misión sin pérdida humana directa. |
-| **Probabilidad** | `remote` | Tasa de fallo estimada $< 10^{-5}$ por hora de operación nominal. |
-| **FTTI (Tolerancia a Fallos)** | `250 ms` | Ventana temporal máxima para transicionar a modo seguro antes de efectos adversos. |
+| **Severity** | `critical` | Potential significant damage to aircraft or mission without direct human casualty. |
+| **Probability** | `remote` | Estimated failure rate $< 10^{-5}$ per nominal operating hour. |
+| **FTTI (Fault Tolerance)** | `250 ms` | Maximum time window to transition to safe state prior to adverse effects. |
 
-## 3. Condiciones Desencadenantes y Efectos
+## 3. Triggering Conditions and Effects
 
-### Condición Anómala
-Detallar el evento iniciador (fallo de sensor, pérdida de enlace, congelamiento de bus CAN o degradación de actuador).
+### Anomalous Condition
+Detail the initiating event (sensor failure, link loss, CAN bus freeze, or actuator degradation).
 
-### Efecto Potencial
-Consecuencia directa si el fallo no es detectado y mitigado en el intervalo FTTI.
+### Potential Effect
+Direct consequence if the failure is not detected and mitigated within the FTTI interval.
 
 ---
 
-## 4. Trazabilidad de Mitigación (Downstream Safety Requirements)
+## 4. Mitigation Traceability (Downstream Safety Requirements)
 
-| Requisito de Safety | Acción Fail-Safe | Estado de Mitigación |
+| Safety Requirement | Fail-Safe Action | Mitigation Status |
 | :--- | :--- | :--- |
-| `SAF-REQ-NOMBRE-001` | Maniobra de contingencia o paso a estado seguro | Diseñado |
+| `SAF-REQ-NAME-001` | Contingency maneuver or transition to safe state | Designed |
 
 ---
 
-## 5. Historial de Revisiones
+## 5. Revision History
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-23 | Safety Engineer | Creación inicial de la definición de peligro | CHG-INIT-001 |
+| **1.0.0** | 2026-09-23 | Safety Engineer | Initial hazard definition creation | CHG-INIT-001 |

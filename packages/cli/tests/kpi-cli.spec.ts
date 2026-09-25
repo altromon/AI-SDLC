@@ -76,7 +76,7 @@ Active-Time-Seconds: 300
 
     expect(prSuccess).toBe(true);
     const updatedPrDoc = fs.readFileSync(prDocPath, 'utf-8');
-    expect(updatedPrDoc).toContain('AI-SDLC: Resumen Agregado de KPIs de la PR');
+    expect(updatedPrDoc).toContain('AI-SDLC: Aggregated PR KPI Summary');
     expect(updatedPrDoc).toContain('claude-3-7-sonnet');
     expect(updatedPrDoc).toContain('11,200 tokens');
   });

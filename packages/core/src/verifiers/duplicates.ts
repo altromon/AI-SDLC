@@ -264,7 +264,7 @@ export function verifyArtifactDuplicates(
           conflictingId: b.id,
           conflictingFile: b.relFile,
           similarityScore: Math.round(similarity * 100) / 100,
-          message: `Títulos con alta redundancia léxica (${Math.round(similarity * 100)}% de similitud) entre '${a.id}' ("${a.title}") y '${b.id}' ("${b.title}").`,
+          message: `Titles with high lexical redundancy (${Math.round(similarity * 100)}% similarity) between '${a.id}' ("${a.title}") and '${b.id}' ("${b.title}").`,
         });
       }
 
@@ -292,7 +292,7 @@ export function verifyArtifactDuplicates(
             file: a.relFile,
             conflictingId: b.id,
             conflictingFile: b.relFile,
-            message: `Colisión en etiquetas de prueba BDD: '${a.id}' y '${b.id}' reclaman las mismas etiquetas específicas: @${Array.from(specificTagsA).join(' @')}.`,
+            message: `BDD test tag collision: '${a.id}' and '${b.id}' claim the same specific tags: @${Array.from(specificTagsA).join(' @')}.`,
           });
         }
       }
@@ -309,7 +309,7 @@ export function verifyArtifactDuplicates(
             file: a.relFile,
             conflictingId: b.id,
             conflictingFile: b.relFile,
-            message: `Posible solapamiento de lógica: tanto '${a.id}' como '${b.id}' gobiernan la misma regla de negocio atómica '${br}'.`,
+            message: `Potential logic overlap: both '${a.id}' and '${b.id}' govern the same atomic business rule '${br}'.`,
           });
         }
       }
@@ -334,11 +334,11 @@ export function verifyArtifactDuplicates(
 export function generateDuplicatesReportMarkdown(result: DuplicateVerifierResult): string {
   const isOk = result.success;
   const lines: string[] = [
-    `# 🛡️ Auditoría de Requisitos Duplicados y Redundancia (Shift-Left Pre-Flight)`,
+    `# 🛡️ Duplicate Requirements and Redundancy Audit (Shift-Left Pre-Flight)`,
     ``,
-    `> **Fecha de Evaluación:** ${new Date().toISOString()}`,
-    `> **Veredicto:** ${isOk ? '✅ CONFORME (Sin duplicados bloqueantes)' : `❌ BLOQUEADO (${result.errorCount} errores de duplicidad detectados)`}`,
-    `> **Requisitos Auditados:** ${result.totalRequirements} | **Errores:** ${result.errorCount} | **Advertencias:** ${result.warningCount}`,
+    `> **Evaluation Date:** ${new Date().toISOString()}`,
+    `> **Verdict:** ${isOk ? '✅ COMPLIANT (No blocking duplicates)' : `❌ BLOCKED (${result.errorCount} duplicate errors detected)`}`,
+    `> **Audited Requirements:** ${result.totalRequirements} | **Errors:** ${result.errorCount} | **Warnings:** ${result.warningCount}`,
     ``,
     `---`,
   ];
@@ -346,17 +346,17 @@ export function generateDuplicatesReportMarkdown(result: DuplicateVerifierResult
   if (result.issues.length === 0) {
     lines.push(
       ``,
-      `## Resumen de Conformidad`,
+      `## Compliance Summary`,
       ``,
-      `Todos los requisitos analizados respetan el principio de identificador único, diferencian títulos y enunciados normativos, y presentan escenarios de prueba BDD desacoplados.`,
-      `El desglose de múltiples requisitos atómicos por Caso de Uso (SRP) es conforme.`
+      `All analyzed requirements respect the unique identifier principle, distinguish titles and normative statements, and present decoupled BDD test scenarios.`,
+      `The breakdown of multiple atomic requirements per Use Case (SRP) is compliant.`
     );
   } else {
     lines.push(
       ``,
-      `## Detalle de Infracciones y Advertencias`,
+      `## Violations and Warnings Detail`,
       ``,
-      `| Severidad | Tipo de Colisión | Requisito A | Requisito B | Mensaje |`,
+      `| Severity | Collision Type | Requirement A | Requirement B | Message |`,
       `| :---: | :--- | :--- | :--- | :--- |`
     );
 

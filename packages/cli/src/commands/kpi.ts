@@ -45,13 +45,13 @@ export function runKpiPr(options: KpiPrCliOptions): boolean {
 
     if (options.updateFile) {
       if (!fs.existsSync(options.updateFile)) {
-        console.error(pc.red(`\n✖ [ERROR] El archivo objetivo '${options.updateFile}' no existe.\n`));
+        console.error(pc.red(`\n✖ [ERROR] Target file '${options.updateFile}' does not exist.\n`));
         return false;
       }
       const original = fs.readFileSync(options.updateFile, 'utf-8');
       const updated = injectKpisIntoPrBody(original, markdown);
       fs.writeFileSync(options.updateFile, updated, 'utf-8');
-      console.log(pc.green(`✔ [ACTUALIZADO] Resumen de KPIs inyectado en '${options.updateFile}'.`));
+      console.log(pc.green(`✔ [UPDATED] KPI summary injected into '${options.updateFile}'.`));
     } else {
       console.log('\n' + markdown + '\n');
     }
@@ -59,14 +59,14 @@ export function runKpiPr(options: KpiPrCliOptions): boolean {
     return true;
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error(pc.red(`\n✖ [ERROR] Fallo al calcular KPIs de PR: ${msg}\n`));
+    console.error(pc.red(`\n✖ [ERROR] Failed to calculate PR KPIs: ${msg}\n`));
     return false;
   }
 }
 
 export function runKpiRelease(options: KpiReleaseCliOptions): boolean {
   if (!options.release) {
-    console.error(pc.red('\n✖ [ERROR] Debe especificar la rama de la release (--release <rama>).\n'));
+    console.error(pc.red('\n✖ [ERROR] Release branch must be specified (--release <branch>).\n'));
     return false;
   }
 
@@ -74,7 +74,7 @@ export function runKpiRelease(options: KpiReleaseCliOptions): boolean {
   const rootDir = options.root || process.cwd();
 
   try {
-    console.log(pc.cyan(`\n📊 [AI-SDLC Release KPI] Consolidando métricas para '${pc.bold(options.release)}'...`));
+    console.log(pc.cyan(`\n📊 [AI-SDLC Release KPI] Consolidating metrics for '${pc.bold(options.release)}'...`));
     const report = aggregateReleaseKpis(options.release, baseBranch, { cwd: rootDir });
 
     if (options.json) {
@@ -83,17 +83,17 @@ export function runKpiRelease(options: KpiReleaseCliOptions): boolean {
     }
 
     const { markdownPath, jsonPath } = writeReleaseKpiReport(report, { outputDir: options.output });
-    console.log(pc.green(`✔ [CONFORME] Informe consolidado generado exitosamente:`));
+    console.log(pc.green(`✔ [COMPLIANT] Consolidated report successfully generated:`));
     console.log(`  - Markdown: ${pc.bold(markdownPath)}`);
     console.log(`  - JSON:     ${pc.bold(jsonPath)}`);
     console.log(`  - KLoC:     ${report.totalKloc} (${report.totalCommits} commits)`);
-    console.log(`  - Bugs:     ${report.totalBugs} (Densidad: ${report.globalDefectDensity} bugs/KLoC)`);
-    console.log(`  - Rework:   ${report.reworkTimePercent}% tiempo | ${report.reworkTokensPercent}% tokens\n`);
+    console.log(`  - Bugs:     ${report.totalBugs} (Density: ${report.globalDefectDensity} bugs/KLoC)`);
+    console.log(`  - Rework:   ${report.reworkTimePercent}% time | ${report.reworkTokensPercent}% tokens\n`);
 
     return true;
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error(pc.red(`\n✖ [ERROR] Fallo al calcular KPIs de Release: ${msg}\n`));
+    console.error(pc.red(`\n✖ [ERROR] Failed to calculate Release KPIs: ${msg}\n`));
     return false;
   }
 }

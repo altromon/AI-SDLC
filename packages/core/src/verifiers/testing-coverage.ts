@@ -90,25 +90,25 @@ export function generateTestingCoverageReportMarkdown(
 ): string {
   const totalErrors = reqErrors + taskErrors;
   const reportLines: string[] = [
-    `# 🧪 Auditoría Determinista de Cobertura de Pruebas en Requisitos y Tareas`,
+    `# 🧪 Deterministic Test Coverage Audit for Requirements and Tasks`,
     ``,
-    `> **Fecha de Auditoría:** ${new Date().toISOString()}`,
-    `> **Veredicto General:** ${
+    `> **Audit Date:** ${new Date().toISOString()}`,
+    `> **Overall Verdict:** ${
       totalErrors === 0
-        ? '100% VERIFICADO CON PRUEBAS (PASSED)'
-        : `BLOQUEADO: Se detectaron ${totalErrors} elementos sin pruebas (${reqErrors} Requisitos, ${taskErrors} Tareas)`
+        ? '100% VERIFIED WITH TESTS (PASSED)'
+        : `BLOCKED: Detected ${totalErrors} items without tests (${reqErrors} Requirements, ${taskErrors} Tasks)`
     }`,
     ``,
     `---`,
     ``,
-    `## 1. Auditoría de Requisitos (Producto, Calidad y Seguridad)`,
+    `## 1. Requirements Audit (Product, Quality, and Security)`,
     ``,
-    `| ID Requerimiento | Título | Archivo Origen | Método Declarado | Archivos de Prueba Vinculados | Estado |`,
+    `| Requirement ID | Title | Source File | Declared Method | Linked Test Files | Status |`,
     `| :--- | :--- | :--- | :---: | :--- | :---: |`,
   ];
 
   for (const r of reqAudit) {
-    const icon = r.status === 'VERIFICADO_CON_PRUEBA' ? '✅ VERIFICADO' : '❌ SIN PRUEBA';
+    const icon = r.status === 'VERIFICADO_CON_PRUEBA' ? '✅ VERIFIED' : '❌ NO TESTS';
     reportLines.push(
       `| **\`${r.id}\`** | ${r.title} | \`${r.file}\` | \`${r.method}\` | \`${r.testRefs}\` | ${icon} |`
     );
@@ -117,15 +117,15 @@ export function generateTestingCoverageReportMarkdown(
   reportLines.push('');
   reportLines.push('---');
   reportLines.push('');
-  reportLines.push('## 2. Auditoría de Tareas (Ingeniería de Entrega SDD)');
+  reportLines.push('## 2. Tasks Audit (SDD Delivery Engineering)');
   reportLines.push('');
   reportLines.push(
-    '| ID Tarea | Título | Archivo tasks.md | Método | Comando / Criterio de Verificación | Estado |'
+    '| Task ID | Title | tasks.md File | Method | Verification Command / Criterion | Status |'
   );
   reportLines.push('| :--- | :--- | :--- | :---: | :--- | :---: |');
 
   for (const t of taskAudit) {
-    const icon = t.status === 'VERIFICADO_CON_PRUEBA' ? '✅ VERIFICADO' : '❌ SIN PRUEBA';
+    const icon = t.status === 'VERIFICADO_CON_PRUEBA' ? '✅ VERIFIED' : '❌ NO TESTS';
     reportLines.push(
       `| **\`${t.id}\`** | ${t.title} | \`${t.file}\` | \`${t.method}\` | \`${t.commandOrCriteria}\` | ${icon} |`
     );

@@ -1,29 +1,29 @@
 ---
-id: ACT-NOMBRE-001
+id: ACT-NAME-001
 type: actor
-title: Título Descriptivo del Actor
+title: Descriptive Actor Title
 status: draft
 version: "1.0.0"
 schema-version: "1.0"
 role-type: human-user # human-user, ai-agent, external-system, sensor-iot
-description: Resumen en una frase del rol que desempeña este actor en el sistema.
+description: One-sentence summary of the role this actor performs in the system.
 supersedes: null
 superseded-by: null
 ---
 
-# ACT-NOMBRE-001: Título Descriptivo del Actor
+# ACT-NAME-001: Descriptive Actor Title
 
-## 1. Perfil y Responsabilidad
-Describe quién es este actor, su contexto operativo y qué objetivos persigue al interactuar con el producto.
+## 1. Profile and Responsibility
+Describes who this actor is, their operational context, and what goals they pursue when interacting with the product.
 
-## 2. Puntos de Contacto con el Sistema
-- Canales de interacción (Web UI, API REST, WebSocket, Mensajería).
-- Nivel de privilegios y expectativas de latencia/disponibilidad.
+## 2. System Touchpoints
+- Interaction channels (Web UI, REST API, WebSocket, Messaging).
+- Privilege level and latency/availability expectations.
 
 ---
 
-## 3. Historial de Revisiones y Control de Versiones
+## 3. Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-03 | Product Owner / Analista | Creación inicial del perfil de actor | CHG-INIT-001 |
+| **1.0.0** | 2026-09-03 | Product Owner / Analyst | Initial actor profile creation | CHG-INIT-001 |

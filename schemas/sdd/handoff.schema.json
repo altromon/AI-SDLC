@@ -8,7 +8,7 @@
     "id": {
       "type": "string",
       "pattern": "^HOF-[A-Z0-9]+(-[A-Z0-9]+)*$",
-      "description": "Identificador inmutable emitido por el handoff de PDaC."
+      "description": "Immutable identifier emitted by PDaC handoff."
     },
     "type": {
       "type": "string",

@@ -1,4 +1,4 @@
-# 📊 Informe Formal de Calidad y Release Gate (AI-SDLC)
+# 📊 Formal Quality and Release Gate Report (AI-SDLC)
 
 > **Fecha de Generación:** 2026-09-25T12:25:54.336Z
 > **Veredicto Release Gate:** 🟢 APROBADO (RELEASE READY)
@@ -6,29 +6,29 @@
 
 ---
 
-## 1. Resumen Ejecutivo de Métricas
+## 1. Executive Metric Summary
 
-| Métrica Clave | Valor Medido | Umbral de Política | Cumplimiento |
+| Key Metric | Measured Value | Policy Threshold | Compliance |
 | :--- | :---: | :---: | :---: |
-| **Archivos Analizados** | `1` | N/A | ℹ️ |
-| **Funciones Evaluadas** | `2` | N/A | ℹ️ |
-| **Líneas de Código (LOC)** | `12` | N/A | ℹ️ |
-| **Complejidad Ciclomática (Promedio)** | `1.5` | $\le 10$ | ✅ CONFORME |
-| **Complejidad Cognitiva (Promedio)** | `0.5` | $\le 15$ | ✅ CONFORME |
-| **Índice de Mantenibilidad (SEI MI)** | `71.8 / 100` | $\ge 50$ | ✅ CONFORME |
-| **Funciones en Violación** | `0` | $0$ (Modo STRICT) | ✅ 0 VIOLACIONES |
+| **Analyzed Files** | `1` | N/A | ℹ️ |
+| **Evaluated Functions** | `2` | N/A | ℹ️ |
+| **Lines of Code (LOC)** | `12` | N/A | ℹ️ |
+| **Cyclomatic Complexity (Average)** | `1.5` | $\le 10$ | ✅ COMPLIANT |
+| **Cognitive Complexity (Average)** | `0.5` | $\le 15$ | ✅ COMPLIANT |
+| **Maintainability Index (SEI MI)** | `71.8 / 100` | $\ge 50$ | ✅ COMPLIANT |
+| **Functions in Violation** | `0` | $0$ (Mode STRICT) | ✅ 0 VIOLATIONS |
 
 ---
 
-## 2. Desglose Políglota por Ecosistema de Lenguaje
+## 2. Polyglot Breakdown by Language Ecosystem
 
-| Lenguaje | Funciones | LOC Total | MI Promedio | CC Promedio | Calificación |
+| Language | Functions | Total LOC | Average MI | Average CC | Rating |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **TypeScript** | `2` | `12` | `71.8` | `1.5` | `B` |
 
 ---
 
-## 4. Criterios de Evaluación y Estándares
-- **McCabe Cyclomatic Complexity (CC)**: Número de caminos linealmente independientes.
-- **Maintainability Index (SEI MI)**: Fórmula normalizada [0 - 100] combinando Halstead Volume, CC y LOC.
-- **Clean Code Guardrails**: Prohibición de tipado `any` implícito, límites de extensión por función ($le 40$ líneas) y cero supresiones no justificadas.
+## 4. Evaluation Criteria and Standards
+- **McCabe Cyclomatic Complexity (CC)**: Number of linearly independent paths.
+- **Maintainability Index (SEI MI)**: Normalized formula [0 - 100] combining Halstead Volume, CC, and LOC.
+- **Clean Code Guardrails**: Prohibition of implicit `any` typing, function length limits ($le 40$ lines), and zero unjustified suppressions.

@@ -16,7 +16,7 @@
     "version": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
-      "description": "Versión semántica del requisito de seguridad (SemVer)."
+      "description": "Security requirement semantic version (SemVer)."
     },
     "schema-version": {
       "type": "string"
@@ -40,12 +40,12 @@
         "type": "string",
         "pattern": "^ABUSE-[A-Z0-9]+(-[A-Z0-9]+)*$"
       },
-      "description": "Trazabilidad a Producto/Seguridad: Caso de abuso o amenaza que este control neutraliza."
+      "description": "Product/Security Traceability: Abuse case or threat this control neutralizes."
     },
     "enforced-in-enclave": {
       "type": "string",
       "pattern": "^SEC-ENC-[A-Z0-9]+(-[A-Z0-9]+)*$",
-      "description": "Trazabilidad a Arquitectura: Enclave de seguridad perimetral o interno."
+      "description": "Architecture Traceability: Perimeter or internal security enclave."
     },
     "compliance-references": {
       "type": "array",
@@ -56,7 +56,7 @@
     "acceptance-format": {
       "type": "string",
       "enum": ["gherkin", "declarative-prose"],
-      "description": "Formato de los criterios de mitigación."
+      "description": "Mitigation criteria format."
     },
     "cucumber-tags": {
       "type": "array",

@@ -452,7 +452,7 @@ describe('@ai-sdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () 
 
       expect(passed).toBe(true);
       expect(() => JSON.parse(output)).toThrow();
-      expect(output).toContain('Release Gate APROBADO');
+      expect(output).toContain('Release Gate PASSED');
     });
 
     it('should prioritize explicit format: "text" over AISDLC_FORMAT=json (FR-027-ENV-OUTPUT-JSON-001)', () => {
@@ -464,7 +464,7 @@ describe('@ai-sdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () 
 
       expect(passed).toBe(true);
       expect(() => JSON.parse(output)).toThrow();
-      expect(output).toContain('Release Gate APROBADO');
+      expect(output).toContain('Release Gate PASSED');
     });
 
     it('should emit human-readable text by default when no flags or env vars are set (FR-027-ENV-OUTPUT-JSON-001)', () => {
@@ -477,7 +477,7 @@ describe('@ai-sdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () 
 
       expect(passed).toBe(true);
       expect(() => JSON.parse(output)).toThrow();
-      expect(output).toContain('Release Gate APROBADO');
+      expect(output).toContain('Release Gate PASSED');
     });
 
     it('should emit consolidated JSON for runVerifyAll when AISDLC_FORMAT=json is set (FR-027-ENV-OUTPUT-JSON-001)', () => {

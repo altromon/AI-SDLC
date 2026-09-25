@@ -1,97 +1,97 @@
-# AI-SDLC: Framework de Desarrollo Híbrido para Personas y Agentes
+# AI-SDLC: Hybrid Software Development Lifecycle for Humans and AI Agents
 
-> **Ciclo de Vida de Software de Nueva Generación basado en Git, "As-Code", ProductShape, NAF v4, arc42, Ciberseguridad Integral y Gobernanza de Licencias Open Source.**
-
----
-
-## 🎯 Visión y Propósito
-
-En la era de la ingeniería asistida por Inteligencia Artificial, la velocidad de escritura de código ha dejado de ser el cuello de botella. **El factor crítico se ha desplazado hacia la izquierda:**
-- ¿Qué es exactamente el producto y para quién se construye?
-- ¿Qué comportamientos y reglas de negocio lo gobiernan?
-- ¿Qué arquitectura técnica garantiza su escalabilidad, seguridad e interoperabilidad?
-- ¿Cómo prevenimos vulnerabilidades y modelamos las amenazas desde el día cero?
-- ¿Qué licencias de terceros son de uso libre y cuáles exigen adquisición comercial o violan la propiedad intelectual?
-- ¿Cómo entregamos contexto preciso, atómico y verificable a los agentes de IA para que no alucinen código?
-
-**AI-SDLC** es una metodología y marco operativo diseñado para que **personas (ingenieros, arquitectos, product managers, oficiales de seguridad)** y **agentes de IA (analistas, arquitectos, programadores, auditores)** colaboren simétricamente con rigor industrial y sin fricción.
+> **Next-Generation Software Lifecycle based on Git, "As-Code", ProductShape, NAF v4, arc42, End-to-End Cybersecurity, and Open Source License Governance.**
 
 ---
 
-## 🏛️ Los 5 Pilares del Framework
+## 🎯 Vision and Purpose
+
+In the age of AI-assisted engineering, the speed of code authoring is no longer the bottleneck. **The critical bottleneck has shifted to the left:**
+- What exactly is the product, and for whom is it being built?
+- What behaviors and business rules govern it?
+- What technical architecture guarantees scalability, security, and interoperability?
+- How do we prevent vulnerabilities and model threats from day zero?
+- Which third-party dependencies are free for commercial use, and which require acquisition or introduce legal liabilities?
+- How do we feed precise, atomic, and verifiable context to AI agents so they never hallucinate code?
+
+**AI-SDLC** is an operational methodology and framework engineered so that **humans (engineers, architects, product managers, security officers)** and **AI agents (analysts, architects, developers, auditors)** collaborate symmetrically with industrial rigor and zero friction.
+
+---
+
+## 🏛️ The 5 Pillars of the Framework
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   AI-SDLC: ARQUITECTURA DEL PROCESO                    │
+│                   AI-SDLC: PROCESS ARCHITECTURE                        │
 └────────────────────────────────────────────────────────────────────────┘
 
- [1. DEFINICIÓN DE PRODUCTO] (ProductShape - PDaC)
-  ├── Actores (ACT-*) & Journeys (JRN-*)
-  ├── Casos de Uso (UC-*) & Reglas de Negocio (BR-*)
-  └── Bounded Contexts (BC-*) & Requisitos (FR-*, QR-*, CON-*)
+ [1. PRODUCT DEFINITION] (ProductShape - PDaC)
+  ├── Actors (ACT-*) & Journeys (JRN-*)
+  ├── Use Cases (UC-*) & Business Rules (BR-*)
+  └── Bounded Contexts (BC-*) & Requirements (FR-*, QR-*, CON-*)
                             │
-                            ▼ (Cita canónica: id + SHA256 digest + anchor)
- [2. CIBERSEGURIDAD BY DESIGN] (STRIDE / ASVS / NAF Security)
-  ├── Actores Maliciosos (ACT-THREAT-*) & Casos de Abuso (ABUSE-*)
-  ├── Requisitos de Seguridad (SEC-REQ-*) & Políticas Zero Trust (SEC-POL-*)
-  └── Enclaves de Seguridad y Zonas de Confianza (SEC-ENC-*)
+                            ▼ (Canonical citation: id + SHA256 digest + anchor)
+ [2. CYBERSECURITY BY DESIGN] (STRIDE / ASVS / NAF Security)
+  ├── Threat Actors (ACT-THREAT-*) & Abuse Cases (ABUSE-*)
+  ├── Security Requirements (SEC-REQ-*) & Zero Trust Policies (SEC-POL-*)
+  └── Security Enclaves and Trust Zones (SEC-ENC-*)
                             │
-                            ▼ (Cita canónica)
- [3. GOBERNANZA DE LICENCIAS OSS] (Legal & IP Compliance as Code)
-  ├── Categorización: Permisivas (Libre) vs. Comerciales/Duales (Pago) vs. Virales (AGPL)
-  ├── license-policy.yaml & Guardrails de Agentes
-  └── Generación de SBOM (CycloneDX) y Verificación en CI/CD
+                            ▼ (Canonical citation)
+ [3. OSS LICENSE GOVERNANCE] (Legal & IP Compliance as Code)
+  ├── Categorization: Permissive (Free) vs Commercial/Dual (Paid) vs Viral (AGPL)
+  ├── license-policy.yaml & Agent Guardrails
+  └── SBOM Generation (CycloneDX) and CI/CD Verification
                             │
-                            ▼ (Cita canónica)
- [4. GESTIÓN DE CALIDAD Y RELEASE GATES] (Software Quality as Code)
-  ├── Coding Rules (Clean Code, Tipado Estricto, Cero Dead Code, ESLint/Prettier)
-  ├── Métricas Estándar: Complejidad Ciclomática (<=10), Cognitiva (<=15), Mantenibilidad (>=50)
-  └── quality-policy.yaml & Verificador Determinista de Release Gate
+                            ▼ (Canonical citation)
+ [4. QUALITY MANAGEMENT & RELEASE GATES] (Software Quality as Code)
+  ├── Coding Rules (Clean Code, Strict Typing, Zero Dead Code, ESLint/Prettier)
+  ├── Standard Metrics: Cyclomatic Complexity (<=10), Cognitive (<=15), Maintainability (>=50)
+  └── quality-policy.yaml & Deterministic Release Gate Verifier
                             │
-                            ▼ (Cita canónica)
- [5. ARQUITECTURA DE SISTEMAS] (arc42 + NAF v4)
-  ├── Contexto y Estrategia (arc42 Sec. 1-4 + NAF Operational)
-  ├── Bloques y Componentes (arc42 Sec. 5 + NAF Services & Systems CMP-*)
-  ├── Runtime y Despliegue (arc42 Sec. 6-7 + NAF Behaviour & Resources)
-  └── Conceptos Transversales y ADRs (arc42 Sec. 8-9 + NAF Governance)
+                            ▼ (Canonical citation)
+ [5. SYSTEMS ARCHITECTURE] (arc42 + NAF v4)
+  ├── Context & Strategy (arc42 Sec. 1-4 + NAF Operational)
+  ├── Building Blocks (arc42 Sec. 5 + NAF Services & Systems CMP-*)
+  ├── Runtime & Deployment (arc42 Sec. 6-7 + NAF Behaviour & Resources)
+  └── Cross-Cutting Concepts & ADRs (arc42 Sec. 8-9 + NAF Governance)
                             │
-                            ▼ (Cita canónica)
- [6. ENTREGA E IMPLEMENTACIÓN] (Spec-Driven Development - SDD)
-  ├── Incrementos acotados (Changes: Proposal, Spec, Design, Tasks)
-  ├── Criterios de Aceptación Gherkin & Pruebas BDD Cucumber
-  ├── Programación por Agentes de IA + Pruebas Unitarias y de Mitigación
-  └── CI/CD Gates Deterministas: Quality Gate, SAST, SCA, SBOM, Licencias y PR Humano
+                            ▼ (Canonical citation)
+ [6. DELIVERY & IMPLEMENTATION] (Spec-Driven Development - SDD)
+  ├── Bounded Increments (Changes: Proposal, Spec, Design, Tasks)
+  ├── Gherkin Acceptance Criteria & Cucumber BDD Tests
+  ├── AI Agent Authoring + Unit & Mitigation Tests
+  └── Deterministic CI/CD Gates: Quality Gate, SAST, SCA, SBOM, Licenses & Human PR
 ```
 
 ---
 
-## 📂 Estructura del Repositorio
+## 📂 Repository Structure
 
 ```text
 AI-SDLC/
-├── README.md                                 # Esta guía
-├── license-policy.yaml                       # Política declarativa de licencias permitidas/bloqueadas
+├── README.md                                 # This guide
+├── license-policy.yaml                       # Declarative allowed/blocked license policy
 │
 ├── packages/                                 # Monorepo Workspace (pnpm + Changesets)
-│   ├── core/                                 # @ai-sdlc/core: Motor de dominio, verificadores puros y reporters
-│   ├── mcp/                                  # @ai-sdlc/mcp: Servidor nativo Model Context Protocol (npx @ai-sdlc/mcp / aisdlc mcp)
-│   └── cli/                                  # @ai-sdlc/cli: CLI ejecutable binario (npx aisdlc)
+│   ├── core/                                 # @ai-sdlc/core: Domain engine, pure verifiers, and reporters
+│   ├── mcp/                                  # @ai-sdlc/mcp: Native Model Context Protocol server (npx @ai-sdlc/mcp / aisdlc mcp)
+│   └── cli/                                  # @ai-sdlc/cli: Binary CLI executable (npx aisdlc)
 │
-├── process/                                  # Especificación Normativa del Proceso
-│   ├── 00_principles_and_manifesto.md        # Manifiesto y principios fundamentales
-│   ├── 01_governance_and_roles.md            # Matriz RACI Persona-Agente y autorizaciones
-│   ├── 02_product_definition.md              # Guía ProductShape (Actores, Casos de Uso, Requisitos)
-│   ├── 03_security_by_design.md              # Modelado de amenazas, Abuse Cases y Requisitos de Seguridad
-│   ├── 04_open_source_license_compliance.md  # Clasificación de licencias, uso libre y adquisición comercial
-│   ├── 05_architecture_arc42_nafv4.md        # Estructura arc42 potenciada por el grid NAF v4
-│   ├── 06_spec_driven_development.md         # Ciclo de entrega SDD citando Producto y Arquitectura
-│   ├── 07_security_and_license_validation.md # Gates de CI/CD: SAST, Secret Scan, SBOM y Licencias
-│   ├── 08_citation_contract_and_drift.md     # Protocolo criptográfico anti-deriva
-│   ├── 09_agent_protocols.md                 # Prompts, contratos de skills y guardrails para LLMs
-│   ├── 10_quality_management_and_release_gates.md # Reglas de código, Complejidad Ciclomática y Release Gates
-│   └── 11_git_branching_and_lifecycle.md     # Modelo de ramas Git de 4 tiers (main, release, feat/bug, task)
+├── process/                                  # Normative Process Specification
+│   ├── 00_principles_and_manifesto.md        # Manifesto and core principles
+│   ├── 01_governance_and_roles.md            # Human-Agent RACI matrix and authorization levels
+│   ├── 02_product_definition.md              # ProductShape guide (Actors, Use Cases, Requirements)
+│   ├── 03_security_by_design.md              # Threat modeling, Abuse Cases, and Security Requirements
+│   ├── 04_open_source_license_compliance.md  # License classification, free usage, and commercial acquisition
+│   ├── 05_architecture_arc42_nafv4.md        # arc42 structure augmented with NAF v4 grid
+│   ├── 06_spec_driven_development.md         # SDD delivery lifecycle citing Product and Architecture
+│   ├── 07_security_and_license_validation.md # CI/CD Gates: SAST, Secret Scanning, SBOM, and Licenses
+│   ├── 08_citation_contract_and_drift.md     # Anti-drift cryptographic citation protocol
+│   ├── 09_agent_protocols.md                 # Prompts, skill contracts, and guardrails for LLMs
+│   ├── 10_quality_management_and_release_gates.md # Coding rules, Cyclomatic Complexity, and Release Gates
+│   └── 11_git_branching_and_lifecycle.md     # 4-tier Git branching model (main, release, feat/bug, task)
 │
-├── schemas/                                  # Esquemas JSON (Validación Determinista)
+├── schemas/                                  # JSON Schemas (Deterministic Validation)
 │   ├── product/                              # Schemas: actor, use-case, requirement, business-rule
 │   ├── security/                             # Schemas: threat-actor, abuse-case, security-req
 │   ├── compliance/                           # Schemas: license-policy, dependency-manifest
@@ -99,11 +99,11 @@ AI-SDLC/
 │   ├── sdd/                                  # Schemas: tasks, handoff
 │   └── manuals/                              # Schemas: user-manual, production-manual
 │
-├── templates/                                # Plantillas estándar Markdown con YAML frontmatter
-│   ├── product/                              # Plantillas ACT, JRN, UC, BR, FR, QR, CON
-│   ├── security/                             # Plantillas THREAT, ABUSE, SEC-REQ, SEC-POL
-│   ├── compliance/                           # Plantillas CON-LIC, ADR-LIC, Solicitud de Compra
-│   ├── architecture/                         # Plantillas arc42 (01-12) enriquecidas con NAF v4
+├── templates/                                # Standard Markdown templates with YAML frontmatter
+│   ├── product/                              # ACT, JRN, UC, BR, FR, QR, CON templates
+│   ├── security/                             # THREAT, ABUSE, SEC-REQ, SEC-POL templates
+│   ├── compliance/                           # CON-LIC, ADR-LIC, Commercial Acquisition Request templates
+│   ├── architecture/                         # arc42 templates (01-12) enriched with NAF v4
 │   │   ├── introduction-and-goals.template.md      # Sec. 1 (Enterprise & Capability: ARCH-INTRO-*)
 │   │   ├── architecture-constraints.template.md    # Sec. 2 (Constraints: CON-*, ACON-*)
 │   │   ├── context-and-scope.template.md           # Sec. 3 (Operational: CTX-*, OIE-*)
@@ -117,133 +117,132 @@ AI-SDLC/
 │   │   ├── quality-requirements.template.md        # Sec. 10 (Quality: ARCH-QUAL-*, QR-*)
 │   │   ├── risks-and-technical-debt.template.md    # Sec. 11 (Risk & Debt: RSK-*)
 │   │   └── glossary.template.md                    # Sec. 12 (Taxonomy: TERM-*, BC-*)
-│   ├── sdd/                                  # Plantillas SDD (Proposal, Spec, Design, Tasks, Handoff)
-│   ├── manuals/                              # Plantillas MAN-USER (Manual de Usuario), MAN-PROD (Manual de Producción)
-│   └── ci/                                   # Plantillas de CI/CD (GitLab CI, Azure DevOps, Bitbucket, GitHub Actions)
+│   ├── sdd/                                  # SDD templates (Proposal, Spec, Design, Tasks, Handoff)
+│   ├── manuals/                              # MAN-USER (User Manual), MAN-PROD (Production Manual) templates
+│   └── ci/                                   # CI/CD templates (GitLab CI, Azure DevOps, Bitbucket, GitHub Actions)
 │
-├── reports/                                  # Informes formales autogenerados (RTM 360°, Calidad, Requerimientos Activos)
+├── reports/                                  # Autogenerated formal reports (360° RTM, Quality, Active Reqs)
 │
-└── examples/                                 # Caso de Estudio Realista: "SentinelCore" (SaaS Telemétrico Crítico)
-    ├── product/                              # Modelo canónico de producto
-    ├── security/                             # Modelado de amenazas y mitigaciones
-    ├── compliance/                           # Manifiesto de dependencias evaluadas
-    ├── architecture/                         # Arquitectura arc42 + NAF v4 con enclaves
-    ├── specs/                                # Especificación de entrega SDD con citaciones criptográficas
-    ├── manuals/                              # Manual de Usuario y de Producción del caso de estudio
-    ├── src/                                  # Implementación del caso de estudio (TS, Go, Python)
-    └── tests/                                # Pruebas unitarias, BDD y benchmarks del caso de estudio
+└── examples/                                 # Realistic Case Study: "SentinelCore" (Critical Telemetry SaaS)
+    ├── product/                              # Canonical product model
+    ├── security/                             # Threat modeling and mitigations
+    ├── compliance/                           # Evaluated dependency manifest
+    ├── architecture/                         # arc42 + NAF v4 architecture with enclaves
+    ├── specs/                                # SDD delivery specification with cryptographic citations
+    ├── manuals/                              # User and Production manuals for case study
+    ├── src/                                  # Case study implementation (TS, Go, Python)
+    └── tests/                                # Unit, BDD, and benchmark test suites for case study
 ```
 
 ---
 
-## ⚡ Tutorial 1: Creación Rápida de una Funcionalidad (Quickstart en 5 Minutos)
+## ⚡ Tutorial 1: Quick Feature Creation (5-Minute Quickstart)
 
-Este flujo acelerado describe cómo crear, implementar, verificar e integrar una nueva funcionalidad desde cero utilizando exclusivamente los **comandos simplificados** del CLI (`aisdlc` o scripts de `pnpm`).
+This accelerated flow demonstrates how to create, implement, verify, and integrate a new feature from scratch using the **simplified CLI commands** (`aisdlc` or `pnpm` scripts).
 
-### 1. Prerrequisitos
-- **Node.js** (v18.0 o superior): `node -v`
-- **pnpm** (v9 o v10+): `pnpm -v`
-- **Git** (v2.30 o superior): `git --version`
+### 1. Prerequisites
+- **Node.js** (v18.0 or higher): `node -v`
+- **pnpm** (v9 or v10+): `pnpm -v`
+- **Git** (v2.30 or higher): `git --version`
 
-### 2. Flujo Rápido en 6 Pasos con Comandos Simplificados
+### 2. Fast 6-Step Workflow with Simplified Commands
 
 ```bash
-# 1. Crear el andamiaje del cambio SDD y su sidecar PDaC (handoff.yaml) automáticamente
-pnpm run change:new "Notificaciones de Alerta en Tiempo Real" --from UC-STREAM-TELEMETRY
-# o vía npx: npx aisdlc change new "Notificaciones de Alerta en Tiempo Real" --from UC-STREAM-TELEMETRY
+# 1. Automatically scaffold the SDD change and its PDaC sidecar (handoff.yaml)
+pnpm run change:new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
+# or via npx: npx aisdlc change new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
 
-# 2. Navegar y crear automáticamente la rama de tarea en la jerarquía de 4 tiers de Git
+# 2. Automatically navigate and cascade-create the task branch in Git 4-tier hierarchy
 pnpm run git:checkout TSK-001
-# o vía npx: npx aisdlc git checkout TSK-001
+# or via npx: npx aisdlc git checkout TSK-001
 
-# 3. Implementar la funcionalidad y sus pruebas (TDD) en src/ y tests/
-#    (El desarrollador o agente implementa código y tests unitarios / BDD)
+# 3. Implement feature and tests (TDD) in src/ and tests/
+#    (Developer or agent writes logic and unit/BDD tests)
 
-# 4. Pre-vuelo determinista con auto-fix (sincroniza Gherkin a .feature y digests SHA-256)
+# 4. Deterministic pre-flight with auto-fix (syncs Gherkin to .feature and recalculates SHA-256 digests)
 pnpm run check:fix
-# o vía npx: npx aisdlc check --fix
+# or via npx: npx aisdlc check --fix
 
-# 5. Ejecutar la suite consolidada de CI/CD (9 Gates de calidad y gobernanza)
+# 5. Execute consolidated CI/CD suite (all 9 quality and governance gates)
 pnpm run verify:all
-# o vía npx: npx aisdlc verify all
-# o con salida estructurada JSON para agentes de IA / CI: npx aisdlc verify all --json
+# or via npx: npx aisdlc verify all
+# or with structured JSON output for AI agents / CI pipelines: npx aisdlc verify all --json
 
-# 6. Integrar el cambio a la línea base canónica (promoción de requisitos y arquitectura)
+# 6. Integrate change into canonical baseline (promotes requirements and syncs architecture)
 npx aisdlc sdd integrate --auto
-# o especificando el ID: npx aisdlc sdd integrate --change chg-002-notificaciones-de-alerta-en-tiempo-real
+# or specifying the ID: npx aisdlc sdd integrate --change chg-002-real-time-alert-notifications
 ```
 
 > [!TIP]
-> **Integración Desatendida en CI/CD Multi-Plataforma**: En flujos con Pull Request o Merge Request, el paso 6 (`sdd integrate`) se ejecuta automáticamente al fusionar el PR/MR mediante los pipelines configurados para GitHub Actions ([`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml)), GitLab CI (`.gitlab-ci.yml`), Azure DevOps (`azure-pipelines.yml`) o Bitbucket Pipelines (`bitbucket-pipelines.yml`).
+> **Unattended Integration in Multi-Platform CI/CD**: In workflows using Pull Requests or Merge Requests, step 6 (`sdd integrate`) runs automatically upon PR/MR merge via configured CI pipelines for GitHub Actions ([`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml)), GitLab CI (`.gitlab-ci.yml`), Azure DevOps (`azure-pipelines.yml`), or Bitbucket Pipelines (`bitbucket-pipelines.yml`).
 
-### 3. Resumen de Comandos Simplificados del CLI (`aisdlc`)
+### 3. Simplified CLI Commands Summary (`aisdlc`)
 
-| Herramienta / Comando CLI | Comando pnpm equivalente | Fase del Ciclo de Vida | Salida / Acción Realizada |
+| CLI Tool / Command | Equivalent pnpm Command | Lifecycle Phase | Output / Action Performed |
 |---|---|---|---|
-| `npx aisdlc change new <nombre>` | `pnpm run change:new -- <nombre>` | **Andamiaje SDD** | Genera `proposal.md`, `spec.md`, `design.md`, `tasks.md` y sidecar `handoff.yaml` (`HOF-*`) con digests SHA-256 |
-| `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Gestión Git 4-Tiers** | Resuelve versión y crea en cascada: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
-| `npx aisdlc git plan` | `pnpm run git:plan` | **Planificación Git** | Renderiza el árbol visual de jerarquía de ramas antes de trabajar |
-| `npx aisdlc git validate <rama>` | `pnpm run git:validate <rama>` | **Gobierno Git** | Valida la nomenclatura estricta de cualquier rama según su Tier (1 a 4) |
-| `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Telemetría Git** | Instala el hook `prepare-commit-msg` para inyección automática de trailers en commits |
-| `npx aisdlc kpi pr [opciones]` | `pnpm run kpi:pr` | **Métricas Pull Request** | Calcula y genera la tabla Markdown agregada de KPIs (tiempo, tokens, autoría) para el PR (admite `--json`) |
-| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Consolidado de Release** | Computa DIR por modelo/humano, densidad de defectos y coste de re-trabajo (`RELEASE_KPIS_<release>.md`, admite `--json`) |
-| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Pre-vuelo Unificado** | Sincroniza bloques Gherkin a `.feature`, actualiza digests SHA-256 PDaC, audita seguridad y verifica Quality Gates |
-| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 9 Quality Gates (soporta `--json` determinista sin ANSI para agentes autónomos) |
-| `npx aisdlc verify security [opciones]` | `pnpm run verify:security` | **Seguridad Shift-Left (Gate 9)** | Verificación unificada de secretos (Gitleaks) y SAST determinista (OWASP Top 10, `--json`, código de salida 4 en fugas) |
-| `npx aisdlc verify secrets [opciones]` | `pnpm run verify:secrets` | **Escaneo de Secretos** | Detección determinista de credenciales, llaves API y alta entropía (Shannon) con soporte git diff, `--json` y exitCode 4 |
-| `npx aisdlc verify sast [opciones]` | `pnpm run verify:sast` | **Seguridad SAST** | Detección determinista de patrones vulnerables generados por IA (SQLi, exec, eval, SSRF, `--json`) |
-| `npx aisdlc verify quality [--json]` | `pnpm run verify:quality` | **Release Gate de Código** | Evalúa Complejidad Ciclomática ($\le 10$), Cognitiva ($\le 15$) y Mantenibilidad ($\ge 50$) con soporte `--json` |
-| `npx aisdlc verify traceability [--json]`| `pnpm run verify:traceability` | **Matriz 360° RTM** | Valida triangulación obligatoria: Producto (`HOF-*`) ➔ Arquitectura (`CMP-*`) ➔ Tests (`.feature`) |
-| `npx aisdlc verify governance [--json]` | `pnpm run verify:governance` | **Gobierno de Tareas** | Audita modos de autonomía (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc., admite `--json`) |
-| `npx aisdlc verify testing [--json]` | `pnpm run verify:testing` | **Auditoría de Tests** | Comprueba cobertura al 100% de requisitos y tareas con pruebas verificables en disco (`--json`) |
-| `npx aisdlc verify licenses [opciones]` | `pnpm run verify:licenses` | **Gobernanza IP / OSS y SCA** | Escaneo dinámico de dependencias, SBOM CycloneDX 1.5 y atribución legal frente a `license-policy.yaml` (`--json`) |
-| `npx aisdlc verify pdac [--json]` | `pnpm run verify:pdac` | **Integridad Criptográfica**| Detecta derivas (*drift*) en el grafo PDaC comparando hashes SHA-256 (`--json`) |
-| `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Conformidad Estructural** | Valida artefactos Markdown frente a esquemas JSON canónicos (Draft 2020-12, `--json`) |
-| `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancia** | Audita colisiones léxicas y solapamientos de requisitos antes de codificar (`--json`) |
-| `npx aisdlc verify friction [change]` | - | **Fricción Progresiva** | Valida protecciones Anti-Bypass y umbrales según el perfil de riesgo (`patch`/`standard`/`critical`, `--json`) |
-| `npx aisdlc sdd verify` | - | **Conformidad SDD** | Audita que los cambios activos cumplan la especificación y contengan sidecars válidos |
-| `npx aisdlc sdd integrate [--auto]` | - | **Promoción a Baseline** | Promueve requerimientos a `active`, enlaza arquitectura, marca propuesta `applied` y archiva el cambio |
-| `npx aisdlc report quality` | `pnpm run report:quality` | **Reporting Formal** | Genera informe detallado de métricas en `reports/QUALITY_REPORT.md` |
-| `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Catálogo de Producto** | Genera catálogo consolidado de requerimientos en `reports/ACTIVE_REQUIREMENTS.md` |
-| `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | **Dossier Maestro** | Compila documentación y manuales con TOC interactiva en `reports/AI_SDLC_SPECIFICATION_FULL.md` |
-| `npx aisdlc init [dir] [--ci <prov>] [--arch <minimal|full|none>]` | - | **Inicialización** | Inicializa un nuevo repo con carpetas, esquemas, políticas, pipeline CI/CD y plantillas de arquitectura seleccionadas (`minimal`, `full`, `none`) |
-| `npx aisdlc mcp` / `npx @ai-sdlc/mcp` | `pnpm run mcp` | **Servidor MCP Nativo** | Arranca el servidor Model Context Protocol sobre `stdio` con 20 herramientas tipadas (incluyendo `new`, `verify`, `report`) y 5 recursos canónicos |
-
+| `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | **SDD Scaffolding** | Generates `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` sidecar (`HOF-*`) with SHA-256 digests |
+| `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Git 4-Tier Branching** | Resolves version and cascade-creates: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
+| `npx aisdlc git plan` | `pnpm run git:plan` | **Git Planning** | Renders visual branch hierarchy tree before starting work |
+| `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | **Git Governance** | Validates strict naming rules for any branch according to its Tier (1 to 4) |
+| `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
+| `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship) for PRs (supports `--json`) |
+| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Release Summary** | Computes DIR per model/human, defect density, and rework costs (`RELEASE_KPIS_<release>.md`, supports `--json`) |
+| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Unified Pre-Flight** | Syncs Gherkin to `.feature`, updates PDaC SHA-256 digests, audits security, and checks Quality Gates |
+| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 9 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
+| `npx aisdlc verify security [options]` | `pnpm run verify:security` | **Shift-Left Security (Gate 9)** | Unified secret verification (Gitleaks) and deterministic SAST (OWASP Top 10, `--json`, exit code 4 on leaks) |
+| `npx aisdlc verify secrets [options]` | `pnpm run verify:secrets` | **Secret Scanning** | Deterministic detection of credentials, API keys, and Shannon entropy with Git diff support, `--json`, and exitCode 4 |
+| `npx aisdlc verify sast [options]` | `pnpm run verify:sast` | **SAST Security** | Deterministic detection of AI-generated vulnerable patterns (SQLi, exec, eval, SSRF, `--json`) |
+| `npx aisdlc verify quality [--json]` | `pnpm run verify:quality` | **Code Release Gate** | Evaluates Cyclomatic Complexity ($\le 10$), Cognitive ($\le 15$), and Maintainability ($\ge 50$) with `--json` |
+| `npx aisdlc verify traceability [--json]`| `pnpm run verify:traceability` | **360° RTM Matrix** | Enforces mandatory triangulation: Product (`HOF-*`) ➔ Architecture (`CMP-*`) ➔ Tests (`.feature`) |
+| `npx aisdlc verify governance [--json]` | `pnpm run verify:governance` | **Task Governance** | Audits task autonomy modes (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc., supports `--json`) |
+| `npx aisdlc verify testing [--json]` | `pnpm run verify:testing` | **Testing Audit** | Verifies 100% test coverage for requirements and tasks with physical disk tests (`--json`) |
+| `npx aisdlc verify licenses [options]` | `pnpm run verify:licenses` | **IP / OSS Governance & SCA** | Dynamic dependency scan, CycloneDX 1.5 SBOM, and legal attribution against `license-policy.yaml` (`--json`) |
+| `npx aisdlc verify pdac [--json]` | `pnpm run verify:pdac` | **Cryptographic Integrity**| Detects drift in PDaC graph comparing SHA-256 hashes (`--json`) |
+| `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Structural Compliance** | Validates Markdown artifacts against canonical JSON schemas (Draft 2020-12, `--json`) |
+| `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancy** | Audits lexical collisions and requirement overlaps before coding (`--json`) |
+| `npx aisdlc verify friction [change]` | - | **Progressive Friction** | Validates Anti-Bypass rules and thresholds according to risk profile (`patch`/`standard`/`critical`, `--json`) |
+| `npx aisdlc sdd verify` | - | **SDD Compliance** | Audits active changes for specification compliance and valid sidecars |
+| `npx aisdlc sdd integrate [--auto]` | - | **Baseline Promotion** | Promotes requirements to `active`, links architecture, marks proposal `applied`, and archives change |
+| `npx aisdlc report quality` | `pnpm run report:quality` | **Formal Reporting** | Generates detailed metrics report in `reports/QUALITY_REPORT.md` |
+| `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Product Catalog** | Generates consolidated requirement catalog in `reports/ACTIVE_REQUIREMENTS.md` |
+| `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | **Master Dossier** | Compiles full documentation and manuals with interactive TOC in `reports/AI_SDLC_SPECIFICATION_FULL.md` |
+| `npx aisdlc init [dir] [--ci <prov>] [--arch <minimal|full|none>]` | - | **Initialization** | Bootstraps a repository with folders, schemas, policies, CI/CD, and selected architecture templates (`minimal`, `full`, `none`) |
+| `npx aisdlc mcp` / `npx @ai-sdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 20 typed tools (including `new`, `verify`, `report`) and 5 canonical resources |
 
 ---
 
-## 📖 Tutorial 2: Flujo Detallado Paso a Paso (End-to-End Deep Dive)
+## 📖 Tutorial 2: End-to-End Deep Dive
 
-Este tutorial exhaustivo describe cómo construir una nueva funcionalidad desde cero utilizando todas las fases, plantillas y controles deterministas de **AI-SDLC**, aprovechando los **comandos simplificados** del CLI para agilizar cada etapa con cero derivas y máxima trazabilidad.
+This comprehensive walkthrough details how to build a new feature using all phases, templates, and deterministic controls of **AI-SDLC**, leveraging simplified CLI commands for zero drift and full traceability.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│               FLUJO DETALLADO DE CREACIÓN DE UNA NUEVA FUNCIONALIDAD                   │
+│                      DETAILED NEW FEATURE CREATION WORKFLOW                            │
 └────────────────────────────────────────────────────────────────────────────────────────┘
-  [1. Producto & BDD]    ➔ Modelar UC/FR/BR y sincronizar Gherkin (.feature) vía `check:fix`
-  [2. Threat Modeling]   ➔ Modelar ABUSE, requisitos SEC-REQ y enclaves Zero Trust
-  [3. Licencias OSS]     ➔ Validar dependencias con `verify:licenses` y license-policy.yaml
-  [4. Andamiaje SDD]     ➔ Scaffolding automatizado con `change:new` y sidecar HOF-*
-  [5. 4-Tier Branching]  ➔ Crear ramas en cascada: main ➔ release ➔ feat ➔ task con `git checkout`
-  [6. Coder / Agent]     ➔ Implementación TDD e inyección quirúrgica de contexto
-  [7. Pre-vuelo & Calidad]➔ `check:fix` para sincronizar digests y `verify:quality` para métricas
-  [8. Trazabilidad 360°] ➔ Matriz RTM (`verify:traceability`), suite completa (`verify:all`) y PR
-  [9. Integración SDD]   ➔ `sdd integrate --auto` para promover a baseline y archivar el cambio
+  [1. Product & BDD]     ➔ Model UC/FR/BR and sync Gherkin (.feature) via `check:fix`
+  [2. Threat Modeling]   ➔ Model ABUSE, SEC-REQ requirements, and Zero Trust enclaves
+  [3. OSS Licenses]      ➔ Validate dependencies with `verify:licenses` and license-policy.yaml
+  [4. SDD Scaffolding]   ➔ Automated scaffolding with `change:new` and HOF-* sidecar
+  [5. 4-Tier Branching]  ➔ Cascade branch creation: main ➔ release ➔ feat ➔ task via `git checkout`
+  [6. Coder / Agent]     ➔ TDD implementation and surgical context injection
+  [7. Pre-Flight & Qual] ➔ `check:fix` to sync digests and `verify:quality` for metrics
+  [8. 360° Traceability] ➔ RTM matrix (`verify:traceability`), full suite (`verify:all`), and PR
+  [9. SDD Integration]   ➔ `sdd integrate --auto` to promote to baseline and archive change
 ```
 
 ---
 
-### Fase 1: Definición Canónica de Producto y Criterios Gherkin (BDD)
+### Phase 1: Canonical Product Definition and Gherkin Criteria (BDD)
 
-Toda nueva funcionalidad parte de una necesidad de negocio canónica:
+Every feature starts from a canonical business need:
 
-1. **Definir o Derivar el Requerimiento Funcional**:
-   Puedes crear el archivo en `specs/product/` utilizando la plantilla de `templates/product/requirement.template.md` (o dejar que el comando de andamiaje `aisdlc change new` de la Fase 4 lo genere automáticamente como borrador si se trata de un desarrollo *greenfield*):
+1. **Define or Derive the Functional Requirement**:
+   Create the file in `specs/product/` using `templates/product/requirement.template.md` (or let the `aisdlc change new` command in Phase 4 generate a draft automatically for greenfield features):
    ```markdown
    ---
    id: "FR-002-ALERT-NOTIFICATIONS-001"
    type: "requirement"
-   title: "Notificaciones de Alerta en Tiempo Real"
+   title: "Real-Time Alert Notifications"
    status: "draft"
    version: "1.0.0"
    schema-version: "1.0"
@@ -257,56 +256,56 @@ Toda nueva funcionalidad parte de una necesidad de negocio canónica:
      - "@automated"
    ---
 
-   # FR-002-ALERT-NOTIFICATIONS-001: Notificaciones de Alerta en Tiempo Real
+   # FR-002-ALERT-NOTIFICATIONS-001: Real-Time Alert Notifications
 
-   ## 1. Enunciado Normativo
-   El sistema DEBE emitir alertas en tiempo real con latencia inferior a 500ms ante anomalías telemétricas detectadas.
+   ## 1. Normative Statement
+   The system MUST emit real-time alert notifications with latency under 500ms upon detected telemetry anomalies.
 
    ---
 
-   ## 2. Criterios de Aceptación (Gherkin BDD)
+   ## 2. Acceptance Criteria (Gherkin BDD)
 
    ```gherkin
    @FR-002-ALERT-NOTIFICATIONS-001 @automated
-   Feature: Notificaciones de Alerta en Tiempo Real
-     Scenario: Disparo de alerta ante desviación crítica de altitud
-       Given un dron transmitiendo telemetría con altitud fuera del límite seguro
-       When el motor de telemetría procesa la trama de datos
-       Then se genera una notificación de severidad CRITICAL
-       And la alerta se entrega a los suscriptores en menos de 500 ms
+   Feature: Real-Time Alert Notifications
+     Scenario: Alert trigger on critical altitude deviation
+       Given a drone transmitting telemetry with altitude outside safe boundaries
+       When telemetry engine processes data packet
+       Then a notification with severity CRITICAL is generated
+       And alert is delivered to subscribers in under 500 ms
    ```
    ```
 
-2. **Sincronización Automática con Cucumber (.feature)**:
-   En lugar de copiar o extraer manualmente los escenarios, ejecuta el comando simplificado de pre-vuelo:
+2. **Automated Cucumber Synchronization (.feature)**:
+   Instead of manual copy-paste, run the pre-flight command:
    ```bash
    pnpm run check:fix
-   # o específicamente: pnpm run extract:gherkin:all (npx aisdlc gherkin extract --all)
+   # or specifically: pnpm run extract:gherkin:all (npx aisdlc gherkin extract --all)
    ```
-   *Efecto*: Escanea los documentos de producto, extrae los bloques ````gherkin```` y genera o actualiza de forma determinista los archivos `.feature` en `tests/features/`.
+   *Effect*: Scans product specs, extracts ````gherkin```` blocks, and generates or updates `.feature` files under `tests/features/`.
 
-3. **Validación Estructural de Esquemas**:
+3. **Structural Schema Validation**:
    ```bash
    pnpm run verify:schemas
-   # o: npx aisdlc verify schemas --path specs/product
+   # or: npx aisdlc verify schemas --path specs/product
    ```
-   *Efecto*: Valida que el frontmatter YAML y el contenido cumplan con el esquema JSON canónico de producto (Draft 2020-12).
+   *Effect*: Validates that YAML frontmatter satisfies JSON Schema Draft 2020-12.
 
 ---
 
-### Fase 2: Ciberseguridad Shift-Left y Modelado de Amenazas
+### Phase 2: Shift-Left Cybersecurity and Threat Modeling
 
-1. **Modelar Amenazas con STRIDE / ASVS**:
-   Identifica los vectores de ataque y casos de abuso utilizando las plantillas de `templates/security/`:
-   - Actor malicioso: `templates/security/threat-actor.template.md` (ej. `specs/security/ACT-THREAT-INJECTOR.md`)
-   - Caso de abuso: `templates/security/abuse-case.template.md` (ej. `specs/security/ABUSE-ALERT-INJECTION.md`)
-   - Requisito de seguridad: `templates/security/security-req.template.md` (ej. `specs/security/SEC-REQ-ALERT-HMAC.md`)
+1. **Threat Modeling with STRIDE / ASVS**:
+   Identify attack vectors and abuse cases using `templates/security/`:
+   - Threat actor: `templates/security/threat-actor.template.md` (e.g., `specs/security/ACT-THREAT-INJECTOR.md`)
+   - Abuse case: `templates/security/abuse-case.template.md` (e.g., `specs/security/ABUSE-ALERT-INJECTION.md`)
+   - Security requirement: `templates/security/security-req.template.md` (e.g., `specs/security/SEC-REQ-ALERT-HMAC.md`)
 
-2. **Vincular Mitigaciones a Enclaves Zero Trust**:
+2. **Bind Mitigations to Zero Trust Enclaves**:
    ```markdown
    ---
    id: "SEC-REQ-ALERT-HMAC"
-   title: "Firma HMAC Obligatoria para Mensajes de Alerta"
+   title: "Mandatory HMAC Signature for Alert Notifications"
    status: "approved"
    category: "integrity"
    mitigates:
@@ -317,69 +316,68 @@ Toda nueva funcionalidad parte de una necesidad de negocio canónica:
    ---
    ```
 
-3. **Validar Conformidad de Artefactos de Seguridad**:
+3. **Validate Security Artifacts**:
    ```bash
    npx aisdlc verify schemas --path specs/security
    ```
 
 ---
 
-### Fase 3: Gobernanza de Licencias Open Source (IP & Legal as Code)
+### Phase 3: Open Source License Governance (IP & Legal as Code)
 
-Antes de incorporar cualquier dependencia o paquete de terceros:
-1. **Consultar `license-policy.yaml`**:
-   - 🟢 **Permisivas (Aprobadas)**: `MIT`, `Apache-2.0`, `BSD-3-Clause`, `ISC`, `MS-PL` (uso libre en cualquier capa).
-   - 🟡 **Copyleft Débil (Condicionadas)**: `LGPL-3.0`, `MPL-2.0`, `MS-RL` (solo consumo como librería dinámica, sin modificaciones internas).
-   - 🔴 **Virales (Prohibidas)**: `GPL-2.0`, `GPL-3.0`, `AGPL-3.0` (bloqueadas para proteger la propiedad intelectual del código propietario y SaaS).
-   - ⚠️ **Comerciales / Duales (Pago Requerido)**: `BSL-1.1`, `SSPL-1.0` (requieren aprobación y formulario formal en `templates/compliance/commercial-acquisition-request.template.md`).
+Before introducing any third-party dependency:
+1. **Consult `license-policy.yaml`**:
+   - 🟢 **Permissive (Approved)**: `MIT`, `Apache-2.0`, `BSD-3-Clause`, `ISC`, `MS-PL` (unrestricted usage).
+   - 🟡 **Weak Copyleft (Conditional)**: `LGPL-3.0`, `MPL-2.0`, `MS-RL` (dynamic linking only, no internal modifications).
+   - 🔴 **Viral (Disallowed)**: `GPL-2.0`, `GPL-3.0`, `AGPL-3.0` (blocked to protect proprietary IP and SaaS boundaries).
+   - ⚠️ **Commercial / Dual (Paid)**: `BSL-1.1`, `SSPL-1.0` (requires approval via `templates/compliance/commercial-acquisition-request.template.md`).
 
-2. **Auditar Licencias y Composición de Software (SCA) con el Comando Simplificado**:
+2. **Audit Licenses and Software Composition (SCA)**:
    ```bash
    pnpm run verify:licenses
-   # o: npx aisdlc verify licenses
+   # or: npx aisdlc verify licenses
    
-   # Opcional: Generar SBOM CycloneDX 1.5 y Notices de Atribución en un solo paso
+   # Optional: Generate CycloneDX 1.5 SBOM and Attribution Notices in one pass
    npx aisdlc verify licenses --sbom reports/sbom.cdx.json --notices THIRD_PARTY_NOTICES.md
    ```
-   *Efecto*:
-   - Ejecuta un escaneo dinámico determinista sobre los paquetes reales instalados en `node_modules` y `.pnpm` (o mediante `--tool trivy` / `--tool syft` si están instalados).
-   - Bloquea la entrega si detecta licencias prohibidas o comerciales no homologadas.
-   - Genera `reports/LICENSE_COMPLIANCE_REPORT.md` con el estado formal del Quality Gate.
-   - Si se solicita `--sbom`, exporta el inventario estándar en formato CycloneDX 1.5 JSON.
-   - Si se solicita `--notices`, consolida las atribuciones legales y textos de copyright en Markdown.
+   *Effect*:
+   - Runs deterministic dynamic scan over installed dependencies in `node_modules` and `.pnpm`.
+   - Blocks delivery if unapproved or viral licenses are detected.
+   - Generates `reports/LICENSE_COMPLIANCE_REPORT.md`.
+   - If `--sbom` is requested, exports CycloneDX 1.5 JSON.
+   - If `--notices` is requested, generates `THIRD_PARTY_NOTICES.md`.
 
 ---
 
-### Fase 4: Andamiaje de Entrega SDD y Gobernanza de Autonomía
+### Phase 4: SDD Delivery Scaffolding and Autonomy Governance
 
-Para implementar la funcionalidad, genera el paquete del cambio SDD de forma automatizada en un único comando:
+Generate the SDD delivery package in a single automated step:
 
-1. **Crear el Cambio con el Comando Simplificado**:
+1. **Create Change with Simplified Command**:
    ```bash
-   pnpm run change:new "Notificaciones de Alerta en Tiempo Real" --from UC-STREAM-TELEMETRY
-   # o: npx aisdlc change new "Notificaciones de Alerta en Tiempo Real" --from UC-STREAM-TELEMETRY --profile standard
+   pnpm run change:new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
+   # or: npx aisdlc change new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY --profile standard
    ```
-   *Efecto Determinista*:
-   - Crea el directorio del cambio en `specs/changes/active/chg-002-notificaciones-de-alerta-en-tiempo-real/`.
-   - Genera el cuarteto SDD preconfigurado:
-     - `proposal.md`: Justificación, impacto y citaciones inmutables con hashes SHA-256.
-     - `spec.md`: Escenarios funcionales y de mitigación de seguridad.
-     - `design.md`: DTOs, interfaces, endpoints y arquitectura arc42 / NAF v4.
-     - `tasks.md`: Plan de tareas atómicas gobernadas y verificables.
-   - Genera y deposita automáticamente el sidecar PDaC formal `handoff.yaml` (`HOF-002-NOTIFICACIONES-DE-ALERTA-EN-TIEMPO-REAL`) con los hashes SHA-256 de los artefactos citados.
-   - *(Si no se proporciona `--from`, el comando crea automáticamente un requerimiento borrador `FR-*-001.md` en `specs/product/`)*.
+   *Deterministic Effect*:
+   - Creates directory `specs/changes/active/chg-002-real-time-alert-notifications/`.
+   - Generates preconfigured SDD quartet:
+     - `proposal.md`: Rationale, impact, and SHA-256 citations.
+     - `spec.md`: Functional and security mitigation scenarios.
+     - `design.md`: DTOs, interfaces, endpoints, and arc42 / NAF v4 mapping.
+     - `tasks.md`: Governed and verifiable atomic tasks.
+   - Generates and deposits formal PDaC sidecar `handoff.yaml` (`HOF-002-REAL-TIME-ALERT-NOTIFICATIONS`) with SHA-256 digests.
+   - *(If `--from` is omitted, the command creates a draft requirement `FR-*-001.md` in `specs/product/`)*.
 
-2. **Configurar Tareas y Modos de Autonomía en `tasks.md`**:
-   Cada tarea define su nivel de riesgo y modo de supervisión humana:
-   - `AUTONOMOUS`: Tarea de bajo riesgo; el agente planifica e implementa de forma autónoma.
-   - `HUMAN_REVIEW_PLAN`: Tarea de riesgo medio; el agente propone el diseño y espera confirmación antes de codificar.
-   - `HIGH_RISK_MANUAL`: Tarea crítica (credenciales, migraciones destructivas); reservada a humanos.
-   - `AMBIGUOUS`: Tarea bloqueada por ambigüedad de requisitos; requiere refinamiento previo.
+2. **Configure Tasks and Autonomy Modes in `tasks.md`**:
+   - `AUTONOMOUS`: Low-risk task; agent plans and implements autonomously.
+   - `HUMAN_REVIEW_PLAN`: Medium-risk; agent proposes design and pauses for approval before coding.
+   - `HIGH_RISK_MANUAL`: Critical task (credentials, destructive migrations); reserved for humans.
+   - `AMBIGUOUS`: Blocked task due to missing requirements; requires human refinement.
 
-   *Ejemplo en `tasks.md`:*
+   *Example in `tasks.md`:*
    ```yaml
    - id: "TSK-001"
-     title: "Definición de DTOs e Interfaces de Alerta"
+     title: "Alert DTO and Interface Definition"
      complexity: "LOW"
      risk-level: "LOW"
      autonomy-mode: "AUTONOMOUS"
@@ -389,7 +387,7 @@ Para implementar la funcionalidad, genera el paquete del cambio SDD de forma aut
        command-or-criteria: "pnpm run verify:quality"
 
    - id: "TSK-002"
-     title: "Implementación del Motor de Alerta y Firma HMAC"
+     title: "Alert Engine and HMAC Signature Implementation"
      complexity: "MEDIUM"
      risk-level: "MEDIUM"
      autonomy-mode: "HUMAN_REVIEW_PLAN"
@@ -399,372 +397,321 @@ Para implementar la funcionalidad, genera el paquete del cambio SDD de forma aut
        command-or-criteria: "pnpm test -- tests/unit/alert_engine.spec.ts"
    ```
 
-3. **Auditar el Gobierno de Tareas y Conformidad SDD**:
+3. **Audit Task Governance and SDD Compliance**:
    ```bash
-   pnpm run verify:governance                    # o: npx aisdlc verify governance
-   npx aisdlc sdd verify                         # Audita sidecars HOF-*, espacios SDD y colisiones pre-vuelo
+   pnpm run verify:governance                    # or: npx aisdlc verify governance
+   npx aisdlc sdd verify                         # Audits HOF-* sidecars, SDD spaces, and pre-flight collisions
    ```
-   *Salida*: Genera `reports/TASKS_GOVERNANCE_REPORT.md` validando que no existan tareas sin verificación o asignaciones indebidas.
 
-4. **Compuerta Pre-Implementación de Duplicados (Shift-Left Pre-Flight Gate)**:
+4. **Shift-Left Pre-Flight Duplicate Gate**:
    ```bash
-   pnpm run verify:duplicates                    # o: npx aisdlc verify duplicates
+   pnpm run verify:duplicates                    # or: npx aisdlc verify duplicates
    ```
-   *Efecto*: Audita que los nuevos requisitos no colisionen en ID, textos normativos idénticos, títulos redundantes ($\ge 85\%$) ni pruebas BDD con la línea base activa. Respeta el Principio de Responsabilidad Única (SRP) permitiendo múltiples requisitos atómicos por Caso de Uso (`UC-*`) y admite evolución *in-place*. Bloquea el proceso antes de gastar recursos de computación y tokens en código.
+   *Effect*: Audits new requirements for collisions in IDs, identical text, redundant titles ($\ge 85\%$), or duplicate BDD tests against the active baseline. Respects Single Responsibility Principle (SRP) and permits in-place evolution. Blocks early to save compute and tokens.
 
 ---
 
-### Fase 5: Gestión Automatizada de Ramas Git (Modelo de 4 Tiers)
+### Phase 5: Automated Git Branch Management (4-Tier Model)
 
-1. **Navegación y Creación en Cascada por Tarea (Comando Simplificado Recomendado)**:
+1. **Cascade Navigation and Creation per Task (Recommended)**:
    ```bash
    pnpm run git:checkout TSK-001
-   # o: npx aisdlc git checkout TSK-001
+   # or: npx aisdlc git checkout TSK-001
    ```
-   *Qué hace el CLI bajo el capó*:
-   - Localiza `TSK-001` dentro de `specs/changes/active/*/tasks.md`.
-   - Resuelve la versión de release asociada y construye la jerarquía estricta de 4 tiers:
+   *Under the Hood*:
+   - Locates `TSK-001` in `specs/changes/active/*/tasks.md`.
+   - Resolves associated release version and builds strict 4-tier hierarchy:
      `Tier 1: main` ➔ `Tier 2: release/vX.Y.Z` ➔ `Tier 3: feat/CHG-XXX` ➔ `Tier 4: task/CHG-XXX/TSK-001-...`
-   - Crea en cascada las ramas intermedias que no existan y sitúa la sesión de trabajo directamente en la rama de la tarea.
+   - Cascade-creates missing intermediate branches and checks out task branch directly.
 
-2. **Herramientas de Planificación y Validación de Ramas**:
+2. **Branch Planning and Validation Tools**:
    ```bash
-   # Visualizar la jerarquía de ramas antes de iniciar
-   pnpm run git:plan                             # o: npx aisdlc git plan --release v1.2.0 --feature CHG-002-alerting --tasks TSK-001,TSK-002
+   # Visualize branch hierarchy before starting
+   pnpm run git:plan                             # or: npx aisdlc git plan --release v1.2.0 --feature CHG-002-alerting --tasks TSK-001,TSK-002
 
-   # Validar la nomenclatura de cualquier rama activa
-   pnpm run git:validate task/CHG-002/TSK-001-alert-dto # o: npx aisdlc git validate <rama>
+   # Validate branch naming rules
+   pnpm run git:validate task/CHG-002/TSK-001-alert-dto # or: npx aisdlc git validate <branch>
    ```
 
 ---
 
-### Fase 6: Implementación con TDD y Auditoría de Pruebas
+### Phase 6: Implementation with TDD and Test Audit
 
-1. **Inyección Quirúrgica de Contexto**:
-   El desarrollador o agente de IA (`agent-developer`) solo debe recibir como contexto `spec.md`, `design.md` y `license-policy.yaml`. Esto evita distracciones y alucinaciones.
+1. **Surgical Context Injection**:
+   The developer or agent (`agent-developer`) receives strictly `spec.md`, `design.md`, and `license-policy.yaml`.
 2. **Test-Driven Development (TDD)**:
-   Se desarrollan las pruebas unitarias y de mitigación (`SEC-TEST-*`) en `tests/` antes o junto con la implementación en `src/`.
-3. **Auditar la Cobertura Total de Pruebas**:
+   Unit tests and mitigation tests (`SEC-TEST-*`) are authored in `tests/` before or alongside logic in `src/`.
+3. **Audit Total Test Coverage**:
    ```bash
    pnpm run verify:testing
-   # o: npx aisdlc verify testing
+   # or: npx aisdlc verify testing
    ```
-   *Salida*: Genera `reports/TEST_VERIFICATION_AUDIT.md`. Bloquea la entrega si algún requisito o tarea carece de pruebas verificables en disco.
+   *Output*: Generates `reports/TEST_VERIFICATION_AUDIT.md`. Blocks delivery if any requirement or task lacks verifiable tests on disk.
 
 ---
 
-### Fase 7: Release Gate de Calidad Multilenguaje y Pre-Vuelo
+### Phase 7: Polyglot Quality Release Gate and Pre-Flight
 
-Verifica que el código cumpla con los umbrales de calidad definidos en `quality-policy.yaml`:
-- **Complejidad Ciclomática (McCabe)**: $\le 10$ por función.
-- **Complejidad Cognitiva**: $\le 15$ por función.
-- **Índice de Mantenibilidad (SEI MI)**: $\ge 50.0$ (Objetivo: $>65.0$).
-- **Longitud Máxima de Función**: $\le 40$ líneas.
+Verify code meets quality thresholds in `quality-policy.yaml`:
+- **Cyclomatic Complexity (McCabe)**: $\le 10$ per function.
+- **Cognitive Complexity**: $\le 15$ per function.
+- **Maintainability Index (SEI MI)**: $\ge 50.0$ (Target: $>65.0$).
+- **Maximum Function Length**: $\le 40$ lines.
 
-1. **Ejecutar Pre-Vuelo con Auto-Fix**:
+1. **Run Pre-Flight with Auto-Fix**:
    ```bash
    pnpm run check:fix
-   # o: npx aisdlc check --fix
+   # or: npx aisdlc check --fix
    ```
-   *Efecto*: Sincroniza escenarios Gherkin, recalcula digests PDaC SHA-256 de las citaciones y verifica los gates de calidad.
 
-2. **Evaluar el Release Gate de Calidad**:
+2. **Evaluate Quality Release Gate**:
    ```bash
    pnpm run verify:quality
-   # o: npx aisdlc verify quality
+   # or: npx aisdlc verify quality
    ```
 
-3. **Generar Informe Formal de Calidad**:
+3. **Generate Formal Quality Report**:
    ```bash
    pnpm run report:quality
-   # o: npx aisdlc report quality
+   # or: npx aisdlc report quality
    ```
-   *Salida*: Genera `reports/QUALITY_REPORT.md` analizando TypeScript, JavaScript, Python, Go, Java, C#, Rust, C/C++.
+   *Output*: Generates `reports/QUALITY_REPORT.md` analyzing TypeScript, JavaScript, Python, Go, Java, C#, Rust, C/C++.
 
 ---
 
-### Fase 8: Matriz de Trazabilidad 360° Automatizada y Pull Request
+### Phase 8: Automated 360° Traceability Matrix and Pull Request
 
-1. **Auditar Trazabilidad 360° sin Fragilidad Textual**:
+1. **Audit 360° Traceability via Reverse Lookup**:
    ```bash
    pnpm run verify:traceability
-   # o: npx aisdlc verify traceability
+   # or: npx aisdlc verify traceability
    ```
-   *Salida*: Genera `reports/TRACEABILITY_MATRIX.md` verificando deterministamente la triangulación obligatoria:
-   - **Producto (Upstream)**: Handoff PDaC (`HOF-*`) con subgrafo de casos de uso (`UC-*`), reglas (`BR-*`) y casos de abuso (`ABUSE-*`).
-   - **Arquitectura (Midstream)**: Vistas arc42 / NAF v4 (`CMP-*`, `ADR-*`, `SEC-ENC-*`).
-   - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) y pruebas unitarias correspondientes.
+   *Output*: Generates `reports/TRACEABILITY_MATRIX.md` deterministically validating triangulation:
+   - **Product (Upstream)**: PDaC Handoff (`HOF-*`) with use cases (`UC-*`), rules (`BR-*`), and abuse cases (`ABUSE-*`).
+   - **Architecture (Midstream)**: arc42 / NAF v4 views (`CMP-*`, `ADR-*`, `SEC-ENC-*`).
+   - **Testing (Downstream)**: BDD/Gherkin suites (`.feature`) and unit tests.
 
-2. **Ejecución Consolidada de la Suite de CI/CD (9 Quality Gates)**:
+2. **Consolidated CI/CD Suite Execution (All 9 Quality Gates)**:
    ```bash
    pnpm run verify:all
-   # o: npx aisdlc verify all
+   # or: npx aisdlc verify all
    ```
-   *Compuertas evaluadas*: 1) Quality Gate (Complejidad y Calidad AST), 2) Trazabilidad 360° (RTM), 3) Gobierno de Tareas y Autonomía, 4) Cobertura de Pruebas (Reqs & Tasks), 5) Licencias Open Source y SCA, 6) PDaC & Deriva Criptográfica SHA-256, 7) Esquemas JSON de Artefactos, 8) Verificación de Duplicados (Shift-Left Gate), 9) Seguridad Shift-Left (Detección de Secretos Gitleaks & SAST).
+   *Gates evaluated*: 1) Quality Gate (AST Complexity & Cleanliness), 2) 360° Traceability (RTM), 3) Task Governance & Autonomy, 4) Test Coverage (Reqs & Tasks), 5) Open Source Licenses & SCA, 6) PDaC Cryptographic Integrity & Drift, 7) JSON Schemas Compliance, 8) Duplicate Check (Shift-Left Gate), 9) Shift-Left Security (Secret Scanning & SAST).
 
-
-3. **Pull Request y Aprobación Humana**:
-   - Se abre el Pull Request de la tarea hacia la rama feature, y luego hacia la rama release.
-   - **Intervención Humana Innegociable**: El Tech Lead humano inspecciona el diff y los informes autogenerados en `reports/` antes de autorizar el merge final a producción.
-
-> [!TIP]
-> **Modelo de Trazabilidad Invertida (Inverted Traceability)**:
-> Los requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`) no acoplan rutas de implementación ni de tests descendentes. Son los componentes (`satisfies-requirements`) y las pruebas (`@<REQ-ID>` o citaciones en tests) los que referencian hacia arriba a los requerimientos. La herramienta compila la matriz 360° deterministamente mediante resolución inversa (*Reverse Lookup*), protegiendo la inmutabilidad y los hashes SHA-256 de las especificaciones canónicas de producto.
+3. **Pull Request and Human Approval**:
+   - PR is opened from task branch to feature branch, and onward to release branch.
+   - **Non-Negotiable Human Sign-Off**: The human Tech Lead inspects diffs and autogenerated reports in `reports/` before approving the final production merge.
 
 ---
 
-### Fase 9: Integración Canónica Post-Implementación a la Línea Base
+### Phase 9: Post-Implementation Canonical Baseline Integration
 
-Una vez concluida la implementación del cambio y verificado que todas las tareas en `tasks.md` están en estado `COMPLETED`:
+Once change implementation finishes and all tasks in `tasks.md` are `COMPLETED`:
 
-1. **Automatización Desatendida en CI/CD (Recomendado)**:
-   - Al fusionar (*merge*) el Pull Request hacia `main` o ramas `release/*`, el workflow de GitHub Actions [`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml) se ejecuta automáticamente.
-   - Detecta deterministamente el cambio activo asociado a la rama o commit del PR, ejecuta la integración canónica de forma segura y realiza commit y push automatizado con mensaje `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
-   - **Para el desarrollador**: solo es necesario ejecutar `git pull` en su rama local para ver los cambios reflejados.
+1. **Unattended CI/CD Automation (Recommended)**:
+   - Upon merging the Pull Request into `main` or release branches (`release/*`), GitHub Actions workflow [`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml) triggers automatically.
+   - Detects the active change, executes canonical integration safely, and commits/pushes with `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
+   - **Developer workflow**: Simply run `git pull` locally to receive the updated baseline.
 
-2. **Ejecución Local / Manual (Comando Simplificado)**:
+2. **Local / Manual Execution (Simplified Command)**:
    ```bash
-   # Detección y resolución automática del cambio activo completado:
+   # Auto-detect completed active change:
    npx aisdlc sdd integrate --auto
 
-   # O indicando explícitamente el ID del cambio:
-   npx aisdlc sdd integrate --change chg-002-notificaciones-de-alerta-en-tiempo-real
+   # Or explicitly specifying change ID:
+   npx aisdlc sdd integrate --change chg-002-real-time-alert-notifications
    ```
-
-   *Efectos y Transformaciones Deterministas*:
-   - **Requerimientos de Producto**: Se promueven automáticamente a estado `active` en `specs/product/` y se añade una entrada en su historial de revisiones referenciando el `changeId`.
-   - **Arquitectura**: Se actualizan los bloques de componente en `specs/architecture/` enlazando los requerimientos recién satisfechos en `satisfies-requirements`.
-   - **Archivado Atómico**: El directorio del cambio se mueve de `specs/changes/active/<id>/` a `specs/changes/completed/<id>/`.
-   - **Propuesta**: Se actualiza `proposal.md` fijando `status: applied`.
+   *Transformations*:
+   - **Product Requirements**: Promoted to `active` in `specs/product/` with revision history updated.
+   - **Architecture**: Component blocks in `specs/architecture/` updated with satisfied requirements in `satisfies-requirements`.
+   - **Atomic Archiving**: Change moved from `specs/changes/active/<id>/` to `specs/changes/completed/<id>/`.
+   - **Proposal**: Marked as `status: applied`.
 
 ---
 
-## 🔬 Tutorial 3: Análisis Estático con AST Real y Soporte Multilenguaje
+## 🔬 Tutorial 3: Real AST Static Analysis & Polyglot Support
 
-AI-SDLC incluye un motor de análisis estático basado en **Árbol de Sintaxis Abstracta (AST) Real** para medir con precisión matemática la Complejidad Ciclomática (McCabe), Complejidad Cognitiva (SonarQube), Líneas de Código (LOC) e Índice de Mantenibilidad (MI), erradicando por completo los falsos positivos derivados de expresiones regulares heurísticas o conteo ingenuo de llaves.
+AI-SDLC includes a static analysis engine based on **Real Abstract Syntax Trees (AST)** to measure Cyclomatic Complexity (McCabe), Cognitive Complexity (SonarQube), Lines of Code (LOC), and Maintainability Index (MI) with mathematical precision, eliminating false positives from heuristics or naive brace counting.
 
-### 1. Arquitectura Multilenguaje Híbrida
+### 1. Hybrid Polyglot Architecture
 
-- **TypeScript, JavaScript, TSX y JSX**: Analizados mediante [`ts-morph`](https://github.com/dsherret/ts-morph) (licencia MIT) directamente sobre el AST en memoria.
-  - Reconoce con precisión componentes React funcionales, callbacks, closures, getters/setters y constructores.
-  - Inmune a plantillas con llaves anidadas `${{ a: 1 }}`, atributos JSX (`style={{ ... }}`) y comentarios.
-  - Detecta el uso prohibido de `any` semántico (`SyntaxKind.AnyKeyword`) sin falsos positivos en variables como `company`.
-- **Go, Rust, Java, C#, C, C++ y Python**: Analizados mediante un escáner léxico token-aware determinista.
-  - Aísla comentarios de línea (`//`, `#`) y bloque (`/* ... */`, `""" ... """`).
-  - Protege cadenas de texto, caracteres escapados y raw strings (ej. `r#"..."#` en Rust o backticks en Go).
+- **TypeScript, JavaScript, TSX, and JSX**: Analyzed via [`ts-morph`](https://github.com/dsherret/ts-morph) (MIT license) directly on in-memory AST.
+  - Demarcates React functional components, callbacks, closures, getters/setters, and constructors.
+  - Immune to nested template literals `${{ a: 1 }}`, JSX attributes (`style={{ ... }}`), and comments.
+  - Detects prohibited `any` usage (`SyntaxKind.AnyKeyword`) without false positives on words like `company`.
+- **Go, Rust, Java, C#, C, C++, and Python**: Analyzed via deterministic token-aware lexical scanner.
+  - Isolates line comments (`//`, `#`) and block comments (`/* ... */`, `""" ... """`).
+  - Protects strings, escaped characters, and raw strings (e.g., `r#"..."#` in Rust or backticks in Go).
 
-### 2. Ejemplos Prácticos de Referencia en el Repositorio
+### 2. Practical Reference Examples
 
-El directorio [`examples/ast-analysis/`](examples/ast-analysis/) contiene casos de prueba y módulos representativos en cada lenguaje:
-- [`examples/ast-analysis/component.tsx`](examples/ast-analysis/component.tsx): Componente TSX con hooks, closures y templates anidados.
-- [`examples/ast-analysis/gateway.go`](examples/ast-analysis/gateway.go): Módulo Go con JSON embebido y comentarios con llaves.
-- [`examples/ast-analysis/pipeline.rs`](examples/ast-analysis/pipeline.rs): Módulo Rust con raw strings JSON y pattern matching.
-- [`examples/ast-analysis/analytics.py`](examples/ast-analysis/analytics.py): Módulo Python con docstrings multilínea conteniendo llaves.
-- [`examples/ast-analysis/OrderService.cs`](examples/ast-analysis/OrderService.cs): Servicio C# con interpolación de strings.
-- [`examples/ast-analysis/TelemetryHandler.java`](examples/ast-analysis/TelemetryHandler.java): Clase Java con métodos y try-with-resources.
+The [`examples/ast-analysis/`](examples/ast-analysis/) directory contains representative samples:
+- [`examples/ast-analysis/component.tsx`](examples/ast-analysis/component.tsx): TSX component with hooks and closures.
+- [`examples/ast-analysis/gateway.go`](examples/ast-analysis/gateway.go): Go module with embedded JSON.
+- [`examples/ast-analysis/pipeline.rs`](examples/ast-analysis/pipeline.rs): Rust module with raw string JSON and pattern matching.
+- [`examples/ast-analysis/analytics.py`](examples/ast-analysis/analytics.py): Python module with multiline docstrings containing braces.
+- [`examples/ast-analysis/OrderService.cs`](examples/ast-analysis/OrderService.cs): C# service with string interpolation.
+- [`examples/ast-analysis/TelemetryHandler.java`](examples/ast-analysis/TelemetryHandler.java): Java class with try-with-resources.
 
-### 3. Comandos de Verificación de Calidad
-
-Para evaluar la calidad de todo el código del repositorio frente a `quality-policy.yaml`:
+### 3. Quality Verification Commands
 
 ```bash
-# Ejecutar verificación de calidad aislada
+# Isolated quality check
 pnpm run verify:quality
-# o mediante npx:
+# or via npx:
 npx aisdlc verify quality
 
-# Ejecutar el pre-vuelo consolidado que incluye la compuerta de calidad AST
+# Consolidated pre-flight including AST quality gate
 pnpm run check
 ```
 
 ---
 
-## 🛡️ Tutorial 4: Escaneo Dinámico de Licencias y Generación de SBOM (SCA)
+## 🛡️ Tutorial 4: Dynamic License Scanning & SBOM Generation (SCA)
 
-AI-SDLC incluye un motor de análisis de composición de software (SCA) y gobernanza de licencias dinámico con capacidad de introspección directa sobre el árbol instalado de dependencias (`node_modules` / `.pnpm`), generación de SBOM estándar **CycloneDX 1.5** y consolidación automática de atribuciones legales (`THIRD_PARTY_NOTICES.md`).
+AI-SDLC includes a dynamic software composition analysis (SCA) engine that inspects installed dependencies (`node_modules` / `.pnpm`), generates standard **CycloneDX 1.5 SBOMs**, and consolidates legal attribution (`THIRD_PARTY_NOTICES.md`).
 
-### 1. Modos de Escaneo: Nativo Zero-Install y Conectores de Terceros
+### 1. Scan Modes: Native Zero-Install & Bring-Your-Own-Tool
 
-- **Escaneo Dinámico Nativo (Por Defecto)**:
-  - Inspecciona deterministamente las dependencias reales instaladas en disco (`node_modules` y carpetas de monorepos pnpm), resolviendo paquetes físicos y enlaces simbólicos.
-  - Extrae metadatos precisos de `package.json`, resuelve expresiones compuestas (`AND` / `OR`) y detecta ficheros de licencia físicos (`LICENSE`, `COPYING`, `NOTICE`) para incorporar los textos completos de atribución.
-  - No requiere la instalación de binarios externos ni herramientas adicionales.
-- **Conectores Opcionales Bring-Your-Own-Tool (`--tool`)**:
-  - Si el entorno dispone de herramientas corporativas como **Trivy** (`--tool trivy`) o **Syft** (`--tool syft`), AI-SDLC se conecta a sus salidas JSON/CycloneDX nativas.
-  - Implementa *graceful fallback*: si el binario especificado no se encuentra en el sistema, retrocede automáticamente al escáner nativo sin romper el pipeline.
+- **Native Dynamic Scan (Default)**:
+  - Deterministically inspects installed dependencies on disk, resolving physical packages and symlinks.
+  - Extracts metadata from `package.json`, resolves compound expressions (`AND` / `OR`), and extracts full license texts (`LICENSE`, `COPYING`, `NOTICE`).
+  - Requires no external binaries or third-party tools.
+- **Optional Bring-Your-Own-Tool Connectors (`--tool`)**:
+  - Connects to **Trivy** (`--tool trivy`) or **Syft** (`--tool syft`) if installed in the host environment.
+  - Provides graceful fallback: reverts automatically to native scanner if the binary is absent.
 
-### 2. Comandos y Generación de Entregables de Compliance
+### 2. Compliance Commands
 
 ```bash
-# Verificación estándar de licencias dinámicas frente a license-policy.yaml
+# Standard dynamic scan against license-policy.yaml
 pnpm run verify:licenses
-# o mediante npx:
-npx aisdlc verify licenses
+# or: npx aisdlc verify licenses
 
-# Generar SBOM en formato CycloneDX 1.5 JSON para auditorías o inventario
+# Generate CycloneDX 1.5 JSON SBOM
 npx aisdlc verify licenses --sbom reports/sbom.cdx.json
 
-# Generar el dossier legal consolidado de atribución THIRD_PARTY_NOTICES.md
+# Generate consolidated THIRD_PARTY_NOTICES.md
 npx aisdlc verify licenses --notices THIRD_PARTY_NOTICES.md
 
-# Generar simultáneamente SBOM y Notices limitando el escaneo a dependencias directas
+# Generate both SBOM and Notices limiting to direct dependencies
 npx aisdlc verify licenses --sbom reports/sbom.cdx.json --notices THIRD_PARTY_NOTICES.md --depth direct
 
-# Integrar con Trivy o Syft en runners corporativos de CI/CD
+# Run with Trivy or Syft in corporate CI runners
 npx aisdlc verify licenses --tool trivy --sbom reports/trivy-sbom.cdx.json
 ```
 
-### 3. Salidas y Artefactos Producidos
-
-- **`reports/LICENSE_COMPLIANCE_REPORT.md`**: Informe formal con desglose por categoría (Permisivas, Copyleft, Comerciales, Prohibidas), dependencias analizadas y estado del Quality Gate.
-- **`reports/sbom.cdx.json`**: Software Bill of Materials (CycloneDX 1.5) con metadatos completos de componentes, hashes y licencias SPDX.
-- **`THIRD_PARTY_NOTICES.md`**: Archivo de atribución legal que agrupa paquetes por licencia y reproduce los textos íntegros de copyright requeridos por licencias MIT, Apache-2.0, BSD, etc.
-
 ---
 
-## 🔐 Tutorial 5: Detección Determinista de Secretos y Seguridad Shift-Left (Gitleaks & SAST)
+## 🔐 Tutorial 5: Deterministic Secret Detection & Shift-Left Security (Gitleaks & SAST)
 
-AI-SDLC implementa una defensa en profundidad determinista para erradicar la exposición involuntaria de credenciales y la introducción de patrones de vulnerabilidad comunes en código sintetizado por modelos de lenguaje (LLMs).
+AI-SDLC implements deterministic defense-in-depth to eliminate exposed credentials and vulnerable code patterns common in LLM-generated code.
 
-### 1. Gate 9: Detección Determinista de Secretos (`verify secrets`)
+### 1. Gate 9: Deterministic Secret Detection (`verify secrets`)
 
-El escaneo de secretos inspecciona el repositorio en busca de credenciales, llaves API, tokens de autenticación o certificados embebidos antes de que alcancen el repositorio remoto o el entorno de producción.
+Scans the repository for credentials, API keys, tokens, or private certificates before code reaches remote repositories:
+- **Zero-Dependency Hybrid Engine**:
+  - Rules for RSA/EC/DSA/OpenSSH Private Keys, GitHub tokens, AWS Access Keys, Google API Keys, Slack tokens, Stripe keys, OpenAI keys, JWTs, and generic token assignments.
+  - **Shannon Entropy** analysis ($\ge 4.5$ default) to catch high-entropy random secrets.
+- **Incremental Git Diff Scanning**:
+  - `--diff` inspects only unstaged/staged Git changes in milliseconds.
+  - `--base <branch>` compares against target branch in PR pipelines.
+- **Gitleaks Integration (`--gitleaks`)**:
+  - Delegates to official `gitleaks` binary if installed, with graceful fallback.
+- **Secure Masking**: Secrets are never output in plain text (`AKIA****************`).
+- **Controlled Suppressions**: Inline comments allow explicit test mocks:
+  ```typescript
+  const testPlaceholder = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // ai-sdlc:allow-secret
+  ```
+- **Exit Code 4**: Any detected secret exits with code 4, immediately failing CI.
 
-#### Características Principales:
-- **Motor Híbrido Zero-Dependencies**:
-  - Reglas deterministas para Claves Privadas (RSA, EC, DSA, OpenSSH), tokens de GitHub (`ghp_`, `gho_`, etc.), AWS Access Keys (`AKIA...`), Google API Keys (`AIza...`), Slack API tokens (`xox[baprs]-...`), Stripe API keys (`sk_live_...`, `rk_live_...`), OpenAI API keys (`sk-...`), JSON Web Tokens (`eyJ...`) y asignaciones genéricas de tokens.
-  - Análisis de **Entropía de Shannon** para identificar cadenas aleatorias de alta entropía ($\ge 4.5$ por defecto) comúnmente empleadas en claves y contraseñas.
-- **Escaneo Incremental Git Diff**:
-  - Mediante el flag `--diff`, analiza únicamente las modificaciones en el área de trabajo o *staging* de Git, reduciendo el tiempo de escaneo a milisegundos en tareas y commits diarios.
-  - El flag opcional `--base <rama>` permite comparar contra la rama de destino (ej. `origin/main` o `release/v1.0.0`) en pipelines de Pull Request.
-- **Delegación en Gitleaks (`--gitleaks`)**:
-  - Si el binario oficial de `gitleaks` está instalado localmente o en el runner de CI/CD, el CLI puede delegar el escaneo en Gitleaks para máxima cobertura.
-  - Implementa *graceful fallback*: si `gitleaks` no está presente, retrocede transparentemente al motor determinista interno.
-- **Enmascaramiento Estricto de Seguridad**:
-  - Los secretos nunca se vuelcan en texto claro en la consola ni en los artefactos generados. Todas las salidas se anonimizan (`AKIA****************`).
-- **Supresiones Controladas**:
-  - Cuando un valor similar a un secreto es un identificador legítimo o un mock seguro de test, se puede suprimir el hallazgo añadiendo el comentario en línea:
-    ```typescript
-    const testPlaceholder = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // ai-sdlc:allow-secret
-    ```
-- **Código de Salida 4**:
-  - Cualquier violación detectada finaliza con **exit code 4**, bloqueando de inmediato el pipeline de integración continua.
+### 2. Static Application Security Testing SAST (`verify sast`)
 
-### 2. Análisis Estático de Vulnerabilidades SAST y Prompt Injection (`verify sast`)
+Evaluates code against critical OWASP patterns:
+1. **SQL Injection (CWE-89)**: Direct concatenation in SQL queries.
+2. **Command Injection (CWE-78)**: OS execution (`exec`, `spawn`) with unsanitized variables.
+3. **Dynamic Code Evaluation (CWE-95)**: `eval(...)` or `new Function(...)`.
+4. **Server-Side Request Forgery - SSRF (CWE-918)**: Outbound requests constructed from user inputs.
+5. **Path Traversal (CWE-22)**: File operations without boundary checks.
+6. **Prompt Injection (OWASP LLM01 / CWE-1427)**: Direct concatenation in LLM prompts (`SAST-006`) and jailbreak overrides (`SAST-007`).
+   - *Runtime Guard*: In-memory `detectPromptInjection(text)` exported by `@ai-sdlc/core`.
 
-Los asistentes de IA generativa pueden sintetizar soluciones sintácticamente elegantes pero intrínsecamente vulnerables. El motor SAST shift-left evalúa el código frente a los patrones de riesgo más críticos de OWASP y OWASP Top 10 for LLMs:
-1. **SQL Injection (CWE-89)**: Concatenación directa o interpolación en sentencias SQL (`SELECT ... + userInput`).
-2. **Command Injection (CWE-78)**: Llamadas al sistema operativo (`exec`, `execSync`, `spawn`) con interpolación de cadenas sin parametrización.
-3. **Dynamic Code Evaluation (CWE-95)**: Uso de `eval(...)` o `new Function(...)` con variables no confiables.
-4. **Server-Side Request Forgery - SSRF (CWE-918)**: Solicitudes HTTP salientes (`fetch`, `axios`, `http.get`) donde la URL o dominio se construye con entradas del usuario.
-5. **Path Traversal (CWE-22)**: Acceso a archivos (`fs.readFile`, `fs.open`) con interpolación directa sin resolución o *jail* de ruta.
-6. **Prompt Injection Inseguro (OWASP LLM01 / CWE-1427)**:
-   - *Concatenación Directa (`SAST-006`)*: Construcción de prompts o mensajes hacia LLMs interpolando entradas del usuario sin delimitadores defensivos (`prompt = $"Summarize: {userInput}"`, `prompt = "Translate: " + req.query.text`).
-   - *Jailbreaks y Firmas Adversariales (`SAST-007`)*: Directivas que intentan anular o forzar modos desprotegidos (*"ignore previous instructions"*, *"system prompt override"*, *"DAN mode"*, rupturas `</system>`).
-   - *Runtime Guard*: Función exportada `detectPromptInjection(text)` en `@ai-sdlc/core` para validación programática en memoria.
+#### Universal Multilingual Coverage:
+TypeScript/JavaScript, Python, C#, Java/Kotlin/Scala, C/C++, Go, Rust, PHP, Ruby, Swift, and `.prompt` files.
 
-#### Cobertura Multilingüe Universal:
-El motor SAST escanea código fuente en lenguajes generalistas y plantillas de IA: **TypeScript/JavaScript** (`.ts`, `.js`), **Python** (`.py`), **C#** (`.cs`), **Java/Kotlin/Scala** (`.java`, `.kt`, `.scala`), **C/C++** (`.c`, `.cpp`, `.cc`), **Go** (`.go`), **Rust** (`.rs`), **PHP** (`.php`), **Ruby** (`.rb`), **Swift** (`.swift`) y plantillas de prompts (`.prompt`).
-
-Opcionalmente, `--semgrep` permite delegar la ejecución en el motor corporativo de Semgrep si está presente en el entorno.
-
-
-### 3. Comandos Prácticos de Seguridad
+### 3. Practical Security Commands
 
 ```bash
-# 1. Escaneo completo de secretos en el árbol de trabajo
+# 1. Full secret scan on working tree
 pnpm run verify:secrets
-# o vía npx:
-npx aisdlc verify secrets
+# or: npx aisdlc verify secrets
 
-# 2. Escaneo ultra-rápido sobre el diff local de Git (ideal para pre-commit hooks)
+# 2. Fast scan on local Git diff (ideal for pre-commit)
 npx aisdlc verify secrets --diff
 
-# 3. Escaneo de diff frente a una rama base en CI (Pull Request)
+# 3. Diff scan against PR target branch
 npx aisdlc verify secrets --diff --base origin/main
 
-# 4. Ajuste de sensibilidad de entropía de Shannon (ej. 5.0 para menor sensibilidad)
-npx aisdlc verify secrets --entropy 5.0
-
-# 5. Escaneo de secretos delegando en el binario oficial de Gitleaks
-npx aisdlc verify secrets --gitleaks
-
-# 6. Escaneo estático SAST shift-left de vulnerabilidades generadas por IA
+# 4. SAST vulnerability scan
 pnpm run verify:sast
-# o vía npx:
-npx aisdlc verify sast
+# or: npx aisdlc verify sast
 
-# 7. Escaneo SAST con delegación opcional en Semgrep
-npx aisdlc verify sast --semgrep
-
-# 8. Pre-vuelo consolidado (incluye Gate 9 de secretos)
+# 5. Consolidated pre-flight (includes Gate 9 secrets & SAST)
 pnpm run check
 ```
 
-### 4. Salidas y Reportes Generados
-
-- **`reports/SECRET_SCAN_REPORT.md`**: Informe formal de auditoría de secretos con regla infringida, severidad, fichero, línea y token enmascarado.
-- **`reports/SAST_REPORT.md`**: Informe formal de vulnerabilidades SAST con tipo de fallo, severidad, fichero, línea y fragmento de código de muestra.
-
 ---
 
-## 🌐 Tutorial 6: Dashboard Web Interactivo y Visualizador de Grafos (Cytoscape.js)
+## 🌐 Tutorial 6: Interactive Web Dashboard and Graph Visualizer (Cytoscape.js)
 
-AI-SDLC incluye un generador de dashboard web interactivo y visualizador de redes de dependencias (`reports/dashboard.html`) basado en **Cytoscape.js (MIT)**, diseñado para Product Owners, CISOs, directores de ingeniería y auditores.
+AI-SDLC generates a self-contained interactive web dashboard and dependency graph (`reports/dashboard.html`) powered by **Cytoscape.js (MIT)**.
 
-### 1. Características Principales
-- **Visualizador de Red PDaC / RTM**:
-  - Navegación multinivel por 4 capas: Producto (Upstream), Requerimientos, Arquitectura (Midstream) y Pruebas BDD (Downstream).
-  - Semáforo de conformidad determinista: Nodos verdes (conformes) vs. nodos rojos (huérfanos o con deriva de digest SHA-256).
-  - **Resaltado de Camino Crítico**: Al pulsar en cualquier requerimiento o nodo, se ilumina toda su cadena de impacto upstream y downstream.
-  - Filtros en vivo por capa y por estado de salud, búsqueda con auto-foco y layouts intercambiables (jerárquico, COSE, concéntrico).
-- **Matriz de Trazabilidad 360° en Tabla**:
-  - Búsqueda en tiempo real con salto interactivo directo hacia el grafo.
-- **Métricas de Calidad & Gobernanza de Autonomía**:
-  - Indicadores ejecutivos (Mantenibilidad SEI MI, CC promedio, veredicto de Release Gate).
-  - Desglose de tareas por modo de autonomía (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
-- **Telemetría y KPIs con Histórico**:
-  - Métricas de la rama activa (commits, líneas añadidas/eliminadas, tiempo de desarrollo activo, consumo de tokens y coste computacional en USD).
-  - Registro histórico consolidado de releases desde `reports/releases/*.kpis.json` para monitorizar KLoC, bugs, DIR y costes a lo largo del tiempo.
-- **Cero Infraestructura Externa (100% Offline)**:
-  - Todo el código JavaScript de Cytoscape.js y los estilos están incrustados en un único archivo HTML autocontenido. Se abre localmente con doble clic o se publica en GitHub/GitLab Pages sin requerir servidores locales ni conexión a internet.
+### 1. Key Features
+- **PDaC / RTM Network Visualizer**:
+  - 4 layers: Product (Upstream), Requirements, Architecture (Midstream), and BDD Tests (Downstream).
+  - Deterministic health status: Green (compliant) vs. Red (orphans or SHA-256 drift).
+  - **Critical Path Highlighting**: Clicking any node illuminates its full upstream and downstream dependency chain.
+  - Live filters by layer and health, auto-focus search, and multiple layout algorithms.
+- **360° Traceability Matrix Table**: Interactive table with bidirectional graph navigation.
+- **Quality & Autonomy Governance Metrics**: Executive cards (SEI MI, average CC, Release Gate verdict) and autonomy mode distribution.
+- **Telemetry and Historical KPIs**: Active branch metrics and historical trends tracking KLoC, bugs, DIR, and rework from `reports/releases/*.kpis.json`.
+- **Zero External Infrastructure (100% Offline)**: Embedded JavaScript and styles in a single HTML file. Opens directly via `file:///` or hosts statically on GitHub/GitLab Pages.
 
-### 2. Comandos CLI
+### 2. CLI Commands
 
 ```bash
-# 1. Generar el dashboard en reports/dashboard.html
+# Generate dashboard at reports/dashboard.html
 npx aisdlc report dashboard
-# o vía script pnpm:
+# or via pnpm:
 pnpm run report:dashboard
 
-# 2. Generar y abrir automáticamente en el navegador web
+# Generate and immediately open in browser
 npx aisdlc report dashboard --open
 
-# 3. Personalizar ruta de salida y título del dashboard
+# Custom path and title
 npx aisdlc report dashboard --output docs/dashboard.html --title "SentinelCore Mission Control"
 ```
 
 ---
 
-## 🔌 Servidor Nativo Model Context Protocol (MCP): Control Total desde tu IDE
+## 🔌 Native Model Context Protocol (MCP) Server: Full Control from your IDE
 
-El framework AI-SDLC incluye un servidor oficial **Model Context Protocol (MCP)** en `@ai-sdlc/mcp` que expone todo el ciclo de vida metodológico a asistentes y agentes de IA en tiempo real sobre `stdio`. Cualquier desarrollador humano o agente puede invocar las herramientas de AI-SDLC directamente desde **Cursor, Claude Desktop / Code, Google Antigravity, VS Code o GitHub Copilot**.
+AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@ai-sdlc/mcp` running over `stdio`. Developers and AI agents can invoke AI-SDLC tools directly within **Cursor, Claude Desktop / Code, Google Antigravity, VS Code, or GitHub Copilot**.
 
-### 1. Comandos Resumen (High-Level Workflows)
-Para simplificar la interacción y minimizar el número de pasos, el servidor MCP ofrece 3 herramientas agregadas principales:
-- **`new`**: Inicializa un nuevo proyecto o adopta AI-SDLC en un repositorio existente, configurando carpetas metodológicas, esquemas, políticas (`quality-policy.yaml`, `license-policy.yaml`) y plantillas de CI (`github`, `gitlab`, `azure`, `bitbucket`).
-- **`verify`**: Ejecuta la suite consolidada de los 9 Quality Gates deterministas a la vez (`quality`, `traceability`, `governance`, `licenses`, `schemas`, `duplicates`, `security`, `testing`, `pdac`), devolviendo el veredicto consolidado y el detalle de cada gate.
-- **`report`**: Genera simultáneamente el panel interactivo HTML (`reports/dashboard.html`) y el informe consolidado en Markdown (`reports/QUALITY_REPORT.md`).
+### 1. High-Level Workflows
+- **`new`**: Initializes a project or adopts AI-SDLC in an existing repo, configuring folders, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`), and CI templates (`github`, `gitlab`, `azure`, `bitbucket`).
+- **`verify`**: Runs all 9 deterministic Quality Gates simultaneously (`quality`, `traceability`, `governance`, `licenses`, `schemas`, `duplicates`, `security`, `testing`, `pdac`).
+- **`report`**: Concurrently generates interactive HTML dashboard (`reports/dashboard.html`) and Markdown quality report (`reports/QUALITY_REPORT.md`).
 
-### 2. Catálogo Completo de Herramientas (20 Tools) y Recursos (5 Resources)
-- **Ciclo SDD**: `sdd_init`, `sdd_new`, `sdd_deposit`, `sdd_integrate`.
-- **Quality Gates Individuales**: `verify_quality`, `verify_traceability`, `verify_governance`, `verify_licenses`, `verify_schemas`, `verify_duplicates`, `verify_security`, `verify_testing`, `verify_pdac`.
-- **Informes & KPIs**: `report_markdown`, `report_dashboard`, `kpi_pr`, `git_detect_author`.
-- **Recursos Canónicos (`aisdlc://`)**: `aisdlc://policies/quality`, `aisdlc://policies/licenses`, `aisdlc://changes/active`, `aisdlc://changes/completed`, `aisdlc://status/summary`.
+### 2. Complete Tools (20 Tools) and Resources (5 Resources)
+- **SDD Lifecycle**: `sdd_init`, `sdd_new`, `sdd_deposit`, `sdd_integrate`.
+- **Individual Quality Gates**: `verify_quality`, `verify_traceability`, `verify_governance`, `verify_licenses`, `verify_schemas`, `verify_duplicates`, `verify_security`, `verify_testing`, `verify_pdac`.
+- **Reports & KPIs**: `report_markdown`, `report_dashboard`, `kpi_pr`, `git_detect_author`.
+- **Canonical Resources (`aisdlc://`)**: `aisdlc://policies/quality`, `aisdlc://policies/licenses`, `aisdlc://changes/active`, `aisdlc://changes/completed`, `aisdlc://status/summary`.
 
-### 3. Configuración en Clientes MCP e IDEs
+### 3. IDE and MCP Client Configuration
 
-#### En Cursor (`.cursor/mcp.json`):
+#### Cursor (`.cursor/mcp.json`):
 ```json
 {
   "mcpServers": {
@@ -776,7 +723,7 @@ Para simplificar la interacción y minimizar el número de pasos, el servidor MC
 }
 ```
 
-#### En Claude Desktop (`claude_desktop_config.json`):
+#### Claude Desktop (`claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
@@ -788,7 +735,7 @@ Para simplificar la interacción y minimizar el número de pasos, el servidor MC
 }
 ```
 
-#### En Google Antigravity / Gemini CLI (`antigravity.mcp.json`):
+#### Google Antigravity / Gemini CLI (`antigravity.mcp.json`):
 ```json
 {
   "mcpServers": {
@@ -800,79 +747,78 @@ Para simplificar la interacción y minimizar el número de pasos, el servidor MC
 }
 ```
 
-> Para el detalle completo de los esquemas Zod y opciones avanzadas, consulta [process/09_agent_protocols.md](process/09_agent_protocols.md#7-servidor-model-context-protocol-mcp-nativo-ai-sdlcmcp--aisdlc-mcp).
+> For complete Zod schemas and options, consult [process/09_agent_protocols.md](process/09_agent_protocols.md#7-native-model-context-protocol-mcp-server-ai-sdlcmcp--aisdlc-mcp).
 
 ---
 
-## 🚀 Guía Rápida para Equipos Humanos
+## 🚀 Quick Guide for Human Teams
 
-
-1. **Definir la Intención del Producto**:
-   - Usa plantillas en `templates/product/` para modelar Actores (`ACT-*`), Casos de Uso (`UC-*`) y Reglas de Negocio (`BR-*`).
-   - Apóyate en agentes analistas (`ps:explore`) para identificar lagunas y requerimientos derivados (`FR-*`, `QR-*`).
-2. **Incorporar Ciberseguridad Shift-Left**:
-   - Modela actores maliciosos (`ACT-THREAT-*`) y casos de abuso (`ABUSE-*`).
-   - Define requisitos de seguridad (`SEC-REQ-*`) y restricciones Zero Trust antes de diseñar la solución técnica.
-3. **Modelar la Arquitectura arc42 / NAF v4**:
-   - Utiliza las plantillas desplegadas en `templates/architecture/` según la granularidad seleccionada al inicializar (`aisdlc init --arch minimal|full|none`, detallado en [process/05_architecture_arc42_nafv4.md](process/05_architecture_arc42_nafv4.md)).
-   - En proyectos estándar (`minimal`), modela componentes (`component.template.md` ➔ `CMP-*`) y decisiones inmutables (`adr.template.md` ➔ `ADR-*`). En sistemas críticos (`full`), cubre las 12 secciones completas de arc42 y perspectivas NAF v4.
-   - Cada componente (`CMP-*`) debe citar explícitamente los casos de uso (`implements-use-cases`) y requerimientos (`satisfies-requirements`) que implementa para asegurar la trazabilidad 360°.
-4. **Verificar Cumplimiento de Licencias**:
-   - Consulta `license-policy.yaml`. Si se necesita una librería comercial o dual, tramita la solicitud formal (`ADR-LIC-*`).
-5. **Revisión y Aprobación Humana**:
-   - Toda propuesta de cambio se valida con linters/schemas en CI. La aprobación y merge es prerrogativa humana exclusiva.
+1. **Define Product Intent**:
+   - Use `templates/product/` to model Actors (`ACT-*`), Use Cases (`UC-*`), and Business Rules (`BR-*`).
+   - Collaborate with analyst agents (`ps:explore`) to surface gaps and derived requirements (`FR-*`, `QR-*`).
+2. **Incorporate Shift-Left Cybersecurity**:
+   - Model threat actors (`ACT-THREAT-*`) and abuse cases (`ABUSE-*`).
+   - Define security requirements (`SEC-REQ-*`) and Zero Trust boundaries before technical design.
+3. **Model arc42 / NAF v4 Architecture**:
+   - Use templates in `templates/architecture/` according to selected granularity (`aisdlc init --arch minimal|full|none`).
+   - Standard projects (`minimal`) model components (`CMP-*`) and ADRs (`ADR-*`). Critical projects (`full`) cover all 12 arc42 sections.
+   - Each component (`CMP-*`) explicitly cites use cases (`implements-use-cases`) and requirements (`satisfies-requirements`).
+4. **Enforce License Compliance**:
+   - Check `license-policy.yaml`. If commercial libraries are needed, file formal requests (`ADR-LIC-*`).
+5. **Human Review and Approval**:
+   - Every proposal is validated by CI linters and schemas. Final approval and merge is strictly a human prerogative.
 
 ---
 
-## 🤖 Guía Operativa para Agentes de IA
+## 🤖 Operational Guide for AI Agents
 
-### 1. Principios y Guardrails Innegociables
-1. **Lectura de Contexto mediante Citaciones**: Nunca asumas comportamientos ni inventes reglas. Lee los artefactos canónicos citados en la especificación (`SPEC-*`).
-2. **Respeto a los Guardrails de Seguridad**: Todo código generado debe cumplir con los principios OWASP Secure Coding. Si la tarea implementa un `SEC-REQ-*`, debes generar obligatoriamente la prueba automatizada correspondiente (`SEC-TEST-*`).
-3. **Inspección Previa de Licencias de Dependencias**: Antes de modificar manifiestos de paquetes (`package.json`, etc.), consulta la licencia del paquete frente a `license-policy.yaml`. Quedan prohibidas dependencias virales (`GPL`/`AGPL`) o comerciales de pago sin aprobación previa.
-4. **Instanciación y Evolución Arquitectural**: Al modelar nuevos módulos o servicios, copia la plantilla correspondiente desde `templates/architecture/` hacia `docs/architecture/` (o diseña en `specs/changes/active/.../design.md`). Completa rigurosamente el frontmatter YAML y valida con `npx aisdlc verify schemas` y `npx aisdlc verify traceability`.
-5. **Validación Determinista y Cero Auto-Aprobación**: Al finalizar, ejecuta los linters y verificadores de esquemas (`pnpm run check:fix` y `pnpm run verify:all`). Nunca intentes auto-aprobar o forzar el merge de un PR: la aprobación y fusión es prerrogativa humana exclusiva.
+### 1. Non-Negotiable Principles and Guardrails
+1. **Context via Citations**: Never assume behaviors or invent rules. Read canonical cited artifacts (`SPEC-*`).
+2. **Security Guardrails**: All code must satisfy OWASP Secure Coding standards. If a task implements `SEC-REQ-*`, generate the corresponding automated test (`SEC-TEST-*`).
+3. **Pre-Inspection of Dependencies**: Before editing dependency manifests (`package.json`, etc.), verify package SPDX against `license-policy.yaml`. Viral (`GPL`/`AGPL`) or commercial paid licenses without approval are forbidden.
+4. **Architectural Instantiation**: Copy templates from `templates/architecture/` to `docs/architecture/` (or design in `specs/changes/active/.../design.md`). Fill YAML frontmatter and validate via `npx aisdlc verify schemas` and `npx aisdlc verify traceability`.
+5. **Deterministic Validation & Zero Auto-Approval**: Run pre-flight commands (`pnpm run check:fix` and `pnpm run verify:all`). Never attempt to auto-approve or merge a PR: merging is strictly a human prerogative.
 
-### 2. Catálogo Canónico de Agentes Especializados (10 Roles)
+### 2. Canonical Specialized Agents (10 Roles)
 
-AI-SDLC define 10 roles especializados con responsabilidades demarcadas, contratos de entrada/salida y compuertas deterministas (ver detalle canónico en [process/09_agent_protocols.md](process/09_agent_protocols.md) y [process/01_governance_and_roles.md](process/01_governance_and_roles.md)):
+AI-SDLC defines 10 specialized roles with bounded responsibilities and deterministic gates (see details in [process/09_agent_protocols.md](process/09_agent_protocols.md) and [process/01_governance_and_roles.md](process/01_governance_and_roles.md)):
 
-| Rol de Agente | Especialidad / Misión | Entregables Principales | Guardrails Críticos |
+| Agent Role | Specialty / Mission | Core Deliverables | Critical Guardrails |
 | :--- | :--- | :--- | :--- |
-| **`agent-product-analyst`** | Analista de Producto y Scribe PDaC | `ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*` en `specs/product/` | `status: draft`, estructura Gherkin obligatoria, sin asunciones. |
-| **`agent-threat-modeler`** | Modelado de Amenazas y Shift-Left Security | `ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`, `SEC-ENC-*` | STRIDE / ASVS, pruebas negativas, bucle de retorno de seguridad técnica. |
-| **`agent-system-architect`** | Arquitecto de Sistemas arc42 / NAF v4 | `CMP-*`, diagramas Mermaid, registros `ADR-*` | Citación de `implements-use-cases` y `satisfies-requirements`; retorno a threat modeler. |
-| **`agent-qa-engineer`** | Ingeniero de QA y SDET | Suites BDD en ROJO (`nominal`, `límite`, `fuera de rango`) | **Cero código de producción**; bloqueo si falta límite o fuera de rango. |
-| **`agent-developer`** | Desarrollador de Software | Código en verde (`src/`), tests unitarios, TDD | Umbrales `quality-policy.yaml` (CC $\le 10$, MI $\ge 50$); handoff post-desarrollo. |
-| **`agent-expert-user`** | Usuario Experto y Evaluador de Dominio | Feedback MVP (diseño) / Atestación funcional (post-dev) | Bimodal: MVP estricto upstream vs. validación funcional CLI/UI downstream. |
-| **`agent-security-auditor`** | Auditor Adversarial de Código (Pre-Merge) | Informe CVSS v3.1, auditoría SAST / secretos | Mentalidad atacante; bloqueo de PRs ante vulnerabilidades críticas o altas. |
-| **`agent-compliance-checker`** | Auditor de Licencias y Propiedad Intelectual | Dictamen de compatibilidad legal de dependencias | Verificación SPDX contra `license-policy.yaml`; bloqueo de virales/comerciales. |
-| **`agent-code-reviewer`** | Revisor Técnico y Arquitectónico (Pre-Merge) | Auditoría Clean Code, SOLID, DRY, YAGNI, AST | Umbrales CC $\le 10$, MI $\ge 50$; categorización `[BLOQUEANTE]` vs `[SUGERENCIA]`. |
-| **`agent-devops`** | Ingeniero de Automatización e Infraestructura | `.github/workflows/`, Dockerfiles, IaC, scripts | **NO INVASIÓN**: Prohibido modificar código de aplicación en `src/`. |
+| **`agent-product-analyst`** | Product Analyst & PDaC Scribe | `ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*` in `specs/product/` | `status: draft`, mandatory Gherkin, zero assumptions. |
+| **`agent-threat-modeler`** | Threat Modeling & Shift-Left Security | `ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`, `SEC-ENC-*` | STRIDE / ASVS, negative tests, technical security loop. |
+| **`agent-system-architect`** | arc42 / NAF v4 Systems Architect | `CMP-*`, Mermaid diagrams, `ADR-*` records | Cites `implements-use-cases` and `satisfies-requirements`; returns to threat modeler. |
+| **`agent-qa-engineer`** | QA Engineer & SDET | FAILING BDD suites (nominal, boundary, out of range) | **Zero production code**; blocked if boundary scenarios missing. |
+| **`agent-developer`** | Software Developer | Green code (`src/`), unit tests, TDD | Thresholds in `quality-policy.yaml` (CC $\le 10$, MI $\ge 50$); post-dev handoff. |
+| **`agent-expert-user`** | Expert User & Domain Evaluator | MVP feedback (design) / Functional attestation (post-dev) | Bimodal: strict upstream MVP vs downstream UI/CLI functional validation. |
+| **`agent-security-auditor`** | Adversarial Code Auditor (Pre-Merge) | CVSS v3.1 report, SAST / secret audit | Attacker mindset; blocks PRs on critical/high findings. |
+| **`agent-compliance-checker`** | License & IP Compliance Auditor | Legal dependency compatibility verdict | SPDX audit against `license-policy.yaml`; blocks viral/commercial. |
+| **`agent-code-reviewer`** | Technical & Architecture Reviewer (Pre-Merge) | Clean Code, SOLID, DRY, YAGNI, AST audit | CC $\le 10$, MI $\ge 50$; categorizes `[BLOCKING]` vs `[SUGGESTION]`. |
+| **`agent-devops`** | Automation & Infrastructure Engineer | `.github/workflows/`, Dockerfiles, IaC, scripts | **NON-INVASION**: Strictly forbidden from touching application code in `src/`. |
 
-### 3. La Tríada de Auditoría Pre-Merge
-Antes de someter cualquier Pull Request a la aprobación humana del Tech Lead, tres agentes especializados auditan concurrentemente el diff:
-1. **`agent-code-reviewer`**: Audita la salud técnica, legibilidad, patrones de diseño, ausencia de deuda técnica y respeto a las métricas de complejidad AST.
-2. **`agent-security-auditor`**: Examina la superficie de ataque, vectores de inyección, sanitización y controles criptográficos.
-3. **`agent-compliance-checker`**: Audita manifiestos, bloquea licencias incompatibles y verifica el SBOM.
+### 3. Pre-Merge Audit Triad
+Before a PR reaches human Tech Lead review, three agents audit the diff concurrently:
+1. **`agent-code-reviewer`**: Audits technical health, design patterns, clean code, and AST complexity metrics.
+2. **`agent-security-auditor`**: Examines attack surface, injection vectors, sanitization, and cryptography.
+3. **`agent-compliance-checker`**: Audits manifests, blocks incompatible licenses, and verifies SBOM.
 
-### 4. Automatización e Infraestructura: `agent-devops` y Guardrail de No Invasión
-El agente `agent-devops` asume la evolución y mantenimiento de pipelines de CI/CD, imágenes de contenedor y scripts de infraestructura. Opera bajo un **guardrail de no invasión estricto**:
-- **Ámbito permitido**: `.github/workflows/`, `Dockerfile*`, `docker-compose*.yml`, manifiestos IaC y `scripts/`.
-- **Ámbito prohibido**: Prohibido terminantemente modificar o refactorizar archivos de código fuente de la aplicación (`src/`, `packages/*/src/app/`). La lógica de negocio es competencia exclusiva de `agent-developer`.
+### 4. Automation & Infrastructure: `agent-devops` and Non-Invasion Guardrail
+The `agent-devops` agent maintains CI/CD pipelines, container images, and infrastructure scripts under a **strict non-invasion guardrail**:
+- **Permitted scope**: `.github/workflows/`, `Dockerfile*`, `docker-compose*.yml`, IaC manifests, and `scripts/`.
+- **Prohibited scope**: Modifying application source code files (`src/`, `packages/*/src/app/`) is strictly forbidden. Business logic belongs exclusively to `agent-developer`.
 
-### Integración Nativa por Entorno de IA
+### Native Integration by AI Environment
 
-El repositorio cuenta con archivos de contexto estándar listos para su carga automática:
-- **Cursor**: Reglas modulares en [`.cursor/rules/`](.cursor/rules/) (`ai-sdlc-core.mdc`, `ai-sdlc-product.mdc`, `ai-sdlc-quality.mdc`).
-- **Claude Code**: Directrices de ejecución, commits y pre-vuelo en [`CLAUDE.md`](CLAUDE.md).
-- **GitHub Copilot**: Contexto de ciclo de vida SDD y políticas en [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
-- **Google Antigravity / Gemini CLI**: Mapeo de roles y guardrails en [`.agent/rules/ai-sdlc.md`](.agent/rules/ai-sdlc.md).
+Standard configuration files are ready for automated loading:
+- **Cursor**: Modular rules in [`.cursor/rules/`](.cursor/rules/) (`ai-sdlc-core.mdc`, `ai-sdlc-product.mdc`, `ai-sdlc-quality.mdc`).
+- **Claude Code**: Guidelines, commits, and pre-flight in [`CLAUDE.md`](CLAUDE.md).
+- **GitHub Copilot**: SDD lifecycle context in [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
+- **Google Antigravity / Gemini CLI**: Roles and guardrails in [`.agent/rules/ai-sdlc.md`](.agent/rules/ai-sdlc.md).
 
-> Para más detalles, consulta la [Matriz de Compatibilidad en process/09_agent_protocols.md](process/09_agent_protocols.md#6-matriz-de-compatibilidad-e-integración-nativa-con-entornos-de-agentes).
+> For details, consult the [Compatibility Matrix in process/09_agent_protocols.md](process/09_agent_protocols.md#6-compatibility-matrix-and-native-integration-with-agent-environments).
 
 ---
 
-## 📜 Licencia
+## 📜 License
 
-Este framework está publicado bajo licencia [MIT](https://opensource.org/licenses/MIT).
+This framework is published under the [MIT](https://opensource.org/licenses/MIT) license.

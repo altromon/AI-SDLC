@@ -1,6 +1,6 @@
 # ==============================================================================
 # AI-SDLC: Bitbucket Pipelines Template
-# Verificación continua de Quality Gates y promoción canónica de cambios SDD
+# Continuous Quality Gates verification and canonical promotion of SDD changes
 # ==============================================================================
 
 image: node:20
@@ -43,7 +43,7 @@ definitions:
             if ! git diff --cached --quiet; then
               git commit -m "chore(sdd): integrate changes into canonical baseline [skip ci]"
               git push origin HEAD:$BITBUCKET_BRANCH
-              echo "✔ Integración canónica sincronizada en Bitbucket."
+              echo "✔ Canonical integration synchronized in Bitbucket."
             fi
 
 pipelines:

@@ -57,13 +57,13 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
     expect(Array.isArray(fm['use-cases-covered'])).toBe(true);
 
     const content = fs.readFileSync(templatePath, 'utf-8');
-    expect(content).toContain('Roles de Usuario');
-    expect(content).toContain('Matriz de Permisos');
-    expect(content).toContain('Matriz de Compatibilidad de Versiones y Plataformas de Usuario');
-    expect(content).toContain('Compatibilidad Cliente-Servidor');
-    expect(content).toContain('Roles Autorizados');
-    expect(content).toContain('Instalación, Acceso y Configuración');
-    expect(content).toContain('Catálogo de Mensajes');
+    expect(content.includes('User Role') || content.includes('Roles de Usuario')).toBe(true);
+    expect(content.includes('Permissions Matrix') || content.includes('Matriz de Permisos')).toBe(true);
+    expect(content.includes('Version and User Platform Compatibility') || content.includes('Matriz de Compatibilidad de Versiones y Plataformas de Usuario')).toBe(true);
+    expect(content.includes('Client-Server Compatibility') || content.includes('Compatibilidad Cliente-Servidor')).toBe(true);
+    expect(content.includes('Authorized Role') || content.includes('Roles Autorizados')).toBe(true);
+    expect(content.includes('Installation, Access, and Configuration') || content.includes('Instalación, Acceso y Configuración')).toBe(true);
+    expect(content.includes('System Messages') || content.includes('Catálogo de Mensajes')).toBe(true);
   });
 
   it('should validate production-manual template frontmatter and structure', () => {
@@ -78,15 +78,15 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
     expect(Array.isArray(fm['enclaves-involved'])).toBe(true);
 
     const content = fs.readFileSync(templatePath, 'utf-8');
-    expect(content).toContain('Regeneración Determinista de Releases');
-    expect(content).toContain('Matriz de Compatibilidad de Versiones, Infraestructura y Migración');
-    expect(content).toContain('Soporte $N-1$');
-    expect(content).toContain('Rutas de Actualización y Marcha Atrás');
-    expect(content).toContain('Herramientas de Compilación');
-    expect(content).toContain('Librerías, Dependencias y Grafo de Vértices');
-    expect(content).toContain('Arquitectura y Pipelines de CI/CD');
-    expect(content).toContain('Estrategia y Procedimiento de Despliegue');
-    expect(content).toContain('Resolución de Errores Probables y Troubleshooting');
+    expect(content.includes('Deterministic Release Regeneration') || content.includes('Regeneración Determinista de Releases')).toBe(true);
+    expect(content.includes('Version, Infrastructure, and Migration Compatibility') || content.includes('Matriz de Compatibilidad de Versiones, Infraestructura y Migración')).toBe(true);
+    expect(content.includes('N-1') || content.includes('$N-1$')).toBe(true);
+    expect(content.includes('Upgrade & Rollback') || content.includes('Rutas de Actualización y Marcha Atrás')).toBe(true);
+    expect(content.includes('Build Tool') || content.includes('Herramientas de Compilación')).toBe(true);
+    expect(content.includes('Libraries, Dependencies, and Vertex Graph') || content.includes('Librerías, Dependencias y Grafo de Vértices')).toBe(true);
+    expect(content.includes('CI/CD Architecture and Pipelines') || content.includes('Arquitectura y Pipelines de CI/CD')).toBe(true);
+    expect(content.includes('Deployment Strategy and Procedure') || content.includes('Estrategia y Procedimiento de Despliegue')).toBe(true);
+    expect(content.includes('Troubleshooting') || content.includes('Resolución de Errores Probables y Troubleshooting')).toBe(true);
   });
 
   it('should validate SentinelCore User Manual instance', () => {
@@ -167,8 +167,8 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
     expect(fm['fault-tolerance-time-ms']).toBe(100);
 
     const content = fs.readFileSync(templatePath, 'utf-8');
-    expect(content).toContain('Enunciado Normativo de Seguridad Operacional');
-    expect(content).toContain('Matriz de Mitigación de Peligros y Tolerancia a Fallos');
+    expect(content.includes('Safety Statement') || content.includes('Enunciado Normativo de Seguridad Operacional')).toBe(true);
+    expect(content.includes('Hazard Mitigation') || content.includes('Matriz de Mitigación de Peligros')).toBe(true);
     expect(content).toContain('@safety @failsafe');
   });
 });

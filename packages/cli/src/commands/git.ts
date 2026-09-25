@@ -13,23 +13,23 @@ import {
 
 export function runGitValidate(branchName: string): boolean {
   if (!branchName) {
-    console.error(pc.red('\n[ERROR] Debe especificar el nombre de la rama a validar.\n'));
+    console.error(pc.red('\n[ERROR] Branch name to validate must be specified.\n'));
     return false;
   }
 
   const result = classifyBranch(branchName);
   if (result.valid) {
-    console.log(pc.green(`\n✔ [CONFORME] Rama válida en el modelo de 4 tiers:`));
-    console.log(`  - Nivel (Tier):  ${pc.bold(`Tier ${result.tier} (${result.tierName})`)}`);
-    console.log(`  - Origen Base:   ${result.parentRequirement}`);
-    console.log(`  - Destino Merge: ${result.targetMerge}\n`);
+    console.log(pc.green(`\n✔ [COMPLIANT] Valid branch in 4-tier model:`));
+    console.log(`  - Level (Tier):  ${pc.bold(`Tier ${result.tier} (${result.tierName})`)}`);
+    console.log(`  - Base Origin:   ${result.parentRequirement}`);
+    console.log(`  - Target Merge:  ${result.targetMerge}\n`);
     return true;
   } else {
-    console.error(pc.red(`\n✖ [ERROR DE NOMENCLATURA] ${result.error}`));
-    console.error(pc.yellow('\nPatrones permitidos:'));
+    console.error(pc.red(`\n✖ [NAMING ERROR] ${result.error}`));
+    console.error(pc.yellow('\nAllowed patterns:'));
     console.error('  Tier 1: main');
     console.error('  Tier 2: release/vX.Y.Z');
-    console.error('  Tier 3: feat/<FEAT-ID>-<slug>  o  bug/<BUG-ID>-<slug>');
+    console.error('  Tier 3: feat/<FEAT-ID>-<slug>  or  bug/<BUG-ID>-<slug>');
     console.error('  Tier 4: task/<PARENT-ID>/<TSK-ID>-<slug>\n');
     return false;
   }
@@ -48,19 +48,19 @@ export function runGitPlan(options: { version?: string; feature?: string; tasks?
 
 export function runGitCheckout(taskId: string, options: { root?: string } = {}): boolean {
   if (!taskId) {
-    console.error(pc.red('\n[ERROR] Debe especificar el identificador de la tarea a navegar (ej. TSK-001).\n'));
+    console.error(pc.red('\n[ERROR] Task identifier to navigate must be specified (e.g. TSK-001).\n'));
     return false;
   }
 
   const rootDir = options.root || process.cwd();
-  console.log(pc.cyan(`\n🚀 [AI-SDLC Git] Navegando y preparando ramas para la tarea '${pc.bold(taskId)}'...`));
+  console.log(pc.cyan(`\n🚀 [AI-SDLC Git] Navigating and preparing branches for task '${pc.bold(taskId)}'...`));
 
   const result = checkoutTaskBranch(taskId, { rootDir });
 
   if (!result.success) {
     console.error(pc.red(`\n✖ [ERROR] ${result.error}`));
     if (result.availableTasks && result.availableTasks.length > 0) {
-      console.log(pc.yellow('\nTareas disponibles en cambios activos:'));
+      console.log(pc.yellow('\nAvailable tasks in active changes:'));
       for (const t of result.availableTasks) {
         console.log(`  - [${pc.cyan(t.changeId)}] ${pc.bold(t.id)}${t.title ? `: ${t.title}` : ''}`);
       }
@@ -69,29 +69,29 @@ export function runGitCheckout(taskId: string, options: { root?: string } = {}):
     return false;
   }
 
-  console.log(`  - Cambio detectado:  ${pc.bold(result.changeId || 'N/A')}`);
-  console.log(`  - Rama Release:      ${pc.green(result.releaseBranch || '')} (Tier 2)`);
-  console.log(`  - Rama Feature:      ${pc.green(result.featureBranch || '')} (Tier 3)`);
-  console.log(`  - Rama Task:         ${pc.green(result.taskBranch || '')} (Tier 4)`);
+  console.log(`  - Detected change:   ${pc.bold(result.changeId || 'N/A')}`);
+  console.log(`  - Release Branch:    ${pc.green(result.releaseBranch || '')} (Tier 2)`);
+  console.log(`  - Feature Branch:    ${pc.green(result.featureBranch || '')} (Tier 3)`);
+  console.log(`  - Task Branch:       ${pc.green(result.taskBranch || '')} (Tier 4)`);
 
   if (result.createdBranches && result.createdBranches.length > 0) {
-    console.log(pc.green(`\n✔ Ramas creadas en cascada:`));
+    console.log(pc.green(`\n✔ Cascading branches created:`));
     for (const b of result.createdBranches) {
       console.log(`  ├── ${pc.bold(b)}`);
     }
   }
 
-  console.log(pc.green(`\n✔ [CHECKOUT] Cambio a la rama de trabajo exitoso:`));
+  console.log(pc.green(`\n✔ [CHECKOUT] Successfully switched to working branch:`));
   console.log(`  👉 ${pc.bold(pc.cyan(result.switchedBranch || result.taskBranch || ''))}\n`);
   return true;
 }
 
 export function runGitHookInstall(options: { root?: string } = {}): boolean {
   const rootDir = options.root || process.cwd();
-  console.log(pc.cyan(`\n🔧 [AI-SDLC Git] Instalando hook determinista para commit trailers...`));
+  console.log(pc.cyan(`\n🔧 [AI-SDLC Git] Installing deterministic hook for commit trailers...`));
   const result = installGitHooks(rootDir);
   if (result.success) {
-    console.log(pc.green(`✔ [CONFORME] Git Hook instalado exitosamente en:`));
+    console.log(pc.green(`✔ [COMPLIANT] Git Hook successfully installed at:`));
     console.log(`  👉 ${pc.bold(result.hookPath || '.git/hooks/prepare-commit-msg')}\n`);
     return true;
   } else {

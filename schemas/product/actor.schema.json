@@ -16,11 +16,11 @@
     "version": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
-      "description": "Versión semántica del artefacto (SemVer)."
+      "description": "Artifact semantic version (SemVer)."
     },
     "schema-version": {
       "type": "string",
-      "description": "Versión de la especificación de esquema utilizada."
+      "description": "Schema specification version used."
     },
     "title": {
       "type": "string",
@@ -40,12 +40,12 @@
     "supersedes": {
       "type": ["string", "null"],
       "pattern": "^ACT-[A-Z0-9]+(-[A-Z0-9]+)*$",
-      "description": "Identificador del actor al que sustituye esta versión o artefacto."
+      "description": "Identifier of the actor superseded by this version or artifact."
     },
     "superseded-by": {
       "type": ["string", "null"],
       "pattern": "^ACT-[A-Z0-9]+(-[A-Z0-9]+)*$",
-      "description": "Identificador del nuevo actor que reemplaza a este cuando pasa a deprecated/retired."
+      "description": "Identifier of the new actor superseding this one upon deprecation/retirement."
     }
   },
   "additionalProperties": false
