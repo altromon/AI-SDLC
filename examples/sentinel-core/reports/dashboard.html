@@ -26,6 +26,100 @@
     .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
     .badge-green { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
     .badge-amber { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+    .badge-blue { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
+    .badge-rose { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+    .mode-row { cursor: pointer; transition: background 0.15s; }
+    .mode-row:hover { background: rgba(56, 189, 248, 0.08) !important; }
+    .accordion-indicator { display: inline-block; transition: transform 0.2s ease; margin-right: 6px; font-size: 0.75rem; color: var(--accent-cyan); }
+    .accordion-indicator.open { transform: rotate(90deg); }
+    .autonomy-tasks-panel { background: rgba(15, 23, 42, 0.75); }
+    .autonomy-tasks-panel > td { padding: 16px 20px !important; border-bottom: 2px solid var(--border-color) !important; }
+    .autonomy-tasks-container { display: flex; flex-direction: column; gap: 12px; }
+    .autonomy-tasks-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .autonomy-tasks-title { font-weight: 700; font-size: 0.85rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px; }
+    .filter-btn-group { display: flex; gap: 6px; align-items: center; }
+    .filter-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .filter-btn:hover { color: var(--text-main); background: #475569; }
+    .filter-btn.active { background: var(--accent-cyan); color: #0f172a; border-color: var(--accent-cyan); font-weight: 700; }
+    .sub-data-table { width: 100%; border-collapse: collapse; background: #0f172a; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); font-size: 0.8rem; }
+    .sub-data-table th, .sub-data-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid rgba(71, 85, 105, 0.4); }
+    .sub-data-table th { background: #182234; color: var(--text-muted); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; }
+    .sub-data-table tr.task-row { transition: background 0.15s; cursor: pointer; }
+    .sub-data-table tr.task-row:hover { background: rgba(56, 189, 248, 0.12) !important; }
+    .task-file-link { color: #7dd3fc; text-decoration: underline; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.75rem; }
+    .task-file-link:hover { color: #bae6fd; }
+
+    /* Task Details Slide-Over Sidebar */
+    .task-sidebar {
+      position: fixed;
+      top: 0;
+      right: -480px;
+      width: 460px;
+      max-width: 90vw;
+      height: 100vh;
+      background: var(--panel-bg);
+      border-left: 1px solid var(--border-color);
+      box-shadow: -8px 0 30px rgba(0, 0, 0, 0.65);
+      z-index: 10001;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .task-sidebar.open {
+      right: 0;
+    }
+    .task-sidebar-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #182234;
+    }
+    .task-sidebar-header h2 {
+      font-size: 1rem;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .task-sidebar-close {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      border-radius: 4px;
+      width: 28px;
+      height: 28px;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .task-sidebar-close:hover {
+      background: #475569;
+      color: var(--text-main);
+      border-color: var(--accent-cyan);
+    }
+    .task-sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .task-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(2px);
+      z-index: 10000;
+    }
 
     nav.tabs { display: flex; background: var(--panel-bg); border-bottom: 1px solid var(--border-color); padding: 0 24px; gap: 8px; }
     .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 16px; font-weight: 600; font-size: 0.875rem; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
@@ -67,26 +161,127 @@
     /* Timeline & KPI Historical */
     .chart-container { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; }
     .chart-container h3 { font-size: 0.9rem; color: var(--accent-cyan); margin-bottom: 16px; }
+    /* REQUIREMENT HOVER TOOLTIP */
+    .req-tooltip {
+      position: fixed;
+      z-index: 10000;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 6px;
+      padding: 8px 12px;
+      max-width: 280px;
+      font-size: 0.75rem;
+      line-height: 1.35;
+      color: var(--text-main);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      animation: tooltipFadeIn 0.12s ease-out;
+    }
+
+    @keyframes tooltipFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tooltip-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 3px;
+    }
+
+    .tooltip-id {
+      font-weight: 700;
+      color: var(--accent-cyan);
+      font-size: 0.75rem;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+
+    .tooltip-title {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tooltip-body {
+      font-size: 0.7rem;
+      color: #cbd5e1;
+      max-height: 80px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+    }
+
+    /* GRAPH NODE TYPOLOGIES LEGEND */
+    .graph-legend {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      z-index: 10;
+      background: rgba(30, 41, 59, 0.9);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+      font-size: 0.72rem;
+      max-width: 520px;
+    }
+    .legend-header {
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      margin-bottom: 6px;
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+    }
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #e2e8f0;
+      font-size: 0.72rem;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="brand">
-      <h1>AI-SDLC // DASHBOARD INTERACTIVO</h1>
+      <h1>AI-SDLC // INTERACTIVE DASHBOARD</h1>
       <span class="badge badge-green">
-        100% CONFORME
+        100% COMPLIANT
       </span>
     </div>
     <div style="font-size: 0.75rem; color: var(--text-muted);">
-      Generado: <span>2026-09-23 19:30:09</span>
+      Generated: <span>2026-09-25 22:39:49</span>
     </div>
   </header>
 
   <nav class="tabs">
-    <button class="tab-btn active" onclick="switchTab('graph')">🌐 Grafo PDaC / RTM</button>
-    <button class="tab-btn" onclick="switchTab('rtm')">📋 Matriz RTM 360°</button>
-    <button class="tab-btn" onclick="switchTab('quality')">📊 Calidad & Gobernanza</button>
-    <button class="tab-btn" onclick="switchTab('kpis')">📈 Telemetría & Histórico KPIs</button>
+    <button class="tab-btn active" onclick="switchTab('graph')">🌐 PDaC / RTM Graph</button>
+    <button class="tab-btn" onclick="switchTab('rtm')">📋 360° RTM Matrix</button>
+    <button class="tab-btn" onclick="switchTab('quality')">📊 Quality & Governance</button>
+    <button class="tab-btn" onclick="switchTab('kpis')">📈 Telemetry & Historical KPIs</button>
   </nav>
 
   <main>
@@ -97,43 +292,69 @@
           <div class="tool-row">
             <button class="tool-btn" onclick="cyZoom(0.2)">Zoom +</button>
             <button class="tool-btn" onclick="cyZoom(-0.2)">Zoom -</button>
-            <button class="tool-btn" onclick="cy.fit(30)">Centrar</button>
-            <button class="tool-btn" onclick="resetHighlight()">Limpiar</button>
+            <button class="tool-btn" onclick="cy.fit(30)">Center</button>
+            <button class="tool-btn" onclick="resetHighlight()">Reset</button>
           </div>
           <div class="tool-row">
             <select id="layout-select" class="tool-select" onchange="applyLayout(this.value)">
-              <option value="breadthfirst">Jerárquico (Capas)</option>
-              <option value="cose">Fuerza dirigida (COSE)</option>
-              <option value="concentric">Concéntrico</option>
+              <option value="breadthfirst">Hierarchical (Layers)</option>
+              <option value="cose">Force-directed (COSE)</option>
+              <option value="concentric">Concentric</option>
               <option value="circle">Circular</option>
             </select>
           </div>
           <div class="tool-row">
+            <select id="type-filter" class="tool-select" onchange="filterType(this.value)">
+              <option value="all">All Typologies</option>
+              <option value="journey">Journeys (JRN)</option>
+              <option value="actor">Actors (ACT)</option>
+              <option value="use-case">Use Cases (UC)</option>
+              <option value="business-rule">Business Rules (BR)</option>
+              <option value="abuse-case">Abuse Cases (ABUSE)</option>
+              <option value="requirement">Requirements (FR/QR/SEC)</option>
+              <option value="architecture">Architecture (CMP/ADR)</option>
+              <option value="test">Testing (BDD/Test)</option>
+            </select>
+          </div>
+          <div class="tool-row">
             <select id="layer-filter" class="tool-select" onchange="filterLayer(this.value)">
-              <option value="all">Todas las Capas</option>
-              <option value="product">Capa 1: Producto (Upstream)</option>
-              <option value="requirement">Capa 2: Requerimientos</option>
-              <option value="architecture">Capa 3: Arquitectura (Midstream)</option>
-              <option value="test">Capa 4: Pruebas (Downstream)</option>
+              <option value="all">All Layers</option>
+              <option value="product">Layer 1: Product (Upstream)</option>
+              <option value="requirement">Layer 2: Requirements</option>
+              <option value="architecture">Layer 3: Architecture (Midstream)</option>
+              <option value="test">Layer 4: Testing (Downstream)</option>
             </select>
           </div>
           <div class="tool-row">
             <select id="status-filter" class="tool-select" onchange="filterStatus(this.value)">
-              <option value="all">Todos los Estados</option>
-              <option value="CONFORME">Solo Conformes (Verde)</option>
-              <option value="issues">Solo Huérfanos / Deriva (Rojo)</option>
+              <option value="all">All Statuses</option>
+              <option value="COMPLIANT">Only Compliant (Green)</option>
+              <option value="issues">Only Orphans / Drift (Red)</option>
             </select>
           </div>
           <div class="tool-row">
-            <input type="text" id="node-search" class="tool-input" placeholder="Buscar ID de nodo..." oninput="searchNode(this.value)">
+            <input type="text" id="node-search" class="tool-input" placeholder="Search node ID..." oninput="searchNode(this.value)">
           </div>
         </div>
         <div id="cy"></div>
+        <div class="graph-legend">
+          <div class="legend-header">Node Typologies</div>
+          <div class="legend-items">
+            <div class="legend-item"><span class="legend-dot" style="background:#581c87; border:2px solid #c084fc;"></span><strong>Journey</strong> (JRN)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#065f46; border:2px solid #34d399; border-radius:50%;"></span><strong>Actor</strong> (ACT)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#0369a1; border:2px solid #38bdf8;"></span><strong>Use Case</strong> (UC)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#b45309; border:2px solid #fbbf24; transform:rotate(45deg);"></span><strong>Business Rule</strong> (BR)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#881337; border:2px solid #f43f5e;"></span><strong>Abuse Case</strong> (ABUSE)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#1e293b; border:2px solid #64748b;"></span><strong>Requirement</strong> (FR/QR/SEC)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#312e81; border:2px solid #818cf8;"></span><strong>Architecture</strong> (CMP/ADR)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#047857; border:2px solid #10b981;"></span><strong>Test</strong> (BDD/Test)</div>
+          </div>
+        </div>
       </div>
       <aside class="sidebar" id="node-details">
-        <h2>Detalle del Nodo</h2>
+        <h2>Node Details</h2>
         <div id="sidebar-content" style="display: flex; flex-direction: column; gap: 12px;">
-          <p style="color: var(--text-muted); font-size: 0.8rem;">Haz clic en cualquier nodo del grafo para inspeccionar su camino crítico y trazabilidad completa.</p>
+          <p style="color: var(--text-muted); font-size: 0.8rem;">Click on any graph node to inspect its critical path and full traceability.</p>
         </div>
       </aside>
     </div>
@@ -141,45 +362,45 @@
     <!-- TAB 2: RTM TABLE -->
     <div id="tab-rtm" class="tab-panel">
       <div class="content-container">
-        <h2>Matriz de Trazabilidad de Requerimientos 360°</h2>
+        <h2>360° Requirements Traceability Matrix</h2>
         <table class="data-table">
           <thead>
             <tr>
-              <th>ID Requerimiento</th>
-              <th>Título</th>
-              <th>Producto (Upstream)</th>
-              <th>Arquitectura (Midstream)</th>
-              <th>Pruebas (Downstream)</th>
-              <th>Estado Global</th>
+              <th>Requirement ID</th>
+              <th>Title</th>
+              <th>Product (Upstream)</th>
+              <th>Architecture (Midstream)</th>
+              <th>Testing (Downstream)</th>
+              <th>Global Status</th>
             </tr>
           </thead>
           <tbody>
             
-              <tr onclick="focusNode('FR-TELEMETRY-STREAM-001')" style="cursor: pointer;">
+              <tr onclick="focusNode('FR-TELEMETRY-STREAM-001')" onmouseenter="startRowTooltip(event, 'FR-TELEMETRY-STREAM-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>FR-TELEMETRY-STREAM-001</code></strong></td>
                 <td>Ingesta Continua de Tramas Telemétricas UAV</td>
-                <td><code>UC-STREAM-TELEMETRY</code></td>
+                <td><code>UC-STREAM-TELEMETRY, BR-TELEMETRY-VALIDITY, ABUSE-TELEMETRY-SPOOFING</code></td>
                 <td><code>CMP-TELEMETRY-INGEST, 06_runtime_view.md, CMP-TELEMETRY-INGEST.md</code></td>
                 <td><code>tests/features/fr-telemetry-stream-001.feature, tests/unit/telemetry_gateway.spec.ts</code></td>
-                <td><span class="badge badge-green">CONFORME</span></td>
+                <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
-              <tr onclick="focusNode('QR-LATENCY-REALTIME')" style="cursor: pointer;">
+              <tr onclick="focusNode('QR-LATENCY-REALTIME')" onmouseenter="startRowTooltip(event, 'QR-LATENCY-REALTIME')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>QR-LATENCY-REALTIME</code></strong></td>
                 <td>Latencia de Procesamiento e Ingesta Sub-100ms</td>
-                <td><code>UC-STREAM-TELEMETRY</code></td>
+                <td><code>UC-STREAM-TELEMETRY, BR-TELEMETRY-VALIDITY, ABUSE-TELEMETRY-SPOOFING</code></td>
                 <td><code>CMP-TELEMETRY-INGEST, 01_introduction_goals.md, ADR-001-WEBSOCKET-STACK.md, CMP-TELEMETRY-INGEST.md</code></td>
                 <td><code>tests/benchmarks/latency_benchmark.spec.ts</code></td>
-                <td><span class="badge badge-green">CONFORME</span></td>
+                <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
-              <tr onclick="focusNode('SEC-REQ-MTLS-STREAM')" style="cursor: pointer;">
+              <tr onclick="focusNode('SEC-REQ-MTLS-STREAM')" onmouseenter="startRowTooltip(event, 'SEC-REQ-MTLS-STREAM')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>SEC-REQ-MTLS-STREAM</code></strong></td>
                 <td>Autenticación Criptográfica Mutua (mTLS) en Ingesta</td>
-                <td><code>ABUSE-TELEMETRY-SPOOFING</code></td>
+                <td><code>ABUSE-TELEMETRY-SPOOFING, UC-STREAM-TELEMETRY, BR-TELEMETRY-VALIDITY</code></td>
                 <td><code>CMP-TELEMETRY-INGEST, SEC-ENC-DMZ-INGEST, 01_introduction_goals.md, 06_runtime_view.md, CMP-TELEMETRY-INGEST.md</code></td>
                 <td><code>tests/features/security/sec-req-mtls-stream.feature, tests/unit/telemetry_gateway.spec.ts</code></td>
-                <td><span class="badge badge-green">CONFORME</span></td>
+                <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
           </tbody>
@@ -194,61 +415,180 @@
           <div class="metric-card">
             <span class="title">Release Gate</span>
             <span class="value" style="color: var(--accent-emerald);">PASS</span>
-            <span class="subtitle">0 funciones violando política</span>
+            <span class="subtitle">0 policy-violating functions</span>
           </div>
           <div class="metric-card">
-            <span class="title">Mantenibilidad (SEI MI)</span>
+            <span class="title">Maintainability (SEI MI)</span>
             <span class="value">72 / 100</span>
-            <span class="subtitle">Umbral mínimo: 50</span>
+            <span class="subtitle">Minimum threshold: 50</span>
           </div>
           <div class="metric-card">
-            <span class="title">Complejidad Ciclomática</span>
+            <span class="title">Cyclomatic Complexity</span>
             <span class="value">2.2</span>
-            <span class="subtitle">Umbral máximo: 10</span>
+            <span class="subtitle">Maximum threshold: 10</span>
           </div>
           <div class="metric-card">
-            <span class="title">Cobertura BDD Requisitos</span>
+            <span class="title">Requirements BDD Coverage</span>
             <span class="value">100%</span>
-            <span class="subtitle">3 / 3 verificados</span>
+            <span class="subtitle">3 / 3 verified</span>
           </div>
         </div>
 
         <div class="chart-container">
-          <h3>Distribución de Modos de Autonomía de Tareas (Gobernanza)</h3>
+          <h3>Task Autonomy Modes Distribution (Governance)</h3>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">
+            Haz clic sobre cualquier tipo de autonomía para desplegar sus tareas asociadas, filtrar por estado y abrir el fichero .md correspondiente.
+          </p>
           <table class="data-table">
             <thead>
               <tr>
-                <th>Modo de Autonomía</th>
-                <th>Semáforo</th>
-                <th>Cantidad</th>
-                <th>Rol Agente / Intervención Requerida</th>
+                <th>Autonomy Mode</th>
+                <th>Status</th>
+                <th>Count</th>
+                <th>Agent Role / Required Intervention</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><code>AUTONOMOUS</code></td>
-                <td>🟢</td>
-                <td><strong>0</strong></td>
-                <td>Planificación y codificación autónoma. Revisión en PR.</td>
-              </tr>
-              <tr>
-                <td><code>HUMAN_REVIEW_PLAN</code></td>
-                <td>🟡</td>
-                <td><strong>0</strong></td>
-                <td>Plan detallado aprobado antes de codificar.</td>
-              </tr>
-              <tr>
-                <td><code>AMBIGUOUS</code></td>
-                <td>🟠</td>
-                <td><strong>0</strong></td>
-                <td>Detenido: Refinamiento requerido con Product Owner.</td>
-              </tr>
-              <tr>
-                <td><code>HIGH_RISK_MANUAL</code></td>
-                <td>🔴</td>
-                <td><strong>0</strong></td>
-                <td>Ejecución directa por ingenieros humanos.</td>
-              </tr>
+              
+    <tr class="mode-row" onclick="toggleAutonomyTasks('AUTONOMOUS')" title="Haz clic para desplegar u ocultar las tareas AUTONOMOUS">
+      <td>
+        <span class="accordion-indicator" id="toggle-icon-AUTONOMOUS">▶</span>
+        <code>AUTONOMOUS</code>
+        <span style="font-size: 0.72rem; color: var(--accent-cyan); margin-left: 6px;">(Ver tareas ▼)</span>
+      </td>
+      <td>🟢</td>
+      <td><strong>0</strong></td>
+      <td>Autonomous planning and coding. Asynchronous PR review.</td>
+    </tr>
+    <tr id="tasks-row-AUTONOMOUS" class="autonomy-tasks-panel" style="display: none;">
+      <td colspan="4">
+        <div class="autonomy-tasks-container">
+          <div class="autonomy-tasks-header">
+            <div class="autonomy-tasks-title">
+              <span>📋 Tareas <code>AUTONOMOUS</code></span>
+              <span class="badge" style="background:#334155;">Total: 0</span>
+            </div>
+            <div class="filter-btn-group">
+              <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Filtrar:</span>
+              <button type="button" class="filter-btn active" id="btn-filter-AUTONOMOUS-all" onclick="filterAutonomyTasks('AUTONOMOUS', 'all', event)">Todas (0)</button>
+              <button type="button" class="filter-btn" id="btn-filter-AUTONOMOUS-open" onclick="filterAutonomyTasks('AUTONOMOUS', 'open', event)">Abiertas (0)</button>
+              <button type="button" class="filter-btn" id="btn-filter-AUTONOMOUS-closed" onclick="filterAutonomyTasks('AUTONOMOUS', 'closed', event)">Cerradas (0)</button>
+            </div>
+          </div>
+          
+          <div style="color: var(--text-muted); font-size: 0.8rem; padding: 10px 0; font-style: italic;">
+            No hay tareas registradas con modo <code>AUTONOMOUS</code>.
+          </div>
+          
+        </div>
+      </td>
+    </tr>
+  
+              
+    <tr class="mode-row" onclick="toggleAutonomyTasks('HUMAN_REVIEW_PLAN')" title="Haz clic para desplegar u ocultar las tareas HUMAN_REVIEW_PLAN">
+      <td>
+        <span class="accordion-indicator" id="toggle-icon-HUMAN_REVIEW_PLAN">▶</span>
+        <code>HUMAN_REVIEW_PLAN</code>
+        <span style="font-size: 0.72rem; color: var(--accent-cyan); margin-left: 6px;">(Ver tareas ▼)</span>
+      </td>
+      <td>🟡</td>
+      <td><strong>0</strong></td>
+      <td>Detailed plan approved before coding.</td>
+    </tr>
+    <tr id="tasks-row-HUMAN_REVIEW_PLAN" class="autonomy-tasks-panel" style="display: none;">
+      <td colspan="4">
+        <div class="autonomy-tasks-container">
+          <div class="autonomy-tasks-header">
+            <div class="autonomy-tasks-title">
+              <span>📋 Tareas <code>HUMAN_REVIEW_PLAN</code></span>
+              <span class="badge" style="background:#334155;">Total: 0</span>
+            </div>
+            <div class="filter-btn-group">
+              <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Filtrar:</span>
+              <button type="button" class="filter-btn active" id="btn-filter-HUMAN_REVIEW_PLAN-all" onclick="filterAutonomyTasks('HUMAN_REVIEW_PLAN', 'all', event)">Todas (0)</button>
+              <button type="button" class="filter-btn" id="btn-filter-HUMAN_REVIEW_PLAN-open" onclick="filterAutonomyTasks('HUMAN_REVIEW_PLAN', 'open', event)">Abiertas (0)</button>
+              <button type="button" class="filter-btn" id="btn-filter-HUMAN_REVIEW_PLAN-closed" onclick="filterAutonomyTasks('HUMAN_REVIEW_PLAN', 'closed', event)">Cerradas (0)</button>
+            </div>
+          </div>
+          
+          <div style="color: var(--text-muted); font-size: 0.8rem; padding: 10px 0; font-style: italic;">
+            No hay tareas registradas con modo <code>HUMAN_REVIEW_PLAN</code>.
+          </div>
+          
+        </div>
+      </td>
+    </tr>
+  
+              
+    <tr class="mode-row" onclick="toggleAutonomyTasks('AMBIGUOUS')" title="Haz clic para desplegar u ocultar las tareas AMBIGUOUS">
+      <td>
+        <span class="accordion-indicator" id="toggle-icon-AMBIGUOUS">▶</span>
+        <code>AMBIGUOUS</code>
+        <span style="font-size: 0.72rem; color: var(--accent-cyan); margin-left: 6px;">(Ver tareas ▼)</span>
+      </td>
+      <td>🟠</td>
+      <td><strong>0</strong></td>
+      <td>Halted: Refinement required with Product Owner.</td>
+    </tr>
+    <tr id="tasks-row-AMBIGUOUS" class="autonomy-tasks-panel" style="display: none;">
+      <td colspan="4">
+        <div class="autonomy-tasks-container">
+          <div class="autonomy-tasks-header">
+            <div class="autonomy-tasks-title">
+              <span>📋 Tareas <code>AMBIGUOUS</code></span>
+              <span class="badge" style="background:#334155;">Total: 0</span>
+            </div>
+            <div class="filter-btn-group">
+              <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Filtrar:</span>
+              <button type="button" class="filter-btn active" id="btn-filter-AMBIGUOUS-all" onclick="filterAutonomyTasks('AMBIGUOUS', 'all', event)">Todas (0)</button>
+              <button type="button" class="filter-btn" id="btn-filter-AMBIGUOUS-open" onclick="filterAutonomyTasks('AMBIGUOUS', 'open', event)">Abiertas (0)</button>
+              <button type="button" class="filter-btn" id="btn-filter-AMBIGUOUS-closed" onclick="filterAutonomyTasks('AMBIGUOUS', 'closed', event)">Cerradas (0)</button>
+            </div>
+          </div>
+          
+          <div style="color: var(--text-muted); font-size: 0.8rem; padding: 10px 0; font-style: italic;">
+            No hay tareas registradas con modo <code>AMBIGUOUS</code>.
+          </div>
+          
+        </div>
+      </td>
+    </tr>
+  
+              
+    <tr class="mode-row" onclick="toggleAutonomyTasks('HIGH_RISK_MANUAL')" title="Haz clic para desplegar u ocultar las tareas HIGH_RISK_MANUAL">
+      <td>
+        <span class="accordion-indicator" id="toggle-icon-HIGH_RISK_MANUAL">▶</span>
+        <code>HIGH_RISK_MANUAL</code>
+        <span style="font-size: 0.72rem; color: var(--accent-cyan); margin-left: 6px;">(Ver tareas ▼)</span>
+      </td>
+      <td>🔴</td>
+      <td><strong>0</strong></td>
+      <td>Direct execution by human engineers.</td>
+    </tr>
+    <tr id="tasks-row-HIGH_RISK_MANUAL" class="autonomy-tasks-panel" style="display: none;">
+      <td colspan="4">
+        <div class="autonomy-tasks-container">
+          <div class="autonomy-tasks-header">
+            <div class="autonomy-tasks-title">
+              <span>📋 Tareas <code>HIGH_RISK_MANUAL</code></span>
+              <span class="badge" style="background:#334155;">Total: 0</span>
+            </div>
+            <div class="filter-btn-group">
+              <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Filtrar:</span>
+              <button type="button" class="filter-btn active" id="btn-filter-HIGH_RISK_MANUAL-all" onclick="filterAutonomyTasks('HIGH_RISK_MANUAL', 'all', event)">Todas (0)</button>
+              <button type="button" class="filter-btn" id="btn-filter-HIGH_RISK_MANUAL-open" onclick="filterAutonomyTasks('HIGH_RISK_MANUAL', 'open', event)">Abiertas (0)</button>
+              <button type="button" class="filter-btn" id="btn-filter-HIGH_RISK_MANUAL-closed" onclick="filterAutonomyTasks('HIGH_RISK_MANUAL', 'closed', event)">Cerradas (0)</button>
+            </div>
+          </div>
+          
+          <div style="color: var(--text-muted); font-size: 0.8rem; padding: 10px 0; font-style: italic;">
+            No hay tareas registradas con modo <code>HIGH_RISK_MANUAL</code>.
+          </div>
+          
+        </div>
+      </td>
+    </tr>
+  
             </tbody>
           </table>
         </div>
@@ -258,44 +598,115 @@
     <!-- TAB 4: TELEMETRY & HISTORICAL KPIS -->
     <div id="tab-kpis" class="tab-panel">
       <div class="content-container">
-        <h2>Telemetría Activa e Histórico de KPIs</h2>
+        <h2>Active Telemetry and KPI History</h2>
         
         <div class="grid-cards">
           <div class="metric-card">
-            <span class="title">Commits en Rama Activa</span>
-            <span class="value">1</span>
-            <span class="subtitle">+31 / -0 líneas</span>
+            <span class="title">Commits in Active Branch</span>
+            <span class="value">27</span>
+            <span class="subtitle">+15620 / -6992 lines</span>
           </div>
           <div class="metric-card">
-            <span class="title">Tiempo de Desarrollo Activo</span>
-            <span class="value">0m</span>
-            <span class="subtitle">0s acumulados</span>
+            <span class="title">Active Development Time</span>
+            <span class="value">211m</span>
+            <span class="subtitle">12668s accumulated</span>
           </div>
           <div class="metric-card">
-            <span class="title">Tokens Consumidos</span>
-            <span class="value">0</span>
-            <span class="subtitle">In: 0 | Out: 0</span>
+            <span class="title">Consumed Tokens</span>
+            <span class="value">804,230</span>
+            <span class="subtitle">In: 588.750 | Out: 215.480</span>
           </div>
           <div class="metric-card">
-            <span class="title">Coste Estimado Computación</span>
-            <span class="value">$0.00</span>
-            <span class="subtitle">USD ponderado</span>
+            <span class="title">Estimated Compute Cost</span>
+            <span class="value">$5.00</span>
+            <span class="subtitle">Weighted USD</span>
           </div>
+        </div>
+
+        <div class="chart-container">
+          <h3>Telemetry Breakdown by Author and Model (feat/dashboard-journey-typologies)</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Entity / Model</th>
+                <th>Type</th>
+                <th>Commits</th>
+                <th>Lines (+/-)</th>
+                <th>Active Time</th>
+                <th>Consumed Tokens</th>
+                <th>Estimated Cost ($ USD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              <tr>
+                <td><strong>Human (Developer)</strong></td>
+                <td><span class="badge" style="background:#334155;">HUMAN</span></td>
+                <td>8</td>
+                <td>+74 / -54</td>
+                <td>21m</td>
+                <td>0</td>
+                <td>—</td>
+              </tr>
+              
+              
+              <tr>
+                <td><strong><code>gemini-3.8-flash</code></strong></td>
+                <td><span class="badge badge-green">AGENT</span></td>
+                <td>19</td>
+                <td>+15546 / -6938</td>
+                <td>190m</td>
+                <td>804,230</td>
+                <td>$5.00</td>
+              </tr>
+              
+              <tr style="font-weight: bold; background: rgba(255,255,255,0.05);">
+                <td>TOTAL BRANCH</td>
+                <td>—</td>
+                <td>27</td>
+                <td>+15620 / -6992</td>
+                <td>211m</td>
+                <td>804,230</td>
+                <td>$5.00 USD</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         
 
         <div class="chart-container">
-          <h3>Histórico Consolidado de Releases</h3>
+          <h3>Consolidated Release History</h3>
           
           <p style="color: var(--text-muted); font-size: 0.85rem;">
-            No se registran aún informes de release consolidados en <code>reports/releases/*.kpis.json</code>.
-            Utiliza el comando <code>aisdlc kpi release --release &lt;rama&gt;</code> para consolidar métricas de entrega.
+            No consolidated release reports recorded yet in <code>reports/releases/*.kpis.json</code>.
+            Use the command <code>aisdlc kpi release --release &lt;branch&gt;</code> to consolidate delivery metrics.
           </p>
           
         </div>
       </div>
     </div>
   </main>
+
+    <!-- REQUIREMENT HOVER TOOLTIP (1s hover) -->
+    <div id="req-tooltip" class="req-tooltip" style="display: none;">
+      <div class="tooltip-header">
+        <span class="tooltip-id" id="tooltip-id">FR-000</span>
+        <span class="tooltip-title" id="tooltip-title">Title</span>
+      </div>
+      <div class="tooltip-body" id="tooltip-body"></div>
+    </div>
+
+    <!-- TASK DETAILS SLIDE-OVER SIDEBAR -->
+    <div id="task-backdrop" class="task-backdrop" style="display: none;" onclick="closeTaskSidebar()"></div>
+    <aside id="task-sidebar" class="task-sidebar" aria-label="Task Details">
+      <div class="task-sidebar-header">
+        <h2><span>📋 Detalles de la Tarea</span></h2>
+        <button type="button" class="task-sidebar-close" onclick="closeTaskSidebar()" title="Cerrar panel (Esc)">✕</button>
+      </div>
+      <div class="task-sidebar-body" id="task-sidebar-content">
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Haz clic en una tarea para ver sus detalles de gobernanza.</p>
+      </div>
+    </aside>
 
   <script>
     /**
@@ -332,8 +743,140 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
 
   </script>
   <script>
-    var elements = [{"group":"nodes","data":{"id":"FR-TELEMETRY-STREAM-001","label":"FR-TELEMETRY-STREAM-001","title":"Ingesta Continua de Tramas Telemétricas UAV","type":"requirement","layer":"requirement","status":"CONFORME","details":{"productStatus":"CONFORME","archStatus":"CONFORME","testStatus":"CONFORME"},"upstream":["UC-STREAM-TELEMETRY"],"downstream":["CMP-TELEMETRY-INGEST","06_runtime_view.md","CMP-TELEMETRY-INGEST.md","tests/features/fr-telemetry-stream-001.feature","tests/unit/telemetry_gateway.spec.ts"]},"classes":"layer-requirement status-conforme"},{"group":"nodes","data":{"id":"UC-STREAM-TELEMETRY","label":"UC-STREAM-TELEMETRY","title":"UC-STREAM-TELEMETRY","type":"usecase","layer":"product","status":"CONFORME"},"classes":"layer-product status-conforme"},{"group":"nodes","data":{"id":"CMP-TELEMETRY-INGEST","label":"CMP-TELEMETRY-INGEST","title":"CMP-TELEMETRY-INGEST","type":"component","layer":"architecture","status":"CONFORME"},"classes":"layer-architecture status-conforme"},{"group":"nodes","data":{"id":"06_runtime_view.md","label":"06_runtime_view.md","title":"06_runtime_view.md","type":"architecture","layer":"architecture","status":"CONFORME"},"classes":"layer-architecture status-conforme"},{"group":"nodes","data":{"id":"CMP-TELEMETRY-INGEST.md","label":"CMP-TELEMETRY-INGEST.md","title":"CMP-TELEMETRY-INGEST.md","type":"component","layer":"architecture","status":"CONFORME"},"classes":"layer-architecture status-conforme"},{"group":"nodes","data":{"id":"tests_features_fr-telemetry-stream-001_feature","label":"fr-telemetry-stream-001.feature","title":"tests/features/fr-telemetry-stream-001.feature","type":"bdd-feature","layer":"test","status":"CONFORME","filePath":"tests/features/fr-telemetry-stream-001.feature"},"classes":"layer-test status-conforme"},{"group":"nodes","data":{"id":"tests_unit_telemetry_gateway_spec_ts","label":"telemetry_gateway.spec.ts","title":"tests/unit/telemetry_gateway.spec.ts","type":"code-test","layer":"test","status":"CONFORME","filePath":"tests/unit/telemetry_gateway.spec.ts"},"classes":"layer-test status-conforme"},{"group":"nodes","data":{"id":"QR-LATENCY-REALTIME","label":"QR-LATENCY-REALTIME","title":"Latencia de Procesamiento e Ingesta Sub-100ms","type":"requirement","layer":"requirement","status":"CONFORME","details":{"productStatus":"CONFORME","archStatus":"CONFORME","testStatus":"CONFORME"},"upstream":["UC-STREAM-TELEMETRY"],"downstream":["CMP-TELEMETRY-INGEST","01_introduction_goals.md","ADR-001-WEBSOCKET-STACK.md","CMP-TELEMETRY-INGEST.md","tests/benchmarks/latency_benchmark.spec.ts"]},"classes":"layer-requirement status-conforme"},{"group":"nodes","data":{"id":"01_introduction_goals.md","label":"01_introduction_goals.md","title":"01_introduction_goals.md","type":"architecture","layer":"architecture","status":"CONFORME"},"classes":"layer-architecture status-conforme"},{"group":"nodes","data":{"id":"ADR-001-WEBSOCKET-STACK.md","label":"ADR-001-WEBSOCKET-STACK.md","title":"ADR-001-WEBSOCKET-STACK.md","type":"adr","layer":"architecture","status":"CONFORME"},"classes":"layer-architecture status-conforme"},{"group":"nodes","data":{"id":"tests_benchmarks_latency_benchmark_spec_ts","label":"latency_benchmark.spec.ts","title":"tests/benchmarks/latency_benchmark.spec.ts","type":"code-test","layer":"test","status":"CONFORME","filePath":"tests/benchmarks/latency_benchmark.spec.ts"},"classes":"layer-test status-conforme"},{"group":"nodes","data":{"id":"SEC-REQ-MTLS-STREAM","label":"SEC-REQ-MTLS-STREAM","title":"Autenticación Criptográfica Mutua (mTLS) en Ingesta","type":"security-requirement","layer":"requirement","status":"CONFORME","details":{"productStatus":"CONFORME","archStatus":"CONFORME","testStatus":"CONFORME"},"upstream":["ABUSE-TELEMETRY-SPOOFING"],"downstream":["CMP-TELEMETRY-INGEST","SEC-ENC-DMZ-INGEST","01_introduction_goals.md","06_runtime_view.md","CMP-TELEMETRY-INGEST.md","tests/features/security/sec-req-mtls-stream.feature","tests/unit/telemetry_gateway.spec.ts"]},"classes":"layer-requirement status-conforme"},{"group":"nodes","data":{"id":"ABUSE-TELEMETRY-SPOOFING","label":"ABUSE-TELEMETRY-SPOOFING","title":"ABUSE-TELEMETRY-SPOOFING","type":"product","layer":"product","status":"CONFORME"},"classes":"layer-product status-conforme"},{"group":"nodes","data":{"id":"SEC-ENC-DMZ-INGEST","label":"SEC-ENC-DMZ-INGEST","title":"SEC-ENC-DMZ-INGEST","type":"architecture","layer":"architecture","status":"CONFORME"},"classes":"layer-architecture status-conforme"},{"group":"nodes","data":{"id":"tests_features_security_sec-req-mtls-stream_feature","label":"sec-req-mtls-stream.feature","title":"tests/features/security/sec-req-mtls-stream.feature","type":"bdd-feature","layer":"test","status":"CONFORME","filePath":"tests/features/security/sec-req-mtls-stream.feature"},"classes":"layer-test status-conforme"},{"group":"edges","data":{"id":"edge-UC-STREAM-TELEMETRY-FR-TELEMETRY-STREAM-001","source":"UC-STREAM-TELEMETRY","target":"FR-TELEMETRY-STREAM-001","label":"derives-from","relation":"derives-from","status":"CONFORME"},"classes":"relation-derives-from status-conforme"},{"group":"edges","data":{"id":"edge-FR-TELEMETRY-STREAM-001-CMP-TELEMETRY-INGEST","source":"FR-TELEMETRY-STREAM-001","target":"CMP-TELEMETRY-INGEST","label":"satisfies","relation":"satisfies","status":"CONFORME"},"classes":"relation-satisfies status-conforme"},{"group":"edges","data":{"id":"edge-FR-TELEMETRY-STREAM-001-06_runtime_view.md","source":"FR-TELEMETRY-STREAM-001","target":"06_runtime_view.md","label":"satisfies","relation":"satisfies","status":"CONFORME"},"classes":"relation-satisfies status-conforme"},{"group":"edges","data":{"id":"edge-FR-TELEMETRY-STREAM-001-CMP-TELEMETRY-INGEST.md","source":"FR-TELEMETRY-STREAM-001","target":"CMP-TELEMETRY-INGEST.md","label":"satisfies","relation":"satisfies","status":"CONFORME"},"classes":"relation-satisfies status-conforme"},{"group":"edges","data":{"id":"edge-FR-TELEMETRY-STREAM-001-tests_features_fr-telemetry-stream-001_feature","source":"FR-TELEMETRY-STREAM-001","target":"tests_features_fr-telemetry-stream-001_feature","label":"verified-by","relation":"verified-by","status":"CONFORME"},"classes":"relation-verified-by status-conforme"},{"group":"edges","data":{"id":"edge-FR-TELEMETRY-STREAM-001-tests_unit_telemetry_gateway_spec_ts","source":"FR-TELEMETRY-STREAM-001","target":"tests_unit_telemetry_gateway_spec_ts","label":"verified-by","relation":"verified-by","status":"CONFORME"},"classes":"relation-verified-by status-conforme"},{"group":"edges","data":{"id":"edge-UC-STREAM-TELEMETRY-QR-LATENCY-REALTIME","source":"UC-STREAM-TELEMETRY","target":"QR-LATENCY-REALTIME","label":"derives-from","relation":"derives-from","status":"CONFORME"},"classes":"relation-derives-from status-conforme"},{"group":"edges","data":{"id":"edge-QR-LATENCY-REALTIME-CMP-TELEMETRY-INGEST","source":"QR-LATENCY-REALTIME","target":"CMP-TELEMETRY-INGEST","label":"satisfies","relation":"satisfies","status":"CONFORME"},"classes":"relation-satisfies status-conforme"},{"group":"edges","data":{"id":"edge-QR-LATENCY-REALTIME-01_introduction_goals.md","source":"QR-LATENCY-REALTIME","target":"01_introduction_goals.md","label":"satisfies","relation":"satisfies","status":"CONFORME"},"classes":"relation-satisfies status-conforme"},{"group":"edges","data":{"id":"edge-QR-LATENCY-REALTIME-ADR-001-WEBSOCKET-STACK.md","source":"QR-LATENCY-REALTIME","target":"ADR-001-WEBSOCKET-STACK.md","label":"satisfies","relation":"satisfies","status":"CONFORME"},"classes":"relation-satisfies status-conforme"},{"group":"edges","data":{"id":"edge-QR-LATENCY-REALTIME-CMP-TELEMETRY-INGEST.md","source":"QR-LATENCY-REALTIME","target":"CMP-TELEMETRY-INGEST.md","label":"satisfies","relation":"satisfies","status":"CONFORME"},"classes":"relation-satisfies status-conforme"},{"group":"edges","data":{"id":"edge-QR-LATENCY-REALTIME-tests_benchmarks_latency_benchmark_spec_ts","source":"QR-LATENCY-REALTIME","target":"tests_benchmarks_latency_benchmark_spec_ts","label":"verified-by","relation":"verified-by","status":"CONFORME"},"classes":"relation-verified-by status-conforme"},{"group":"edges","data":{"id":"edge-ABUSE-TELEMETRY-SPOOFING-SEC-REQ-MTLS-STREAM","source":"ABUSE-TELEMETRY-SPOOFING","target":"SEC-REQ-MTLS-STREAM","label":"derives-from","relation":"derives-from","status":"CONFORME"},"classes":"relation-derives-from status-conforme"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-CMP-TELEMETRY-INGEST","source":"SEC-REQ-MTLS-STREAM","target":"CMP-TELEMETRY-INGEST","label":"satisfies","relation":"satisfies","status":"CONFORME"},"classes":"relation-satisfies status-conforme"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-SEC-ENC-DMZ-INGEST","source":"SEC-REQ-MTLS-STREAM","target":"SEC-ENC-DMZ-INGEST","label":"satisfies","relation":"satisfies","status":"CONFORME"},"classes":"relation-satisfies status-conforme"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-01_introduction_goals.md","source":"SEC-REQ-MTLS-STREAM","target":"01_introduction_goals.md","label":"satisfies","relation":"satisfies","status":"CONFORME"},"classes":"relation-satisfies status-conforme"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-06_runtime_view.md","source":"SEC-REQ-MTLS-STREAM","target":"06_runtime_view.md","label":"satisfies","relation":"satisfies","status":"CONFORME"},"classes":"relation-satisfies status-conforme"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-CMP-TELEMETRY-INGEST.md","source":"SEC-REQ-MTLS-STREAM","target":"CMP-TELEMETRY-INGEST.md","label":"satisfies","relation":"satisfies","status":"CONFORME"},"classes":"relation-satisfies status-conforme"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-tests_features_security_sec-req-mtls-stream_feature","source":"SEC-REQ-MTLS-STREAM","target":"tests_features_security_sec-req-mtls-stream_feature","label":"verified-by","relation":"verified-by","status":"CONFORME"},"classes":"relation-verified-by status-conforme"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-tests_unit_telemetry_gateway_spec_ts","source":"SEC-REQ-MTLS-STREAM","target":"tests_unit_telemetry_gateway_spec_ts","label":"verified-by","relation":"verified-by","status":"CONFORME"},"classes":"relation-verified-by status-conforme"}];
+    var elements = [{"group":"nodes","data":{"id":"FR-TELEMETRY-STREAM-001","label":"FR-TELEMETRY-STREAM-001","title":"Ingesta Continua de Tramas Telemétricas UAV","type":"requirement","layer":"requirement","status":"COMPLIANT","content":"# FR-TELEMETRY-STREAM-001: Ingesta Continua de Tramas Telemétricas\r\n\r\n## 1. Enunciado Normativo\r\nEl sistema DEBE recibir, deserializar y validar paquetes de telemetría geospacial enviados por UAVs autenticados a una frecuencia nominal de 10 Hz (1 paquete cada 100 ms por aeronave), descartando paquetes corruptos y notificando al bus de eventos interno en caso de éxito.\r\n\r\n---\r\n\r\n## 2. Criterios de Aceptación en Formato Gherkin (Ejecutable por Cucumber)\r\n\r\n```gherkin\r\n@FR-TELEMETRY-STREAM-001 @telemetry @automated\r\nFeature: Ingesta Continua de Telemetría UAV\r\n  Como Sistema de Control del Espacio Aéreo (SentinelCore)\r\n  Quiero procesar ráfagas telemétricas a 10 Hz de drones en vuelo\r\n  Para mantener la separación espacial y evitar colisiones aéreas\r\n\r\n  Background:\r\n    Given el gateway de ingesta en el enclave DMZ se encuentra activo y escuchando\r\n    And el dron \"UAV-ALPHA-01\" ha completado el handshake mTLS con certificado de CA válido\r\n\r\n  Scenario: Recepción y publicación exitosa de telemetría nominal\r\n    Given que el dron envía una trama de telemetría con:\r\n      | latitud   | 40.4168 |\r\n      | longitud  | -3.7038 |\r\n      | altitud_m | 120.5   |\r\n      | velocidad | 15.0    |\r\n    When el gateway procesa la trama recibida\r\n    Then la trama es validada exitosamente en menos de 50 milisegundos\r\n    And se envía un ACK de confirmación al dron\r\n    And se publica el evento en el topic Kafka \"telemetry.normalized.v1\"\r\n\r\n  Scenario Outline: Detección y rechazo de tramas con saltos cinemáticos anómalos\r\n    Given que la última posición registrada del dron fue latitud 40.4168 y longitud -3.7038\r\n    When el dron envía 100ms después una trama con salto imposible \"<salto_km>\" km\r\n    Then el sistema debe detectar la violación de la regla cinemática BR-TELEMETRY-VALIDITY\r\n    And la trama debe ser descartada inmediatamente\r\n    And el gateway debe responder con el error \"<codigo_error>\"\r\n    And se debe registrar un evento de alerta geospacial en el log estructurado\r\n\r\n    Examples:\r\n      | salto_km | codigo_error             |\r\n      | 50.0     | NACK-INVALID-KINEMATICS  |\r\n      | 250.0    | NACK-INVALID-KINEMATICS  |\r\n```\r\n\r\n---\r\n\r\n## 3. Integración con Cucumber\r\nEsta especificación se extrae automáticamente a `tests/features/fr-telemetry-stream-001.feature` y puede ejecutarse directamente mediante:\r\n```bash\r\nnpx tsx scripts/extract-gherkin.ts examples/product/FR-TELEMETRY-STREAM-001.md\r\n```\r\n\r\n---\r\n\r\n## 4. Historial de Revisiones\r\n\r\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Carlos Mendoza (Lead) | Especificación con criterios de aceptación Gherkin/Cucumber | CHG-INIT-001 |","filePath":"product/FR-TELEMETRY-STREAM-001.md","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-001-TELEMETRY-INGESTION"},"upstream":["UC-STREAM-TELEMETRY","BR-TELEMETRY-VALIDITY","ABUSE-TELEMETRY-SPOOFING"],"downstream":["CMP-TELEMETRY-INGEST","06_runtime_view.md","CMP-TELEMETRY-INGEST.md","tests/features/fr-telemetry-stream-001.feature","tests/unit/telemetry_gateway.spec.ts","tests_features_fr-telemetry-stream-001_feature","tests_unit_telemetry_gateway_spec_ts"]},"classes":"layer-requirement type-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-STREAM-TELEMETRY","label":"UC-STREAM-TELEMETRY","title":"Transmisión y Procesamiento de Telemetría en Tiempo Real","type":"use-case","layer":"product","status":"COMPLIANT","filePath":"product/UC-STREAM-TELEMETRY.md","content":"# UC-STREAM-TELEMETRY: Transmisión y Procesamiento de Telemetría\r\n\r\n## 1. Intención y Resultado\r\nEl UAV transmite continuamente su posición geospacial (latitud, longitud, altitud barométrica, velocidad 3D) para que la plataforma valide su integridad y la proyecte a los operadores con latencia sub-segundo.\r\n\r\n## 2. Precondiciones\r\n- El UAV posee un certificado criptográfico x509 válido expedido por la CA de la flota.\r\n- El canal WSS está autenticado mediante mTLS en el enclave perimetral.\r\n\r\n## 3. Flujo Principal\r\n1. El UAV abre conexión WebSocket segura con autenticación mTLS.\r\n2. El UAV transmite un paquete binario de telemetría estructurado cada 100ms.\r\n3. El sistema valida la coherencia cinemática (conforme a `BR-TELEMETRY-VALIDITY`).\r\n4. El sistema reenvía el estado validado al bus de eventos y actualiza la consola del operador.\r\n\r\n## 4. Excepciones\r\n- **Salto Cinemático Imposible**: Si las coordenadas implican una velocidad supersónica o teletransportación, el paquete se marca como anómalo y se emite alerta de seguridad.\r\n\r\n---\r\n\r\n## 5. Historial de Revisiones\r\n\r\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Carlos Mendoza (Lead) | Definición canónica inicial del caso de uso telemétrico | CHG-INIT-001 |","downstream":["FR-TELEMETRY-STREAM-001","QR-LATENCY-REALTIME","SEC-REQ-MTLS-STREAM"],"upstream":["JRN-UAV-SURVEILLANCE","ACT-AUTONOMOUS-UAV","BR-TELEMETRY-VALIDITY","ABUSE-TELEMETRY-SPOOFING"]},"classes":"layer-product type-use-case status-compliant"},{"group":"nodes","data":{"id":"BR-TELEMETRY-VALIDITY","label":"BR-TELEMETRY-VALIDITY","title":"Invariante de Coherencia Cinemática de Telemetría","type":"business-rule","layer":"product","status":"COMPLIANT","filePath":"product/BR-TELEMETRY-VALIDITY.md","content":"# BR-TELEMETRY-VALIDITY: Invariante de Coherencia Cinemática\r\n\r\n## 1. Definición de la Regla\r\nNingún UAV puede reportar una aceleración física superior a 4G (39.2 m/s²) ni un desplazamiento geospacial entre dos tramas de 100ms que supere la velocidad máxima operativa del modelo (Mach 0.3 / 100 m/s).\r\n\r\n## 2. Acción ante Violación\r\nCualquier paquete que infrinja este invariante será descartado inmediatamente y registrado como anomalía física o intento de manipulación telemétrica (Spoofing).\r\n\r\n---\r\n\r\n## 3. Historial de Revisiones\r\n\r\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Carlos Mendoza (Lead) | Definición del invariante cinemático de seguridad | CHG-INIT-001 |","downstream":["FR-TELEMETRY-STREAM-001","QR-LATENCY-REALTIME","SEC-REQ-MTLS-STREAM","UC-STREAM-TELEMETRY"]},"classes":"layer-product type-business-rule status-compliant"},{"group":"nodes","data":{"id":"ABUSE-TELEMETRY-SPOOFING","label":"ABUSE-TELEMETRY-SPOOFING","title":"Inyección de Telemetría Forjada y Aeronaves Fantasma","type":"abuse-case","layer":"product","status":"COMPLIANT","filePath":"security/ABUSE-TELEMETRY-SPOOFING.md","content":"# ABUSE-TELEMETRY-SPOOFING: Inyección de Telemetría Forjada\r\n\r\n## 1. Mecánica de Explotación\r\nEl atacante envía tramas sintéticas de telemetría a la dirección IP pública del servicio de ingesta imitando el identificador de un UAV legítimo. Si el sistema no valida criptográficamente la identidad de origen, el operador creerá que el dron está en una ubicación distinta a la real.\r\n\r\n## 2. Impacto\r\n- Riesgo de colisión aérea en el mundo físico.\r\n- Corrupción de las rutas de vuelo automatizadas.\r\n\r\n---\r\n\r\n## 3. Historial de Revisiones\r\n\r\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Laura Ibáñez (SecOps) | Modelado del caso de abuso de telemetría forjada | CHG-SEC-001 |","downstream":["FR-TELEMETRY-STREAM-001","QR-LATENCY-REALTIME","SEC-REQ-MTLS-STREAM","UC-STREAM-TELEMETRY"],"upstream":["ACT-THREAT-SPOOFER"]},"classes":"layer-product type-abuse-case status-compliant"},{"group":"nodes","data":{"id":"CMP-TELEMETRY-INGEST","label":"CMP-TELEMETRY-INGEST","title":"Componente de Ingesta Telemétrica y Deserialización de Alta Frecuencia","type":"component","layer":"architecture","status":"COMPLIANT","filePath":"architecture/components/CMP-TELEMETRY-INGEST.md","content":"# CMP-TELEMETRY-INGEST: Componente de Ingesta Telemétrica\r\n\r\n## 1. Responsabilidad y Límites\r\nPunto de entrada perimetral de alta concurrencia encargado de recibir conexiones WebSocket con mTLS de flotas de drones, validar firmas de certificados, deserializar payloads binarios Protobuf y verificar la regla cinemática `BR-TELEMETRY-VALIDITY`.\r\n\r\n## 2. Diagrama de Estructura Interna (Whitebox Nivel 2)\r\n```mermaid\r\ngraph LR\r\n    UAV[ACT-AUTONOMOUS-UAV] -->|mTLS TLS 1.3 / WSS| GW[Gateway TLS Terminator]\r\n    GW --> Parser[CMP-STREAM-PARSER: Deserializador]\r\n    Parser --> Validator[CMP-KINEMATICS-VALIDATOR: BR-TELEMETRY-VALIDITY]\r\n    Validator --> KafkaProducer[Productor Kafka: kafkajs]\r\n    KafkaProducer -->|telemetry.normalized.v1| Broker[(Kafka Broker Interno)]\r\n```\r\n\r\n---\r\n\r\n## 3. Historial de Revisiones\r\n\r\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Carlos Mendoza (Lead) | Definición formal del componente de ingesta telemétrica | CHG-ARCH-001 |","upstream":["FR-TELEMETRY-STREAM-001","QR-LATENCY-REALTIME","SEC-REQ-MTLS-STREAM"]},"classes":"layer-architecture type-component status-compliant"},{"group":"nodes","data":{"id":"06_runtime_view.md","label":"06_runtime_view.md","title":"06_runtime_view.md","type":"architecture","layer":"architecture","status":"COMPLIANT","upstream":["FR-TELEMETRY-STREAM-001","SEC-REQ-MTLS-STREAM"]},"classes":"layer-architecture type-architecture status-compliant"},{"group":"nodes","data":{"id":"CMP-TELEMETRY-INGEST.md","label":"CMP-TELEMETRY-INGEST.md","title":"CMP-TELEMETRY-INGEST.md","type":"component","layer":"architecture","status":"COMPLIANT","upstream":["FR-TELEMETRY-STREAM-001","QR-LATENCY-REALTIME","SEC-REQ-MTLS-STREAM"]},"classes":"layer-architecture type-component status-compliant"},{"group":"nodes","data":{"id":"tests_features_fr-telemetry-stream-001_feature","label":"fr-telemetry-stream-001.feature","title":"tests/features/fr-telemetry-stream-001.feature","type":"bdd-feature","layer":"test","status":"COMPLIANT","filePath":"tests/features/fr-telemetry-stream-001.feature","content":"```gherkin\n# ==============================================================================\r\n# AUTO-GENERADO POR AI-SDLC (Cucumber Integration)\r\n# Origen: examples/product/FR-TELEMETRY-STREAM-001.md\r\n# ID Requerimiento: FR-TELEMETRY-STREAM-001\r\n# Versión: 1.0.0\r\n# NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.\r\n# ==============================================================================\r\n\r\n@FR-TELEMETRY-STREAM-001 @telemetry @automated\r\nFeature: Ingesta Continua de Telemetría UAV\r\n  Como Sistema de Control del Espacio Aéreo (SentinelCore)\r\n  Quiero procesar ráfagas telemétricas a 10 Hz de drones en vuelo\r\n  Para mantener la separación espacial y evitar colisiones aéreas\r\n\r\n  Background:\r\n    Given el gateway de ingesta en el enclave DMZ se encuentra activo y escuchando\r\n    And el dron \"UAV-ALPHA-01\" ha completado el handshake mTLS con certificado de CA válido\r\n\r\n  Scenario: Recepción y publicación exitosa de telemetría nominal\r\n    Given que el dron envía una trama de telemetría con:\r\n      | latitud   | 40.4168 |\r\n      | longitud  | -3.7038 |\r\n      | altitud_m | 120.5   |\r\n      | velocidad | 15.0    |\r\n    When el gateway procesa la trama recibida\r\n    Then la trama es validada exitosamente en menos de 50 milisegundos\r\n    And se envía un ACK de confirmación al dron\r\n    And se publica el evento en el topic Kafka \"telemetry.normalized.v1\"\r\n\r\n  Scenario Outline: Detección y rechazo de tramas con saltos cinemáticos anómalos\r\n    Given que la última\n... (truncated)\n```","upstream":["FR-TELEMETRY-STREAM-001"]},"classes":"layer-test type-bdd-feature status-compliant"},{"group":"nodes","data":{"id":"tests_unit_telemetry_gateway_spec_ts","label":"telemetry_gateway.spec.ts","title":"tests/unit/telemetry_gateway.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"tests/unit/telemetry_gateway.spec.ts","content":"```typescript\n/**\r\n * ==============================================================================\r\n * SentinelCore: Pruebas Unitarias del Gateway de Ingesta (FR-TELEMETRY-STREAM-001 / SEC-REQ-MTLS-STREAM)\r\n * ==============================================================================\r\n */\r\n\r\nimport { TelemetryGateway, ClientCertificateInfo } from '../../src/telemetry/gateway';\r\nimport { TelemetryFrame, validateKinematics } from '../../src/telemetry/kinematics';\r\n\r\ndescribe('TelemetryGateway & Kinematics', () => {\r\n  const validCert: ClientCertificateInfo = {\r\n    authorized: true,\r\n    subjectCommonName: 'UAV-ALPHA-01',\r\n    hardwareUuid: 'hw-9988-7766',\r\n    issuerOrg: 'SentinelCore Fleet CA'\r\n  };\r\n\r\n  const mockPublisher = {\r\n    publish: async (_topic: string, _message: TelemetryFrame) => true\r\n  };\r\n\r\n  it('debe rechazar conexión sin certificado mTLS válido', async () => {\r\n    const gateway = new TelemetryGateway(mockPublisher);\r\n    const frame: TelemetryFrame = {\r\n      droneId: 'UAV-ALPHA-01',\r\n      timestampMs: Date.now(),\r\n      position: { latitude: 40.4168, longitude: -3.7038, altitudeMeters: 120 },\r\n      speedMps: 15\r\n    };\r\n\r\n    const response = await gateway.handleIncomingFrame(null, frame);\r\n    expect(response.accepted).toBe(false);\r\n    expect(response.status).toBe('UNAUTHORIZED');\r\n    expect(response.errorCode).toBe('TLS_PEER_CERT_MISSING');\r\n  });\r\n\r\n  it('debe aceptar tramas con cinemática coherente', async () => {\r\n    const gateway = new TelemetryGateway(\n... (truncated)\n```","upstream":["FR-TELEMETRY-STREAM-001","SEC-REQ-MTLS-STREAM"]},"classes":"layer-test type-code-test status-compliant"},{"group":"nodes","data":{"id":"QR-LATENCY-REALTIME","label":"QR-LATENCY-REALTIME","title":"Latencia de Procesamiento e Ingesta Sub-100ms","type":"requirement","layer":"requirement","status":"COMPLIANT","content":"# QR-LATENCY-REALTIME: Latencia de Ingesta Sub-100ms\r\n\r\n## 1. Enunciado Normativo\r\nEl 99.9% de los paquetes telemétricos (p99.9) recibidos en el gateway de ingesta DEBEN ser procesados, validados y enrutados hacia la memoria de estado del espacio aéreo en menos de 50 milisegundos desde su recepción en el socket.\r\n\r\n---\r\n\r\n## 2. Trazabilidad Ascendente (Upstream)\r\n\r\n| Dimensión | Artefacto / Archivo | Estado |\r\n| :--- | :--- | :--- |\r\n| **Producto** | `UC-STREAM-TELEMETRY` | Conforme |\r\n\r\n---\r\n\r\n## 3. Historial de Revisiones\r\n\r\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Carlos Mendoza (Lead) | Definición del objetivo no funcional y enlace a benchmark | CHG-INIT-001 |","filePath":"product/QR-LATENCY-REALTIME.md","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-001-TELEMETRY-INGESTION"},"upstream":["UC-STREAM-TELEMETRY","BR-TELEMETRY-VALIDITY","ABUSE-TELEMETRY-SPOOFING"],"downstream":["CMP-TELEMETRY-INGEST","01_introduction_goals.md","ADR-001-WEBSOCKET-STACK.md","CMP-TELEMETRY-INGEST.md","tests/benchmarks/latency_benchmark.spec.ts","tests_benchmarks_latency_benchmark_spec_ts"]},"classes":"layer-requirement type-requirement status-compliant"},{"group":"nodes","data":{"id":"01_introduction_goals.md","label":"01_introduction_goals.md","title":"01_introduction_goals.md","type":"architecture","layer":"architecture","status":"COMPLIANT","upstream":["QR-LATENCY-REALTIME","SEC-REQ-MTLS-STREAM"]},"classes":"layer-architecture type-architecture status-compliant"},{"group":"nodes","data":{"id":"ADR-001-WEBSOCKET-STACK.md","label":"ADR-001-WEBSOCKET-STACK.md","title":"ADR-001-WEBSOCKET-STACK.md","type":"adr","layer":"architecture","status":"COMPLIANT","upstream":["QR-LATENCY-REALTIME"]},"classes":"layer-architecture type-adr status-compliant"},{"group":"nodes","data":{"id":"tests_benchmarks_latency_benchmark_spec_ts","label":"latency_benchmark.spec.ts","title":"tests/benchmarks/latency_benchmark.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"tests/benchmarks/latency_benchmark.spec.ts","content":"```typescript\n/**\r\n * Benchmark de Latencia para QR-LATENCY-REALTIME\r\n * Verifica que el p99.9 del procesamiento de tramas sea < 50ms.\r\n */\r\n\r\ndescribe('QR-LATENCY-REALTIME: Benchmark de Ingesta Telemétrica', () => {\r\n  it('debe procesar 10.000 ráfagas en p99.9 < 50ms', async () => {\r\n    // Simulación de carga telemétrica a 10 Hz\r\n    const startTime = performance.now();\r\n    // procesamiento simulado...\r\n    const elapsed = performance.now() - startTime;\r\n    expect(elapsed).toBeLessThan(50);\r\n  });\r\n});\r\n\n```","upstream":["QR-LATENCY-REALTIME"]},"classes":"layer-test type-code-test status-compliant"},{"group":"nodes","data":{"id":"SEC-REQ-MTLS-STREAM","label":"SEC-REQ-MTLS-STREAM","title":"Autenticación Criptográfica Mutua (mTLS) en Ingesta","type":"security-requirement","layer":"requirement","status":"COMPLIANT","content":"# SEC-REQ-MTLS-STREAM: Autenticación Mutua mTLS en Ingesta\r\n\r\n## 1. Enunciado del Control Técnico\r\nToda conexión WebSocket hacia el gateway de ingesta DEBE requerir TLS 1.3 con autenticación mutua (mTLS). El servidor DEBE validar que el certificado presentado por el cliente esté firmado por la CA de Dispositivos Autorizados y contenga el identificador de dron (`Hardware-UUID`) en el campo Subject Alternative Name (SAN).\r\n\r\n---\r\n\r\n## 2. Criterios de Mitigación en Formato Gherkin (Cucumber Security Tests)\r\n\r\n```gherkin\r\n@SEC-REQ-MTLS-STREAM @security @mtls\r\nFeature: Autenticación Mutua Criptográfica mTLS para Ingesta Telemétrica\r\n  Como Oficial de Seguridad (SecOps)\r\n  Quiero garantizar que solo drones con certificados emitidos por la CA de la flota puedan conectarse\r\n  Para prevenir el ataque de suplantación y aeronaves fantasma (ABUSE-TELEMETRY-SPOOFING)\r\n\r\n  Background:\r\n    Given el gateway de ingesta perimetral SEC-ENC-DMZ-INGEST está configurado con TLS 1.3\r\n    And la CA raíz de drones autorizados está cargada en el truststore del servidor\r\n\r\n  Scenario: Conexión rechazada por ausencia de certificado cliente (SEC-TEST-001)\r\n    Given un atacante geospacial ACT-THREAT-SPOOFER intenta establecer conexión WSS\r\n    And el cliente no presenta ningún certificado cliente x509 en el handshake\r\n    When se ejecuta la negociación TLS\r\n    Then el handshake debe ser abortado de inmediato a nivel de transporte TCP\r\n    And no se debe permitir la apertura del socket WebSocket\r\n    And se debe registrar un evento de alerta de seguridad en el SIEM con código \"TLS_PEER_CERT_MISSING\"\r\n\r\n  Scenario Outline: Conexión rechazada por certificado inválido o no confiable (SEC-TEST-002)\r\n    Given un cliente que presenta un certificado con el defecto \"<defecto_certificado>\"\r\n    When se intenta completar el handshake mTLS\r\n    Then el gateway debe terminar la sesión con el error TLS \"<alerta_tls>\"\r\n    And el intento debe ser bloqueado antes de invocar la lógica de aplicación\r\n\r\n    Examples:\r\n      | defecto_certificado               | alerta_tls               |\r\n      | autofirmado_por_atacante          | CERT_SIGNATURE_FAILURE   |\r\n      | firmado_por_ca_desconocida        | UNKNOWN_CA               |\r\n      | certificado_expirado              | CERT_EXPIRED             |\r\n      | san_sin_hardware_uuid_valido      | SAN_IDENTITY_MISMATCH    |\r\n```\r\n\r\n---\r\n\r\n## 3. Integración con Cucumber\r\nEsta especificación de mitigación se extrae a `tests/features/security/sec-req-mtls-stream.feature` para ejecución automática en el pipeline de CI/CD.\r\n\r\n---\r\n\r\n## 4. Historial de Revisiones\r\n\r\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Laura Ibáñez (SecOps) | Especificación del control de seguridad con tests Gherkin | CHG-SEC-001 |","filePath":"security/SEC-REQ-MTLS-STREAM.md","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-001-TELEMETRY-INGESTION"},"upstream":["ABUSE-TELEMETRY-SPOOFING","UC-STREAM-TELEMETRY","BR-TELEMETRY-VALIDITY"],"downstream":["CMP-TELEMETRY-INGEST","SEC-ENC-DMZ-INGEST","01_introduction_goals.md","06_runtime_view.md","CMP-TELEMETRY-INGEST.md","tests/features/security/sec-req-mtls-stream.feature","tests/unit/telemetry_gateway.spec.ts","tests_features_security_sec-req-mtls-stream_feature","tests_unit_telemetry_gateway_spec_ts"]},"classes":"layer-requirement type-security-requirement status-compliant"},{"group":"nodes","data":{"id":"SEC-ENC-DMZ-INGEST","label":"SEC-ENC-DMZ-INGEST","title":"Enclave Perimetral de Ingesta Segura (DMZ Ingestion Enclave)","type":"security-enclave","layer":"architecture","status":"COMPLIANT","filePath":"security/SEC-ENC-DMZ-INGEST.md","content":"# SEC-ENC-DMZ-INGEST: Enclave Perimetral de Ingesta\r\n\r\n## 1. Definición del Perímetro\r\nZona desmilitarizada aislada a nivel de red (Kubernetes NetworkPolicy estricta) donde residen los balanceadores de carga y los pods del Gateway de Ingesta. Ningún pod de este enclave tiene acceso directo a la base de datos central ni al plano de control; únicamente puede publicar eventos validados en el broker interno de Kafka.","upstream":["SEC-REQ-MTLS-STREAM"]},"classes":"layer-architecture type-security-enclave status-compliant"},{"group":"nodes","data":{"id":"tests_features_security_sec-req-mtls-stream_feature","label":"sec-req-mtls-stream.feature","title":"tests/features/security/sec-req-mtls-stream.feature","type":"bdd-feature","layer":"test","status":"COMPLIANT","filePath":"tests/features/security/sec-req-mtls-stream.feature","content":"```gherkin\n# ==============================================================================\r\n# AUTO-GENERADO POR AI-SDLC (Cucumber Integration)\r\n# Origen: examples/security/SEC-REQ-MTLS-STREAM.md\r\n# ID Requerimiento: SEC-REQ-MTLS-STREAM\r\n# Versión: 1.0.0\r\n# NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.\r\n# ==============================================================================\r\n\r\n@SEC-REQ-MTLS-STREAM @security @mtls\r\nFeature: Autenticación Mutua Criptográfica mTLS para Ingesta Telemétrica\r\n  Como Oficial de Seguridad (SecOps)\r\n  Quiero garantizar que solo drones con certificados emitidos por la CA de la flota puedan conectarse\r\n  Para prevenir el ataque de suplantación y aeronaves fantasma (ABUSE-TELEMETRY-SPOOFING)\r\n\r\n  Background:\r\n    Given el gateway de ingesta perimetral SEC-ENC-DMZ-INGEST está configurado con TLS 1.3\r\n    And la CA raíz de drones autorizados está cargada en el truststore del servidor\r\n\r\n  Scenario: Conexión rechazada por ausencia de certificado cliente (SEC-TEST-001)\r\n    Given un atacante geospacial ACT-THREAT-SPOOFER intenta establecer conexión WSS\r\n    And el cliente no presenta ningún certificado cliente x509 en el handshake\r\n    When se ejecuta la negociación TLS\r\n    Then el handshake debe ser abortado de inmediato a nivel de transporte TCP\r\n    And no se debe permitir la apertura del socket WebSocket\r\n    And se debe registrar un evento de alerta de seguridad en el SIEM con código \"TLS_PEER_CERT_MISSING\"\r\n\r\n  Scenario \n... (truncated)\n```","upstream":["SEC-REQ-MTLS-STREAM"]},"classes":"layer-test type-bdd-feature status-compliant"},{"group":"nodes","data":{"id":"ACT-AUTONOMOUS-UAV","label":"ACT-AUTONOMOUS-UAV","title":"Vehículo Aéreo Autónomo No Tripulado (UAV Drone)","type":"actor","layer":"product","status":"COMPLIANT","filePath":"product/ACT-AUTONOMOUS-UAV.md","content":"# ACT-AUTONOMOUS-UAV: Vehículo Aéreo Autónomo\r\n\r\n## 1. Perfil y Responsabilidad\r\nDispositivo de hardware con piloto automático que navega rutas predefinidas y transmite estados de vuelo continuos hacia la nube para control de separación aérea.\r\n\r\n## 2. Puntos de Contacto con el Sistema\r\n- Conexión celular 5G / Enlace satelital.\r\n- Canal bidireccional WebSocket cifrado con mTLS contra el Gateway de Ingesta.\r\n\r\n---\r\n\r\n## 3. Historial de Revisiones\r\n\r\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Carlos Mendoza (Lead) | Creación inicial de la línea base del actor sensor | CHG-INIT-001 |","downstream":["UC-STREAM-TELEMETRY"]},"classes":"layer-product type-actor status-compliant"},{"group":"nodes","data":{"id":"ACT-DRONE-OPERATOR","label":"ACT-DRONE-OPERATOR","title":"Operador de Vuelo de Drones (UAV Flight Operator)","type":"actor","layer":"product","status":"COMPLIANT","filePath":"product/ACT-DRONE-OPERATOR.md","content":"# ACT-DRONE-OPERATOR: Operador de Vuelo de Drones\r\n\r\n## 1. Perfil y Responsabilidad\r\nEl Operador de Vuelo supervisa flotas de vehículos aéreos no tripulados (UAVs). Requiere visibilidad continua de altitud, posición GPS, estado de batería y vectores de velocidad para intervenir en caso de conflicto de tráfico o anomalía técnica.\r\n\r\n## 2. Puntos de Contacto con el Sistema\r\n- Consola Web de Control de Misiones (Dashboard en tiempo real).\r\n- Suscripción a eventos críticos y alertas de colisión vía WebSocket seguro.\r\n\r\n---\r\n\r\n## 3. Historial de Revisiones\r\n\r\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Carlos Mendoza (Lead) | Creación inicial de la línea base del actor | CHG-INIT-001 |","downstream":["JRN-UAV-SURVEILLANCE"]},"classes":"layer-product type-actor status-compliant"},{"group":"nodes","data":{"id":"JRN-UAV-SURVEILLANCE","label":"JRN-UAV-SURVEILLANCE","title":"Vigilancia y Monitoreo Telemétrico Continuo de Flota UAV","type":"journey","layer":"product","status":"COMPLIANT","filePath":"product/JRN-UAV-SURVEILLANCE.md","content":"# JRN-UAV-SURVEILLANCE: Vigilancia y Monitoreo Telemétrico Continuo de Flota UAV\r\n\r\n## 1. Actor / Primary Persona Profile\r\n- **Protagonist Actor**: `ACT-DRONE-OPERATOR` (Operador de Misión / Vuelo)\r\n- **Secondary Autonomous Actor**: `ACT-AUTONOMOUS-UAV` (Vehículo Aéreo No Tripulado)\r\n- **Main Goal**: Supervisar de forma continua, segura y en tiempo real (< 250ms de latencia) la trayectoria y parámetros cinemáticos de UAVs en misión activa.\r\n\r\n---\r\n\r\n## 2. Journey Stages Map\r\n\r\n| Stage | User Goal | Touchpoints | Frictions / Pain Points |\r\n| :--- | :--- | :--- | :--- |\r\n| **1. Autenticación mTLS y Conexión** | Establecer canal seguro criptográfico con el ingest gateway | Gateway WSS/mTLS (`SEC-ENC-DMZ-INGEST`) | Verificación de certificados X.509 de la flota en entornos de baja cobertura |\r\n| **2. Ingestión y Validación Cinemática** | Transmitir ráfagas telemétricas a 10Hz asegurando coherencia física | Ingestor telemétrico SentinelCore | Aceleraciones espurias o anomalías barométricas (`BR-TELEMETRY-VALIDITY`) |\r\n| **3. Proyección Telemétrica en Tiempo Real** | Visualizar latitud, longitud, altitud y velocidad en consola | Consola Web de Misión | Latencia en el renderizado de mapas tácticos (`QR-LATENCY-REALTIME`) |\r\n| **4. Finalización y Desconexión** | Cerrar la sesión de vuelo y consolidar logs de auditoría | Consola y Archivo de Auditoría | Sincronización final de telemetría pendiente |\r\n\r\n---\r\n\r\n## 3. Traceability to Use Cases and Product\r\n\r\n- **Caso de Uso Central**: `UC-STREAM-TELEMETRY`\r\n- **Requerimientos Satisfechos**: `FR-TELEMETRY-STREAM-001`, `QR-LATENCY-REALTIME`, `SEC-REQ-MTLS-STREAM`\r\n- **Regla de Negocio Vinculante**: `BR-TELEMETRY-VALIDITY`\r\n- **Manual de Usuario**: `MAN-USER-SENTINELCORE`\r\n\r\n---\r\n\r\n## 4. Revision History\r\n\r\n| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-25 | AI Architect / Agent | Definición canónica del journey de vigilancia UAV de SentinelCore | CHG-031 |","upstream":["ACT-DRONE-OPERATOR"],"downstream":["UC-STREAM-TELEMETRY"]},"classes":"layer-product type-journey status-compliant"},{"group":"nodes","data":{"id":"ADR-001-WEBSOCKET-STACK","label":"ADR-001-WEBSOCKET-STACK","title":"Selección de la Pila WebSocket y Motor de Concurrencia para Ingesta","type":"adr","layer":"architecture","status":"COMPLIANT","filePath":"architecture/09_decisions/ADR-001-WEBSOCKET-STACK.md","content":"# ADR-001: Selección de la Pila WebSocket para Ingesta Telemétrica\r\n\r\n## 1. Contexto y Problema\r\nEl servicio `CMP-TELEMETRY-INGEST` debe procesar 10.000 drones simultáneos transmitiendo a 10 Hz (100.000 mensajes/segundo) con latencia <50ms (`QR-LATENCY-REALTIME`). La solución debe admitir terminación mTLS y cumplir rigurosamente con la política de licencias `license-policy.yaml`.\r\n\r\n## 2. Opciones Evaluadas\r\n1. **Opción 1: Node.js + `ws`**: Motor maduro, licencia MIT (libre uso), soporte nativo mTLS.\r\n2. **Opción 2: ZeroMQ bindings C**: Rendimiento ultra alto pero dependiente de librerías con licencia LGPL que complican la distribución estática de contenedores mínimos.\r\n3. **Opción 3: Servidor Propietario / Broker Comercial de Streaming**: Requiere pago por conexión concurrente ($35.000/año) bajo licencia BSL/Comercial.\r\n\r\n## 3. Decisión\r\nSe adopta la **Opción 1 (`ws` + Node.js LTS)**. \r\n- La librería `ws` cuenta con licencia **MIT (Permisiva - Allowlist)**.\r\n- Los benchmarks demuestran capacidad de ingesta de 120.000 msg/seg por nodo con consumo moderado de CPU y memoria.\r\n- Evita costes comerciales y riesgos de copyleft viral.\r\n\r\n## 4. Consecuencias\r\n- **Positivas**: Cero coste de licencias, código auditable, soporte nativo de certificados cliente x509.\r\n- **Negativas**: Requiere optimizar el garbage collector de Node.js mediante buffers reusables para evitar pausas GC bajo picos de carga.\r\n\r\n---\r\n\r\n## 5. Historial de Revisiones\r\n\r\n| Versión | Fecha | Decisores | Estado de la Decisión | Referencia (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Carlos Mendoza & Laura Ibáñez | Aceptación formal de la tecnología WebSocket | CHG-ARCH-001 |"},"classes":"layer-architecture type-adr status-compliant"},{"group":"nodes","data":{"id":"DSG-CHG-001-TELEMETRY-INGESTION","label":"DSG-CHG-001-TELEMETRY-INGESTION","title":"Diseño Técnico: Gateway de Ingesta Telemétrica WSS con mTLS","type":"spec-design","layer":"product","status":"COMPLIANT","filePath":"specs/changes/completed/chg-001-telemetry-ingestion/design.md","content":"# Diseño Técnico: CHG-001-TELEMETRY-INGESTION\r\n\r\n## 1. Mapeo Arquitectónico y Enclave Zero Trust\r\nEl componente se despliega en el enclave perimetral **`SEC-ENC-DMZ-INGEST`** y materializa el servicio **`CMP-TELEMETRY-INGEST`** (arc42 Sección 5 / NAF Services):\r\n\r\n```mermaid\r\ngraph TD\r\n    subgraph Enclave DMZ [SEC-ENC-DMZ-INGEST]\r\n        ClientCert[Certificado Cliente x509] -->|TLS 1.3 Handshake| GW[TelemetryGateway: gateway.ts]\r\n        GW -->|Validación Peer| TlsCheck{¿Certificado CA Válido?}\r\n        TlsCheck -->|No| Reject[Abortar Handshake: TLS_PEER_CERT_MISSING]\r\n        TlsCheck -->|Sí| Parser[Deserializador JSON / Protobuf]\r\n        Parser --> Kinematics[Validador Cinemático: kinematics.ts]\r\n        Kinematics -->|BR-TELEMETRY-VALIDITY| Pub[EventPublisher: kafkajs]\r\n    end\r\n    Pub -->|telemetry.normalized.v1| Broker[(Kafka Cluster Interno)]\r\n```\r\n\r\n---\r\n\r\n## 2. Contratos de Datos e Interfaces\r\n\r\n### A. DTOs Principales (`src/telemetry/kinematics.ts`)\r\n```typescript\r\nexport interface GeoPosition {\r\n  latitude: number;\r\n  longitude: number;\r\n  altitudeMeters: number;\r\n}\r\n\r\nexport interface TelemetryFrame {\r\n  droneId: string;\r\n  timestampMs: number;\r\n  position: GeoPosition;\r\n  speedMps: number;\r\n}\r\n\r\nexport interface KinematicValidationResult {\r\n  isValid: boolean;\r\n  errorCode?: string;\r\n  calculatedSpeedMps?: number;\r\n}\r\n```\r\n\r\n### B. Contrato de Conexión Segura (`src/telemetry/gateway.ts`)\r\n```typescript\r\nexport interface ClientCertificateInfo {\r\n  authorized: boolean;\r\n  subjectCommonName: string;\r\n  hardwareUuid: string;\r\n  issuerOrg: string;\r\n}\r\n\r\nexport interface IngestionResponse {\r\n  accepted: boolean;\r\n  status: 'PROCESSED' | 'UNAUTHORIZED' | 'INVALID_KINEMATICS';\r\n  errorCode?: string;\r\n}\r\n```\r\n\r\n---\r\n\r\n## 3. Protocolos de Manejo de Errores y Mitigación\r\n\r\n1. **Fallo de Certificado Cliente (`SEC-TEST-001` / `SEC-TEST-002`)**:\r\n   - Si no se suministra certificado o es inválido, `verifyTlsPeer()` aborta con `TLS_PEER_CERT_MISSING` o `UNKNOWN_CA`, retornando código HTTP `UNAUTHORIZED` y abortando el stream.\r\n2. **Violación Cinemática (`BR-TELEMETRY-VALIDITY`)**:\r\n   - Se evalúa la distancia ortodrómica (fórmula de Haversine) entre dos tramas sucesivas separadas por $\\Delta t$. Si la velocidad aparente excede $150\\text{ m/s}$, se descarta con `NACK-INVALID-KINEMATICS`.\r\n\r\n---\r\n\r\n## 4. Conformidad con la Política de Licencias (`license-policy.yaml`)\r\nTodas las librerías empleadas en la implementación son de uso libre comercial:\r\n- `ws`: MIT (Permitida)\r\n- `pino`: MIT (Permitida)\r\n- `kafkajs`: Apache-2.0 (Permitida)\r\n\r\n---\r\n\r\n## 5. Historial de Revisiones\r\n\r\n| Versión | Fecha | Autor | Descripción del Cambio | Referencia |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Carlos Mendoza | Diseño técnico formal del gateway de telemetría | CHG-001 |"},"classes":"layer-product type-spec-design status-compliant"},{"group":"nodes","data":{"id":"CHG-001-TELEMETRY-INGESTION","label":"CHG-001-TELEMETRY-INGESTION","title":"Implementación del Gateway de Ingesta Telemétrica WSS con mTLS","type":"spec-change-proposal","layer":"product","status":"COMPLIANT","filePath":"specs/changes/completed/chg-001-telemetry-ingestion/proposal.md","content":"# Propuesta de Cambio: CHG-001-TELEMETRY-INGESTION\r\n\r\n## 1. Motivación y Alcance\r\nEste incremento de entrega implementa el socket receptor WebSocket WSS con mTLS en el enclave perimetral `SEC-ENC-DMZ-INGEST`, permitiendo que la flota de drones transmita telemetría en tiempo real y asegurando que cualquier atacante sin certificado válido sea abortado en el handshake.\r\n\r\n## 2. Cumplimiento de Licencias OSS\r\nLas dependencias añadidas han sido validadas contra `license-policy.yaml`:\r\n- `ws` (MIT - Permitida)\r\n- `pino` (MIT - Permitida)\r\n- `kafkajs` (Apache-2.0 - Permitida)\r\n- Cero dependencias virales (GPL/AGPL) y cero licencias comerciales de pago.\r\n\r\n---\r\n\r\n## 3. Historial de Revisiones\r\n\r\n| Versión | Fecha | Autor | Descripción del Cambio | Estado |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Carlos Mendoza | Propuesta con citaciones de trazabilidad 360° verificadas | Aceptado |"},"classes":"layer-product type-spec-change-proposal status-compliant"},{"group":"nodes","data":{"id":"SPEC-CHG-001-TELEMETRY-INGESTION","label":"SPEC-CHG-001-TELEMETRY-INGESTION","title":"Especificación de Entrega: Ingesta Telemétrica WSS con mTLS","type":"delivery-spec","layer":"product","status":"COMPLIANT","filePath":"specs/changes/completed/chg-001-telemetry-ingestion/spec.md","content":"# Especificación de Entrega: CHG-001-TELEMETRY-INGESTION\r\n\r\n## 1. Escenarios de Comportamiento Funcional\r\n\r\n### Escenario 1.1: Recepción y Publicación de Telemetría Válida\r\n- **GIVEN**: Un dron con certificado cliente x509 válido conectado al endpoint `/v1/telemetry/stream`.\r\n- **WHEN**: Envía una trama binaria con `latitude: 40.4168`, `longitude: -3.7038`, `altitude: 120.5m`, `speed_horizontal: 15 m/s`.\r\n- **THEN**: El servidor deserializa el paquete en <10ms, valida que la aceleración sea <4G y publica el evento en el topic Kafka `telemetry.normalized.v1`.\r\n\r\n### Escenario 1.2: Detección y Rechazo de Salto Cinemático Anómalo\r\n- **GIVEN**: Un dron conectado que envía una trama 100ms después con un salto de posición de 50 km (velocidad equivalente Mach 15).\r\n- **WHEN**: El validador evalúa la coherencia cinemática según `BR-TELEMETRY-VALIDITY`.\r\n- **THEN**: La trama es descartada, el dron recibe `NACK-INVALID-KINEMATICS` y se emite una alerta de anomalía geospacial en el log estructurado.\r\n\r\n---\r\n\r\n## 2. Escenarios de Ciberseguridad y Mitigación (Abuse Scenarios)\r\n\r\n### Escenario 2.1: Intento de Suplantación sin Certificado (SEC-TEST-001)\r\n- **GIVEN**: Un actor malicioso (`ACT-THREAT-SPOOFER`) intenta abrir un socket WebSocket hacia el puerto 443 sin proveer certificado cliente.\r\n- **WHEN**: Se inicia la negociación TLS 1.3.\r\n- **THEN**: El handshake falla con error TLS `peer did not return a certificate`, cerrando el socket TCP inmediatamente sin invocar la capa de aplicación.\r\n\r\n### Escenario 2.2: Certificado Cliente Autofirmado o de CA no Autorizada (SEC-TEST-002)\r\n- **GIVEN**: El atacante presenta un certificado x509 válido sintácticamente pero firmado por una CA desconocida.\r\n- **WHEN**: Se valida la cadena de confianza en el gateway DMZ.\r\n- **THEN**: El handshake es abortado con `CERT_SIGNATURE_FAILURE` y se incrementa el contador de anomalías de seguridad en las métricas Prometheus.\r\n\r\n---\r\n\r\n## 3. Trazabilidad 360° a Suites de Pruebas Ejecutables\r\n\r\n| Escenario | Requerimiento PDaC | Archivo de Prueba / Benchmark | Estado |\r\n| :--- | :--- | :--- | :---: |\r\n| Ingesta continua a 10 Hz | `FR-TELEMETRY-STREAM-001` | `tests/features/fr-telemetry-stream-001.feature` | ✅ PASSED |\r\n| Rechazo por salto cinemático | `BR-TELEMETRY-VALIDITY` | `tests/unit/telemetry_gateway.spec.ts` | ✅ PASSED |\r\n| Latencia p99 < 50ms | `QR-LATENCY-REALTIME` | `tests/benchmarks/latency_benchmark.spec.ts` | ✅ PASSED |\r\n| Autenticación mTLS (SEC-TEST-*) | `SEC-REQ-MTLS-STREAM` | `tests/features/security/sec-req-mtls-stream.feature` | ✅ PASSED |"},"classes":"layer-product type-delivery-spec status-compliant"},{"group":"nodes","data":{"id":"SPEC-CHG-002-FAST-PATCH","label":"SPEC-CHG-002-FAST-PATCH","title":"SPEC-CHG-002-FAST-PATCH","type":"delivery-spec","layer":"product","status":"COMPLIANT","filePath":"specs/changes/completed/chg-002-fast-patch/spec.md","content":"# Especificación de Entrega (Parche Rápido): CHG-002-FAST-PATCH\r\n\r\n## 1. Alcance y Contexto del Parche\r\nEste cambio ejemplifica el **Modelo de Fricción Progresiva** (Progressive Friction) bajo el perfil `patch`.\r\n- **Objetivo**: Corregir un error puntual de formateo en mensajes de error sin alterar contratos ni esquemas.\r\n- **Nivel de Fricción**: Mínimo (Fast Track / Green Path). No requiere descomposición en `tasks.md`, propuesta formal en `proposal.md`, diseño técnico en `design.md` ni sidecar canónico `handoff.yaml`.\r\n- **Nomenclatura**: Clasificado canónicamente mediante frontmatter YAML (`profile: patch`). La carpeta utiliza `chg-002-fast-patch` (permitiéndose indistintamente prefijos `chg-XXX` o `patch-XXX`).\r\n\r\n---\r\n\r\n## 2. Escenario de Verificación y Criterios de Aceptación\r\n- **GIVEN**: El sistema detecta un error de validación en la entrada de datos.\r\n- **WHEN**: Se serializa la respuesta de error devuelta al cliente.\r\n- **THEN**: El mensaje contiene la descripción amigable estandarizada y el código HTTP 400.\r\n\r\n---\r\n\r\n## 3. Verificación Automatizada (Adaptive Quality Gate)\r\n- **Comando de Verificación**: `pnpm test`\r\n- **Requisitos de Puerta**:\r\n  - Cobertura de pruebas unitarias y de regresión al 100% para las líneas modificadas.\r\n  - Quality Gate estándar (Complejidad ciclomática <= 10, Mantenibilidad >= 50).\r\n  - Anti-Patch Bypass: Auditoría automatizada que confirma ausencia de cambios en esquemas canónicos, políticas o enclaves Zero Trust."},"classes":"layer-product type-delivery-spec status-compliant"},{"group":"nodes","data":{"id":"ACT-THREAT-SPOOFER","label":"ACT-THREAT-SPOOFER","title":"Atacante Geospacial / Emisor de Telemetría Falsa (RF Spoofer)","type":"threat-actor","layer":"product","status":"COMPLIANT","filePath":"security/ACT-THREAT-SPOOFER.md","content":"# ACT-THREAT-SPOOFER: Atacante Geospacial / Suplantador\r\n\r\n## 1. Perfil del Adversario\r\nAtacante con capacidad para interceptar tráfico de radiofrecuencia o enviar paquetes forjados al servicio de ingesta, buscando proyectar \"aeronaves fantasma\" en la consola del operador para provocar falsas alertas de colisión o saturar el sistema.\r\n\r\n---\r\n\r\n## 2. Historial de Revisiones\r\n\r\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\r\n| :--- | :--- | :--- | :--- | :--- |\r\n| **1.0.0** | 2026-09-03 | Laura Ibáñez (SecOps) | Caracterización de la amenaza de suplantación RF | CHG-SEC-001 |","downstream":["ABUSE-TELEMETRY-SPOOFING"]},"classes":"layer-product type-threat-actor status-compliant"},{"group":"edges","data":{"id":"edge-UC-STREAM-TELEMETRY-FR-TELEMETRY-STREAM-001","source":"UC-STREAM-TELEMETRY","target":"FR-TELEMETRY-STREAM-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-BR-TELEMETRY-VALIDITY-FR-TELEMETRY-STREAM-001","source":"BR-TELEMETRY-VALIDITY","target":"FR-TELEMETRY-STREAM-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-ABUSE-TELEMETRY-SPOOFING-FR-TELEMETRY-STREAM-001","source":"ABUSE-TELEMETRY-SPOOFING","target":"FR-TELEMETRY-STREAM-001","label":"mitigated-by","relation":"mitigated-by","status":"COMPLIANT"},"classes":"relation-mitigated-by status-compliant"},{"group":"edges","data":{"id":"edge-FR-TELEMETRY-STREAM-001-CMP-TELEMETRY-INGEST","source":"FR-TELEMETRY-STREAM-001","target":"CMP-TELEMETRY-INGEST","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-TELEMETRY-STREAM-001-06_runtime_view.md","source":"FR-TELEMETRY-STREAM-001","target":"06_runtime_view.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-TELEMETRY-STREAM-001-CMP-TELEMETRY-INGEST.md","source":"FR-TELEMETRY-STREAM-001","target":"CMP-TELEMETRY-INGEST.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-TELEMETRY-STREAM-001-tests_features_fr-telemetry-stream-001_feature","source":"FR-TELEMETRY-STREAM-001","target":"tests_features_fr-telemetry-stream-001_feature","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-FR-TELEMETRY-STREAM-001-tests_unit_telemetry_gateway_spec_ts","source":"FR-TELEMETRY-STREAM-001","target":"tests_unit_telemetry_gateway_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-STREAM-TELEMETRY-QR-LATENCY-REALTIME","source":"UC-STREAM-TELEMETRY","target":"QR-LATENCY-REALTIME","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-BR-TELEMETRY-VALIDITY-QR-LATENCY-REALTIME","source":"BR-TELEMETRY-VALIDITY","target":"QR-LATENCY-REALTIME","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-ABUSE-TELEMETRY-SPOOFING-QR-LATENCY-REALTIME","source":"ABUSE-TELEMETRY-SPOOFING","target":"QR-LATENCY-REALTIME","label":"mitigated-by","relation":"mitigated-by","status":"COMPLIANT"},"classes":"relation-mitigated-by status-compliant"},{"group":"edges","data":{"id":"edge-QR-LATENCY-REALTIME-CMP-TELEMETRY-INGEST","source":"QR-LATENCY-REALTIME","target":"CMP-TELEMETRY-INGEST","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-QR-LATENCY-REALTIME-01_introduction_goals.md","source":"QR-LATENCY-REALTIME","target":"01_introduction_goals.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-QR-LATENCY-REALTIME-ADR-001-WEBSOCKET-STACK.md","source":"QR-LATENCY-REALTIME","target":"ADR-001-WEBSOCKET-STACK.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-QR-LATENCY-REALTIME-CMP-TELEMETRY-INGEST.md","source":"QR-LATENCY-REALTIME","target":"CMP-TELEMETRY-INGEST.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-QR-LATENCY-REALTIME-tests_benchmarks_latency_benchmark_spec_ts","source":"QR-LATENCY-REALTIME","target":"tests_benchmarks_latency_benchmark_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-ABUSE-TELEMETRY-SPOOFING-SEC-REQ-MTLS-STREAM","source":"ABUSE-TELEMETRY-SPOOFING","target":"SEC-REQ-MTLS-STREAM","label":"mitigated-by","relation":"mitigated-by","status":"COMPLIANT"},"classes":"relation-mitigated-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-STREAM-TELEMETRY-SEC-REQ-MTLS-STREAM","source":"UC-STREAM-TELEMETRY","target":"SEC-REQ-MTLS-STREAM","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-BR-TELEMETRY-VALIDITY-SEC-REQ-MTLS-STREAM","source":"BR-TELEMETRY-VALIDITY","target":"SEC-REQ-MTLS-STREAM","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-CMP-TELEMETRY-INGEST","source":"SEC-REQ-MTLS-STREAM","target":"CMP-TELEMETRY-INGEST","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-SEC-ENC-DMZ-INGEST","source":"SEC-REQ-MTLS-STREAM","target":"SEC-ENC-DMZ-INGEST","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-01_introduction_goals.md","source":"SEC-REQ-MTLS-STREAM","target":"01_introduction_goals.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-06_runtime_view.md","source":"SEC-REQ-MTLS-STREAM","target":"06_runtime_view.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-CMP-TELEMETRY-INGEST.md","source":"SEC-REQ-MTLS-STREAM","target":"CMP-TELEMETRY-INGEST.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-tests_features_security_sec-req-mtls-stream_feature","source":"SEC-REQ-MTLS-STREAM","target":"tests_features_security_sec-req-mtls-stream_feature","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-SEC-REQ-MTLS-STREAM-tests_unit_telemetry_gateway_spec_ts","source":"SEC-REQ-MTLS-STREAM","target":"tests_unit_telemetry_gateway_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-ACT-DRONE-OPERATOR-JRN-UAV-SURVEILLANCE","source":"ACT-DRONE-OPERATOR","target":"JRN-UAV-SURVEILLANCE","label":"pursues","relation":"pursues","status":"COMPLIANT"},"classes":"relation-pursues status-compliant"},{"group":"edges","data":{"id":"edge-JRN-UAV-SURVEILLANCE-UC-STREAM-TELEMETRY","source":"JRN-UAV-SURVEILLANCE","target":"UC-STREAM-TELEMETRY","label":"decomposes-into","relation":"decomposes-into","status":"COMPLIANT"},"classes":"relation-decomposes-into status-compliant"},{"group":"edges","data":{"id":"edge-ACT-AUTONOMOUS-UAV-UC-STREAM-TELEMETRY","source":"ACT-AUTONOMOUS-UAV","target":"UC-STREAM-TELEMETRY","label":"initiates","relation":"initiates","status":"COMPLIANT"},"classes":"relation-initiates status-compliant"},{"group":"edges","data":{"id":"edge-BR-TELEMETRY-VALIDITY-UC-STREAM-TELEMETRY","source":"BR-TELEMETRY-VALIDITY","target":"UC-STREAM-TELEMETRY","label":"governs","relation":"governs","status":"COMPLIANT"},"classes":"relation-governs status-compliant"},{"group":"edges","data":{"id":"edge-ACT-THREAT-SPOOFER-ABUSE-TELEMETRY-SPOOFING","source":"ACT-THREAT-SPOOFER","target":"ABUSE-TELEMETRY-SPOOFING","label":"threatens","relation":"threatens","status":"COMPLIANT"},"classes":"relation-threatens status-compliant"},{"group":"edges","data":{"id":"edge-ABUSE-TELEMETRY-SPOOFING-UC-STREAM-TELEMETRY","source":"ABUSE-TELEMETRY-SPOOFING","target":"UC-STREAM-TELEMETRY","label":"targets","relation":"targets","status":"COMPLIANT"},"classes":"relation-targets status-compliant"}];
+    var govTasks = [];
     var cy = null;
+
+    var reqHoverTimer = null;
+    var currentHoverNodeId = null;
+    var tableHoverTimer = null;
+    var tableHoverId = null;
+    var lastMouseX = 0;
+    var lastMouseY = 0;
+
+    function renderMarkdown(md) {
+      if (!md || !md.trim()) {
+        return '<p style="color: var(--text-muted); font-style: italic;">Sin contenido detallado en el cuerpo del requisito.</p>';
+      }
+      try {
+        var text = md
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+
+        // Code blocks (triple backticks)
+        var tick = String.fromCharCode(96);
+        var codeBlockRe = new RegExp(tick + '{3}([a-z]*)[\\r\\n]+([\\s\\S]*?)' + tick + '{3}', 'g');
+        text = text.replace(codeBlockRe, function(_, lang, code) {
+          return '<pre><code>' + code.trim() + '</code></pre>';
+        });
+
+        // Inline code (single backtick)
+        var inlineCodeRe = new RegExp(tick + '([^' + tick + ']+)' + tick, 'g');
+        text = text.replace(inlineCodeRe, '<code>$1</code>');
+
+        // Headers (h3, h2, h1)
+        text = text.replace(/^### (.*$)/gim, '<h4>$1</h4>');
+        text = text.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+        text = text.replace(/^# (.*$)/gim, '<h2>$1</h2>');
+
+        // Bold & italic
+        text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+        // Unordered lists
+        text = text.replace(/^\s*[-*]\s+(.*$)/gim, '<li>$1</li>');
+        text = text.replace(/(<li>[\s\S]*?<\/li>(?:\r?\n)*)+/g, function(match) {
+          return '<ul>' + match + '</ul>';
+        });
+
+        // Paragraph line breaks
+        text = text.replace(/\r?\n\r?\n/g, '<br/><br/>');
+
+        return text;
+      } catch (err) {
+        return '<div style="white-space: pre-wrap; font-family: monospace;">' +
+          md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+          '</div>';
+      }
+    }
+
+    function showTooltip(data, x, y) {
+      var tooltip = document.getElementById('req-tooltip');
+      if (!tooltip) return;
+      document.getElementById('tooltip-id').textContent = data.id;
+      document.getElementById('tooltip-title').textContent = data.title || data.label || '';
+      var bodyEl = document.getElementById('tooltip-body');
+      var desc = data.content ? data.content.trim() : (data.title || data.id) + ' [' + (data.layer || data.type || 'NODE').toUpperCase() + ']';
+      bodyEl.textContent = desc;
+
+      tooltip.style.display = 'block';
+      positionTooltip(tooltip, x, y);
+    }
+
+    function positionTooltip(tooltip, x, y) {
+      var pad = 15;
+      var left = x + pad;
+      var top = y + pad;
+      var rect = tooltip.getBoundingClientRect();
+      if (left + rect.width > window.innerWidth - 10) {
+        left = Math.max(10, x - rect.width - pad);
+      }
+      if (top + rect.height > window.innerHeight - 10) {
+        top = Math.max(10, y - rect.height - pad);
+      }
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+    }
+
+    function updateTooltipPosition(x, y) {
+      var tooltip = document.getElementById('req-tooltip');
+      if (tooltip && tooltip.style.display !== 'none') {
+        positionTooltip(tooltip, x, y);
+      }
+    }
+
+    function hideTooltip() {
+      var tooltip = document.getElementById('req-tooltip');
+      if (tooltip) {
+        tooltip.style.display = 'none';
+      }
+    }
+
+    function startRowTooltip(event, id) {
+      tableHoverId = id;
+      lastMouseX = event.clientX;
+      lastMouseY = event.clientY;
+      clearTimeout(tableHoverTimer);
+      tableHoverTimer = setTimeout(function() {
+        if (tableHoverId === id) {
+          var nodeData = null;
+          if (cy) {
+            var n = cy.getElementById(id);
+            if (n && n.length > 0) nodeData = n.data();
+          }
+          if (!nodeData) {
+            var el = elements.find(function(e) { return e.data && e.data.id === id; });
+            if (el) nodeData = el.data;
+          }
+          if (nodeData) {
+            showTooltip(nodeData, lastMouseX, lastMouseY);
+          }
+        }
+      }, 1000);
+    }
+
+    function updateRowTooltipPos(event) {
+      lastMouseX = event.clientX;
+      lastMouseY = event.clientY;
+      updateTooltipPosition(lastMouseX, lastMouseY);
+    }
+
+    function cancelRowTooltip() {
+      clearTimeout(tableHoverTimer);
+      tableHoverId = null;
+      hideTooltip();
+    }
 
     function initCytoscape() {
       if (typeof cytoscape === 'undefined') {
@@ -343,6 +886,8 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
       cy = cytoscape({
         container: document.getElementById('cy'),
         elements: elements,
+        boxSelectionEnabled: false,
+        autoungrabify: true,
         style: [
           {
             selector: 'node',
@@ -358,33 +903,143 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
               'border-width': 2,
               'border-color': '#64748b',
               'text-wrap': 'ellipsis',
-              'text-max-width': '60px'
+              'text-max-width': '65px'
+            }
+          },
+          // Typology Styles
+          {
+            selector: 'node.type-journey',
+            style: {
+              'shape': 'round-rectangle',
+              'background-color': '#581c87',
+              'border-color': '#c084fc',
+              'border-width': 3,
+              'width': 85,
+              'height': 42,
+              'font-weight': 'bold',
+              'text-max-width': '80px'
             }
           },
           {
-            selector: 'node.layer-product',
+            selector: 'node.type-actor',
+            style: {
+              'shape': 'ellipse',
+              'background-color': '#065f46',
+              'border-color': '#34d399',
+              'border-width': 2.5,
+              'width': 54,
+              'height': 54,
+              'font-weight': 'bold'
+            }
+          },
+          {
+            selector: 'node.type-threat-actor',
+            style: {
+              'shape': 'ellipse',
+              'background-color': '#4c0519',
+              'border-color': '#fb7185',
+              'border-width': 2.5,
+              'border-style': 'dashed',
+              'width': 54,
+              'height': 54
+            }
+          },
+          {
+            selector: 'node.type-usecase, node.type-use-case',
+            style: {
+              'shape': 'round-rectangle',
+              'background-color': '#0369a1',
+              'border-color': '#38bdf8',
+              'border-width': 2,
+              'width': 70,
+              'height': 38
+            }
+          },
+          {
+            selector: 'node.type-rule, node.type-business-rule',
+            style: {
+              'shape': 'diamond',
+              'background-color': '#b45309',
+              'border-color': '#fbbf24',
+              'border-width': 2,
+              'width': 58,
+              'height': 58
+            }
+          },
+          {
+            selector: 'node.type-abuse-case',
+            style: {
+              'shape': 'octagon',
+              'background-color': '#881337',
+              'border-color': '#f43f5e',
+              'border-width': 2.5,
+              'width': 64,
+              'height': 46
+            }
+          },
+          {
+            selector: 'node.type-security-enclave',
+            style: {
+              'shape': 'hexagon',
+              'background-color': '#3b0764',
+              'border-color': '#a855f7',
+              'border-width': 2,
+              'width': 65,
+              'height': 45
+            }
+          },
+          {
+            selector: 'node.type-requirement, node.type-security-requirement',
+            style: {
+              'shape': 'round-rectangle',
+              'background-color': '#1e293b',
+              'border-color': '#64748b',
+              'border-width': 2.5,
+              'width': 68,
+              'height': 36
+            }
+          },
+          {
+            selector: 'node.type-component, node.type-adr',
+            style: {
+              'shape': 'hexagon',
+              'background-color': '#312e81',
+              'border-color': '#818cf8',
+              'border-width': 2,
+              'width': 60,
+              'height': 45
+            }
+          },
+          {
+            selector: 'node.type-bdd-feature, node.type-code-test, node.layer-test',
+            style: {
+              'shape': 'round-rectangle',
+              'background-color': '#047857',
+              'border-color': '#10b981',
+              'border-width': 2,
+              'width': 65,
+              'height': 32
+            }
+          },
+          // Fallback Layer styles if type is missing
+          {
+            selector: 'node.layer-product:not(.type-journey):not(.type-actor):not(.type-use-case):not(.type-usecase):not(.type-business-rule):not(.type-rule):not(.type-abuse-case):not(.type-threat-actor)',
             style: { 'shape': 'diamond', 'background-color': '#0e7490', 'border-color': '#38bdf8', 'width': 50, 'height': 50 }
           },
           {
-            selector: 'node.layer-requirement',
-            style: { 'shape': 'round-rectangle', 'border-width': 3 }
-          },
-          {
-            selector: 'node.layer-architecture',
+            selector: 'node.layer-architecture:not(.type-component):not(.type-adr):not(.type-security-enclave)',
             style: { 'shape': 'hexagon', 'background-color': '#4338ca', 'border-color': '#818cf8', 'width': 60, 'height': 45 }
           },
+          // Status modifiers
           {
-            selector: 'node.layer-test',
-            style: { 'shape': 'ellipse', 'background-color': '#047857', 'border-color': '#34d399', 'width': 50, 'height': 50 }
-          },
-          {
-            selector: 'node.status-conforme',
+            selector: 'node.status-conforme, node.status-compliant',
             style: { 'border-color': '#10b981' }
           },
           {
-            selector: 'node.status-huérfano, node.status-drift',
+            selector: 'node.status-huérfano, node.status-orphan, node.status-drift',
             style: { 'border-color': '#ef4444', 'background-color': '#7f1d1d' }
           },
+          // Default Edge
           {
             selector: 'edge',
             style: {
@@ -396,6 +1051,44 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
               'arrow-scale': 0.8
             }
           },
+          // Semantic Edge Relations
+          {
+            selector: 'edge.relation-pursues',
+            style: { 'line-color': '#c084fc', 'target-arrow-color': '#c084fc', 'width': 2 }
+          },
+          {
+            selector: 'edge.relation-decomposes-into',
+            style: { 'line-color': '#a855f7', 'target-arrow-color': '#a855f7', 'width': 2 }
+          },
+          {
+            selector: 'edge.relation-initiates',
+            style: { 'line-color': '#34d399', 'target-arrow-color': '#34d399', 'width': 1.8 }
+          },
+          {
+            selector: 'edge.relation-governs',
+            style: { 'line-color': '#fbbf24', 'target-arrow-color': '#fbbf24', 'line-style': 'dashed', 'width': 1.8 }
+          },
+          {
+            selector: 'edge.relation-mitigated-by, edge.relation-mitigates',
+            style: { 'line-color': '#f43f5e', 'target-arrow-color': '#f43f5e', 'line-style': 'dashed', 'width': 1.8 }
+          },
+          {
+            selector: 'edge.relation-threatens',
+            style: { 'line-color': '#e11d48', 'target-arrow-color': '#e11d48', 'line-style': 'dotted', 'width': 2 }
+          },
+          {
+            selector: 'edge.relation-derives-from',
+            style: { 'line-color': '#38bdf8', 'target-arrow-color': '#38bdf8', 'width': 1.8 }
+          },
+          {
+            selector: 'edge.relation-satisfies',
+            style: { 'line-color': '#818cf8', 'target-arrow-color': '#818cf8', 'width': 1.8 }
+          },
+          {
+            selector: 'edge.relation-verified-by',
+            style: { 'line-color': '#10b981', 'target-arrow-color': '#10b981', 'width': 1.8 }
+          },
+          // Highlight and dim
           {
             selector: 'node.highlighted',
             style: {
@@ -432,8 +1125,9 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
 
       cy.on('tap', 'node', function(evt) {
         var node = evt.target;
+        var data = node.data();
         highlightCriticalPath(node);
-        showNodeDetails(node.data());
+        showNodeDetails(data);
       });
 
       cy.on('tap', function(evt) {
@@ -441,9 +1135,39 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
           resetHighlight();
         }
       });
+
+      cy.on('mouseover', 'node', function(evt) {
+        var node = evt.target;
+        var data = node.data();
+
+        currentHoverNodeId = data.id;
+        clearTimeout(reqHoverTimer);
+
+        var rect = document.getElementById('cy').getBoundingClientRect();
+        var clientX = (evt.originalEvent && evt.originalEvent.clientX) || (rect.left + evt.renderedPosition.x);
+        var clientY = (evt.originalEvent && evt.originalEvent.clientY) || (rect.top + evt.renderedPosition.y);
+
+        reqHoverTimer = setTimeout(function() {
+          if (currentHoverNodeId === data.id) {
+            showTooltip(data, clientX, clientY);
+          }
+        }, 1000);
+      });
+
+      cy.on('mousemove', 'node', function(evt) {
+        if (evt.originalEvent) {
+          updateTooltipPosition(evt.originalEvent.clientX, evt.originalEvent.clientY);
+        }
+      });
+
+      cy.on('mouseout', 'node', function(evt) {
+        clearTimeout(reqHoverTimer);
+        currentHoverNodeId = null;
+        hideTooltip();
+      });
     }
 
-    function highlightCriticalPath(node) {
+        function highlightCriticalPath(node) {
       cy.elements().removeClass('highlighted dimmed');
       var predecessors = node.predecessors();
       var successors = node.successors();
@@ -457,30 +1181,130 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
       if (!cy) return;
       cy.elements().removeClass('highlighted dimmed');
       var sidebar = document.getElementById('sidebar-content');
-      sidebar.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem;">Haz clic en cualquier nodo del grafo para inspeccionar su camino crítico y trazabilidad completa.</p>';
+      sidebar.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem;">Click on any graph node to inspect its critical path and full traceability.</p>';
     }
 
     function showNodeDetails(data) {
-      var sidebar = document.getElementById('sidebar-content');
-      var html = '<div class="sidebar-field"><strong>ID / Identificador:</strong> <code>' + data.id + '</code></div>';
-      html += '<div class="sidebar-field"><strong>Título:</strong> ' + (data.title || data.label) + '</div>';
-      html += '<div class="sidebar-field"><strong>Capa / Tipo:</strong> <span class="badge" style="background:#334155;">' + data.layer.toUpperCase() + ' (' + data.type + ')</span></div>';
-      html += '<div class="sidebar-field"><strong>Estado:</strong> <span class="badge ' + (data.status === 'CONFORME' ? 'badge-green' : 'badge-amber') + '">' + data.status + '</span></div>';
-      if (data.filePath) {
-        html += '<div class="sidebar-field"><strong>Archivo Físico:</strong> <code>' + data.filePath + '</code></div>';
+      try {
+        var sidebar = document.getElementById('sidebar-content');
+        if (!sidebar) return;
+        var isConform = data.status === 'COMPLIANT' || data.status === 'CONFORME';
+        var typeName = (data.type || data.layer || 'node').toLowerCase();
+        var typeBadgeColor = '#334155';
+        var typeTitle = (data.type || data.layer || 'NODE').toUpperCase();
+        if (typeName === 'journey') {
+          typeBadgeColor = '#581c87';
+          typeTitle = 'JOURNEY (JRN)';
+        } else if (typeName === 'actor') {
+          typeBadgeColor = '#065f46';
+          typeTitle = 'ACTOR (ACT)';
+        } else if (typeName === 'threat-actor') {
+          typeBadgeColor = '#4c0519';
+          typeTitle = 'THREAT ACTOR (ACT-THREAT)';
+        } else if (typeName === 'use-case' || typeName === 'usecase') {
+          typeBadgeColor = '#0369a1';
+          typeTitle = 'USE CASE (UC)';
+        } else if (typeName === 'business-rule' || typeName === 'rule') {
+          typeBadgeColor = '#b45309';
+          typeTitle = 'BUSINESS RULE (BR)';
+        } else if (typeName === 'abuse-case') {
+          typeBadgeColor = '#881337';
+          typeTitle = 'ABUSE CASE (ABUSE)';
+        } else if (typeName === 'requirement' || typeName === 'security-requirement') {
+          typeBadgeColor = '#1e293b';
+          typeTitle = 'REQUIREMENT (' + (data.id.split('-')[0] || 'REQ') + ')';
+        } else if (typeName === 'component' || typeName === 'adr' || typeName === 'security-enclave') {
+          typeBadgeColor = '#312e81';
+          typeTitle = 'ARCHITECTURE (' + (data.id.split('-')[0] || 'ARCH') + ')';
+        } else if (typeName === 'bdd-feature' || typeName === 'code-test') {
+          typeBadgeColor = '#047857';
+          typeTitle = 'TEST VERIFICATION';
+        }
+
+        var html = '<div class="sidebar-field"><strong>ID / Identifier:</strong> <code>' + data.id + '</code></div>';
+        html += '<div class="sidebar-field"><strong>Title:</strong> ' + (data.title || data.label || data.id) + '</div>';
+        html += '<div class="sidebar-field"><strong>Typology:</strong> <span class="badge" style="background:' + typeBadgeColor + '; border:1px solid rgba(255,255,255,0.2);">' + typeTitle + '</span></div>';
+        html += '<div class="sidebar-field"><strong>Status:</strong> <span class="badge ' + (isConform ? 'badge-green' : 'badge-amber') + '">' + (data.status || 'UNKNOWN') + '</span></div>';
+        if (data.filePath) {
+          var cleanMetaPath = data.filePath.split('\\').join('/');
+          if (cleanMetaPath.indexOf('./') === 0) cleanMetaPath = cleanMetaPath.substring(2);
+          var metaHref = (cleanMetaPath.indexOf('http://') === 0 || cleanMetaPath.indexOf('https://') === 0 || cleanMetaPath.indexOf('file://') === 0) ? cleanMetaPath : '../' + cleanMetaPath;
+          html += '<div class="sidebar-field"><strong>Physical File:</strong> <a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline;" title="Open file: ' + cleanMetaPath + '"><code>' + cleanMetaPath + ' ↗</code></a></div>';
+        }
+        if (data.upstream && data.upstream.length > 0) {
+          html += '<div class="sidebar-field"><strong>Upstream Traces (Product):</strong> ' + data.upstream.join(', ') + '</div>';
+        }
+        if (data.downstream && data.downstream.length > 0) {
+          html += '<div class="sidebar-field"><strong>Downstream Traces (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
+        }
+        if (data.content && data.content.trim()) {
+          html += '<div class="sidebar-field" style="margin-top: 4px;"><strong>File Content / Specification:</strong>';
+          html += '<div class="sidebar-content-preview" style="margin-top: 6px; max-height: 280px; overflow-y: auto; background: rgba(11, 17, 32, 0.75); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.74rem; line-height: 1.45; color: #cbd5e1;">';
+          html += renderMarkdown(data.content);
+          html += '</div></div>';
+        }
+        sidebar.innerHTML = html;
+      } catch (err) {
+        console.error('Error showing node details:', err);
       }
-      if (data.upstream && data.upstream.length > 0) {
-        html += '<div class="sidebar-field"><strong>Trazas Upstream (Producto):</strong> ' + data.upstream.join(', ') + '</div>';
-      }
-      if (data.downstream && data.downstream.length > 0) {
-        html += '<div class="sidebar-field"><strong>Trazas Downstream (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
-      }
-      sidebar.innerHTML = html;
     }
 
     function applyLayout(name) {
       if (!cy) return;
       cy.layout({ name: name, directed: true, padding: 30, animate: true, animationDuration: 400 }).run();
+    }
+
+    function filterType(type) {
+      if (!cy) return;
+      if (type === 'all') {
+        cy.elements().show();
+      } else if (type === 'journey') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-journey');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'actor') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-actor, .type-threat-actor');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'use-case') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-use-case, .type-usecase');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'business-rule') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-business-rule, .type-rule');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'abuse-case') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-abuse-case, .type-threat-actor');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'requirement') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-requirement, .type-security-requirement, .layer-requirement');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'architecture') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-component, .type-adr, .type-security-enclave, .layer-architecture');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'test') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-bdd-feature, .type-code-test, .layer-test');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-' + type);
+        nodes.show();
+        nodes.connectedEdges().show();
+      }
+      cy.fit(30);
     }
 
     function filterLayer(layer) {
@@ -500,14 +1324,14 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
       if (!cy) return;
       if (status === 'all') {
         cy.elements().show();
-      } else if (status === 'CONFORME') {
+      } else if (status === 'COMPLIANT' || status === 'CONFORME') {
         cy.elements().hide();
-        var nodes = cy.nodes('.status-conforme');
+        var nodes = cy.nodes('.status-compliant, .status-conforme');
         nodes.show();
         nodes.connectedEdges().show();
       } else {
         cy.elements().hide();
-        var nodes = cy.nodes('.status-huérfano, .status-drift');
+        var nodes = cy.nodes('.status-orphan, .status-huérfano, .status-drift');
         nodes.show();
         nodes.connectedEdges().show();
       }
@@ -532,6 +1356,7 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
     }
 
     function focusNode(id) {
+      cancelRowTooltip();
       switchTab('graph');
       setTimeout(function() {
         if (!cy) return;
@@ -551,6 +1376,7 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
     }
 
     function switchTab(name) {
+      hideTooltip();
       document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
       document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
       event.target?.classList?.add('active');
@@ -561,6 +1387,158 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
         cy.fit(30);
       }
     }
+
+    function toggleAutonomyTasks(mode) {
+      var panel = document.getElementById('tasks-row-' + mode);
+      var icon = document.getElementById('toggle-icon-' + mode);
+      if (!panel) return;
+      var isHidden = panel.style.display === 'none' || panel.style.display === '';
+      if (isHidden) {
+        panel.style.display = 'table-row';
+        if (icon) icon.classList.add('open');
+      } else {
+        panel.style.display = 'none';
+        if (icon) icon.classList.remove('open');
+      }
+    }
+
+    function filterAutonomyTasks(mode, filter, event) {
+      if (event) {
+        event.stopPropagation();
+      }
+      var panel = document.getElementById('tasks-row-' + mode);
+      if (!panel) return;
+
+      var btns = panel.querySelectorAll('.filter-btn');
+      btns.forEach(function(b) { b.classList.remove('active'); });
+      var activeBtn = document.getElementById('btn-filter-' + mode + '-' + filter);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      var allRows = panel.querySelectorAll('.task-item');
+      var visibleCount = 0;
+      allRows.forEach(function(row) {
+        if (filter === 'all') {
+          row.style.display = '';
+          visibleCount++;
+        } else if (filter === 'open') {
+          if (row.classList.contains('task-item-open')) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        } else if (filter === 'closed') {
+          if (row.classList.contains('task-item-closed')) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        }
+      });
+
+      var tableEl = panel.querySelector('.sub-data-table');
+      var emptyMsg = document.getElementById('tasks-empty-' + mode);
+      if (emptyMsg) {
+        if (visibleCount === 0) {
+          emptyMsg.textContent = filter === 'open'
+            ? 'No hay tareas abiertas para este modo.'
+            : (filter === 'closed' ? 'No hay tareas cerradas para este modo.' : 'No hay tareas registradas para este modo.');
+          emptyMsg.style.display = 'block';
+          if (tableEl) tableEl.style.display = 'none';
+        } else {
+          emptyMsg.style.display = 'none';
+          if (tableEl) tableEl.style.display = 'table';
+        }
+      }
+    }
+
+    function showTaskSidebar(index) {
+      if (typeof govTasks === 'undefined' || !govTasks[index]) return;
+      var t = govTasks[index];
+      var task = t.task || {};
+      var sidebar = document.getElementById('task-sidebar');
+      var backdrop = document.getElementById('task-backdrop');
+      var contentEl = document.getElementById('task-sidebar-content');
+      if (!sidebar || !contentEl) return;
+
+      var rawStatus = (task.status || 'PENDING').toUpperCase();
+      var isClosed = rawStatus === 'COMPLETED';
+      var badgeClass = 'badge-amber';
+      var badgeText = rawStatus + ' (Abierta)';
+      if (rawStatus === 'COMPLETED') {
+        badgeClass = 'badge-green';
+        badgeText = 'COMPLETED (Cerrada)';
+      } else if (rawStatus === 'IN_PROGRESS') {
+        badgeClass = 'badge-blue';
+        badgeText = 'IN_PROGRESS (Abierta)';
+      } else if (rawStatus === 'BLOCKED') {
+        badgeClass = 'badge-rose';
+        badgeText = 'BLOCKED (Abierta)';
+      }
+
+      var cleanPath = (t.file || '').split(String.fromCharCode(92)).join('/');
+      if (cleanPath.indexOf('./') === 0) cleanPath = cleanPath.substring(2);
+      var metaHref = cleanPath;
+      if (cleanPath.indexOf('http://') === 0 || cleanPath.indexOf('https://') === 0 || cleanPath.indexOf('file://') === 0) {
+        metaHref = cleanPath;
+      } else if (cleanPath.indexOf(':') === 1 || cleanPath.indexOf('/') === 0) {
+        metaHref = 'file:///' + cleanPath.replace(/^[/]+/, '');
+      } else {
+        metaHref = '../' + cleanPath;
+      }
+
+      var html = '';
+      html += '<div class="sidebar-field"><strong>ID de la Tarea:</strong> <code style="font-size: 0.95rem; color: var(--accent-cyan); font-weight: 700;">' + (task.id || 'TSK-UNKNOWN') + '</code></div>';
+      html += '<div class="sidebar-field"><strong>Título:</strong> <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">' + (task.title || 'Sin título') + '</span></div>';
+      html += '<div class="sidebar-field"><strong>Estado:</strong> <span class="badge ' + badgeClass + '">' + badgeText + '</span></div>';
+      html += '<div class="sidebar-field"><strong>Modo de Autonomía:</strong> <code>' + (task.autonomyMode || 'UNKNOWN') + '</code></div>';
+      if (task.riskLevel) {
+        html += '<div class="sidebar-field"><strong>Nivel de Riesgo:</strong> <span class="badge" style="background:#334155;">' + task.riskLevel + '</span></div>';
+      }
+      if (task.complexity) {
+        html += '<div class="sidebar-field"><strong>Complejidad:</strong> <span class="badge" style="background:#334155;">' + task.complexity + '</span></div>';
+      }
+      html += '<div class="sidebar-field"><strong>Asignada a:</strong> <code>' + (task.assignedTo || 'agent-developer') + '</code></div>';
+
+      var criteria = (task.verification && task.verification.criteria) || 'No especificado';
+      var method = (task.verification && task.verification.method) || 'N/A';
+      html += '<div class="sidebar-field"><strong>Método de Verificación:</strong> <code>' + method + '</code></div>';
+      html += '<div class="sidebar-field"><strong>Criterio / Comando de Aceptación:</strong><pre><code>' + criteria + '</code></pre></div>';
+
+      if (task.blockingReason) {
+        html += '<div class="sidebar-field"><strong style="color: var(--accent-rose);">Motivo de Bloqueo:</strong> <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--accent-rose); border-radius: 4px; padding: 8px; color: #fca5a5;">' + task.blockingReason + '</div></div>';
+      }
+
+      html += '<div class="sidebar-field"><strong>Gobernanza y Validación:</strong>';
+      html += '<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px; font-size: 0.75rem;">';
+      html += '<div>Verificación ejecutable: ' + (t.hasVerification ? '✅ Sí' : '❌ Falta') + '</div>';
+      html += '<div>Modo de autonomía válido: ' + (t.validAutonomy ? '✅ Sí' : '⚠️ Inválido') + '</div>';
+      html += '<div>Anomalías de seguridad/riesgo: ' + (t.riskAnomaly ? '⚠️ Detectadas' : '✅ Ninguna') + '</div>';
+      html += '</div></div>';
+
+      html += '<div class="sidebar-field" style="margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 12px;"><strong>Fichero de Especificación (.md):</strong>';
+      html += '<div style="margin-top: 4px;"><a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline; font-family: monospace; font-size: 0.8rem;" title="Abrir archivo original"><code>' + cleanPath + ' ↗</code></a></div>';
+      html += '</div>';
+
+      contentEl.innerHTML = html;
+      sidebar.classList.add('open');
+      if (backdrop) backdrop.style.display = 'block';
+    }
+
+    function closeTaskSidebar() {
+      var sidebar = document.getElementById('task-sidebar');
+      var backdrop = document.getElementById('task-backdrop');
+      if (sidebar) sidebar.classList.remove('open');
+      if (backdrop) backdrop.style.display = 'none';
+    }
+
+    window.addEventListener('keydown', function(evt) {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        hideTooltip();
+        closeTaskSidebar();
+      }
+    });
 
     window.addEventListener('DOMContentLoaded', function() {
       initCytoscape();
