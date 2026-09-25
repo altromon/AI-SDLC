@@ -23,6 +23,7 @@ import { verifyTraceability } from '../verifiers/traceability.js';
 import { verifyQualityGate } from '../verifiers/quality-gate.js';
 import { verifyTasksGovernance } from '../verifiers/governance.js';
 import { verifyTestingCoverage } from '../verifiers/testing-coverage.js';
+import { walkMdFiles } from '../utils/fs.js';
 import { aggregatePrKpis } from './pr-kpis.js';
 import { getCytoscapeScript } from './cytoscape-bundle.js';
 
@@ -142,6 +143,13 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
           status,
         });
         if (!nodeMap.has(testId)) {
+          let testContent = undefined;
+          const fullTestPath = path.isAbsolute(t) ? t : path.join(rootDir, t);
+          if (fs.existsSync(fullTestPath)) {
+            try {
+              testContent = fs.readFileSync(fullTestPath, 'utf-8');
+            } catch {}
+          }
           nodeMap.set(testId, {
             id: testId,
             label: path.basename(t),
@@ -150,6 +158,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
             layer: 'test',
             status: 'COMPLIANT',
             filePath: t,
+            content: testContent ? '```' + (t.endsWith('.feature') ? 'gherkin' : 'typescript') + '\n' + testContent.substring(0, 1500) + (testContent.length > 1500 ? '\n... (truncated)' : '') + '\n```' : undefined,
           });
         }
       }
@@ -160,6 +169,67 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
   for (const [id, node] of nodeMap.entries()) {
     if (driftTargets.has(id)) {
       node.status = 'DRIFT';
+    }
+  }
+
+  // Populate bidirectional upstream and downstream traces for all nodes
+  for (const e of edges) {
+    const srcNode = nodeMap.get(e.source);
+    const tgtNode = nodeMap.get(e.target);
+    if (srcNode) {
+      srcNode.downstream = srcNode.downstream || [];
+      if (!srcNode.downstream.includes(e.target)) {
+        srcNode.downstream.push(e.target);
+      }
+    }
+    if (tgtNode) {
+      tgtNode.upstream = tgtNode.upstream || [];
+      if (!tgtNode.upstream.includes(e.source)) {
+        tgtNode.upstream.push(e.source);
+      }
+    }
+  }
+
+  // Enrich all nodes with filePath, title, content, and type by scanning workspace artifact directories
+  const artifactDirs = ['product', 'architecture', 'specs', 'security'];
+  for (const dirName of artifactDirs) {
+    const fullDirPath = path.join(rootDir, dirName);
+    if (fs.existsSync(fullDirPath)) {
+      const files = walkMdFiles(fullDirPath);
+      for (const f of files) {
+        try {
+          const fileContent = fs.readFileSync(f, 'utf-8');
+          const relPath = path.relative(rootDir, f).replace(/\\/g, '/');
+          const baseName = path.basename(f, '.md');
+          const match = fileContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+          let idVal = undefined;
+          let titleVal = undefined;
+          let typeVal = undefined;
+          if (match) {
+            const idM = match[1].match(/^id:\s*["']?([^"'\r\n]+)["']?/m);
+            if (idM) idVal = idM[1].trim();
+            const tM = match[1].match(/^title:\s*["']?([^"'\r\n]+)["']?/m);
+            if (tM) titleVal = tM[1].trim();
+            const typM = match[1].match(/^type:\s*["']?([^"'\r\n]+)["']?/m);
+            if (typM) typeVal = typM[1].trim();
+          }
+
+          const candidateIds = [idVal, baseName, path.basename(f)].filter((id): id is string => Boolean(id));
+          for (const cid of candidateIds) {
+            const n = nodeMap.get(cid);
+            if (n) {
+              if (!n.filePath) n.filePath = relPath;
+              if ((!n.title || n.title === n.id) && titleVal) n.title = titleVal;
+              if (!n.content) n.content = fileContent.replace(/^---\r?\n[\s\S]*?\r?\n---/, '').trim();
+              if (typeVal && (!n.type || n.type === 'product' || n.type === 'architecture')) {
+                n.type = typeVal;
+              }
+            }
+          }
+        } catch {
+          // Ignore unparseable
+        }
+      }
     }
   }
 
@@ -388,6 +458,255 @@ export function renderDashboardHtml(
     /* Timeline & KPI Historical */
     .chart-container { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; }
     .chart-container h3 { font-size: 0.9rem; color: var(--accent-cyan); margin-bottom: 16px; }
+
+    /* FLOATING REQUIREMENT POPUP CARD (Max 10% viewport footprint) */
+    .req-popup-card {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: clamp(260px, 20vw, 320px);
+      max-width: 24vw;
+      max-height: clamp(180px, 24vh, 250px);
+      background: rgba(30, 41, 59, 0.98);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(56, 189, 248, 0.25);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-size: 0.78rem;
+      animation: popupSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popupSlideUp {
+      from { opacity: 0; transform: translateY(12px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 10px 12px;
+      background: rgba(15, 23, 42, 0.85);
+      border-bottom: 1px solid var(--border-color);
+      gap: 8px;
+    }
+
+    .popup-title-area {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .popup-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+
+    .popup-id {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      font-size: 0.75rem;
+    }
+
+    .popup-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+
+    .popup-title-link {
+      color: inherit;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .popup-title-link:hover {
+      color: var(--accent-cyan);
+      text-decoration: underline;
+    }
+
+    .popup-link-icon {
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      opacity: 0.85;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .popup-title-link:hover .popup-link-icon {
+      opacity: 1;
+      transform: translate(1px, -1px);
+    }
+
+    .popup-close-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-main);
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .popup-close-btn:hover {
+      background: var(--accent-rose);
+      border-color: var(--accent-rose);
+      color: #fff;
+    }
+
+    .popup-meta {
+      padding: 4px 12px;
+      background: rgba(15, 23, 42, 0.5);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .popup-meta code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1px 4px;
+      border-radius: 3px;
+      color: #7dd3fc;
+      font-size: 0.68rem;
+    }
+
+    .popup-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 10px 12px;
+      font-size: 0.75rem;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+
+    .popup-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .popup-body::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 2px;
+    }
+
+    .popup-body h1, .popup-body h2, .popup-body h3 {
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      margin: 8px 0 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 2px;
+    }
+
+    .popup-body p {
+      margin-bottom: 6px;
+    }
+
+    .popup-body ul, .popup-body ol {
+      margin-left: 16px;
+      margin-bottom: 6px;
+    }
+
+    .popup-body code {
+      background: #0b1120;
+      padding: 1px 3px;
+      border-radius: 3px;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 0.7rem;
+      color: #a5f3fc;
+    }
+
+    .popup-body pre {
+      background: #0b1120;
+      padding: 6px 8px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 6px 0;
+      border: 1px solid var(--border-color);
+      font-size: 0.7rem;
+    }
+
+    /* REQUIREMENT HOVER TOOLTIP */
+    .req-tooltip {
+      position: fixed;
+      z-index: 10000;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 6px;
+      padding: 8px 12px;
+      max-width: 280px;
+      font-size: 0.75rem;
+      line-height: 1.35;
+      color: var(--text-main);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      animation: tooltipFadeIn 0.12s ease-out;
+    }
+
+    @keyframes tooltipFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tooltip-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 3px;
+    }
+
+    .tooltip-id {
+      font-weight: 700;
+      color: var(--accent-cyan);
+      font-size: 0.75rem;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+
+    .tooltip-title {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tooltip-body {
+      font-size: 0.7rem;
+      color: #cbd5e1;
+      max-height: 80px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+    }
   </style>
 </head>
 <body>
@@ -411,31 +730,6 @@ export function renderDashboardHtml(
   </nav>
 
   <main>
-    <!-- REQUIREMENT POPUP CARD -->
-    <div id="req-popup" class="req-popup-card" style="display: none;">
-      <div class="popup-header">
-        <div class="popup-title-area">
-          <div class="popup-badge-row">
-            <span class="badge" id="popup-badge">REQUIREMENT</span>
-            <span class="popup-id" id="popup-id">FR-000</span>
-          </div>
-          <h3 class="popup-title" id="popup-title">Requirement Title</h3>
-        </div>
-        <button class="popup-close-btn" onclick="closeRequirementPopup()" title="Close (Esc)">✕</button>
-      </div>
-      <div class="popup-meta" id="popup-meta"></div>
-      <div class="popup-body" id="popup-body"></div>
-    </div>
-
-    <!-- REQUIREMENT HOVER TOOLTIP (1s hover) -->
-    <div id="req-tooltip" class="req-tooltip" style="display: none;">
-      <div class="tooltip-header">
-        <span class="tooltip-id" id="tooltip-id">FR-000</span>
-        <span class="tooltip-title" id="tooltip-title">Title</span>
-      </div>
-      <div class="tooltip-body" id="tooltip-body"></div>
-    </div>
-
     <!-- TAB 1: CYTOSCAPE GRAPH -->
     <div id="tab-graph" class="tab-panel active" style="flex: 1;">
       <div id="graph-view">
@@ -708,6 +1002,31 @@ export function renderDashboardHtml(
     </div>
   </main>
 
+    <!-- REQUIREMENT POPUP CARD -->
+    <div id="req-popup" class="req-popup-card" style="display: none;">
+      <div class="popup-header">
+        <div class="popup-title-area">
+          <div class="popup-badge-row">
+            <span class="badge" id="popup-badge">REQUIREMENT</span>
+            <span class="popup-id" id="popup-id">FR-000</span>
+          </div>
+          <h3 class="popup-title" id="popup-title">Requirement Title</h3>
+        </div>
+        <button class="popup-close-btn" onclick="closeRequirementPopup()" title="Close (Esc)">✕</button>
+      </div>
+      <div class="popup-meta" id="popup-meta"></div>
+      <div class="popup-body" id="popup-body"></div>
+    </div>
+
+    <!-- REQUIREMENT HOVER TOOLTIP (1s hover) -->
+    <div id="req-tooltip" class="req-tooltip" style="display: none;">
+      <div class="tooltip-header">
+        <span class="tooltip-id" id="tooltip-id">FR-000</span>
+        <span class="tooltip-title" id="tooltip-title">Title</span>
+      </div>
+      <div class="tooltip-body" id="tooltip-body"></div>
+    </div>
+
   <script>
     ${cytoscapeScript}
   </script>
@@ -771,15 +1090,47 @@ export function renderDashboardHtml(
       activePopupReqId = data.id;
 
       document.getElementById('popup-id').textContent = data.id;
-      document.getElementById('popup-title').textContent = data.title || data.label || 'Requisito';
+      var titleText = data.title || data.label || data.id;
+      var titleEl = document.getElementById('popup-title');
+      if (data.filePath) {
+        var cleanPath = data.filePath.split('\\\\').join('/');
+        if (cleanPath.indexOf('./') === 0) cleanPath = cleanPath.substring(2);
+        var fileHref = (cleanPath.indexOf('http://') === 0 || cleanPath.indexOf('https://') === 0 || cleanPath.indexOf('file://') === 0)
+          ? cleanPath
+          : '../' + cleanPath;
+        titleEl.innerHTML = '<a href="' + fileHref + '" target="_blank" rel="noopener noreferrer" class="popup-title-link" title="Abrir archivo: ' + cleanPath + '">' + titleText + ' <span class="popup-link-icon">↗</span></a>';
+      } else {
+        titleEl.textContent = titleText;
+      }
 
       var badge = document.getElementById('popup-badge');
-      badge.textContent = data.status || 'CONFORME';
-      badge.className = 'badge ' + (data.status === 'CONFORME' ? 'badge-green' : 'badge-amber');
+      var layerName = (data.layer || data.type || 'NODE').toUpperCase();
+      badge.textContent = layerName;
+      if (data.layer === 'product') {
+        badge.className = 'badge';
+        badge.style.background = '#0e7490';
+      } else if (data.layer === 'architecture') {
+        badge.className = 'badge';
+        badge.style.background = '#4338ca';
+      } else if (data.layer === 'test') {
+        badge.className = 'badge';
+        badge.style.background = '#047857';
+      } else {
+        badge.className = 'badge ' + (data.status === 'COMPLIANT' || data.status === 'CONFORME' ? 'badge-green' : 'badge-amber');
+        badge.style.background = '';
+      }
 
       var metaHtml = '';
+      if (data.type && data.type !== data.layer) {
+        metaHtml += '<span><strong>Tipo:</strong> <code>' + data.type + '</code></span>';
+      }
       if (data.filePath) {
-        metaHtml += '<span><strong>Archivo:</strong> <code>' + data.filePath + '</code></span>';
+        var cleanMetaPath = data.filePath.split('\\\\').join('/');
+        if (cleanMetaPath.indexOf('./') === 0) cleanMetaPath = cleanMetaPath.substring(2);
+        var metaHref = (cleanMetaPath.indexOf('http://') === 0 || cleanMetaPath.indexOf('https://') === 0 || cleanMetaPath.indexOf('file://') === 0)
+          ? cleanMetaPath
+          : '../' + cleanMetaPath;
+        metaHtml += '<span><strong>Archivo:</strong> <a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline;" title="Abrir archivo: ' + cleanMetaPath + '"><code>' + cleanMetaPath + ' ↗</code></a></span>';
       }
       if (data.upstream && data.upstream.length > 0) {
         metaHtml += '<span><strong>Upstream:</strong> ' + data.upstream.join(', ') + '</span>';
@@ -790,7 +1141,24 @@ export function renderDashboardHtml(
       document.getElementById('popup-meta').innerHTML = metaHtml;
 
       var bodyEl = document.getElementById('popup-body');
-      bodyEl.innerHTML = renderMarkdown(data.content);
+      if (data.content && data.content.trim()) {
+        bodyEl.innerHTML = renderMarkdown(data.content);
+      } else {
+        var summaryHtml = '<div style="color: var(--text-muted); font-size: 0.72rem; line-height: 1.4;">';
+        summaryHtml += '<p><strong>' + (data.title || data.id) + '</strong></p>';
+        summaryHtml += '<p style="margin-top: 4px;">Capa: <code>' + layerName + '</code>' + (data.type ? ' | Tipo: <code>' + data.type + '</code>' : '') + '</p>';
+        if (data.filePath) {
+          summaryHtml += '<p style="margin-top: 4px;">Archivo: <code>' + data.filePath + '</code></p>';
+        }
+        if (data.upstream && data.upstream.length > 0) {
+          summaryHtml += '<p style="margin-top: 4px;"><strong>Trazabilidad Upstream:</strong> ' + data.upstream.join(', ') + '</p>';
+        }
+        if (data.downstream && data.downstream.length > 0) {
+          summaryHtml += '<p style="margin-top: 4px;"><strong>Trazabilidad Downstream:</strong> ' + data.downstream.join(', ') + '</p>';
+        }
+        summaryHtml += '</div>';
+        bodyEl.innerHTML = summaryHtml;
+      }
 
       popup.style.display = 'flex';
     }
@@ -809,7 +1177,8 @@ export function renderDashboardHtml(
       document.getElementById('tooltip-id').textContent = data.id;
       document.getElementById('tooltip-title').textContent = data.title || data.label || '';
       var bodyEl = document.getElementById('tooltip-body');
-      bodyEl.textContent = data.content ? data.content.trim() : 'Sin descripción en el cuerpo del requisito.';
+      var desc = data.content ? data.content.trim() : (data.title || data.id) + ' [' + (data.layer || data.type || 'NODE').toUpperCase() + ']';
+      bodyEl.textContent = desc;
 
       tooltip.style.display = 'block';
       positionTooltip(tooltip, x, y);
@@ -887,6 +1256,8 @@ export function renderDashboardHtml(
       cy = cytoscape({
         container: document.getElementById('cy'),
         elements: elements,
+        boxSelectionEnabled: false,
+        autoungrabify: true,
         style: [
           {
             selector: 'node',
@@ -979,11 +1350,7 @@ export function renderDashboardHtml(
         var data = node.data();
         highlightCriticalPath(node);
         showNodeDetails(data);
-        if (data.layer === 'requirement') {
-          openRequirementPopup(data);
-        } else {
-          closeRequirementPopup();
-        }
+        openRequirementPopup(data);
       });
 
       cy.on('tap', function(evt) {
@@ -996,7 +1363,6 @@ export function renderDashboardHtml(
       cy.on('mouseover', 'node', function(evt) {
         var node = evt.target;
         var data = node.data();
-        if (data.layer !== 'requirement') return;
 
         currentHoverNodeId = data.id;
         clearTimeout(reqHoverTimer);
@@ -1013,8 +1379,6 @@ export function renderDashboardHtml(
       });
 
       cy.on('mousemove', 'node', function(evt) {
-        var node = evt.target;
-        if (node.data('layer') !== 'requirement') return;
         if (evt.originalEvent) {
           updateTooltipPosition(evt.originalEvent.clientX, evt.originalEvent.clientY);
         }
@@ -1053,13 +1417,22 @@ export function renderDashboardHtml(
       html += '<div class="sidebar-field"><strong>Layer / Type:</strong> <span class="badge" style="background:#334155;">' + data.layer.toUpperCase() + ' (' + data.type + ')</span></div>';
       html += '<div class="sidebar-field"><strong>Status:</strong> <span class="badge ' + (isConform ? 'badge-green' : 'badge-amber') + '">' + data.status + '</span></div>';
       if (data.filePath) {
-        html += '<div class="sidebar-field"><strong>Physical File:</strong> <code>' + data.filePath + '</code></div>';
+        var cleanMetaPath = data.filePath.split('\\\\').join('/');
+        if (cleanMetaPath.indexOf('./') === 0) cleanMetaPath = cleanMetaPath.substring(2);
+        var metaHref = (cleanMetaPath.indexOf('http://') === 0 || cleanMetaPath.indexOf('https://') === 0 || cleanMetaPath.indexOf('file://') === 0) ? cleanMetaPath : '../' + cleanMetaPath;
+        html += '<div class="sidebar-field"><strong>Physical File:</strong> <a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline;" title="Abrir archivo: ' + cleanMetaPath + '"><code>' + cleanMetaPath + ' ↗</code></a></div>';
       }
       if (data.upstream && data.upstream.length > 0) {
         html += '<div class="sidebar-field"><strong>Upstream Traces (Product):</strong> ' + data.upstream.join(', ') + '</div>';
       }
       if (data.downstream && data.downstream.length > 0) {
         html += '<div class="sidebar-field"><strong>Downstream Traces (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
+      }
+      if (data.content && data.content.trim()) {
+        html += '<div class="sidebar-field" style="margin-top: 4px;"><strong>Contenido / Especificación del Fichero:</strong>';
+        html += '<div class="sidebar-content-preview" style="margin-top: 6px; max-height: 280px; overflow-y: auto; background: rgba(11, 17, 32, 0.75); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.74rem; line-height: 1.45; color: #cbd5e1;">';
+        html += renderMarkdown(data.content);
+        html += '</div></div>';
       }
       sidebar.innerHTML = html;
     }
@@ -1126,9 +1499,7 @@ export function renderDashboardHtml(
         if (node && node.length > 0) {
           highlightCriticalPath(node);
           showNodeDetails(node.data());
-          if (node.data('layer') === 'requirement') {
-            openRequirementPopup(node.data());
-          }
+          openRequirementPopup(node.data());
           cy.center(node);
           cy.zoom(1.2);
         }
@@ -1141,6 +1512,8 @@ export function renderDashboardHtml(
     }
 
     function switchTab(name) {
+      closeRequirementPopup();
+      hideTooltip();
       document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
       document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
       event.target?.classList?.add('active');
@@ -1153,9 +1526,21 @@ export function renderDashboardHtml(
     }
 
     window.addEventListener('keydown', function(evt) {
-      if (evt.key === 'Escape') {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
         closeRequirementPopup();
+        hideTooltip();
       }
+    });
+
+    document.addEventListener('pointerdown', function(evt) {
+      var popup = document.getElementById('req-popup');
+      if (!popup || popup.style.display === 'none') return;
+      if (popup.contains(evt.target)) return;
+      var cyEl = document.getElementById('cy');
+      if (cyEl && cyEl.contains(evt.target)) return;
+      var trEl = evt.target && evt.target.closest && evt.target.closest('tr[onclick]');
+      if (trEl) return;
+      closeRequirementPopup();
     });
 
     window.addEventListener('DOMContentLoaded', function() {
