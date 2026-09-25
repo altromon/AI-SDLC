@@ -23,6 +23,7 @@ satisfies-requirements:
   - FR-030-INIT-AGENT-SCAFFOLDING-001
   - FR-031-WORKFLOW-AGENT-HANDOFF-001
   - FR-033-ARCHITECTURE-TEMPLATES-001
+  - SEC-REQ-DETERMINISTIC-VERIFY
 interfaces:
   - name: TypeScript API Engine
     protocol: In-Process API

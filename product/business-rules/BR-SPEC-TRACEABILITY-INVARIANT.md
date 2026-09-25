@@ -6,9 +6,6 @@ schema-version: "1.0"
 title: Invariante de Trazabilidad Estricta entre Requisitos, Arquitectura y Pruebas
 status: active
 enforcement-level: strict-invariant
-governs:
-  - UC-025-STRUCTURED-JSON-VERIFY
-  - UC-028-NATIVE-MCP-SERVER
 supersedes: null
 superseded-by: null
 ---

@@ -145,69 +145,76 @@ This accelerated flow demonstrates how to create, implement, verify, and integra
 - **pnpm** (v9 or v10+): `pnpm -v`
 - **Git** (v2.30 or higher): `git --version`
 
-### 2. Fast 6-Step Workflow with Simplified Commands
+### 2. Fast 7-Step Workflow with Simplified Commands
 
 ```bash
-# 1. Automatically scaffold the SDD change and its PDaC sidecar (handoff.yaml)
-pnpm run change:new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
-# or via npx: npx aisdlc change new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
-
-# 2. Automatically navigate and cascade-create the task branch in Git 4-tier hierarchy
-pnpm run git:checkout TSK-001
-# or via npx: npx aisdlc git checkout TSK-001
-
-# 3. Implement feature and tests (TDD) in src/ and tests/
-#    (Developer or agent writes logic and unit/BDD tests)
-
-# 4. Deterministic pre-flight with auto-fix (syncs Gherkin to .feature and recalculates SHA-256 digests)
+# 1. Define canonical product (ProductShape / PDaC) upstream in specs/product/
+#    Create or derive the Use Case or Requirement (e.g., specs/product/UC-STREAM-TELEMETRY.md) using templates/product/
+#    Pre-flight auto-fix syncs Gherkin scenarios to .feature and validates schemas:
 pnpm run check:fix
 # or via npx: npx aisdlc check --fix
 
-# 5. Execute consolidated CI/CD suite (all 9 quality and governance gates)
+# 2. Automatically scaffold the SDD change and its PDaC sidecar (handoff.yaml) citing the product
+pnpm run change:new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
+# or via npx: npx aisdlc change new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
+
+# 3. Automatically navigate and cascade-create the task branch in Git 4-tier hierarchy
+pnpm run git:checkout TSK-001
+# or via npx: npx aisdlc git checkout TSK-001
+
+# 4. Implement feature and tests (TDD) in src/ and tests/
+#    (Developer or agent writes logic and unit/BDD tests)
+
+# 5. Deterministic pre-flight with auto-fix (syncs Gherkin to .feature and recalculates SHA-256 digests)
+pnpm run check:fix
+# or via npx: npx aisdlc check --fix
+
+# 6. Execute consolidated CI/CD suite (all 9 quality and governance gates)
 pnpm run verify:all
 # or via npx: npx aisdlc verify all
 # or with structured JSON output for AI agents / CI pipelines: npx aisdlc verify all --json
 
-# 6. Integrate change into canonical baseline (promotes requirements and syncs architecture)
+# 7. Integrate change into canonical baseline (promotes requirements and syncs architecture)
 npx aisdlc sdd integrate --auto
 # or specifying the ID: npx aisdlc sdd integrate --change chg-002-real-time-alert-notifications
 ```
 
 > [!TIP]
-> **Unattended Integration in Multi-Platform CI/CD**: In workflows using Pull Requests or Merge Requests, step 6 (`sdd integrate`) runs automatically upon PR/MR merge via configured CI pipelines for GitHub Actions ([`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml)), GitLab CI (`.gitlab-ci.yml`), Azure DevOps (`azure-pipelines.yml`), or Bitbucket Pipelines (`bitbucket-pipelines.yml`).
+> **Unattended Integration in Multi-Platform CI/CD**: In workflows using Pull Requests or Merge Requests, step 7 (`sdd integrate`) runs automatically upon PR/MR merge via configured CI pipelines for GitHub Actions ([`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml)), GitLab CI (`.gitlab-ci.yml`), Azure DevOps (`azure-pipelines.yml`), or Bitbucket Pipelines (`bitbucket-pipelines.yml`).
 
 ### 3. Simplified CLI Commands Summary (`aisdlc`)
 
 | CLI Tool / Command | Equivalent pnpm Command | Lifecycle Phase | Output / Action Performed |
 |---|---|---|---|
+| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository structure, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`), CI/CD pipelines (`--ci <github\|gitlab\|azure\|bitbucket>`), AI agent rules (`--agents <all\|cursor\|claude\|antigravity\|copilot\|mcp\|none>`), and architecture templates (`--arch <minimal\|full\|none>`). Supports `--dry-run`, `--json`, and interactive console wizard |
+| `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry Setup** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
+| `npx aisdlc mcp` / `npx @ai-sdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 20 typed tools (including `new`, `verify`, `report`) and 5 canonical resources |
 | `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | **SDD Scaffolding** | Generates `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` sidecar (`HOF-*`) with SHA-256 digests |
-| `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Git 4-Tier Branching** | Resolves version and cascade-creates: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
+| `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancy** | Audits lexical collisions and requirement overlaps before coding (`--json`) |
+| `npx aisdlc verify friction [change]` | - | **Progressive Friction** | Validates Anti-Bypass rules and thresholds according to risk profile (`patch`/`standard`/`critical`, `--json`) |
 | `npx aisdlc git plan` | `pnpm run git:plan` | **Git Planning** | Renders visual branch hierarchy tree before starting work |
+| `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Git 4-Tier Branching** | Resolves version and cascade-creates: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
 | `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | **Git Governance** | Validates strict naming rules for any branch according to its Tier (1 to 4) |
-| `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
-| `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship) for PRs (supports `--json`) |
-| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Release Summary** | Computes DIR per model/human, defect density, and rework costs (`RELEASE_KPIS_<release>.md`, supports `--json`) |
 | `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Unified Pre-Flight** | Syncs Gherkin to `.feature`, updates PDaC SHA-256 digests, audits security, and checks Quality Gates |
-| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 9 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
+| `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Structural Compliance** | Validates Markdown artifacts against canonical JSON schemas (Draft 2020-12, `--json`) |
+| `npx aisdlc verify pdac [--json]` | `pnpm run verify:pdac` | **Cryptographic Integrity** | Detects drift in PDaC graph comparing SHA-256 hashes (`--json`) |
+| `npx aisdlc verify quality [--json]` | `pnpm run verify:quality` | **Code Release Gate** | Evaluates Cyclomatic Complexity ($\le 10$), Cognitive ($\le 15$), and Maintainability ($\ge 50$) with `--json` |
 | `npx aisdlc verify security [options]` | `pnpm run verify:security` | **Shift-Left Security (Gate 9)** | Unified secret verification (Gitleaks) and deterministic SAST (OWASP Top 10, `--json`, exit code 4 on leaks) |
 | `npx aisdlc verify secrets [options]` | `pnpm run verify:secrets` | **Secret Scanning** | Deterministic detection of credentials, API keys, and Shannon entropy with Git diff support, `--json`, and exitCode 4 |
 | `npx aisdlc verify sast [options]` | `pnpm run verify:sast` | **SAST Security** | Deterministic detection of AI-generated vulnerable patterns (SQLi, exec, eval, SSRF, `--json`) |
-| `npx aisdlc verify quality [--json]` | `pnpm run verify:quality` | **Code Release Gate** | Evaluates Cyclomatic Complexity ($\le 10$), Cognitive ($\le 15$), and Maintainability ($\ge 50$) with `--json` |
-| `npx aisdlc verify traceability [--json]`| `pnpm run verify:traceability` | **360° RTM Matrix** | Enforces mandatory triangulation: Product (`HOF-*`) ➔ Architecture (`CMP-*`) ➔ Tests (`.feature`) |
-| `npx aisdlc verify governance [--json]` | `pnpm run verify:governance` | **Task Governance** | Audits task autonomy modes (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc., supports `--json`) |
 | `npx aisdlc verify testing [--json]` | `pnpm run verify:testing` | **Testing Audit** | Verifies 100% test coverage for requirements and tasks with physical disk tests (`--json`) |
+| `npx aisdlc verify traceability [--json]` | `pnpm run verify:traceability` | **360° RTM Matrix** | Enforces mandatory triangulation: Product (`HOF-*`) ➔ Architecture (`CMP-*`) ➔ Tests (`.feature`) |
+| `npx aisdlc verify governance [--json]` | `pnpm run verify:governance` | **Task Governance** | Audits task autonomy modes (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc., supports `--json`) |
 | `npx aisdlc verify licenses [options]` | `pnpm run verify:licenses` | **IP / OSS Governance & SCA** | Dynamic dependency scan, CycloneDX 1.5 SBOM, and legal attribution against `license-policy.yaml` (`--json`) |
-| `npx aisdlc verify pdac [--json]` | `pnpm run verify:pdac` | **Cryptographic Integrity**| Detects drift in PDaC graph comparing SHA-256 hashes (`--json`) |
-| `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Structural Compliance** | Validates Markdown artifacts against canonical JSON schemas (Draft 2020-12, `--json`) |
-| `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancy** | Audits lexical collisions and requirement overlaps before coding (`--json`) |
-| `npx aisdlc verify friction [change]` | - | **Progressive Friction** | Validates Anti-Bypass rules and thresholds according to risk profile (`patch`/`standard`/`critical`, `--json`) |
 | `npx aisdlc sdd verify` | - | **SDD Compliance** | Audits active changes for specification compliance and valid sidecars |
+| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 9 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
+| `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship) for PRs (supports `--json`) |
 | `npx aisdlc sdd integrate [--auto]` | - | **Baseline Promotion** | Promotes requirements to `active`, links architecture, marks proposal `applied`, and archives change |
+| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Release Summary** | Computes DIR per model/human, defect density, and rework costs (`RELEASE_KPIS_<release>.md`, supports `--json`) |
 | `npx aisdlc report quality` | `pnpm run report:quality` | **Formal Reporting** | Generates detailed metrics report in `reports/QUALITY_REPORT.md` |
+| `npx aisdlc report dashboard` | `pnpm run report:dashboard` | **Interactive Dashboard** | Generates self-contained HTML dashboard and PDaC/RTM visual graph (supports `--open`, `--output`) |
 | `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Product Catalog** | Generates consolidated requirement catalog in `reports/ACTIVE_REQUIREMENTS.md` |
 | `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | **Master Dossier** | Compiles full documentation and manuals with interactive TOC in `reports/AI_SDLC_SPECIFICATION_FULL.md` |
-| `npx aisdlc init [dir] [--ci <prov>] [--arch <minimal|full|none>]` | - | **Initialization** | Bootstraps a repository with folders, schemas, policies, CI/CD, and selected architecture templates (`minimal`, `full`, `none`) |
-| `npx aisdlc mcp` / `npx @ai-sdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 20 typed tools (including `new`, `verify`, `report`) and 5 canonical resources |
 
 ---
 

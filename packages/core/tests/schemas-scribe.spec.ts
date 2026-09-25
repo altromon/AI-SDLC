@@ -593,4 +593,15 @@ unknown-extra-property: "disallowed"
     expect(mcpResInvalid.valid).toBe(false);
     expect(mcpResInvalid.errors.some((e) => e.includes('command') || e.includes('disallowedProperty'))).toBe(true);
   });
+
+  it('should verify SEC-REQ-DETERMINISTIC-VERIFY schema compliance and cryptographic hashing', () => {
+    const secReqPath = path.join(repoRoot, 'security', 'requirements', 'SEC-REQ-DETERMINISTIC-VERIFY.md');
+    expect(fs.existsSync(secReqPath)).toBe(true);
+    const content = fs.readFileSync(secReqPath, 'utf-8');
+    const { frontmatter } = extractFrontmatter(content);
+    expect(frontmatter.id).toBe('SEC-REQ-DETERMINISTIC-VERIFY');
+    const res = validateArtifactSchema(frontmatter, 'security-requirement', repoRoot);
+    expect(res.valid).toBe(true);
+    expect(computeCanonicalSha256(content)).toBeDefined();
+  });
 });

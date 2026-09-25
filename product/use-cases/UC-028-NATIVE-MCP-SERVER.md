@@ -8,6 +8,8 @@ status: active
 primary-actor: ACT-AI-AGENT
 supporting-actors:
   - ACT-HUMAN-ENGINEER
+governed-by:
+  - BR-SPEC-TRACEABILITY-INVARIANT
 supersedes: null
 superseded-by: null
 ---
