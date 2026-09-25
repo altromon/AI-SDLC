@@ -63,6 +63,8 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
       type: r.type || 'requirement',
       layer: 'requirement',
       status,
+      content: r.content,
+      filePath: r.filePath,
       details: {
         productStatus: r.productStatus,
         archStatus: r.archStatus,
@@ -409,6 +411,31 @@ export function renderDashboardHtml(
   </nav>
 
   <main>
+    <!-- REQUIREMENT POPUP CARD -->
+    <div id="req-popup" class="req-popup-card" style="display: none;">
+      <div class="popup-header">
+        <div class="popup-title-area">
+          <div class="popup-badge-row">
+            <span class="badge" id="popup-badge">REQUIREMENT</span>
+            <span class="popup-id" id="popup-id">FR-000</span>
+          </div>
+          <h3 class="popup-title" id="popup-title">Requirement Title</h3>
+        </div>
+        <button class="popup-close-btn" onclick="closeRequirementPopup()" title="Close (Esc)">✕</button>
+      </div>
+      <div class="popup-meta" id="popup-meta"></div>
+      <div class="popup-body" id="popup-body"></div>
+    </div>
+
+    <!-- REQUIREMENT HOVER TOOLTIP (1s hover) -->
+    <div id="req-tooltip" class="req-tooltip" style="display: none;">
+      <div class="tooltip-header">
+        <span class="tooltip-id" id="tooltip-id">FR-000</span>
+        <span class="tooltip-title" id="tooltip-title">Title</span>
+      </div>
+      <div class="tooltip-body" id="tooltip-body"></div>
+    </div>
+
     <!-- TAB 1: CYTOSCAPE GRAPH -->
     <div id="tab-graph" class="tab-panel active" style="flex: 1;">
       <div id="graph-view">
@@ -478,7 +505,7 @@ export function renderDashboardHtml(
                 (r.archStatus === 'COMPLIANT' || r.archStatus === 'CONFORME') &&
                 (r.testStatus === 'COMPLIANT' || r.testStatus === 'CONFORME');
               return `
-              <tr onclick="focusNode('${r.id}')" style="cursor: pointer;">
+              <tr onclick="focusNode('${r.id}')" onmouseenter="startRowTooltip(event, '${r.id}')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>${r.id}</code></strong></td>
                 <td>${r.title}</td>
                 <td><code>${r.productTraces}</code></td>
@@ -688,6 +715,170 @@ export function renderDashboardHtml(
     var elements = ${elementsJson};
     var cy = null;
 
+    var reqHoverTimer = null;
+    var currentHoverNodeId = null;
+    var tableHoverTimer = null;
+    var tableHoverId = null;
+    var lastMouseX = 0;
+    var lastMouseY = 0;
+
+    function renderMarkdown(md) {
+      if (!md || !md.trim()) {
+        return '<p style="color: var(--text-muted); font-style: italic;">Sin contenido detallado en el cuerpo del requisito.</p>';
+      }
+      var text = md
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      // Code blocks
+      text = text.replace(new RegExp('\\x60{3}([a-z]*)\\r?\\n([\\s\\S]*?)\\x60{3}', 'g'), function(_, lang, code) {
+        return '<pre><code>' + code.trim() + '</code></pre>';
+      });
+
+      // Inline code
+      text = text.replace(new RegExp('\\x60([^\\x60]+)\\x60', 'g'), '<code>$1</code>');
+
+      // Headers (h3, h2, h1)
+      text = text.replace(new RegExp('^### (.*$)', 'gim'), '<h4>$1</h4>');
+      text = text.replace(new RegExp('^## (.*$)', 'gim'), '<h3>$1</h3>');
+      text = text.replace(new RegExp('^# (.*$)', 'gim'), '<h2>$1</h2>');
+
+      // Bold & italic
+      text = text.replace(new RegExp('\\*\\*([^*]+)\\*\\*', 'g'), '<strong>$1</strong>');
+      text = text.replace(new RegExp('\\*([^*]+)\\*', 'g'), '<em>$1</em>');
+
+      // Unordered lists
+      text = text.replace(new RegExp('^\\s*[-*]\\s+(.*$)', 'gim'), '<li>$1</li>');
+      text = text.replace(new RegExp('(<li>[\\s\\S]*?<\\/li>(\\r?\\n)*)+', 'g'), function(match) {
+        return '<ul>' + match + '</ul>';
+      });
+
+      // Paragraph line breaks
+      text = text.replace(new RegExp('\\r?\\n\\r?\\n', 'g'), '<br/><br/>');
+
+      return text;
+    }
+
+    function openRequirementPopup(data) {
+      hideTooltip();
+      clearTimeout(reqHoverTimer);
+      clearTimeout(tableHoverTimer);
+
+      var popup = document.getElementById('req-popup');
+      if (!popup) return;
+
+      activePopupReqId = data.id;
+
+      document.getElementById('popup-id').textContent = data.id;
+      document.getElementById('popup-title').textContent = data.title || data.label || 'Requisito';
+
+      var badge = document.getElementById('popup-badge');
+      badge.textContent = data.status || 'CONFORME';
+      badge.className = 'badge ' + (data.status === 'CONFORME' ? 'badge-green' : 'badge-amber');
+
+      var metaHtml = '';
+      if (data.filePath) {
+        metaHtml += '<span><strong>Archivo:</strong> <code>' + data.filePath + '</code></span>';
+      }
+      if (data.upstream && data.upstream.length > 0) {
+        metaHtml += '<span><strong>Upstream:</strong> ' + data.upstream.join(', ') + '</span>';
+      }
+      if (data.downstream && data.downstream.length > 0) {
+        metaHtml += '<span><strong>Downstream:</strong> ' + data.downstream.join(', ') + '</span>';
+      }
+      document.getElementById('popup-meta').innerHTML = metaHtml;
+
+      var bodyEl = document.getElementById('popup-body');
+      bodyEl.innerHTML = renderMarkdown(data.content);
+
+      popup.style.display = 'flex';
+    }
+
+    function closeRequirementPopup() {
+      var popup = document.getElementById('req-popup');
+      if (popup) {
+        popup.style.display = 'none';
+      }
+      activePopupReqId = null;
+    }
+
+    function showTooltip(data, x, y) {
+      var tooltip = document.getElementById('req-tooltip');
+      if (!tooltip) return;
+      document.getElementById('tooltip-id').textContent = data.id;
+      document.getElementById('tooltip-title').textContent = data.title || data.label || '';
+      var bodyEl = document.getElementById('tooltip-body');
+      bodyEl.textContent = data.content ? data.content.trim() : 'Sin descripción en el cuerpo del requisito.';
+
+      tooltip.style.display = 'block';
+      positionTooltip(tooltip, x, y);
+    }
+
+    function positionTooltip(tooltip, x, y) {
+      var pad = 15;
+      var left = x + pad;
+      var top = y + pad;
+      var rect = tooltip.getBoundingClientRect();
+      if (left + rect.width > window.innerWidth - 10) {
+        left = Math.max(10, x - rect.width - pad);
+      }
+      if (top + rect.height > window.innerHeight - 10) {
+        top = Math.max(10, y - rect.height - pad);
+      }
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+    }
+
+    function updateTooltipPosition(x, y) {
+      var tooltip = document.getElementById('req-tooltip');
+      if (tooltip && tooltip.style.display !== 'none') {
+        positionTooltip(tooltip, x, y);
+      }
+    }
+
+    function hideTooltip() {
+      var tooltip = document.getElementById('req-tooltip');
+      if (tooltip) {
+        tooltip.style.display = 'none';
+      }
+    }
+
+    function startRowTooltip(event, id) {
+      tableHoverId = id;
+      lastMouseX = event.clientX;
+      lastMouseY = event.clientY;
+      clearTimeout(tableHoverTimer);
+      tableHoverTimer = setTimeout(function() {
+        if (tableHoverId === id) {
+          var nodeData = null;
+          if (cy) {
+            var n = cy.getElementById(id);
+            if (n && n.length > 0) nodeData = n.data();
+          }
+          if (!nodeData) {
+            var el = elements.find(function(e) { return e.data && e.data.id === id; });
+            if (el) nodeData = el.data;
+          }
+          if (nodeData) {
+            showTooltip(nodeData, lastMouseX, lastMouseY);
+          }
+        }
+      }, 1000);
+    }
+
+    function updateRowTooltipPos(event) {
+      lastMouseX = event.clientX;
+      lastMouseY = event.clientY;
+      updateTooltipPosition(lastMouseX, lastMouseY);
+    }
+
+    function cancelRowTooltip() {
+      clearTimeout(tableHoverTimer);
+      tableHoverId = null;
+      hideTooltip();
+    }
+
     function initCytoscape() {
       if (typeof cytoscape === 'undefined') {
         console.error('Cytoscape library not loaded');
@@ -785,18 +976,58 @@ export function renderDashboardHtml(
 
       cy.on('tap', 'node', function(evt) {
         var node = evt.target;
+        var data = node.data();
         highlightCriticalPath(node);
-        showNodeDetails(node.data());
+        showNodeDetails(data);
+        if (data.layer === 'requirement') {
+          openRequirementPopup(data);
+        } else {
+          closeRequirementPopup();
+        }
       });
 
       cy.on('tap', function(evt) {
         if (evt.target === cy) {
           resetHighlight();
+          closeRequirementPopup();
         }
+      });
+
+      cy.on('mouseover', 'node', function(evt) {
+        var node = evt.target;
+        var data = node.data();
+        if (data.layer !== 'requirement') return;
+
+        currentHoverNodeId = data.id;
+        clearTimeout(reqHoverTimer);
+
+        var rect = document.getElementById('cy').getBoundingClientRect();
+        var clientX = (evt.originalEvent && evt.originalEvent.clientX) || (rect.left + evt.renderedPosition.x);
+        var clientY = (evt.originalEvent && evt.originalEvent.clientY) || (rect.top + evt.renderedPosition.y);
+
+        reqHoverTimer = setTimeout(function() {
+          if (currentHoverNodeId === data.id) {
+            showTooltip(data, clientX, clientY);
+          }
+        }, 1000);
+      });
+
+      cy.on('mousemove', 'node', function(evt) {
+        var node = evt.target;
+        if (node.data('layer') !== 'requirement') return;
+        if (evt.originalEvent) {
+          updateTooltipPosition(evt.originalEvent.clientX, evt.originalEvent.clientY);
+        }
+      });
+
+      cy.on('mouseout', 'node', function(evt) {
+        clearTimeout(reqHoverTimer);
+        currentHoverNodeId = null;
+        hideTooltip();
       });
     }
 
-    function highlightCriticalPath(node) {
+        function highlightCriticalPath(node) {
       cy.elements().removeClass('highlighted dimmed');
       var predecessors = node.predecessors();
       var successors = node.successors();
@@ -811,6 +1042,7 @@ export function renderDashboardHtml(
       cy.elements().removeClass('highlighted dimmed');
       var sidebar = document.getElementById('sidebar-content');
       sidebar.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem;">Click on any graph node to inspect its critical path and full traceability.</p>';
+      closeRequirementPopup();
     }
 
     function showNodeDetails(data) {
@@ -886,6 +1118,7 @@ export function renderDashboardHtml(
     }
 
     function focusNode(id) {
+      cancelRowTooltip();
       switchTab('graph');
       setTimeout(function() {
         if (!cy) return;
@@ -893,6 +1126,9 @@ export function renderDashboardHtml(
         if (node && node.length > 0) {
           highlightCriticalPath(node);
           showNodeDetails(node.data());
+          if (node.data('layer') === 'requirement') {
+            openRequirementPopup(node.data());
+          }
           cy.center(node);
           cy.zoom(1.2);
         }
@@ -915,6 +1151,12 @@ export function renderDashboardHtml(
         cy.fit(30);
       }
     }
+
+    window.addEventListener('keydown', function(evt) {
+      if (evt.key === 'Escape') {
+        closeRequirementPopup();
+      }
+    });
 
     window.addEventListener('DOMContentLoaded', function() {
       initCytoscape();

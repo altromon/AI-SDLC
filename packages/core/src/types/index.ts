@@ -85,6 +85,8 @@ export interface TraceabilityRow {
   archStatus: 'COMPLIANT' | 'ORPHAN' | 'CONFORME' | 'HUÉRFANO';
   testTraces: string;
   testStatus: 'COMPLIANT' | 'ORPHAN' | 'CONFORME' | 'HUÉRFANO';
+  content?: string;
+  filePath?: string;
 }
 
 export interface TraceabilityOptions {
@@ -786,6 +788,7 @@ export interface CytoscapeNodeData {
   layer: GraphNodeLayer;
   status: GraphNodeStatus;
   filePath?: string;
+  content?: string;
   digest?: string;
   details?: Record<string, unknown>;
   upstream?: string[];

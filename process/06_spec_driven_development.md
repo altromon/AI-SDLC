@@ -36,8 +36,9 @@ specs/changes/active/chg-001-telemetry-stream/
 - **Mandatory Citations**: IDs and digests of involved use cases (`UC-*`), functional requirements (`FR-*`), security requirements (`SEC-REQ-*`), and architecture building blocks (`SRV-*`).
 
 ### 2. `spec.md`
-- Detailed expected behavior using executable specifications (Given-When-Then / Gherkin format or assertion scenarios).
-- Explicitly includes **security mitigation scenarios** derived from abuse cases (`ABUSE-*`).
+- Detailed expected behavior using executable specifications (**mandatory BDD Gherkin format** from change declaration: `acceptance-format: gherkin` and ```gherkin ... ``` blocks).
+- Explicitly includes functional scenarios and **security mitigation scenarios** derived from abuse cases (`ABUSE-*`).
+- Immediately extractable to executable Cucumber `.feature` files via `aisdlc gherkin extract` or `aisdlc check --fix`.
 
 ### 3. `design.md`
 - Direct mapping to arc42 / NAF v4 architecture blocks (`SRV-*`, `SYS-*`).

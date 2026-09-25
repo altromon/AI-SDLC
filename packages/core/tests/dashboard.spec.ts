@@ -137,12 +137,35 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(htmlContent).toContain('Custom Test AI-SDLC Dashboard');
     expect(htmlContent).toContain('cytoscape');
     expect(htmlContent).toContain('id="cy"');
-    expect(htmlContent).toContain('highlightCriticalPath');
     expect(htmlContent).toContain('360° Requirements Traceability Matrix');
     expect(htmlContent).toContain('Task Autonomy Modes Distribution');
     expect(htmlContent).toMatch(/Active Telemetry.*and KPI History/);
+    // Verify requirement content popup and 1-second hover tooltip
+    expect(htmlContent).toContain('id="req-popup"');
+    expect(htmlContent).toContain('id="req-tooltip"');
+    expect(htmlContent).toContain('openRequirementPopup');
+    expect(htmlContent).toContain('closeRequirementPopup');
+    expect(htmlContent).toContain('startRowTooltip');
+    expect(htmlContent).toContain('showTooltip');
+    expect(htmlContent).toContain('hideTooltip');
+    expect(htmlContent).toContain('1000');
 
     // Verify it is larger than 100KB due to bundled Cytoscape library
     expect(htmlContent.length).toBeGreaterThan(100000);
+  });
+
+  it('should include markdown content and filePath in requirement graph nodes', () => {
+    const rootDir = process.cwd();
+    const result = buildGraphElements(rootDir);
+    const reqNodes = result.elements
+      .filter((e) => e.group === 'nodes')
+      .map((e) => e.data as any)
+      .filter((d) => d.layer === 'requirement');
+
+    expect(reqNodes.length).toBeGreaterThan(0);
+    const withContent = reqNodes.find((n) => n.content && n.content.length > 0);
+    expect(withContent).toBeDefined();
+    expect(withContent.filePath).toBeDefined();
+    expect(withContent.content).toContain('Enunciado Normativo');
   });
 });

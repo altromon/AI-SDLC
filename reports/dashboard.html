@@ -78,7 +78,7 @@
       </span>
     </div>
     <div style="font-size: 0.75rem; color: var(--text-muted);">
-      Generated: <span>2026-09-24 19:26:58</span>
+      Generated: <span>2026-09-25 13:01:09</span>
     </div>
   </header>
 
@@ -90,6 +90,31 @@
   </nav>
 
   <main>
+    <!-- REQUIREMENT POPUP CARD -->
+    <div id="req-popup" class="req-popup-card" style="display: none;">
+      <div class="popup-header">
+        <div class="popup-title-area">
+          <div class="popup-badge-row">
+            <span class="badge" id="popup-badge">REQUIREMENT</span>
+            <span class="popup-id" id="popup-id">FR-000</span>
+          </div>
+          <h3 class="popup-title" id="popup-title">Requirement Title</h3>
+        </div>
+        <button class="popup-close-btn" onclick="closeRequirementPopup()" title="Close (Esc)">✕</button>
+      </div>
+      <div class="popup-meta" id="popup-meta"></div>
+      <div class="popup-body" id="popup-body"></div>
+    </div>
+
+    <!-- REQUIREMENT HOVER TOOLTIP (1s hover) -->
+    <div id="req-tooltip" class="req-tooltip" style="display: none;">
+      <div class="tooltip-header">
+        <span class="tooltip-id" id="tooltip-id">FR-000</span>
+        <span class="tooltip-title" id="tooltip-title">Title</span>
+      </div>
+      <div class="tooltip-body" id="tooltip-body"></div>
+    </div>
+
     <!-- TAB 1: CYTOSCAPE GRAPH -->
     <div id="tab-graph" class="tab-panel active" style="flex: 1;">
       <div id="graph-view">
@@ -155,7 +180,7 @@
           </thead>
           <tbody>
             
-              <tr onclick="focusNode('FR-025-STRUCTURED-JSON-VERIFY-001')" style="cursor: pointer;">
+              <tr onclick="focusNode('FR-025-STRUCTURED-JSON-VERIFY-001')" onmouseenter="startRowTooltip(event, 'FR-025-STRUCTURED-JSON-VERIFY-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>FR-025-STRUCTURED-JSON-VERIFY-001</code></strong></td>
                 <td>Emisión de Resultados Estructurados en Formato JSON por CLI</td>
                 <td><code>UC-025-STRUCTURED-JSON-VERIFY</code></td>
@@ -164,7 +189,7 @@
                 <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
-              <tr onclick="focusNode('FR-026-AGENT-NATIVE-CONFIGS-001')" style="cursor: pointer;">
+              <tr onclick="focusNode('FR-026-AGENT-NATIVE-CONFIGS-001')" onmouseenter="startRowTooltip(event, 'FR-026-AGENT-NATIVE-CONFIGS-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>FR-026-AGENT-NATIVE-CONFIGS-001</code></strong></td>
                 <td>Generación y Sincronización de Reglas Nativas para Agentes IDE</td>
                 <td><code>UC-026-AGENT-NATIVE-CONFIGS</code></td>
@@ -173,7 +198,7 @@
                 <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
-              <tr onclick="focusNode('FR-027-ENV-OUTPUT-JSON-001')" style="cursor: pointer;">
+              <tr onclick="focusNode('FR-027-ENV-OUTPUT-JSON-001')" onmouseenter="startRowTooltip(event, 'FR-027-ENV-OUTPUT-JSON-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>FR-027-ENV-OUTPUT-JSON-001</code></strong></td>
                 <td>Configuración Global de Formato JSON por AISDLC_OUTPUT o AISDLC_FORMAT</td>
                 <td><code>UC-027-ENV-OUTPUT-JSON</code></td>
@@ -182,7 +207,7 @@
                 <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
-              <tr onclick="focusNode('FR-028-NATIVE-MCP-SERVER-001')" style="cursor: pointer;">
+              <tr onclick="focusNode('FR-028-NATIVE-MCP-SERVER-001')" onmouseenter="startRowTooltip(event, 'FR-028-NATIVE-MCP-SERVER-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>FR-028-NATIVE-MCP-SERVER-001</code></strong></td>
                 <td>Exposición de Herramientas y Recursos de AI-SDLC mediante Protocolo MCP</td>
                 <td><code>UC-028-NATIVE-MCP-SERVER</code></td>
@@ -191,7 +216,7 @@
                 <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
-              <tr onclick="focusNode('FR-029-EXPERT-USER-AGENT-001')" style="cursor: pointer;">
+              <tr onclick="focusNode('FR-029-EXPERT-USER-AGENT-001')" onmouseenter="startRowTooltip(event, 'FR-029-EXPERT-USER-AGENT-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>FR-029-EXPERT-USER-AGENT-001</code></strong></td>
                 <td>Generación Automática de Informes de Feedback de Usuario Experto</td>
                 <td><code>UC-029-EXPERT-USER-AGENT</code></td>
@@ -200,7 +225,7 @@
                 <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
-              <tr onclick="focusNode('FR-030-INIT-AGENT-SCAFFOLDING-001')" style="cursor: pointer;">
+              <tr onclick="focusNode('FR-030-INIT-AGENT-SCAFFOLDING-001')" onmouseenter="startRowTooltip(event, 'FR-030-INIT-AGENT-SCAFFOLDING-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>FR-030-INIT-AGENT-SCAFFOLDING-001</code></strong></td>
                 <td>Scaffolding de Reglas Cursor y Antigravity en Comando Init</td>
                 <td><code>UC-030-INIT-AGENT-SCAFFOLDING</code></td>
@@ -209,7 +234,7 @@
                 <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
-              <tr onclick="focusNode('FR-031-WORKFLOW-AGENT-HANDOFF-001')" style="cursor: pointer;">
+              <tr onclick="focusNode('FR-031-WORKFLOW-AGENT-HANDOFF-001')" onmouseenter="startRowTooltip(event, 'FR-031-WORKFLOW-AGENT-HANDOFF-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>FR-031-WORKFLOW-AGENT-HANDOFF-001</code></strong></td>
                 <td>Gestión y Emisión de Handoffs de Flujo entre Agentes</td>
                 <td><code>UC-031-WORKFLOW-AGENT-HANDOFF</code></td>
@@ -218,7 +243,7 @@
                 <td><span class="badge badge-green">COMPLIANT</span></td>
               </tr>
             
-              <tr onclick="focusNode('FR-033-ARCHITECTURE-TEMPLATES-001')" style="cursor: pointer;">
+              <tr onclick="focusNode('FR-033-ARCHITECTURE-TEMPLATES-001')" onmouseenter="startRowTooltip(event, 'FR-033-ARCHITECTURE-TEMPLATES-001')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>FR-033-ARCHITECTURE-TEMPLATES-001</code></strong></td>
                 <td>Plantillas Canónicas de Arquitectura arc42 y NAF v4</td>
                 <td><code>UC-033-ARCHITECTURE-TEMPLATES</code></td>
@@ -308,28 +333,28 @@
         <div class="grid-cards">
           <div class="metric-card">
             <span class="title">Commits in Active Branch</span>
-            <span class="value">8</span>
-            <span class="subtitle">+2217 / -242 lines</span>
+            <span class="value">20</span>
+            <span class="subtitle">+10656 / -5470 lines</span>
           </div>
           <div class="metric-card">
             <span class="title">Active Development Time</span>
-            <span class="value">24m</span>
-            <span class="subtitle">1469s accumulated</span>
+            <span class="value">155m</span>
+            <span class="subtitle">9291s accumulated</span>
           </div>
           <div class="metric-card">
             <span class="title">Consumed Tokens</span>
-            <span class="value">105,045</span>
-            <span class="subtitle">In: 81.475 | Out: 23.570</span>
+            <span class="value">595,890</span>
+            <span class="subtitle">In: 435.650 | Out: 160.240</span>
           </div>
           <div class="metric-card">
             <span class="title">Estimated Compute Cost</span>
-            <span class="value">$0.60</span>
+            <span class="value">$3.71</span>
             <span class="subtitle">Weighted USD</span>
           </div>
         </div>
 
         <div class="chart-container">
-          <h3>Telemetry Breakdown by Author and Model (feat/framework-i18n-english)</h3>
+          <h3>Telemetry Breakdown by Author and Model (feat/mandatory-gherkin-sdd-specs)</h3>
           <table class="data-table">
             <thead>
               <tr>
@@ -344,25 +369,35 @@
             </thead>
             <tbody>
               
+              <tr>
+                <td><strong>Human (Developer)</strong></td>
+                <td><span class="badge" style="background:#334155;">HUMAN</span></td>
+                <td>7</td>
+                <td>+0 / -0</td>
+                <td>14m</td>
+                <td>0</td>
+                <td>—</td>
+              </tr>
+              
               
               <tr>
                 <td><strong><code>gemini-3.8-flash</code></strong></td>
                 <td><span class="badge badge-green">AGENT</span></td>
-                <td>8</td>
-                <td>+2217 / -242</td>
-                <td>24m</td>
-                <td>105,045</td>
-                <td>$0.60</td>
+                <td>13</td>
+                <td>+10656 / -5470</td>
+                <td>141m</td>
+                <td>595,890</td>
+                <td>$3.71</td>
               </tr>
               
               <tr style="font-weight: bold; background: rgba(255,255,255,0.05);">
                 <td>TOTAL BRANCH</td>
                 <td>—</td>
-                <td>8</td>
-                <td>+2217 / -242</td>
-                <td>24m</td>
-                <td>105,045</td>
-                <td>$0.60 USD</td>
+                <td>20</td>
+                <td>+10656 / -5470</td>
+                <td>155m</td>
+                <td>595,890</td>
+                <td>$3.71 USD</td>
               </tr>
             </tbody>
           </table>
@@ -417,8 +452,172 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
 
   </script>
   <script>
-    var elements = [{"group":"nodes","data":{"id":"FR-025-STRUCTURED-JSON-VERIFY-001","label":"FR-025-STRUCTURED-JSON-VERIFY-001","title":"Emisión de Resultados Estructurados en Formato JSON por CLI","type":"requirement","layer":"requirement","status":"COMPLIANT","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-025-STRUCTURED-JSON-VERIFY"},"upstream":["UC-025-STRUCTURED-JSON-VERIFY"],"downstream":["CMP-CLI","CMP-CORE","CMP-CLI.md","CMP-CORE.md","packages/cli/tests/verify-json.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-025-STRUCTURED-JSON-VERIFY","label":"UC-025-STRUCTURED-JSON-VERIFY","title":"UC-025-STRUCTURED-JSON-VERIFY","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"CMP-CLI","label":"CMP-CLI","title":"CMP-CLI","type":"component","layer":"architecture","status":"COMPLIANT"},"classes":"layer-architecture status-compliant"},{"group":"nodes","data":{"id":"CMP-CORE","label":"CMP-CORE","title":"CMP-CORE","type":"component","layer":"architecture","status":"COMPLIANT"},"classes":"layer-architecture status-compliant"},{"group":"nodes","data":{"id":"CMP-CLI.md","label":"CMP-CLI.md","title":"CMP-CLI.md","type":"component","layer":"architecture","status":"COMPLIANT"},"classes":"layer-architecture status-compliant"},{"group":"nodes","data":{"id":"CMP-CORE.md","label":"CMP-CORE.md","title":"CMP-CORE.md","type":"component","layer":"architecture","status":"COMPLIANT"},"classes":"layer-architecture status-compliant"},{"group":"nodes","data":{"id":"packages_cli_tests_verify-json_spec_ts","label":"verify-json.spec.ts","title":"packages/cli/tests/verify-json.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/cli/tests/verify-json.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"FR-026-AGENT-NATIVE-CONFIGS-001","label":"FR-026-AGENT-NATIVE-CONFIGS-001","title":"Generación y Sincronización de Reglas Nativas para Agentes IDE","type":"requirement","layer":"requirement","status":"COMPLIANT","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-026-AGENT-NATIVE-CONFIGS"},"upstream":["UC-026-AGENT-NATIVE-CONFIGS"],"downstream":["CMP-CORE","CMP-CORE.md","packages/core/tests/agent-native-configs-drift.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-026-AGENT-NATIVE-CONFIGS","label":"UC-026-AGENT-NATIVE-CONFIGS","title":"UC-026-AGENT-NATIVE-CONFIGS","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"packages_core_tests_agent-native-configs-drift_spec_ts","label":"agent-native-configs-drift.spec.ts","title":"packages/core/tests/agent-native-configs-drift.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/core/tests/agent-native-configs-drift.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"FR-027-ENV-OUTPUT-JSON-001","label":"FR-027-ENV-OUTPUT-JSON-001","title":"Configuración Global de Formato JSON por AISDLC_OUTPUT o AISDLC_FORMAT","type":"requirement","layer":"requirement","status":"COMPLIANT","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-027-ENV-OUTPUT-JSON"},"upstream":["UC-027-ENV-OUTPUT-JSON"],"downstream":["CMP-CLI","CMP-CORE","CMP-CLI.md","packages/cli/tests/verify-json.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-027-ENV-OUTPUT-JSON","label":"UC-027-ENV-OUTPUT-JSON","title":"UC-027-ENV-OUTPUT-JSON","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"FR-028-NATIVE-MCP-SERVER-001","label":"FR-028-NATIVE-MCP-SERVER-001","title":"Exposición de Herramientas y Recursos de AI-SDLC mediante Protocolo MCP","type":"requirement","layer":"requirement","status":"COMPLIANT","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-028-NATIVE-MCP-SERVER"},"upstream":["UC-028-NATIVE-MCP-SERVER"],"downstream":["CMP-MCP-SERVER","CMP-CORE","CMP-MCP-SERVER.md","packages/cli/tests/change-new.spec.ts","packages/core/tests/sdd-adapters.spec.ts","packages/mcp/tests/mcp-server.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-028-NATIVE-MCP-SERVER","label":"UC-028-NATIVE-MCP-SERVER","title":"UC-028-NATIVE-MCP-SERVER","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"CMP-MCP-SERVER","label":"CMP-MCP-SERVER","title":"CMP-MCP-SERVER","type":"component","layer":"architecture","status":"COMPLIANT"},"classes":"layer-architecture status-compliant"},{"group":"nodes","data":{"id":"CMP-MCP-SERVER.md","label":"CMP-MCP-SERVER.md","title":"CMP-MCP-SERVER.md","type":"component","layer":"architecture","status":"COMPLIANT"},"classes":"layer-architecture status-compliant"},{"group":"nodes","data":{"id":"packages_cli_tests_change-new_spec_ts","label":"change-new.spec.ts","title":"packages/cli/tests/change-new.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/cli/tests/change-new.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"packages_core_tests_sdd-adapters_spec_ts","label":"sdd-adapters.spec.ts","title":"packages/core/tests/sdd-adapters.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/core/tests/sdd-adapters.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"packages_mcp_tests_mcp-server_spec_ts","label":"mcp-server.spec.ts","title":"packages/mcp/tests/mcp-server.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/mcp/tests/mcp-server.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"FR-029-EXPERT-USER-AGENT-001","label":"FR-029-EXPERT-USER-AGENT-001","title":"Generación Automática de Informes de Feedback de Usuario Experto","type":"requirement","layer":"requirement","status":"COMPLIANT","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-029-EXPERT-USER-AGENT"},"upstream":["UC-029-EXPERT-USER-AGENT"],"downstream":["CMP-CORE","CMP-CORE.md","packages/core/tests/init-agents.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-029-EXPERT-USER-AGENT","label":"UC-029-EXPERT-USER-AGENT","title":"UC-029-EXPERT-USER-AGENT","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"packages_core_tests_init-agents_spec_ts","label":"init-agents.spec.ts","title":"packages/core/tests/init-agents.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/core/tests/init-agents.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"FR-030-INIT-AGENT-SCAFFOLDING-001","label":"FR-030-INIT-AGENT-SCAFFOLDING-001","title":"Scaffolding de Reglas Cursor y Antigravity en Comando Init","type":"requirement","layer":"requirement","status":"COMPLIANT","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-030-INIT-AGENT-SCAFFOLDING"},"upstream":["UC-030-INIT-AGENT-SCAFFOLDING"],"downstream":["CMP-CLI","CMP-CORE","CMP-CLI.md","CMP-CORE.md","packages/core/tests/init-agents.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-030-INIT-AGENT-SCAFFOLDING","label":"UC-030-INIT-AGENT-SCAFFOLDING","title":"UC-030-INIT-AGENT-SCAFFOLDING","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"FR-031-WORKFLOW-AGENT-HANDOFF-001","label":"FR-031-WORKFLOW-AGENT-HANDOFF-001","title":"Gestión y Emisión de Handoffs de Flujo entre Agentes","type":"requirement","layer":"requirement","status":"COMPLIANT","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-031-WORKFLOW-AGENT-HANDOFF"},"upstream":["UC-031-WORKFLOW-AGENT-HANDOFF"],"downstream":["CMP-CORE","CMP-CORE.md","packages/core/tests/init-agents.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-031-WORKFLOW-AGENT-HANDOFF","label":"UC-031-WORKFLOW-AGENT-HANDOFF","title":"UC-031-WORKFLOW-AGENT-HANDOFF","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"FR-033-ARCHITECTURE-TEMPLATES-001","label":"FR-033-ARCHITECTURE-TEMPLATES-001","title":"Plantillas Canónicas de Arquitectura arc42 y NAF v4","type":"requirement","layer":"requirement","status":"COMPLIANT","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-033-ARCHITECTURE-TEMPLATES"},"upstream":["UC-033-ARCHITECTURE-TEMPLATES"],"downstream":["CMP-CORE","CMP-CORE.md","packages/core/tests/architecture-templates.spec.ts","packages/core/tests/init-architecture.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-033-ARCHITECTURE-TEMPLATES","label":"UC-033-ARCHITECTURE-TEMPLATES","title":"UC-033-ARCHITECTURE-TEMPLATES","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"packages_core_tests_architecture-templates_spec_ts","label":"architecture-templates.spec.ts","title":"packages/core/tests/architecture-templates.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/core/tests/architecture-templates.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"packages_core_tests_init-architecture_spec_ts","label":"init-architecture.spec.ts","title":"packages/core/tests/init-architecture.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/core/tests/init-architecture.spec.ts"},"classes":"layer-test status-compliant"},{"group":"edges","data":{"id":"edge-UC-025-STRUCTURED-JSON-VERIFY-FR-025-STRUCTURED-JSON-VERIFY-001","source":"UC-025-STRUCTURED-JSON-VERIFY","target":"FR-025-STRUCTURED-JSON-VERIFY-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-025-STRUCTURED-JSON-VERIFY-001-CMP-CLI","source":"FR-025-STRUCTURED-JSON-VERIFY-001","target":"CMP-CLI","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-025-STRUCTURED-JSON-VERIFY-001-CMP-CORE","source":"FR-025-STRUCTURED-JSON-VERIFY-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-025-STRUCTURED-JSON-VERIFY-001-CMP-CLI.md","source":"FR-025-STRUCTURED-JSON-VERIFY-001","target":"CMP-CLI.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-025-STRUCTURED-JSON-VERIFY-001-CMP-CORE.md","source":"FR-025-STRUCTURED-JSON-VERIFY-001","target":"CMP-CORE.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-025-STRUCTURED-JSON-VERIFY-001-packages_cli_tests_verify-json_spec_ts","source":"FR-025-STRUCTURED-JSON-VERIFY-001","target":"packages_cli_tests_verify-json_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-026-AGENT-NATIVE-CONFIGS-FR-026-AGENT-NATIVE-CONFIGS-001","source":"UC-026-AGENT-NATIVE-CONFIGS","target":"FR-026-AGENT-NATIVE-CONFIGS-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-026-AGENT-NATIVE-CONFIGS-001-CMP-CORE","source":"FR-026-AGENT-NATIVE-CONFIGS-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-026-AGENT-NATIVE-CONFIGS-001-CMP-CORE.md","source":"FR-026-AGENT-NATIVE-CONFIGS-001","target":"CMP-CORE.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-026-AGENT-NATIVE-CONFIGS-001-packages_core_tests_agent-native-configs-drift_spec_ts","source":"FR-026-AGENT-NATIVE-CONFIGS-001","target":"packages_core_tests_agent-native-configs-drift_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-027-ENV-OUTPUT-JSON-FR-027-ENV-OUTPUT-JSON-001","source":"UC-027-ENV-OUTPUT-JSON","target":"FR-027-ENV-OUTPUT-JSON-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-027-ENV-OUTPUT-JSON-001-CMP-CLI","source":"FR-027-ENV-OUTPUT-JSON-001","target":"CMP-CLI","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-027-ENV-OUTPUT-JSON-001-CMP-CORE","source":"FR-027-ENV-OUTPUT-JSON-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-027-ENV-OUTPUT-JSON-001-CMP-CLI.md","source":"FR-027-ENV-OUTPUT-JSON-001","target":"CMP-CLI.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-027-ENV-OUTPUT-JSON-001-packages_cli_tests_verify-json_spec_ts","source":"FR-027-ENV-OUTPUT-JSON-001","target":"packages_cli_tests_verify-json_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-028-NATIVE-MCP-SERVER-FR-028-NATIVE-MCP-SERVER-001","source":"UC-028-NATIVE-MCP-SERVER","target":"FR-028-NATIVE-MCP-SERVER-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-028-NATIVE-MCP-SERVER-001-CMP-MCP-SERVER","source":"FR-028-NATIVE-MCP-SERVER-001","target":"CMP-MCP-SERVER","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-028-NATIVE-MCP-SERVER-001-CMP-CORE","source":"FR-028-NATIVE-MCP-SERVER-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-028-NATIVE-MCP-SERVER-001-CMP-MCP-SERVER.md","source":"FR-028-NATIVE-MCP-SERVER-001","target":"CMP-MCP-SERVER.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-028-NATIVE-MCP-SERVER-001-packages_cli_tests_change-new_spec_ts","source":"FR-028-NATIVE-MCP-SERVER-001","target":"packages_cli_tests_change-new_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-FR-028-NATIVE-MCP-SERVER-001-packages_core_tests_sdd-adapters_spec_ts","source":"FR-028-NATIVE-MCP-SERVER-001","target":"packages_core_tests_sdd-adapters_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-FR-028-NATIVE-MCP-SERVER-001-packages_mcp_tests_mcp-server_spec_ts","source":"FR-028-NATIVE-MCP-SERVER-001","target":"packages_mcp_tests_mcp-server_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-029-EXPERT-USER-AGENT-FR-029-EXPERT-USER-AGENT-001","source":"UC-029-EXPERT-USER-AGENT","target":"FR-029-EXPERT-USER-AGENT-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-029-EXPERT-USER-AGENT-001-CMP-CORE","source":"FR-029-EXPERT-USER-AGENT-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-029-EXPERT-USER-AGENT-001-CMP-CORE.md","source":"FR-029-EXPERT-USER-AGENT-001","target":"CMP-CORE.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-029-EXPERT-USER-AGENT-001-packages_core_tests_init-agents_spec_ts","source":"FR-029-EXPERT-USER-AGENT-001","target":"packages_core_tests_init-agents_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-030-INIT-AGENT-SCAFFOLDING-FR-030-INIT-AGENT-SCAFFOLDING-001","source":"UC-030-INIT-AGENT-SCAFFOLDING","target":"FR-030-INIT-AGENT-SCAFFOLDING-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-030-INIT-AGENT-SCAFFOLDING-001-CMP-CLI","source":"FR-030-INIT-AGENT-SCAFFOLDING-001","target":"CMP-CLI","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-030-INIT-AGENT-SCAFFOLDING-001-CMP-CORE","source":"FR-030-INIT-AGENT-SCAFFOLDING-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-030-INIT-AGENT-SCAFFOLDING-001-CMP-CLI.md","source":"FR-030-INIT-AGENT-SCAFFOLDING-001","target":"CMP-CLI.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-030-INIT-AGENT-SCAFFOLDING-001-CMP-CORE.md","source":"FR-030-INIT-AGENT-SCAFFOLDING-001","target":"CMP-CORE.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-030-INIT-AGENT-SCAFFOLDING-001-packages_core_tests_init-agents_spec_ts","source":"FR-030-INIT-AGENT-SCAFFOLDING-001","target":"packages_core_tests_init-agents_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-031-WORKFLOW-AGENT-HANDOFF-FR-031-WORKFLOW-AGENT-HANDOFF-001","source":"UC-031-WORKFLOW-AGENT-HANDOFF","target":"FR-031-WORKFLOW-AGENT-HANDOFF-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-031-WORKFLOW-AGENT-HANDOFF-001-CMP-CORE","source":"FR-031-WORKFLOW-AGENT-HANDOFF-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-031-WORKFLOW-AGENT-HANDOFF-001-CMP-CORE.md","source":"FR-031-WORKFLOW-AGENT-HANDOFF-001","target":"CMP-CORE.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-031-WORKFLOW-AGENT-HANDOFF-001-packages_core_tests_init-agents_spec_ts","source":"FR-031-WORKFLOW-AGENT-HANDOFF-001","target":"packages_core_tests_init-agents_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-033-ARCHITECTURE-TEMPLATES-FR-033-ARCHITECTURE-TEMPLATES-001","source":"UC-033-ARCHITECTURE-TEMPLATES","target":"FR-033-ARCHITECTURE-TEMPLATES-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-033-ARCHITECTURE-TEMPLATES-001-CMP-CORE","source":"FR-033-ARCHITECTURE-TEMPLATES-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-033-ARCHITECTURE-TEMPLATES-001-CMP-CORE.md","source":"FR-033-ARCHITECTURE-TEMPLATES-001","target":"CMP-CORE.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-033-ARCHITECTURE-TEMPLATES-001-packages_core_tests_architecture-templates_spec_ts","source":"FR-033-ARCHITECTURE-TEMPLATES-001","target":"packages_core_tests_architecture-templates_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-FR-033-ARCHITECTURE-TEMPLATES-001-packages_core_tests_init-architecture_spec_ts","source":"FR-033-ARCHITECTURE-TEMPLATES-001","target":"packages_core_tests_init-architecture_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"}];
+    var elements = [{"group":"nodes","data":{"id":"FR-025-STRUCTURED-JSON-VERIFY-001","label":"FR-025-STRUCTURED-JSON-VERIFY-001","title":"Emisión de Resultados Estructurados en Formato JSON por CLI","type":"requirement","layer":"requirement","status":"COMPLIANT","content":"# FR-025-STRUCTURED-JSON-VERIFY-001: Salida Estructurada JSON en Verificadores\r\n\r\n## 1. Enunciado Normativo\r\nLa CLI y los módulos verifcadores DEBEN soportar la opción de emitir resultados en formato JSON determinista mediante `--json` o `-o json`, estructurando los campos de veredicto, compuertas evaluadas, conteo de infracciones y detalles sin contaminación de códigos de escape ANSI.\r\n\r\n## 2. Criterios de Aceptación\r\n- **Criterio 1 (Formato)**: Al pasar `--json`, la salida estándar debe ser analizable mediante `JSON.parse()` sin arrojar errores de sintaxis.\r\n- **Criterio 2 (Campos Requeridos)**: El objeto raíz debe contener las propiedades booleanas de veredicto (`success` o `conforme`) y el desglose de métricas o violaciones.\r\n- **Criterio 3 (Código de Salida)**: Si se detectan violaciones deterministas, el código de salida del proceso debe ser no-cero (`1`).","filePath":"product/requirements/FR-025-STRUCTURED-JSON-VERIFY-001.md","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-025-STRUCTURED-JSON-VERIFY"},"upstream":["UC-025-STRUCTURED-JSON-VERIFY"],"downstream":["CMP-CLI","CMP-CORE","CMP-CLI.md","CMP-CORE.md","packages/cli/tests/verify-json.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-025-STRUCTURED-JSON-VERIFY","label":"UC-025-STRUCTURED-JSON-VERIFY","title":"UC-025-STRUCTURED-JSON-VERIFY","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"CMP-CLI","label":"CMP-CLI","title":"CMP-CLI","type":"component","layer":"architecture","status":"COMPLIANT"},"classes":"layer-architecture status-compliant"},{"group":"nodes","data":{"id":"CMP-CORE","label":"CMP-CORE","title":"CMP-CORE","type":"component","layer":"architecture","status":"COMPLIANT"},"classes":"layer-architecture status-compliant"},{"group":"nodes","data":{"id":"CMP-CLI.md","label":"CMP-CLI.md","title":"CMP-CLI.md","type":"component","layer":"architecture","status":"COMPLIANT"},"classes":"layer-architecture status-compliant"},{"group":"nodes","data":{"id":"CMP-CORE.md","label":"CMP-CORE.md","title":"CMP-CORE.md","type":"component","layer":"architecture","status":"COMPLIANT"},"classes":"layer-architecture status-compliant"},{"group":"nodes","data":{"id":"packages_cli_tests_verify-json_spec_ts","label":"verify-json.spec.ts","title":"packages/cli/tests/verify-json.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/cli/tests/verify-json.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"FR-026-AGENT-NATIVE-CONFIGS-001","label":"FR-026-AGENT-NATIVE-CONFIGS-001","title":"Generación y Sincronización de Reglas Nativas para Agentes IDE","type":"requirement","layer":"requirement","status":"COMPLIANT","content":"# FR-026-AGENT-NATIVE-CONFIGS-001: Reglas Nativas para Agentes IDE\r\n\r\n## 1. Enunciado Normativo\r\nEl sistema DEBE generar y sincronizar archivos de configuración y reglas nativas para IDEs de inteligencia artificial (Cursor `.cursorrules` / `.cursor/rules/`, Google Antigravity / Gemini `.gemini/rules`) garantizando que los guardrails normativos se reflejen con fidelidad y detectando desviaciones no autorizadas mediante comparación de hashes deterministas.\r\n\r\n## 2. Criterios de Aceptación\r\n- **Criterio 1 (Sincronización)**: Los archivos de reglas nativas deben generarse con la cabecera canónica citando las especificaciones de proceso de origen.\r\n- **Criterio 2 (Detección de Deriva)**: El comando de verificación debe reportar cualquier discrepancia entre el contenido canónico esperado y el archivo de reglas en disco.","filePath":"product/requirements/FR-026-AGENT-NATIVE-CONFIGS-001.md","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-026-AGENT-NATIVE-CONFIGS"},"upstream":["UC-026-AGENT-NATIVE-CONFIGS"],"downstream":["CMP-CORE","CMP-CORE.md","packages/core/tests/agent-native-configs-drift.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-026-AGENT-NATIVE-CONFIGS","label":"UC-026-AGENT-NATIVE-CONFIGS","title":"UC-026-AGENT-NATIVE-CONFIGS","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"packages_core_tests_agent-native-configs-drift_spec_ts","label":"agent-native-configs-drift.spec.ts","title":"packages/core/tests/agent-native-configs-drift.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/core/tests/agent-native-configs-drift.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"FR-027-ENV-OUTPUT-JSON-001","label":"FR-027-ENV-OUTPUT-JSON-001","title":"Configuración Global de Formato JSON por AISDLC_OUTPUT o AISDLC_FORMAT","type":"requirement","layer":"requirement","status":"COMPLIANT","content":"# FR-027-ENV-OUTPUT-JSON-001: Variables de Entorno de Formato JSON\r\n\r\n## 1. Enunciado Normativo\r\nLa CLI DEBE inspeccionar las variables de entorno `AISDLC_OUTPUT` y `AISDLC_FORMAT`. Si alguna de ellas está establecida en `json` (insensible a mayúsculas), el comportamiento por defecto de salida de todos los comandos de verificación y reporte DEBE ser JSON estructurado, salvo que se especifique explícitamente un formato alternativo mediante línea de comandos.\r\n\r\n## 2. Criterios de Aceptación\r\n- **Criterio 1 (Prioridad de Flags)**: Los argumentos de línea de comandos explícitos (`--format text` o `--no-json`) anulan el valor de las variables de entorno.\r\n- **Criterio 2 (Activación por Entorno)**: En ausencia de flags de línea de comandos, si `AISDLC_OUTPUT=json` o `AISDLC_FORMAT=json`, la salida se formatea en JSON válido sin texto decorativo.","filePath":"product/requirements/FR-027-ENV-OUTPUT-JSON-001.md","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-027-ENV-OUTPUT-JSON"},"upstream":["UC-027-ENV-OUTPUT-JSON"],"downstream":["CMP-CLI","CMP-CORE","CMP-CLI.md","packages/cli/tests/verify-json.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-027-ENV-OUTPUT-JSON","label":"UC-027-ENV-OUTPUT-JSON","title":"UC-027-ENV-OUTPUT-JSON","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"FR-028-NATIVE-MCP-SERVER-001","label":"FR-028-NATIVE-MCP-SERVER-001","title":"Exposición de Herramientas y Recursos de AI-SDLC mediante Protocolo MCP","type":"requirement","layer":"requirement","status":"COMPLIANT","content":"# FR-028-NATIVE-MCP-SERVER-001: Servidor Nativo MCP\r\n\r\n## 1. Enunciado Normativo\r\nEl sistema DEBE proveer un paquete `@ai-sdlc/mcp` ejecutable que implemente la especificación Model Context Protocol (MCP) a través de transporte stdio, exponiendo las herramientas operativas (`new`, `verify`, `report`, `sdd_*`) y recursos del framework con validación de parámetros mediante esquemas Zod.\r\n\r\n## 2. Criterios de Aceptación\r\n- **Criterio 1 (Descubrimiento)**: El servidor responde a solicitudes `tools/list` y `resources/list` con el catálogo completo de capacidades del framework.\r\n- **Criterio 2 (Invocación)**: Las herramientas invocadas devuelven resultados estructurados conformes con el veredicto y datos de ejecución.","filePath":"product/requirements/FR-028-NATIVE-MCP-SERVER-001.md","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-028-NATIVE-MCP-SERVER"},"upstream":["UC-028-NATIVE-MCP-SERVER"],"downstream":["CMP-MCP-SERVER","CMP-CORE","CMP-MCP-SERVER.md","packages/cli/tests/change-new.spec.ts","packages/core/tests/sdd-adapters.spec.ts","packages/mcp/tests/mcp-server.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-028-NATIVE-MCP-SERVER","label":"UC-028-NATIVE-MCP-SERVER","title":"UC-028-NATIVE-MCP-SERVER","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"CMP-MCP-SERVER","label":"CMP-MCP-SERVER","title":"CMP-MCP-SERVER","type":"component","layer":"architecture","status":"COMPLIANT"},"classes":"layer-architecture status-compliant"},{"group":"nodes","data":{"id":"CMP-MCP-SERVER.md","label":"CMP-MCP-SERVER.md","title":"CMP-MCP-SERVER.md","type":"component","layer":"architecture","status":"COMPLIANT"},"classes":"layer-architecture status-compliant"},{"group":"nodes","data":{"id":"packages_cli_tests_change-new_spec_ts","label":"change-new.spec.ts","title":"packages/cli/tests/change-new.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/cli/tests/change-new.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"packages_core_tests_sdd-adapters_spec_ts","label":"sdd-adapters.spec.ts","title":"packages/core/tests/sdd-adapters.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/core/tests/sdd-adapters.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"packages_mcp_tests_mcp-server_spec_ts","label":"mcp-server.spec.ts","title":"packages/mcp/tests/mcp-server.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/mcp/tests/mcp-server.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"FR-029-EXPERT-USER-AGENT-001","label":"FR-029-EXPERT-USER-AGENT-001","title":"Generación Automática de Informes de Feedback de Usuario Experto","type":"requirement","layer":"requirement","status":"COMPLIANT","content":"# FR-029-EXPERT-USER-AGENT-001: Informes de Usuario Experto\r\n\r\n## 1. Enunciado Normativo\r\nEl sistema DEBE proveer capacidades para generar informes estructurados de evaluación de usabilidad emitidos por el rol `agent-expert-user`, contrastando la especificación y diseño frente a condiciones operativas de estrés y dividiendo hallazgos en núcleo estricto MVP y banco de ideas para roadmap.\r\n\r\n## 2. Criterios de Aceptación\r\n- **Criterio 1 (Estructura)**: El informe se ajusta a la plantilla canónica `templates/product/user-design-feedback.template.md`.\r\n- **Criterio 2 (Bimodalidad)**: Las observaciones se categorizan estrictamente entre requerimientos esenciales MVP y mejoras diferidas de roadmap.","filePath":"product/requirements/FR-029-EXPERT-USER-AGENT-001.md","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-029-EXPERT-USER-AGENT"},"upstream":["UC-029-EXPERT-USER-AGENT"],"downstream":["CMP-CORE","CMP-CORE.md","packages/core/tests/init-agents.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-029-EXPERT-USER-AGENT","label":"UC-029-EXPERT-USER-AGENT","title":"UC-029-EXPERT-USER-AGENT","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"packages_core_tests_init-agents_spec_ts","label":"init-agents.spec.ts","title":"packages/core/tests/init-agents.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/core/tests/init-agents.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"FR-030-INIT-AGENT-SCAFFOLDING-001","label":"FR-030-INIT-AGENT-SCAFFOLDING-001","title":"Scaffolding de Reglas Cursor y Antigravity en Comando Init","type":"requirement","layer":"requirement","status":"COMPLIANT","content":"# FR-030-INIT-AGENT-SCAFFOLDING-001: Scaffolding en Init\r\n\r\n## 1. Enunciado Normativo\r\nEl comando `aisdlc init` DEBE generar el andamiaje completo para la gobernanza de agentes de IA, incluyendo la creación de archivos de reglas para Cursor (`.cursorrules`) y Google Antigravity (`.gemini/rules`), así como las carpetas canónicas de artefactos y políticas de gobernanza de software.\r\n\r\n## 2. Criterios de Aceptación\r\n- **Criterio 1 (Inicialización Limpia)**: La ejecución de `init` sobre un directorio nuevo crea la estructura canónica sin errores.\r\n- **Criterio 2 (Reglas Operativas)**: Los archivos de reglas de agentes generados contienen los mandamientos inquebrantables y definiciones de roles especializadas.","filePath":"product/requirements/FR-030-INIT-AGENT-SCAFFOLDING-001.md","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-030-INIT-AGENT-SCAFFOLDING"},"upstream":["UC-030-INIT-AGENT-SCAFFOLDING"],"downstream":["CMP-CLI","CMP-CORE","CMP-CLI.md","CMP-CORE.md","packages/core/tests/init-agents.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-030-INIT-AGENT-SCAFFOLDING","label":"UC-030-INIT-AGENT-SCAFFOLDING","title":"UC-030-INIT-AGENT-SCAFFOLDING","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"FR-031-WORKFLOW-AGENT-HANDOFF-001","label":"FR-031-WORKFLOW-AGENT-HANDOFF-001","title":"Gestión y Emisión de Handoffs de Flujo entre Agentes","type":"requirement","layer":"requirement","status":"COMPLIANT","content":"# FR-031-WORKFLOW-AGENT-HANDOFF-001: Handoff de Flujo entre Agentes\r\n\r\n## 1. Enunciado Normativo\r\nEl sistema DEBE proveer herramientas y directivas para que los agentes emitan bloques de handoff interactivos al concluir tareas en niveles de autonomía `>= HUMAN_REVIEW_PLAN`, especificando entregables producidos, rol recomendado y prompt de invocación para el siguiente agente, reservando siempre una ventana explícita de supervisión humana.\r\n\r\n## 2. Criterios de Aceptación\r\n- **Criterio 1 (Bloque Handoff)**: La emisión se ajusta a la plantilla canónica `templates/workflow/agent-handoff.template.md`.\r\n- **Criterio 2 (Detención Controlada)**: El agente se detiene tras emitir el bloque de handoff sin proceder a la siguiente fase de forma desatendida.","filePath":"product/requirements/FR-031-WORKFLOW-AGENT-HANDOFF-001.md","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-031-WORKFLOW-AGENT-HANDOFF"},"upstream":["UC-031-WORKFLOW-AGENT-HANDOFF"],"downstream":["CMP-CORE","CMP-CORE.md","packages/core/tests/init-agents.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-031-WORKFLOW-AGENT-HANDOFF","label":"UC-031-WORKFLOW-AGENT-HANDOFF","title":"UC-031-WORKFLOW-AGENT-HANDOFF","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"FR-033-ARCHITECTURE-TEMPLATES-001","label":"FR-033-ARCHITECTURE-TEMPLATES-001","title":"Plantillas Canónicas de Arquitectura arc42 y NAF v4","type":"requirement","layer":"requirement","status":"COMPLIANT","content":"# FR-033-ARCHITECTURE-TEMPLATES-001: Plantillas Canónicas de Arquitectura\n\n## 1. Enunciado Normativo\nEl sistema DEBE suministrar en `templates/architecture/` un conjunto integral y determinista de plantillas Markdown para las 12 secciones de la fusión arc42 + NAF v4, incorporando YAML frontmatter con metadatos estructurados para facilitar la trazabilidad bidireccional, el análisis automatizado y la interoperabilidad con agentes de IA y herramientas de gobernanza.\n\n## 2. Criterios de Aceptación\n- **Criterio 1 (Cobertura Completa de Secciones)**: `templates/architecture/` debe albergar plantillas canónicas para las secciones 1 a 12 de arc42/NAF v4:\n  1. Introducción y Objetivos (`introduction-and-goals.template.md`)\n  2. Restricciones de Arquitectura (`architecture-constraints.template.md`)\n  3. Contexto y Alcance (`context-and-scope.template.md`)\n  4. Estrategia de Solución (`solution-strategy.template.md`)\n  5. Vista de Bloques L1 Whitebox (`level-1-whitebox.template.md`) y Componentes L1-L3 (`component.template.md`)\n  6. Vista de Ejecución (`runtime-view.template.md`)\n  7. Vista de Despliegue (`deployment-view.template.md`)\n  8. Conceptos Transversales (`cross-cutting-concepts.template.md`)\n  9. Decisiones de Arquitectura (`adr.template.md`)\n  10. Requerimientos de Calidad (`quality-requirements.template.md`)\n  11. Riesgos y Deuda Técnica (`risks-and-technical-debt.template.md`)\n  12. Glosario de Arquitectura (`glossary.template.md`)\n- **Criterio 2 (Estructura y Frontmatter Canónico)**: Cada plantilla debe contener encabezado YAML con `id`, `type`, `version`, `status` y campos de relación acordes con la especificación normativa `process/05_architecture_arc42_nafv4.md`.\n- **Criterio 3 (Verificabilidad Automatizada)**: La existencia, sintaxis y frontmatters de todas las plantillas deben ser validadas mediante pruebas unitarias automatizadas en la suite del monorepo.","filePath":"product/requirements/FR-033-ARCHITECTURE-TEMPLATES-001.md","details":{"productStatus":"COMPLIANT","archStatus":"COMPLIANT","testStatus":"COMPLIANT","hofId":"HOF-CHG-033-ARCHITECTURE-TEMPLATES"},"upstream":["UC-033-ARCHITECTURE-TEMPLATES"],"downstream":["CMP-CORE","CMP-CORE.md","packages/core/tests/architecture-templates.spec.ts","packages/core/tests/init-architecture.spec.ts"]},"classes":"layer-requirement status-compliant"},{"group":"nodes","data":{"id":"UC-033-ARCHITECTURE-TEMPLATES","label":"UC-033-ARCHITECTURE-TEMPLATES","title":"UC-033-ARCHITECTURE-TEMPLATES","type":"usecase","layer":"product","status":"COMPLIANT"},"classes":"layer-product status-compliant"},{"group":"nodes","data":{"id":"packages_core_tests_architecture-templates_spec_ts","label":"architecture-templates.spec.ts","title":"packages/core/tests/architecture-templates.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/core/tests/architecture-templates.spec.ts"},"classes":"layer-test status-compliant"},{"group":"nodes","data":{"id":"packages_core_tests_init-architecture_spec_ts","label":"init-architecture.spec.ts","title":"packages/core/tests/init-architecture.spec.ts","type":"code-test","layer":"test","status":"COMPLIANT","filePath":"packages/core/tests/init-architecture.spec.ts"},"classes":"layer-test status-compliant"},{"group":"edges","data":{"id":"edge-UC-025-STRUCTURED-JSON-VERIFY-FR-025-STRUCTURED-JSON-VERIFY-001","source":"UC-025-STRUCTURED-JSON-VERIFY","target":"FR-025-STRUCTURED-JSON-VERIFY-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-025-STRUCTURED-JSON-VERIFY-001-CMP-CLI","source":"FR-025-STRUCTURED-JSON-VERIFY-001","target":"CMP-CLI","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-025-STRUCTURED-JSON-VERIFY-001-CMP-CORE","source":"FR-025-STRUCTURED-JSON-VERIFY-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-025-STRUCTURED-JSON-VERIFY-001-CMP-CLI.md","source":"FR-025-STRUCTURED-JSON-VERIFY-001","target":"CMP-CLI.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-025-STRUCTURED-JSON-VERIFY-001-CMP-CORE.md","source":"FR-025-STRUCTURED-JSON-VERIFY-001","target":"CMP-CORE.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-025-STRUCTURED-JSON-VERIFY-001-packages_cli_tests_verify-json_spec_ts","source":"FR-025-STRUCTURED-JSON-VERIFY-001","target":"packages_cli_tests_verify-json_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-026-AGENT-NATIVE-CONFIGS-FR-026-AGENT-NATIVE-CONFIGS-001","source":"UC-026-AGENT-NATIVE-CONFIGS","target":"FR-026-AGENT-NATIVE-CONFIGS-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-026-AGENT-NATIVE-CONFIGS-001-CMP-CORE","source":"FR-026-AGENT-NATIVE-CONFIGS-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-026-AGENT-NATIVE-CONFIGS-001-CMP-CORE.md","source":"FR-026-AGENT-NATIVE-CONFIGS-001","target":"CMP-CORE.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-026-AGENT-NATIVE-CONFIGS-001-packages_core_tests_agent-native-configs-drift_spec_ts","source":"FR-026-AGENT-NATIVE-CONFIGS-001","target":"packages_core_tests_agent-native-configs-drift_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-027-ENV-OUTPUT-JSON-FR-027-ENV-OUTPUT-JSON-001","source":"UC-027-ENV-OUTPUT-JSON","target":"FR-027-ENV-OUTPUT-JSON-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-027-ENV-OUTPUT-JSON-001-CMP-CLI","source":"FR-027-ENV-OUTPUT-JSON-001","target":"CMP-CLI","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-027-ENV-OUTPUT-JSON-001-CMP-CORE","source":"FR-027-ENV-OUTPUT-JSON-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-027-ENV-OUTPUT-JSON-001-CMP-CLI.md","source":"FR-027-ENV-OUTPUT-JSON-001","target":"CMP-CLI.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-027-ENV-OUTPUT-JSON-001-packages_cli_tests_verify-json_spec_ts","source":"FR-027-ENV-OUTPUT-JSON-001","target":"packages_cli_tests_verify-json_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-028-NATIVE-MCP-SERVER-FR-028-NATIVE-MCP-SERVER-001","source":"UC-028-NATIVE-MCP-SERVER","target":"FR-028-NATIVE-MCP-SERVER-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-028-NATIVE-MCP-SERVER-001-CMP-MCP-SERVER","source":"FR-028-NATIVE-MCP-SERVER-001","target":"CMP-MCP-SERVER","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-028-NATIVE-MCP-SERVER-001-CMP-CORE","source":"FR-028-NATIVE-MCP-SERVER-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-028-NATIVE-MCP-SERVER-001-CMP-MCP-SERVER.md","source":"FR-028-NATIVE-MCP-SERVER-001","target":"CMP-MCP-SERVER.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-028-NATIVE-MCP-SERVER-001-packages_cli_tests_change-new_spec_ts","source":"FR-028-NATIVE-MCP-SERVER-001","target":"packages_cli_tests_change-new_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-FR-028-NATIVE-MCP-SERVER-001-packages_core_tests_sdd-adapters_spec_ts","source":"FR-028-NATIVE-MCP-SERVER-001","target":"packages_core_tests_sdd-adapters_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-FR-028-NATIVE-MCP-SERVER-001-packages_mcp_tests_mcp-server_spec_ts","source":"FR-028-NATIVE-MCP-SERVER-001","target":"packages_mcp_tests_mcp-server_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-029-EXPERT-USER-AGENT-FR-029-EXPERT-USER-AGENT-001","source":"UC-029-EXPERT-USER-AGENT","target":"FR-029-EXPERT-USER-AGENT-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-029-EXPERT-USER-AGENT-001-CMP-CORE","source":"FR-029-EXPERT-USER-AGENT-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-029-EXPERT-USER-AGENT-001-CMP-CORE.md","source":"FR-029-EXPERT-USER-AGENT-001","target":"CMP-CORE.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-029-EXPERT-USER-AGENT-001-packages_core_tests_init-agents_spec_ts","source":"FR-029-EXPERT-USER-AGENT-001","target":"packages_core_tests_init-agents_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-030-INIT-AGENT-SCAFFOLDING-FR-030-INIT-AGENT-SCAFFOLDING-001","source":"UC-030-INIT-AGENT-SCAFFOLDING","target":"FR-030-INIT-AGENT-SCAFFOLDING-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-030-INIT-AGENT-SCAFFOLDING-001-CMP-CLI","source":"FR-030-INIT-AGENT-SCAFFOLDING-001","target":"CMP-CLI","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-030-INIT-AGENT-SCAFFOLDING-001-CMP-CORE","source":"FR-030-INIT-AGENT-SCAFFOLDING-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-030-INIT-AGENT-SCAFFOLDING-001-CMP-CLI.md","source":"FR-030-INIT-AGENT-SCAFFOLDING-001","target":"CMP-CLI.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-030-INIT-AGENT-SCAFFOLDING-001-CMP-CORE.md","source":"FR-030-INIT-AGENT-SCAFFOLDING-001","target":"CMP-CORE.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-030-INIT-AGENT-SCAFFOLDING-001-packages_core_tests_init-agents_spec_ts","source":"FR-030-INIT-AGENT-SCAFFOLDING-001","target":"packages_core_tests_init-agents_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-031-WORKFLOW-AGENT-HANDOFF-FR-031-WORKFLOW-AGENT-HANDOFF-001","source":"UC-031-WORKFLOW-AGENT-HANDOFF","target":"FR-031-WORKFLOW-AGENT-HANDOFF-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-031-WORKFLOW-AGENT-HANDOFF-001-CMP-CORE","source":"FR-031-WORKFLOW-AGENT-HANDOFF-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-031-WORKFLOW-AGENT-HANDOFF-001-CMP-CORE.md","source":"FR-031-WORKFLOW-AGENT-HANDOFF-001","target":"CMP-CORE.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-031-WORKFLOW-AGENT-HANDOFF-001-packages_core_tests_init-agents_spec_ts","source":"FR-031-WORKFLOW-AGENT-HANDOFF-001","target":"packages_core_tests_init-agents_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-UC-033-ARCHITECTURE-TEMPLATES-FR-033-ARCHITECTURE-TEMPLATES-001","source":"UC-033-ARCHITECTURE-TEMPLATES","target":"FR-033-ARCHITECTURE-TEMPLATES-001","label":"derives-from","relation":"derives-from","status":"COMPLIANT"},"classes":"relation-derives-from status-compliant"},{"group":"edges","data":{"id":"edge-FR-033-ARCHITECTURE-TEMPLATES-001-CMP-CORE","source":"FR-033-ARCHITECTURE-TEMPLATES-001","target":"CMP-CORE","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-033-ARCHITECTURE-TEMPLATES-001-CMP-CORE.md","source":"FR-033-ARCHITECTURE-TEMPLATES-001","target":"CMP-CORE.md","label":"satisfies","relation":"satisfies","status":"COMPLIANT"},"classes":"relation-satisfies status-compliant"},{"group":"edges","data":{"id":"edge-FR-033-ARCHITECTURE-TEMPLATES-001-packages_core_tests_architecture-templates_spec_ts","source":"FR-033-ARCHITECTURE-TEMPLATES-001","target":"packages_core_tests_architecture-templates_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"},{"group":"edges","data":{"id":"edge-FR-033-ARCHITECTURE-TEMPLATES-001-packages_core_tests_init-architecture_spec_ts","source":"FR-033-ARCHITECTURE-TEMPLATES-001","target":"packages_core_tests_init-architecture_spec_ts","label":"verified-by","relation":"verified-by","status":"COMPLIANT"},"classes":"relation-verified-by status-compliant"}];
     var cy = null;
+
+    var reqHoverTimer = null;
+    var currentHoverNodeId = null;
+    var tableHoverTimer = null;
+    var tableHoverId = null;
+    var lastMouseX = 0;
+    var lastMouseY = 0;
+
+    function renderMarkdown(md) {
+      if (!md || !md.trim()) {
+        return '<p style="color: var(--text-muted); font-style: italic;">Sin contenido detallado en el cuerpo del requisito.</p>';
+      }
+      var text = md
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      // Code blocks
+      text = text.replace(new RegExp('\x60{3}([a-z]*)\r?\n([\s\S]*?)\x60{3}', 'g'), function(_, lang, code) {
+        return '<pre><code>' + code.trim() + '</code></pre>';
+      });
+
+      // Inline code
+      text = text.replace(new RegExp('\x60([^\x60]+)\x60', 'g'), '<code>$1</code>');
+
+      // Headers (h3, h2, h1)
+      text = text.replace(new RegExp('^### (.*$)', 'gim'), '<h4>$1</h4>');
+      text = text.replace(new RegExp('^## (.*$)', 'gim'), '<h3>$1</h3>');
+      text = text.replace(new RegExp('^# (.*$)', 'gim'), '<h2>$1</h2>');
+
+      // Bold & italic
+      text = text.replace(new RegExp('\*\*([^*]+)\*\*', 'g'), '<strong>$1</strong>');
+      text = text.replace(new RegExp('\*([^*]+)\*', 'g'), '<em>$1</em>');
+
+      // Unordered lists
+      text = text.replace(new RegExp('^\s*[-*]\s+(.*$)', 'gim'), '<li>$1</li>');
+      text = text.replace(new RegExp('(<li>[\s\S]*?<\/li>(\r?\n)*)+', 'g'), function(match) {
+        return '<ul>' + match + '</ul>';
+      });
+
+      // Paragraph line breaks
+      text = text.replace(new RegExp('\r?\n\r?\n', 'g'), '<br/><br/>');
+
+      return text;
+    }
+
+    function openRequirementPopup(data) {
+      hideTooltip();
+      clearTimeout(reqHoverTimer);
+      clearTimeout(tableHoverTimer);
+
+      var popup = document.getElementById('req-popup');
+      if (!popup) return;
+
+      activePopupReqId = data.id;
+
+      document.getElementById('popup-id').textContent = data.id;
+      document.getElementById('popup-title').textContent = data.title || data.label || 'Requisito';
+
+      var badge = document.getElementById('popup-badge');
+      badge.textContent = data.status || 'CONFORME';
+      badge.className = 'badge ' + (data.status === 'CONFORME' ? 'badge-green' : 'badge-amber');
+
+      var metaHtml = '';
+      if (data.filePath) {
+        metaHtml += '<span><strong>Archivo:</strong> <code>' + data.filePath + '</code></span>';
+      }
+      if (data.upstream && data.upstream.length > 0) {
+        metaHtml += '<span><strong>Upstream:</strong> ' + data.upstream.join(', ') + '</span>';
+      }
+      if (data.downstream && data.downstream.length > 0) {
+        metaHtml += '<span><strong>Downstream:</strong> ' + data.downstream.join(', ') + '</span>';
+      }
+      document.getElementById('popup-meta').innerHTML = metaHtml;
+
+      var bodyEl = document.getElementById('popup-body');
+      bodyEl.innerHTML = renderMarkdown(data.content);
+
+      popup.style.display = 'flex';
+    }
+
+    function closeRequirementPopup() {
+      var popup = document.getElementById('req-popup');
+      if (popup) {
+        popup.style.display = 'none';
+      }
+      activePopupReqId = null;
+    }
+
+    function showTooltip(data, x, y) {
+      var tooltip = document.getElementById('req-tooltip');
+      if (!tooltip) return;
+      document.getElementById('tooltip-id').textContent = data.id;
+      document.getElementById('tooltip-title').textContent = data.title || data.label || '';
+      var bodyEl = document.getElementById('tooltip-body');
+      bodyEl.textContent = data.content ? data.content.trim() : 'Sin descripción en el cuerpo del requisito.';
+
+      tooltip.style.display = 'block';
+      positionTooltip(tooltip, x, y);
+    }
+
+    function positionTooltip(tooltip, x, y) {
+      var pad = 15;
+      var left = x + pad;
+      var top = y + pad;
+      var rect = tooltip.getBoundingClientRect();
+      if (left + rect.width > window.innerWidth - 10) {
+        left = Math.max(10, x - rect.width - pad);
+      }
+      if (top + rect.height > window.innerHeight - 10) {
+        top = Math.max(10, y - rect.height - pad);
+      }
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+    }
+
+    function updateTooltipPosition(x, y) {
+      var tooltip = document.getElementById('req-tooltip');
+      if (tooltip && tooltip.style.display !== 'none') {
+        positionTooltip(tooltip, x, y);
+      }
+    }
+
+    function hideTooltip() {
+      var tooltip = document.getElementById('req-tooltip');
+      if (tooltip) {
+        tooltip.style.display = 'none';
+      }
+    }
+
+    function startRowTooltip(event, id) {
+      tableHoverId = id;
+      lastMouseX = event.clientX;
+      lastMouseY = event.clientY;
+      clearTimeout(tableHoverTimer);
+      tableHoverTimer = setTimeout(function() {
+        if (tableHoverId === id) {
+          var nodeData = null;
+          if (cy) {
+            var n = cy.getElementById(id);
+            if (n && n.length > 0) nodeData = n.data();
+          }
+          if (!nodeData) {
+            var el = elements.find(function(e) { return e.data && e.data.id === id; });
+            if (el) nodeData = el.data;
+          }
+          if (nodeData) {
+            showTooltip(nodeData, lastMouseX, lastMouseY);
+          }
+        }
+      }, 1000);
+    }
+
+    function updateRowTooltipPos(event) {
+      lastMouseX = event.clientX;
+      lastMouseY = event.clientY;
+      updateTooltipPosition(lastMouseX, lastMouseY);
+    }
+
+    function cancelRowTooltip() {
+      clearTimeout(tableHoverTimer);
+      tableHoverId = null;
+      hideTooltip();
+    }
 
     function initCytoscape() {
       if (typeof cytoscape === 'undefined') {
@@ -517,18 +716,58 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
 
       cy.on('tap', 'node', function(evt) {
         var node = evt.target;
+        var data = node.data();
         highlightCriticalPath(node);
-        showNodeDetails(node.data());
+        showNodeDetails(data);
+        if (data.layer === 'requirement') {
+          openRequirementPopup(data);
+        } else {
+          closeRequirementPopup();
+        }
       });
 
       cy.on('tap', function(evt) {
         if (evt.target === cy) {
           resetHighlight();
+          closeRequirementPopup();
         }
+      });
+
+      cy.on('mouseover', 'node', function(evt) {
+        var node = evt.target;
+        var data = node.data();
+        if (data.layer !== 'requirement') return;
+
+        currentHoverNodeId = data.id;
+        clearTimeout(reqHoverTimer);
+
+        var rect = document.getElementById('cy').getBoundingClientRect();
+        var clientX = (evt.originalEvent && evt.originalEvent.clientX) || (rect.left + evt.renderedPosition.x);
+        var clientY = (evt.originalEvent && evt.originalEvent.clientY) || (rect.top + evt.renderedPosition.y);
+
+        reqHoverTimer = setTimeout(function() {
+          if (currentHoverNodeId === data.id) {
+            showTooltip(data, clientX, clientY);
+          }
+        }, 1000);
+      });
+
+      cy.on('mousemove', 'node', function(evt) {
+        var node = evt.target;
+        if (node.data('layer') !== 'requirement') return;
+        if (evt.originalEvent) {
+          updateTooltipPosition(evt.originalEvent.clientX, evt.originalEvent.clientY);
+        }
+      });
+
+      cy.on('mouseout', 'node', function(evt) {
+        clearTimeout(reqHoverTimer);
+        currentHoverNodeId = null;
+        hideTooltip();
       });
     }
 
-    function highlightCriticalPath(node) {
+        function highlightCriticalPath(node) {
       cy.elements().removeClass('highlighted dimmed');
       var predecessors = node.predecessors();
       var successors = node.successors();
@@ -543,6 +782,7 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
       cy.elements().removeClass('highlighted dimmed');
       var sidebar = document.getElementById('sidebar-content');
       sidebar.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem;">Click on any graph node to inspect its critical path and full traceability.</p>';
+      closeRequirementPopup();
     }
 
     function showNodeDetails(data) {
@@ -618,6 +858,7 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
     }
 
     function focusNode(id) {
+      cancelRowTooltip();
       switchTab('graph');
       setTimeout(function() {
         if (!cy) return;
@@ -625,6 +866,9 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
         if (node && node.length > 0) {
           highlightCriticalPath(node);
           showNodeDetails(node.data());
+          if (node.data('layer') === 'requirement') {
+            openRequirementPopup(node.data());
+          }
           cy.center(node);
           cy.zoom(1.2);
         }
@@ -647,6 +891,12 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
         cy.fit(30);
       }
     }
+
+    window.addEventListener('keydown', function(evt) {
+      if (evt.key === 'Escape') {
+        closeRequirementPopup();
+      }
+    });
 
     window.addEventListener('DOMContentLoaded', function() {
       initCytoscape();

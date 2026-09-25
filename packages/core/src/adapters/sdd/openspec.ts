@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
 import { ChangeProfile, ProductHandoff, SddValidationResult, SddWorkspaceInfo } from '../../types/index.js';
+import { extractGherkinBlock } from '../../verifiers/gherkin.js';
 import { SddAdapter } from './types.js';
 
 export class OpenSpecAdapter implements SddAdapter {
@@ -132,6 +133,29 @@ export class OpenSpecAdapter implements SddAdapter {
 
     if (!fs.existsSync(specFile)) {
       errors.push(`Falta el archivo obligatorio 'spec.md' en ${changeWorkspaceDir}.`);
+    } else {
+      try {
+        const rawSpec = fs.readFileSync(specFile, 'utf-8').replace(/^\uFEFF/, '');
+        const match = rawSpec.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+        if (match) {
+          const parsedFm = yaml.load(match[1]) as any;
+          if (parsedFm && parsedFm['acceptance-format'] && parsedFm['acceptance-format'] !== 'gherkin') {
+            errors.push(
+              `El archivo 'spec.md' declara acceptance-format '${parsedFm['acceptance-format']}', pero el estándar obligatorio es 'gherkin'.`
+            );
+          }
+          if (parsedFm && parsedFm['acceptance-format'] === 'gherkin') {
+            const blocks = extractGherkinBlock(rawSpec);
+            if (blocks.length === 0) {
+              errors.push(
+                `El archivo 'spec.md' en ${changeWorkspaceDir} declara 'acceptance-format: gherkin' pero no incluye ningún bloque de especificación ejecutable (\`\`\`gherkin ... \`\`\`).`
+              );
+            }
+          }
+        }
+      } catch {
+        // ignore parse error
+      }
     }
 
     let sidecarFile: string | undefined;

@@ -14,6 +14,7 @@ import {
   SddChangeScaffoldResult,
 } from '../../types/index.js';
 import { walkMdFiles } from '../../utils/fs.js';
+import { extractGherkinBlock } from '../../verifiers/gherkin.js';
 import { computeCanonicalSha256 } from '../../verifiers/pdac-graph.js';
 import { validateArtifactSchema } from '../../verifiers/schemas.js';
 import { parseFrontmatter } from '../../verifiers/traceability.js';
@@ -199,31 +200,67 @@ export function scaffoldSddChange(options: SddChangeScaffoldOptions): SddChangeS
         : '';
 
     const specPath = path.join(changeDir, 'spec.md');
+    const specFmObj = {
+      id: `SPEC-${canonicalId}`,
+      type: 'delivery-spec',
+      'change-id': canonicalId,
+      profile: 'patch',
+      'acceptance-format': 'gherkin',
+      'cucumber-tags': [`@${canonicalId}`, '@patch', '@automated'],
+    };
     const specContent = `---
 id: SPEC-${canonicalId}
 type: delivery-spec
 change-id: ${canonicalId}
 profile: patch
+acceptance-format: gherkin
+cucumber-tags:
+  - "@${canonicalId}"
+  - "@patch"
+  - "@automated"
 ${citationsSection}verification:
   method: automated-test
   command: pnpm test
 ---
 
-# Especificación de Entrega (Parche Rápido): ${canonicalId}
+# Delivery Specification (Fast Patch): ${canonicalId}
 
-## 1. Alcance y Justificación del Parche
+## 1. Patch Scope and Justification
 ${name}
 
-## 2. Verificación Automatizada
-- **Comando**: \`pnpm test\`
-- **Criterio**: Todas las pruebas unitarias y de regresión deben ejecutarse y pasar satisfactoriamente.
+## 2. Acceptance and Correction Criteria (BDD Gherkin)
+
+\`\`\`gherkin
+@${canonicalId} @patch @automated
+Feature: Patch ${canonicalId} - ${name}
+  Scenario: Defect fix verification
+    Given the system exhibits the defect identified in "${name}"
+    When the patch fix is applied
+    Then the anomalous behavior is resolved and verification passes
+\`\`\`
+
+## 3. Automated Verification
+- **Command**: \`pnpm test\`
+- **Criteria**: All unit and regression tests must pass.
 `;
     fs.writeFileSync(specPath, specContent, 'utf-8');
     createdFiles.push(specPath);
 
+    const specGherkinBlocks = extractGherkinBlock(specContent);
+    if (specGherkinBlocks.length === 0) {
+      errors.push(
+        `El archivo 'spec.md' de la entrega debe incluir obligatoriamente especificaciones en formato Gherkin (\`\`\`gherkin ... \`\`\`).`
+      );
+    }
+
     const wsValidation = adapter.validateWorkspace(changeDir);
     if (!wsValidation.valid) {
       errors.push(...wsValidation.errors);
+    }
+
+    const specValidation = validateArtifactSchema(specFmObj as any, 'delivery-spec', rootDir);
+    if (!specValidation.valid) {
+      errors.push(...specValidation.errors);
     }
 
     return {
@@ -283,14 +320,14 @@ El sistema DEBE implementar y soportar la capacidad de ${name}.
 \`\`\`gherkin
 @${reqId} @automated
 Feature: ${name}
-  Como usuario o sistema cliente
-  Quiero ejecutar la funcionalidad de ${name}
-  Para obtener el resultado y valor esperado
+  As a user or client system
+  I want to execute the capability for ${name}
+  So that the expected outcome and value are achieved
 
-  Scenario: Flujo nominal exitoso
-    Given el sistema se encuentra en estado operativo
-    When se ejecuta la operación de ${name}
-    Then la operación finaliza satisfactoriamente
+  Scenario: Nominal successful flow
+    Given the system is in an operational state
+    When the operation for "${name}" is executed
+    Then the operation completes successfully
 \`\`\`
 
 ---
@@ -382,6 +419,17 @@ superseded-by: null
 
 ## 1. Enunciado
 Definición de artefacto citado en ${canonicalId}.
+
+## 2. Criterios de Aceptación en Formato Gherkin (Cucumber)
+
+\`\`\`gherkin
+@${id} @automated
+Feature: ${name}
+  Scenario: Expected behavior verification
+    Given the system is initialized for "${name}"
+    When the request associated with ${id} is processed
+    Then the response satisfies acceptance criteria
+\`\`\`
 `;
         fs.writeFileSync(reqFilePath, reqContent, 'utf-8');
         createdFiles.push(reqFilePath);
@@ -450,35 +498,66 @@ ${name}
   fs.writeFileSync(proposalPath, proposalContent, 'utf-8');
   createdFiles.push(proposalPath);
 
-  // 7. Generate spec.md
+  // 7. Generate spec.md with mandatory Gherkin formatting
   const specPath = path.join(changeDir, 'spec.md');
+  const specFmObj = {
+    id: `SPEC-${canonicalId}`,
+    type: 'delivery-spec',
+    'change-id': canonicalId,
+    profile,
+    'acceptance-format': 'gherkin',
+    'cucumber-tags': [`@${canonicalId}`, '@automated'],
+  };
   const specContent = `---
 id: SPEC-${canonicalId}
 type: delivery-spec
 change-id: ${canonicalId}
 profile: ${profile}
+acceptance-format: gherkin
+cucumber-tags:
+  - "@${canonicalId}"
+  - "@automated"
 ---
 
-# Especificación de Entrega: ${canonicalId}
+# Delivery Specification: ${canonicalId}
 
-## 1. Escenarios de Comportamiento Funcional
+## 1. Functional Behavior Scenarios (BDD Gherkin)
 
-### Escenario 1: Flujo Exitoso
-- **GIVEN**: El sistema se encuentra en un estado operacional nominal.
-- **WHEN**: Se procesa la operación correspondiente a ${name}.
-- **THEN**: La operación se ejecuta exitosamente cumpliendo los criterios de aceptación.
+\`\`\`gherkin
+@${canonicalId} @functional @automated
+Feature: ${name}
+  As a system component or user
+  I want to process the operation for ${name}
+  So that delivery criteria are satisfied
+
+  Scenario: Nominal successful flow
+    Given the system is in a nominal operational state
+    When the operation for "${name}" is processed
+    Then the operation completes successfully satisfying acceptance criteria
+\`\`\`
 
 ---
 
-## 2. Escenarios de Ciberseguridad y Mitigación (Abuse Scenarios)
+## 2. Cybersecurity and Mitigation Scenarios (Abuse Scenarios)
 
-### Escenario 2: Intento de Acceso No Autorizado o Payload Inválido
-- **GIVEN**: Un actor no autenticado o con credenciales inválidas intenta acceder a la funcionalidad.
-- **WHEN**: La solicitud llega a los enclaves del sistema.
-- **THEN**: La conexión es rechazada inmediatamente y se registra un evento de seguridad.
+\`\`\`gherkin
+@${canonicalId} @security @mitigation
+Feature: Security Mitigation for ${canonicalId}
+  Scenario: Unauthorized access attempt or invalid payload
+    Given an unauthenticated actor or invalid credentials
+    When the request reaches protected enclaves
+    Then the connection is rejected immediately and a security event is recorded
+\`\`\`
 `;
   fs.writeFileSync(specPath, specContent, 'utf-8');
   createdFiles.push(specPath);
+
+  const specGherkinBlocks = extractGherkinBlock(specContent);
+  if (specGherkinBlocks.length === 0) {
+    errors.push(
+      `El archivo 'spec.md' de la entrega debe incluir obligatoriamente especificaciones en formato Gherkin (\`\`\`gherkin ... \`\`\`).`
+    );
+  }
 
   // 8. Generate design.md
   const designPath = path.join(changeDir, 'design.md');
@@ -651,6 +730,11 @@ ${yaml.dump(tasksFm, { indent: 2, lineWidth: -1 }).trim()}
   const wsValidation = adapter.validateWorkspace(changeDir);
   if (!wsValidation.valid) {
     errors.push(...wsValidation.errors);
+  }
+
+  const specValidation = validateArtifactSchema(specFmObj as any, 'delivery-spec', rootDir);
+  if (!specValidation.valid) {
+    errors.push(...specValidation.errors);
   }
 
   const tasksValidation = validateArtifactSchema(tasksFm as any, 'tasks', rootDir);
