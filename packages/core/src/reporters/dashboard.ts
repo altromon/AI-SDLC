@@ -23,6 +23,7 @@ import { verifyTraceability } from '../verifiers/traceability.js';
 import { verifyQualityGate } from '../verifiers/quality-gate.js';
 import { verifyTasksGovernance } from '../verifiers/governance.js';
 import { verifyTestingCoverage } from '../verifiers/testing-coverage.js';
+import { walkMdFiles } from '../utils/fs.js';
 import { aggregatePrKpis } from './pr-kpis.js';
 import { getCytoscapeScript } from './cytoscape-bundle.js';
 
@@ -142,6 +143,13 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
           status,
         });
         if (!nodeMap.has(testId)) {
+          let testContent = undefined;
+          const fullTestPath = path.isAbsolute(t) ? t : path.join(rootDir, t);
+          if (fs.existsSync(fullTestPath)) {
+            try {
+              testContent = fs.readFileSync(fullTestPath, 'utf-8');
+            } catch {}
+          }
           nodeMap.set(testId, {
             id: testId,
             label: path.basename(t),
@@ -150,6 +158,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
             layer: 'test',
             status: 'COMPLIANT',
             filePath: t,
+            content: testContent ? '```' + (t.endsWith('.feature') ? 'gherkin' : 'typescript') + '\n' + testContent.substring(0, 1500) + (testContent.length > 1500 ? '\n... (truncated)' : '') + '\n```' : undefined,
           });
         }
       }
@@ -160,6 +169,67 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
   for (const [id, node] of nodeMap.entries()) {
     if (driftTargets.has(id)) {
       node.status = 'DRIFT';
+    }
+  }
+
+  // Populate bidirectional upstream and downstream traces for all nodes
+  for (const e of edges) {
+    const srcNode = nodeMap.get(e.source);
+    const tgtNode = nodeMap.get(e.target);
+    if (srcNode) {
+      srcNode.downstream = srcNode.downstream || [];
+      if (!srcNode.downstream.includes(e.target)) {
+        srcNode.downstream.push(e.target);
+      }
+    }
+    if (tgtNode) {
+      tgtNode.upstream = tgtNode.upstream || [];
+      if (!tgtNode.upstream.includes(e.source)) {
+        tgtNode.upstream.push(e.source);
+      }
+    }
+  }
+
+  // Enrich all nodes with filePath, title, content, and type by scanning workspace artifact directories
+  const artifactDirs = ['product', 'architecture', 'specs', 'security'];
+  for (const dirName of artifactDirs) {
+    const fullDirPath = path.join(rootDir, dirName);
+    if (fs.existsSync(fullDirPath)) {
+      const files = walkMdFiles(fullDirPath);
+      for (const f of files) {
+        try {
+          const fileContent = fs.readFileSync(f, 'utf-8');
+          const relPath = path.relative(rootDir, f).replace(/\\/g, '/');
+          const baseName = path.basename(f, '.md');
+          const match = fileContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+          let idVal = undefined;
+          let titleVal = undefined;
+          let typeVal = undefined;
+          if (match) {
+            const idM = match[1].match(/^id:\s*["']?([^"'\r\n]+)["']?/m);
+            if (idM) idVal = idM[1].trim();
+            const tM = match[1].match(/^title:\s*["']?([^"'\r\n]+)["']?/m);
+            if (tM) titleVal = tM[1].trim();
+            const typM = match[1].match(/^type:\s*["']?([^"'\r\n]+)["']?/m);
+            if (typM) typeVal = typM[1].trim();
+          }
+
+          const candidateIds = [idVal, baseName, path.basename(f)].filter((id): id is string => Boolean(id));
+          for (const cid of candidateIds) {
+            const n = nodeMap.get(cid);
+            if (n) {
+              if (!n.filePath) n.filePath = relPath;
+              if ((!n.title || n.title === n.id) && titleVal) n.title = titleVal;
+              if (!n.content) n.content = fileContent.replace(/^---\r?\n[\s\S]*?\r?\n---/, '').trim();
+              if (typeVal && (!n.type || n.type === 'product' || n.type === 'architecture')) {
+                n.type = typeVal;
+              }
+            }
+          }
+        } catch {
+          // Ignore unparseable
+        }
+      }
     }
   }
 
@@ -388,6 +458,63 @@ export function renderDashboardHtml(
     /* Timeline & KPI Historical */
     .chart-container { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; }
     .chart-container h3 { font-size: 0.9rem; color: var(--accent-cyan); margin-bottom: 16px; }
+    /* REQUIREMENT HOVER TOOLTIP */
+    .req-tooltip {
+      position: fixed;
+      z-index: 10000;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 6px;
+      padding: 8px 12px;
+      max-width: 280px;
+      font-size: 0.75rem;
+      line-height: 1.35;
+      color: var(--text-main);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      animation: tooltipFadeIn 0.12s ease-out;
+    }
+
+    @keyframes tooltipFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tooltip-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 3px;
+    }
+
+    .tooltip-id {
+      font-weight: 700;
+      color: var(--accent-cyan);
+      font-size: 0.75rem;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+
+    .tooltip-title {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tooltip-body {
+      font-size: 0.7rem;
+      color: #cbd5e1;
+      max-height: 80px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+    }
   </style>
 </head>
 <body>
@@ -411,31 +538,6 @@ export function renderDashboardHtml(
   </nav>
 
   <main>
-    <!-- REQUIREMENT POPUP CARD -->
-    <div id="req-popup" class="req-popup-card" style="display: none;">
-      <div class="popup-header">
-        <div class="popup-title-area">
-          <div class="popup-badge-row">
-            <span class="badge" id="popup-badge">REQUIREMENT</span>
-            <span class="popup-id" id="popup-id">FR-000</span>
-          </div>
-          <h3 class="popup-title" id="popup-title">Requirement Title</h3>
-        </div>
-        <button class="popup-close-btn" onclick="closeRequirementPopup()" title="Close (Esc)">✕</button>
-      </div>
-      <div class="popup-meta" id="popup-meta"></div>
-      <div class="popup-body" id="popup-body"></div>
-    </div>
-
-    <!-- REQUIREMENT HOVER TOOLTIP (1s hover) -->
-    <div id="req-tooltip" class="req-tooltip" style="display: none;">
-      <div class="tooltip-header">
-        <span class="tooltip-id" id="tooltip-id">FR-000</span>
-        <span class="tooltip-title" id="tooltip-title">Title</span>
-      </div>
-      <div class="tooltip-body" id="tooltip-body"></div>
-    </div>
-
     <!-- TAB 1: CYTOSCAPE GRAPH -->
     <div id="tab-graph" class="tab-panel active" style="flex: 1;">
       <div id="graph-view">
@@ -708,6 +810,15 @@ export function renderDashboardHtml(
     </div>
   </main>
 
+    <!-- REQUIREMENT HOVER TOOLTIP (1s hover) -->
+    <div id="req-tooltip" class="req-tooltip" style="display: none;">
+      <div class="tooltip-header">
+        <span class="tooltip-id" id="tooltip-id">FR-000</span>
+        <span class="tooltip-title" id="tooltip-title">Title</span>
+      </div>
+      <div class="tooltip-body" id="tooltip-body"></div>
+    </div>
+
   <script>
     ${cytoscapeScript}
   </script>
@@ -726,81 +837,47 @@ export function renderDashboardHtml(
       if (!md || !md.trim()) {
         return '<p style="color: var(--text-muted); font-style: italic;">Sin contenido detallado en el cuerpo del requisito.</p>';
       }
-      var text = md
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+      try {
+        var text = md
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
 
-      // Code blocks
-      text = text.replace(new RegExp('\\x60{3}([a-z]*)\\r?\\n([\\s\\S]*?)\\x60{3}', 'g'), function(_, lang, code) {
-        return '<pre><code>' + code.trim() + '</code></pre>';
-      });
+        // Code blocks (triple backticks)
+        var tick = String.fromCharCode(96);
+        var codeBlockRe = new RegExp(tick + '{3}([a-z]*)[\\\\r\\\\n]+([\\\\s\\\\S]*?)' + tick + '{3}', 'g');
+        text = text.replace(codeBlockRe, function(_, lang, code) {
+          return '<pre><code>' + code.trim() + '</code></pre>';
+        });
 
-      // Inline code
-      text = text.replace(new RegExp('\\x60([^\\x60]+)\\x60', 'g'), '<code>$1</code>');
+        // Inline code (single backtick)
+        var inlineCodeRe = new RegExp(tick + '([^' + tick + ']+)' + tick, 'g');
+        text = text.replace(inlineCodeRe, '<code>$1</code>');
 
-      // Headers (h3, h2, h1)
-      text = text.replace(new RegExp('^### (.*$)', 'gim'), '<h4>$1</h4>');
-      text = text.replace(new RegExp('^## (.*$)', 'gim'), '<h3>$1</h3>');
-      text = text.replace(new RegExp('^# (.*$)', 'gim'), '<h2>$1</h2>');
+        // Headers (h3, h2, h1)
+        text = text.replace(/^### (.*$)/gim, '<h4>$1</h4>');
+        text = text.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+        text = text.replace(/^# (.*$)/gim, '<h2>$1</h2>');
 
-      // Bold & italic
-      text = text.replace(new RegExp('\\*\\*([^*]+)\\*\\*', 'g'), '<strong>$1</strong>');
-      text = text.replace(new RegExp('\\*([^*]+)\\*', 'g'), '<em>$1</em>');
+        // Bold & italic
+        text = text.replace(/\\*\\*([^*]+)\\*\\*/g, '<strong>$1</strong>');
+        text = text.replace(/\\*([^*]+)\\*/g, '<em>$1</em>');
 
-      // Unordered lists
-      text = text.replace(new RegExp('^\\s*[-*]\\s+(.*$)', 'gim'), '<li>$1</li>');
-      text = text.replace(new RegExp('(<li>[\\s\\S]*?<\\/li>(\\r?\\n)*)+', 'g'), function(match) {
-        return '<ul>' + match + '</ul>';
-      });
+        // Unordered lists
+        text = text.replace(/^\\s*[-*]\\s+(.*$)/gim, '<li>$1</li>');
+        text = text.replace(/(<li>[\\s\\S]*?<\\/li>(?:\\r?\\n)*)+/g, function(match) {
+          return '<ul>' + match + '</ul>';
+        });
 
-      // Paragraph line breaks
-      text = text.replace(new RegExp('\\r?\\n\\r?\\n', 'g'), '<br/><br/>');
+        // Paragraph line breaks
+        text = text.replace(/\\r?\\n\\r?\\n/g, '<br/><br/>');
 
-      return text;
-    }
-
-    function openRequirementPopup(data) {
-      hideTooltip();
-      clearTimeout(reqHoverTimer);
-      clearTimeout(tableHoverTimer);
-
-      var popup = document.getElementById('req-popup');
-      if (!popup) return;
-
-      activePopupReqId = data.id;
-
-      document.getElementById('popup-id').textContent = data.id;
-      document.getElementById('popup-title').textContent = data.title || data.label || 'Requisito';
-
-      var badge = document.getElementById('popup-badge');
-      badge.textContent = data.status || 'CONFORME';
-      badge.className = 'badge ' + (data.status === 'CONFORME' ? 'badge-green' : 'badge-amber');
-
-      var metaHtml = '';
-      if (data.filePath) {
-        metaHtml += '<span><strong>Archivo:</strong> <code>' + data.filePath + '</code></span>';
+        return text;
+      } catch (err) {
+        return '<div style="white-space: pre-wrap; font-family: monospace;">' +
+          md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+          '</div>';
       }
-      if (data.upstream && data.upstream.length > 0) {
-        metaHtml += '<span><strong>Upstream:</strong> ' + data.upstream.join(', ') + '</span>';
-      }
-      if (data.downstream && data.downstream.length > 0) {
-        metaHtml += '<span><strong>Downstream:</strong> ' + data.downstream.join(', ') + '</span>';
-      }
-      document.getElementById('popup-meta').innerHTML = metaHtml;
-
-      var bodyEl = document.getElementById('popup-body');
-      bodyEl.innerHTML = renderMarkdown(data.content);
-
-      popup.style.display = 'flex';
-    }
-
-    function closeRequirementPopup() {
-      var popup = document.getElementById('req-popup');
-      if (popup) {
-        popup.style.display = 'none';
-      }
-      activePopupReqId = null;
     }
 
     function showTooltip(data, x, y) {
@@ -809,7 +886,8 @@ export function renderDashboardHtml(
       document.getElementById('tooltip-id').textContent = data.id;
       document.getElementById('tooltip-title').textContent = data.title || data.label || '';
       var bodyEl = document.getElementById('tooltip-body');
-      bodyEl.textContent = data.content ? data.content.trim() : 'Sin descripción en el cuerpo del requisito.';
+      var desc = data.content ? data.content.trim() : (data.title || data.id) + ' [' + (data.layer || data.type || 'NODE').toUpperCase() + ']';
+      bodyEl.textContent = desc;
 
       tooltip.style.display = 'block';
       positionTooltip(tooltip, x, y);
@@ -887,6 +965,8 @@ export function renderDashboardHtml(
       cy = cytoscape({
         container: document.getElementById('cy'),
         elements: elements,
+        boxSelectionEnabled: false,
+        autoungrabify: true,
         style: [
           {
             selector: 'node',
@@ -979,24 +1059,17 @@ export function renderDashboardHtml(
         var data = node.data();
         highlightCriticalPath(node);
         showNodeDetails(data);
-        if (data.layer === 'requirement') {
-          openRequirementPopup(data);
-        } else {
-          closeRequirementPopup();
-        }
       });
 
       cy.on('tap', function(evt) {
         if (evt.target === cy) {
           resetHighlight();
-          closeRequirementPopup();
         }
       });
 
       cy.on('mouseover', 'node', function(evt) {
         var node = evt.target;
         var data = node.data();
-        if (data.layer !== 'requirement') return;
 
         currentHoverNodeId = data.id;
         clearTimeout(reqHoverTimer);
@@ -1013,8 +1086,6 @@ export function renderDashboardHtml(
       });
 
       cy.on('mousemove', 'node', function(evt) {
-        var node = evt.target;
-        if (node.data('layer') !== 'requirement') return;
         if (evt.originalEvent) {
           updateTooltipPosition(evt.originalEvent.clientX, evt.originalEvent.clientY);
         }
@@ -1042,26 +1113,40 @@ export function renderDashboardHtml(
       cy.elements().removeClass('highlighted dimmed');
       var sidebar = document.getElementById('sidebar-content');
       sidebar.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem;">Click on any graph node to inspect its critical path and full traceability.</p>';
-      closeRequirementPopup();
     }
 
     function showNodeDetails(data) {
-      var sidebar = document.getElementById('sidebar-content');
-      var isConform = data.status === 'COMPLIANT' || data.status === 'CONFORME';
-      var html = '<div class="sidebar-field"><strong>ID / Identifier:</strong> <code>' + data.id + '</code></div>';
-      html += '<div class="sidebar-field"><strong>Title:</strong> ' + (data.title || data.label) + '</div>';
-      html += '<div class="sidebar-field"><strong>Layer / Type:</strong> <span class="badge" style="background:#334155;">' + data.layer.toUpperCase() + ' (' + data.type + ')</span></div>';
-      html += '<div class="sidebar-field"><strong>Status:</strong> <span class="badge ' + (isConform ? 'badge-green' : 'badge-amber') + '">' + data.status + '</span></div>';
-      if (data.filePath) {
-        html += '<div class="sidebar-field"><strong>Physical File:</strong> <code>' + data.filePath + '</code></div>';
+      try {
+        var sidebar = document.getElementById('sidebar-content');
+        if (!sidebar) return;
+        var isConform = data.status === 'COMPLIANT' || data.status === 'CONFORME';
+        var layerName = (data.layer || data.type || 'NODE').toUpperCase();
+        var html = '<div class="sidebar-field"><strong>ID / Identifier:</strong> <code>' + data.id + '</code></div>';
+        html += '<div class="sidebar-field"><strong>Title:</strong> ' + (data.title || data.label || data.id) + '</div>';
+        html += '<div class="sidebar-field"><strong>Layer / Type:</strong> <span class="badge" style="background:#334155;">' + layerName + ' (' + (data.type || data.layer || 'node') + ')</span></div>';
+        html += '<div class="sidebar-field"><strong>Status:</strong> <span class="badge ' + (isConform ? 'badge-green' : 'badge-amber') + '">' + (data.status || 'UNKNOWN') + '</span></div>';
+        if (data.filePath) {
+          var cleanMetaPath = data.filePath.split('\\\\').join('/');
+          if (cleanMetaPath.indexOf('./') === 0) cleanMetaPath = cleanMetaPath.substring(2);
+          var metaHref = (cleanMetaPath.indexOf('http://') === 0 || cleanMetaPath.indexOf('https://') === 0 || cleanMetaPath.indexOf('file://') === 0) ? cleanMetaPath : '../' + cleanMetaPath;
+          html += '<div class="sidebar-field"><strong>Physical File:</strong> <a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline;" title="Abrir archivo: ' + cleanMetaPath + '"><code>' + cleanMetaPath + ' ↗</code></a></div>';
+        }
+        if (data.upstream && data.upstream.length > 0) {
+          html += '<div class="sidebar-field"><strong>Upstream Traces (Product):</strong> ' + data.upstream.join(', ') + '</div>';
+        }
+        if (data.downstream && data.downstream.length > 0) {
+          html += '<div class="sidebar-field"><strong>Downstream Traces (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
+        }
+        if (data.content && data.content.trim()) {
+          html += '<div class="sidebar-field" style="margin-top: 4px;"><strong>Contenido / Especificación del Fichero:</strong>';
+          html += '<div class="sidebar-content-preview" style="margin-top: 6px; max-height: 280px; overflow-y: auto; background: rgba(11, 17, 32, 0.75); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.74rem; line-height: 1.45; color: #cbd5e1;">';
+          html += renderMarkdown(data.content);
+          html += '</div></div>';
+        }
+        sidebar.innerHTML = html;
+      } catch (err) {
+        console.error('Error showing node details:', err);
       }
-      if (data.upstream && data.upstream.length > 0) {
-        html += '<div class="sidebar-field"><strong>Upstream Traces (Product):</strong> ' + data.upstream.join(', ') + '</div>';
-      }
-      if (data.downstream && data.downstream.length > 0) {
-        html += '<div class="sidebar-field"><strong>Downstream Traces (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
-      }
-      sidebar.innerHTML = html;
     }
 
     function applyLayout(name) {
@@ -1126,9 +1211,6 @@ export function renderDashboardHtml(
         if (node && node.length > 0) {
           highlightCriticalPath(node);
           showNodeDetails(node.data());
-          if (node.data('layer') === 'requirement') {
-            openRequirementPopup(node.data());
-          }
           cy.center(node);
           cy.zoom(1.2);
         }
@@ -1141,6 +1223,7 @@ export function renderDashboardHtml(
     }
 
     function switchTab(name) {
+      hideTooltip();
       document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
       document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
       event.target?.classList?.add('active');
@@ -1153,8 +1236,8 @@ export function renderDashboardHtml(
     }
 
     window.addEventListener('keydown', function(evt) {
-      if (evt.key === 'Escape') {
-        closeRequirementPopup();
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        hideTooltip();
       }
     });
 
