@@ -779,12 +779,29 @@ export interface PromptInjectionFinding {
 // --- Interactive Web Dashboard & Cytoscape Graph Types ---
 export type GraphNodeLayer = 'product' | 'requirement' | 'architecture' | 'test';
 export type GraphNodeStatus = 'COMPLIANT' | 'ORPHAN' | 'DRIFT' | 'REVIEW' | 'CONFORME' | 'HUÉRFANO';
+export type GraphNodeType =
+  | 'journey'
+  | 'actor'
+  | 'threat-actor'
+  | 'use-case'
+  | 'business-rule'
+  | 'abuse-case'
+  | 'hazard'
+  | 'requirement'
+  | 'security-requirement'
+  | 'safety-requirement'
+  | 'component'
+  | 'adr'
+  | 'security-enclave'
+  | 'bdd-feature'
+  | 'code-test'
+  | string;
 
 export interface CytoscapeNodeData {
   id: string;
   label: string;
   title: string;
-  type: string;
+  type: GraphNodeType;
   layer: GraphNodeLayer;
   status: GraphNodeStatus;
   filePath?: string;

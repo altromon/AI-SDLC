@@ -7,6 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { execFileSync } from 'child_process';
+import yaml from 'js-yaml';
 import {
   CytoscapeEdgeData,
   CytoscapeElement,
@@ -43,25 +44,132 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
 
   const nodeMap = new Map<string, CytoscapeNodeData>();
   const edges: CytoscapeEdgeData[] = [];
+  const edgeKeySet = new Set<string>();
   const driftTargets = new Set(pdac.drifts.map((d) => d.targetId));
 
-  // 1. Process PDaC Baseline Nodes (Product, Handoffs, Architecture)
+  function addEdge(e: CytoscapeEdgeData) {
+    const key = `${e.source}->${e.target}:${e.relation}`;
+    if (!edgeKeySet.has(key)) {
+      edgeKeySet.add(key);
+      edges.push(e);
+    }
+  }
+
+  // 1. Process PDaC Baseline Nodes (Drifts)
   for (const n of pdac.drifts) {
     driftTargets.add(n.targetId);
   }
 
-  // 2. Process Traceability Requirements
+  // 2. Scan and catalog workspace artifacts (product, security, architecture, specs)
+  interface ScannedArtifact {
+    id: string;
+    type: string;
+    title: string;
+    layer: GraphNodeLayer;
+    filePath: string;
+    content: string;
+    frontmatter: Record<string, any>;
+  }
+
+  const scannedArtifactsMap = new Map<string, ScannedArtifact>();
+  const artifactDirs = ['product', 'architecture', 'specs', 'security'];
+  for (const dirName of artifactDirs) {
+    const fullDirPath = path.join(rootDir, dirName);
+    if (fs.existsSync(fullDirPath)) {
+        const files = walkMdFiles(fullDirPath);
+        for (const f of files) {
+          try {
+            const fileContent = fs.readFileSync(f, 'utf-8');
+            const relPath = path.relative(rootDir, f).replace(/\\/g, '/');
+            const match = fileContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+            if (!match) continue;
+            let fm: Record<string, any> = {};
+            try {
+              fm = (yaml.load(match[1]) as Record<string, any>) || {};
+            } catch {
+              continue;
+            }
+
+            const id = typeof fm.id === 'string' ? fm.id.trim() : undefined;
+            if (!id) continue;
+
+            let type = typeof fm.type === 'string' ? fm.type.trim() : '';
+            let layer: GraphNodeLayer = 'product';
+
+            if (id.startsWith('JRN-') || type === 'journey') {
+              type = 'journey';
+              layer = 'product';
+            } else if (id.startsWith('ACT-THREAT-') || type === 'threat-actor') {
+              type = 'threat-actor';
+              layer = 'product';
+            } else if (id.startsWith('ACT-') || type === 'actor') {
+              type = 'actor';
+              layer = 'product';
+            } else if (id.startsWith('UC-') || type === 'use-case' || type === 'usecase') {
+              type = 'use-case';
+              layer = 'product';
+            } else if (id.startsWith('BR-') || type === 'business-rule' || type === 'rule') {
+              type = 'business-rule';
+              layer = 'product';
+            } else if (id.startsWith('ABUSE-') || type === 'abuse-case') {
+              type = 'abuse-case';
+              layer = 'product';
+            } else if (id.startsWith('HAZ-') || type === 'hazard') {
+              type = 'hazard';
+              layer = 'product';
+            } else if (id.startsWith('SEC-ENC-') || type === 'security-enclave') {
+              type = 'security-enclave';
+              layer = 'architecture';
+            } else if (id.startsWith('CMP-') || type === 'component') {
+              type = 'component';
+              layer = 'architecture';
+            } else if (id.startsWith('ADR-') || type === 'architecture-decision-record' || type === 'adr') {
+              type = 'adr';
+              layer = 'architecture';
+            } else if (id.startsWith('SEC-REQ-') || type === 'security-requirement') {
+              type = 'security-requirement';
+              layer = 'requirement';
+            } else if (id.startsWith('FR-') || id.startsWith('QR-') || id.startsWith('CON-') || type === 'requirement') {
+              type = 'requirement';
+              layer = 'requirement';
+            } else {
+              type = type || 'product';
+              layer = 'product';
+            }
+
+            const title = typeof fm.title === 'string' ? fm.title.trim() : id;
+            const content = fileContent.replace(/^---\r?\n[\s\S]*?\r?\n---/, '').trim();
+
+            scannedArtifactsMap.set(id, {
+              id,
+              type,
+              title,
+              layer,
+              filePath: relPath,
+              content,
+              frontmatter: fm,
+            });
+          } catch {
+            // Ignore unparseable files
+          }
+        }
+      }
+    }
+
+  // 3. Process Traceability Requirements
   for (const r of trace.rows) {
     const isOk =
       (r.productStatus === 'COMPLIANT' || r.productStatus === 'CONFORME') &&
       (r.archStatus === 'COMPLIANT' || r.archStatus === 'CONFORME') &&
       (r.testStatus === 'COMPLIANT' || r.testStatus === 'CONFORME');
     const status: GraphNodeStatus = isOk ? 'COMPLIANT' : 'ORPHAN';
+    const reqType = r.id.startsWith('SEC-REQ-') ? 'security-requirement' : (r.type || 'requirement');
+
     nodeMap.set(r.id, {
       id: r.id,
       label: r.id,
       title: r.title,
-      type: r.type || 'requirement',
+      type: reqType,
       layer: 'requirement',
       status,
       content: r.content,
@@ -83,20 +191,22 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
     for (const up of r.productTraces.split(',')) {
       const u = up.trim();
       if (u && u !== 'NINGUNO' && u !== 'NONE') {
-        edges.push({
+        const isAbuse = u.startsWith('ABUSE-');
+        addEdge({
           id: `edge-${u}-${r.id}`,
           source: u,
           target: r.id,
-          label: 'derives-from',
-          relation: 'derives-from',
+          label: isAbuse ? 'mitigated-by' : 'derives-from',
+          relation: isAbuse ? 'mitigated-by' : 'derives-from',
           status,
         });
         if (!nodeMap.has(u)) {
+          const upType = u.startsWith('ACT-') ? 'actor' : u.startsWith('UC-') ? 'use-case' : u.startsWith('BR-') ? 'business-rule' : u.startsWith('ABUSE-') ? 'abuse-case' : 'product';
           nodeMap.set(u, {
             id: u,
             label: u,
             title: u,
-            type: u.startsWith('ACT-') ? 'actor' : u.startsWith('UC-') ? 'usecase' : u.startsWith('BR-') ? 'rule' : 'product',
+            type: upType,
             layer: 'product',
             status: 'COMPLIANT',
           });
@@ -108,7 +218,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
     for (const arch of r.archTraces.split(',')) {
       const a = arch.trim();
       if (a && a !== 'NINGUNO' && a !== 'NONE') {
-        edges.push({
+        addEdge({
           id: `edge-${r.id}-${a}`,
           source: r.id,
           target: a,
@@ -117,11 +227,12 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
           status,
         });
         if (!nodeMap.has(a)) {
+          const aType = a.startsWith('CMP-') ? 'component' : a.startsWith('ADR-') ? 'adr' : a.startsWith('SEC-ENC-') ? 'security-enclave' : 'architecture';
           nodeMap.set(a, {
             id: a,
             label: a,
             title: a,
-            type: a.startsWith('CMP-') ? 'component' : a.startsWith('ADR-') ? 'adr' : 'architecture',
+            type: aType,
             layer: 'architecture',
             status: 'COMPLIANT',
           });
@@ -134,7 +245,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
       const t = tst.trim();
       if (t && t !== 'NINGUNO' && t !== 'NONE') {
         const testId = t.replace(/[^a-zA-Z0-9_-]/g, '_');
-        edges.push({
+        addEdge({
           id: `edge-${r.id}-${testId}`,
           source: r.id,
           target: testId,
@@ -165,14 +276,274 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
     }
   }
 
-  // Update status for nodes with cryptographic drifts
+  // 4. Register all scanned artifacts into nodeMap and enrich existing ones
+  for (const art of scannedArtifactsMap.values()) {
+    if (!nodeMap.has(art.id)) {
+      nodeMap.set(art.id, {
+        id: art.id,
+        label: art.id,
+        title: art.title,
+        type: art.type,
+        layer: art.layer,
+        status: 'COMPLIANT',
+        filePath: art.filePath,
+        content: art.content,
+      });
+    } else {
+      const n = nodeMap.get(art.id)!;
+      if (!n.filePath) n.filePath = art.filePath;
+      if ((!n.title || n.title === n.id) && art.title) n.title = art.title;
+      if (!n.content) n.content = art.content;
+      if (art.type && (!n.type || n.type === 'product' || n.type === 'architecture' || n.type === 'usecase' || n.type === 'rule')) {
+        n.type = art.type;
+      }
+    }
+  }
+
+  // 5. Connect product graph relationships: Journeys, Actors, Use Cases, Business Rules, Abuse Cases
+  for (const art of scannedArtifactsMap.values()) {
+    const fm = art.frontmatter;
+
+    if (art.type === 'journey') {
+      // Persona / Actor
+      const persona = typeof fm.persona === 'string' ? fm.persona : (typeof fm.actor === 'string' ? fm.actor : undefined);
+      if (persona) {
+        if (!nodeMap.has(persona)) {
+          nodeMap.set(persona, {
+            id: persona,
+            label: persona,
+            title: persona,
+            type: 'actor',
+            layer: 'product',
+            status: 'COMPLIANT',
+          });
+        }
+        addEdge({
+          id: `edge-${persona}-${art.id}`,
+          source: persona,
+          target: art.id,
+          label: 'pursues',
+          relation: 'pursues',
+          status: 'COMPLIANT',
+        });
+      }
+
+      // Related Use Cases
+      const relatedUcs = Array.isArray(fm['related-use-cases']) ? fm['related-use-cases'] : (Array.isArray(fm['use-cases']) ? fm['use-cases'] : []);
+      for (const ucId of relatedUcs) {
+        if (typeof ucId === 'string' && ucId.trim()) {
+          const u = ucId.trim();
+          if (!nodeMap.has(u)) {
+            nodeMap.set(u, {
+              id: u,
+              label: u,
+              title: u,
+              type: 'use-case',
+              layer: 'product',
+              status: 'COMPLIANT',
+            });
+          }
+          addEdge({
+            id: `edge-${art.id}-${u}`,
+            source: art.id,
+            target: u,
+            label: 'decomposes-into',
+            relation: 'decomposes-into',
+            status: 'COMPLIANT',
+          });
+        }
+      }
+    } else if (art.type === 'use-case') {
+      // Primary Actor
+      const primaryActor = typeof fm['primary-actor'] === 'string' ? fm['primary-actor'] : (typeof fm.actor === 'string' ? fm.actor : undefined);
+      if (primaryActor) {
+        if (!nodeMap.has(primaryActor)) {
+          nodeMap.set(primaryActor, {
+            id: primaryActor,
+            label: primaryActor,
+            title: primaryActor,
+            type: 'actor',
+            layer: 'product',
+            status: 'COMPLIANT',
+          });
+        }
+        addEdge({
+          id: `edge-${primaryActor}-${art.id}`,
+          source: primaryActor,
+          target: art.id,
+          label: 'initiates',
+          relation: 'initiates',
+          status: 'COMPLIANT',
+        });
+      }
+
+      // Governed By (Business Rules)
+      const governedBy = Array.isArray(fm['governed-by']) ? fm['governed-by'] : [];
+      for (const ruleId of governedBy) {
+        if (typeof ruleId === 'string' && ruleId.trim()) {
+          const r = ruleId.trim();
+          if (!nodeMap.has(r)) {
+            nodeMap.set(r, {
+              id: r,
+              label: r,
+              title: r,
+              type: 'business-rule',
+              layer: 'product',
+              status: 'COMPLIANT',
+            });
+          }
+          addEdge({
+            id: `edge-${r}-${art.id}`,
+            source: r,
+            target: art.id,
+            label: 'governs',
+            relation: 'governs',
+            status: 'COMPLIANT',
+          });
+        }
+      }
+    } else if (art.type === 'business-rule') {
+      const governsTargets = Array.isArray(fm['governs'])
+        ? fm['governs']
+        : Array.isArray(fm['applies-to'])
+        ? fm['applies-to']
+        : typeof fm['governs'] === 'string'
+        ? [fm['governs']]
+        : [];
+      for (const tgt of governsTargets) {
+        if (typeof tgt === 'string' && tgt.trim()) {
+          const t = tgt.trim();
+          addEdge({
+            id: `edge-${art.id}-${t}`,
+            source: art.id,
+            target: t,
+            label: 'governs',
+            relation: 'governs',
+            status: 'COMPLIANT',
+          });
+        }
+      }
+    } else if (art.type === 'abuse-case') {
+      // Threat Actor
+      const threatActor =
+        typeof fm['primary-threat-actor'] === 'string'
+          ? fm['primary-threat-actor']
+          : typeof fm['threat-actor'] === 'string'
+          ? fm['threat-actor']
+          : typeof fm.actor === 'string'
+          ? fm.actor
+          : undefined;
+      if (threatActor) {
+        if (!nodeMap.has(threatActor)) {
+          nodeMap.set(threatActor, {
+            id: threatActor,
+            label: threatActor,
+            title: threatActor,
+            type: 'threat-actor',
+            layer: 'product',
+            status: 'COMPLIANT',
+          });
+        }
+        addEdge({
+          id: `edge-${threatActor}-${art.id}`,
+          source: threatActor,
+          target: art.id,
+          label: 'threatens',
+          relation: 'threatens',
+          status: 'COMPLIANT',
+        });
+      }
+
+      // Targets Use Cases
+      const rawTargets = fm['targets-use-case']
+        ? [fm['targets-use-case']]
+        : Array.isArray(fm['targets-use-cases'])
+        ? fm['targets-use-cases']
+        : Array.isArray(fm['targets'])
+        ? fm['targets']
+        : [];
+      for (const tgt of rawTargets) {
+        if (typeof tgt === 'string' && tgt.trim()) {
+          const t = tgt.trim();
+          if (nodeMap.has(t)) {
+            addEdge({
+              id: `edge-${art.id}-${t}`,
+              source: art.id,
+              target: t,
+              label: 'targets',
+              relation: 'targets',
+              status: 'COMPLIANT',
+            });
+          }
+        }
+      }
+
+      // Mitigated By (Security Requirements)
+      const mitigatedBy = Array.isArray(fm['mitigated-by'])
+        ? fm['mitigated-by']
+        : typeof fm['mitigated-by'] === 'string'
+        ? [fm['mitigated-by']]
+        : [];
+      for (const secReq of mitigatedBy) {
+        if (typeof secReq === 'string' && secReq.trim()) {
+          const s = secReq.trim();
+          if (!nodeMap.has(s)) {
+            nodeMap.set(s, {
+              id: s,
+              label: s,
+              title: s,
+              type: s.startsWith('SEC-REQ-') ? 'security-requirement' : 'requirement',
+              layer: 'requirement',
+              status: 'COMPLIANT',
+            });
+          }
+          addEdge({
+            id: `edge-${art.id}-${s}`,
+            source: art.id,
+            target: s,
+            label: 'mitigated-by',
+            relation: 'mitigated-by',
+            status: 'COMPLIANT',
+          });
+        }
+      }
+    } else if (art.type === 'requirement' || art.type === 'security-requirement') {
+      // Mitigates Abuse Cases
+      const mitigates = Array.isArray(fm['mitigates-abuse-case']) ? fm['mitigates-abuse-case'] : (typeof fm['mitigates-abuse-case'] === 'string' ? [fm['mitigates-abuse-case']] : []);
+      for (const abuseId of mitigates) {
+        if (typeof abuseId === 'string' && abuseId.trim()) {
+          const ab = abuseId.trim();
+          if (!nodeMap.has(ab)) {
+            nodeMap.set(ab, {
+              id: ab,
+              label: ab,
+              title: ab,
+              type: 'abuse-case',
+              layer: 'product',
+              status: 'COMPLIANT',
+            });
+          }
+          addEdge({
+            id: `edge-${ab}-${art.id}`,
+            source: ab,
+            target: art.id,
+            label: 'mitigated-by',
+            relation: 'mitigated-by',
+            status: 'COMPLIANT',
+          });
+        }
+      }
+    }
+  }
+
+  // 6. Update status for nodes with cryptographic drifts
   for (const [id, node] of nodeMap.entries()) {
     if (driftTargets.has(id)) {
       node.status = 'DRIFT';
     }
   }
 
-  // Populate bidirectional upstream and downstream traces for all nodes
+  // 7. Populate bidirectional upstream and downstream traces for all nodes
   for (const e of edges) {
     const srcNode = nodeMap.get(e.source);
     const tgtNode = nodeMap.get(e.target);
@@ -186,49 +557,6 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
       tgtNode.upstream = tgtNode.upstream || [];
       if (!tgtNode.upstream.includes(e.source)) {
         tgtNode.upstream.push(e.source);
-      }
-    }
-  }
-
-  // Enrich all nodes with filePath, title, content, and type by scanning workspace artifact directories
-  const artifactDirs = ['product', 'architecture', 'specs', 'security'];
-  for (const dirName of artifactDirs) {
-    const fullDirPath = path.join(rootDir, dirName);
-    if (fs.existsSync(fullDirPath)) {
-      const files = walkMdFiles(fullDirPath);
-      for (const f of files) {
-        try {
-          const fileContent = fs.readFileSync(f, 'utf-8');
-          const relPath = path.relative(rootDir, f).replace(/\\/g, '/');
-          const baseName = path.basename(f, '.md');
-          const match = fileContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-          let idVal = undefined;
-          let titleVal = undefined;
-          let typeVal = undefined;
-          if (match) {
-            const idM = match[1].match(/^id:\s*["']?([^"'\r\n]+)["']?/m);
-            if (idM) idVal = idM[1].trim();
-            const tM = match[1].match(/^title:\s*["']?([^"'\r\n]+)["']?/m);
-            if (tM) titleVal = tM[1].trim();
-            const typM = match[1].match(/^type:\s*["']?([^"'\r\n]+)["']?/m);
-            if (typM) typeVal = typM[1].trim();
-          }
-
-          const candidateIds = [idVal, baseName, path.basename(f)].filter((id): id is string => Boolean(id));
-          for (const cid of candidateIds) {
-            const n = nodeMap.get(cid);
-            if (n) {
-              if (!n.filePath) n.filePath = relPath;
-              if ((!n.title || n.title === n.id) && titleVal) n.title = titleVal;
-              if (!n.content) n.content = fileContent.replace(/^---\r?\n[\s\S]*?\r?\n---/, '').trim();
-              if (typeVal && (!n.type || n.type === 'product' || n.type === 'architecture')) {
-                n.type = typeVal;
-              }
-            }
-          }
-        } catch {
-          // Ignore unparseable
-        }
       }
     }
   }
@@ -255,7 +583,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
     elements.push({
       group: 'nodes',
       data: n,
-      classes: `layer-${n.layer} status-${n.status.toLowerCase()}`,
+      classes: `layer-${n.layer} type-${n.type} status-${n.status.toLowerCase()}`,
     });
   }
 
@@ -377,6 +705,133 @@ export function collectDashboardMetrics(rootDir: string) {
   };
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderAutonomyModeSection(
+  mode: string,
+  statusIcon: string,
+  count: number,
+  roleDescription: string,
+  allTasks: any[] = []
+): string {
+  const modeTasks = (allTasks || []).filter(
+    (t: any) => (t.task?.autonomyMode || '').toUpperCase() === mode
+  );
+  const openCount = modeTasks.filter(
+    (t: any) => (t.task?.status || '').toUpperCase() !== 'COMPLETED'
+  ).length;
+  const closedCount = modeTasks.filter(
+    (t: any) => (t.task?.status || '').toUpperCase() === 'COMPLETED'
+  ).length;
+
+  return `
+    <tr class="mode-row" onclick="toggleAutonomyTasks('${mode}')" title="Haz clic para desplegar u ocultar las tareas ${mode}">
+      <td>
+        <span class="accordion-indicator" id="toggle-icon-${mode}">▶</span>
+        <code>${mode}</code>
+        <span style="font-size: 0.72rem; color: var(--accent-cyan); margin-left: 6px;">(Ver tareas ▼)</span>
+      </td>
+      <td>${statusIcon}</td>
+      <td><strong>${count}</strong></td>
+      <td>${roleDescription}</td>
+    </tr>
+    <tr id="tasks-row-${mode}" class="autonomy-tasks-panel" style="display: none;">
+      <td colspan="4">
+        <div class="autonomy-tasks-container">
+          <div class="autonomy-tasks-header">
+            <div class="autonomy-tasks-title">
+              <span>📋 Tareas <code>${mode}</code></span>
+              <span class="badge" style="background:#334155;">Total: ${modeTasks.length}</span>
+            </div>
+            <div class="filter-btn-group">
+              <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Filtrar:</span>
+              <button type="button" class="filter-btn active" id="btn-filter-${mode}-all" onclick="filterAutonomyTasks('${mode}', 'all', event)">Todas (${modeTasks.length})</button>
+              <button type="button" class="filter-btn" id="btn-filter-${mode}-open" onclick="filterAutonomyTasks('${mode}', 'open', event)">Abiertas (${openCount})</button>
+              <button type="button" class="filter-btn" id="btn-filter-${mode}-closed" onclick="filterAutonomyTasks('${mode}', 'closed', event)">Cerradas (${closedCount})</button>
+            </div>
+          </div>
+          ${modeTasks.length === 0 ? `
+          <div style="color: var(--text-muted); font-size: 0.8rem; padding: 10px 0; font-style: italic;">
+            No hay tareas registradas con modo <code>${mode}</code>.
+          </div>
+          ` : `
+          <div id="tasks-empty-${mode}" style="display: none; color: var(--text-muted); font-size: 0.8rem; padding: 10px 0; font-style: italic;">
+            No hay tareas en el filtro seleccionado.
+          </div>
+          <table class="sub-data-table" id="tasks-table-${mode}">
+            <thead>
+              <tr>
+                <th style="width: 105px;">ID Tarea</th>
+                <th>Título de la Tarea</th>
+                <th style="width: 160px;">Estado</th>
+                <th style="width: 130px;">Asignada a</th>
+                <th>Verificación</th>
+                <th style="width: 200px;">Fichero .md</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${modeTasks.map((t: any) => {
+                const cleanPath = (t.file || '').replace(/\\/g, '/').replace(/^\.\//, '');
+                const rawStatus = (t.task?.status || 'PENDING').toUpperCase();
+                const isClosed = rawStatus === 'COMPLETED';
+                const isOpen = !isClosed;
+                let badgeClass = 'badge-amber';
+                let badgeText = `${rawStatus} (Abierta)`;
+                if (rawStatus === 'COMPLETED') {
+                  badgeClass = 'badge-green';
+                  badgeText = 'COMPLETED (Cerrada)';
+                } else if (rawStatus === 'IN_PROGRESS') {
+                  badgeClass = 'badge-blue';
+                  badgeText = 'IN_PROGRESS (Abierta)';
+                } else if (rawStatus === 'BLOCKED') {
+                  badgeClass = 'badge-rose';
+                  badgeText = 'BLOCKED (Abierta)';
+                }
+                const criteria = t.task?.verification?.criteria || 'N/A';
+                const criteriaShort = criteria.length > 45 ? criteria.substring(0, 42) + '...' : criteria;
+                const pathParts = cleanPath.split('/');
+                const shortFile = pathParts.length > 2 ? pathParts.slice(-2).join('/') : cleanPath;
+
+                const globalIndex = allTasks.indexOf(t);
+                return `
+                <tr class="task-row task-item task-item-${isOpen ? 'open' : 'closed'}" onclick="showTaskSidebar(${globalIndex})" title="Ver información de ${escapeHtml(t.task?.id || 'la tarea')}">
+                  <td>
+                    <strong style="color: var(--accent-cyan); font-family: monospace;"><code>${escapeHtml(t.task?.id || 'TSK-UNKNOWN')}</code></strong>
+                  </td>
+                  <td>
+                    <span style="color: var(--text-main); font-weight: 500;">${escapeHtml(t.task?.title || 'Untitled task')}</span>
+                  </td>
+                  <td>
+                    <span class="badge ${badgeClass}">${escapeHtml(badgeText)}</span>
+                  </td>
+                  <td>
+                    <code>${escapeHtml(t.task?.assignedTo || 'agent-developer')}</code>
+                  </td>
+                  <td>
+                    <code style="font-size: 0.72rem; color: #cbd5e1;" title="${escapeHtml(criteria)}">${escapeHtml(criteriaShort)}</code>
+                  </td>
+                  <td>
+                    <code style="color: var(--text-muted); font-size: 0.75rem;">${escapeHtml(shortFile)}</code>
+                  </td>
+                </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+          `}
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
 /**
  * Renders the HTML string for the interactive dashboard.
  */
@@ -417,6 +872,100 @@ export function renderDashboardHtml(
     .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
     .badge-green { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
     .badge-amber { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+    .badge-blue { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
+    .badge-rose { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+    .mode-row { cursor: pointer; transition: background 0.15s; }
+    .mode-row:hover { background: rgba(56, 189, 248, 0.08) !important; }
+    .accordion-indicator { display: inline-block; transition: transform 0.2s ease; margin-right: 6px; font-size: 0.75rem; color: var(--accent-cyan); }
+    .accordion-indicator.open { transform: rotate(90deg); }
+    .autonomy-tasks-panel { background: rgba(15, 23, 42, 0.75); }
+    .autonomy-tasks-panel > td { padding: 16px 20px !important; border-bottom: 2px solid var(--border-color) !important; }
+    .autonomy-tasks-container { display: flex; flex-direction: column; gap: 12px; }
+    .autonomy-tasks-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .autonomy-tasks-title { font-weight: 700; font-size: 0.85rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px; }
+    .filter-btn-group { display: flex; gap: 6px; align-items: center; }
+    .filter-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .filter-btn:hover { color: var(--text-main); background: #475569; }
+    .filter-btn.active { background: var(--accent-cyan); color: #0f172a; border-color: var(--accent-cyan); font-weight: 700; }
+    .sub-data-table { width: 100%; border-collapse: collapse; background: #0f172a; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); font-size: 0.8rem; }
+    .sub-data-table th, .sub-data-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid rgba(71, 85, 105, 0.4); }
+    .sub-data-table th { background: #182234; color: var(--text-muted); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; }
+    .sub-data-table tr.task-row { transition: background 0.15s; cursor: pointer; }
+    .sub-data-table tr.task-row:hover { background: rgba(56, 189, 248, 0.12) !important; }
+    .task-file-link { color: #7dd3fc; text-decoration: underline; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.75rem; }
+    .task-file-link:hover { color: #bae6fd; }
+
+    /* Task Details Slide-Over Sidebar */
+    .task-sidebar {
+      position: fixed;
+      top: 0;
+      right: -480px;
+      width: 460px;
+      max-width: 90vw;
+      height: 100vh;
+      background: var(--panel-bg);
+      border-left: 1px solid var(--border-color);
+      box-shadow: -8px 0 30px rgba(0, 0, 0, 0.65);
+      z-index: 10001;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .task-sidebar.open {
+      right: 0;
+    }
+    .task-sidebar-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #182234;
+    }
+    .task-sidebar-header h2 {
+      font-size: 1rem;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .task-sidebar-close {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      border-radius: 4px;
+      width: 28px;
+      height: 28px;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .task-sidebar-close:hover {
+      background: #475569;
+      color: var(--text-main);
+      border-color: var(--accent-cyan);
+    }
+    .task-sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .task-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(2px);
+      z-index: 10000;
+    }
 
     nav.tabs { display: flex; background: var(--panel-bg); border-bottom: 1px solid var(--border-color); padding: 0 24px; gap: 8px; }
     .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 16px; font-weight: 600; font-size: 0.875rem; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
@@ -515,6 +1064,50 @@ export function renderDashboardHtml(
       -webkit-line-clamp: 4;
       -webkit-box-orient: vertical;
     }
+
+    /* GRAPH NODE TYPOLOGIES LEGEND */
+    .graph-legend {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      z-index: 10;
+      background: rgba(30, 41, 59, 0.9);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+      font-size: 0.72rem;
+      max-width: 520px;
+    }
+    .legend-header {
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      margin-bottom: 6px;
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+    }
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #e2e8f0;
+      font-size: 0.72rem;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -557,6 +1150,19 @@ export function renderDashboardHtml(
             </select>
           </div>
           <div class="tool-row">
+            <select id="type-filter" class="tool-select" onchange="filterType(this.value)">
+              <option value="all">Todas las Tipologías</option>
+              <option value="journey">Journeys (JRN)</option>
+              <option value="actor">Actores (ACT)</option>
+              <option value="use-case">Casos de Uso (UC)</option>
+              <option value="business-rule">Reglas de Negocio (BR)</option>
+              <option value="abuse-case">Casos de Abuso (ABUSE)</option>
+              <option value="requirement">Requisitos (FR/QR/SEC)</option>
+              <option value="architecture">Arquitectura (CMP/ADR)</option>
+              <option value="test">Pruebas (BDD/Test)</option>
+            </select>
+          </div>
+          <div class="tool-row">
             <select id="layer-filter" class="tool-select" onchange="filterLayer(this.value)">
               <option value="all">All Layers</option>
               <option value="product">Layer 1: Product (Upstream)</option>
@@ -577,6 +1183,19 @@ export function renderDashboardHtml(
           </div>
         </div>
         <div id="cy"></div>
+        <div class="graph-legend">
+          <div class="legend-header">Tipología de Nodos</div>
+          <div class="legend-items">
+            <div class="legend-item"><span class="legend-dot" style="background:#581c87; border:2px solid #c084fc;"></span><strong>Journey</strong> (JRN)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#065f46; border:2px solid #34d399; border-radius:50%;"></span><strong>Actor</strong> (ACT)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#0369a1; border:2px solid #38bdf8;"></span><strong>Use Case</strong> (UC)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#b45309; border:2px solid #fbbf24; transform:rotate(45deg);"></span><strong>Regla Negocio</strong> (BR)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#881337; border:2px solid #f43f5e;"></span><strong>Caso Abuso</strong> (ABUSE)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#1e293b; border:2px solid #64748b;"></span><strong>Requisito</strong> (FR/QR/SEC)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#312e81; border:2px solid #818cf8;"></span><strong>Arquitectura</strong> (CMP/ADR)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#047857; border:2px solid #10b981;"></span><strong>Prueba</strong> (BDD/Test)</div>
+          </div>
+        </div>
       </div>
       <aside class="sidebar" id="node-details">
         <h2>Node Details</h2>
@@ -649,6 +1268,9 @@ export function renderDashboardHtml(
 
         <div class="chart-container">
           <h3>Task Autonomy Modes Distribution (Governance)</h3>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">
+            Haz clic sobre cualquier tipo de autonomía para desplegar sus tareas asociadas, filtrar por estado y abrir el fichero .md correspondiente.
+          </p>
           <table class="data-table">
             <thead>
               <tr>
@@ -659,30 +1281,10 @@ export function renderDashboardHtml(
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><code>AUTONOMOUS</code></td>
-                <td>🟢</td>
-                <td><strong>${metricsData.gov.modeCounts?.AUTONOMOUS || 0}</strong></td>
-                <td>Autonomous planning and coding. Asynchronous PR review.</td>
-              </tr>
-              <tr>
-                <td><code>HUMAN_REVIEW_PLAN</code></td>
-                <td>🟡</td>
-                <td><strong>${metricsData.gov.modeCounts?.HUMAN_REVIEW_PLAN || 0}</strong></td>
-                <td>Detailed plan approved before coding.</td>
-              </tr>
-              <tr>
-                <td><code>AMBIGUOUS</code></td>
-                <td>🟠</td>
-                <td><strong>${metricsData.gov.modeCounts?.AMBIGUOUS || 0}</strong></td>
-                <td>Halted: Refinement required with Product Owner.</td>
-              </tr>
-              <tr>
-                <td><code>HIGH_RISK_MANUAL</code></td>
-                <td>🔴</td>
-                <td><strong>${metricsData.gov.modeCounts?.HIGH_RISK_MANUAL || 0}</strong></td>
-                <td>Direct execution by human engineers.</td>
-              </tr>
+              ${renderAutonomyModeSection('AUTONOMOUS', '🟢', metricsData.gov.modeCounts?.AUTONOMOUS || 0, 'Autonomous planning and coding. Asynchronous PR review.', metricsData.gov.tasks)}
+              ${renderAutonomyModeSection('HUMAN_REVIEW_PLAN', '🟡', metricsData.gov.modeCounts?.HUMAN_REVIEW_PLAN || 0, 'Detailed plan approved before coding.', metricsData.gov.tasks)}
+              ${renderAutonomyModeSection('AMBIGUOUS', '🟠', metricsData.gov.modeCounts?.AMBIGUOUS || 0, 'Halted: Refinement required with Product Owner.', metricsData.gov.tasks)}
+              ${renderAutonomyModeSection('HIGH_RISK_MANUAL', '🔴', metricsData.gov.modeCounts?.HIGH_RISK_MANUAL || 0, 'Direct execution by human engineers.', metricsData.gov.tasks)}
             </tbody>
           </table>
         </div>
@@ -819,11 +1421,24 @@ export function renderDashboardHtml(
       <div class="tooltip-body" id="tooltip-body"></div>
     </div>
 
+    <!-- TASK DETAILS SLIDE-OVER SIDEBAR -->
+    <div id="task-backdrop" class="task-backdrop" style="display: none;" onclick="closeTaskSidebar()"></div>
+    <aside id="task-sidebar" class="task-sidebar" aria-label="Task Details">
+      <div class="task-sidebar-header">
+        <h2><span>📋 Detalles de la Tarea</span></h2>
+        <button type="button" class="task-sidebar-close" onclick="closeTaskSidebar()" title="Cerrar panel (Esc)">✕</button>
+      </div>
+      <div class="task-sidebar-body" id="task-sidebar-content">
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Haz clic en una tarea para ver sus detalles de gobernanza.</p>
+      </div>
+    </aside>
+
   <script>
     ${cytoscapeScript}
   </script>
   <script>
     var elements = ${elementsJson};
+    var govTasks = ${JSON.stringify(metricsData.gov.tasks || [])};
     var cy = null;
 
     var reqHoverTimer = null;
@@ -982,33 +1597,143 @@ export function renderDashboardHtml(
               'border-width': 2,
               'border-color': '#64748b',
               'text-wrap': 'ellipsis',
-              'text-max-width': '60px'
+              'text-max-width': '65px'
+            }
+          },
+          // Typology Styles
+          {
+            selector: 'node.type-journey',
+            style: {
+              'shape': 'round-rectangle',
+              'background-color': '#581c87',
+              'border-color': '#c084fc',
+              'border-width': 3,
+              'width': 85,
+              'height': 42,
+              'font-weight': 'bold',
+              'text-max-width': '80px'
             }
           },
           {
-            selector: 'node.layer-product',
+            selector: 'node.type-actor',
+            style: {
+              'shape': 'ellipse',
+              'background-color': '#065f46',
+              'border-color': '#34d399',
+              'border-width': 2.5,
+              'width': 54,
+              'height': 54,
+              'font-weight': 'bold'
+            }
+          },
+          {
+            selector: 'node.type-threat-actor',
+            style: {
+              'shape': 'ellipse',
+              'background-color': '#4c0519',
+              'border-color': '#fb7185',
+              'border-width': 2.5,
+              'border-style': 'dashed',
+              'width': 54,
+              'height': 54
+            }
+          },
+          {
+            selector: 'node.type-usecase, node.type-use-case',
+            style: {
+              'shape': 'round-rectangle',
+              'background-color': '#0369a1',
+              'border-color': '#38bdf8',
+              'border-width': 2,
+              'width': 70,
+              'height': 38
+            }
+          },
+          {
+            selector: 'node.type-rule, node.type-business-rule',
+            style: {
+              'shape': 'diamond',
+              'background-color': '#b45309',
+              'border-color': '#fbbf24',
+              'border-width': 2,
+              'width': 58,
+              'height': 58
+            }
+          },
+          {
+            selector: 'node.type-abuse-case',
+            style: {
+              'shape': 'octagon',
+              'background-color': '#881337',
+              'border-color': '#f43f5e',
+              'border-width': 2.5,
+              'width': 64,
+              'height': 46
+            }
+          },
+          {
+            selector: 'node.type-security-enclave',
+            style: {
+              'shape': 'hexagon',
+              'background-color': '#3b0764',
+              'border-color': '#a855f7',
+              'border-width': 2,
+              'width': 65,
+              'height': 45
+            }
+          },
+          {
+            selector: 'node.type-requirement, node.type-security-requirement',
+            style: {
+              'shape': 'round-rectangle',
+              'background-color': '#1e293b',
+              'border-color': '#64748b',
+              'border-width': 2.5,
+              'width': 68,
+              'height': 36
+            }
+          },
+          {
+            selector: 'node.type-component, node.type-adr',
+            style: {
+              'shape': 'hexagon',
+              'background-color': '#312e81',
+              'border-color': '#818cf8',
+              'border-width': 2,
+              'width': 60,
+              'height': 45
+            }
+          },
+          {
+            selector: 'node.type-bdd-feature, node.type-code-test, node.layer-test',
+            style: {
+              'shape': 'round-rectangle',
+              'background-color': '#047857',
+              'border-color': '#10b981',
+              'border-width': 2,
+              'width': 65,
+              'height': 32
+            }
+          },
+          // Fallback Layer styles if type is missing
+          {
+            selector: 'node.layer-product:not(.type-journey):not(.type-actor):not(.type-use-case):not(.type-usecase):not(.type-business-rule):not(.type-rule):not(.type-abuse-case):not(.type-threat-actor)',
             style: { 'shape': 'diamond', 'background-color': '#0e7490', 'border-color': '#38bdf8', 'width': 50, 'height': 50 }
           },
           {
-            selector: 'node.layer-requirement',
-            style: { 'shape': 'round-rectangle', 'border-width': 3 }
-          },
-          {
-            selector: 'node.layer-architecture',
+            selector: 'node.layer-architecture:not(.type-component):not(.type-adr):not(.type-security-enclave)',
             style: { 'shape': 'hexagon', 'background-color': '#4338ca', 'border-color': '#818cf8', 'width': 60, 'height': 45 }
           },
+          // Status modifiers
           {
-            selector: 'node.layer-test',
-            style: { 'shape': 'ellipse', 'background-color': '#047857', 'border-color': '#34d399', 'width': 50, 'height': 50 }
-          },
-          {
-            selector: 'node.status-conforme',
+            selector: 'node.status-conforme, node.status-compliant',
             style: { 'border-color': '#10b981' }
           },
           {
-            selector: 'node.status-huérfano, node.status-drift',
+            selector: 'node.status-huérfano, node.status-orphan, node.status-drift',
             style: { 'border-color': '#ef4444', 'background-color': '#7f1d1d' }
           },
+          // Default Edge
           {
             selector: 'edge',
             style: {
@@ -1020,6 +1745,44 @@ export function renderDashboardHtml(
               'arrow-scale': 0.8
             }
           },
+          // Semantic Edge Relations
+          {
+            selector: 'edge.relation-pursues',
+            style: { 'line-color': '#c084fc', 'target-arrow-color': '#c084fc', 'width': 2 }
+          },
+          {
+            selector: 'edge.relation-decomposes-into',
+            style: { 'line-color': '#a855f7', 'target-arrow-color': '#a855f7', 'width': 2 }
+          },
+          {
+            selector: 'edge.relation-initiates',
+            style: { 'line-color': '#34d399', 'target-arrow-color': '#34d399', 'width': 1.8 }
+          },
+          {
+            selector: 'edge.relation-governs',
+            style: { 'line-color': '#fbbf24', 'target-arrow-color': '#fbbf24', 'line-style': 'dashed', 'width': 1.8 }
+          },
+          {
+            selector: 'edge.relation-mitigated-by, edge.relation-mitigates',
+            style: { 'line-color': '#f43f5e', 'target-arrow-color': '#f43f5e', 'line-style': 'dashed', 'width': 1.8 }
+          },
+          {
+            selector: 'edge.relation-threatens',
+            style: { 'line-color': '#e11d48', 'target-arrow-color': '#e11d48', 'line-style': 'dotted', 'width': 2 }
+          },
+          {
+            selector: 'edge.relation-derives-from',
+            style: { 'line-color': '#38bdf8', 'target-arrow-color': '#38bdf8', 'width': 1.8 }
+          },
+          {
+            selector: 'edge.relation-satisfies',
+            style: { 'line-color': '#818cf8', 'target-arrow-color': '#818cf8', 'width': 1.8 }
+          },
+          {
+            selector: 'edge.relation-verified-by',
+            style: { 'line-color': '#10b981', 'target-arrow-color': '#10b981', 'width': 1.8 }
+          },
+          // Highlight and dim
           {
             selector: 'node.highlighted',
             style: {
@@ -1120,10 +1883,41 @@ export function renderDashboardHtml(
         var sidebar = document.getElementById('sidebar-content');
         if (!sidebar) return;
         var isConform = data.status === 'COMPLIANT' || data.status === 'CONFORME';
-        var layerName = (data.layer || data.type || 'NODE').toUpperCase();
+        var typeName = (data.type || data.layer || 'node').toLowerCase();
+        var typeBadgeColor = '#334155';
+        var typeTitle = (data.type || data.layer || 'NODE').toUpperCase();
+        if (typeName === 'journey') {
+          typeBadgeColor = '#581c87';
+          typeTitle = 'JOURNEY (JRN)';
+        } else if (typeName === 'actor') {
+          typeBadgeColor = '#065f46';
+          typeTitle = 'ACTOR (ACT)';
+        } else if (typeName === 'threat-actor') {
+          typeBadgeColor = '#4c0519';
+          typeTitle = 'THREAT ACTOR (ACT-THREAT)';
+        } else if (typeName === 'use-case' || typeName === 'usecase') {
+          typeBadgeColor = '#0369a1';
+          typeTitle = 'USE CASE (UC)';
+        } else if (typeName === 'business-rule' || typeName === 'rule') {
+          typeBadgeColor = '#b45309';
+          typeTitle = 'BUSINESS RULE (BR)';
+        } else if (typeName === 'abuse-case') {
+          typeBadgeColor = '#881337';
+          typeTitle = 'ABUSE CASE (ABUSE)';
+        } else if (typeName === 'requirement' || typeName === 'security-requirement') {
+          typeBadgeColor = '#1e293b';
+          typeTitle = 'REQUIREMENT (' + (data.id.split('-')[0] || 'REQ') + ')';
+        } else if (typeName === 'component' || typeName === 'adr' || typeName === 'security-enclave') {
+          typeBadgeColor = '#312e81';
+          typeTitle = 'ARCHITECTURE (' + (data.id.split('-')[0] || 'ARCH') + ')';
+        } else if (typeName === 'bdd-feature' || typeName === 'code-test') {
+          typeBadgeColor = '#047857';
+          typeTitle = 'TEST VERIFICATION';
+        }
+
         var html = '<div class="sidebar-field"><strong>ID / Identifier:</strong> <code>' + data.id + '</code></div>';
         html += '<div class="sidebar-field"><strong>Title:</strong> ' + (data.title || data.label || data.id) + '</div>';
-        html += '<div class="sidebar-field"><strong>Layer / Type:</strong> <span class="badge" style="background:#334155;">' + layerName + ' (' + (data.type || data.layer || 'node') + ')</span></div>';
+        html += '<div class="sidebar-field"><strong>Typology:</strong> <span class="badge" style="background:' + typeBadgeColor + '; border:1px solid rgba(255,255,255,0.2);">' + typeTitle + '</span></div>';
         html += '<div class="sidebar-field"><strong>Status:</strong> <span class="badge ' + (isConform ? 'badge-green' : 'badge-amber') + '">' + (data.status || 'UNKNOWN') + '</span></div>';
         if (data.filePath) {
           var cleanMetaPath = data.filePath.split('\\\\').join('/');
@@ -1152,6 +1946,59 @@ export function renderDashboardHtml(
     function applyLayout(name) {
       if (!cy) return;
       cy.layout({ name: name, directed: true, padding: 30, animate: true, animationDuration: 400 }).run();
+    }
+
+    function filterType(type) {
+      if (!cy) return;
+      if (type === 'all') {
+        cy.elements().show();
+      } else if (type === 'journey') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-journey');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'actor') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-actor, .type-threat-actor');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'use-case') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-use-case, .type-usecase');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'business-rule') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-business-rule, .type-rule');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'abuse-case') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-abuse-case, .type-threat-actor');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'requirement') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-requirement, .type-security-requirement, .layer-requirement');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'architecture') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-component, .type-adr, .type-security-enclave, .layer-architecture');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else if (type === 'test') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-bdd-feature, .type-code-test, .layer-test');
+        nodes.show();
+        nodes.connectedEdges().show();
+      } else {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-' + type);
+        nodes.show();
+        nodes.connectedEdges().show();
+      }
+      cy.fit(30);
     }
 
     function filterLayer(layer) {
@@ -1235,9 +2082,155 @@ export function renderDashboardHtml(
       }
     }
 
+    function toggleAutonomyTasks(mode) {
+      var panel = document.getElementById('tasks-row-' + mode);
+      var icon = document.getElementById('toggle-icon-' + mode);
+      if (!panel) return;
+      var isHidden = panel.style.display === 'none' || panel.style.display === '';
+      if (isHidden) {
+        panel.style.display = 'table-row';
+        if (icon) icon.classList.add('open');
+      } else {
+        panel.style.display = 'none';
+        if (icon) icon.classList.remove('open');
+      }
+    }
+
+    function filterAutonomyTasks(mode, filter, event) {
+      if (event) {
+        event.stopPropagation();
+      }
+      var panel = document.getElementById('tasks-row-' + mode);
+      if (!panel) return;
+
+      var btns = panel.querySelectorAll('.filter-btn');
+      btns.forEach(function(b) { b.classList.remove('active'); });
+      var activeBtn = document.getElementById('btn-filter-' + mode + '-' + filter);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      var allRows = panel.querySelectorAll('.task-item');
+      var visibleCount = 0;
+      allRows.forEach(function(row) {
+        if (filter === 'all') {
+          row.style.display = '';
+          visibleCount++;
+        } else if (filter === 'open') {
+          if (row.classList.contains('task-item-open')) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        } else if (filter === 'closed') {
+          if (row.classList.contains('task-item-closed')) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        }
+      });
+
+      var tableEl = panel.querySelector('.sub-data-table');
+      var emptyMsg = document.getElementById('tasks-empty-' + mode);
+      if (emptyMsg) {
+        if (visibleCount === 0) {
+          emptyMsg.textContent = filter === 'open'
+            ? 'No hay tareas abiertas para este modo.'
+            : (filter === 'closed' ? 'No hay tareas cerradas para este modo.' : 'No hay tareas registradas para este modo.');
+          emptyMsg.style.display = 'block';
+          if (tableEl) tableEl.style.display = 'none';
+        } else {
+          emptyMsg.style.display = 'none';
+          if (tableEl) tableEl.style.display = 'table';
+        }
+      }
+    }
+
+    function showTaskSidebar(index) {
+      if (typeof govTasks === 'undefined' || !govTasks[index]) return;
+      var t = govTasks[index];
+      var task = t.task || {};
+      var sidebar = document.getElementById('task-sidebar');
+      var backdrop = document.getElementById('task-backdrop');
+      var contentEl = document.getElementById('task-sidebar-content');
+      if (!sidebar || !contentEl) return;
+
+      var rawStatus = (task.status || 'PENDING').toUpperCase();
+      var isClosed = rawStatus === 'COMPLETED';
+      var badgeClass = 'badge-amber';
+      var badgeText = rawStatus + ' (Abierta)';
+      if (rawStatus === 'COMPLETED') {
+        badgeClass = 'badge-green';
+        badgeText = 'COMPLETED (Cerrada)';
+      } else if (rawStatus === 'IN_PROGRESS') {
+        badgeClass = 'badge-blue';
+        badgeText = 'IN_PROGRESS (Abierta)';
+      } else if (rawStatus === 'BLOCKED') {
+        badgeClass = 'badge-rose';
+        badgeText = 'BLOCKED (Abierta)';
+      }
+
+      var cleanPath = (t.file || '').split(String.fromCharCode(92)).join('/');
+      if (cleanPath.indexOf('./') === 0) cleanPath = cleanPath.substring(2);
+      var metaHref = cleanPath;
+      if (cleanPath.indexOf('http://') === 0 || cleanPath.indexOf('https://') === 0 || cleanPath.indexOf('file://') === 0) {
+        metaHref = cleanPath;
+      } else if (cleanPath.indexOf(':') === 1 || cleanPath.indexOf('/') === 0) {
+        metaHref = 'file:///' + cleanPath.replace(/^[/]+/, '');
+      } else {
+        metaHref = '../' + cleanPath;
+      }
+
+      var html = '';
+      html += '<div class="sidebar-field"><strong>ID de la Tarea:</strong> <code style="font-size: 0.95rem; color: var(--accent-cyan); font-weight: 700;">' + (task.id || 'TSK-UNKNOWN') + '</code></div>';
+      html += '<div class="sidebar-field"><strong>Título:</strong> <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">' + (task.title || 'Sin título') + '</span></div>';
+      html += '<div class="sidebar-field"><strong>Estado:</strong> <span class="badge ' + badgeClass + '">' + badgeText + '</span></div>';
+      html += '<div class="sidebar-field"><strong>Modo de Autonomía:</strong> <code>' + (task.autonomyMode || 'UNKNOWN') + '</code></div>';
+      if (task.riskLevel) {
+        html += '<div class="sidebar-field"><strong>Nivel de Riesgo:</strong> <span class="badge" style="background:#334155;">' + task.riskLevel + '</span></div>';
+      }
+      if (task.complexity) {
+        html += '<div class="sidebar-field"><strong>Complejidad:</strong> <span class="badge" style="background:#334155;">' + task.complexity + '</span></div>';
+      }
+      html += '<div class="sidebar-field"><strong>Asignada a:</strong> <code>' + (task.assignedTo || 'agent-developer') + '</code></div>';
+
+      var criteria = (task.verification && task.verification.criteria) || 'No especificado';
+      var method = (task.verification && task.verification.method) || 'N/A';
+      html += '<div class="sidebar-field"><strong>Método de Verificación:</strong> <code>' + method + '</code></div>';
+      html += '<div class="sidebar-field"><strong>Criterio / Comando de Aceptación:</strong><pre><code>' + criteria + '</code></pre></div>';
+
+      if (task.blockingReason) {
+        html += '<div class="sidebar-field"><strong style="color: var(--accent-rose);">Motivo de Bloqueo:</strong> <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--accent-rose); border-radius: 4px; padding: 8px; color: #fca5a5;">' + task.blockingReason + '</div></div>';
+      }
+
+      html += '<div class="sidebar-field"><strong>Gobernanza y Validación:</strong>';
+      html += '<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px; font-size: 0.75rem;">';
+      html += '<div>Verificación ejecutable: ' + (t.hasVerification ? '✅ Sí' : '❌ Falta') + '</div>';
+      html += '<div>Modo de autonomía válido: ' + (t.validAutonomy ? '✅ Sí' : '⚠️ Inválido') + '</div>';
+      html += '<div>Anomalías de seguridad/riesgo: ' + (t.riskAnomaly ? '⚠️ Detectadas' : '✅ Ninguna') + '</div>';
+      html += '</div></div>';
+
+      html += '<div class="sidebar-field" style="margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 12px;"><strong>Fichero de Especificación (.md):</strong>';
+      html += '<div style="margin-top: 4px;"><a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline; font-family: monospace; font-size: 0.8rem;" title="Abrir archivo original"><code>' + cleanPath + ' ↗</code></a></div>';
+      html += '</div>';
+
+      contentEl.innerHTML = html;
+      sidebar.classList.add('open');
+      if (backdrop) backdrop.style.display = 'block';
+    }
+
+    function closeTaskSidebar() {
+      var sidebar = document.getElementById('task-sidebar');
+      var backdrop = document.getElementById('task-backdrop');
+      if (sidebar) sidebar.classList.remove('open');
+      if (backdrop) backdrop.style.display = 'none';
+    }
+
     window.addEventListener('keydown', function(evt) {
       if (evt.key === 'Escape' || evt.key === 'Esc') {
         hideTooltip();
+        closeTaskSidebar();
       }
     });
 
