@@ -51,8 +51,11 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
 
   // 2. Process Traceability Requirements
   for (const r of trace.rows) {
-    const isOk = r.productStatus === 'CONFORME' && r.archStatus === 'CONFORME' && r.testStatus === 'CONFORME';
-    const status: GraphNodeStatus = isOk ? 'CONFORME' : 'HUÉRFANO';
+    const isOk =
+      (r.productStatus === 'COMPLIANT' || r.productStatus === 'CONFORME') &&
+      (r.archStatus === 'COMPLIANT' || r.archStatus === 'CONFORME') &&
+      (r.testStatus === 'COMPLIANT' || r.testStatus === 'CONFORME');
+    const status: GraphNodeStatus = isOk ? 'COMPLIANT' : 'ORPHAN';
     nodeMap.set(r.id, {
       id: r.id,
       label: r.id,
@@ -78,7 +81,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
     // Edges from upstream
     for (const up of r.productTraces.split(',')) {
       const u = up.trim();
-      if (u && u !== 'NINGUNO') {
+      if (u && u !== 'NINGUNO' && u !== 'NONE') {
         edges.push({
           id: `edge-${u}-${r.id}`,
           source: u,
@@ -94,7 +97,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
             title: u,
             type: u.startsWith('ACT-') ? 'actor' : u.startsWith('UC-') ? 'usecase' : u.startsWith('BR-') ? 'rule' : 'product',
             layer: 'product',
-            status: 'CONFORME',
+            status: 'COMPLIANT',
           });
         }
       }
@@ -103,7 +106,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
     // Edges to architecture
     for (const arch of r.archTraces.split(',')) {
       const a = arch.trim();
-      if (a && a !== 'NINGUNO') {
+      if (a && a !== 'NINGUNO' && a !== 'NONE') {
         edges.push({
           id: `edge-${r.id}-${a}`,
           source: r.id,
@@ -119,7 +122,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
             title: a,
             type: a.startsWith('CMP-') ? 'component' : a.startsWith('ADR-') ? 'adr' : 'architecture',
             layer: 'architecture',
-            status: 'CONFORME',
+            status: 'COMPLIANT',
           });
         }
       }
@@ -128,7 +131,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
     // Edges to tests
     for (const tst of r.testTraces.split(',')) {
       const t = tst.trim();
-      if (t && t !== 'NINGUNO') {
+      if (t && t !== 'NINGUNO' && t !== 'NONE') {
         const testId = t.replace(/[^a-zA-Z0-9_-]/g, '_');
         edges.push({
           id: `edge-${r.id}-${testId}`,
@@ -145,7 +148,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
             title: t,
             type: t.endsWith('.feature') ? 'bdd-feature' : 'code-test',
             layer: 'test',
-            status: 'CONFORME',
+            status: 'COMPLIANT',
             filePath: t,
           });
         }
@@ -174,7 +177,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
 
   for (const n of nodeMap.values()) {
     nodesByLayer[n.layer] = (nodesByLayer[n.layer] || 0) + 1;
-    if (n.status === 'CONFORME') {
+    if (n.status === 'COMPLIANT' || n.status === 'CONFORME') {
       conformingCount++;
     } else {
       issueCount++;
@@ -190,7 +193,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
     elements.push({
       group: 'edges',
       data: e,
-      classes: `relation-${e.relation} status-${e.status?.toLowerCase() || 'conforme'}`,
+      classes: `relation-${e.relation} status-${e.status?.toLowerCase() || 'compliant'}`,
     });
   }
 
@@ -385,210 +388,26 @@ export function renderDashboardHtml(
     /* Timeline & KPI Historical */
     .chart-container { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; }
     .chart-container h3 { font-size: 0.9rem; color: var(--accent-cyan); margin-bottom: 16px; }
-
-    /* Requirement Content Popup */
-    .req-popup-card {
-      position: fixed;
-      top: 100px;
-      right: 360px;
-      width: 520px;
-      max-width: calc(100vw - 400px);
-      max-height: calc(100vh - 130px);
-      background: var(--panel-bg);
-      border: 1px solid var(--accent-cyan);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7), 0 0 15px rgba(56, 189, 248, 0.2);
-      border-radius: 8px;
-      z-index: 50;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      animation: scaleIn 0.15s ease-out;
-    }
-    @media (max-width: 1100px) {
-      .req-popup-card {
-        right: 20px;
-        max-width: calc(100vw - 40px);
-      }
-    }
-    .popup-header {
-      padding: 14px 18px;
-      background: #182234;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-    }
-    .popup-title-area {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      overflow: hidden;
-    }
-    .popup-badge-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .popup-id {
-      font-size: 0.8rem;
-      color: var(--accent-cyan);
-      font-weight: 700;
-      font-family: monospace;
-    }
-    .popup-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text-main);
-      margin: 2px 0 0 0;
-      line-height: 1.3;
-    }
-    .popup-close-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.2rem;
-      cursor: pointer;
-      line-height: 1;
-      padding: 4px 8px;
-      border-radius: 4px;
-      transition: all 0.15s;
-    }
-    .popup-close-btn:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.1);
-    }
-    .popup-meta {
-      padding: 8px 18px;
-      background: rgba(0, 0, 0, 0.25);
-      border-bottom: 1px solid var(--border-color);
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-    }
-    .popup-meta code {
-      color: #7dd3fc;
-      font-size: 0.75rem;
-    }
-    .popup-body {
-      padding: 18px;
-      overflow-y: auto;
-      font-size: 0.85rem;
-      line-height: 1.55;
-      color: #e2e8f0;
-      flex: 1;
-    }
-    .popup-body h1, .popup-body h2, .popup-body h3, .popup-body h4 {
-      color: var(--accent-cyan);
-      margin: 12px 0 6px;
-    }
-    .popup-body h1:first-child, .popup-body h2:first-child {
-      margin-top: 0;
-    }
-    .popup-body pre {
-      background: #0f172a;
-      border: 1px solid var(--border-color);
-      padding: 10px;
-      border-radius: 6px;
-      overflow-x: auto;
-      font-size: 0.78rem;
-      color: #a5f3fc;
-      margin: 8px 0;
-    }
-    .popup-body code {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 2px 4px;
-      border-radius: 3px;
-      font-size: 0.85em;
-      color: #38bdf8;
-    }
-    .popup-body ul {
-      margin-left: 20px;
-      margin-bottom: 8px;
-    }
-    .popup-body li {
-      margin-bottom: 3px;
-    }
-
-    /* Requirement Hover Tooltip (1s hover) */
-    .req-tooltip {
-      position: fixed;
-      z-index: 2000;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid var(--accent-cyan);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), 0 0 10px rgba(56, 189, 248, 0.2);
-      backdrop-filter: blur(8px);
-      padding: 10px 14px;
-      border-radius: 6px;
-      max-width: 420px;
-      max-height: 240px;
-      overflow: hidden;
-      pointer-events: none;
-      animation: fadeIn 0.15s ease-out;
-    }
-    .tooltip-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 5px;
-      margin-bottom: 6px;
-    }
-    .tooltip-id {
-      font-size: 0.75rem;
-      color: var(--accent-cyan);
-      font-family: monospace;
-      font-weight: 700;
-    }
-    .tooltip-title {
-      font-size: 0.75rem;
-      color: var(--text-main);
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .tooltip-body {
-      font-size: 0.75rem;
-      color: #cbd5e1;
-      line-height: 1.45;
-      display: -webkit-box;
-      -webkit-line-clamp: 7;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      white-space: pre-wrap;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes scaleIn {
-      from { opacity: 0; transform: scale(0.96); }
-      to { opacity: 1; transform: scale(1); }
-    }
   </style>
 </head>
 <body>
   <header>
     <div class="brand">
-      <h1>AI-SDLC // DASHBOARD INTERACTIVO</h1>
+      <h1>AI-SDLC // INTERACTIVE DASHBOARD</h1>
       <span class="badge ${graphData.issueCount === 0 ? 'badge-green' : 'badge-amber'}">
-        ${graphData.issueCount === 0 ? '100% CONFORME' : graphData.issueCount + ' INCIDENCIAS'}
+        ${graphData.issueCount === 0 ? '100% COMPLIANT' : graphData.issueCount + ' ISSUES'}
       </span>
     </div>
     <div style="font-size: 0.75rem; color: var(--text-muted);">
-      Generado: <span>${now.replace('T', ' ').substring(0, 19)}</span>
+      Generated: <span>${now.replace('T', ' ').substring(0, 19)}</span>
     </div>
   </header>
 
   <nav class="tabs">
-    <button class="tab-btn active" onclick="switchTab('graph')">🌐 Grafo PDaC / RTM</button>
-    <button class="tab-btn" onclick="switchTab('rtm')">📋 Matriz RTM 360°</button>
-    <button class="tab-btn" onclick="switchTab('quality')">📊 Calidad & Gobernanza</button>
-    <button class="tab-btn" onclick="switchTab('kpis')">📈 Telemetría & Histórico KPIs</button>
+    <button class="tab-btn active" onclick="switchTab('graph')">🌐 PDaC / RTM Graph</button>
+    <button class="tab-btn" onclick="switchTab('rtm')">📋 360° RTM Matrix</button>
+    <button class="tab-btn" onclick="switchTab('quality')">📊 Quality & Governance</button>
+    <button class="tab-btn" onclick="switchTab('kpis')">📈 Telemetry & Historical KPIs</button>
   </nav>
 
   <main>
@@ -597,12 +416,12 @@ export function renderDashboardHtml(
       <div class="popup-header">
         <div class="popup-title-area">
           <div class="popup-badge-row">
-            <span class="badge" id="popup-badge">REQUISITO</span>
+            <span class="badge" id="popup-badge">REQUIREMENT</span>
             <span class="popup-id" id="popup-id">FR-000</span>
           </div>
-          <h3 class="popup-title" id="popup-title">Título del Requisito</h3>
+          <h3 class="popup-title" id="popup-title">Requirement Title</h3>
         </div>
-        <button class="popup-close-btn" onclick="closeRequirementPopup()" title="Cerrar (Esc)">✕</button>
+        <button class="popup-close-btn" onclick="closeRequirementPopup()" title="Close (Esc)">✕</button>
       </div>
       <div class="popup-meta" id="popup-meta"></div>
       <div class="popup-body" id="popup-body"></div>
@@ -612,7 +431,7 @@ export function renderDashboardHtml(
     <div id="req-tooltip" class="req-tooltip" style="display: none;">
       <div class="tooltip-header">
         <span class="tooltip-id" id="tooltip-id">FR-000</span>
-        <span class="tooltip-title" id="tooltip-title">Título</span>
+        <span class="tooltip-title" id="tooltip-title">Title</span>
       </div>
       <div class="tooltip-body" id="tooltip-body"></div>
     </div>
@@ -624,43 +443,43 @@ export function renderDashboardHtml(
           <div class="tool-row">
             <button class="tool-btn" onclick="cyZoom(0.2)">Zoom +</button>
             <button class="tool-btn" onclick="cyZoom(-0.2)">Zoom -</button>
-            <button class="tool-btn" onclick="cy.fit(30)">Centrar</button>
-            <button class="tool-btn" onclick="resetHighlight()">Limpiar</button>
+            <button class="tool-btn" onclick="cy.fit(30)">Center</button>
+            <button class="tool-btn" onclick="resetHighlight()">Reset</button>
           </div>
           <div class="tool-row">
             <select id="layout-select" class="tool-select" onchange="applyLayout(this.value)">
-              <option value="breadthfirst">Jerárquico (Capas)</option>
-              <option value="cose">Fuerza dirigida (COSE)</option>
-              <option value="concentric">Concéntrico</option>
+              <option value="breadthfirst">Hierarchical (Layers)</option>
+              <option value="cose">Force-directed (COSE)</option>
+              <option value="concentric">Concentric</option>
               <option value="circle">Circular</option>
             </select>
           </div>
           <div class="tool-row">
             <select id="layer-filter" class="tool-select" onchange="filterLayer(this.value)">
-              <option value="all">Todas las Capas</option>
-              <option value="product">Capa 1: Producto (Upstream)</option>
-              <option value="requirement">Capa 2: Requerimientos</option>
-              <option value="architecture">Capa 3: Arquitectura (Midstream)</option>
-              <option value="test">Capa 4: Pruebas (Downstream)</option>
+              <option value="all">All Layers</option>
+              <option value="product">Layer 1: Product (Upstream)</option>
+              <option value="requirement">Layer 2: Requirements</option>
+              <option value="architecture">Layer 3: Architecture (Midstream)</option>
+              <option value="test">Layer 4: Testing (Downstream)</option>
             </select>
           </div>
           <div class="tool-row">
             <select id="status-filter" class="tool-select" onchange="filterStatus(this.value)">
-              <option value="all">Todos los Estados</option>
-              <option value="CONFORME">Solo Conformes (Verde)</option>
-              <option value="issues">Solo Huérfanos / Deriva (Rojo)</option>
+              <option value="all">All Statuses</option>
+              <option value="COMPLIANT">Only Compliant (Green)</option>
+              <option value="issues">Only Orphans / Drift (Red)</option>
             </select>
           </div>
           <div class="tool-row">
-            <input type="text" id="node-search" class="tool-input" placeholder="Buscar ID de nodo..." oninput="searchNode(this.value)">
+            <input type="text" id="node-search" class="tool-input" placeholder="Search node ID..." oninput="searchNode(this.value)">
           </div>
         </div>
         <div id="cy"></div>
       </div>
       <aside class="sidebar" id="node-details">
-        <h2>Detalle del Nodo</h2>
+        <h2>Node Details</h2>
         <div id="sidebar-content" style="display: flex; flex-direction: column; gap: 12px;">
-          <p style="color: var(--text-muted); font-size: 0.8rem;">Haz clic en cualquier nodo del grafo para inspeccionar su camino crítico y trazabilidad completa.</p>
+          <p style="color: var(--text-muted); font-size: 0.8rem;">Click on any graph node to inspect its critical path and full traceability.</p>
         </div>
       </aside>
     </div>
@@ -668,29 +487,33 @@ export function renderDashboardHtml(
     <!-- TAB 2: RTM TABLE -->
     <div id="tab-rtm" class="tab-panel">
       <div class="content-container">
-        <h2>Matriz de Trazabilidad de Requerimientos 360°</h2>
+        <h2>360° Requirements Traceability Matrix</h2>
         <table class="data-table">
           <thead>
             <tr>
-              <th>ID Requerimiento</th>
-              <th>Título</th>
-              <th>Producto (Upstream)</th>
-              <th>Arquitectura (Midstream)</th>
-              <th>Pruebas (Downstream)</th>
-              <th>Estado Global</th>
+              <th>Requirement ID</th>
+              <th>Title</th>
+              <th>Product (Upstream)</th>
+              <th>Architecture (Midstream)</th>
+              <th>Testing (Downstream)</th>
+              <th>Global Status</th>
             </tr>
           </thead>
           <tbody>
-            ${metricsData.trace.rows.map((r: any) => `
+            ${metricsData.trace.rows.map((r: any) => {
+              const isRowOk = (r.productStatus === 'COMPLIANT' || r.productStatus === 'CONFORME') &&
+                (r.archStatus === 'COMPLIANT' || r.archStatus === 'CONFORME') &&
+                (r.testStatus === 'COMPLIANT' || r.testStatus === 'CONFORME');
+              return `
               <tr onclick="focusNode('${r.id}')" onmouseenter="startRowTooltip(event, '${r.id}')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
                 <td><strong><code>${r.id}</code></strong></td>
                 <td>${r.title}</td>
                 <td><code>${r.productTraces}</code></td>
                 <td><code>${r.archTraces}</code></td>
                 <td><code>${r.testTraces}</code></td>
-                <td><span class="badge ${r.productStatus === 'CONFORME' && r.archStatus === 'CONFORME' && r.testStatus === 'CONFORME' ? 'badge-green' : 'badge-amber'}">${r.productStatus === 'CONFORME' && r.archStatus === 'CONFORME' && r.testStatus === 'CONFORME' ? 'CONFORME' : 'HUÉRFANO'}</span></td>
+                <td><span class="badge ${isRowOk ? 'badge-green' : 'badge-amber'}">${isRowOk ? 'COMPLIANT' : 'ORPHAN'}</span></td>
               </tr>
-            `).join('')}
+            `}).join('')}
           </tbody>
         </table>
       </div>
@@ -703,34 +526,34 @@ export function renderDashboardHtml(
           <div class="metric-card">
             <span class="title">Release Gate</span>
             <span class="value" style="color: ${metricsData.gate.success ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">${metricsData.gate.success ? 'PASS' : 'FAIL'}</span>
-            <span class="subtitle">${metricsData.gate.failCount} funciones violando política</span>
+            <span class="subtitle">${metricsData.gate.failCount} policy-violating functions</span>
           </div>
           <div class="metric-card">
-            <span class="title">Mantenibilidad (SEI MI)</span>
+            <span class="title">Maintainability (SEI MI)</span>
             <span class="value">${metricsData.gate.results.length > 0 ? Math.round(metricsData.gate.results.reduce((a: number, b: any) => a + b.maintainability, 0) / metricsData.gate.results.length) : 100} / 100</span>
-            <span class="subtitle">Umbral mínimo: ${metricsData.gate.policy.min_maintainability}</span>
+            <span class="subtitle">Minimum threshold: ${metricsData.gate.policy.min_maintainability}</span>
           </div>
           <div class="metric-card">
-            <span class="title">Complejidad Ciclomática</span>
+            <span class="title">Cyclomatic Complexity</span>
             <span class="value">${metricsData.gate.results.length > 0 ? (metricsData.gate.results.reduce((a: number, b: any) => a + b.cyclomatic, 0) / metricsData.gate.results.length).toFixed(1) : 1.0}</span>
-            <span class="subtitle">Umbral máximo: ${metricsData.gate.policy.max_cyclomatic}</span>
+            <span class="subtitle">Maximum threshold: ${metricsData.gate.policy.max_cyclomatic}</span>
           </div>
           <div class="metric-card">
-            <span class="title">Cobertura BDD Requisitos</span>
+            <span class="title">Requirements BDD Coverage</span>
             <span class="value">${metricsData.cov.totalRequirements > 0 ? Math.round((metricsData.cov.passedRequirements / metricsData.cov.totalRequirements) * 100) : 100}%</span>
-            <span class="subtitle">${metricsData.cov.passedRequirements} / ${metricsData.cov.totalRequirements} verificados</span>
+            <span class="subtitle">${metricsData.cov.passedRequirements} / ${metricsData.cov.totalRequirements} verified</span>
           </div>
         </div>
 
         <div class="chart-container">
-          <h3>Distribución de Modos de Autonomía de Tareas (Gobernanza)</h3>
+          <h3>Task Autonomy Modes Distribution (Governance)</h3>
           <table class="data-table">
             <thead>
               <tr>
-                <th>Modo de Autonomía</th>
-                <th>Semáforo</th>
-                <th>Cantidad</th>
-                <th>Rol Agente / Intervención Requerida</th>
+                <th>Autonomy Mode</th>
+                <th>Status</th>
+                <th>Count</th>
+                <th>Agent Role / Required Intervention</th>
               </tr>
             </thead>
             <tbody>
@@ -738,25 +561,25 @@ export function renderDashboardHtml(
                 <td><code>AUTONOMOUS</code></td>
                 <td>🟢</td>
                 <td><strong>${metricsData.gov.modeCounts?.AUTONOMOUS || 0}</strong></td>
-                <td>Planificación y codificación autónoma. Revisión en PR.</td>
+                <td>Autonomous planning and coding. Asynchronous PR review.</td>
               </tr>
               <tr>
                 <td><code>HUMAN_REVIEW_PLAN</code></td>
                 <td>🟡</td>
                 <td><strong>${metricsData.gov.modeCounts?.HUMAN_REVIEW_PLAN || 0}</strong></td>
-                <td>Plan detallado aprobado antes de codificar.</td>
+                <td>Detailed plan approved before coding.</td>
               </tr>
               <tr>
                 <td><code>AMBIGUOUS</code></td>
                 <td>🟠</td>
                 <td><strong>${metricsData.gov.modeCounts?.AMBIGUOUS || 0}</strong></td>
-                <td>Detenido: Refinamiento requerido con Product Owner.</td>
+                <td>Halted: Refinement required with Product Owner.</td>
               </tr>
               <tr>
                 <td><code>HIGH_RISK_MANUAL</code></td>
                 <td>🔴</td>
                 <td><strong>${metricsData.gov.modeCounts?.HIGH_RISK_MANUAL || 0}</strong></td>
-                <td>Ejecución directa por ingenieros humanos.</td>
+                <td>Direct execution by human engineers.</td>
               </tr>
             </tbody>
           </table>
@@ -767,49 +590,49 @@ export function renderDashboardHtml(
     <!-- TAB 4: TELEMETRY & HISTORICAL KPIS -->
     <div id="tab-kpis" class="tab-panel">
       <div class="content-container">
-        <h2>Telemetría Activa e Histórico de KPIs</h2>
+        <h2>Active Telemetry and KPI History</h2>
         ${metricsData.activePrKpi ? `
         <div class="grid-cards">
           <div class="metric-card">
-            <span class="title">Commits en Rama Activa</span>
+            <span class="title">Commits in Active Branch</span>
             <span class="value">${metricsData.activePrKpi.totalCommits}</span>
-            <span class="subtitle">+${metricsData.activePrKpi.linesAdded} / -${metricsData.activePrKpi.linesDeleted} líneas</span>
+            <span class="subtitle">+${metricsData.activePrKpi.linesAdded} / -${metricsData.activePrKpi.linesDeleted} lines</span>
           </div>
           <div class="metric-card">
-            <span class="title">Tiempo de Desarrollo Activo</span>
+            <span class="title">Active Development Time</span>
             <span class="value">${Math.round(metricsData.activePrKpi.totalActiveTimeSeconds / 60)}m</span>
-            <span class="subtitle">${metricsData.activePrKpi.totalActiveTimeSeconds}s acumulados</span>
+            <span class="subtitle">${metricsData.activePrKpi.totalActiveTimeSeconds}s accumulated</span>
           </div>
           <div class="metric-card">
-            <span class="title">Tokens Consumidos</span>
+            <span class="title">Consumed Tokens</span>
             <span class="value">${metricsData.activePrKpi.totalTokens.toLocaleString('en-US')}</span>
             <span class="subtitle">In: ${metricsData.activePrKpi.totalPromptTokens.toLocaleString()} | Out: ${metricsData.activePrKpi.totalCompletionTokens.toLocaleString()}</span>
           </div>
           <div class="metric-card">
-            <span class="title">Coste Estimado Computación</span>
+            <span class="title">Estimated Compute Cost</span>
             <span class="value">$${metricsData.activePrKpi.estimatedCostUsd.toFixed(2)}</span>
-            <span class="subtitle">USD ponderado</span>
+            <span class="subtitle">Weighted USD</span>
           </div>
         </div>
 
         <div class="chart-container">
-          <h3>Desglose de Telemetría por Autor y Modelo (${metricsData.activeBranch || 'HEAD'})</h3>
+          <h3>Telemetry Breakdown by Author and Model (${metricsData.activeBranch || 'HEAD'})</h3>
           <table class="data-table">
             <thead>
               <tr>
-                <th>Entidad / Modelo</th>
-                <th>Tipo</th>
+                <th>Entity / Model</th>
+                <th>Type</th>
                 <th>Commits</th>
-                <th>Líneas (+/-)</th>
-                <th>Tiempo Activo</th>
-                <th>Tokens Consumidos</th>
-                <th>Coste Estimado ($ USD)</th>
+                <th>Lines (+/-)</th>
+                <th>Active Time</th>
+                <th>Consumed Tokens</th>
+                <th>Estimated Cost ($ USD)</th>
               </tr>
             </thead>
             <tbody>
               ${metricsData.activePrKpi.humanSummary.commits > 0 ? `
               <tr>
-                <td><strong>Humano (Desarrollador)</strong></td>
+                <td><strong>Human (Developer)</strong></td>
                 <td><span class="badge" style="background:#334155;">HUMAN</span></td>
                 <td>${metricsData.activePrKpi.humanSummary.commits}</td>
                 <td>+${metricsData.activePrKpi.humanSummary.linesAdded} / -${metricsData.activePrKpi.humanSummary.linesDeleted}</td>
@@ -830,7 +653,7 @@ export function renderDashboardHtml(
               </tr>
               `).join('')}
               <tr style="font-weight: bold; background: rgba(255,255,255,0.05);">
-                <td>TOTAL RAMA</td>
+                <td>TOTAL BRANCH</td>
                 <td>—</td>
                 <td>${metricsData.activePrKpi.totalCommits}</td>
                 <td>+${metricsData.activePrKpi.linesAdded} / -${metricsData.activePrKpi.linesDeleted}</td>
@@ -844,19 +667,19 @@ export function renderDashboardHtml(
         ` : ''}
 
         <div class="chart-container">
-          <h3>Histórico Consolidado de Releases</h3>
+          <h3>Consolidated Release History</h3>
           ${metricsData.history.length > 0 ? `
           <table class="data-table">
             <thead>
               <tr>
                 <th>Release</th>
-                <th>Fecha</th>
+                <th>Date</th>
                 <th>KLoC</th>
                 <th>Commits</th>
-                <th>Bugs Confirmados</th>
+                <th>Confirmed Bugs</th>
                 <th>DIR (Bugs/KLoC)</th>
                 <th>Rework (%)</th>
-                <th>Coste ($ USD)</th>
+                <th>Cost ($ USD)</th>
               </tr>
             </thead>
             <tbody>
@@ -876,8 +699,8 @@ export function renderDashboardHtml(
           </table>
           ` : `
           <p style="color: var(--text-muted); font-size: 0.85rem;">
-            No se registran aún informes de release consolidados en <code>reports/releases/*.kpis.json</code>.
-            Utiliza el comando <code>aisdlc kpi release --release &lt;rama&gt;</code> para consolidar métricas de entrega.
+            No consolidated release reports recorded yet in <code>reports/releases/*.kpis.json</code>.
+            Use the command <code>aisdlc kpi release --release &lt;branch&gt;</code> to consolidate delivery metrics.
           </p>
           `}
         </div>
@@ -891,7 +714,7 @@ export function renderDashboardHtml(
   <script>
     var elements = ${elementsJson};
     var cy = null;
-    var activePopupReqId = null;
+
     var reqHoverTimer = null;
     var currentHoverNodeId = null;
     var tableHoverTimer = null;
@@ -1204,7 +1027,7 @@ export function renderDashboardHtml(
       });
     }
 
-    function highlightCriticalPath(node) {
+        function highlightCriticalPath(node) {
       cy.elements().removeClass('highlighted dimmed');
       var predecessors = node.predecessors();
       var successors = node.successors();
@@ -1218,24 +1041,25 @@ export function renderDashboardHtml(
       if (!cy) return;
       cy.elements().removeClass('highlighted dimmed');
       var sidebar = document.getElementById('sidebar-content');
-      sidebar.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem;">Haz clic en cualquier nodo del grafo para inspeccionar su camino crítico y trazabilidad completa.</p>';
+      sidebar.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem;">Click on any graph node to inspect its critical path and full traceability.</p>';
       closeRequirementPopup();
     }
 
     function showNodeDetails(data) {
       var sidebar = document.getElementById('sidebar-content');
-      var html = '<div class="sidebar-field"><strong>ID / Identificador:</strong> <code>' + data.id + '</code></div>';
-      html += '<div class="sidebar-field"><strong>Título:</strong> ' + (data.title || data.label) + '</div>';
-      html += '<div class="sidebar-field"><strong>Capa / Tipo:</strong> <span class="badge" style="background:#334155;">' + data.layer.toUpperCase() + ' (' + data.type + ')</span></div>';
-      html += '<div class="sidebar-field"><strong>Estado:</strong> <span class="badge ' + (data.status === 'CONFORME' ? 'badge-green' : 'badge-amber') + '">' + data.status + '</span></div>';
+      var isConform = data.status === 'COMPLIANT' || data.status === 'CONFORME';
+      var html = '<div class="sidebar-field"><strong>ID / Identifier:</strong> <code>' + data.id + '</code></div>';
+      html += '<div class="sidebar-field"><strong>Title:</strong> ' + (data.title || data.label) + '</div>';
+      html += '<div class="sidebar-field"><strong>Layer / Type:</strong> <span class="badge" style="background:#334155;">' + data.layer.toUpperCase() + ' (' + data.type + ')</span></div>';
+      html += '<div class="sidebar-field"><strong>Status:</strong> <span class="badge ' + (isConform ? 'badge-green' : 'badge-amber') + '">' + data.status + '</span></div>';
       if (data.filePath) {
-        html += '<div class="sidebar-field"><strong>Archivo Físico:</strong> <code>' + data.filePath + '</code></div>';
+        html += '<div class="sidebar-field"><strong>Physical File:</strong> <code>' + data.filePath + '</code></div>';
       }
       if (data.upstream && data.upstream.length > 0) {
-        html += '<div class="sidebar-field"><strong>Trazas Upstream (Producto):</strong> ' + data.upstream.join(', ') + '</div>';
+        html += '<div class="sidebar-field"><strong>Upstream Traces (Product):</strong> ' + data.upstream.join(', ') + '</div>';
       }
       if (data.downstream && data.downstream.length > 0) {
-        html += '<div class="sidebar-field"><strong>Trazas Downstream (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
+        html += '<div class="sidebar-field"><strong>Downstream Traces (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
       }
       sidebar.innerHTML = html;
     }
@@ -1262,14 +1086,14 @@ export function renderDashboardHtml(
       if (!cy) return;
       if (status === 'all') {
         cy.elements().show();
-      } else if (status === 'CONFORME') {
+      } else if (status === 'COMPLIANT' || status === 'CONFORME') {
         cy.elements().hide();
-        var nodes = cy.nodes('.status-conforme');
+        var nodes = cy.nodes('.status-compliant, .status-conforme');
         nodes.show();
         nodes.connectedEdges().show();
       } else {
         cy.elements().hide();
-        var nodes = cy.nodes('.status-huérfano, .status-drift');
+        var nodes = cy.nodes('.status-orphan, .status-huérfano, .status-drift');
         nodes.show();
         nodes.connectedEdges().show();
       }
