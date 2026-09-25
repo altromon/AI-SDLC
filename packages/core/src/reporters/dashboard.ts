@@ -1040,43 +1040,53 @@ export function renderDashboardHtml(
     var tableHoverId = null;
     var lastMouseX = 0;
     var lastMouseY = 0;
+    var activePopupReqId = null;
 
     function renderMarkdown(md) {
       if (!md || !md.trim()) {
         return '<p style="color: var(--text-muted); font-style: italic;">Sin contenido detallado en el cuerpo del requisito.</p>';
       }
-      var text = md
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+      try {
+        var text = md
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
 
-      // Code blocks
-      text = text.replace(new RegExp('\\x60{3}([a-z]*)\\r?\\n([\\s\\S]*?)\\x60{3}', 'g'), function(_, lang, code) {
-        return '<pre><code>' + code.trim() + '</code></pre>';
-      });
+        // Code blocks (triple backticks)
+        var tick = String.fromCharCode(96);
+        var codeBlockRe = new RegExp(tick + '{3}([a-z]*)[\\\\r\\\\n]+([\\\\s\\\\S]*?)' + tick + '{3}', 'g');
+        text = text.replace(codeBlockRe, function(_, lang, code) {
+          return '<pre><code>' + code.trim() + '</code></pre>';
+        });
 
-      // Inline code
-      text = text.replace(new RegExp('\\x60([^\\x60]+)\\x60', 'g'), '<code>$1</code>');
+        // Inline code (single backtick)
+        var inlineCodeRe = new RegExp(tick + '([^' + tick + ']+)' + tick, 'g');
+        text = text.replace(inlineCodeRe, '<code>$1</code>');
 
-      // Headers (h3, h2, h1)
-      text = text.replace(new RegExp('^### (.*$)', 'gim'), '<h4>$1</h4>');
-      text = text.replace(new RegExp('^## (.*$)', 'gim'), '<h3>$1</h3>');
-      text = text.replace(new RegExp('^# (.*$)', 'gim'), '<h2>$1</h2>');
+        // Headers (h3, h2, h1)
+        text = text.replace(/^### (.*$)/gim, '<h4>$1</h4>');
+        text = text.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+        text = text.replace(/^# (.*$)/gim, '<h2>$1</h2>');
 
-      // Bold & italic
-      text = text.replace(new RegExp('\\*\\*([^*]+)\\*\\*', 'g'), '<strong>$1</strong>');
-      text = text.replace(new RegExp('\\*([^*]+)\\*', 'g'), '<em>$1</em>');
+        // Bold & italic
+        text = text.replace(/\\*\\*([^*]+)\\*\\*/g, '<strong>$1</strong>');
+        text = text.replace(/\\*([^*]+)\\*/g, '<em>$1</em>');
 
-      // Unordered lists
-      text = text.replace(new RegExp('^\\s*[-*]\\s+(.*$)', 'gim'), '<li>$1</li>');
-      text = text.replace(new RegExp('(<li>[\\s\\S]*?<\\/li>(\\r?\\n)*)+', 'g'), function(match) {
-        return '<ul>' + match + '</ul>';
-      });
+        // Unordered lists
+        text = text.replace(/^\\s*[-*]\\s+(.*$)/gim, '<li>$1</li>');
+        text = text.replace(/(<li>[\\s\\S]*?<\\/li>(?:\\r?\\n)*)+/g, function(match) {
+          return '<ul>' + match + '</ul>';
+        });
 
-      // Paragraph line breaks
-      text = text.replace(new RegExp('\\r?\\n\\r?\\n', 'g'), '<br/><br/>');
+        // Paragraph line breaks
+        text = text.replace(/\\r?\\n\\r?\\n/g, '<br/><br/>');
 
-      return text;
+        return text;
+      } catch (err) {
+        return '<div style="white-space: pre-wrap; font-family: monospace;">' +
+          md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+          '</div>';
+      }
     }
 
     function openRequirementPopup(data) {
@@ -1410,31 +1420,37 @@ export function renderDashboardHtml(
     }
 
     function showNodeDetails(data) {
-      var sidebar = document.getElementById('sidebar-content');
-      var isConform = data.status === 'COMPLIANT' || data.status === 'CONFORME';
-      var html = '<div class="sidebar-field"><strong>ID / Identifier:</strong> <code>' + data.id + '</code></div>';
-      html += '<div class="sidebar-field"><strong>Title:</strong> ' + (data.title || data.label) + '</div>';
-      html += '<div class="sidebar-field"><strong>Layer / Type:</strong> <span class="badge" style="background:#334155;">' + data.layer.toUpperCase() + ' (' + data.type + ')</span></div>';
-      html += '<div class="sidebar-field"><strong>Status:</strong> <span class="badge ' + (isConform ? 'badge-green' : 'badge-amber') + '">' + data.status + '</span></div>';
-      if (data.filePath) {
-        var cleanMetaPath = data.filePath.split('\\\\').join('/');
-        if (cleanMetaPath.indexOf('./') === 0) cleanMetaPath = cleanMetaPath.substring(2);
-        var metaHref = (cleanMetaPath.indexOf('http://') === 0 || cleanMetaPath.indexOf('https://') === 0 || cleanMetaPath.indexOf('file://') === 0) ? cleanMetaPath : '../' + cleanMetaPath;
-        html += '<div class="sidebar-field"><strong>Physical File:</strong> <a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline;" title="Abrir archivo: ' + cleanMetaPath + '"><code>' + cleanMetaPath + ' ↗</code></a></div>';
+      try {
+        var sidebar = document.getElementById('sidebar-content');
+        if (!sidebar) return;
+        var isConform = data.status === 'COMPLIANT' || data.status === 'CONFORME';
+        var layerName = (data.layer || data.type || 'NODE').toUpperCase();
+        var html = '<div class="sidebar-field"><strong>ID / Identifier:</strong> <code>' + data.id + '</code></div>';
+        html += '<div class="sidebar-field"><strong>Title:</strong> ' + (data.title || data.label || data.id) + '</div>';
+        html += '<div class="sidebar-field"><strong>Layer / Type:</strong> <span class="badge" style="background:#334155;">' + layerName + ' (' + (data.type || data.layer || 'node') + ')</span></div>';
+        html += '<div class="sidebar-field"><strong>Status:</strong> <span class="badge ' + (isConform ? 'badge-green' : 'badge-amber') + '">' + (data.status || 'UNKNOWN') + '</span></div>';
+        if (data.filePath) {
+          var cleanMetaPath = data.filePath.split('\\\\').join('/');
+          if (cleanMetaPath.indexOf('./') === 0) cleanMetaPath = cleanMetaPath.substring(2);
+          var metaHref = (cleanMetaPath.indexOf('http://') === 0 || cleanMetaPath.indexOf('https://') === 0 || cleanMetaPath.indexOf('file://') === 0) ? cleanMetaPath : '../' + cleanMetaPath;
+          html += '<div class="sidebar-field"><strong>Physical File:</strong> <a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline;" title="Abrir archivo: ' + cleanMetaPath + '"><code>' + cleanMetaPath + ' ↗</code></a></div>';
+        }
+        if (data.upstream && data.upstream.length > 0) {
+          html += '<div class="sidebar-field"><strong>Upstream Traces (Product):</strong> ' + data.upstream.join(', ') + '</div>';
+        }
+        if (data.downstream && data.downstream.length > 0) {
+          html += '<div class="sidebar-field"><strong>Downstream Traces (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
+        }
+        if (data.content && data.content.trim()) {
+          html += '<div class="sidebar-field" style="margin-top: 4px;"><strong>Contenido / Especificación del Fichero:</strong>';
+          html += '<div class="sidebar-content-preview" style="margin-top: 6px; max-height: 280px; overflow-y: auto; background: rgba(11, 17, 32, 0.75); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.74rem; line-height: 1.45; color: #cbd5e1;">';
+          html += renderMarkdown(data.content);
+          html += '</div></div>';
+        }
+        sidebar.innerHTML = html;
+      } catch (err) {
+        console.error('Error showing node details:', err);
       }
-      if (data.upstream && data.upstream.length > 0) {
-        html += '<div class="sidebar-field"><strong>Upstream Traces (Product):</strong> ' + data.upstream.join(', ') + '</div>';
-      }
-      if (data.downstream && data.downstream.length > 0) {
-        html += '<div class="sidebar-field"><strong>Downstream Traces (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
-      }
-      if (data.content && data.content.trim()) {
-        html += '<div class="sidebar-field" style="margin-top: 4px;"><strong>Contenido / Especificación del Fichero:</strong>';
-        html += '<div class="sidebar-content-preview" style="margin-top: 6px; max-height: 280px; overflow-y: auto; background: rgba(11, 17, 32, 0.75); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.74rem; line-height: 1.45; color: #cbd5e1;">';
-        html += renderMarkdown(data.content);
-        html += '</div></div>';
-      }
-      sidebar.innerHTML = html;
     }
 
     function applyLayout(name) {

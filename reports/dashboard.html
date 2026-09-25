@@ -327,7 +327,7 @@
       </span>
     </div>
     <div style="font-size: 0.75rem; color: var(--text-muted);">
-      Generated: <span>2026-09-25 17:29:24</span>
+      Generated: <span>2026-09-25 18:46:57</span>
     </div>
   </header>
 
@@ -558,21 +558,21 @@
           <div class="metric-card">
             <span class="title">Commits in Active Branch</span>
             <span class="value">22</span>
-            <span class="subtitle">+11475 / -5799 lines</span>
+            <span class="subtitle">+11503 / -5801 lines</span>
           </div>
           <div class="metric-card">
             <span class="title">Active Development Time</span>
             <span class="value">159m</span>
-            <span class="subtitle">9568s accumulated</span>
+            <span class="subtitle">9523s accumulated</span>
           </div>
           <div class="metric-card">
             <span class="title">Consumed Tokens</span>
-            <span class="value">616,080</span>
-            <span class="subtitle">In: 451.500 | Out: 164.580</span>
+            <span class="value">612,930</span>
+            <span class="subtitle">In: 449.250 | Out: 163.680</span>
           </div>
           <div class="metric-card">
             <span class="title">Estimated Compute Cost</span>
-            <span class="value">$3.82</span>
+            <span class="value">$3.80</span>
             <span class="subtitle">Weighted USD</span>
           </div>
         </div>
@@ -608,20 +608,20 @@
                 <td><strong><code>gemini-3.8-flash</code></strong></td>
                 <td><span class="badge badge-green">AGENT</span></td>
                 <td>15</td>
-                <td>+11475 / -5799</td>
+                <td>+11503 / -5801</td>
                 <td>145m</td>
-                <td>616,080</td>
-                <td>$3.82</td>
+                <td>612,930</td>
+                <td>$3.80</td>
               </tr>
               
               <tr style="font-weight: bold; background: rgba(255,255,255,0.05);">
                 <td>TOTAL BRANCH</td>
                 <td>—</td>
                 <td>22</td>
-                <td>+11475 / -5799</td>
+                <td>+11503 / -5801</td>
                 <td>159m</td>
-                <td>616,080</td>
-                <td>$3.82 USD</td>
+                <td>612,930</td>
+                <td>$3.80 USD</td>
               </tr>
             </tbody>
           </table>
@@ -710,43 +710,53 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
     var tableHoverId = null;
     var lastMouseX = 0;
     var lastMouseY = 0;
+    var activePopupReqId = null;
 
     function renderMarkdown(md) {
       if (!md || !md.trim()) {
         return '<p style="color: var(--text-muted); font-style: italic;">Sin contenido detallado en el cuerpo del requisito.</p>';
       }
-      var text = md
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+      try {
+        var text = md
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
 
-      // Code blocks
-      text = text.replace(new RegExp('\x60{3}([a-z]*)\r?\n([\s\S]*?)\x60{3}', 'g'), function(_, lang, code) {
-        return '<pre><code>' + code.trim() + '</code></pre>';
-      });
+        // Code blocks (triple backticks)
+        var tick = String.fromCharCode(96);
+        var codeBlockRe = new RegExp(tick + '{3}([a-z]*)[\\r\\n]+([\\s\\S]*?)' + tick + '{3}', 'g');
+        text = text.replace(codeBlockRe, function(_, lang, code) {
+          return '<pre><code>' + code.trim() + '</code></pre>';
+        });
 
-      // Inline code
-      text = text.replace(new RegExp('\x60([^\x60]+)\x60', 'g'), '<code>$1</code>');
+        // Inline code (single backtick)
+        var inlineCodeRe = new RegExp(tick + '([^' + tick + ']+)' + tick, 'g');
+        text = text.replace(inlineCodeRe, '<code>$1</code>');
 
-      // Headers (h3, h2, h1)
-      text = text.replace(new RegExp('^### (.*$)', 'gim'), '<h4>$1</h4>');
-      text = text.replace(new RegExp('^## (.*$)', 'gim'), '<h3>$1</h3>');
-      text = text.replace(new RegExp('^# (.*$)', 'gim'), '<h2>$1</h2>');
+        // Headers (h3, h2, h1)
+        text = text.replace(/^### (.*$)/gim, '<h4>$1</h4>');
+        text = text.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+        text = text.replace(/^# (.*$)/gim, '<h2>$1</h2>');
 
-      // Bold & italic
-      text = text.replace(new RegExp('\*\*([^*]+)\*\*', 'g'), '<strong>$1</strong>');
-      text = text.replace(new RegExp('\*([^*]+)\*', 'g'), '<em>$1</em>');
+        // Bold & italic
+        text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
 
-      // Unordered lists
-      text = text.replace(new RegExp('^\s*[-*]\s+(.*$)', 'gim'), '<li>$1</li>');
-      text = text.replace(new RegExp('(<li>[\s\S]*?<\/li>(\r?\n)*)+', 'g'), function(match) {
-        return '<ul>' + match + '</ul>';
-      });
+        // Unordered lists
+        text = text.replace(/^\s*[-*]\s+(.*$)/gim, '<li>$1</li>');
+        text = text.replace(/(<li>[\s\S]*?<\/li>(?:\r?\n)*)+/g, function(match) {
+          return '<ul>' + match + '</ul>';
+        });
 
-      // Paragraph line breaks
-      text = text.replace(new RegExp('\r?\n\r?\n', 'g'), '<br/><br/>');
+        // Paragraph line breaks
+        text = text.replace(/\r?\n\r?\n/g, '<br/><br/>');
 
-      return text;
+        return text;
+      } catch (err) {
+        return '<div style="white-space: pre-wrap; font-family: monospace;">' +
+          md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+          '</div>';
+      }
     }
 
     function openRequirementPopup(data) {
@@ -1080,31 +1090,37 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
     }
 
     function showNodeDetails(data) {
-      var sidebar = document.getElementById('sidebar-content');
-      var isConform = data.status === 'COMPLIANT' || data.status === 'CONFORME';
-      var html = '<div class="sidebar-field"><strong>ID / Identifier:</strong> <code>' + data.id + '</code></div>';
-      html += '<div class="sidebar-field"><strong>Title:</strong> ' + (data.title || data.label) + '</div>';
-      html += '<div class="sidebar-field"><strong>Layer / Type:</strong> <span class="badge" style="background:#334155;">' + data.layer.toUpperCase() + ' (' + data.type + ')</span></div>';
-      html += '<div class="sidebar-field"><strong>Status:</strong> <span class="badge ' + (isConform ? 'badge-green' : 'badge-amber') + '">' + data.status + '</span></div>';
-      if (data.filePath) {
-        var cleanMetaPath = data.filePath.split('\\').join('/');
-        if (cleanMetaPath.indexOf('./') === 0) cleanMetaPath = cleanMetaPath.substring(2);
-        var metaHref = (cleanMetaPath.indexOf('http://') === 0 || cleanMetaPath.indexOf('https://') === 0 || cleanMetaPath.indexOf('file://') === 0) ? cleanMetaPath : '../' + cleanMetaPath;
-        html += '<div class="sidebar-field"><strong>Physical File:</strong> <a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline;" title="Abrir archivo: ' + cleanMetaPath + '"><code>' + cleanMetaPath + ' ↗</code></a></div>';
+      try {
+        var sidebar = document.getElementById('sidebar-content');
+        if (!sidebar) return;
+        var isConform = data.status === 'COMPLIANT' || data.status === 'CONFORME';
+        var layerName = (data.layer || data.type || 'NODE').toUpperCase();
+        var html = '<div class="sidebar-field"><strong>ID / Identifier:</strong> <code>' + data.id + '</code></div>';
+        html += '<div class="sidebar-field"><strong>Title:</strong> ' + (data.title || data.label || data.id) + '</div>';
+        html += '<div class="sidebar-field"><strong>Layer / Type:</strong> <span class="badge" style="background:#334155;">' + layerName + ' (' + (data.type || data.layer || 'node') + ')</span></div>';
+        html += '<div class="sidebar-field"><strong>Status:</strong> <span class="badge ' + (isConform ? 'badge-green' : 'badge-amber') + '">' + (data.status || 'UNKNOWN') + '</span></div>';
+        if (data.filePath) {
+          var cleanMetaPath = data.filePath.split('\\').join('/');
+          if (cleanMetaPath.indexOf('./') === 0) cleanMetaPath = cleanMetaPath.substring(2);
+          var metaHref = (cleanMetaPath.indexOf('http://') === 0 || cleanMetaPath.indexOf('https://') === 0 || cleanMetaPath.indexOf('file://') === 0) ? cleanMetaPath : '../' + cleanMetaPath;
+          html += '<div class="sidebar-field"><strong>Physical File:</strong> <a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline;" title="Abrir archivo: ' + cleanMetaPath + '"><code>' + cleanMetaPath + ' ↗</code></a></div>';
+        }
+        if (data.upstream && data.upstream.length > 0) {
+          html += '<div class="sidebar-field"><strong>Upstream Traces (Product):</strong> ' + data.upstream.join(', ') + '</div>';
+        }
+        if (data.downstream && data.downstream.length > 0) {
+          html += '<div class="sidebar-field"><strong>Downstream Traces (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
+        }
+        if (data.content && data.content.trim()) {
+          html += '<div class="sidebar-field" style="margin-top: 4px;"><strong>Contenido / Especificación del Fichero:</strong>';
+          html += '<div class="sidebar-content-preview" style="margin-top: 6px; max-height: 280px; overflow-y: auto; background: rgba(11, 17, 32, 0.75); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.74rem; line-height: 1.45; color: #cbd5e1;">';
+          html += renderMarkdown(data.content);
+          html += '</div></div>';
+        }
+        sidebar.innerHTML = html;
+      } catch (err) {
+        console.error('Error showing node details:', err);
       }
-      if (data.upstream && data.upstream.length > 0) {
-        html += '<div class="sidebar-field"><strong>Upstream Traces (Product):</strong> ' + data.upstream.join(', ') + '</div>';
-      }
-      if (data.downstream && data.downstream.length > 0) {
-        html += '<div class="sidebar-field"><strong>Downstream Traces (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
-      }
-      if (data.content && data.content.trim()) {
-        html += '<div class="sidebar-field" style="margin-top: 4px;"><strong>Contenido / Especificación del Fichero:</strong>';
-        html += '<div class="sidebar-content-preview" style="margin-top: 6px; max-height: 280px; overflow-y: auto; background: rgba(11, 17, 32, 0.75); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.74rem; line-height: 1.45; color: #cbd5e1;">';
-        html += renderMarkdown(data.content);
-        html += '</div></div>';
-      }
-      sidebar.innerHTML = html;
     }
 
     function applyLayout(name) {

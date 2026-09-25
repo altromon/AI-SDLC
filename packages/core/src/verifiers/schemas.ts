@@ -451,6 +451,7 @@ export function verifyArtifactsSchemas(
       relPath.startsWith('dist/') ||
       (!options.targetPath && relPath.startsWith('templates/')) ||
       relPath.startsWith('temp-') ||
+      relPath.startsWith('test-') ||
       !relPath.includes('/')
     ) {
       continue;
