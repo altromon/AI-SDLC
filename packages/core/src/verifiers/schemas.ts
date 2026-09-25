@@ -45,27 +45,74 @@ export const TYPE_TO_SCHEMA_MAP: Record<string, string> = {
   // SDD
   tasks: 'schemas/sdd/tasks.schema.json',
   handoff: 'schemas/sdd/handoff.schema.json',
+  'spec-change-proposal': 'schemas/sdd/proposal.schema.json',
+  proposal: 'schemas/sdd/proposal.schema.json',
+  'spec-design': 'schemas/sdd/design.schema.json',
+  'spec-change-design': 'schemas/sdd/design.schema.json',
+  design: 'schemas/sdd/design.schema.json',
+  'delivery-spec': 'schemas/sdd/spec.schema.json',
+  spec: 'schemas/sdd/spec.schema.json',
+  'release-kpis': 'schemas/sdd/release-kpis.schema.json',
+  'session-telemetry': 'schemas/sdd/session-telemetry.schema.json',
+
+  // Compliance
+  'license-manifest': 'schemas/compliance/license-manifest.schema.json',
+
+  // Workflow
+  'agent-handoff': 'schemas/workflow/agent-handoff.schema.json',
+
+  // IDE
+  'mcp-config': 'schemas/ide/mcp-config.schema.json',
 };
 
+const PREFIX_TAXONOMY: Array<[string, string]> = [
+  ['ACT-THREAT-', 'threat-actor'],
+  ['ACT-', 'actor'],
+  ['UC-', 'use-case'],
+  ['BR-', 'business-rule'],
+  ['FR-', 'requirement'],
+  ['QR-', 'requirement'],
+  ['CON-', 'requirement'],
+  ['JRN-', 'journey'],
+  ['TERM-', 'term'],
+  ['ABUSE-', 'abuse-case'],
+  ['SEC-ENC-', 'security-enclave'],
+  ['SEC-REQ-', 'security-requirement'],
+  ['HAZ-', 'hazard'],
+  ['SAF-REQ-', 'safety-requirement'],
+  ['SAF-', 'safety-requirement'],
+  ['ADR-', 'architecture-decision-record'],
+  ['CMP-', 'component'],
+  ['MAN-USER-', 'user-manual'],
+  ['MAN-PROD-', 'production-manual'],
+  ['MAN-LIC-', 'license-manifest'],
+  ['LIC-MAN-', 'license-manifest'],
+  ['LIC-', 'license-manifest'],
+  ['TSK-', 'tasks'],
+  ['HOF-WORKFLOW-', 'agent-handoff'],
+  ['AHOF-', 'agent-handoff'],
+  ['HOF-', 'handoff'],
+  ['SPEC-', 'delivery-spec'],
+  ['DSG-', 'spec-design'],
+  ['CHG-', 'spec-change-proposal'],
+  ['PATCH-', 'spec-change-proposal'],
+  ['PROP-', 'spec-change-proposal'],
+  ['KPI-REL-', 'release-kpis'],
+  ['REL-KPI-', 'release-kpis'],
+  ['TEL-SES-', 'session-telemetry'],
+  ['SES-TEL-', 'session-telemetry'],
+  ['TEL-', 'session-telemetry'],
+  ['MCP-CFG-', 'mcp-config'],
+  ['IDE-MCP-', 'mcp-config'],
+  ['MCP-', 'mcp-config'],
+];
+
 export function inferArtifactTypeFromId(id: string): string | null {
-  if (id.startsWith('ACT-THREAT-')) return 'threat-actor';
-  if (id.startsWith('ACT-')) return 'actor';
-  if (id.startsWith('UC-')) return 'use-case';
-  if (id.startsWith('BR-')) return 'business-rule';
-  if (id.startsWith('FR-') || id.startsWith('QR-') || id.startsWith('CON-')) return 'requirement';
-  if (id.startsWith('JRN-')) return 'journey';
-  if (id.startsWith('TERM-')) return 'term';
-  if (id.startsWith('ABUSE-')) return 'abuse-case';
-  if (id.startsWith('SEC-ENC-')) return 'security-enclave';
-  if (id.startsWith('SEC-REQ-')) return 'security-requirement';
-  if (id.startsWith('HAZ-')) return 'hazard';
-  if (id.startsWith('SAF-REQ-') || id.startsWith('SAF-')) return 'safety-requirement';
-  if (id.startsWith('ADR-')) return 'architecture-decision-record';
-  if (id.startsWith('CMP-')) return 'component';
-  if (id.startsWith('MAN-USER-')) return 'user-manual';
-  if (id.startsWith('MAN-PROD-')) return 'production-manual';
-  if (id.startsWith('TSK-')) return 'tasks';
-  if (id.startsWith('HOF-')) return 'handoff';
+  for (const [prefix, type] of PREFIX_TAXONOMY) {
+    if (id.startsWith(prefix)) {
+      return type;
+    }
+  }
   return null;
 }
 

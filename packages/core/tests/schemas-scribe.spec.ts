@@ -57,6 +57,14 @@ describe('AI as Scribe & JSON Schema Validation Suite', () => {
     expect(inferArtifactTypeFromId('SEC-ENC-VAULT-PERIMETER')).toBe('security-enclave');
     expect(inferArtifactTypeFromId('JRN-ONBOARDING-OPERATOR')).toBe('journey');
     expect(inferArtifactTypeFromId('TERM-WAYPOINT-ENVELOPE')).toBe('term');
+    expect(inferArtifactTypeFromId('CHG-001-TELEMETRY-INGEST')).toBe('spec-change-proposal');
+    expect(inferArtifactTypeFromId('DSG-CHG-001-TELEMETRY-INGEST')).toBe('spec-design');
+    expect(inferArtifactTypeFromId('SPEC-CHG-001-TELEMETRY-INGEST')).toBe('delivery-spec');
+    expect(inferArtifactTypeFromId('MAN-LIC-STATIC-DEPS')).toBe('license-manifest');
+    expect(inferArtifactTypeFromId('KPI-REL-V1-0-0')).toBe('release-kpis');
+    expect(inferArtifactTypeFromId('TEL-SES-DEV-SESSION')).toBe('session-telemetry');
+    expect(inferArtifactTypeFromId('AHOF-DEV-TO-QA')).toBe('agent-handoff');
+    expect(inferArtifactTypeFromId('MCP-CFG-WORKSPACE')).toBe('mcp-config');
   });
 
   it('should validate AI as Scribe generated Product artifacts from natural language prompt', () => {
@@ -335,5 +343,254 @@ unknown-extra-property: "disallowed"
     const termRes = validateArtifactSchema(termFm, 'term', repoRoot);
     expect(termRes.valid).toBe(true);
     expect(termRes.errors).toHaveLength(0);
+  });
+
+  it('should validate SDD and telemetry schemas: proposal, design, spec, license-manifest, release-kpis, session-telemetry, agent-handoff, and mcp-config (#55)', () => {
+    // 1. spec-change-proposal (proposal.schema.json)
+    const validProposal = {
+      id: 'CHG-001-AI-TELEMETRY',
+      type: 'spec-change-proposal',
+      title: 'Ingestión Determinista de Telemetría',
+      status: 'draft',
+      version: '1.0.0',
+      author: 'agent-developer',
+      citations: [{ id: 'UC-STREAM-TELEMETRY', digest: 'sha256:0123', comment: 'Base use case' }],
+    };
+    const propResValid = validateArtifactSchema(validProposal, 'spec-change-proposal', repoRoot);
+    expect(propResValid.valid).toBe(true);
+    expect(propResValid.errors).toHaveLength(0);
+
+    const invalidProposal = {
+      id: 'CHG-001-AI-TELEMETRY',
+      type: 'spec-change-proposal',
+      status: 'unknown-status',
+      disallowedField: true,
+    };
+    const propResInvalid = validateArtifactSchema(invalidProposal, 'spec-change-proposal', repoRoot);
+    expect(propResInvalid.valid).toBe(false);
+    expect(propResInvalid.errors.some((e) => e.includes('missing required field'))).toBe(true);
+
+    // 2. spec-design (design.schema.json)
+    const validDesign = {
+      id: 'DSG-CHG-001-TELEMETRY',
+      type: 'spec-design',
+      'change-id': 'CHG-001-TELEMETRY',
+      title: 'Diseño Técnico de Ingestión',
+      version: '1.0.0',
+      handoff: 'HOF-CHG-001',
+      'architecture-component': 'CMP-TELEMETRY-INGEST',
+      enclave: 'SEC-ENC-DMZ',
+      status: 'approved',
+    };
+    const dsgResValid = validateArtifactSchema(validDesign, 'spec-design', repoRoot);
+    expect(dsgResValid.valid).toBe(true);
+    expect(dsgResValid.errors).toHaveLength(0);
+
+    const invalidDesign = {
+      id: 'DSG-CHG-001-TELEMETRY',
+      type: 'spec-design',
+      title: 'D',
+      handoff: 'INVALID-HOF-PATTERN',
+    };
+    const dsgResInvalid = validateArtifactSchema(invalidDesign, 'spec-design', repoRoot);
+    expect(dsgResInvalid.valid).toBe(false);
+    expect(dsgResInvalid.errors.some((e) => e.includes('handoff') || e.includes('title'))).toBe(true);
+
+    // 3. delivery-spec (spec.schema.json)
+    const validSpec = {
+      id: 'SPEC-CHG-001-TELEMETRY',
+      type: 'delivery-spec',
+      'change-id': 'CHG-001-TELEMETRY',
+      profile: 'standard',
+      title: 'Especificación de Entrega',
+      version: '1.0.0',
+      status: 'active',
+    };
+    const specResValid = validateArtifactSchema(validSpec, 'delivery-spec', repoRoot);
+    expect(specResValid.valid).toBe(true);
+    expect(specResValid.errors).toHaveLength(0);
+
+    const invalidSpec = {
+      id: 'SPEC-CHG-001-TELEMETRY',
+      type: 'delivery-spec',
+      profile: 'unsupported-profile',
+    };
+    const specResInvalid = validateArtifactSchema(invalidSpec, 'delivery-spec', repoRoot);
+    expect(specResInvalid.valid).toBe(false);
+    expect(specResInvalid.errors.some((e) => e.includes('profile'))).toBe(true);
+
+    // 4. license-manifest (license-manifest.schema.json)
+    const validManifest = {
+      id: 'MAN-LIC-CORE-DEPENDENCIES',
+      type: 'license-manifest',
+      version: '1.0.0',
+      evaluated_dependencies: [
+        {
+          package: 'picocolors',
+          version: '^1.1.0',
+          spdx_license: 'ISC',
+          status: 'APPROVED',
+        },
+      ],
+    };
+    const licResValid = validateArtifactSchema(validManifest, 'license-manifest', repoRoot);
+    expect(licResValid.valid).toBe(true);
+    expect(licResValid.errors).toHaveLength(0);
+
+    const invalidManifest = {
+      id: 'MAN-LIC-CORE-DEPENDENCIES',
+      type: 'license-manifest',
+      evaluated_dependencies: [
+        {
+          package: 'bad-pkg',
+          version: '1.0.0',
+          spdx_license: 'GPL-3.0',
+          status: 'DISALLOWED_STATUS',
+        },
+      ],
+    };
+    const licResInvalid = validateArtifactSchema(invalidManifest, 'license-manifest', repoRoot);
+    expect(licResInvalid.valid).toBe(false);
+    expect(licResInvalid.errors.some((e) => e.includes('status'))).toBe(true);
+
+    // 5. release-kpis (release-kpis.schema.json)
+    const validReleaseKpis = {
+      id: 'KPI-REL-V1-0-0',
+      type: 'release-kpis',
+      releaseBranch: 'release/v1.0.0',
+      baseBranch: 'main',
+      generatedAt: '2026-09-24T20:00:00Z',
+      totalCommits: 5,
+      totalLinesAdded: 500,
+      totalLinesDeleted: 50,
+      totalKloc: 0.5,
+      totalBugs: 1,
+      globalDefectDensity: 2.0,
+      totalTimeSeconds: 3600,
+      totalTokens: 50000,
+      totalCostUsd: 0.75,
+      authorStats: [
+        {
+          authorOrModel: 'claude-3-7-sonnet',
+          isAgent: true,
+          commits: 5,
+          linesAdded: 500,
+          linesDeleted: 50,
+          klocProduced: 0.5,
+          bugsInjected: 1,
+          defectInjectionRate: 2.0,
+          totalTimeSeconds: 3600,
+          totalTokens: 50000,
+          estimatedCostUsd: 0.75,
+        },
+      ],
+      bugList: [
+        {
+          sha: 'a1b2c3d',
+          subject: 'fix bug',
+          author: 'claude-3-7-sonnet',
+          timeSeconds: 300,
+          tokens: 5000,
+        },
+      ],
+    };
+    const kpiResValid = validateArtifactSchema(validReleaseKpis, 'release-kpis', repoRoot);
+    expect(kpiResValid.valid).toBe(true);
+    expect(kpiResValid.errors).toHaveLength(0);
+
+    const invalidReleaseKpis = {
+      id: 'KPI-REL-V1-0-0',
+      type: 'release-kpis',
+      totalCommits: -5,
+    };
+    const kpiResInvalid = validateArtifactSchema(invalidReleaseKpis, 'release-kpis', repoRoot);
+    expect(kpiResInvalid.valid).toBe(false);
+    expect(kpiResInvalid.errors.some((e) => e.includes('missing required field'))).toBe(true);
+
+    // 6. session-telemetry (session-telemetry.schema.json)
+    const validSessionTelemetry = {
+      id: 'TEL-SES-DEV-001',
+      type: 'session-telemetry',
+      model: 'gemini-1.5-pro',
+      promptTokens: 12000,
+      completionTokens: 1500,
+      activeTimeSeconds: 180,
+      author: 'agent-developer',
+      confidence: 'HIGH',
+    };
+    const sesResValid = validateArtifactSchema(validSessionTelemetry, 'session-telemetry', repoRoot);
+    expect(sesResValid.valid).toBe(true);
+    expect(sesResValid.errors).toHaveLength(0);
+
+    const invalidSessionTelemetry = {
+      id: 'TEL-SES-DEV-001',
+      type: 'session-telemetry',
+      model: 'gemini-1.5-pro',
+      promptTokens: -100,
+    };
+    const sesResInvalid = validateArtifactSchema(invalidSessionTelemetry, 'session-telemetry', repoRoot);
+    expect(sesResInvalid.valid).toBe(false);
+    expect(sesResInvalid.errors.some((e) => e.includes('completionTokens') || e.includes('promptTokens'))).toBe(true);
+
+    // 7. agent-handoff (agent-handoff.schema.json)
+    const validAgentHandoff = {
+      id: 'AHOF-ARCH-TO-QA',
+      type: 'agent-handoff',
+      'completed-phase': 'Architecture Review',
+      'acting-role': 'agent-system-architect',
+      'autonomy-mode': 'HUMAN_REVIEW_PLAN',
+      deliverables: ['docs/architecture/09_decisions/ADR-001.md'],
+      'recommended-next-roles': [
+        {
+          role: 'agent-qa-engineer',
+          rationale: 'Generar casos Gherkin antes de codificar',
+        },
+      ],
+      'suggested-prompt': 'Act as agent-qa-engineer and generate tests',
+    };
+    const ahofResValid = validateArtifactSchema(validAgentHandoff, 'agent-handoff', repoRoot);
+    expect(ahofResValid.valid).toBe(true);
+    expect(ahofResValid.errors).toHaveLength(0);
+
+    const invalidAgentHandoff = {
+      id: 'AHOF-ARCH-TO-QA',
+      type: 'agent-handoff',
+      'completed-phase': 'Architecture Review',
+      'acting-role': 'unsupported-agent',
+      'autonomy-mode': 'HUMAN_REVIEW_PLAN',
+      deliverables: [],
+    };
+    const ahofResInvalid = validateArtifactSchema(invalidAgentHandoff, 'agent-handoff', repoRoot);
+    expect(ahofResInvalid.valid).toBe(false);
+    expect(ahofResInvalid.errors.some((e) => e.includes('acting-role') || e.includes('deliverables'))).toBe(true);
+
+    // 8. mcp-config (mcp-config.schema.json)
+    const validMcpConfig = {
+      id: 'MCP-CFG-CURSOR',
+      type: 'mcp-config',
+      mcpServers: {
+        'ai-sdlc': {
+          command: 'npx',
+          args: ['@ai-sdlc/mcp'],
+        },
+      },
+    };
+    const mcpResValid = validateArtifactSchema(validMcpConfig, 'mcp-config', repoRoot);
+    expect(mcpResValid.valid).toBe(true);
+    expect(mcpResValid.errors).toHaveLength(0);
+
+    const invalidMcpConfig = {
+      id: 'MCP-CFG-CURSOR',
+      type: 'mcp-config',
+      mcpServers: {
+        'ai-sdlc': {
+          args: ['@ai-sdlc/mcp'],
+        },
+      },
+      disallowedProperty: true,
+    };
+    const mcpResInvalid = validateArtifactSchema(invalidMcpConfig, 'mcp-config', repoRoot);
+    expect(mcpResInvalid.valid).toBe(false);
+    expect(mcpResInvalid.errors.some((e) => e.includes('command') || e.includes('disallowedProperty'))).toBe(true);
   });
 });
