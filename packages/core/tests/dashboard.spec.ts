@@ -273,15 +273,16 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
 
     // Visual legend presence
     expect(htmlContent).toContain('class="graph-legend"');
-    expect(htmlContent).toContain('Tipología de Nodos');
+    expect(htmlContent).toContain('Node Typologies');
     expect(htmlContent).toContain('Journey');
     expect(htmlContent).toContain('Actor');
     expect(htmlContent).toContain('Use Case');
-    expect(htmlContent).toContain('Regla Negocio');
-    expect(htmlContent).toContain('Caso Abuso');
+    expect(htmlContent).toContain('Business Rule');
+    expect(htmlContent).toContain('Abuse Case');
 
     // Type filter dropdown presence
     expect(htmlContent).toContain('id="type-filter"');
+    expect(htmlContent).toContain('All Typologies');
     expect(htmlContent).toContain('filterType(this.value)');
     expect(htmlContent).toContain('value="journey"');
     expect(htmlContent).toContain('value="actor"');

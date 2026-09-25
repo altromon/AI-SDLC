@@ -1151,15 +1151,15 @@ export function renderDashboardHtml(
           </div>
           <div class="tool-row">
             <select id="type-filter" class="tool-select" onchange="filterType(this.value)">
-              <option value="all">Todas las Tipologías</option>
+              <option value="all">All Typologies</option>
               <option value="journey">Journeys (JRN)</option>
-              <option value="actor">Actores (ACT)</option>
-              <option value="use-case">Casos de Uso (UC)</option>
-              <option value="business-rule">Reglas de Negocio (BR)</option>
-              <option value="abuse-case">Casos de Abuso (ABUSE)</option>
-              <option value="requirement">Requisitos (FR/QR/SEC)</option>
-              <option value="architecture">Arquitectura (CMP/ADR)</option>
-              <option value="test">Pruebas (BDD/Test)</option>
+              <option value="actor">Actors (ACT)</option>
+              <option value="use-case">Use Cases (UC)</option>
+              <option value="business-rule">Business Rules (BR)</option>
+              <option value="abuse-case">Abuse Cases (ABUSE)</option>
+              <option value="requirement">Requirements (FR/QR/SEC)</option>
+              <option value="architecture">Architecture (CMP/ADR)</option>
+              <option value="test">Testing (BDD/Test)</option>
             </select>
           </div>
           <div class="tool-row">
@@ -1184,16 +1184,16 @@ export function renderDashboardHtml(
         </div>
         <div id="cy"></div>
         <div class="graph-legend">
-          <div class="legend-header">Tipología de Nodos</div>
+          <div class="legend-header">Node Typologies</div>
           <div class="legend-items">
             <div class="legend-item"><span class="legend-dot" style="background:#581c87; border:2px solid #c084fc;"></span><strong>Journey</strong> (JRN)</div>
             <div class="legend-item"><span class="legend-dot" style="background:#065f46; border:2px solid #34d399; border-radius:50%;"></span><strong>Actor</strong> (ACT)</div>
             <div class="legend-item"><span class="legend-dot" style="background:#0369a1; border:2px solid #38bdf8;"></span><strong>Use Case</strong> (UC)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#b45309; border:2px solid #fbbf24; transform:rotate(45deg);"></span><strong>Regla Negocio</strong> (BR)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#881337; border:2px solid #f43f5e;"></span><strong>Caso Abuso</strong> (ABUSE)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#1e293b; border:2px solid #64748b;"></span><strong>Requisito</strong> (FR/QR/SEC)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#312e81; border:2px solid #818cf8;"></span><strong>Arquitectura</strong> (CMP/ADR)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#047857; border:2px solid #10b981;"></span><strong>Prueba</strong> (BDD/Test)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#b45309; border:2px solid #fbbf24; transform:rotate(45deg);"></span><strong>Business Rule</strong> (BR)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#881337; border:2px solid #f43f5e;"></span><strong>Abuse Case</strong> (ABUSE)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#1e293b; border:2px solid #64748b;"></span><strong>Requirement</strong> (FR/QR/SEC)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#312e81; border:2px solid #818cf8;"></span><strong>Architecture</strong> (CMP/ADR)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#047857; border:2px solid #10b981;"></span><strong>Test</strong> (BDD/Test)</div>
           </div>
         </div>
       </div>
@@ -1923,7 +1923,7 @@ export function renderDashboardHtml(
           var cleanMetaPath = data.filePath.split('\\\\').join('/');
           if (cleanMetaPath.indexOf('./') === 0) cleanMetaPath = cleanMetaPath.substring(2);
           var metaHref = (cleanMetaPath.indexOf('http://') === 0 || cleanMetaPath.indexOf('https://') === 0 || cleanMetaPath.indexOf('file://') === 0) ? cleanMetaPath : '../' + cleanMetaPath;
-          html += '<div class="sidebar-field"><strong>Physical File:</strong> <a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline;" title="Abrir archivo: ' + cleanMetaPath + '"><code>' + cleanMetaPath + ' ↗</code></a></div>';
+          html += '<div class="sidebar-field"><strong>Physical File:</strong> <a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline;" title="Open file: ' + cleanMetaPath + '"><code>' + cleanMetaPath + ' ↗</code></a></div>';
         }
         if (data.upstream && data.upstream.length > 0) {
           html += '<div class="sidebar-field"><strong>Upstream Traces (Product):</strong> ' + data.upstream.join(', ') + '</div>';
@@ -1932,7 +1932,7 @@ export function renderDashboardHtml(
           html += '<div class="sidebar-field"><strong>Downstream Traces (Arch/Test):</strong> ' + data.downstream.join(', ') + '</div>';
         }
         if (data.content && data.content.trim()) {
-          html += '<div class="sidebar-field" style="margin-top: 4px;"><strong>Contenido / Especificación del Fichero:</strong>';
+          html += '<div class="sidebar-field" style="margin-top: 4px;"><strong>File Content / Specification:</strong>';
           html += '<div class="sidebar-content-preview" style="margin-top: 6px; max-height: 280px; overflow-y: auto; background: rgba(11, 17, 32, 0.75); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.74rem; line-height: 1.45; color: #cbd5e1;">';
           html += renderMarkdown(data.content);
           html += '</div></div>';
