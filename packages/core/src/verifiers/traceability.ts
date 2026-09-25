@@ -459,6 +459,8 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
       archStatus,
       testTraces: uniqueTestTraces.join(', ') || 'NINGUNO',
       testStatus,
+      content: req.rawBody ? req.rawBody.trim() : undefined,
+      filePath: req.file,
     };
 
     matrixRows.push(row);
