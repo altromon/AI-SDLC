@@ -80,6 +80,23 @@
         },
         "additionalProperties": false
       }
+    },
+    "acceptance-format": {
+      "type": "string",
+      "enum": ["gherkin"],
+      "description": "Formato de aceptación BDD obligatorio para especificaciones de entrega SDD."
+    },
+    "cucumber-tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^@[a-zA-Z0-9_-]+$"
+      },
+      "description": "Etiquetas de trazabilidad BDD para ejecución con Cucumber."
+    },
+    "cucumber-feature-file": {
+      "type": "string",
+      "description": "Ruta personalizada de extracción del archivo .feature para Cucumber."
     }
   },
   "additionalProperties": false

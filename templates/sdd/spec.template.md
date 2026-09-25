@@ -1,17 +1,56 @@
-# Especificación de Entrega: CHG-NOMBRE-001
+---
+id: SPEC-CHG-NAME-001
+type: delivery-spec
+change-id: CHG-NAME-001
+profile: standard # standard, patch, critical
+acceptance-format: gherkin
+cucumber-tags:
+  - "@CHG-NAME-001"
+  - "@automated"
+---
 
-## 1. Escenarios de Comportamiento Funcional
+# Delivery Specification: CHG-NAME-001
 
-### Escenario 1: Flujo Exitoso
-- **GIVEN**: El cliente ha establecido una sesión autenticada.
-- **WHEN**: Envía una carga de datos válida conforme a la especificación.
-- **THEN**: El servidor responde con código 200 OK y persiste los datos.
+## 1. Functional Behavior Scenarios (BDD Gherkin)
+
+```gherkin
+@CHG-NAME-001 @functional @automated
+Feature: Delivery Specification CHG-NAME-001
+  As a [primary actor / system role]
+  I want [functional capability delivered by this change]
+  So that [expected business value or outcome]
+
+  Background:
+    Given the system is in a nominal operational state
+    And dependent services are available
+
+  Scenario: Nominal successful flow
+    Given the client has established an authenticated session
+    When valid payload is submitted according to specification
+    Then the server responds with status 200 OK and persists state
+
+  Scenario Outline: Parameter and edge case validation
+    Given an input with parameter "<param>"
+    When the request is processed
+    Then the system returns status "<status>"
+
+    Examples:
+      | param   | status |
+      | nominal | 200    |
+      | invalid | 400    |
+```
 
 ---
 
-## 2. Escenarios de Ciberseguridad y Mitigación (Abuse Scenarios)
+## 2. Cybersecurity and Mitigation Scenarios (Abuse Scenarios)
 
-### Escenario 2: Intento de Suplantación o Payload No Autenticado
-- **GIVEN**: Un actor malicioso intenta enviar datos sin certificado mTLS o con token falso.
-- **WHEN**: La conexión intenta abrir el socket o enviar datos.
-- **THEN**: El handshake es abortado de inmediato por el gateway y se registra una alerta de seguridad (SEC-TEST-001).
+```gherkin
+@CHG-NAME-001 @security @mitigation
+Feature: Threat Mitigation and Abuse Scenarios
+  Scenario: Unauthorized access or unauthenticated payload attempt
+    Given a malicious actor attempts to send data without valid credentials
+    When connection attempts to reach protected enclaves
+    Then handshake is aborted immediately and security alert SEC-TEST-001 is emitted
+```
+
+
