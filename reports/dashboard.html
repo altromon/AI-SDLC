@@ -67,198 +67,6 @@
     /* Timeline & KPI Historical */
     .chart-container { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; }
     .chart-container h3 { font-size: 0.9rem; color: var(--accent-cyan); margin-bottom: 16px; }
-
-    /* FLOATING REQUIREMENT POPUP CARD (Max 10% viewport footprint) */
-    .req-popup-card {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: clamp(260px, 20vw, 320px);
-      max-width: 24vw;
-      max-height: clamp(180px, 24vh, 250px);
-      background: rgba(30, 41, 59, 0.98);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--accent-cyan);
-      border-radius: 8px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(56, 189, 248, 0.25);
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      font-size: 0.78rem;
-      animation: popupSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    @keyframes popupSlideUp {
-      from { opacity: 0; transform: translateY(12px) scale(0.97); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .popup-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 10px 12px;
-      background: rgba(15, 23, 42, 0.85);
-      border-bottom: 1px solid var(--border-color);
-      gap: 8px;
-    }
-
-    .popup-title-area {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .popup-badge-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 3px;
-    }
-
-    .popup-id {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-weight: 700;
-      color: var(--accent-cyan);
-      font-size: 0.75rem;
-    }
-
-    .popup-title {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-main);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 1.3;
-    }
-
-    .popup-title-link {
-      color: inherit;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      transition: all 0.15s ease;
-      cursor: pointer;
-    }
-
-    .popup-title-link:hover {
-      color: var(--accent-cyan);
-      text-decoration: underline;
-    }
-
-    .popup-link-icon {
-      font-size: 0.75rem;
-      color: var(--accent-cyan);
-      opacity: 0.85;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .popup-title-link:hover .popup-link-icon {
-      opacity: 1;
-      transform: translate(1px, -1px);
-    }
-
-    .popup-close-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: var(--text-main);
-      width: 24px;
-      height: 24px;
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      font-weight: 700;
-      flex-shrink: 0;
-      transition: all 0.15s ease;
-    }
-
-    .popup-close-btn:hover {
-      background: var(--accent-rose);
-      border-color: var(--accent-rose);
-      color: #fff;
-    }
-
-    .popup-meta {
-      padding: 4px 12px;
-      background: rgba(15, 23, 42, 0.5);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .popup-meta code {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 1px 4px;
-      border-radius: 3px;
-      color: #7dd3fc;
-      font-size: 0.68rem;
-    }
-
-    .popup-body {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      padding: 10px 12px;
-      font-size: 0.75rem;
-      line-height: 1.45;
-      color: #cbd5e1;
-    }
-
-    .popup-body::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .popup-body::-webkit-scrollbar-thumb {
-      background: #475569;
-      border-radius: 2px;
-    }
-
-    .popup-body h1, .popup-body h2, .popup-body h3 {
-      font-size: 0.8rem;
-      color: var(--accent-cyan);
-      margin: 8px 0 4px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 2px;
-    }
-
-    .popup-body p {
-      margin-bottom: 6px;
-    }
-
-    .popup-body ul, .popup-body ol {
-      margin-left: 16px;
-      margin-bottom: 6px;
-    }
-
-    .popup-body code {
-      background: #0b1120;
-      padding: 1px 3px;
-      border-radius: 3px;
-      font-family: ui-monospace, SFMono-Regular, monospace;
-      font-size: 0.7rem;
-      color: #a5f3fc;
-    }
-
-    .popup-body pre {
-      background: #0b1120;
-      padding: 6px 8px;
-      border-radius: 4px;
-      overflow-x: auto;
-      margin: 6px 0;
-      border: 1px solid var(--border-color);
-      font-size: 0.7rem;
-    }
-
     /* REQUIREMENT HOVER TOOLTIP */
     .req-tooltip {
       position: fixed;
@@ -327,7 +135,7 @@
       </span>
     </div>
     <div style="font-size: 0.75rem; color: var(--text-muted);">
-      Generated: <span>2026-09-25 18:46:57</span>
+      Generated: <span>2026-09-25 20:22:37</span>
     </div>
   </header>
 
@@ -557,22 +365,22 @@
         <div class="grid-cards">
           <div class="metric-card">
             <span class="title">Commits in Active Branch</span>
-            <span class="value">22</span>
-            <span class="subtitle">+11503 / -5801 lines</span>
+            <span class="value">23</span>
+            <span class="subtitle">+11654 / -5919 lines</span>
           </div>
           <div class="metric-card">
             <span class="title">Active Development Time</span>
-            <span class="value">159m</span>
-            <span class="subtitle">9523s accumulated</span>
+            <span class="value">161m</span>
+            <span class="subtitle">9687s accumulated</span>
           </div>
           <div class="metric-card">
             <span class="title">Consumed Tokens</span>
-            <span class="value">612,930</span>
-            <span class="subtitle">In: 449.250 | Out: 163.680</span>
+            <span class="value">624,845</span>
+            <span class="subtitle">In: 458.475 | Out: 166.370</span>
           </div>
           <div class="metric-card">
             <span class="title">Estimated Compute Cost</span>
-            <span class="value">$3.80</span>
+            <span class="value">$3.87</span>
             <span class="subtitle">Weighted USD</span>
           </div>
         </div>
@@ -607,21 +415,21 @@
               <tr>
                 <td><strong><code>gemini-3.8-flash</code></strong></td>
                 <td><span class="badge badge-green">AGENT</span></td>
-                <td>15</td>
-                <td>+11503 / -5801</td>
-                <td>145m</td>
-                <td>612,930</td>
-                <td>$3.80</td>
+                <td>16</td>
+                <td>+11654 / -5919</td>
+                <td>147m</td>
+                <td>624,845</td>
+                <td>$3.87</td>
               </tr>
               
               <tr style="font-weight: bold; background: rgba(255,255,255,0.05);">
                 <td>TOTAL BRANCH</td>
                 <td>—</td>
-                <td>22</td>
-                <td>+11503 / -5801</td>
-                <td>159m</td>
-                <td>612,930</td>
-                <td>$3.80 USD</td>
+                <td>23</td>
+                <td>+11654 / -5919</td>
+                <td>161m</td>
+                <td>624,845</td>
+                <td>$3.87 USD</td>
               </tr>
             </tbody>
           </table>
@@ -640,22 +448,6 @@
       </div>
     </div>
   </main>
-
-    <!-- REQUIREMENT POPUP CARD -->
-    <div id="req-popup" class="req-popup-card" style="display: none;">
-      <div class="popup-header">
-        <div class="popup-title-area">
-          <div class="popup-badge-row">
-            <span class="badge" id="popup-badge">REQUIREMENT</span>
-            <span class="popup-id" id="popup-id">FR-000</span>
-          </div>
-          <h3 class="popup-title" id="popup-title">Requirement Title</h3>
-        </div>
-        <button class="popup-close-btn" onclick="closeRequirementPopup()" title="Close (Esc)">✕</button>
-      </div>
-      <div class="popup-meta" id="popup-meta"></div>
-      <div class="popup-body" id="popup-body"></div>
-    </div>
 
     <!-- REQUIREMENT HOVER TOOLTIP (1s hover) -->
     <div id="req-tooltip" class="req-tooltip" style="display: none;">
@@ -710,7 +502,6 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
     var tableHoverId = null;
     var lastMouseX = 0;
     var lastMouseY = 0;
-    var activePopupReqId = null;
 
     function renderMarkdown(md) {
       if (!md || !md.trim()) {
@@ -757,98 +548,6 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
           md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') +
           '</div>';
       }
-    }
-
-    function openRequirementPopup(data) {
-      hideTooltip();
-      clearTimeout(reqHoverTimer);
-      clearTimeout(tableHoverTimer);
-
-      var popup = document.getElementById('req-popup');
-      if (!popup) return;
-
-      activePopupReqId = data.id;
-
-      document.getElementById('popup-id').textContent = data.id;
-      var titleText = data.title || data.label || data.id;
-      var titleEl = document.getElementById('popup-title');
-      if (data.filePath) {
-        var cleanPath = data.filePath.split('\\').join('/');
-        if (cleanPath.indexOf('./') === 0) cleanPath = cleanPath.substring(2);
-        var fileHref = (cleanPath.indexOf('http://') === 0 || cleanPath.indexOf('https://') === 0 || cleanPath.indexOf('file://') === 0)
-          ? cleanPath
-          : '../' + cleanPath;
-        titleEl.innerHTML = '<a href="' + fileHref + '" target="_blank" rel="noopener noreferrer" class="popup-title-link" title="Abrir archivo: ' + cleanPath + '">' + titleText + ' <span class="popup-link-icon">↗</span></a>';
-      } else {
-        titleEl.textContent = titleText;
-      }
-
-      var badge = document.getElementById('popup-badge');
-      var layerName = (data.layer || data.type || 'NODE').toUpperCase();
-      badge.textContent = layerName;
-      if (data.layer === 'product') {
-        badge.className = 'badge';
-        badge.style.background = '#0e7490';
-      } else if (data.layer === 'architecture') {
-        badge.className = 'badge';
-        badge.style.background = '#4338ca';
-      } else if (data.layer === 'test') {
-        badge.className = 'badge';
-        badge.style.background = '#047857';
-      } else {
-        badge.className = 'badge ' + (data.status === 'COMPLIANT' || data.status === 'CONFORME' ? 'badge-green' : 'badge-amber');
-        badge.style.background = '';
-      }
-
-      var metaHtml = '';
-      if (data.type && data.type !== data.layer) {
-        metaHtml += '<span><strong>Tipo:</strong> <code>' + data.type + '</code></span>';
-      }
-      if (data.filePath) {
-        var cleanMetaPath = data.filePath.split('\\').join('/');
-        if (cleanMetaPath.indexOf('./') === 0) cleanMetaPath = cleanMetaPath.substring(2);
-        var metaHref = (cleanMetaPath.indexOf('http://') === 0 || cleanMetaPath.indexOf('https://') === 0 || cleanMetaPath.indexOf('file://') === 0)
-          ? cleanMetaPath
-          : '../' + cleanMetaPath;
-        metaHtml += '<span><strong>Archivo:</strong> <a href="' + metaHref + '" target="_blank" rel="noopener noreferrer" style="color: #7dd3fc; text-decoration: underline;" title="Abrir archivo: ' + cleanMetaPath + '"><code>' + cleanMetaPath + ' ↗</code></a></span>';
-      }
-      if (data.upstream && data.upstream.length > 0) {
-        metaHtml += '<span><strong>Upstream:</strong> ' + data.upstream.join(', ') + '</span>';
-      }
-      if (data.downstream && data.downstream.length > 0) {
-        metaHtml += '<span><strong>Downstream:</strong> ' + data.downstream.join(', ') + '</span>';
-      }
-      document.getElementById('popup-meta').innerHTML = metaHtml;
-
-      var bodyEl = document.getElementById('popup-body');
-      if (data.content && data.content.trim()) {
-        bodyEl.innerHTML = renderMarkdown(data.content);
-      } else {
-        var summaryHtml = '<div style="color: var(--text-muted); font-size: 0.72rem; line-height: 1.4;">';
-        summaryHtml += '<p><strong>' + (data.title || data.id) + '</strong></p>';
-        summaryHtml += '<p style="margin-top: 4px;">Capa: <code>' + layerName + '</code>' + (data.type ? ' | Tipo: <code>' + data.type + '</code>' : '') + '</p>';
-        if (data.filePath) {
-          summaryHtml += '<p style="margin-top: 4px;">Archivo: <code>' + data.filePath + '</code></p>';
-        }
-        if (data.upstream && data.upstream.length > 0) {
-          summaryHtml += '<p style="margin-top: 4px;"><strong>Trazabilidad Upstream:</strong> ' + data.upstream.join(', ') + '</p>';
-        }
-        if (data.downstream && data.downstream.length > 0) {
-          summaryHtml += '<p style="margin-top: 4px;"><strong>Trazabilidad Downstream:</strong> ' + data.downstream.join(', ') + '</p>';
-        }
-        summaryHtml += '</div>';
-        bodyEl.innerHTML = summaryHtml;
-      }
-
-      popup.style.display = 'flex';
-    }
-
-    function closeRequirementPopup() {
-      var popup = document.getElementById('req-popup');
-      if (popup) {
-        popup.style.display = 'none';
-      }
-      activePopupReqId = null;
     }
 
     function showTooltip(data, x, y) {
@@ -1030,13 +729,11 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
         var data = node.data();
         highlightCriticalPath(node);
         showNodeDetails(data);
-        openRequirementPopup(data);
       });
 
       cy.on('tap', function(evt) {
         if (evt.target === cy) {
           resetHighlight();
-          closeRequirementPopup();
         }
       });
 
@@ -1086,7 +783,6 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
       cy.elements().removeClass('highlighted dimmed');
       var sidebar = document.getElementById('sidebar-content');
       sidebar.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem;">Click on any graph node to inspect its critical path and full traceability.</p>';
-      closeRequirementPopup();
     }
 
     function showNodeDetails(data) {
@@ -1185,7 +881,6 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
         if (node && node.length > 0) {
           highlightCriticalPath(node);
           showNodeDetails(node.data());
-          openRequirementPopup(node.data());
           cy.center(node);
           cy.zoom(1.2);
         }
@@ -1198,7 +893,6 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
     }
 
     function switchTab(name) {
-      closeRequirementPopup();
       hideTooltip();
       document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
       document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
@@ -1213,20 +907,8 @@ var Yr=function(e){if(!(this instanceof Yr))return new Yr(e);this.id="Thenable/1
 
     window.addEventListener('keydown', function(evt) {
       if (evt.key === 'Escape' || evt.key === 'Esc') {
-        closeRequirementPopup();
         hideTooltip();
       }
-    });
-
-    document.addEventListener('pointerdown', function(evt) {
-      var popup = document.getElementById('req-popup');
-      if (!popup || popup.style.display === 'none') return;
-      if (popup.contains(evt.target)) return;
-      var cyEl = document.getElementById('cy');
-      if (cyEl && cyEl.contains(evt.target)) return;
-      var trEl = evt.target && evt.target.closest && evt.target.closest('tr[onclick]');
-      if (trEl) return;
-      closeRequirementPopup();
     });
 
     window.addEventListener('DOMContentLoaded', function() {

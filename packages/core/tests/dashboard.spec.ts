@@ -140,11 +140,11 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(htmlContent).toContain('360° Requirements Traceability Matrix');
     expect(htmlContent).toContain('Task Autonomy Modes Distribution');
     expect(htmlContent).toMatch(/Active Telemetry.*and KPI History/);
-    // Verify requirement content popup and 1-second hover tooltip
-    expect(htmlContent).toContain('id="req-popup"');
+    // Verify node details sidebar content and 1-second hover tooltip
+    expect(htmlContent).toContain('id="node-details"');
+    expect(htmlContent).toContain('id="sidebar-content"');
+    expect(htmlContent).toContain('showNodeDetails');
     expect(htmlContent).toContain('id="req-tooltip"');
-    expect(htmlContent).toContain('openRequirementPopup');
-    expect(htmlContent).toContain('closeRequirementPopup');
     expect(htmlContent).toContain('startRowTooltip');
     expect(htmlContent).toContain('showTooltip');
     expect(htmlContent).toContain('hideTooltip');
