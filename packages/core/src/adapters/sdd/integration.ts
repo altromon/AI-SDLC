@@ -89,6 +89,112 @@ export function appendRevisionHistoryRow(
   return body + newSection;
 }
 
+
+// --- Canonical Artifact Materialization ---
+
+
+interface SpecCatalogNewItem {
+  id: string;
+  targetDir: string;
+  category: string;
+  scope: string;
+}
+
+interface SpecCatalogAffectedItem {
+  id: string;
+  action: 'MODIFIED' | 'DEPRECATED';
+  category: string;
+}
+
+export interface SpecCatalogScope {
+  newItems: SpecCatalogNewItem[];
+  affectedItems: SpecCatalogAffectedItem[];
+}
+
+/**
+ * Parses a spec.md using the canonical template format to extract:
+ * - Section 1.1: existing catalog items that are MODIFIED or DEPRECATED
+ * - Section 1.2: new catalog items to be physically materialized
+ *
+ * Returns empty arrays when the spec uses the simplified format (no 1.1 / 1.2 headings).
+ */
+export function parseSpecCatalogScope(specContent: string): SpecCatalogScope {
+  const newItems: SpecCatalogNewItem[] = [];
+  const affectedItems: SpecCatalogAffectedItem[] = [];
+
+  // Locate section 1.1 and 1.2 blocks by heading
+  const section11Match = specContent.match(/###\s+1\.1\s+Affected Existing Catalog Items[^\n]*\n([\s\S]*?)(?=\n###\s+1\.2|\n---|\n##\s|$)/i);
+  const section12Match = specContent.match(/###\s+1\.2\s+New Catalog Items Introduced[^\n]*\n([\s\S]*?)(?=\n---|\n##\s|\n###\s+[^1]|$)/i);
+
+  // Parse section 1.1 — table rows: | Category | `ID` | `ACTION` | Description |
+  if (section11Match) {
+    const tableRows = section11Match[1].split('\n').filter(l => l.trim().startsWith('|'));
+    for (const row of tableRows) {
+      // Skip header and separator rows
+      if (/^\|\s*:?-+:?\s*\|/.test(row) || /Catalog Category/.test(row)) continue;
+      const cols = row.split('|').map(c => c.trim()).filter(Boolean);
+      if (cols.length < 3) continue;
+      const rawId = cols[1].replace(/`/g, '').trim();
+      const rawAction = cols[2].replace(/`/g, '').trim().toUpperCase();
+      if (!rawId || !rawAction) continue;
+      if (rawAction === 'MODIFIED' || rawAction === 'DEPRECATED') {
+        affectedItems.push({ id: rawId, action: rawAction as 'MODIFIED' | 'DEPRECATED', category: cols[0] });
+      }
+    }
+  }
+
+  // Parse section 1.2 — table rows: | Category | `ID` | `target/dir/` | Scope |
+  if (section12Match) {
+    const tableRows = section12Match[1].split('\n').filter(l => l.trim().startsWith('|'));
+    for (const row of tableRows) {
+      if (/^\|\s*:?-+:?\s*\|/.test(row) || /Catalog Category/.test(row)) continue;
+      const cols = row.split('|').map(c => c.trim()).filter(Boolean);
+      if (cols.length < 3) continue;
+      const rawId = cols[1].replace(/`/g, '').trim();
+      const rawDir = cols[2].replace(/`/g, '').trim();
+      if (!rawId || !rawDir) continue;
+      newItems.push({ id: rawId, targetDir: rawDir, category: cols[0], scope: cols[3] || '' });
+    }
+  }
+
+  return { newItems, affectedItems };
+}
+
+/**
+ * Writes a new canonical artifact file with valid frontmatter and empty revision table.
+ * Only runs if the target file does not already exist (idempotent).
+ */
+function materializeCanonicalArtifact(
+  rootDir: string,
+  item: SpecCatalogNewItem,
+  changeId: string,
+  author: string,
+  date: string
+): string {
+  const targetPath = path.join(rootDir, item.targetDir, `${item.id}.md`);
+  if (fs.existsSync(targetPath)) return targetPath;
+
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+
+  const typeMap: Record<string, string> = {
+    'product/requirements/': 'requirement',
+    'product/use-cases/': 'use-case',
+    'product/actors/': 'actor',
+    'product/business-rules/': 'business-rule',
+    'product/journeys/': 'journey',
+    'security/requirements/': 'security-requirement',
+    'architecture/': 'component',
+  };
+  const artifactType = typeMap[item.targetDir] || 'artifact';
+  const frontmatter = `id: ${item.id}\ntype: ${artifactType}\nstatus: draft\nversion: "1.0.0"\n`;
+  const title = item.scope || item.id;
+  const revisionRow = `| **1.0.0** | ${date} | ${author} | Creación inicial desde ${changeId} | ${changeId} |\n`;
+  const body = `# ${item.id}: ${title}\n\n## Historial de Revisiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n${revisionRow}`;
+
+  fs.writeFileSync(targetPath, `---\n${frontmatter}---\n${body}`, 'utf-8');
+  return targetPath;
+}
+
 export function findChangeWorkspaceDir(rootDir: string, changeId: string): string | null {
   const candidateDirs = [
     path.join(rootDir, 'specs', 'changes', 'active', changeId),
@@ -205,6 +311,22 @@ export function integrateSddChange(options: SddIntegrationOptions): SddIntegrati
     ...(handoff.subgraph.securityRequirements || []),
   ];
 
+  // 4.5 Materialize new canonical artifacts declared in spec.md section 1.2
+  const createdCanonicalArtifacts: string[] = [];
+  const specFile = path.join(changeDir, 'spec.md');
+  if (fs.existsSync(specFile)) {
+    const specContent = fs.readFileSync(specFile, 'utf-8');
+    const { newItems } = parseSpecCatalogScope(specContent);
+    for (const item of newItems) {
+      try {
+        materializeCanonicalArtifact(rootDir, item, changeId, author, date);
+        createdCanonicalArtifacts.push(item.id);
+      } catch (err: any) {
+        errors.push(`Error materializando artefacto canónico '${item.id}': ${err.message}`);
+      }
+    }
+  }
+
   // 5. Scan all markdown files to find canonical target files
   const allMdFiles = walkMdFiles(rootDir);
   const canonicalArtifacts = new Map<string, { file: string; frontmatter: any; body: string }>();
@@ -227,6 +349,7 @@ export function integrateSddChange(options: SddIntegrationOptions): SddIntegrati
 
   // 6. Integrate Product & Requirements Artifacts
   for (const reqId of targetReqs) {
+    if (createdCanonicalArtifacts.includes(reqId)) continue; // newly materialized — leave as draft
     const canonical = canonicalArtifacts.get(reqId);
     if (canonical) {
       try {
@@ -385,6 +508,7 @@ export function integrateSddChange(options: SddIntegrationOptions): SddIntegrati
     integratedRequirements: targetReqs,
     updatedProductArtifacts,
     updatedArchitectureArtifacts,
+    createdCanonicalArtifacts,
     archived,
     archivedPath,
     errors,

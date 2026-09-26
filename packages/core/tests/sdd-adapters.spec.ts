@@ -8,6 +8,7 @@ import {
   integrateSddChange,
   loadProductHandoffSidecar,
   OpenSpecAdapter,
+  parseSpecCatalogScope,
   ProductHandoff,
   scaffoldSddChange,
   scanAllProductHandoffs,
@@ -389,3 +390,120 @@ satisfies-requirements: []
   });
 });
 
+describe('SDD Canonical Artifact Materialization from spec.md', () => {
+  const tmpDir = path.join(process.cwd(), 'scratch', 'test-sdd-materialize');
+
+  const SPEC_WITH_CATALOG = `---
+id: SPEC-CHG-TEST-MATERIALIZE
+type: delivery-spec
+change-id: CHG-TEST-MATERIALIZE
+profile: standard
+---
+
+# Delivery Specification: CHG-TEST-MATERIALIZE
+
+## 1. Catalog Scope and Traceability (Canonical Alignment)
+
+### 1.1 Affected Existing Catalog Items (Modifications / Deprecations)
+
+| Catalog Category | Catalog ID | Action (\`MODIFIED\` / \`DEPRECATED\`) | Description of Delta & Behavioral Impact |
+| :--- | :--- | :--- | :--- |
+| Functional Requirement | \`FR-EXISTING-001\` | \`MODIFIED\` | Extends validation rules |
+
+### 1.2 New Catalog Items Introduced (Additions)
+
+| Catalog Category | Proposed ID | Target Catalog Location | Formal Scope & Functional Contract |
+| :--- | :--- | :--- | :--- |
+| Functional Requirement | \`FR-MAT-001\` | \`product/requirements/\` | Automated signature verification |
+| Use Case | \`UC-MAT-001\` | \`product/use-cases/\` | End-to-end telemetry subscription |
+| Actor / Persona | \`ACT-MAT-001\` | \`product/actors/\` | External auditor agent role |
+
+---
+
+## 2. Requirement Deltas and Formal Contracts
+
+### [FR-MAT-001]: Automated Signature Verification
+* **Operation:** \`ADDED\`
+* **Primary Actor(s):** \`ACT-MAT-001\`
+* **Behavioral Contract (Delta Specification):**
+  * **Baseline (Before):** None (New requirement)
+  * **Target Delta (After):** System verifies cryptographic signature on every incoming payload.
+`;
+
+  it('should parse new catalog items from spec.md section 1.2', () => {
+    const scope = parseSpecCatalogScope(SPEC_WITH_CATALOG);
+    expect(scope.newItems).toHaveLength(3);
+    expect(scope.newItems.map((i: any) => i.id)).toContain('FR-MAT-001');
+    expect(scope.newItems.map((i: any) => i.id)).toContain('UC-MAT-001');
+    expect(scope.newItems.map((i: any) => i.id)).toContain('ACT-MAT-001');
+    expect(scope.newItems.find((i: any) => i.id === 'FR-MAT-001').targetDir).toBe('product/requirements/');
+    expect(scope.newItems.find((i: any) => i.id === 'UC-MAT-001').targetDir).toBe('product/use-cases/');
+    expect(scope.newItems.find((i: any) => i.id === 'ACT-MAT-001').targetDir).toBe('product/actors/');
+  });
+
+  it('should parse affected existing catalog items from spec.md section 1.1', () => {
+    const scope = parseSpecCatalogScope(SPEC_WITH_CATALOG);
+    expect(scope.affectedItems).toHaveLength(1);
+    expect(scope.affectedItems[0].id).toBe('FR-EXISTING-001');
+    expect(scope.affectedItems[0].action).toBe('MODIFIED');
+  });
+
+  it('should return empty scope when spec.md has no sections 1.1 / 1.2 (simplified format)', () => {
+    const simplifiedSpec = `---
+id: SPEC-CHG-SIMPLE
+type: delivery-spec
+---
+## 1. Escenarios de Comportamiento Funcional
+### Escenario 1: Flujo Exitoso
+- GIVEN / WHEN / THEN
+`;
+    const scope = parseSpecCatalogScope(simplifiedSpec);
+    expect(scope.newItems).toHaveLength(0);
+    expect(scope.affectedItems).toHaveLength(0);
+  });
+
+  it('should materialize new canonical artifacts and populate createdCanonicalArtifacts in result', () => {
+    const changeDir = path.join(tmpDir, 'specs', 'changes', 'active', 'chg-test-materialize');
+    fs.mkdirSync(changeDir, { recursive: true });
+
+    fs.writeFileSync(path.join(changeDir, 'tasks.md'), `---
+tasks:
+  - id: TSK-001
+    status: COMPLETED
+---
+`);
+    fs.writeFileSync(path.join(changeDir, 'spec.md'), SPEC_WITH_CATALOG);
+    fs.writeFileSync(path.join(changeDir, 'handoff.yaml'), `id: HOF-TEST-MATERIALIZE
+type: handoff
+changeId: chg-test-materialize
+subgraph:
+  requirements:
+    - FR-MAT-001
+`);
+
+    const res = integrateSddChange({
+      rootDir: tmpDir,
+      changeId: 'chg-test-materialize',
+      author: 'TestBot',
+    });
+
+    expect(res.success).toBe(true);
+    expect(res.createdCanonicalArtifacts).toBeDefined();
+    expect(res.createdCanonicalArtifacts).toContain('FR-MAT-001');
+    expect(res.createdCanonicalArtifacts).toContain('UC-MAT-001');
+    expect(res.createdCanonicalArtifacts).toContain('ACT-MAT-001');
+
+    // Verify physical files were created
+    expect(fs.existsSync(path.join(tmpDir, 'product', 'requirements', 'FR-MAT-001.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, 'product', 'use-cases', 'UC-MAT-001.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, 'product', 'actors', 'ACT-MAT-001.md'))).toBe(true);
+
+    // Verify materialized file has valid frontmatter
+    const frContent = fs.readFileSync(path.join(tmpDir, 'product', 'requirements', 'FR-MAT-001.md'), 'utf-8');
+    expect(frContent).toContain('id: FR-MAT-001');
+    expect(frContent).toContain('status: draft');
+    expect(frContent).toContain('Historial de Revisiones');
+
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+});
