@@ -18,7 +18,7 @@ In the age of AI-assisted engineering, the speed of code authoring is no longer 
 
 ---
 
-## 🏛️ The 5 Pillars of the Framework
+## 🏛️ The 6 Pillars of the Framework
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
