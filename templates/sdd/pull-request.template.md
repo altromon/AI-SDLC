@@ -102,3 +102,19 @@ description: "Institutional template for monitoring weak points and plan balance
 
 - **Observability Metrics and Alarms**: <!-- What metrics (p99 latency, 5xx error rate, memory) or logs should be monitored post-deployment? -->
 - **Rollback Procedure**: <!-- Exact command or procedure to revert change without collateral impact (e.g. git revert -m 1 <sha>) -->
+
+---
+
+## 8. 📊 AI-SDLC: Aggregated KPIs Summary
+
+<!-- AI-SDLC-KPI-SUMMARY-START -->
+| Metric | Human | Total PR |
+| :--- | :---: | :---: |
+| **Commits Made** | - | **-** |
+| **Lines Added / Modif.** | - | **-** |
+| **Active Development Time** | - | **-** |
+| **Consumed Tokens (In+Out)** | - | **-** |
+| **Estimated Cost (€/$)** | — (Labor) | **-** |
+
+> *This block is updated automatically via `aisdlc kpi pr` or the CI workflow.*
+<!-- AI-SDLC-KPI-SUMMARY-END -->
