@@ -351,6 +351,7 @@ export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
       console.log(`  ${pc.green('✔')} Change '${changeId}' successfully processed:`);
       console.log(`    - Completed tasks:             ${pc.bold(String(result.completedTasks.length))}`);
       console.log(`    - Integrated requirements:     ${pc.green(result.integratedRequirements.join(', ') || 'None')}`);
+      console.log(`    - Created canonical artifacts: ${pc.green(result.createdCanonicalArtifacts?.join(', ') || 'None')}`);
       console.log(`    - Updated product artifacts:   ${pc.green(result.updatedProductArtifacts.join(', ') || 'None')}`);
       console.log(`    - Updated arc42 architecture:  ${pc.green(result.updatedArchitectureArtifacts.join(', ') || 'None')}`);
       if (result.archived) {
@@ -374,6 +375,7 @@ export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
       changeId,
       completedTasks: result.completedTasks,
       integratedRequirements: result.integratedRequirements,
+      createdCanonicalArtifacts: result.createdCanonicalArtifacts ?? [],
       updatedProductArtifacts: result.updatedProductArtifacts,
       updatedArchitectureArtifacts: result.updatedArchitectureArtifacts,
       archived: result.archived,

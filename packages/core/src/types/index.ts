@@ -184,6 +184,7 @@ export interface SddIntegrationResult {
   integratedRequirements: string[];
   updatedProductArtifacts: string[];
   updatedArchitectureArtifacts: string[];
+  createdCanonicalArtifacts?: string[];
   archived: boolean;
   archivedPath?: string;
   errors: string[];
