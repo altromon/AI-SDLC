@@ -40,7 +40,51 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ---
 
-## 3. Git Workflow and Commit Rules with Trailers
+## 3. Specialized Roles Mapping
+
+### 1. `agent-product-analyst` (Product Analyst / Scribe)
+- **Mission**: Assist in defining and refining the product model using ProductShape.
+- **Input**: Business intent or natural language specification.
+- **Output**: Markdown artifacts with YAML frontmatter compliant with `schemas/product/` (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`).
+- **Guardrails**: `status` always starts in `draft`. Mandatory Gherkin criteria with `@<ID> @automated @regression`.
+
+### 2. `agent-threat-modeler` (Threat Modeler and Security Specialist)
+- **Mission**: Analyze use cases and proactively model adversaries, STRIDE attack vectors, and OWASP ASVS mitigations.
+- **Output**: Cybersecurity triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`) compliant with `schemas/security/`.
+
+### 3. `agent-qa-engineer` (QA Engineer and SDET)
+- **Mission**: Translate approved requirements (`FR-*`, `SEC-REQ-*`, `QR-*`) into comprehensive FAILING (red) BDD/Gherkin test suites, before `agent-developer` writes production code.
+- **Guardrails**: FORBIDDEN to include production code. Mandatory tags: `@<FR-ID> @automated @regression`.
+
+### 4. `agent-developer` (Software Developer)
+- **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) with clean, strictly typed code and thorough tests.
+- **Directives**: Respect the autonomy mode. Make tests delivered by `agent-qa-engineer` pass green. Run `pnpm run check:fix` and `pnpm run verify:all`.
+
+### 5. `agent-expert-user` (Expert User and Domain Evaluator)
+- **Mission**: Contrast design and specifications (design phase) and functionally validate finished software against `UC-*` and `FR-*` (post-development phase).
+
+### 6. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
+- **Mission**: Audit Pull Requests evaluating code cleanliness, adherence to SOLID, DRY, YAGNI principles, and respect for `quality-policy.yaml` thresholds.
+- **Findings classification**: `[BLOCKING]`, `[CLEAN_CODE_SUGGESTION]`, `[COMPLIANT]`.
+
+### 7. `agent-devops` (Automation and Infrastructure Engineer)
+- **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts.
+- **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying application source code (`src/`, `packages/*/src/`).
+
+---
+
+## 4. Task Autonomy Modes (`tasks.md`)
+
+- 🟢 **`AUTONOMOUS`**: Low risk, isolated task. Implement code and tests directly. Omit interactive handoff block.
+- 🟡 **`HUMAN_REVIEW_PLAN`**: Medium risk. Design detailed plan, emit Workflow Handoff block, and wait for human confirmation before coding.
+- 🟠 **`AMBIGUOUS`**: Incomplete requirements. Blocked: request human clarification.
+- 🔴 **`HIGH_RISK_MANUAL`**: Critical risk (migrations, cryptography). Direct manual execution by humans only.
+
+---
+
+
+
+## 5. Git Workflow and Commit Rules with Trailers
 
 ### 4-Tier Hierarchy
 1. **Tier 1 (`main`)**: Absolute stability and production readiness.
@@ -62,7 +106,7 @@ Change-ID: CHG-026-AGENT-NATIVE-CONFIGS
 
 ---
 
-## 4. Non-Negotiable Quality Thresholds (`quality-policy.yaml`)
+## 6. Non-Negotiable Quality Thresholds (`quality-policy.yaml`)
 - **Cyclomatic Complexity (CC)**: $\le 10$
 - **Cognitive Complexity**: $\le 15$
 - **Maintainability Index (MI)**: $\ge 50$
@@ -71,8 +115,9 @@ Change-ID: CHG-026-AGENT-NATIVE-CONFIGS
 
 ---
 
-## 5. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
+## 7. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
 - **Conditional Activation**:
   - 🟢 **`AUTONOMOUS`** (or PR/CI final supervision): **OMITTED**. Uninterrupted continuous execution.
   - 🟡 **Autonomy $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **MANDATORY**. Emit Workflow Handoff block ([`templates/workflow/agent-handoff.template.md`](templates/workflow/agent-handoff.template.md)) and **STOP**.
 - **Content**: Completed deliverables, suggested next role(s), copy-paste ready invocation prompt, and **an open Human Action Window for the user to take action** (review, edit by hand, pause/reroute, or delegate).
+

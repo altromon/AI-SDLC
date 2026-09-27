@@ -25,3 +25,10 @@ Every generated or modified artifact must follow canonical naming and satisfy it
 - **Security Mitigations**: Every `SEC-REQ-*` must include negative tests in Gherkin (`@security @mitigation`).
 - **Use Cases (User Story Structure)**: In every `UC-*`, section `1. Intent and Outcome` must be structured under the standard English format: `As a <ACT-ID>... I want <action>... To <outcome>...`.
 - **Deterministic Validation**: Run `pnpm run verify:schemas` and `pnpm run verify:duplicates` before presenting the draft to the human reviewer.
+
+## 3. Task Autonomy Modes for Product Artifacts
+- 🟢 **`AUTONOMOUS`**: Low risk. Generate artifact and run `verify:schemas` + `verify:duplicates` without interruption.
+- 🟡 **`HUMAN_REVIEW_PLAN`**: Medium risk (new product model, schema changes). Emit Workflow Handoff and wait for approval.
+- 🟠 **`AMBIGUOUS`**: Blocked. Request human clarification on product intent.
+- 🔴 **`HIGH_RISK_MANUAL`**: Critical risk. Human-only action.
+
