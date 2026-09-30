@@ -15,7 +15,7 @@ import {
   scanAllProductHandoffs,
   SddFramework,
   verifyArtifactDuplicates,
-} from '@ai-sdlc/core';
+} from '@aisdlc/core';
 import { isJsonOutput } from './verify.js';
 
 

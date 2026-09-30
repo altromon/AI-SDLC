@@ -3,9 +3,9 @@ import * as os from 'os';
 import * as path from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { executePreflightCheck, runCheck } from '../src/commands/check.js';
-import { computeCanonicalSha256 } from '@ai-sdlc/core';
+import { computeCanonicalSha256 } from '@aisdlc/core';
 
-describe('@ai-sdlc/cli check command and auto-fix suite', () => {
+describe('@aisdlc/cli check command and auto-fix suite', () => {
   let tempDir: string;
 
   beforeEach(() => {

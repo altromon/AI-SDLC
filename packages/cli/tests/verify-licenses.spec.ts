@@ -4,7 +4,7 @@ import * as os from 'os';
 import { describe, expect, it } from 'vitest';
 import { runVerifyLicenses } from '../src/commands/verify.js';
 
-describe('@ai-sdlc/cli verify licenses command suite', () => {
+describe('@aisdlc/cli verify licenses command suite', () => {
   it('should run dynamic license compliance verification on current repository and pass', () => {
     const passed = runVerifyLicenses({ silent: true });
     expect(passed).toBe(true);

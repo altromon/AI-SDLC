@@ -4,7 +4,7 @@ import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import { scanFileForSast, verifySast } from '../src/verifiers/sast.js';
 
-describe('Shift-Left SAST Verifier (@ai-sdlc/core)', () => {
+describe('Shift-Left SAST Verifier (@aisdlc/core)', () => {
   it('should detect SQL injection vulnerabilities via dynamic string concatenation', () => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-sast-test-'));
     try {

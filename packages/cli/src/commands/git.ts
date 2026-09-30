@@ -9,7 +9,7 @@ import {
   checkoutTaskBranch,
   installGitHooks,
   detectAuthorIdentity,
-} from '@ai-sdlc/core';
+} from '@aisdlc/core';
 
 export function runGitValidate(branchName: string): boolean {
   if (!branchName) {

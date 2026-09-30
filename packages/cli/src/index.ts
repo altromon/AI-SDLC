@@ -1,5 +1,5 @@
 /**
- * @ai-sdlc/cli
+ * @aisdlc/cli
  * Command Line Interface for AI-SDLC Quality Gates and Governance
  */
 

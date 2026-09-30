@@ -1,5 +1,5 @@
 /**
- * @ai-sdlc/mcp Integration and Unit Tests
+ * @aisdlc/mcp Integration and Unit Tests
  * Cites: FR-028-NATIVE-MCP-SERVER-001
  */
 

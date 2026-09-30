@@ -75,7 +75,7 @@ export function generateCycloneDxSbom(
       tools: [
         {
           vendor: 'AI-SDLC',
-          name: '@ai-sdlc/core',
+          name: '@aisdlc/core',
           version: '1.0.0',
         },
       ],

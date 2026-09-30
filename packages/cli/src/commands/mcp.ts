@@ -4,7 +4,7 @@
  */
 
 import pc from 'picocolors';
-import { startMcpServer } from '@ai-sdlc/mcp';
+import { startMcpServer } from '@aisdlc/mcp';
 
 export interface McpCliOptions {
   root?: string;

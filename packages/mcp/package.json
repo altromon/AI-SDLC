@@ -1,5 +1,5 @@
 {
-  "name": "@ai-sdlc/mcp",
+  "name": "@aisdlc/mcp",
   "version": "1.0.0",
   "description": "Model Context Protocol (MCP) native server for AI-SDLC tools, resources, and governance",
   "license": "MIT",
@@ -23,7 +23,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@ai-sdlc/core": "workspace:*",
+    "@aisdlc/core": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.6.0",
     "zod": "^3.24.1"
   },

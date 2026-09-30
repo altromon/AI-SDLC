@@ -33,7 +33,7 @@ import {
   verifyTestingCoverage,
   verifyTraceability,
   writeReleaseKpiReport,
-} from '@ai-sdlc/core';
+} from '@aisdlc/core';
 
 export interface RegisterToolsOptions {
   rootDir?: string;

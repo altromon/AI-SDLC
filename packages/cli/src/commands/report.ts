@@ -5,7 +5,7 @@
 import * as path from 'path';
 import { spawn } from 'child_process';
 import pc from 'picocolors';
-import { generateDashboardReport, generateQualityReport } from '@ai-sdlc/core';
+import { generateDashboardReport, generateQualityReport } from '@aisdlc/core';
 
 function openInBrowser(filePath: string): void {
   const resolved = path.resolve(filePath);

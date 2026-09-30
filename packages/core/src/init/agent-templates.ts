@@ -360,8 +360,8 @@ To consult full protocols, specialized prompts, and interface contracts:\r
 - [\`process/01_governance_and_roles.md\`](../process/01_governance_and_roles.md)\r
 `;
 
-export const STARTER_CURSOR_MCP = `{\n  "mcpServers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@ai-sdlc/mcp"\n      ]\n    }\n  }\n}\n`;
+export const STARTER_CURSOR_MCP = `{\n  "mcpServers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@aisdlc/mcp"\n      ]\n    }\n  }\n}\n`;
 
-export const STARTER_ANTIGRAVITY_MCP = `{\n  "mcpServers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@ai-sdlc/mcp"\n      ]\n    }\n  }\n}\n`;
+export const STARTER_ANTIGRAVITY_MCP = `{\n  "mcpServers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@aisdlc/mcp"\n      ]\n    }\n  }\n}\n`;
 
-export const STARTER_VSCODE_MCP = `{\n  "servers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@ai-sdlc/mcp"\n      ]\n    }\n  }\n}\n`;
+export const STARTER_VSCODE_MCP = `{\n  "servers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@aisdlc/mcp"\n      ]\n    }\n  }\n}\n`;

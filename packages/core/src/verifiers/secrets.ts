@@ -505,7 +505,7 @@ export function generateSecretsReportMarkdown(result: SecretVerifierResult): str
     `> **Evaluation Date:** ${new Date().toISOString()}`,
     `> **Verdict:** ${isOk ? '✅ COMPLIANT (No exposed secrets or credentials)' : `❌ BLOCKED (${result.findingsCount} exposed credentials detected)`}`,
     `> **Audited Files:** ${result.totalFilesScanned} | **Security Violations:** ${result.findingsCount}`,
-    `> **Native Gitleaks Engine:** ${result.scannedWithGitleaks ? '🟢 Active / Integrated' : '⚪ Deterministic Native Scanner (@ai-sdlc/core)'}`,
+    `> **Native Gitleaks Engine:** ${result.scannedWithGitleaks ? '🟢 Active / Integrated' : '⚪ Deterministic Native Scanner (@aisdlc/core)'}`,
     ``,
     `---`,
   ];

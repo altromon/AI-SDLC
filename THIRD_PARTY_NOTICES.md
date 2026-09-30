@@ -2,7 +2,7 @@
 
 > **Proyecto:** AI-SDLC
 > **Fecha:** 2026-09-30
-> **Total Componentes:** 423
+> **Total Componentes:** 413
 
 Este documento contiene los avisos de copyright y términos de licencia aplicables a los componentes de terceros utilizados en este proyecto.
 
@@ -20,7 +20,6 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`@babel/runtime`** | `7.29.7` | `MIT` |
 | **`@babel/types`** | `7.29.8` | `MIT` |
 | **`@bcoe/v8-coverage`** | `0.2.3` | `MIT` |
-| **`@bcoe/v8-coverage`** | `1.0.2` | `MIT` |
 | **`@changesets/apply-release-plan`** | `7.1.1` | `MIT` |
 | **`@changesets/assemble-release-plan`** | `6.0.10` | `MIT` |
 | **`@changesets/changelog-git`** | `0.2.1` | `MIT` |
@@ -94,10 +93,7 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`@types/yargs`** | `17.0.35` | `MIT` |
 | **`@types/yargs-parser`** | `21.0.3` | `MIT` |
 | **`@vitest/coverage-v8`** | `2.1.9` | `MIT` |
-| **`@vitest/coverage-v8`** | `5.0.1` | `MIT` |
 | **`@vitest/expect`** | `2.1.9` | `MIT` |
-| **`@vitest/istanbul-lib-coverage`** | `1.0.1` | `MIT` |
-| **`@vitest/istanbul-lib-report`** | `1.0.1` | `MIT` |
 | **`@vitest/mocker`** | `2.1.9` | `MIT` |
 | **`@vitest/pretty-format`** | `2.1.9` | `MIT` |
 | **`@vitest/runner`** | `2.1.9` | `MIT` |
@@ -120,7 +116,6 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`argparse`** | `2.0.1` | `Python-2.0` |
 | **`array-union`** | `2.1.0` | `MIT` |
 | **`assertion-error`** | `2.0.1` | `MIT` |
-| **`ast-v8-to-istanbul`** | `1.0.6` | `MIT` |
 | **`balanced-match`** | `1.0.2` | `MIT` |
 | **`balanced-match`** | `4.0.4` | `MIT` |
 | **`better-path-resolve`** | `1.0.0` | `MIT` |
@@ -265,7 +260,6 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`jose`** | `6.2.12` | `MIT` |
 | **`joycon`** | `3.1.1` | `MIT` |
 | **`js-tokens`** | `4.0.0` | `MIT` |
-| **`js-tokens`** | `10.0.0` | `MIT` |
 | **`js-yaml`** | `3.15.2` | `MIT` |
 | **`js-yaml`** | `4.3.2` | `MIT` |
 | **`json-buffer`** | `3.0.1` | `MIT` |
@@ -287,7 +281,6 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`lru-cache`** | `10.4.3` | `ISC` |
 | **`magic-string`** | `0.30.21` | `MIT` |
 | **`magicast`** | `0.3.5` | `MIT` |
-| **`magicast`** | `0.5.5` | `MIT` |
 | **`make-dir`** | `4.0.0` | `MIT` |
 | **`math-intrinsics`** | `1.1.0` | `MIT` |
 | **`media-typer`** | `1.1.1` | `MIT` |
@@ -309,7 +302,6 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`negotiator`** | `1.1.0` | `MIT` |
 | **`object-assign`** | `4.1.1` | `MIT` |
 | **`object-inspect`** | `1.13.4` | `MIT` |
-| **`obug`** | `2.2.1` | `MIT` |
 | **`on-finished`** | `2.4.1` | `MIT` |
 | **`once`** | `1.4.0` | `ISC` |
 | **`optionator`** | `0.9.4` | `MIT` |
@@ -387,7 +379,6 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`stackback`** | `0.0.2` | `MIT` |
 | **`statuses`** | `2.0.2` | `MIT` |
 | **`std-env`** | `3.10.0` | `MIT` |
-| **`std-env`** | `4.2.0` | `MIT` |
 | **`string-width`** | `4.2.3` | `MIT` |
 | **`string-width`** | `5.1.2` | `MIT` |
 | **`strip-ansi`** | `6.0.1` | `MIT` |
@@ -405,7 +396,6 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 | **`tinyglobby`** | `0.2.17` | `MIT` |
 | **`tinypool`** | `1.1.1` | `MIT` |
 | **`tinyrainbow`** | `1.2.0` | `MIT` |
-| **`tinyrainbow`** | `3.1.1` | `MIT` |
 | **`tinyspy`** | `3.0.2` | `MIT` |
 | **`to-regex-range`** | `5.0.1` | `MIT` |
 | **`toidentifier`** | `1.0.1` | `MIT` |
@@ -653,35 +643,6 @@ OF CONTRACT, TORT OR OTHERWI
 - **Licencia:** `MIT`
 - **Autor:** Charles Samborski <demurgos@demurgos.net> (https://demurgos.net)
 - **Repositorio:** git://github.com/demurgos/v8-coverage.git
-
-```
-The MIT License (MIT)
-
-Copyright © 2015-2017 Charles Samborski
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-O
-... (texto truncado)
-```
-
-### @bcoe/v8-coverage@1.0.2
-- **Licencia:** `MIT`
-- **Autor:** Charles Samborski <demurgos@demurgos.net> (https://demurgos.net)
-- **Repositorio:** git://github.com/bcoe/v8-coverage.git
 
 ```
 The MIT License (MIT)
@@ -2176,34 +2137,6 @@ OUT OF OR IN
 ... (texto truncado)
 ```
 
-### @vitest/coverage-v8@5.0.1
-- **Licencia:** `MIT`
-- **Autor:** Anthony Fu <anthonyfu117@hotmail.com>
-- **Repositorio:** git+https://github.com/vitest-dev/vitest.git
-
-```
-MIT License
-
-Copyright (c) 2021-Present VoidZero Inc. and Vitest contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
-... (texto truncado)
-```
-
 ### @vitest/expect@2.1.9
 - **Licencia:** `MIT`
 - **Repositorio:** git+https://github.com/vitest-dev/vitest.git
@@ -2229,60 +2162,6 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN
-... (texto truncado)
-```
-
-### @vitest/istanbul-lib-coverage@1.0.1
-- **Licencia:** `MIT`
-- **Autor:** Vitest Team
-- **Repositorio:** git+https://github.com/vitest-dev/istanbuljs.git
-
-```
-Copyright 2012-2015 Yahoo! Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of the Yahoo! Inc. nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN
-... (texto truncado)
-```
-
-### @vitest/istanbul-lib-report@1.0.1
-- **Licencia:** `MIT`
-- **Autor:** Vitest Team
-- **Repositorio:** git+https://github.com/vitest-dev/istanbuljs.git
-
-```
-Copyright 2012-2015 Yahoo! Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of the Yahoo! Inc. nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN
 ... (texto truncado)
 ```
 
@@ -2847,35 +2726,6 @@ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHER
-... (texto truncado)
-```
-
-### ast-v8-to-istanbul@1.0.6
-- **Licencia:** `MIT`
-- **Autor:** Ari Perkkiö <ari.perkkio@gmail.com>
-- **Repositorio:** git+https://github.com/AriPerkkio/ast-v8-to-istanbul.git
-
-```
-MIT License
-
-Copyright (c) 2026 Ari Perkkiö
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECT
 ... (texto truncado)
 ```
 
@@ -6515,34 +6365,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ... (texto truncado)
 ```
 
-### js-tokens@10.0.0
-- **Licencia:** `MIT`
-- **Autor:** Simon Lydell
-- **Repositorio:** lydell/js-tokens
-
-```
-The MIT License (MIT)
-
-Copyright (c) 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 Simon Lydell
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN
-... (texto truncado)
-```
-
 ### js-yaml@3.15.2
 - **Licencia:** `MIT`
 - **Autor:** Vladimir Zapparov <dervus.grim@gmail.com>
@@ -7051,33 +6873,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ```
 
 ### magicast@0.3.5
-- **Licencia:** `MIT`
-- **Repositorio:** unjs/magicast
-
-```
-MIT License
-
-Copyright (c) Pooya Parsa <pooya@pi0.io> and Anthony Fu <https://github.com/antfu>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, T
-... (texto truncado)
-```
-
-### magicast@0.5.5
 - **Licencia:** `MIT`
 - **Repositorio:** unjs/magicast
 
@@ -7679,35 +7474,6 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONN
-... (texto truncado)
-```
-
-### obug@2.2.1
-- **Licencia:** `MIT`
-- **Autor:** Kevin Deng <sxzz@sxzz.moe>
-- **Repositorio:** git+https://github.com/sxzz/obug.git
-
-```
-The MIT License (MIT)
-
-Copyright © 2025-PRESENT Kevin Deng (https://github.com/sxzz)
-Copyright (c) 2014-2017 TJ Holowaychuk <tj@vision-media.ca>
-Copyright (c) 2018-2021 Josh Junon
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE L
 ... (texto truncado)
 ```
 
@@ -9650,34 +9416,6 @@ OUT OF OR
 ... (texto truncado)
 ```
 
-### std-env@4.2.0
-- **Licencia:** `MIT`
-- **Repositorio:** unjs/std-env
-
-```
-MIT License
-
-Copyright (c) Pooya Parsa <pooya@pi0.io>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR 
-... (texto truncado)
-```
-
 ### string-width@4.2.3
 - **Licencia:** `MIT`
 - **Autor:** Sindre Sorhus
@@ -10054,34 +9792,6 @@ AUTHORS OR COPYRIGHT HOLDERS
 ```
 
 ### tinyrainbow@1.2.0
-- **Licencia:** `MIT`
-- **Repositorio:** git+https://github.com/tinylibs/tinyrainbow.git
-
-```
-MIT License
-
-Copyright (c) 2022 Tinylibs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION
-... (texto truncado)
-```
-
-### tinyrainbow@3.1.1
 - **Licencia:** `MIT`
 - **Repositorio:** git+https://github.com/tinylibs/tinyrainbow.git
 

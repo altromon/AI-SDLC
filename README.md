@@ -73,9 +73,9 @@ AI-SDLC/
 ├── license-policy.yaml                       # Declarative allowed/blocked license policy
 │
 ├── packages/                                 # Monorepo Workspace (pnpm + Changesets)
-│   ├── core/                                 # @ai-sdlc/core: Domain engine, pure verifiers, and reporters
-│   ├── mcp/                                  # @ai-sdlc/mcp: Native Model Context Protocol server (npx @ai-sdlc/mcp / aisdlc mcp)
-│   └── cli/                                  # @ai-sdlc/cli: Binary CLI executable (npx aisdlc)
+│   ├── core/                                 # @aisdlc/core: Domain engine, pure verifiers, and reporters
+│   ├── mcp/                                  # @aisdlc/mcp: Native Model Context Protocol server (npx @aisdlc/mcp / aisdlc mcp)
+│   └── cli/                                  # @aisdlc/cli: Binary CLI executable (npx aisdlc)
 │
 ├── process/                                  # Normative Process Specification
 │   ├── 00_principles_and_manifesto.md        # Manifesto and core principles
@@ -188,7 +188,7 @@ npx aisdlc sdd integrate --auto
 |---|---|---|---|
 | `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository structure, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`), CI/CD pipelines (`--ci <github\|gitlab\|azure\|bitbucket>`), AI agent rules (`--agents <all\|cursor\|claude\|antigravity\|copilot\|mcp\|none>`), and architecture templates (`--arch <minimal\|full\|none>`). Supports `--dry-run`, `--json`, and interactive console wizard |
 | `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry Setup** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
-| `npx aisdlc mcp` / `npx @ai-sdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 20 typed tools (including `new`, `verify`, `report`) and 5 canonical resources |
+| `npx aisdlc mcp` / `npx @aisdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 20 typed tools (including `new`, `verify`, `report`) and 5 canonical resources |
 | `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | **SDD Scaffolding** | Generates `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` sidecar (`HOF-*`) with SHA-256 digests |
 | `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancy** | Audits lexical collisions and requirement overlaps before coding (`--json`) |
 | `npx aisdlc verify friction [change]` | - | **Progressive Friction** | Validates Anti-Bypass rules and thresholds according to risk profile (`patch`/`standard`/`critical`, `--json`) |
@@ -641,7 +641,7 @@ Evaluates code against critical OWASP patterns:
 4. **Server-Side Request Forgery - SSRF (CWE-918)**: Outbound requests constructed from user inputs.
 5. **Path Traversal (CWE-22)**: File operations without boundary checks.
 6. **Prompt Injection (OWASP LLM01 / CWE-1427)**: Direct concatenation in LLM prompts (`SAST-006`) and jailbreak overrides (`SAST-007`).
-   - *Runtime Guard*: In-memory `detectPromptInjection(text)` exported by `@ai-sdlc/core`.
+   - *Runtime Guard*: In-memory `detectPromptInjection(text)` exported by `@aisdlc/core`.
 
 #### Universal Multilingual Coverage:
 TypeScript/JavaScript, Python, C#, Java/Kotlin/Scala, C/C++, Go, Rust, PHP, Ruby, Swift, and `.prompt` files.
@@ -703,7 +703,7 @@ npx aisdlc report dashboard --output docs/dashboard.html --title "SentinelCore M
 
 ## 🔌 Native Model Context Protocol (MCP) Server: Full Control from your IDE
 
-AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@ai-sdlc/mcp` running over `stdio`. Developers and AI agents can invoke AI-SDLC tools directly within **Cursor, Claude Desktop / Code, Google Antigravity, VS Code, or GitHub Copilot**.
+AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@aisdlc/mcp` running over `stdio`. Developers and AI agents can invoke AI-SDLC tools directly within **Cursor, Claude Desktop / Code, Google Antigravity, VS Code, or GitHub Copilot**.
 
 ### 1. High-Level Workflows
 - **`new`**: Initializes a project or adopts AI-SDLC in an existing repo, configuring folders, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`), and CI templates (`github`, `gitlab`, `azure`, `bitbucket`).
@@ -724,7 +724,7 @@ AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@ai-sdlc
   "mcpServers": {
     "ai-sdlc": {
       "command": "npx",
-      "args": ["@ai-sdlc/mcp"]
+      "args": ["@aisdlc/mcp"]
     }
   }
 }
@@ -736,7 +736,7 @@ AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@ai-sdlc
   "mcpServers": {
     "ai-sdlc": {
       "command": "npx",
-      "args": ["@ai-sdlc/mcp"]
+      "args": ["@aisdlc/mcp"]
     }
   }
 }

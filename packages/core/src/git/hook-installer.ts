@@ -42,7 +42,7 @@ COMPLETION_TOKENS=0
 ACTIVE_TIME_SEC=0
 
 # Execute universal IDE-agnostic author detection engine
-DETECTED=$(node packages/cli/bin/aisdlc.js git detect-author 2>/dev/null || npx aisdlc git detect-author 2>/dev/null || node -e "try { const { detectAuthorIdentity } = require('@ai-sdlc/core'); const id = detectAuthorIdentity(); console.log([id.authorType, id.model, id.promptTokens, id.completionTokens, id.activeTimeSeconds].join('|')); } catch {}" 2>/dev/null || echo "")
+DETECTED=$(node packages/cli/bin/aisdlc.js git detect-author 2>/dev/null || npx aisdlc git detect-author 2>/dev/null || node -e "try { const { detectAuthorIdentity } = require('@aisdlc/core'); const id = detectAuthorIdentity(); console.log([id.authorType, id.model, id.promptTokens, id.completionTokens, id.activeTimeSeconds].join('|')); } catch {}" 2>/dev/null || echo "")
 
 if [ -n "$DETECTED" ]; then
   IFS='|' read -r DET_AUTHOR DET_MODEL DET_PROMPT DET_COMPL DET_TIME <<< "$DETECTED"

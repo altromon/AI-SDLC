@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { scanAllProductHandoffs } from '@ai-sdlc/core';
+import { scanAllProductHandoffs } from '@aisdlc/core';
 
 export interface RegisterResourcesOptions {
   rootDir?: string;

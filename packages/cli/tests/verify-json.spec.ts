@@ -46,7 +46,7 @@ function captureConsoleLog(fn: () => void): string {
   return output.trim();
 }
 
-describe('@ai-sdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () => {
+describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () => {
   it('should emit valid JSON without ANSI codes for runVerifyQuality in nominal pass', () => {
     let passed: boolean = false;
     const output = captureConsoleLog(() => {
