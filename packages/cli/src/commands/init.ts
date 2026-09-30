@@ -1,5 +1,5 @@
 import * as readline from 'node:readline/promises';
-import { initProject } from '@ai-sdlc/core';
+import { initProject } from '@aisdlc/core';
 import pc from 'picocolors';
 import { isJsonOutput } from './verify.js';
 

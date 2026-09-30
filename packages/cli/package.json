@@ -23,8 +23,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@ai-sdlc/core": "workspace:*",
-    "@ai-sdlc/mcp": "workspace:*",
+    "@aisdlc/core": "workspace:*",
+    "@aisdlc/mcp": "workspace:*",
     "commander": "^13.1.0",
     "picocolors": "^1.1.1"
   },

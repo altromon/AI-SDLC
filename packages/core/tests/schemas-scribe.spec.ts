@@ -571,7 +571,7 @@ unknown-extra-property: "disallowed"
       mcpServers: {
         'ai-sdlc': {
           command: 'npx',
-          args: ['@ai-sdlc/mcp'],
+          args: ['@aisdlc/mcp'],
         },
       },
     };
@@ -584,7 +584,7 @@ unknown-extra-property: "disallowed"
       type: 'mcp-config',
       mcpServers: {
         'ai-sdlc': {
-          args: ['@ai-sdlc/mcp'],
+          args: ['@aisdlc/mcp'],
         },
       },
       disallowedProperty: true,

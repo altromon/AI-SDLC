@@ -1,5 +1,5 @@
 /**
- * @ai-sdlc/core
+ * @aisdlc/core
  * Deterministic domain verification, compliance, and governance engine for AI-SDLC
  */
 

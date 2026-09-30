@@ -20,7 +20,7 @@ import {
   verifyTasksGovernance,
   verifyTestingCoverage,
   verifyTraceability,
-} from '@ai-sdlc/core';
+} from '@aisdlc/core';
 import { isJsonOutput } from './verify.js';
 
 export interface CheckCommandOptions extends PreflightCheckOptions {

@@ -10,7 +10,7 @@ import {
   injectKpisIntoPrBody,
   aggregateReleaseKpis,
   writeReleaseKpiReport,
-} from '@ai-sdlc/core';
+} from '@aisdlc/core';
 
 export interface KpiPrCliOptions {
   base?: string;

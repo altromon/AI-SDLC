@@ -38,10 +38,10 @@ importers:
 
   packages/cli:
     dependencies:
-      '@ai-sdlc/core':
+      '@aisdlc/core':
         specifier: workspace:*
         version: link:../core
-      '@ai-sdlc/mcp':
+      '@aisdlc/mcp':
         specifier: workspace:*
         version: link:../mcp
       commander:
@@ -97,7 +97,7 @@ importers:
 
   packages/mcp:
     dependencies:
-      '@ai-sdlc/core':
+      '@aisdlc/core':
         specifier: workspace:*
         version: link:../core
       '@modelcontextprotocol/sdk':

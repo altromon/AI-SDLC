@@ -2,13 +2,13 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:8de58d09-0d09-42ed-a9c0-fcf502dc8c1d",
+  "serialNumber": "urn:uuid:0a392d9f-2d75-400d-80b5-fe2f709f4458",
   "metadata": {
-    "timestamp": "2026-09-30T07:45:09.820Z",
+    "timestamp": "2026-09-30T18:15:51.465Z",
     "tools": [
       {
         "vendor": "AI-SDLC",
-        "name": "@ai-sdlc/core",
+        "name": "@aisdlc/core",
         "version": "1.0.0"
       }
     ],
@@ -122,20 +122,6 @@
       "name": "@bcoe/v8-coverage",
       "version": "0.2.3",
       "purl": "pkg:npm/@bcoe/v8-coverage@0.2.3",
-      "author": "Charles Samborski <demurgos@demurgos.net> (https://demurgos.net)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@bcoe/v8-coverage",
-      "version": "1.0.2",
-      "purl": "pkg:npm/@bcoe/v8-coverage@1.0.2",
       "author": "Charles Samborski <demurgos@demurgos.net> (https://demurgos.net)",
       "licenses": [
         {
@@ -1124,51 +1110,9 @@
     },
     {
       "type": "library",
-      "name": "@vitest/coverage-v8",
-      "version": "5.0.1",
-      "purl": "pkg:npm/@vitest/coverage-v8@5.0.1",
-      "author": "Anthony Fu <anthonyfu117@hotmail.com>",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "@vitest/expect",
       "version": "2.1.9",
       "purl": "pkg:npm/@vitest/expect@2.1.9",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@vitest/istanbul-lib-coverage",
-      "version": "1.0.1",
-      "purl": "pkg:npm/@vitest/istanbul-lib-coverage@1.0.1",
-      "author": "Vitest Team",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@vitest/istanbul-lib-report",
-      "version": "1.0.1",
-      "purl": "pkg:npm/@vitest/istanbul-lib-report@1.0.1",
-      "author": "Vitest Team",
       "licenses": [
         {
           "license": {
@@ -1466,20 +1410,6 @@
       "version": "2.0.1",
       "purl": "pkg:npm/assertion-error@2.0.1",
       "author": "Jake Luer <jake@qualiancy.com> (http://qualiancy.com)",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "ast-v8-to-istanbul",
-      "version": "1.0.6",
-      "purl": "pkg:npm/ast-v8-to-istanbul@1.0.6",
-      "author": "Ari Perkkiö <ari.perkkio@gmail.com>",
       "licenses": [
         {
           "license": {
@@ -3477,20 +3407,6 @@
     },
     {
       "type": "library",
-      "name": "js-tokens",
-      "version": "10.0.0",
-      "purl": "pkg:npm/js-tokens@10.0.0",
-      "author": "Simon Lydell",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "js-yaml",
       "version": "3.15.2",
       "purl": "pkg:npm/js-yaml@3.15.2",
@@ -3783,19 +3699,6 @@
     },
     {
       "type": "library",
-      "name": "magicast",
-      "version": "0.5.5",
-      "purl": "pkg:npm/magicast@0.5.5",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "make-dir",
       "version": "4.0.0",
       "purl": "pkg:npm/make-dir@4.0.0",
@@ -4073,20 +3976,6 @@
       "version": "1.13.4",
       "purl": "pkg:npm/object-inspect@1.13.4",
       "author": "James Halliday",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "obug",
-      "version": "2.2.1",
-      "purl": "pkg:npm/obug@2.2.1",
-      "author": "Kevin Deng <sxzz@sxzz.moe>",
       "licenses": [
         {
           "license": {
@@ -5164,19 +5053,6 @@
     },
     {
       "type": "library",
-      "name": "std-env",
-      "version": "4.2.0",
-      "purl": "pkg:npm/std-env@4.2.0",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "string-width",
       "version": "4.2.3",
       "purl": "pkg:npm/string-width@4.2.3",
@@ -5402,19 +5278,6 @@
       "name": "tinyrainbow",
       "version": "1.2.0",
       "purl": "pkg:npm/tinyrainbow@1.2.0",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "tinyrainbow",
-      "version": "3.1.1",
-      "purl": "pkg:npm/tinyrainbow@3.1.1",
       "licenses": [
         {
           "license": {

@@ -15,7 +15,7 @@ import {
   verifyTasksGovernance,
   verifyTestingCoverage,
   verifyTraceability,
-} from '@ai-sdlc/core';
+} from '@aisdlc/core';
 
 export interface VerifyBaseOptions {
   root?: string;
@@ -720,7 +720,7 @@ export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean 
       `  Credential leaks:        ${result.findingsCount > 0 ? pc.red(String(result.findingsCount)) : pc.green('0')}`
     );
     console.log(
-      `  Native Gitleaks engine:  ${result.scannedWithGitleaks ? pc.cyan('Active / Integrated') : pc.dim('Deterministic Scanner (@ai-sdlc/core)')}`
+      `  Native Gitleaks engine:  ${result.scannedWithGitleaks ? pc.cyan('Active / Integrated') : pc.dim('Deterministic Scanner (@aisdlc/core)')}`
     );
 
     if (result.findings.length > 0) {

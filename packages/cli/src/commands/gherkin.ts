@@ -3,7 +3,7 @@
  */
 
 import pc from 'picocolors';
-import { extractGherkinFeatures } from '@ai-sdlc/core';
+import { extractGherkinFeatures } from '@aisdlc/core';
 import { isJsonOutput } from './verify.js';
 
 export interface GherkinExtractCliOptions {

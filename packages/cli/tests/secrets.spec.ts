@@ -4,7 +4,7 @@ import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import { runVerifySast, runVerifySecrets } from '../src/commands/verify.js';
 
-describe('@ai-sdlc/cli Secret & SAST Verification Suite', () => {
+describe('@aisdlc/cli Secret & SAST Verification Suite', () => {
   it('should pass secret verification on clean repository', () => {
     const passed = runVerifySecrets({ silent: true });
     expect(passed).toBe(true);

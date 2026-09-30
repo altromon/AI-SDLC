@@ -6,7 +6,7 @@ import { execFileSync } from 'child_process';
 import { runGitHookInstall } from '../src/commands/git.js';
 import { runKpiPr, runKpiRelease } from '../src/commands/kpi.js';
 
-describe('@ai-sdlc/cli KPI & Git Hook Commands', () => {
+describe('@aisdlc/cli KPI & Git Hook Commands', () => {
   let tmpDir: string;
 
   beforeEach(() => {

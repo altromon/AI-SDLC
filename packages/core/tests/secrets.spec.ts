@@ -9,7 +9,7 @@ import {
   verifySecrets,
 } from '../src/verifiers/secrets.js';
 
-describe('Deterministic Secret Scanning & Gitleaks Gate (@ai-sdlc/core)', () => {
+describe('Deterministic Secret Scanning & Gitleaks Gate (@aisdlc/core)', () => {
   it('should calculate Shannon entropy accurately', () => {
     // Monotonous repeated string has 0 entropy
     expect(calculateShannonEntropy('aaaaaaaaaaaaaaaa')).toBe(0);

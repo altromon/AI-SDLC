@@ -5,7 +5,7 @@ import * as os from 'os';
 import { execFileSync } from 'child_process';
 import { runGitCheckout } from '../src/commands/git.js';
 
-describe('@ai-sdlc/cli runGitCheckout command', () => {
+describe('@aisdlc/cli runGitCheckout command', () => {
   let tmpDir: string;
 
   beforeEach(() => {

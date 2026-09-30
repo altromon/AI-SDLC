@@ -1,5 +1,5 @@
 /**
- * @ai-sdlc/mcp
+ * @aisdlc/mcp
  * Native Model Context Protocol (MCP) Server for AI-SDLC tools, resources, and governance
  */
 

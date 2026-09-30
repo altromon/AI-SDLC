@@ -451,7 +451,7 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm approve-builds --all
 
-      - name: Build Monorepo Packages (@ai-sdlc/core & @ai-sdlc/cli)
+      - name: Build Monorepo Packages (@aisdlc/core & @aisdlc/cli)
         run: pnpm run build
 
       - name: Run Vitest Unit & Integration Suites

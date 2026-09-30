@@ -3,7 +3,7 @@ import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import { runChangeNew, runSddVerify } from '../src/commands/sdd.js';
 
-describe('@ai-sdlc/cli change new Command Suite', () => {
+describe('@aisdlc/cli change new Command Suite', () => {
   it('should scaffold greenfield change with dual product artifact (Option A)', () => {
     const tmpDir = path.join(process.cwd(), 'scratch', 'test-cli-change-new-greenfield');
     if (fs.existsSync(tmpDir)) {

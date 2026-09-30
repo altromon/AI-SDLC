@@ -20,7 +20,7 @@ import {
   runVerifyTraceability,
 } from '../src/commands/verify.js';
 
-describe('@ai-sdlc/cli Command Suite', () => {
+describe('@aisdlc/cli Command Suite', () => {
   it('should validate 4-tier git branch names', () => {
     expect(runGitValidate('main')).toBe(true);
     expect(runGitValidate('release/v1.0.0')).toBe(true);
