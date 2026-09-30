@@ -27,3 +27,10 @@ Canonical Reference: [`process/09_agent_protocols.md`](process/09_agent_protocol
 
 ## 4. Structured `--json` Output
 - Any extension to CLI commands must maintain compatibility with the `--json` flag and suppress ANSI escape codes when this flag is present.
+
+## 5. Task Autonomy Modes for Code Tasks
+- 🟢 **`AUTONOMOUS`**: Low risk, isolated, well-specified task. Implement and test without interruption.
+- 🟡 **`HUMAN_REVIEW_PLAN`**: Medium risk (API contract, architecture changes). Emit Workflow Handoff block and wait for human approval.
+- 🟠 **`AMBIGUOUS`**: Blocked. Request human clarification before any implementation.
+- 🔴 **`HIGH_RISK_MANUAL`**: Critical risk (destructive DB migrations, cryptography). Human-only execution.
+

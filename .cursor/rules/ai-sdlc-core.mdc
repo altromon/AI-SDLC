@@ -29,8 +29,26 @@ Before finalizing changes or proposing commits:
 - Tier 3: `feat/<FEAT-ID>-<slug>` / `bug/<BUG-ID>-<slug>` (Feature)
 - Tier 4: `task/<PARENT-ID>/<TSK-ID>-<slug>` (Atomic task)
 
-## 4. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
+## 3. Specialized Roles Mapping
+| Role | Mission (summary) |
+| :--- | :--- |
+| `agent-product-analyst` | ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); status starts `draft`. |
+| `agent-threat-modeler` | STRIDE/OWASP threat triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`). |
+| `agent-qa-engineer` | FAILING BDD/Gherkin suites before `agent-developer` writes code. |
+| `agent-developer` | Atomic tasks from `tasks.md`; respects autonomy mode; runs `pnpm run check:fix` + `pnpm run verify:all`. |
+| `agent-expert-user` | Functional validation against `UC-*` and `FR-*` pre-PR. |
+| `agent-code-reviewer` | PR audit: `[BLOCKING]` / `[CLEAN_CODE_SUGGESTION]` / `[COMPLIANT]`. |
+| `agent-devops` | CI/CD, Docker, IaC only — **FORBIDDEN** to touch `src/` or `packages/*/src/`. |
+
+## 4. Task Autonomy Modes (`tasks.md`)
+- 🟢 **`AUTONOMOUS`**: Low risk. Implement directly, omit handoff block.
+- 🟡 **`HUMAN_REVIEW_PLAN`**: Medium risk. Emit Workflow Handoff block, wait for approval.
+- 🟠 **`AMBIGUOUS`**: Blocked. Request human clarification.
+- 🔴 **`HIGH_RISK_MANUAL`**: Critical risk. Human-only execution.
+
+## 5. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
 - **Conditional Activation**:
   * 🟢 **`AUTONOMOUS`** (or PR/CI supervision): **OMITTED**. Do not request or emit interactive handoff.
   * 🟡 **Autonomy $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **MANDATORY**. Emit Workflow Handoff block compliant with [`templates/workflow/agent-handoff.template.md`](templates/workflow/agent-handoff.template.md) and **STOP**.
 - **Content**: Declare completed deliverables, recommend next role(s), provide suggested invocation prompt, and **keep the Human Action Window open for the human user to take action** (review, edit by hand, pause/reroute, or delegate).
+

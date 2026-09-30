@@ -1,0 +1,15 @@
+id: HOF-CHG-027-NORMALIZE-IDE-RULESETS
+type: handoff
+title: Handoff Canónico de Producto para normalize-ide-rulesets
+changeId: CHG-027-NORMALIZE-IDE-RULESETS
+version: 1.0.0
+createdAt: '2026-09-27T17:56:01.757Z'
+subgraph:
+  requirements:
+    - FR-027-NORMALIZE-IDE-RULESETS-001
+  useCases:
+    - UC-027-NORMALIZE-IDE-RULESETS
+citations:
+  - id: FR-027-NORMALIZE-IDE-RULESETS-001
+    digest: sha256:21c0adb1609ba2ff2ce1dadf63e9bc50693a94e3d396d67497d0f789e2a6cae3
+    comment: Requerimiento funcional canónico asociado (Génesis CHG-027-NORMALIZE-IDE-RULESETS)

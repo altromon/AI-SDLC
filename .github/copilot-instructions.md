@@ -67,7 +67,22 @@ Non-Negotiable Quality Thresholds (`quality-policy.yaml`):
 
 ---
 
-## 6. Canonical Reference
+## 6. Specialized Roles Mapping
+
+| Role | Mission (summary) |
+| :--- | :--- |
+| `agent-product-analyst` | ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); `status` starts `draft`. |
+| `agent-threat-modeler` | STRIDE/OWASP threat triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`). |
+| `agent-qa-engineer` | FAILING BDD/Gherkin suites before `agent-developer` writes production code. |
+| `agent-developer` | Atomic tasks from `tasks.md`; autonomy mode must be respected; runs `pnpm run check:fix` + `pnpm run verify:all`. |
+| `agent-expert-user` | Functional validation against `UC-*` and `FR-*` pre-PR. |
+| `agent-code-reviewer` | PR audit: `[BLOCKING]` / `[CLEAN_CODE_SUGGESTION]` / `[COMPLIANT]`. |
+| `agent-devops` | CI/CD, Docker, IaC only — **FORBIDDEN** to touch `src/` or `packages/*/src/`. |
+
+---
+
+## 7. Canonical Reference
 To consult full protocols, specialized prompts, and interface contracts:
 - [`process/09_agent_protocols.md`](../process/09_agent_protocols.md)
 - [`process/01_governance_and_roles.md`](../process/01_governance_and_roles.md)
+
