@@ -1,5 +1,5 @@
 {
-  "name": "@ai-sdlc/cli",
+  "name": "@aisdlc/cli",
   "version": "1.0.0",
   "description": "Command line interface for AI-SDLC quality gates, governance, and scaffolding",
   "license": "MIT",
