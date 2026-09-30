@@ -108,39 +108,47 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: verify (Consolidated execution of all Quality Gates)
   server.tool(
     'verify',
-    'Executes all 9 deterministic AI-SDLC Quality Gates in a consolidated run and returns overall repository health.',
+    'Executes deterministic AI-SDLC Quality Gates (all 9 gates in "full" profile, or essential gates [quality, security, licenses] in "lite" profile) in a consolidated run and returns overall repository health.',
     {
       root: z.string().optional().describe('Project root directory (optional)'),
+      profile: z
+        .enum(['full', 'lite'])
+        .optional()
+        .describe('Quality Gate evaluation profile: "full" (default, executes all 9 gates) or "lite" (essential gates: quality, security, and licenses for personal/solo projects)'),
     },
     async (params) => {
       try {
         const root = resolveRoot(params.root, baseRoot);
+        const isLite = params.profile === 'lite';
+
         const qg = verifyQualityGate({ rootDir: root });
-        const tr = verifyTraceability({ rootDir: root });
-        const gv = verifyTasksGovernance({ rootDir: root });
-        const tc = verifyTestingCoverage({ rootDir: root });
-        const lc = verifyLicenses({ rootDir: root });
-        const pd = verifyPdacGraph({ rootDir: root });
-        const sc = verifyArtifactsSchemas({ rootDir: root });
-        const dp = verifyArtifactDuplicates({ rootDir: root });
         const sec = verifySecrets({ rootDir: root });
         const sast = verifySast({ rootDir: root });
+        const lc = verifyLicenses({ rootDir: root });
+
+        const tr = !isLite ? verifyTraceability({ rootDir: root }) : undefined;
+        const gv = !isLite ? verifyTasksGovernance({ rootDir: root }) : undefined;
+        const tc = !isLite ? verifyTestingCoverage({ rootDir: root }) : undefined;
+        const pd = !isLite ? verifyPdacGraph({ rootDir: root }) : undefined;
+        const sc = !isLite ? verifyArtifactsSchemas({ rootDir: root }) : undefined;
+        const dp = !isLite ? verifyArtifactDuplicates({ rootDir: root }) : undefined;
 
         const gates = [
           { name: 'quality', success: qg.success, summary: `${qg.passCount}/${qg.totalFunctions} compliant functions` },
-          { name: 'traceability', success: tr.success, summary: `${tr.orphanCount} orphan requirements` },
-          { name: 'governance', success: gv.success, summary: `${gv.totalTasks} audited tasks` },
-          { name: 'testing', success: tc.success, summary: `${tc.passedRequirements}/${tc.totalRequirements} covered requirements` },
+          ...(tr ? [{ name: 'traceability', success: tr.success, summary: `${tr.orphanCount} orphan requirements` }] : []),
+          ...(gv ? [{ name: 'governance', success: gv.success, summary: `${gv.totalTasks} audited tasks` }] : []),
+          ...(tc ? [{ name: 'testing', success: tc.success, summary: `${tc.passedRequirements}/${tc.totalRequirements} covered requirements` }] : []),
           { name: 'licenses', success: lc.success, summary: `${lc.totalEvaluated} analyzed dependencies` },
-          { name: 'pdac', success: pd.success, summary: `${pd.totalNodes} aligned nodes` },
-          { name: 'schemas', success: sc.success, summary: `${sc.validCount}/${sc.totalEvaluated} valid artifacts` },
-          { name: 'duplicates', success: dp.success, summary: `${dp.errorCount} errors, ${dp.warningCount} warnings` },
+          ...(pd ? [{ name: 'pdac', success: pd.success, summary: `${pd.totalNodes} aligned nodes` }] : []),
+          ...(sc ? [{ name: 'schemas', success: sc.success, summary: `${sc.validCount}/${sc.totalEvaluated} valid artifacts` }] : []),
+          ...(dp ? [{ name: 'duplicates', success: dp.success, summary: `${dp.errorCount} errors, ${dp.warningCount} warnings` }] : []),
           { name: 'security', success: sec.success && sast.success, summary: `${sec.findingsCount} secrets, ${sast.violationsCount} SAST` },
         ];
 
         const allPassed = gates.every((g) => g.success);
         return formatResponse({
           success: allPassed,
+          profile: isLite ? 'lite' : 'full',
           exitCode: allPassed ? 0 : (!sec.success ? 4 : 1),
           totalGates: gates.length,
           passedGates: gates.filter((g) => g.success).length,
