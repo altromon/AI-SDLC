@@ -124,7 +124,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       expect(content.directoriesCreated).toContain('templates/ci');
     });
 
-    it('should execute summary tool "verify" returning consolidated gates', async () => {
+    it('should execute summary tool "verify" returning consolidated gates (default full profile)', async () => {
       const result = await client.callTool({
         name: 'verify',
         arguments: {},
@@ -136,9 +136,27 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
         console.error('FAILED GATES IN MCP VERIFY:', JSON.stringify(content.gates.filter((g: any) => !g.success), null, 2));
       }
       expect(content.success).toBe(true);
+      expect(content.profile).toBe('full');
       expect(content.totalGates).toBe(9);
       expect(content.passedGates).toBe(9);
       expect(content.failedGates).toBe(0);
+    });
+
+    it('should execute summary tool "verify" with profile "lite" evaluating only essential gates', async () => {
+      const result = await client.callTool({
+        name: 'verify',
+        arguments: { profile: 'lite' },
+      });
+
+      expect(result.isError).toBeFalsy();
+      const content = JSON.parse((result.content[0] as any).text);
+      expect(content.success).toBe(true);
+      expect(content.profile).toBe('lite');
+      expect(content.totalGates).toBe(3);
+      expect(content.passedGates).toBe(3);
+      expect(content.failedGates).toBe(0);
+      const gateNames = content.gates.map((g: any) => g.name);
+      expect(gateNames).toEqual(['quality', 'licenses', 'security']);
     });
 
     it('should execute summary tool "report" generating dashboard and quality report metadata', async () => {
