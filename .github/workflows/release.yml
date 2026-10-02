@@ -1,9 +1,13 @@
 name: Release & NPM Publishing
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI - AI-SDLC Quality Gates & Testing"]
     branches:
       - main
+    types:
+      - completed
+  workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -15,9 +19,13 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+          fetch-depth: 0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -39,12 +47,6 @@ jobs:
       - name: Build Packages
         run: pnpm run build
 
-      - name: Run Vitest Unit & Integration Suites
-        run: pnpm test
-
-      - name: Dogfooding - Run AI-SDLC Full Verification Suite
-        run: node packages/cli/bin/aisdlc.js verify all
-
       - name: Create Release Pull Request or Publish to NPM
         uses: changesets/action@v1
         with:
@@ -56,3 +58,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
