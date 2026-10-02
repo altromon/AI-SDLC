@@ -1,0 +1,14 @@
+# @aisdlc/core
+
+## 1.1.0
+
+### Minor Changes
+
+- d949673: feat(agents): incorporar archivos de configuración y reglas nativas para entornos de agentes (Cursor, Claude, Copilot, Antigravity) (#45)
+- c540475: feat(product): incorporar agent-expert-user y plantilla estandarizada de evaluación (user-design-feedback.template.md)
+- c4e1a83: feat(cli): andamiaje interactivo y selectivo de directrices de agentes de IA y MCP en init (#51)
+- 1177056: feat(reporting): generar dashboard web interactivo para visualizar el grafo PDaC y matriz RTM con Cytoscape.js (#35)
+- a3d08d9: feat(ci-cd): soporte multi-plataforma con plantillas para GitLab CI, Azure DevOps y Bitbucket Pipelines (#36)
+- fda9561: feat(mcp): servidor Model Context Protocol (MCP) nativo con 20 herramientas tipadas (incluyendo new, verify y report) y 5 recursos canónicos (#44)
+- eb184e7: feat(security): añadir gate de detección determinista de secretos (Gitleaks) y SAST shift-left (#34)
+- 198897c: feat(agents): protocolo y plantilla canónica de workflow handoff con activación condicional por autonomía (#51)
