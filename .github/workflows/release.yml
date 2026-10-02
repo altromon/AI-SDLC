@@ -12,6 +12,7 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
+  id-token: write      # Required for OIDC
   contents: write      # Required for pushing to branches
   pull-requests: write # Required for creating PRs
 
