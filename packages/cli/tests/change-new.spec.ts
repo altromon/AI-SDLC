@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import { runChangeNew, runSddVerify } from '../src/commands/sdd.js';
@@ -50,20 +51,37 @@ describe('@aisdlc/cli change new Command Suite', () => {
   });
 
   it('should scaffold change citing existing artifact with --from flag', () => {
-    const testChangeDir = path.join(
-      process.cwd(),
-      'specs',
-      'changes',
-      'active',
-      'chg-cli-test-retry'
+    const tmpFromDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test-cli-change-from-'));
+    const ucDir = path.join(tmpFromDir, 'product', 'use-cases');
+    const reqDir = path.join(tmpFromDir, 'product', 'requirements');
+    fs.mkdirSync(ucDir, { recursive: true });
+    fs.mkdirSync(reqDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(ucDir, 'UC-028-NATIVE-MCP-SERVER.md'),
+      `---
+id: UC-028-NATIVE-MCP-SERVER
+type: use-case
+title: Native MCP Server
+---
+# Native MCP Server
+`
     );
-    if (fs.existsSync(testChangeDir)) {
-      fs.rmSync(testChangeDir, { recursive: true, force: true });
-    }
+    fs.writeFileSync(
+      path.join(reqDir, 'FR-028-NATIVE-MCP-SERVER-001.md'),
+      `---
+id: FR-028-NATIVE-MCP-SERVER-001
+type: requirement
+title: MCP Server Requirement
+derives-from:
+  - UC-028-NATIVE-MCP-SERVER
+---
+# FR-028 Requirement
+`
+    );
 
     try {
       const passed = runChangeNew({
-        root: process.cwd(),
+        root: tmpFromDir,
         name: 'Reintento resiliente de telemetría',
         id: 'chg-cli-test-retry',
         from: 'UC-028-NATIVE-MCP-SERVER',
@@ -73,7 +91,7 @@ describe('@aisdlc/cli change new Command Suite', () => {
       expect(passed).toBe(true);
 
       const changeDir = path.join(
-        process.cwd(),
+        tmpFromDir,
         'specs',
         'changes',
         'active',
@@ -88,13 +106,10 @@ describe('@aisdlc/cli change new Command Suite', () => {
       expect(handoffContent).not.toContain('00000000000000000000000000000000');
 
       // Verify SDD workspace passes verify
-      const verifyPassed = runSddVerify({ root: process.cwd(), silent: true });
+      const verifyPassed = runSddVerify({ root: tmpFromDir, silent: true });
       expect(verifyPassed).toBe(true);
     } finally {
-      // Clean up created change folder
-      if (fs.existsSync(testChangeDir)) {
-        fs.rmSync(testChangeDir, { recursive: true, force: true });
-      }
+      fs.rmSync(tmpFromDir, { recursive: true, force: true });
     }
   });
 

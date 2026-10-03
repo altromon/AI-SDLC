@@ -46,43 +46,51 @@ export function runGitPlan(options: { version?: string; feature?: string; tasks?
   return true;
 }
 
-export function runGitCheckout(taskId: string, options: { root?: string } = {}): boolean {
+export function runGitCheckout(taskId: string, options: { root?: string; silent?: boolean } = {}): boolean {
   if (!taskId) {
-    console.error(pc.red('\n[ERROR] Task identifier to navigate must be specified (e.g. TSK-001).\n'));
+    if (!options.silent) {
+      console.error(pc.red('\n[ERROR] Task identifier to navigate must be specified (e.g. TSK-001).\n'));
+    }
     return false;
   }
 
   const rootDir = options.root || process.cwd();
-  console.log(pc.cyan(`\n🚀 [AI-SDLC Git] Navigating and preparing branches for task '${pc.bold(taskId)}'...`));
+  if (!options.silent) {
+    console.log(pc.cyan(`\n🚀 [AI-SDLC Git] Navigating and preparing branches for task '${pc.bold(taskId)}'...`));
+  }
 
   const result = checkoutTaskBranch(taskId, { rootDir });
 
   if (!result.success) {
-    console.error(pc.red(`\n✖ [ERROR] ${result.error}`));
-    if (result.availableTasks && result.availableTasks.length > 0) {
-      console.log(pc.yellow('\nAvailable tasks in active changes:'));
-      for (const t of result.availableTasks) {
-        console.log(`  - [${pc.cyan(t.changeId)}] ${pc.bold(t.id)}${t.title ? `: ${t.title}` : ''}`);
+    if (!options.silent) {
+      console.error(pc.red(`\n✖ [ERROR] ${result.error}`));
+      if (result.availableTasks && result.availableTasks.length > 0) {
+        console.log(pc.yellow('\nAvailable tasks in active changes:'));
+        for (const t of result.availableTasks) {
+          console.log(`  - [${pc.cyan(t.changeId)}] ${pc.bold(t.id)}${t.title ? `: ${t.title}` : ''}`);
+        }
       }
+      console.log();
     }
-    console.log();
     return false;
   }
 
-  console.log(`  - Detected change:   ${pc.bold(result.changeId || 'N/A')}`);
-  console.log(`  - Release Branch:    ${pc.green(result.releaseBranch || '')} (Tier 2)`);
-  console.log(`  - Feature Branch:    ${pc.green(result.featureBranch || '')} (Tier 3)`);
-  console.log(`  - Task Branch:       ${pc.green(result.taskBranch || '')} (Tier 4)`);
+  if (!options.silent) {
+    console.log(`  - Detected change:   ${pc.bold(result.changeId || 'N/A')}`);
+    console.log(`  - Release Branch:    ${pc.green(result.releaseBranch || '')} (Tier 2)`);
+    console.log(`  - Feature Branch:    ${pc.green(result.featureBranch || '')} (Tier 3)`);
+    console.log(`  - Task Branch:       ${pc.green(result.taskBranch || '')} (Tier 4)`);
 
-  if (result.createdBranches && result.createdBranches.length > 0) {
-    console.log(pc.green(`\n✔ Cascading branches created:`));
-    for (const b of result.createdBranches) {
-      console.log(`  ├── ${pc.bold(b)}`);
+    if (result.createdBranches && result.createdBranches.length > 0) {
+      console.log(pc.green(`\n✔ Cascading branches created:`));
+      for (const b of result.createdBranches) {
+        console.log(`  ├── ${pc.bold(b)}`);
+      }
     }
-  }
 
-  console.log(pc.green(`\n✔ [CHECKOUT] Successfully switched to working branch:`));
-  console.log(`  👉 ${pc.bold(pc.cyan(result.switchedBranch || result.taskBranch || ''))}\n`);
+    console.log(pc.green(`\n✔ [CHECKOUT] Successfully switched to working branch:`));
+    console.log(`  👉 ${pc.bold(pc.cyan(result.switchedBranch || result.taskBranch || ''))}\n`);
+  }
   return true;
 }
 
