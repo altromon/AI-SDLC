@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 1.1.1
+
+### Patch Changes
+
+- c7e4639: feat(mcp): deploy all 10 specialized agents across IDEs by default when invoking the `new` MCP tool (#105)
+- Updated dependencies [c7e4639]
+  - @aisdlc/core@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes

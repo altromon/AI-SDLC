@@ -1,5 +1,15 @@
 # @aisdlc/cli
 
+## 1.1.1
+
+### Patch Changes
+
+- c7e4639: feat(init): deploy all 10 specialized agents across IDEs by default on `aisdlc init` (#105)
+- 67c69fc: fix(ci): suppress stderr noise in negative `git checkout` validation tests
+- Updated dependencies [c7e4639]
+  - @aisdlc/core@1.1.1
+  - @aisdlc/mcp@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes
