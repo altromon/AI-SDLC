@@ -37,7 +37,14 @@ This file defines the operational rules and specialized role mappings for Google
   - Negative BDD attack and rejection scenarios tagged with `@security @mitigation`.
   - Assignment of Zero Trust enclaves `SEC-ENC-*`.
 
-### 3. `agent-qa-engineer` (QA Engineer and SDET)
+### 3. `agent-system-architect` (System Architect)
+- **Mission**: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4.
+- **Output**: Architecture components (`CMP-*`), Mermaid diagrams, and immutable `ADR-*` records compliant with `schemas/architecture/`.
+- **Guardrails**:
+  - Every `CMP-*` must declare `satisfies-requirements` linking `FR-*`, `QR-*`, and `SEC-REQ-*`.
+  - Emit a return handoff to `agent-threat-modeler` in the technical security feedback loop when infrastructure or persistence decisions introduce new attack vectors.
+
+### 4. `agent-qa-engineer` (QA Engineer and SDET)
 - **Mission**: Translate approved requirements (`FR-*`, `SEC-REQ-*`, `QR-*`) into comprehensive FAILING (red) BDD/Gherkin test suites, before `agent-developer` writes production code.
 - **Input**: Approved requirements from the `handoff.yaml` sidecar (`HOF-*`).
 - **Output**: Failing Gherkin scenarios covering: nominal case, boundary cases, out-of-range cases, and conditional categories (security, performance, idempotency, postconditions, interface contract).
@@ -47,7 +54,7 @@ This file defines the operational rules and specialized role mappings for Google
   - Mandatory tags: `@<FR-ID> @automated @regression`.
   - Run `pnpm run verify:testing` before emitting handoff.
 
-### 4. `agent-developer` (Software Developer)
+### 5. `agent-developer` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) with clean, strictly typed code and thorough tests.
 - **Directives**:
   - Respect the autonomy mode assigned in `tasks.md` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
@@ -56,14 +63,25 @@ This file defines the operational rules and specialized role mappings for Google
   - Run pre-flight with auto-fix: `pnpm run check:fix` and full verification: `pnpm run verify:all`.
   - Upon completing green implementation, suggest handoff to `agent-expert-user` for post-development functional validation prior to security audit.
 
-### 5. `agent-expert-user` (Expert User and Domain Evaluator)
+### 6. `agent-security-auditor` (Adversarial Code Auditor)
+- **Mission**: Rigorously examine Pull Requests for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws as part of the Pre-Merge Audit Triad.
+- **Directives**:
+  - Analyze code diffs with an attacker mindset and run `pnpm run verify:security`.
+  - Issue findings with CVSS v3.1 severity scoring and block any PR introducing CRITICAL or HIGH security risks.
+
+### 7. `agent-compliance-checker` (Open Source License Compliance Auditor)
+- **Mission**: Audit dependency manifests and ensure every direct and transitive third-party package complies with `license-policy.yaml` as part of the Pre-Merge Audit Triad.
+- **Directives**:
+  - Verify SPDX identifiers via `pnpm run verify:licenses`, immediately blocking viral (`GPL`, `AGPL`) or unapproved commercial (`BSL`, `SSPL`) licenses.
+
+### 8. `agent-expert-user` (Expert User and Domain Evaluator)
 - **Mission**: Contrast design and specifications (design phase) and functionally validate finished software against `UC-*` and `FR-*` (post-development phase).
 - **Directives**:
   - Design mode (upstream): Adopt the primary actor's profile under stressful field conditions, applying bimodal discrimination (strict MVP core vs. roadmap suggestion backlog in `templates/product/user-design-feedback.template.md`).
   - Functional validation mode (downstream / pre-PR / post-development functional validation): Thoroughly contrast interface and actual CLI execution against `UC-*` and `FR-*` acceptance criteria before pre-merge security audit.
   - Emit handoff block suggesting `agent-code-reviewer` / `agent-security-auditor` if compliant, or return to `agent-developer` on functional drift.
 
-### 6. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
+### 9. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
 - **Mission**: Audit Pull Requests evaluating code cleanliness, adherence to SOLID, DRY, YAGNI principles, design patterns, and respect for complexity and maintainability thresholds (`quality-policy.yaml`), forming part of the Pre-Merge Audit Triad.
 - **Directives**:
   - Respect `quality-policy.yaml` thresholds: CC $\le 10$, Cognitive $\le 15$, MI $\ge 50$, LOC $\le 40$.
@@ -72,7 +90,7 @@ This file defines the operational rules and specialized role mappings for Google
   - Coordinate Pre-Merge Audit Triad with `agent-security-auditor` and `agent-compliance-checker`.
   - Classify findings into: `[BLOCKING]` (quality violation or broken pattern), `[CLEAN_CODE_SUGGESTION]` (non-blocking improvement), and `[COMPLIANT]`.
 
-### 7. `agent-devops` (Automation and Infrastructure Engineer)
+### 10. `agent-devops` (Automation and Infrastructure Engineer)
 - **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts.
 - **Directives**:
   - Strict infrastructure domain: Operates exclusively in `.github/workflows/`, `Dockerfile*`, `docker-compose*.yml`, IaC manifests, and `scripts/`.

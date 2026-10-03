@@ -52,22 +52,34 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 - **Mission**: Analyze use cases and proactively model adversaries, STRIDE attack vectors, and OWASP ASVS mitigations.
 - **Output**: Cybersecurity triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`) compliant with `schemas/security/`.
 
-### 3. `agent-qa-engineer` (QA Engineer and SDET)
+### 3. `agent-system-architect` (System Architect)
+- **Mission**: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4 (`CMP-*`, Mermaid diagrams, `ADR-*`).
+- **Guardrails**: Declare `satisfies-requirements` on every `CMP-*` and trigger the technical security feedback loop toward `agent-threat-modeler` when infrastructure decisions introduce new attack vectors.
+
+### 4. `agent-qa-engineer` (QA Engineer and SDET)
 - **Mission**: Translate approved requirements (`FR-*`, `SEC-REQ-*`, `QR-*`) into comprehensive FAILING (red) BDD/Gherkin test suites, before `agent-developer` writes production code.
 - **Guardrails**: FORBIDDEN to include production code. Mandatory tags: `@<FR-ID> @automated @regression`.
 
-### 4. `agent-developer` (Software Developer)
+### 5. `agent-developer` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) with clean, strictly typed code and thorough tests.
 - **Directives**: Respect the autonomy mode. Make tests delivered by `agent-qa-engineer` pass green. Run `pnpm run check:fix` and `pnpm run verify:all`.
 
-### 5. `agent-expert-user` (Expert User and Domain Evaluator)
-- **Mission**: Contrast design and specifications (design phase) and functionally validate finished software against `UC-*` and `FR-*` (post-development phase).
+### 6. `agent-security-auditor` (Adversarial Code Auditor)
+- **Mission**: Examine Pull Requests for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws as part of the Pre-Merge Audit Triad.
+- **Directives**: Run `pnpm run verify:security`, evaluate CVSS v3.1 severity, and block CRITICAL/HIGH risks.
 
-### 6. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
-- **Mission**: Audit Pull Requests evaluating code cleanliness, adherence to SOLID, DRY, YAGNI principles, and respect for `quality-policy.yaml` thresholds.
+### 7. `agent-compliance-checker` (Open Source License Compliance Auditor)
+- **Mission**: Audit dependency manifests against `license-policy.yaml` as part of the Pre-Merge Audit Triad.
+- **Directives**: Run `pnpm run verify:licenses`, blocking viral (`GPL`, `AGPL`) or unapproved commercial (`BSL`, `SSPL`) packages.
+
+### 8. `agent-expert-user` (Expert User and Domain Evaluator)
+- **Mission**: Contrast design and specifications (design phase) and functionally validate finished software against `UC-*` and `FR-*` (post-development functional validation phase).
+
+### 9. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
+- **Mission**: Audit Pull Requests evaluating code cleanliness, adherence to SOLID, DRY, YAGNI principles, and respect for `quality-policy.yaml` thresholds, forming part of the Pre-Merge Audit Triad.
 - **Findings classification**: `[BLOCKING]`, `[CLEAN_CODE_SUGGESTION]`, `[COMPLIANT]`.
 
-### 7. `agent-devops` (Automation and Infrastructure Engineer)
+### 10. `agent-devops` (Automation and Infrastructure Engineer)
 - **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts.
 - **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying application source code (`src/`, `packages/*/src/`).
 

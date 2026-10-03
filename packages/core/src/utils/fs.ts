@@ -14,6 +14,12 @@ export function walkMdFiles(
     'fixtures',
     'templates',
     'examples',
+    '.agent',
+    '.agents',
+    '.claude',
+    '.cursor',
+    '.github',
+    '.vscode',
   ]
 ): string[] {
   try {

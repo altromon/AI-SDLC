@@ -1,5 +1,12 @@
 # @aisdlc/core
 
+## 1.1.1
+
+### Patch Changes
+
+- c7e4639: feat(init): deploy all 10 specialized agents across IDEs by default (`agents: 'all'`), generate individual agent files for Antigravity, Cursor, Claude Code, and GitHub Copilot, and exclude hidden IDE folders in `walkMdFiles` (#105)
+- 67c69fc: fix(ci): isolate workspace tests in temporary directories to avoid concurrency race conditions
+
 ## 1.1.0
 
 ### Minor Changes

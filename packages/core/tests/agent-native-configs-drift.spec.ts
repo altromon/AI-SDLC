@@ -100,15 +100,31 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     }
   });
 
-  it('verifies Antigravity rules map the specialized roles directly', () => {
-    const content = fs.readFileSync(configFiles.antigravity, 'utf-8');
-    expect(content).toContain('agent-product-analyst');
-    expect(content).toContain('agent-threat-modeler');
-    expect(content).toContain('agent-qa-engineer');
-    expect(content).toContain('agent-developer');
-    expect(content).toContain('agent-expert-user');
-    expect(content).toContain('agent-code-reviewer');
-    expect(content).toContain('agent-devops');
+  it('verifies all core IDE rules map all 10 specialized roles directly', () => {
+    const expectedRoles = [
+      'agent-product-analyst',
+      'agent-threat-modeler',
+      'agent-system-architect',
+      'agent-qa-engineer',
+      'agent-developer',
+      'agent-security-auditor',
+      'agent-compliance-checker',
+      'agent-expert-user',
+      'agent-code-reviewer',
+      'agent-devops',
+    ];
+    const roleMappedConfigs = [
+      configFiles.antigravity,
+      configFiles.claude,
+      configFiles.cursorCore,
+      configFiles.copilot,
+    ];
+    for (const filePath of roleMappedConfigs) {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      for (const role of expectedRoles) {
+        expect(content, `${filePath} should contain ${role}`).toContain(role);
+      }
+    }
   });
 
   it('verifies Cursor product rules declare the ProductShape taxonomy and draft status', () => {
