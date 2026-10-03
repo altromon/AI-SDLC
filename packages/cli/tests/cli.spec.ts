@@ -208,19 +208,21 @@ describe('@aisdlc/cli Command Suite', () => {
   });
 
   it('should deposit SDD HOF-* sidecar via CLI', () => {
-    const passed = runSddDeposit({
-      change: 'chg-cli-deposit-test',
-      framework: 'openspec',
-      silent: true,
-      requirements: 'FR-TEST-01',
-      useCases: 'UC-TEST-01',
-    });
-    expect(passed).toBe(true);
-
-    // Clean up created test folder
-    const createdDir = path.join(process.cwd(), 'specs', 'changes', 'active', 'chg-cli-deposit-test');
-    if (fs.existsSync(createdDir)) {
-      fs.rmSync(createdDir, { recursive: true, force: true });
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'temp-deposit-'));
+    try {
+      const passed = runSddDeposit({
+        root: tempDir,
+        change: 'chg-cli-deposit-test',
+        framework: 'openspec',
+        silent: true,
+        requirements: 'FR-TEST-01',
+        useCases: 'UC-TEST-01',
+      });
+      expect(passed).toBe(true);
+      const createdDir = path.join(tempDir, 'specs', 'changes', 'active', 'chg-cli-deposit-test');
+      expect(fs.existsSync(createdDir)).toBe(true);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
     }
   });
 

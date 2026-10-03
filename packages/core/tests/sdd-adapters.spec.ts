@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import {
@@ -361,31 +362,53 @@ satisfies-requirements: []
   });
 
   it('should scaffold SDD change citing existing canonical artifact with --from', () => {
-    const testChangeDir = path.join(process.cwd(), 'specs', 'changes', 'active', 'chg-test-from-cli');
-    if (fs.existsSync(testChangeDir)) {
-      fs.rmSync(testChangeDir, { recursive: true, force: true });
-    }
+    const tmpFromDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test-sdd-adapters-from-'));
+    const ucDir = path.join(tmpFromDir, 'product', 'use-cases');
+    const reqDir = path.join(tmpFromDir, 'product', 'requirements');
+    fs.mkdirSync(ucDir, { recursive: true });
+    fs.mkdirSync(reqDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(ucDir, 'UC-028-NATIVE-MCP-SERVER.md'),
+      `---
+id: UC-028-NATIVE-MCP-SERVER
+type: use-case
+title: Native MCP Server
+---
+# Native MCP Server
+`
+    );
+    fs.writeFileSync(
+      path.join(reqDir, 'FR-028-NATIVE-MCP-SERVER-001.md'),
+      `---
+id: FR-028-NATIVE-MCP-SERVER-001
+type: requirement
+title: MCP Server Requirement
+derives-from:
+  - UC-028-NATIVE-MCP-SERVER
+---
+# FR-028 Requirement
+`
+    );
 
-    const res = scaffoldSddChange({
-      rootDir: process.cwd(),
-      name: 'Reintento resiliente de servidor MCP',
-      changeId: 'chg-test-from-cli',
-      from: 'UC-028-NATIVE-MCP-SERVER',
-      framework: 'openspec',
-      silent: true,
-    });
+    try {
+      const res = scaffoldSddChange({
+        rootDir: tmpFromDir,
+        name: 'Reintento resiliente de servidor MCP',
+        changeId: 'chg-test-from-cli',
+        from: 'UC-028-NATIVE-MCP-SERVER',
+        framework: 'openspec',
+        silent: true,
+      });
 
-    expect(res.success).toBe(true);
-    expect(res.citedArtifacts.some((c) => c.id === 'UC-028-NATIVE-MCP-SERVER')).toBe(true);
-    expect(res.citedArtifacts.some((c) => c.id === 'FR-028-NATIVE-MCP-SERVER-001')).toBe(true);
+      expect(res.success).toBe(true);
+      expect(res.citedArtifacts.some((c) => c.id === 'UC-028-NATIVE-MCP-SERVER')).toBe(true);
+      expect(res.citedArtifacts.some((c) => c.id === 'FR-028-NATIVE-MCP-SERVER-001')).toBe(true);
 
-    const handoff = loadProductHandoffSidecar(res.changeDir);
-    expect(handoff?.subgraph.requirements).toContain('FR-028-NATIVE-MCP-SERVER-001');
-    expect(handoff?.subgraph.useCases).toContain('UC-028-NATIVE-MCP-SERVER');
-
-    // Clean up created change folder
-    if (fs.existsSync(res.changeDir)) {
-      fs.rmSync(res.changeDir, { recursive: true, force: true });
+      const handoff = loadProductHandoffSidecar(res.changeDir);
+      expect(handoff?.subgraph.requirements).toContain('FR-028-NATIVE-MCP-SERVER-001');
+      expect(handoff?.subgraph.useCases).toContain('UC-028-NATIVE-MCP-SERVER');
+    } finally {
+      fs.rmSync(tmpFromDir, { recursive: true, force: true });
     }
   });
 });

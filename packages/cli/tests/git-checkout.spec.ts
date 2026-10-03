@@ -21,12 +21,12 @@ describe('@aisdlc/cli runGitCheckout command', () => {
   });
 
   it('should return false if no taskId is provided', () => {
-    const passed = runGitCheckout('');
+    const passed = runGitCheckout('', { silent: true });
     expect(passed).toBe(false);
   });
 
   it('should return false if task is not found in active changes', () => {
-    const passed = runGitCheckout('TSK-999', { root: tmpDir });
+    const passed = runGitCheckout('TSK-999', { root: tmpDir, silent: true });
     expect(passed).toBe(false);
   });
 
@@ -60,7 +60,7 @@ tasks:
     execFileSync('git', ['commit', '-m', 'chore: add tasks.md'], { cwd: tmpDir, stdio: 'pipe' });
 
     // 3. Run CLI command
-    const passed = runGitCheckout('TSK-001', { root: tmpDir });
+    const passed = runGitCheckout('TSK-001', { root: tmpDir, silent: true });
     expect(passed).toBe(true);
 
     // Verify checked-out branch
