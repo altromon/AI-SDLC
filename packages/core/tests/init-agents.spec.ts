@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { initProject } from '../src/init/index.js';
+import { initProject, SPECIALIZED_AGENT_TEMPLATES } from '../src/init/index.js';
 
 describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
   const tempDir = path.join(os.tmpdir(), 'test-core-init-agents');
@@ -25,8 +25,34 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
     }
   });
 
-  it('initializes base policies and templates without agents by default', () => {
+  it('deploys all agents and specialized role files by default when agents option is omitted', () => {
     const result = initProject({ targetDir: tempDir });
+    expect(result.success).toBe(true);
+    expect(result.agentsConfigured).toContain('all');
+
+    expect(fs.existsSync(path.join(tempDir, 'quality-policy.yaml'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'license-policy.yaml'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'templates/workflow/agent-handoff.template.md'))).toBe(true);
+
+    // Global agent files should be present by default
+    expect(fs.existsSync(path.join(tempDir, 'CLAUDE.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.agent/rules/ai-sdlc.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.cursor/rules/ai-sdlc-core.mdc'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.github/copilot-instructions.md'))).toBe(true);
+
+    // Individual specialized agent files should be present for all 10 roles
+    expect(SPECIALIZED_AGENT_TEMPLATES).toHaveLength(10);
+    for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
+      expect(fs.existsSync(path.join(tempDir, `.agent/agents/${agent.id}.md`))).toBe(true);
+      expect(fs.existsSync(path.join(tempDir, `.agent/skills/${agent.id}/SKILL.md`))).toBe(true);
+      expect(fs.existsSync(path.join(tempDir, `.cursor/rules/${agent.id}.mdc`))).toBe(true);
+      expect(fs.existsSync(path.join(tempDir, `.claude/agents/${agent.id}.md`))).toBe(true);
+      expect(fs.existsSync(path.join(tempDir, `.github/agents/${agent.id}.agent.md`))).toBe(true);
+    }
+  });
+
+  it('initializes base policies and templates without agents when agents is "none" or false', () => {
+    const result = initProject({ targetDir: tempDir, agents: 'none' });
     expect(result.success).toBe(true);
     expect(result.agentsConfigured).toEqual([]);
 
@@ -50,8 +76,11 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
     const agFile = path.join(tempDir, '.agent/rules/ai-sdlc.md');
     expect(fs.existsSync(agFile)).toBe(true);
     const agContent = fs.readFileSync(agFile, 'utf-8');
-    expect(agContent).toContain('NO AUTO-APPROVE');
+    expect(agContent).toContain('AUTO-APPROVE');
     expect(agContent).toContain('agent-product-analyst');
+    expect(agContent).toContain('agent-system-architect');
+    expect(agContent).toContain('agent-security-auditor');
+    expect(agContent).toContain('agent-compliance-checker');
     expect(agContent).toContain('agent-expert-user');
     expect(agContent).toContain('Workflow Handoff');
 
@@ -65,9 +94,11 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
     const claudeFile = path.join(tempDir, 'CLAUDE.md');
     expect(fs.existsSync(claudeFile)).toBe(true);
     const claudeContent = fs.readFileSync(claudeFile, 'utf-8');
-    expect(claudeContent).toContain('NO AUTO-APPROVE');
+    expect(claudeContent).toContain('AUTO-APPROVE');
     expect(claudeContent).toContain('Workflow Handoff');
     expect(claudeContent).toContain('license-policy.yaml');
+    expect(claudeContent).toContain('agent-product-analyst');
+    expect(claudeContent).toContain('agent-system-architect');
 
     // Copilot
     expect(fs.existsSync(path.join(tempDir, '.github/copilot-instructions.md'))).toBe(true);
@@ -84,13 +115,17 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
     expect(result.agentsConfigured).toContain('claude');
     expect(result.agentsConfigured).not.toContain('antigravity');
 
-    // Cursor & Claude exist
+    // Cursor & Claude exist (both global and individual agent files)
     expect(fs.existsSync(path.join(tempDir, '.cursor/rules/ai-sdlc-core.mdc'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.cursor/rules/agent-developer.mdc'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'CLAUDE.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.claude/agents/agent-developer.md'))).toBe(true);
 
     // Antigravity & Copilot do not exist
     expect(fs.existsSync(path.join(tempDir, '.agent/rules/ai-sdlc.md'))).toBe(false);
+    expect(fs.existsSync(path.join(tempDir, '.agent/agents/agent-developer.md'))).toBe(false);
     expect(fs.existsSync(path.join(tempDir, '.github/copilot-instructions.md'))).toBe(false);
+    expect(fs.existsSync(path.join(tempDir, '.github/agents/agent-developer.agent.md'))).toBe(false);
   });
 
   it('scaffolds only MCP server configs when agents is set to "mcp"', () => {

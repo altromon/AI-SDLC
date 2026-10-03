@@ -15,6 +15,11 @@ import {
   STARTER_CURSOR_MCP,
   STARTER_ANTIGRAVITY_MCP,
   STARTER_VSCODE_MCP,
+  SPECIALIZED_AGENT_TEMPLATES,
+  renderAntigravityAgentFile,
+  renderClaudeAgentFile,
+  renderCopilotAgentFile,
+  renderCursorAgentFile,
 } from './agent-templates.js';
 import {
   getArchitectureTemplates,
@@ -568,10 +573,13 @@ export interface InitProjectResult {
   error?: string;
 }
 
+const DISABLED_AGENT_VALUES = new Set<unknown>([false, 'none', 'false', '']);
+const ALL_AGENT_VALUES = new Set<unknown>([undefined, null, true, 'all']);
+
 export function resolveAgentTargets(agents?: string | boolean | string[]): Set<string> {
   const result = new Set<string>();
-  if (!agents) return result;
-  if (agents === true || agents === 'all') {
+  if (DISABLED_AGENT_VALUES.has(agents)) return result;
+  if (ALL_AGENT_VALUES.has(agents)) {
     VALID_AGENT_TARGETS.forEach((t) => result.add(t));
     return result;
   }
@@ -589,6 +597,47 @@ export function resolveAgentTargets(agents?: string | boolean | string[]): Set<s
   return result;
 }
 
+function appendAntigravityFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
+  dirs.push('.agent/rules', '.agent/agents', '.agent/skills');
+  files.push({ relPath: '.agent/rules/ai-sdlc.md', content: STARTER_ANTIGRAVITY_RULES });
+  for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
+    const content = renderAntigravityAgentFile(agent);
+    dirs.push(`.agent/skills/${agent.id}`);
+    files.push(
+      { relPath: `.agent/agents/${agent.id}.md`, content },
+      { relPath: `.agent/skills/${agent.id}/SKILL.md`, content }
+    );
+  }
+}
+
+function appendCursorFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
+  dirs.push('.cursor/rules');
+  files.push(
+    { relPath: '.cursor/rules/ai-sdlc-core.mdc', content: STARTER_CURSOR_CORE_RULES },
+    { relPath: '.cursor/rules/ai-sdlc-product.mdc', content: STARTER_CURSOR_PRODUCT_RULES },
+    { relPath: '.cursor/rules/ai-sdlc-quality.mdc', content: STARTER_CURSOR_QUALITY_RULES }
+  );
+  for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
+    files.push({ relPath: `.cursor/rules/${agent.id}.mdc`, content: renderCursorAgentFile(agent) });
+  }
+}
+
+function appendClaudeFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
+  dirs.push('.claude/agents');
+  files.push({ relPath: 'CLAUDE.md', content: STARTER_CLAUDE_RULES });
+  for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
+    files.push({ relPath: `.claude/agents/${agent.id}.md`, content: renderClaudeAgentFile(agent) });
+  }
+}
+
+function appendCopilotFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
+  dirs.push('.github', '.github/agents');
+  files.push({ relPath: '.github/copilot-instructions.md', content: STARTER_COPILOT_RULES });
+  for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
+    files.push({ relPath: `.github/agents/${agent.id}.agent.md`, content: renderCopilotAgentFile(agent) });
+  }
+}
+
 export function collectAgentFiles(targets: Set<string>): {
   dirs: string[];
   files: { relPath: string; content: string }[];
@@ -603,25 +652,11 @@ export function collectAgentFiles(targets: Set<string>): {
   const includeCopilot = includeAll || targets.has('copilot');
   const includeMcp = includeAll || targets.has('mcp');
 
-  if (includeAntigravity) {
-    dirs.push('.agent/rules');
-    files.push({ relPath: '.agent/rules/ai-sdlc.md', content: STARTER_ANTIGRAVITY_RULES });
-  }
-  if (includeCursor) {
-    dirs.push('.cursor/rules');
-    files.push(
-      { relPath: '.cursor/rules/ai-sdlc-core.mdc', content: STARTER_CURSOR_CORE_RULES },
-      { relPath: '.cursor/rules/ai-sdlc-product.mdc', content: STARTER_CURSOR_PRODUCT_RULES },
-      { relPath: '.cursor/rules/ai-sdlc-quality.mdc', content: STARTER_CURSOR_QUALITY_RULES }
-    );
-  }
-  if (includeClaude) {
-    files.push({ relPath: 'CLAUDE.md', content: STARTER_CLAUDE_RULES });
-  }
-  if (includeCopilot) {
-    dirs.push('.github');
-    files.push({ relPath: '.github/copilot-instructions.md', content: STARTER_COPILOT_RULES });
-  }
+  if (includeAntigravity) appendAntigravityFiles(dirs, files);
+  if (includeCursor) appendCursorFiles(dirs, files);
+  if (includeClaude) appendClaudeFiles(dirs, files);
+  if (includeCopilot) appendCopilotFiles(dirs, files);
+
   if (includeMcp || includeCursor) {
     dirs.push('.cursor');
     files.push({ relPath: '.cursor/mcp.json', content: STARTER_CURSOR_MCP });
