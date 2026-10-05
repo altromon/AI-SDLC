@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import {
@@ -6,9 +8,11 @@ import {
   computeCanonicalSha256,
   extractGherkinBlock,
   generateBranchHierarchyPlan,
+  generateQualityReport,
   parseLicensePolicy,
   parseQualityPolicy,
   parseTasksDoc,
+  readCodeCoverageSummary,
   verifyTestingCoverage,
   verifyTraceability,
 } from '../src/index.js';
@@ -16,18 +20,84 @@ import {
 const fixturesDir = path.join(__dirname, 'fixtures');
 
 describe('Quality Gate Core Engine', () => {
-  it('should parse quality policy defaults and custom thresholds', () => {
+  it('should parse quality policy defaults and custom thresholds including test_coverage', () => {
     const yaml = `
       max_per_function: 8
       min_acceptable_score: 65.0
       max_function_lines: 30
       enforcement_mode: STRICT
+      release_thresholds:
+        test_coverage:
+          min_line_coverage_percent: 88.0
+          min_branch_coverage_percent: 82.0
+          min_function_coverage_percent: 92.0
     `;
     const policy = parseQualityPolicy(yaml);
     expect(policy.max_cyclomatic).toBe(8);
     expect(policy.min_maintainability).toBe(65.0);
     expect(policy.max_function_lines).toBe(30);
     expect(policy.enforce_mode).toBe('STRICT');
+    expect(policy.min_line_coverage).toBe(88.0);
+    expect(policy.min_branch_coverage).toBe(82.0);
+    expect(policy.min_function_coverage).toBe(92.0);
+  });
+
+  it('should passively read coverage-summary.json and lcov.info and include coverage in QUALITY_REPORT.md', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-cov-test-'));
+    try {
+      // 1. Without coverage artifacts -> null and N/A in report
+      expect(readCodeCoverageSummary(tmpDir)).toBeNull();
+      const reportNoCov = generateQualityReport({ rootDir: tmpDir });
+      expect(reportNoCov.coverage).toBeNull();
+      expect(reportNoCov.markdown).toContain('Line Coverage');
+      expect(reportNoCov.markdown).toContain('N/A (Run test:coverage)');
+
+      // 2. With coverage/coverage-summary.json
+      const covDir = path.join(tmpDir, 'coverage');
+      fs.mkdirSync(covDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(covDir, 'coverage-summary.json'),
+        JSON.stringify({
+          total: {
+            lines: { pct: 87.5 },
+            branches: { pct: 81.2 },
+            functions: { pct: 93.0 },
+            statements: { pct: 87.0 },
+          },
+        }),
+        'utf-8'
+      );
+
+      const summaryJson = readCodeCoverageSummary(tmpDir);
+      expect(summaryJson).not.toBeNull();
+      expect(summaryJson?.linesPct).toBe(87.5);
+      expect(summaryJson?.branchesPct).toBe(81.2);
+      expect(summaryJson?.functionsPct).toBe(93.0);
+
+      const reportWithCov = generateQualityReport({ rootDir: tmpDir });
+      expect(reportWithCov.coverage?.linesPct).toBe(87.5);
+      expect(reportWithCov.markdown).toContain('87.5%');
+      expect(reportWithCov.markdown).toContain('81.2%');
+      expect(reportWithCov.markdown).toContain('93%');
+
+      // 3. Fallback to coverage/lcov.info when coverage-summary.json is absent
+      fs.unlinkSync(path.join(covDir, 'coverage-summary.json'));
+      fs.writeFileSync(
+        path.join(covDir, 'lcov.info'),
+        ['TN:', 'SF:src/index.ts', 'FNF:10', 'FNH:9', 'LF:100', 'LH:86', 'BRF:20', 'BRH:16', 'end_of_record'].join(
+          '\n'
+        ),
+        'utf-8'
+      );
+
+      const summaryLcov = readCodeCoverageSummary(tmpDir);
+      expect(summaryLcov).not.toBeNull();
+      expect(summaryLcov?.linesPct).toBe(86);
+      expect(summaryLcov?.branchesPct).toBe(80);
+      expect(summaryLcov?.functionsPct).toBe(90);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 
   it('should calculate cyclomatic complexity and maintainability for TypeScript code', () => {

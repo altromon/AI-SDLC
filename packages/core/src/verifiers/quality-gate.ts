@@ -52,6 +52,9 @@ export function createDefaultQualityPolicy(): QualityPolicy {
     max_cognitive: 15,
     min_maintainability: 50.0,
     max_function_lines: 40,
+    min_line_coverage: 85.0,
+    min_branch_coverage: 80.0,
+    min_function_coverage: 90.0,
     enforce_mode: 'STRICT',
     target_directories: ['src', 'lib', 'examples', 'tests'],
     supported_extensions: [...DEFAULT_EXTENSIONS],
@@ -78,6 +81,16 @@ function applyDocScope(policy: QualityPolicy, doc: Record<string, unknown>): voi
   }
 }
 
+function applyCoverageThresholds(policy: QualityPolicy, covRaw: unknown): void {
+  if (!covRaw || typeof covRaw !== 'object') return;
+  const cov = covRaw as Record<string, unknown>;
+  if (cov.min_line_coverage_percent !== undefined) policy.min_line_coverage = Number(cov.min_line_coverage_percent);
+  if (cov.min_branch_coverage_percent !== undefined) policy.min_branch_coverage = Number(cov.min_branch_coverage_percent);
+  if (cov.min_function_coverage_percent !== undefined) {
+    policy.min_function_coverage = Number(cov.min_function_coverage_percent);
+  }
+}
+
 function applyDocThresholds(policy: QualityPolicy, doc: Record<string, unknown>): void {
   const sections = [doc.release_thresholds, doc.thresholds].filter(
     (s): s is Record<string, unknown> => Boolean(s && typeof s === 'object')
@@ -93,6 +106,7 @@ function applyDocThresholds(policy: QualityPolicy, doc: Record<string, unknown>)
     if (cog !== undefined) policy.max_cognitive = Number(cog);
     if (mi !== undefined) policy.min_maintainability = Number(mi);
     if (loc !== undefined) policy.max_function_lines = Number(loc);
+    applyCoverageThresholds(policy, s.test_coverage);
   }
 
   const codingRules = doc.coding_rules as Record<string, unknown> | undefined;

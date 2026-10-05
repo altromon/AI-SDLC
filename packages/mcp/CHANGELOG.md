@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 1.2.0
+
+### Minor Changes
+
+- feat(mcp): include automated test coverage metrics in `report` and `report_quality` MCP tools via `@aisdlc/core`
+- Updated dependencies
+  - @aisdlc/core@1.2.0
+
 ## 1.1.1
 
 ### Patch Changes
