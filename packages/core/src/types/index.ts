@@ -8,6 +8,9 @@ export interface QualityPolicy {
   max_cognitive: number;
   min_maintainability: number;
   max_function_lines: number;
+  min_line_coverage: number;
+  min_branch_coverage: number;
+  min_function_coverage: number;
   enforce_mode: 'STRICT' | 'PERMISSIVE' | string;
   target_directories: string[];
   supported_extensions: string[];
@@ -546,6 +549,14 @@ export interface PreflightCheckResult {
 }
 
 // --- Quality Report Types ---
+export interface CodeCoverageSummary {
+  linesPct: number;
+  branchesPct: number;
+  functionsPct: number;
+  statementsPct?: number;
+  source: string;
+}
+
 export interface QualityReportOptions {
   rootDir?: string;
   policyPath?: string;
@@ -559,6 +570,7 @@ export interface QualityReportResult {
   avgMaintainability: number;
   avgCyclomatic: number;
   verdict: 'PASS' | 'FAIL';
+  coverage?: CodeCoverageSummary | null;
 }
 
 // --- Git Workflow Types ---

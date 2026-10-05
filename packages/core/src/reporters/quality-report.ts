@@ -4,7 +4,12 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { QualityReportOptions, QualityReportResult } from '../types/index.js';
+import {
+  CodeCoverageSummary,
+  QualityPolicy,
+  QualityReportOptions,
+  QualityReportResult,
+} from '../types/index.js';
 import { verifyQualityGate } from '../verifiers/quality-gate.js';
 
 export function calculateRating(mi: number, cc: number): 'A' | 'B' | 'C' | 'D' | 'F' {
@@ -40,6 +45,84 @@ export function detectLanguage(filePath: string): string {
   }
 }
 
+function parseJsonSummaryFile(filePath: string, relSource: string): CodeCoverageSummary | null {
+  try {
+    const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Record<string, unknown>;
+    const total = raw.total as Record<string, Record<string, unknown>> | undefined;
+    if (!total || typeof total !== 'object') return null;
+    const linesPct = Number(total.lines?.pct);
+    const branchesPct = Number(total.branches?.pct);
+    const functionsPct = Number(total.functions?.pct);
+    if (Number.isNaN(linesPct) || Number.isNaN(branchesPct) || Number.isNaN(functionsPct)) return null;
+    const statementsPct = total.statements?.pct !== undefined ? Number(total.statements.pct) : undefined;
+    return { linesPct, branchesPct, functionsPct, statementsPct, source: relSource };
+  } catch {
+    return null;
+  }
+}
+
+function parseLcovFile(filePath: string, relSource: string): CodeCoverageSummary | null {
+  try {
+    const lines = fs.readFileSync(filePath, 'utf-8').split(/\r?\n/);
+    let lf = 0, lh = 0, brf = 0, brh = 0, fnf = 0, fnh = 0;
+    for (const line of lines) {
+      if (line.startsWith('LF:')) lf += parseInt(line.slice(3), 10) || 0;
+      else if (line.startsWith('LH:')) lh += parseInt(line.slice(3), 10) || 0;
+      else if (line.startsWith('BRF:')) brf += parseInt(line.slice(4), 10) || 0;
+      else if (line.startsWith('BRH:')) brh += parseInt(line.slice(4), 10) || 0;
+      else if (line.startsWith('FNF:')) fnf += parseInt(line.slice(4), 10) || 0;
+      else if (line.startsWith('FNH:')) fnh += parseInt(line.slice(4), 10) || 0;
+    }
+    if (lf === 0 && fnf === 0 && brf === 0) return null;
+    const pct = (hit: number, found: number): number =>
+      found > 0 ? Math.round((hit / found) * 1000) / 10 : 100;
+    return {
+      linesPct: pct(lh, lf),
+      branchesPct: pct(brh, brf),
+      functionsPct: pct(fnh, fnf),
+      source: relSource,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function readCodeCoverageSummary(rootDir: string = process.cwd()): CodeCoverageSummary | null {
+  const jsonCandidates = ['coverage/coverage-summary.json', 'reports/coverage-summary.json'];
+  for (const rel of jsonCandidates) {
+    const full = path.join(rootDir, rel);
+    if (fs.existsSync(full)) {
+      const parsed = parseJsonSummaryFile(full, rel);
+      if (parsed) return parsed;
+    }
+  }
+  const lcovCandidates = ['coverage/lcov.info', 'lcov.info', 'reports/lcov.info'];
+  for (const rel of lcovCandidates) {
+    const full = path.join(rootDir, rel);
+    if (fs.existsSync(full)) {
+      const parsed = parseLcovFile(full, rel);
+      if (parsed) return parsed;
+    }
+  }
+  return null;
+}
+
+function formatCoverageRow(label: string, measured: number | undefined, minThreshold: number): string {
+  if (measured === undefined) {
+    return `| **${label}** | \`N/A (Run test:coverage)\` | $\\ge ${minThreshold}\\%$ | ℹ️ NOT MEASURED |`;
+  }
+  const status = measured >= minThreshold ? '✅ COMPLIANT' : '⚠️ BELOW THRESHOLD';
+  return `| **${label}** | \`${measured}%\` | $\\ge ${minThreshold}\\%$ | ${status} |`;
+}
+
+function buildCoverageRows(coverage: CodeCoverageSummary | null, policy: QualityPolicy): string[] {
+  return [
+    formatCoverageRow('Line Coverage', coverage?.linesPct, policy.min_line_coverage),
+    formatCoverageRow('Branch Coverage', coverage?.branchesPct, policy.min_branch_coverage),
+    formatCoverageRow('Function Coverage', coverage?.functionsPct, policy.min_function_coverage),
+  ];
+}
+
 export function generateQualityReport(options: QualityReportOptions = {}): QualityReportResult {
   const rootDir = options.rootDir || process.cwd();
   const gateResult = verifyQualityGate({
@@ -47,6 +130,7 @@ export function generateQualityReport(options: QualityReportOptions = {}): Quali
     policyPath: options.policyPath,
     thresholds: options.thresholds,
   });
+  const coverage = readCodeCoverageSummary(rootDir);
 
   const totalFiles = gateResult.totalFiles;
   const totalFunctions = gateResult.totalFunctions;
@@ -103,6 +187,7 @@ export function generateQualityReport(options: QualityReportOptions = {}): Quali
     `| **Cyclomatic Complexity (Average)** | \`${avgCyclomatic}\` | $\\le ${gateResult.policy.max_cyclomatic}$ | ${avgCyclomatic <= gateResult.policy.max_cyclomatic ? '✅ COMPLIANT' : '❌ EXCEEDED'} |`,
     `| **Cognitive Complexity (Average)** | \`${avgCognitive}\` | $\\le ${gateResult.policy.max_cognitive}$ | ${avgCognitive <= gateResult.policy.max_cognitive ? '✅ COMPLIANT' : '❌ EXCEEDED'} |`,
     `| **Maintainability Index (SEI MI)** | \`${avgMaintainability} / 100\` | $\\ge ${gateResult.policy.min_maintainability}$ | ${avgMaintainability >= gateResult.policy.min_maintainability ? '✅ COMPLIANT' : '❌ INSUFFICIENT'} |`,
+    ...buildCoverageRows(coverage, gateResult.policy),
     `| **Functions in Violation** | \`${gateResult.failCount}\` | $0$ (Mode ${gateResult.policy.enforce_mode}) | ${gateResult.failCount === 0 ? '✅ 0 VIOLATIONS' : '❌ BLOCKED'} |`,
     ``,
     `---`,
@@ -137,6 +222,7 @@ export function generateQualityReport(options: QualityReportOptions = {}): Quali
   lines.push('## 4. Evaluation Criteria and Standards');
   lines.push('- **McCabe Cyclomatic Complexity (CC)**: Number of linearly independent paths.');
   lines.push('- **Maintainability Index (SEI MI)**: Normalized formula [0 - 100] combining Halstead Volume, CC, and LOC.');
+  lines.push('- **Automated Test Coverage**: Passively ingested from `coverage/coverage-summary.json` or `lcov.info` when present.');
   lines.push('- **Clean Code Guardrails**: Prohibition of implicit `any` typing, function length limits ($\le 40$ lines), and zero unjustified suppressions.');
 
   const markdown = lines.join('\n');
@@ -153,5 +239,6 @@ export function generateQualityReport(options: QualityReportOptions = {}): Quali
     avgMaintainability,
     avgCyclomatic,
     verdict,
+    coverage,
   };
 }

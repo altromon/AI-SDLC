@@ -27,6 +27,7 @@ import { verifyTestingCoverage } from '../verifiers/testing-coverage.js';
 import { walkMdFiles } from '../utils/fs.js';
 import { aggregatePrKpis } from './pr-kpis.js';
 import { getCytoscapeScript } from './cytoscape-bundle.js';
+import { readCodeCoverageSummary } from './quality-report.js';
 
 export interface GraphElementsResult {
   elements: CytoscapeElement[];
@@ -694,10 +695,13 @@ export function collectDashboardMetrics(rootDir: string) {
     // Graceful fallback if git range is unavailable
   }
 
+  const codeCoverage = readCodeCoverageSummary(rootDir);
+
   return {
     gate,
     gov,
     cov,
+    codeCoverage,
     trace,
     history,
     activePrKpi,
@@ -1263,6 +1267,11 @@ export function renderDashboardHtml(
             <span class="title">Requirements BDD Coverage</span>
             <span class="value">${metricsData.cov.totalRequirements > 0 ? Math.round((metricsData.cov.passedRequirements / metricsData.cov.totalRequirements) * 100) : 100}%</span>
             <span class="subtitle">${metricsData.cov.passedRequirements} / ${metricsData.cov.totalRequirements} verified</span>
+          </div>
+          <div class="metric-card">
+            <span class="title">Code Coverage (Lines)</span>
+            <span class="value">${metricsData.codeCoverage ? metricsData.codeCoverage.linesPct + '%' : 'N/A'}</span>
+            <span class="subtitle">${metricsData.codeCoverage ? `Branches: ${metricsData.codeCoverage.branchesPct}% | Funcs: ${metricsData.codeCoverage.functionsPct}%` : `Min target: ${metricsData.gate.policy.min_line_coverage}% (Run test:coverage)`}</span>
           </div>
         </div>
 

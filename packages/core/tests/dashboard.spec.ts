@@ -149,6 +149,7 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(htmlContent).toContain('showTooltip');
     expect(htmlContent).toContain('hideTooltip');
     expect(htmlContent).toContain('1000');
+    expect(htmlContent).toContain('Code Coverage (Lines)');
 
     // Verify it is larger than 100KB due to bundled Cytoscape library
     expect(htmlContent.length).toBeGreaterThan(100000);

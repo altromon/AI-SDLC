@@ -89,6 +89,13 @@ export function runReportQuality(options: {
   console.log(`  Evaluated functions:        ${pc.bold(String(result.totalFunctions))}`);
   console.log(`  Average maintainability:    ${pc.green(String(result.avgMaintainability) + ' / 100')}`);
   console.log(`  Average complexity (CC):    ${pc.bold(String(result.avgCyclomatic))}`);
+  console.log(
+    `  Code coverage (L/B/F):      ${
+      result.coverage
+        ? pc.bold(`${result.coverage.linesPct}% / ${result.coverage.branchesPct}% / ${result.coverage.functionsPct}%`)
+        : pc.dim('N/A (Run test:coverage)')
+    }`
+  );
   console.log(`  Release Gate verdict:       ${result.verdict === 'PASS' ? pc.green('PASS') : pc.red('FAIL')}`);
 
   const reportRelPath = path.relative(rootDir, path.join(rootDir, 'reports', 'QUALITY_REPORT.md'));

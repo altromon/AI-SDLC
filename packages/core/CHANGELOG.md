@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 1.2.0
+
+### Minor Changes
+
+- feat(reporting): ingest passive test code coverage (`coverage/coverage-summary.json` and `lcov.info`) into `reports/QUALITY_REPORT.md` and `reports/dashboard.html`, comparing line, branch, and function coverage against `quality-policy.yaml` thresholds
+
 ## 1.1.1
 
 ### Patch Changes

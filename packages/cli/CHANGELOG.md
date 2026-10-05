@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 1.2.0
+
+### Minor Changes
+
+- feat(cli): display automated test coverage metrics (Line / Branch / Function %) in `aisdlc report quality` CLI output
+- Updated dependencies
+  - @aisdlc/core@1.2.0
+  - @aisdlc/mcp@1.2.0
+
 ## 1.1.1
 
 ### Patch Changes

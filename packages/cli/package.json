@@ -1,6 +1,6 @@
 {
   "name": "@aisdlc/cli",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Command line interface for AI-SDLC quality gates, governance, and scaffolding",
   "license": "MIT",
   "type": "module",
