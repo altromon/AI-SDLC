@@ -14,6 +14,7 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
 
 ## Operational Directives & Guardrails
 - Decompose the system into building blocks `CMP-*` ensuring each component declares which use cases `UC-*` it implements and which requirements (`FR-*`, `QR-*`, `SEC-REQ-*`) it fulfills under `satisfies-requirements`.
+- **Contract-First Full-Stack Integration**: Whenever a feature or change spans Frontend (UI) and Backend (API/services), define an explicit shared typed contract (Zod schemas, shared TypeScript DTOs, or OpenAPI specification) in `design.md` before implementation so both layers compile against a single source of truth.
 - Generate interaction and sequence diagrams in native Mermaid syntax.
 - Document critical technological decisions using immutable `ADR-*` records conforming to `schemas/architecture/adr.schema.json`.
 - Validate that architectural choices comply with legal constraints in `license-policy.yaml`.

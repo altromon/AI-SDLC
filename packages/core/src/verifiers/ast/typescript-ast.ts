@@ -140,16 +140,32 @@ function calculateLocAndHalstead(fullText: string, cyclomatic: number): { loc: n
   return { loc, mi: Math.round(normalizedMI * 10) / 10 };
 }
 
-function detectAstCodeSmells(node: Node, loc: number, nodeText: string): string[] {
+const TEST_FILE_PATTERN = /(?:^|\/)(?:tests|__tests__|fixtures)\/|\.(?:spec|test)\.[cm]?[jt]sx?$/i;
+const EMPTY_UI_HANDLER_PATTERN = /\bon[A-Z]\w*\s*=\s*\{\s*(?:\([^)]*\)\s*=>\s*\{\s*\}|function\s*\([^)]*\)\s*\{\s*\})\s*\}/;
+const FAKE_WIRING_STUB_PATTERN = /(?:\/\/\s*T[O]DO:\s*(?:connect|wire|integrate)\b|\b(?:m[o]ckData|F[A]KE_DATA)\b)/i;
+
+function isProductionFile(filePath: string): boolean {
+  return !TEST_FILE_PATTERN.test(filePath.replace(/\\/g, '/'));
+}
+
+function detectAstCodeSmells(node: Node, loc: number, fullText: string, filePath: string): string[] {
   const smells: string[] = [];
   if (node.getDescendantsOfKind(SyntaxKind.AnyKeyword).length > 0) {
     smells.push('Uso prohibido de "any"');
   }
-  if (/\/\/\s*@ts-ignore|\/\/\s*eslint-disable/.test(nodeText)) {
+  if (/\/\/\s*@ts-ignore|\/\/\s*eslint-disable/.test(fullText)) {
     smells.push('Supresión no autorizada de linter');
   }
   if (loc > 40) {
     smells.push(`Función extensa (${loc} líneas > límite 40)`);
+  }
+  if (isProductionFile(filePath)) {
+    if (EMPTY_UI_HANDLER_PATTERN.test(fullText)) {
+      smells.push('Handler de UI vacío (fake-wiring detectado)');
+    }
+    if (FAKE_WIRING_STUB_PATTERN.test(fullText)) {
+      smells.push('Datos simulados o conexión pendiente en producción (fake-wiring)');
+    }
   }
   return smells;
 }
@@ -184,9 +200,8 @@ function buildNodeMetrics(node: Node, filePath: string): FunctionMetrics {
   const cyclomatic = computeCyclomaticFromAst(node);
   const cognitive = computeCognitiveFromAst(node);
   const fullText = node.getFullText();
-  const nodeText = node.getText();
   const { loc, mi } = calculateLocAndHalstead(fullText, cyclomatic);
-  const codeSmells = detectAstCodeSmells(node, loc, nodeText);
+  const codeSmells = detectAstCodeSmells(node, loc, fullText, filePath);
 
   return { functionName, filePath, loc, cyclomatic, cognitive, maintainability: mi, codeSmells };
 }

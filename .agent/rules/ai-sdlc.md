@@ -42,6 +42,7 @@ This file defines the operational rules and specialized role mappings for Google
 - **Output**: Architecture components (`CMP-*`), Mermaid diagrams, and immutable `ADR-*` records compliant with `schemas/architecture/`.
 - **Guardrails**:
   - Every `CMP-*` must declare `satisfies-requirements` linking `FR-*`, `QR-*`, and `SEC-REQ-*`.
+  - **Contract-First Full-Stack Integration**: When a feature spans Frontend (UI) and Backend (API), define an explicit shared typed contract (Zod/OpenAPI/DTOs) in `design.md` before implementation.
   - Emit a return handoff to `agent-threat-modeler` in the technical security feedback loop when infrastructure or persistence decisions introduce new attack vectors.
 
 ### 4. `agent-qa-engineer` (QA Engineer and SDET)
@@ -51,6 +52,7 @@ This file defines the operational rules and specialized role mappings for Google
 - **Guardrails**:
   - FORBIDDEN to include production code or anticipate implementations.
   - Every `FR-*` must have at least nominal + boundary + out-of-range scenarios; missing these blocks handoff to `agent-developer`.
+  - **Zero-Mock Integration**: For `FR-*` spanning UI and Backend, unit mocks of `fetch` are insufficient; require integration/contract or E2E scenarios verifying real request/response wiring and the 4 UI states (`Loading`, `Empty`, `Error`, `Nominal`).
   - Mandatory tags: `@<FR-ID> @automated @regression`.
   - Run `pnpm run verify:testing` before emitting handoff.
 
@@ -59,6 +61,9 @@ This file defines the operational rules and specialized role mappings for Google
 - **Directives**:
   - Respect the autonomy mode assigned in `tasks.md` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
   - Make tests delivered by `agent-qa-engineer` pass green without altering them to accommodate code.
+  - **Zero Fake-Wiring**: Forbidden from marking tasks `COMPLETED` with hardcoded `mockData` in views, `setTimeout` network simulations, or empty UI event handlers (`onClick={() => {}}`).
+  - **Mandatory 4 UI States**: Every data-driven UI view must implement `Loading`, `Empty`, `Error`, and `Nominal` states.
+  - **Live Runtime Smoke Verification**: Before handoff on UI/Full-Stack tasks, boot real Backend + Frontend servers and verify (via Playwright or Chrome DevTools MCP) `0` browser `console.error`/`pageerror` and real `2xx` API responses.
   - Respect `quality-policy.yaml` thresholds: CC $\le 10$, Cognitive $\le 15$, MI $\ge 50$, LOC $\le 40$.
   - Run pre-flight with auto-fix: `pnpm run check:fix` and full verification: `pnpm run verify:all`.
   - Upon completing green implementation, suggest handoff to `agent-expert-user` for post-development functional validation prior to security audit.
@@ -78,8 +83,8 @@ This file defines the operational rules and specialized role mappings for Google
 - **Mission**: Contrast design and specifications (design phase) and functionally validate finished software against `UC-*` and `FR-*` (post-development phase).
 - **Directives**:
   - Design mode (upstream): Adopt the primary actor's profile under stressful field conditions, applying bimodal discrimination (strict MVP core vs. roadmap suggestion backlog in `templates/product/user-design-feedback.template.md`).
-  - Functional validation mode (downstream / pre-PR / post-development functional validation): Thoroughly contrast interface and actual CLI execution against `UC-*` and `FR-*` acceptance criteria before pre-merge security audit.
-  - Emit handoff block suggesting `agent-code-reviewer` / `agent-security-auditor` if compliant, or return to `agent-developer` on functional drift.
+  - Functional validation mode (downstream / pre-PR / post-development functional validation): Thoroughly contrast live running UI, CLI, and API execution against `UC-*` and `FR-*` acceptance criteria (verifying real Backend connectivity, the 4 UI states `Loading`/`Empty`/`Error`/`Nominal`, keyboard/ARIA usability, and `0` browser `console.error`) before pre-merge security audit.
+  - Emit handoff block suggesting `agent-code-reviewer` / `agent-security-auditor` if compliant, or return to `agent-developer` on functional drift or fake-wiring.
 
 ### 9. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
 - **Mission**: Audit Pull Requests evaluating code cleanliness, adherence to SOLID, DRY, YAGNI principles, design patterns, and respect for complexity and maintainability thresholds (`quality-policy.yaml`), forming part of the Pre-Merge Audit Triad.
@@ -87,6 +92,7 @@ This file defines the operational rules and specialized role mappings for Google
   - Respect `quality-policy.yaml` thresholds: CC $\le 10$, Cognitive $\le 15$, MI $\ge 50$, LOC $\le 40$.
   - Detect improper coupling, code smells, magic numbers, ambiguous names, and encapsulation violations.
   - Flag premature abstractions and speculative code violating YAGNI.
+  - **Block Fake-Wiring**: Flag as `[BLOCKING]` any UI component with hardcoded mock data (`mockData`), empty event handlers (`onClick={() => {}}`), or missing error/loading states.
   - Coordinate Pre-Merge Audit Triad with `agent-security-auditor` and `agent-compliance-checker`.
   - Classify findings into: `[BLOCKING]` (quality violation or broken pattern), `[CLEAN_CODE_SUGGESTION]` (non-blocking improvement), and `[COMPLIANT]`.
 

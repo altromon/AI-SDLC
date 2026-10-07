@@ -213,5 +213,32 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(agContent).toMatch(/NON-INVASION GUARDRAIL|GUARDRAIL DE NO INVAS[IÍ]ÓN/i);
     expect(canonicalContent).toContain('src/');
   });
+
+  it('verifies full-stack connectivity, Contract-First, 4 UI states, and zero fake-wiring guardrails across protocols and skills', () => {
+    const canonicalContent = fs.readFileSync(canonicalProtocolPath, 'utf-8');
+    expect(canonicalContent).toMatch(/Contract-First/i);
+    expect(canonicalContent).toMatch(/Zero-Mock/i);
+    expect(canonicalContent).toMatch(/Fake-Wiring/i);
+    expect(canonicalContent).toMatch(/Loading.*Empty.*Error/is);
+    expect(canonicalContent).toMatch(/console\.error/);
+
+    const devSkill = fs.readFileSync(path.join(rootDir, '.agent/skills/agent-developer/SKILL.md'), 'utf-8');
+    expect(devSkill).toMatch(/Fake-Wiring/i);
+    expect(devSkill).toMatch(/Loading.*Empty.*Error/is);
+    expect(devSkill).toMatch(/console\.error/);
+
+    const archSkill = fs.readFileSync(path.join(rootDir, '.agent/skills/agent-system-architect/SKILL.md'), 'utf-8');
+    expect(archSkill).toMatch(/Contract-First/i);
+
+    const qaSkill = fs.readFileSync(path.join(rootDir, '.agent/skills/agent-qa-engineer/SKILL.md'), 'utf-8');
+    expect(qaSkill).toMatch(/Zero-Mock/i);
+
+    const expertSkill = fs.readFileSync(path.join(rootDir, '.agent/skills/agent-expert-user/SKILL.md'), 'utf-8');
+    expect(expertSkill).toMatch(/Loading.*Empty.*Error/is);
+
+    const reviewerSkill = fs.readFileSync(path.join(rootDir, '.agent/skills/agent-code-reviewer/SKILL.md'), 'utf-8');
+    expect(reviewerSkill).toMatch(/Fake-Wiring/i);
+  });
 });
+
 

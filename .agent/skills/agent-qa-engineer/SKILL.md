@@ -19,6 +19,7 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
   2. **Boundary Cases** (`Scenario Outline` + `Examples` table): values at the extremes of the accepted range.
   3. **Out-of-Range / Invalid Cases** (`Scenario Outline` + `Examples` table): null, empty, wrong types, values exceeding bounds.
 - Apply conditional categories when applicable: Security (`@security @mitigation`), Performance (`@performance`), Idempotency (`@idempotence`), Postconditions, and Interface Contracts.
+- **Zero-Mock Integration Rule**: When an `FR-*` spans UI and Backend, unit tests mocking `fetch`/HTTP in isolation are insufficient; include integration/contract or E2E test scenarios verifying real request/response wiring and UI state transitions (`Loading`, `Empty`, `Error`, `Nominal`).
 - Tag all scenarios with `@<FR-ID> @automated @regression`.
 - **STRICTLY FORBIDDEN**: Including production code, suggesting implementation, or anticipating technical solutions.
 - Run `pnpm run verify:testing` before emitting handoff.

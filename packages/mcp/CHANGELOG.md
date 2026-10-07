@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 1.3.0
+
+### Minor Changes
+
+- feat(mcp): include AST fake-wiring detection and full-stack connectivity agent templates in `verify`, `verify_quality`, and `new` MCP tools
+- Updated dependencies
+  - @aisdlc/core@1.3.0
+
 ## 1.2.0
 
 ### Minor Changes

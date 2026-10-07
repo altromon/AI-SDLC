@@ -16,6 +16,9 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
 - Respect the autonomy mode assigned to each task in `tasks.md` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
 - Apply Test-Driven Development (TDD): make failing tests delivered by `agent-qa-engineer` pass green without altering tests to accommodate buggy code.
 - Cite implemented `FR-*` or `SEC-REQ-*` IDs in test header comments to maintain 360° reverse traceability.
+- **Zero Fake-Wiring Guardrail**: Strictly forbidden from marking a task `COMPLETED` with hardcoded `mockData` arrays in production views, `setTimeout` simulating network calls, or empty UI event handlers (`onClick={() => {}}`, `onSubmit={() => {}}`). Frontend components must wire directly to the shared contract and real Backend endpoints.
+- **Mandatory 4 UI States Matrix**: Every data-driven UI component or screen must explicitly implement all 4 usability states: `Loading` (spinner/skeleton + disabled submit), `Empty` (clear message + CTA), `Error` (visible error recovery banner, never silent failure), and `Nominal/Success` (accessible semantic DOM + keyboard navigation).
+- **Live Runtime Smoke Verification**: For tasks touching UI or UI-to-Backend integration, unit tests alone are insufficient. Before emitting handoff, boot the real Backend and Frontend servers and verify (via Playwright E2E or Chrome DevTools MCP) that browser `console.error` and `pageerror` counts are `0` and API calls return real `2xx` responses without CORS or schema mismatches.
 - Before adding any external dependency, verify its SPDX license is permitted in `license-policy.yaml`.
 - Respect non-negotiable `quality-policy.yaml` thresholds: Cyclomatic Complexity $\le 10$, Cognitive Complexity $\le 15$, Maintainability Index $\ge 50$, Function Length $\le 40$ lines.
 - Run unified pre-flight with auto-fix (`pnpm run check:fix`) and full verification (`pnpm run verify:all`).

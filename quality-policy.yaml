@@ -21,7 +21,9 @@ scope:
     - "lib"
   supported_extensions:
     - ".ts"
+    - ".tsx"
     - ".js"
+    - ".jsx"
   exclude_patterns:
     - "node_modules"
     - "__pycache__"
@@ -92,6 +94,8 @@ coding_rules:
     no_dead_code: "ERROR"
     no_console_logs_in_prod: "ERROR"
     require_explicit_return_types: "ERROR"
+    no_empty_ui_handlers: "ERROR"
+    no_production_mock_stubs: "ERROR"
     max_function_lines: 40
 
 # ------------------------------------------------------------------------------

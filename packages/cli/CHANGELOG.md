@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 1.3.0
+
+### Minor Changes
+
+- feat(cli): enforce full-stack UI/Backend connectivity guardrails and AST fake-wiring detection in `aisdlc verify quality` and `aisdlc init` agent templates
+- Updated dependencies
+  - @aisdlc/core@1.3.0
+  - @aisdlc/mcp@1.3.0
+
 ## 1.2.0
 
 ### Minor Changes
