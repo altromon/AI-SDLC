@@ -175,6 +175,43 @@ describe('AST Static Analysis Engine (Issue #32)', () => {
       expect(metrics[0].functionName).toBe('should verify authorization header');
       expect(metrics[0].cyclomatic).toBe(2);
     });
+
+    it('should flag empty JSX UI event handlers (fake-wiring) in production components', () => {
+      const code = `
+        export function OrderForm() {
+          return (
+            <form onSubmit={() => {}}>
+              <button onClick={() => {}}>Submit</button>
+            </form>
+          );
+        }
+      `;
+
+      const metrics = extractFunctions(code, 'src/components/OrderForm.tsx');
+      expect(metrics.length).toBeGreaterThanOrEqual(1);
+      const comp = metrics.find((m) => m.functionName === 'OrderForm');
+      expect(comp?.codeSmells).toContain('Handler de UI vacío (fake-wiring detectado)');
+    });
+
+    it('should flag production fake-wiring stubs (TODO connect / mockData) outside test files', () => {
+      const code = `
+        export async function loadUsers() {
+          // TODO: connect to backend API
+          const mockData = [{ id: 1, name: 'Stub' }];
+          return mockData;
+        }
+      `;
+
+      const prodMetrics = extractFunctions(code, 'src/services/userService.ts');
+      expect(prodMetrics[0].codeSmells).toContain(
+        'Datos simulados o conexión pendiente en producción (fake-wiring)'
+      );
+
+      const testMetrics = extractFunctions(code, 'tests/userService.spec.ts');
+      expect(testMetrics[0].codeSmells).not.toContain(
+        'Datos simulados o conexión pendiente en producción (fake-wiring)'
+      );
+    });
   });
 
   describe('Polyglot Token-Aware Structural AST Scanner', () => {

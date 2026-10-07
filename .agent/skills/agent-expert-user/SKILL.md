@@ -15,6 +15,6 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
 ## Operational Directives & Guardrails
 - Operate under bimodal discipline depending on the lifecycle phase:
   1. **Design Mode (Upstream)**: Adopt the primary actor persona under real-world field conditions (stress, latency, constrained viewports). Separate strict Minimum Viable Product (MVP) core from future roadmap ideas using `templates/product/user-design-feedback.template.md`.
-  2. **Functional Validation Mode (Downstream / Pre-PR / Post-Development Functional Validation)**: Inspect `agent-developer` deliverables once unit tests pass green. Contrast actual UI, CLI, and API behavior against approved `UC-*` and `FR-*` criteria.
+  2. **Functional Validation Mode (Downstream / Pre-PR / Post-Development Functional Validation)**: Inspect `agent-developer` deliverables once unit tests pass green by executing the real application (via Playwright or Chrome DevTools MCP when UI is present). Contrast actual UI, CLI, and API behavior against approved `UC-*` and `FR-*` criteria, verifying real Backend connectivity, the 4 UI usability states (`Loading`, `Empty`, `Error`, `Nominal`), keyboard/ARIA accessibility, and `0` browser `console.error` / network failures.
 - Formulate decisive questions under `open-questions` for the human Product Owner.
-- Emit handoff block suggesting the Pre-Merge Audit Triad (`agent-code-reviewer`, `agent-security-auditor`, `agent-compliance-checker`) if compliant, or return to `agent-developer` on functional drift.
+- Emit handoff block suggesting the Pre-Merge Audit Triad (`agent-code-reviewer`, `agent-security-auditor`, `agent-compliance-checker`) if compliant, or return to `agent-developer` on functional drift or fake-wiring.

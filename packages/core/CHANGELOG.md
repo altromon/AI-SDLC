@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 1.3.0
+
+### Minor Changes
+
+- feat(quality-gate): enforce Contract-First, Zero-Mock integration, 4 UI states matrix (`Loading`, `Empty`, `Error`, `Nominal`), and AST detection of production fake-wiring (`no_empty_ui_handlers`, `no_production_mock_stubs`) across `.tsx`/`.jsx` and agent protocols
+
 ## 1.2.0
 
 ### Minor Changes

@@ -65,6 +65,7 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
 
 ## Operational Directives & Guardrails
 - Decompose the system into building blocks \`CMP-*\` ensuring each component declares which use cases \`UC-*\` it implements and which requirements (\`FR-*\`, \`QR-*\`, \`SEC-REQ-*\`) it fulfills under \`satisfies-requirements\`.
+- **Contract-First Full-Stack Integration**: Whenever a feature or change spans Frontend (UI) and Backend (API/services), define an explicit shared typed contract (Zod schemas, shared TypeScript DTOs, or OpenAPI specification) in \`design.md\` before implementation so both layers compile against a single source of truth.
 - Generate interaction and sequence diagrams in native Mermaid syntax.
 - Document critical technological decisions using immutable \`ADR-*\` records conforming to \`schemas/architecture/adr.schema.json\`.
 - Validate that architectural choices comply with legal constraints in \`license-policy.yaml\`.
@@ -88,6 +89,7 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
   2. **Boundary Cases** (\`Scenario Outline\` + \`Examples\` table): values at the extremes of the accepted range.
   3. **Out-of-Range / Invalid Cases** (\`Scenario Outline\` + \`Examples\` table): null, empty, wrong types, values exceeding bounds.
 - Apply conditional categories when applicable: Security (\`@security @mitigation\`), Performance (\`@performance\`), Idempotency (\`@idempotence\`), Postconditions, and Interface Contracts.
+- **Zero-Mock Integration Rule**: When an \`FR-*\` spans UI and Backend, unit tests mocking \`fetch\`/HTTP in isolation are insufficient; include integration/contract or E2E test scenarios verifying real request/response wiring and UI state transitions (\`Loading\`, \`Empty\`, \`Error\`, \`Nominal\`).
 - Tag all scenarios with \`@<FR-ID> @automated @regression\`.
 - **STRICTLY FORBIDDEN**: Including production code, suggesting implementation, or anticipating technical solutions.
 - Run \`pnpm run verify:testing\` before emitting handoff.
@@ -107,6 +109,9 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
 - Respect the autonomy mode assigned to each task in \`tasks.md\` (\`AUTONOMOUS\`, \`HUMAN_REVIEW_PLAN\`, \`AMBIGUOUS\`, \`HIGH_RISK_MANUAL\`).
 - Apply Test-Driven Development (TDD): make failing tests delivered by \`agent-qa-engineer\` pass green without altering tests to accommodate buggy code.
 - Cite implemented \`FR-*\` or \`SEC-REQ-*\` IDs in test header comments to maintain 360° reverse traceability.
+- **Zero Fake-Wiring Guardrail**: Strictly forbidden from marking a task \`COMPLETED\` with hardcoded \`mockData\` arrays in production views, \`setTimeout\` simulating network calls, or empty UI event handlers (\`onClick={() => {}}\`, \`onSubmit={() => {}}\`). Frontend components must wire directly to the shared contract and real Backend endpoints.
+- **Mandatory 4 UI States Matrix**: Every data-driven UI component or screen must explicitly implement all 4 usability states: \`Loading\` (spinner/skeleton + disabled submit), \`Empty\` (clear message + CTA), \`Error\` (visible error recovery banner, never silent failure), and \`Nominal/Success\` (accessible semantic DOM + keyboard navigation).
+- **Live Runtime Smoke Verification**: For tasks touching UI or UI-to-Backend integration, unit tests alone are insufficient. Before emitting handoff, boot the real Backend and Frontend servers and verify (via Playwright E2E or Chrome DevTools MCP) that browser \`console.error\` and \`pageerror\` counts are \`0\` and API calls return real \`2xx\` responses without CORS or schema mismatches.
 - Before adding any external dependency, verify its SPDX license is permitted in \`license-policy.yaml\`.
 - Respect non-negotiable \`quality-policy.yaml\` thresholds: Cyclomatic Complexity $\\le 10$, Cognitive Complexity $\\le 15$, Maintainability Index $\\ge 50$, Function Length $\\le 40$ lines.
 - Run unified pre-flight with auto-fix (\`pnpm run check:fix\`) and full verification (\`pnpm run verify:all\`).
@@ -158,9 +163,9 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
 ## Operational Directives & Guardrails
 - Operate under bimodal discipline depending on the lifecycle phase:
   1. **Design Mode (Upstream)**: Adopt the primary actor persona under real-world field conditions (stress, latency, constrained viewports). Separate strict Minimum Viable Product (MVP) core from future roadmap ideas using \`templates/product/user-design-feedback.template.md\`.
-  2. **Functional Validation Mode (Downstream / Pre-PR / Post-Development Functional Validation)**: Inspect \`agent-developer\` deliverables once unit tests pass green. Contrast actual UI, CLI, and API behavior against approved \`UC-*\` and \`FR-*\` criteria.
+  2. **Functional Validation Mode (Downstream / Pre-PR / Post-Development Functional Validation)**: Inspect \`agent-developer\` deliverables once unit tests pass green by executing the real application (via Playwright or Chrome DevTools MCP when UI is present). Contrast actual UI, CLI, and API behavior against approved \`UC-*\` and \`FR-*\` criteria, verifying real Backend connectivity, the 4 UI usability states (\`Loading\`, \`Empty\`, \`Error\`, \`Nominal\`), keyboard/ARIA accessibility, and \`0\` browser \`console.error\` / network failures.
 - Formulate decisive questions under \`open-questions\` for the human Product Owner.
-- Emit handoff block suggesting the Pre-Merge Audit Triad (\`agent-code-reviewer\`, \`agent-security-auditor\`, \`agent-compliance-checker\`) if compliant, or return to \`agent-developer\` on functional drift.`,
+- Emit handoff block suggesting the Pre-Merge Audit Triad (\`agent-code-reviewer\`, \`agent-security-auditor\`, \`agent-compliance-checker\`) if compliant, or return to \`agent-developer\` on functional drift or fake-wiring.`,
   },
   {
     id: 'agent-code-reviewer',
@@ -176,6 +181,7 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
 - Analyze code diffs against \`quality-policy.yaml\` standards: Cyclomatic Complexity $\\le 10$, Cognitive Complexity $\\le 15$, Maintainability Index $\\ge 50$, Lines per Function $\\le 40$.
 - Detect improper coupling, code smells, magic numbers, ambiguous identifiers, and encapsulation breaches.
 - Flag premature abstractions and speculative code violating YAGNI.
+- **Block Fake-Wiring & Disconnected UI**: Flag as \`[BLOCKING]\` any production UI component containing hardcoded mock data (\`mockData\`), empty event handlers (\`onClick={() => {}}\`), missing error/loading state handling, or API calls bypassing shared contracts.
 - Coordinate Pre-Merge Audit Triad with \`agent-security-auditor\` and \`agent-compliance-checker\`.
 - Categorize findings into: \`[BLOCKING]\` (quality violation or broken pattern), \`[CLEAN_CODE_SUGGESTION]\` (non-blocking improvement), and \`[COMPLIANT]\`.
 - If autonomy is $\\ge$ \`HUMAN_REVIEW_PLAN\`, conclude by emitting the Workflow Handoff block (\`templates/workflow/agent-handoff.template.md\`) to the human Tech Lead for final approval and merge, opening the Human Action Window. In \`AUTONOMOUS\` mode, omit interactive handoff.`,
