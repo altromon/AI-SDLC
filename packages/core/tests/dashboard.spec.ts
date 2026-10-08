@@ -311,5 +311,171 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     const sentinelNodes = nodes.filter((n) => n.id.includes('TELEMETRY') || n.id.includes('DRONE'));
     expect(sentinelNodes.length).toBe(0);
   });
+
+  it('should safely escape </script> tags in embedded JSON and avoid event.target in switchTab', () => {
+    const reqDir = path.join(tempDir, 'specs', 'product', 'requirements');
+    fs.mkdirSync(reqDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(reqDir, 'FR-XSS-001.md'),
+      [
+        '---',
+        'id: FR-XSS-001',
+        'title: Prevent <script>alert(1)</script> injection',
+        'type: functional-requirement',
+        '---',
+        'The system MUST sanitize payloads containing `</script><script>evil()</script>` in input fields.',
+      ].join('\n'),
+      'utf-8'
+    );
+
+    const outputPath = path.join(tempDir, 'reports', 'xss-safe-dashboard.html');
+    const result = generateDashboardReport({
+      rootDir: tempDir,
+      outputPath,
+      title: 'Dashboard <script> Test',
+    });
+
+    const html = result.html;
+    // Exactly 2 <script> blocks (Cytoscape bundle + dashboard app logic)
+    const openScripts = html.match(/<script>/g) || [];
+    const closeScripts = html.match(/<\/script>/g) || [];
+    expect(openScripts.length).toBe(2);
+    expect(closeScripts.length).toBe(2);
+    expect(html).toContain('\\u003c/script\\u003e');
+    expect(html).not.toContain('event.target');
+  });
+
+  it('should deduplicate architecture views, ignore build/changes directories, and link canonical schema relationships', () => {
+    const actorsDir = path.join(tempDir, 'specs', 'product', 'actors');
+    const ucsDir = path.join(tempDir, 'specs', 'product', 'use-cases');
+    const rulesDir = path.join(tempDir, 'specs', 'product', 'rules');
+    const reqsDir = path.join(tempDir, 'specs', 'product', 'requirements');
+    const threatsDir = path.join(tempDir, 'specs', 'security', 'threats');
+    const archCompDir = path.join(tempDir, 'specs', 'architecture', 'components');
+    const archAdrDir = path.join(tempDir, 'specs', 'architecture', 'decisions');
+    const changesDir = path.join(tempDir, 'specs', 'changes', 'CHG-001');
+    const testsDir = path.join(tempDir, 'tests', 'features');
+    const binTestsDir = path.join(tempDir, 'tests', 'bin', 'Debug', 'net8.0', 'features');
+
+    for (const d of [actorsDir, ucsDir, rulesDir, reqsDir, threatsDir, archCompDir, archAdrDir, changesDir, testsDir, binTestsDir]) {
+      fs.mkdirSync(d, { recursive: true });
+    }
+
+    fs.writeFileSync(
+      path.join(actorsDir, 'ACT-CHEF.md'),
+      '---\nid: ACT-CHEF\ntitle: Head Chef\ntype: actor\n---\nChef actor.',
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(actorsDir, 'ACT-AUDITOR.md'),
+      '---\nid: ACT-AUDITOR\ntitle: Cost Auditor\ntype: actor\n---\nAuditor actor.',
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(rulesDir, 'BR-MARGIN-01.md'),
+      '---\nid: BR-MARGIN-01\ntitle: Margin Rule\ntype: business-rule\n---\nMargin rule.',
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(ucsDir, 'UC-RECIPE-01.md'),
+      [
+        '---',
+        'id: UC-RECIPE-01',
+        'title: Calculate Recipe Cost',
+        'type: use-case',
+        'primary-actor: ACT-CHEF',
+        'supporting-actors:',
+        '  - ACT-AUDITOR',
+        'governed-by:',
+        '  - BR-MARGIN-01',
+        '---',
+        'Use case body.',
+      ].join('\n'),
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(threatsDir, 'ABUSE-TAMPER-01.md'),
+      [
+        '---',
+        'id: ABUSE-TAMPER-01',
+        'title: Tamper Cost Calculation',
+        'type: abuse-case',
+        'targets-use-case:',
+        '  - UC-RECIPE-01',
+        '---',
+        'Abuse case body.',
+      ].join('\n'),
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(reqsDir, 'FR-COST-01.md'),
+      [
+        '---',
+        'id: FR-COST-01',
+        'title: Formula Cost Engine',
+        'type: functional-requirement',
+        'derived-from:',
+        '  - UC-RECIPE-01',
+        'satisfied-by:',
+        '  - CMP-COST-ENGINE',
+        '---',
+        'Requirement body.',
+      ].join('\n'),
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(archCompDir, 'CMP-COST-ENGINE.md'),
+      '---\nid: CMP-COST-ENGINE\ntitle: Cost Engine Component\ntype: component\n---\nSatisfies FR-COST-01.',
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(archAdrDir, 'ADR-001-DECIMAL.md'),
+      [
+        '---',
+        'id: ADR-001',
+        'title: Use Decimal Arithmetic',
+        'type: adr',
+        'affects-components:',
+        '  - CMP-COST-ENGINE',
+        '---',
+        'ADR body referencing FR-COST-01.',
+      ].join('\n'),
+      'utf-8'
+    );
+    // SDD operational change file that should be ignored in graph
+    fs.writeFileSync(
+      path.join(changesDir, 'proposal.md'),
+      '---\nid: CHG-001\ntitle: Change Proposal\ntype: proposal\n---\nProposal body.',
+      'utf-8'
+    );
+    // Canonical test feature + duplicate build output in bin/
+    const featureContent = '@FR-COST-01\nFeature: Cost calculation\n  Scenario: Valid cost\n    Given a recipe\n';
+    fs.writeFileSync(path.join(testsDir, 'cost.feature'), featureContent, 'utf-8');
+    fs.writeFileSync(path.join(binTestsDir, 'cost.feature'), featureContent, 'utf-8');
+
+    const graph = buildGraphElements(tempDir);
+    const nodes = graph.elements.filter((e) => e.group === 'nodes').map((e) => e.data as any);
+    const edges = graph.elements.filter((e) => e.group === 'edges').map((e) => e.data as any);
+
+    // 1. No duplicate CMP-COST-ENGINE.md or ADR-001-DECIMAL.md filename nodes
+    expect(nodes.find((n) => n.id === 'CMP-COST-ENGINE.md')).toBeUndefined();
+    expect(nodes.find((n) => n.id === 'ADR-001-DECIMAL.md')).toBeUndefined();
+    expect(nodes.find((n) => n.id === 'CMP-COST-ENGINE')).toBeDefined();
+    expect(nodes.find((n) => n.id === 'ADR-001')).toBeDefined();
+
+    // 2. SDD change proposal excluded
+    expect(nodes.find((n) => n.id === 'CHG-001')).toBeUndefined();
+
+    // 3. Build output in bin/ excluded (only 1 test node for cost.feature)
+    const testNodes = nodes.filter((n) => n.layer === 'test');
+    expect(testNodes.length).toBe(1);
+
+    // 4. Canonical edges created
+    expect(edges.some((e) => e.source === 'ACT-AUDITOR' && e.target === 'UC-RECIPE-01' && e.relation === 'initiates')).toBe(true);
+    expect(edges.some((e) => e.source === 'BR-MARGIN-01' && e.target === 'UC-RECIPE-01' && e.relation === 'governs')).toBe(true);
+    expect(edges.some((e) => e.source === 'ABUSE-TAMPER-01' && e.target === 'UC-RECIPE-01' && e.relation === 'targets')).toBe(true);
+    expect(edges.some((e) => e.source === 'ADR-001' && e.target === 'CMP-COST-ENGINE' && e.relation === 'governs')).toBe(true);
+  });
 });
+
 

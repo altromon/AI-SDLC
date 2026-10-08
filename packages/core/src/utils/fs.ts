@@ -8,6 +8,12 @@ export function walkMdFiles(
     'node_modules',
     '.git',
     'dist',
+    'bin',
+    'obj',
+    'build',
+    'out',
+    'target',
+    'coverage',
     '.changeset',
     'scratch',
     'test-scaffold',
@@ -20,6 +26,8 @@ export function walkMdFiles(
     '.cursor',
     '.github',
     '.vscode',
+    '.vs',
+    '.idea',
   ]
 ): string[] {
   try {

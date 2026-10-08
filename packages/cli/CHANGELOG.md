@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 1.3.1
+
+### Patch Changes
+
+- fix(dashboard): include `<script>` JSON sanitization, deterministic tab switching, build folder exclusion, and canonical PDaC graph deduplication in `aisdlc report dashboard` and `aisdlc verify`
+- Updated dependencies
+  - @aisdlc/core@1.3.1
+  - @aisdlc/mcp@1.3.1
+
 ## 1.3.0
 
 ### Minor Changes

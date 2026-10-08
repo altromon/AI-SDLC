@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 1.3.1
+
+### Patch Changes
+
+- fix(dashboard): escape `<`, `>`, `&`, and line separators in embedded `<script>` JSON payloads (`safeJsonForScript`), escape 360° RTM table cells, make `switchTab()` deterministic without relying on `event.target`, deduplicate canonical architecture views (`CMP-*`, `ADR-*`, `SEC-ENC-*`), exclude build/output folders (`bin`, `obj`, `build`, `out`, `target`, `coverage`) and `specs/changes/` from graph/test scanning, and link canonical schema relationships (`supporting-actors`, `governed-by`, `targets-use-case`, `affects-components`, `enforced-by`)
+
 ## 1.3.0
 
 ### Minor Changes
