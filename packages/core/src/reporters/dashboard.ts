@@ -72,7 +72,32 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
     frontmatter: Record<string, any>;
   }
 
+  const NON_GRAPH_TYPES = new Set([
+    'term',
+    'handoff',
+    'agent-handoff',
+    'tasks',
+    'task-plan',
+    'spec-change-proposal',
+    'proposal',
+    'spec-design',
+    'spec-change-design',
+    'design',
+    'delivery-spec',
+    'spec',
+    'pre-merge-audit-report',
+    'user-design-feedback',
+    'release-kpis',
+    'session-telemetry',
+    'license-manifest',
+    'mcp-config',
+    'user-manual',
+    'production-manual',
+    'architecture-glossary',
+  ]);
+
   const scannedArtifactsMap = new Map<string, ScannedArtifact>();
+  const archViewByBasename = new Map<string, ScannedArtifact>();
   const artifactDirs = ['product', 'architecture', 'specs', 'security'];
   for (const dirName of artifactDirs) {
     const fullDirPath = path.join(rootDir, dirName);
@@ -82,6 +107,8 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
           try {
             const fileContent = fs.readFileSync(f, 'utf-8');
             const relPath = path.relative(rootDir, f).replace(/\\/g, '/');
+            if (relPath.includes('/changes/') || relPath.startsWith('changes/')) continue;
+
             const match = fileContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
             if (!match) continue;
             let fm: Record<string, any> = {};
@@ -95,6 +122,21 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
             if (!id) continue;
 
             let type = typeof fm.type === 'string' ? fm.type.trim() : '';
+            if (
+              NON_GRAPH_TYPES.has(type) ||
+              id.startsWith('TERM-') ||
+              id.startsWith('HOF-') ||
+              id.startsWith('AHOF-') ||
+              id.startsWith('CHG-') ||
+              id.startsWith('DSG-') ||
+              id.startsWith('SPEC-') ||
+              id.startsWith('TSK-') ||
+              id.startsWith('UDF-') ||
+              id.startsWith('AUDIT-')
+            ) {
+              continue;
+            }
+
             let layer: GraphNodeLayer = 'product';
 
             if (id.startsWith('JRN-') || type === 'journey') {
@@ -130,9 +172,19 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
             } else if (id.startsWith('SEC-REQ-') || type === 'security-requirement') {
               type = 'security-requirement';
               layer = 'requirement';
-            } else if (id.startsWith('FR-') || id.startsWith('QR-') || id.startsWith('CON-') || type === 'requirement') {
+            } else if (
+              id.startsWith('FR-') ||
+              id.startsWith('QR-') ||
+              id.startsWith('CON-') ||
+              type === 'requirement' ||
+              type === 'functional-requirement' ||
+              type === 'quality-requirement'
+            ) {
               type = 'requirement';
               layer = 'requirement';
+            } else if (id.startsWith('ARCH-') || relPath.includes('architecture/')) {
+              type = 'architecture';
+              layer = 'architecture';
             } else {
               type = type || 'product';
               layer = 'product';
@@ -141,7 +193,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
             const title = typeof fm.title === 'string' ? fm.title.trim() : id;
             const content = fileContent.replace(/^---\r?\n[\s\S]*?\r?\n---/, '').trim();
 
-            scannedArtifactsMap.set(id, {
+            const scannedArt: ScannedArtifact = {
               id,
               type,
               title,
@@ -149,7 +201,13 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
               filePath: relPath,
               content,
               frontmatter: fm,
-            });
+            };
+
+            if (layer === 'architecture' && type === 'architecture') {
+              archViewByBasename.set(path.basename(relPath), scannedArt);
+            } else {
+              scannedArtifactsMap.set(id, scannedArt);
+            }
           } catch {
             // Ignore unparseable files
           }
@@ -164,7 +222,7 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
       (r.archStatus === 'COMPLIANT' || r.archStatus === 'CONFORME') &&
       (r.testStatus === 'COMPLIANT' || r.testStatus === 'CONFORME');
     const status: GraphNodeStatus = isOk ? 'COMPLIANT' : 'ORPHAN';
-    const reqType = r.id.startsWith('SEC-REQ-') ? 'security-requirement' : (r.type || 'requirement');
+    const reqType = r.id.startsWith('SEC-REQ-') ? 'security-requirement' : 'requirement';
 
     nodeMap.set(r.id, {
       id: r.id,
@@ -229,13 +287,16 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
         });
         if (!nodeMap.has(a)) {
           const aType = a.startsWith('CMP-') ? 'component' : a.startsWith('ADR-') ? 'adr' : a.startsWith('SEC-ENC-') ? 'security-enclave' : 'architecture';
+          const viewArt = archViewByBasename.get(a);
           nodeMap.set(a, {
             id: a,
             label: a,
-            title: a,
+            title: viewArt?.title || a,
             type: aType,
             layer: 'architecture',
             status: 'COMPLIANT',
+            filePath: viewArt?.filePath,
+            content: viewArt?.content,
           });
         }
       }
@@ -378,8 +439,42 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
         });
       }
 
+      // Supporting / Secondary Actors
+      const supportingActors = Array.isArray(fm['supporting-actors'])
+        ? fm['supporting-actors']
+        : Array.isArray(fm['secondary-actors'])
+        ? fm['secondary-actors']
+        : [];
+      for (const actorId of supportingActors) {
+        if (typeof actorId === 'string' && actorId.trim()) {
+          const a = actorId.trim();
+          if (!nodeMap.has(a)) {
+            nodeMap.set(a, {
+              id: a,
+              label: a,
+              title: a,
+              type: 'actor',
+              layer: 'product',
+              status: 'COMPLIANT',
+            });
+          }
+          addEdge({
+            id: `edge-${a}-${art.id}`,
+            source: a,
+            target: art.id,
+            label: 'initiates',
+            relation: 'initiates',
+            status: 'COMPLIANT',
+          });
+        }
+      }
+
       // Governed By (Business Rules)
-      const governedBy = Array.isArray(fm['governed-by']) ? fm['governed-by'] : [];
+      const governedBy = Array.isArray(fm['governed-by'])
+        ? fm['governed-by']
+        : Array.isArray(fm['business-rules'])
+        ? fm['business-rules']
+        : [];
       for (const ruleId of governedBy) {
         if (typeof ruleId === 'string' && ruleId.trim()) {
           const r = ruleId.trim();
@@ -455,8 +550,40 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
         });
       }
 
+      // Secondary Threat Actors
+      const secondaryThreatActors = Array.isArray(fm['secondary-actors'])
+        ? fm['secondary-actors']
+        : Array.isArray(fm['supporting-actors'])
+        ? fm['supporting-actors']
+        : [];
+      for (const secActor of secondaryThreatActors) {
+        if (typeof secActor === 'string' && secActor.trim()) {
+          const sa = secActor.trim();
+          if (!nodeMap.has(sa)) {
+            nodeMap.set(sa, {
+              id: sa,
+              label: sa,
+              title: sa,
+              type: sa.startsWith('ACT-THREAT-') ? 'threat-actor' : 'actor',
+              layer: 'product',
+              status: 'COMPLIANT',
+            });
+          }
+          addEdge({
+            id: `edge-${sa}-${art.id}`,
+            source: sa,
+            target: art.id,
+            label: 'threatens',
+            relation: 'threatens',
+            status: 'COMPLIANT',
+          });
+        }
+      }
+
       // Targets Use Cases
-      const rawTargets = fm['targets-use-case']
+      const rawTargets = Array.isArray(fm['targets-use-case'])
+        ? fm['targets-use-case']
+        : typeof fm['targets-use-case'] === 'string'
         ? [fm['targets-use-case']]
         : Array.isArray(fm['targets-use-cases'])
         ? fm['targets-use-cases']
@@ -532,6 +659,50 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
             relation: 'mitigated-by',
             status: 'COMPLIANT',
           });
+        }
+      }
+    } else if (art.type === 'adr') {
+      // Affects Components (from schemas/architecture/adr.schema.json)
+      const affectedComponents = Array.isArray(fm['affects-components'])
+        ? fm['affects-components']
+        : typeof fm['affects-components'] === 'string'
+        ? [fm['affects-components']]
+        : [];
+      for (const cmpId of affectedComponents) {
+        if (typeof cmpId === 'string' && cmpId.trim()) {
+          const c = cmpId.trim();
+          if (nodeMap.has(c)) {
+            addEdge({
+              id: `edge-${art.id}-${c}`,
+              source: art.id,
+              target: c,
+              label: 'governs',
+              relation: 'governs',
+              status: 'COMPLIANT',
+            });
+          }
+        }
+      }
+    } else if (art.type === 'security-enclave') {
+      // Enforced By Security Requirements (from schemas/security/enclave.schema.json)
+      const enforcedBy = Array.isArray(fm['enforced-by'])
+        ? fm['enforced-by']
+        : typeof fm['enforced-by'] === 'string'
+        ? [fm['enforced-by']]
+        : [];
+      for (const secReq of enforcedBy) {
+        if (typeof secReq === 'string' && secReq.trim()) {
+          const s = secReq.trim();
+          if (nodeMap.has(s)) {
+            addEdge({
+              id: `edge-${s}-${art.id}`,
+              source: s,
+              target: art.id,
+              label: 'satisfies',
+              relation: 'satisfies',
+              status: 'COMPLIANT',
+            });
+          }
         }
       }
     }
@@ -718,6 +889,15 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#39;');
 }
 
+function safeJsonForScript(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
 function renderAutonomyModeSection(
   mode: string,
   statusIcon: string,
@@ -845,7 +1025,7 @@ export function renderDashboardHtml(
   title: string = 'AI-SDLC: Dashboard Interactivo de Trazabilidad y Calidad'
 ): string {
   const cytoscapeScript = getCytoscapeScript();
-  const elementsJson = JSON.stringify(graphData.elements);
+  const elementsJson = safeJsonForScript(graphData.elements);
   const now = new Date().toISOString();
 
   return `<!DOCTYPE html>
@@ -853,7 +1033,7 @@ export function renderDashboardHtml(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title}</title>
+  <title>${escapeHtml(title)}</title>
   <style>
     :root {
       --bg-dark: #0f172a;
@@ -1230,12 +1410,12 @@ export function renderDashboardHtml(
                 (r.archStatus === 'COMPLIANT' || r.archStatus === 'CONFORME') &&
                 (r.testStatus === 'COMPLIANT' || r.testStatus === 'CONFORME');
               return `
-              <tr onclick="focusNode('${r.id}')" onmouseenter="startRowTooltip(event, '${r.id}')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
-                <td><strong><code>${r.id}</code></strong></td>
-                <td>${r.title}</td>
-                <td><code>${r.productTraces}</code></td>
-                <td><code>${r.archTraces}</code></td>
-                <td><code>${r.testTraces}</code></td>
+              <tr onclick="focusNode('${escapeHtml(String(r.id || ''))}')" onmouseenter="startRowTooltip(event, '${escapeHtml(String(r.id || ''))}')" onmouseleave="cancelRowTooltip()" onmousemove="updateRowTooltipPos(event)" style="cursor: pointer;">
+                <td><strong><code>${escapeHtml(String(r.id || ''))}</code></strong></td>
+                <td>${escapeHtml(String(r.title || ''))}</td>
+                <td><code>${escapeHtml(String(r.productTraces || ''))}</code></td>
+                <td><code>${escapeHtml(String(r.archTraces || ''))}</code></td>
+                <td><code>${escapeHtml(String(r.testTraces || ''))}</code></td>
                 <td><span class="badge ${isRowOk ? 'badge-green' : 'badge-amber'}">${isRowOk ? 'COMPLIANT' : 'ORPHAN'}</span></td>
               </tr>
             `}).join('')}
@@ -1447,7 +1627,7 @@ export function renderDashboardHtml(
   </script>
   <script>
     var elements = ${elementsJson};
-    var govTasks = ${JSON.stringify(metricsData.gov.tasks || [])};
+    var govTasks = ${safeJsonForScript(metricsData.gov.tasks || [])};
     var cy = null;
 
     var reqHoverTimer = null;
@@ -2080,9 +2260,10 @@ export function renderDashboardHtml(
 
     function switchTab(name) {
       hideTooltip();
-      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.tab-btn').forEach(function(b) {
+        b.classList.toggle('active', b.getAttribute('onclick') === "switchTab('" + name + "')");
+      });
       document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-      event.target?.classList?.add('active');
       var p = document.getElementById('tab-' + name);
       if (p) p.classList.add('active');
       if (name === 'graph' && cy) {

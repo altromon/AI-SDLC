@@ -108,10 +108,18 @@ const SKIPPED_DIR_NAMES = new Set([
   'node_modules',
   '.git',
   'dist',
+  'bin',
+  'obj',
+  'build',
+  'out',
+  'target',
+  'coverage',
   'scratch',
   'fixtures',
   'templates',
   'examples',
+  '.vs',
+  '.idea',
 ]);
 
 function shouldSkipDir(name: string): boolean {
@@ -219,7 +227,7 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
   // 1. Index all markdown artifacts
   const artifactMap = new Map<string, ArtifactEntry>();
   const componentsList: ComponentEntry[] = [];
-  const architectureViews: { file: string; content: string }[] = [];
+  const architectureViews: { file: string; id?: string; type?: string; content: string }[] = [];
 
   for (const file of allMdFiles) {
     try {
@@ -271,7 +279,12 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
         relFile.includes('08_security_concept') ||
         relFile.includes('09_decisions')
       ) {
-        architectureViews.push({ file: relFile, content });
+        architectureViews.push({
+          file: relFile,
+          id: frontmatter.id ? String(frontmatter.id).trim() : undefined,
+          type: typeof frontmatter.type === 'string' ? frontmatter.type.trim() : undefined,
+          content,
+        });
       }
     } catch {
       // Ignore unparseable files
@@ -421,8 +434,15 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     // Check arc42 / NAF v4 views for direct citations
     for (const view of architectureViews) {
       if (view.content.includes(reqId)) {
-        const viewName = path.basename(view.file);
-        if (!archTraces.includes(viewName)) archTraces.push(viewName);
+        const isEntityWithId =
+          view.type === 'component' ||
+          view.type === 'adr' ||
+          view.type === 'architecture-decision-record' ||
+          view.type === 'security-enclave' ||
+          (view.id !== undefined &&
+            (view.id.startsWith('CMP-') || view.id.startsWith('ADR-') || view.id.startsWith('SEC-ENC-')));
+        const viewIdentifier = isEntityWithId && view.id ? view.id : path.basename(view.file);
+        if (!archTraces.includes(viewIdentifier)) archTraces.push(viewIdentifier);
       }
     }
 

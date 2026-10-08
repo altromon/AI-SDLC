@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 1.3.1
+
+### Patch Changes
+
+- fix(mcp): include `<script>` JSON sanitization, build folder exclusion, and canonical PDaC graph deduplication in `report_dashboard`, `report`, and `verify_*` MCP tools
+- Updated dependencies
+  - @aisdlc/core@1.3.1
+
 ## 1.3.0
 
 ### Minor Changes

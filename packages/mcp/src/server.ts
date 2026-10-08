@@ -15,7 +15,7 @@ export interface CreateMcpServerOptions extends RegisterToolsOptions, RegisterRe
 export function createMcpServer(options: CreateMcpServerOptions = {}): McpServer {
   const server = new McpServer({
     name: options.name || 'ai-sdlc-mcp-server',
-    version: options.version || '1.3.0',
+    version: options.version || '1.3.1',
   });
 
   registerAllTools(server, options);
