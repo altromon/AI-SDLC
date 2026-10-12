@@ -32,7 +32,7 @@ Before finalizing changes or proposing commits:
 ## 4. Specialized Roles Mapping
 | Role | Mission (summary) |
 | :--- | :--- |
-| `agent-product-analyst` | ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); status starts `draft`. |
+| `agent-product-analyst` | Product inception (`ARCH-INTRO-*`) & ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); status starts `draft`. |
 | `agent-threat-modeler` | STRIDE/OWASP threat triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`). |
 | `agent-system-architect` | Modular arc42 + NAF v4 architecture (`CMP-*`, Mermaid diagrams, `ADR-*`). |
 | `agent-qa-engineer` | FAILING BDD/Gherkin suites before `agent-developer` writes code. |

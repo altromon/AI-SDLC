@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 1.3.2
+
+### Patch Changes
+
+- feat(inception): elevate `ARCH-INTRO-*` (`introduction-and-goals.template.md`, NAF v4 Enterprise & Capability / arc42 Sec. 1) as the Phase 0 Greenfield Product Inception artifact in `minimal` architecture mode, register `introduction-and-goals.schema.json` in `TYPE_TO_SCHEMA_MAP` / `PREFIX_TAXONOMY`, instruct `agent-product-analyst` to run a structured discovery interview and derive initial ProductShape artifacts, and integrate `ARCH-INTRO-*` (`architecture-introduction`) as the root upstream vision node (`identifies`, `envisions`, `defines-goal`) in `buildGraphElements`, `verifyTraceability`, and the interactive Dashboard
+
 ## 1.3.1
 
 ### Patch Changes

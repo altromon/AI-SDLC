@@ -793,6 +793,7 @@ export interface PromptInjectionFinding {
 export type GraphNodeLayer = 'product' | 'requirement' | 'architecture' | 'test';
 export type GraphNodeStatus = 'COMPLIANT' | 'ORPHAN' | 'DRIFT' | 'REVIEW' | 'CONFORME' | 'HUÉRFANO';
 export type GraphNodeType =
+  | 'architecture-introduction'
   | 'journey'
   | 'actor'
   | 'threat-actor'

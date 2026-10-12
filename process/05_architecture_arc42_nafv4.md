@@ -198,14 +198,14 @@ To prevent manually copying or deleting templates depending on project complexit
 npx aisdlc init
 
 # Initialization with explicit granularity (unattended or CI/CD):
-npx aisdlc init --arch minimal    # [Recommended] Components (CMP-*) and decisions (ADR-*) only
+npx aisdlc init --arch minimal    # [Recommended] Vision (ARCH-INTRO-*), components (CMP-*), and decisions (ADR-*)
 npx aisdlc init --arch full       # Full 12-section arc42 + NAF v4 catalog (13 templates)
 npx aisdlc init --arch none       # No architecture templates (scripts, utilities, or simple libs)
 ```
 
 | Granularity Level | Templates Deployed in `templates/architecture/` | Recommended Use Cases | RTM Compliance |
 |---|---|---|---|
-| **`minimal`** *(Default)* | `component.template.md`, `adr.template.md` | Microservices, APIs, libraries, standard SaaS, and agile development. | **100% RTM Traceability**. Allows mapping `CMP-*` to `UC-*` and `FR-*`, and documenting `ADR-*` without documentation overhead. |
+| **`minimal`** *(Default)* | `introduction-and-goals.template.md`, `component.template.md`, `adr.template.md` | Microservices, APIs, libraries, standard SaaS, and agile development. | **100% RTM Traceability & Phase 0 Vision**. Captures NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`), maps `CMP-*` to `UC-*` and `FR-*`, and documents `ADR-*` without documentation overhead. |
 | **`full` / `complete`** | 13 complete templates (Sections 1 to 12 arc42 + NAF v4) | Critical systems (defense, aerospace, banking/fintech, telecoms, multi-container platforms). | Exhaustive formal rigor across all perspectives (Capabilities, Operational, Deployment, Risks). |
 | **`none`** | No templates deployed in `templates/architecture/` | Internal CLI tools, support scripts, or utilities without formal architecture. | Projects exempt from formal component modeling. |
 

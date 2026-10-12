@@ -20,7 +20,7 @@ export async function promptForArchitecture(): Promise<string> {
   });
 
   console.log(pc.bold(pc.cyan('\n🏛️  [AI-SDLC] Architecture Granularity Level:')));
-  console.log('  1) ' + pc.green('Minimal / Baseline') + ' (CMP-* Components and ADR-* Decisions only) ' + pc.yellow('[Recommended for microservices and CLI]'));
+  console.log('  1) ' + pc.green('Minimal / Baseline') + ' (ARCH-INTRO-* Vision, CMP-* Components, and ADR-* Decisions) ' + pc.yellow('[Recommended for microservices and CLI]'));
   console.log('  2) ' + pc.cyan('Full / arc42 + NAF v4') + ' (12 complete architecture sections)');
   console.log('  3) ' + pc.gray('None') + ' (No architecture templates)');
 
@@ -142,7 +142,7 @@ export function runInit(
         result.architectureGranularity === 'full' || result.architectureGranularity === 'complete'
           ? 'Full (arc42 + NAF v4, 12 sections)'
           : result.architectureGranularity === 'minimal'
-          ? 'Minimal / Baseline (CMP-* and ADR-*)'
+          ? 'Minimal / Baseline (ARCH-INTRO-*, CMP-* and ADR-*)'
           : 'None';
       console.log(pc.cyan(`\n  ✔ Architecture granularity: ${pc.bold(label)}`));
     }

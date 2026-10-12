@@ -10,36 +10,44 @@ A backlog is a temporary work queue: it dictates what to do next, but never defi
 
 ## 2. Product Artifact Families
 
-Each artifact represents a node in the graph and declares its relationships via typed metadata in its frontmatter:
+Each artifact represents a node in the graph and declares its relationships via typed metadata in its frontmatter, anchored upstream by the **NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`)**:
 
 ```
-                  ┌──────────────────────┐
-                  │     ACTOR (ACT)      │
-                  └──────────┬───────────┘
-                             │ pursues
-                             ▼
-                  ┌──────────────────────┐
-                  │    JOURNEY (JRN)     │
-                  └──────────┬───────────┘
-                             │ decomposes into
-                             ▼
-                  ┌──────────────────────┐
-                  │    USE CASE (UC)     │
-                  └──────┬────────┬──────┘
-                         │        │
-           governed by   │        │ derives into
-                         ▼        ▼
-       ┌────────────────────┐   ┌───────────────────────────────┐
-       │ BUSINESS RULE (BR) │   │ REQUIREMENTS (FR, QR, CON)   │
-       └─────────┬──────────┘   └───────────────────────────────┘
-                 │ uses
-                 ▼
-       ┌────────────────────┐
-       │ DOMAIN TERM (TERM) │ ─── defined in ──► BOUNDED CONTEXT (BC)
-       └────────────────────┘
+          ┌──────────────────────────────────────────────┐
+          │ ENTERPRISE & CAPABILITY VISION (ARCH-INTRO)  │
+          │         (NAF v4 Concept / Phase 0)           │
+          └───────┬──────────────┬───────────────┬───────┘
+                  │ identifies   │ defines MVP   │ sets priority
+                  ▼              │ capabilities  │ quality goals
+          ┌───────────────┐      │               │
+          │  ACTOR (ACT)  │      │               │
+          └───────┬───────┘      │               │
+                  │ pursues      │               │
+                  ▼              │               │
+          ┌───────────────┐      │               │
+          │ JOURNEY (JRN) │      │               │
+          └───────┬───────┘      │               │
+                  │ decomposes   │               │
+                  ▼              ▼               │
+          ┌──────────────────────────────┐       │
+          │        USE CASE (UC)         │       │
+          └───────┬──────────────┬───────┘       │
+                  │              │               │
+    governed by   │              │ derives into  │
+                  ▼              ▼               ▼
+┌────────────────────┐   ┌───────────────────────────────┐
+│ BUSINESS RULE (BR) │   │ REQUIREMENTS (FR, QR, CON)   │
+└─────────┬──────────┘   └───────────────────────────────┘
+          │ uses
+          ▼
+┌────────────────────┐
+│ DOMAIN TERM (TERM) │ ─── defined in ──► BOUNDED CONTEXT (BC)
+└────────────────────┘
 ```
 
 ### Family Breakdown:
+0. **Enterprise & Capability Vision (`ARCH-INTRO-*` — Phase 0 / NAF v4 Concept)**:
+   - Captures the executive product intent at inception (`templates/architecture/introduction-and-goals.template.md`, validated by `schemas/architecture/introduction-and-goals.schema.json`): mission statement, core problem solved, primary stakeholders (`ACT-*`), core MVP capabilities (`UC-*`), and top 3–5 priority quality goals (`QR-*`).
 1. **Actors (`ACT-*`)**:
    - Who or what interacts with the product to achieve an outcome (users, external systems, sensors).
 2. **Journeys (`JRN-*`)**:
@@ -77,29 +85,42 @@ To prevent inconsistencies and broken reciprocal links:
 
 ---
 
-## 4. Product Operations Cycle
+## 4. Product Operations Cycle (Phase 0 Inception & Evolution)
+
+### A. Phase 0: Greenfield Product Inception (Creating a New Product)
+When starting a new product from scratch (or when `specs/product/` has no baseline product model yet), `agent-product-analyst` executes a structured inception flow before any feature change (`change:new`) or code is written:
+1. **Structured Discovery Interview (3–5 Questions)**: The agent interviews the human Product Owner on:
+   - Core problem, mission statement, and value proposition.
+   - Primary stakeholders and actors (`ACT-*`).
+   - Essential MVP capabilities (`UC-*`) vs. future roadmap.
+   - Top 3–5 priority quality goals (`QR-*`) and constraints (`CON-*`).
+2. **Enterprise & Capability Vision (`ARCH-INTRO-001`)**: Instantiates `templates/architecture/introduction-and-goals.template.md` (`naf-perspective: "Enterprise & Capability"`, `status: draft`).
+3. **Initial ProductShape Baseline Derivation**: Derives draft `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` artifacts (`status: draft`) linked to `ARCH-INTRO-001` for human review and approval.
+
+### B. Continuous Product Evolution Cycle
 
 ```text
- Idea / Need
-     │
-     ▼
- ps:explore ────────────► AI Agent reasons over existing graph,
-     │                   identifies gaps, and refines proposal
-     ▼
+  Idea / Need (or Phase 0 New Product Intent)
+      │
+      ▼
+  ps:explore ────────────► agent-product-analyst conducts 3-5 question
+      │                   discovery (if new product -> ARCH-INTRO-001) or
+      │                   reasons over existing graph to identify gaps
+      ▼
 Product Change ─────────► changes/active/<chg-id>/: semantic delta with
-     │                   proposed artifacts in their future state
-     ▼
+      │                   proposed artifacts in their future state
+      ▼
 change validate ────────► Validates overlay on baseline without touching
-     │                   canonical files (100% deterministic)
-     ▼
-   Approval ────────────► A human (Product Owner) reviews and approves.
-     │                   No AI can perform this action.
-     ▼
- change apply ──────────► Applies changes to working branch and archives
-     │                   proposal. Materialized, not accepted.
-     ▼
- Pull Request ──────────► CI validates complete graph; human review and merge.
-                         The merge is formal baseline acceptance.
+      │                   canonical files (100% deterministic)
+      ▼
+    Approval ────────────► A human (Product Owner) reviews and approves.
+      │                   No AI can perform this action.
+      ▼
+  change apply ──────────► Applies changes to working branch and archives
+      │                   proposal. Materialized, not accepted.
+      ▼
+  Pull Request ──────────► CI validates complete graph; human review and merge.
+                          The merge is formal baseline acceptance.
 ```
 
 ---

@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 1.3.2
+
+### Patch Changes
+
+- feat(mcp): support `ARCH-INTRO-*` schema verification, minimal architecture scaffolding, and root vision node rendering in `new`, `verify_schemas`, `verify_traceability`, and `report_dashboard` MCP tools
+- Updated dependencies
+  - @aisdlc/core@1.3.2
+
 ## 1.3.1
 
 ### Patch Changes

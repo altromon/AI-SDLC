@@ -776,7 +776,7 @@ export const ALL_ARCHITECTURE_TEMPLATES: ArchTemplateDef[] = [
   { filename: "cross-cutting-concepts.template.md", content: STARTER_ARCH_CROSS_CUTTING_CONCEPTS, isMinimal: false },
   { filename: "deployment-view.template.md", content: STARTER_ARCH_DEPLOYMENT_VIEW, isMinimal: false },
   { filename: "glossary.template.md", content: STARTER_ARCH_GLOSSARY, isMinimal: false },
-  { filename: "introduction-and-goals.template.md", content: STARTER_ARCH_INTRODUCTION_AND_GOALS, isMinimal: false },
+  { filename: "introduction-and-goals.template.md", content: STARTER_ARCH_INTRODUCTION_AND_GOALS, isMinimal: true },
   { filename: "level-1-whitebox.template.md", content: STARTER_ARCH_LEVEL_1_WHITEBOX, isMinimal: false },
   { filename: "quality-requirements.template.md", content: STARTER_ARCH_QUALITY_REQUIREMENTS, isMinimal: false },
   { filename: "risks-and-technical-debt.template.md", content: STARTER_ARCH_RISKS_AND_TECHNICAL_DEBT, isMinimal: false },

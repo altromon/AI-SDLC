@@ -272,12 +272,16 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
         }
       }
 
-      // Collect arc42 / NAF v4 architecture views
+      // Collect arc42 / NAF v4 midstream architecture views (excluding Phase 0 ARCH-INTRO-* upstream vision)
+      const isArchIntro =
+        frontmatter.type === 'architecture-introduction' ||
+        (frontmatter.id !== undefined && String(frontmatter.id).trim().startsWith('ARCH-INTRO-'));
       if (
-        relFile.includes('architecture/') ||
-        relFile.includes('06_runtime_view') ||
-        relFile.includes('08_security_concept') ||
-        relFile.includes('09_decisions')
+        !isArchIntro &&
+        (relFile.includes('architecture/') ||
+          relFile.includes('06_runtime_view') ||
+          relFile.includes('08_security_concept') ||
+          relFile.includes('09_decisions'))
       ) {
         architectureViews.push({
           file: relFile,
@@ -400,6 +404,16 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
       }
       if (associatedHandoff.subgraph?.abuseCases) {
         productTraces.push(...associatedHandoff.subgraph.abuseCases);
+      }
+    }
+
+    // From ARCH-INTRO-* (NAF v4 Enterprise & Capability Vision citing quality goals)
+    for (const [artId, artEntry] of artifactMap.entries()) {
+      if (artEntry.type === 'architecture-introduction' || artId.startsWith('ARCH-INTRO-')) {
+        const citedGoals = artEntry.frontmatter['cites-quality-goals'];
+        if (Array.isArray(citedGoals) && citedGoals.includes(reqId)) {
+          productTraces.push(artId);
+        }
       }
     }
 

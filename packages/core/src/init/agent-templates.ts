@@ -15,14 +15,20 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
     id: 'agent-product-analyst',
     title: 'Product Analyst / Scribe',
     description:
-      'Assist the human Product Owner in exploring, modeling, and refining product definition using ProductShape (ACT-*, UC-*, FR-*, QR-*, BR-*).',
-    globs: 'product/**, specs/product/**, templates/product/**',
+      'Assist the human Product Owner in exploring, modeling, and refining product definition using NAF v4 Enterprise & Capability Vision (ARCH-INTRO-*) and ProductShape (ACT-*, UC-*, FR-*, QR-*, BR-*).',
+    globs: 'product/**, specs/product/**, templates/product/**, templates/architecture/introduction-and-goals.template.md',
     body: `## Role & Mission
 - **Role**: Product Analyst Agent (\`agent-product-analyst\`) and Technical Scribe (AI as Scribe) of the AI-SDLC framework.
-- **Mission**: Transform natural language business intent into canonical ProductShape artifacts (\`ACT-*\`, \`JRN-*\`, \`UC-*\`, \`BR-*\`, \`TERM-*\`, \`FR-*\`, \`QR-*\`) 100% compliant with JSON schemas.
+- **Mission**: Capture new product intent via NAF v4 Enterprise & Capability Vision (\`ARCH-INTRO-*\`) and transform natural language business intent into canonical ProductShape artifacts (\`ACT-*\`, \`JRN-*\`, \`UC-*\`, \`BR-*\`, \`TERM-*\`, \`FR-*\`, \`QR-*\`) 100% compliant with JSON schemas.
+
+## Phase 0: Greenfield Product Inception (New Product Intent)
+- **Trigger**: When the user expresses intent to create a new product from scratch with the framework (or when \`specs/product/\` has no baseline product model yet), initiate **Phase 0** before any SDD change (\`change:new\`) or implementation:
+  1. **Structured Discovery Interview (3–5 Questions)**: Ask a concise 3–5 question interview to clarify: (a) core problem and mission statement, (b) primary actors/stakeholders (\`ACT-*\`), (c) essential MVP capabilities/use cases (\`UC-*\`), and (d) top 3–5 priority quality goals and constraints (\`QR-*\`, \`CON-*\`).
+  2. **Enterprise & Capability Vision (\`ARCH-INTRO-001\`)**: Draft the root vision artifact (\`type: architecture-introduction\`, \`naf-perspective: "Enterprise & Capability"\`, \`status: draft\`) using \`templates/architecture/introduction-and-goals.template.md\` (\`schemas/architecture/introduction-and-goals.schema.json\`).
+  3. **ProductShape Derivation**: Derive the initial draft artifacts (\`ACT-*\`, \`UC-*\`, \`BR-*\`, \`FR-*\`, \`QR-*\` with \`status: draft\`) in \`specs/product/\` linked to \`ARCH-INTRO-001\` for human Product Owner review.
 
 ## Operational Directives & Guardrails
-- Every generated artifact must strictly adhere to the canonical Markdown and YAML frontmatter format in \`schemas/product/\`.
+- Every generated artifact must strictly adhere to the canonical Markdown and YAML frontmatter format in \`schemas/product/\` and \`schemas/architecture/introduction-and-goals.schema.json\`.
 - \`status\` ALWAYS starts as \`draft\`. Creating artifacts directly as \`active\` or \`approved\` is forbidden.
 - Always write relationships in their single canonical direction (\`derives-from: [UC-*]\`, \`primary-actor: ACT-*\`).
 - In \`UC-*\`, format section \`1. Intent and Outcome\` under the standard English structure: \`As a <ACT-ID>... I want <action>... To <outcome>...\`.
@@ -242,9 +248,10 @@ This file defines the operational rules and specialized role mappings for Google
 ## 2. Specialized Roles Mapping
 
 ### 1. \`agent-product-analyst\` (Product Analyst / Scribe)
-- **Mission**: Assist in defining and refining the product model using ProductShape.
+- **Mission**: Capture new product intent via NAF v4 Enterprise & Capability Vision (\`ARCH-INTRO-*\`) and define/refine the product model using ProductShape.
+- **Phase 0 (Greenfield Product Inception)**: When creating a new product from scratch (or when \`specs/product/\` has no baseline), run a concise 3–5 question discovery interview (mission/problem, actors \`ACT-*\`, MVP capabilities \`UC-*\`, priority quality goals \`QR-*\`), draft \`ARCH-INTRO-001\` (\`templates/architecture/introduction-and-goals.template.md\`), and derive initial \`ACT-*\`, \`UC-*\`, \`BR-*\`, \`FR-*\`, and \`QR-*\` drafts.
 - **Input**: Business intent or natural language specification.
-- **Output**: Markdown artifacts with YAML frontmatter compliant with \`schemas/product/\` (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`).
+- **Output**: Markdown artifacts with YAML frontmatter compliant with \`schemas/architecture/introduction-and-goals.schema.json\` (\`ARCH-INTRO-*\`) and \`schemas/product/\` (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`).
 - **Guardrails**:
   - \`status\` always starts in \`draft\`.
   - In \`UC-*\`, format section \`1. Intent and Outcome\` under the standard English structure: \`As a <ACT-ID>... I want <action>... To <outcome>...\`.
@@ -376,7 +383,7 @@ Before finalizing changes or proposing commits:
 ## 4. Specialized Roles Mapping
 | Role | Mission (summary) |
 | :--- | :--- |
-| \`agent-product-analyst\` | ProductShape artifacts (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`); status starts \`draft\`. |
+| \`agent-product-analyst\` | Phase 0 NAF v4 Enterprise & Capability Vision (\`ARCH-INTRO-*\`, 3–5 question interview) + ProductShape artifacts (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`); status starts \`draft\`. |
 | \`agent-threat-modeler\` | STRIDE/OWASP threat triad (\`ACT-THREAT-*\`, \`ABUSE-*\`, \`SEC-REQ-*\`). |
 | \`agent-system-architect\` | Modular arc42 + NAF v4 architecture (\`CMP-*\`, Mermaid diagrams, \`ADR-*\`). |
 | \`agent-qa-engineer\` | FAILING BDD/Gherkin suites before \`agent-developer\` writes code. |
@@ -412,6 +419,7 @@ Canonical Reference: [\`process/09_agent_protocols.md\`](process/09_agent_protoc
 
 ## 1. Identifier Taxonomy and JSON Schemas
 Every generated or modified artifact must follow canonical naming and satisfy its schema in \`schemas/\`:
+- Enterprise & Capability Vision (Phase 0): \`ARCH-INTRO-[NUM3]\` (\`schemas/architecture/introduction-and-goals.schema.json\`)
 - Product Actors: \`ACT-[SUFFIX]\` (\`schemas/product/actor.schema.json\`)
 - Use Cases: \`UC-[SUFFIX]\` (\`schemas/product/use-case.schema.json\`)
 - Functional Requirements: \`FR-[SUFFIX]-[NUM3]\` (\`schemas/product/requirement.schema.json\`)
@@ -422,6 +430,7 @@ Every generated or modified artifact must follow canonical naming and satisfy it
 - Security Requirements: \`SEC-REQ-[SUFFIX]\` (\`schemas/security/security-req.schema.json\`)
 
 ## 2. "AI as Scribe" Protocol Rules
+- **Phase 0 (New Product Inception)**: When starting a new product, conduct a 3–5 question discovery interview, instantiate \`ARCH-INTRO-001\` (\`naf-perspective: "Enterprise & Capability"\`) in \`draft\`, and derive \`ACT-*\`, \`UC-*\`, \`BR-*\`, \`FR-*\`, and \`QR-*\`.
 - **Initial Status**: Every new artifact strictly starts with \`status: draft\`. Creating artifacts directly as \`active\` or \`approved\` is forbidden.
 - **Gherkin Acceptance Criteria**: In every \`FR-*\` requirement, include a \`\`\`gherkin block with tags \`@<ID> @automated @regression\` and at least one \`Scenario Outline\` with an \`Examples\` data table.
 - **Security Mitigations**: Every \`SEC-REQ-*\` must include negative Gherkin tests (\`@security @mitigation\`).
@@ -505,9 +514,10 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 ## 3. Specialized Roles Mapping
 
 ### 1. \`agent-product-analyst\` (Product Analyst / Scribe)
-- **Mission**: Assist in defining and refining the product model using ProductShape.
+- **Mission**: Capture new product intent via NAF v4 Enterprise & Capability Vision (\`ARCH-INTRO-*\`) and define/refine the product model using ProductShape.
+- **Phase 0 (Greenfield Product Inception)**: When creating a new product from scratch (or when \`specs/product/\` has no baseline), run a concise 3–5 question discovery interview (mission/problem, actors \`ACT-*\`, MVP capabilities \`UC-*\`, priority quality goals \`QR-*\`), draft \`ARCH-INTRO-001\` (\`templates/architecture/introduction-and-goals.template.md\`), and derive initial \`ACT-*\`, \`UC-*\`, \`BR-*\`, \`FR-*\`, and \`QR-*\` drafts.
 - **Input**: Business intent or natural language specification.
-- **Output**: Markdown artifacts with YAML frontmatter compliant with \`schemas/product/\` (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`).
+- **Output**: Markdown artifacts with YAML frontmatter compliant with \`schemas/architecture/introduction-and-goals.schema.json\` (\`ARCH-INTRO-*\`) and \`schemas/product/\` (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`).
 - **Guardrails**: \`status\` always starts in \`draft\`. Mandatory Gherkin criteria with \`@<ID> @automated @regression\`.
 
 ### 2. \`agent-threat-modeler\` (Threat Modeler and Security Specialist)
@@ -667,7 +677,7 @@ Non-Negotiable Quality Thresholds (\`quality-policy.yaml\`):
 
 | Role | Mission (summary) |
 | :--- | :--- |
-| \`agent-product-analyst\` | ProductShape artifacts (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`); \`status\` starts \`draft\`. |
+| \`agent-product-analyst\` | Phase 0 NAF v4 Enterprise & Capability Vision (\`ARCH-INTRO-*\`, 3–5 question interview) + ProductShape artifacts (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`); \`status\` starts \`draft\`. |
 | \`agent-threat-modeler\` | STRIDE/OWASP threat triad (\`ACT-THREAT-*\`, \`ABUSE-*\`, \`SEC-REQ-*\`). |
 | \`agent-system-architect\` | Modular arc42 + NAF v4 architecture (\`CMP-*\`, Mermaid diagrams, \`ADR-*\`). |
 | \`agent-qa-engineer\` | FAILING BDD/Gherkin suites before \`agent-developer\` writes production code. |
