@@ -139,7 +139,10 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
 
             let layer: GraphNodeLayer = 'product';
 
-            if (id.startsWith('JRN-') || type === 'journey') {
+            if (id.startsWith('ARCH-INTRO-') || type === 'architecture-introduction') {
+              type = 'architecture-introduction';
+              layer = 'product';
+            } else if (id.startsWith('JRN-') || type === 'journey') {
               type = 'journey';
               layer = 'product';
             } else if (id.startsWith('ACT-THREAT-') || type === 'threat-actor') {
@@ -251,16 +254,28 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
       const u = up.trim();
       if (u && u !== 'NINGUNO' && u !== 'NONE') {
         const isAbuse = u.startsWith('ABUSE-');
+        const isArchIntro = u.startsWith('ARCH-INTRO-');
+        const rel = isAbuse ? 'mitigated-by' : isArchIntro ? 'defines-goal' : 'derives-from';
         addEdge({
           id: `edge-${u}-${r.id}`,
           source: u,
           target: r.id,
-          label: isAbuse ? 'mitigated-by' : 'derives-from',
-          relation: isAbuse ? 'mitigated-by' : 'derives-from',
+          label: rel,
+          relation: rel,
           status,
         });
         if (!nodeMap.has(u)) {
-          const upType = u.startsWith('ACT-') ? 'actor' : u.startsWith('UC-') ? 'use-case' : u.startsWith('BR-') ? 'business-rule' : u.startsWith('ABUSE-') ? 'abuse-case' : 'product';
+          const upType = u.startsWith('ARCH-INTRO-')
+            ? 'architecture-introduction'
+            : u.startsWith('ACT-')
+            ? 'actor'
+            : u.startsWith('UC-')
+            ? 'use-case'
+            : u.startsWith('BR-')
+            ? 'business-rule'
+            : u.startsWith('ABUSE-')
+            ? 'abuse-case'
+            : 'product';
           nodeMap.set(u, {
             id: u,
             label: u,
@@ -362,11 +377,89 @@ export function buildGraphElements(rootDir: string = process.cwd()): GraphElemen
     }
   }
 
-  // 5. Connect product graph relationships: Journeys, Actors, Use Cases, Business Rules, Abuse Cases
+  // 5. Connect product graph relationships: Vision (ARCH-INTRO-*), Journeys, Actors, Use Cases, Business Rules, Abuse Cases
   for (const art of scannedArtifactsMap.values()) {
     const fm = art.frontmatter;
 
-    if (art.type === 'journey') {
+    if (art.type === 'architecture-introduction') {
+      // Cites Product Actors (identifies)
+      const citedActors = Array.isArray(fm['cites-product-actors']) ? fm['cites-product-actors'] : [];
+      for (const actId of citedActors) {
+        if (typeof actId === 'string' && actId.trim()) {
+          const a = actId.trim();
+          if (!nodeMap.has(a)) {
+            nodeMap.set(a, {
+              id: a,
+              label: a,
+              title: a,
+              type: 'actor',
+              layer: 'product',
+              status: 'COMPLIANT',
+            });
+          }
+          addEdge({
+            id: `edge-${art.id}-${a}`,
+            source: art.id,
+            target: a,
+            label: 'identifies',
+            relation: 'identifies',
+            status: 'COMPLIANT',
+          });
+        }
+      }
+
+      // Cites Use Cases (envisions)
+      const citedUcs = Array.isArray(fm['cites-use-cases']) ? fm['cites-use-cases'] : [];
+      for (const ucId of citedUcs) {
+        if (typeof ucId === 'string' && ucId.trim()) {
+          const u = ucId.trim();
+          if (!nodeMap.has(u)) {
+            nodeMap.set(u, {
+              id: u,
+              label: u,
+              title: u,
+              type: 'use-case',
+              layer: 'product',
+              status: 'COMPLIANT',
+            });
+          }
+          addEdge({
+            id: `edge-${art.id}-${u}`,
+            source: art.id,
+            target: u,
+            label: 'envisions',
+            relation: 'envisions',
+            status: 'COMPLIANT',
+          });
+        }
+      }
+
+      // Cites Quality Goals (defines-goal)
+      const citedGoals = Array.isArray(fm['cites-quality-goals']) ? fm['cites-quality-goals'] : [];
+      for (const qrId of citedGoals) {
+        if (typeof qrId === 'string' && qrId.trim()) {
+          const q = qrId.trim();
+          if (!nodeMap.has(q)) {
+            nodeMap.set(q, {
+              id: q,
+              label: q,
+              title: q,
+              type: q.startsWith('SEC-REQ-') ? 'security-requirement' : 'requirement',
+              layer: 'requirement',
+              status: 'COMPLIANT',
+            });
+          }
+          addEdge({
+            id: `edge-${art.id}-${q}`,
+            source: art.id,
+            target: q,
+            label: 'defines-goal',
+            relation: 'defines-goal',
+            status: 'COMPLIANT',
+          });
+        }
+      }
+    } else if (art.type === 'journey') {
       // Persona / Actor
       const persona = typeof fm.persona === 'string' ? fm.persona : (typeof fm.actor === 'string' ? fm.actor : undefined);
       if (persona) {
@@ -1336,6 +1429,7 @@ export function renderDashboardHtml(
           <div class="tool-row">
             <select id="type-filter" class="tool-select" onchange="filterType(this.value)">
               <option value="all">All Typologies</option>
+              <option value="architecture-introduction">Vision &amp; Goals (ARCH-INTRO)</option>
               <option value="journey">Journeys (JRN)</option>
               <option value="actor">Actors (ACT)</option>
               <option value="use-case">Use Cases (UC)</option>
@@ -1370,6 +1464,7 @@ export function renderDashboardHtml(
         <div class="graph-legend">
           <div class="legend-header">Node Typologies</div>
           <div class="legend-items">
+            <div class="legend-item"><span class="legend-dot" style="background:#0f766e; border:2px solid #2dd4bf;"></span><strong>Vision / Goals</strong> (ARCH-INTRO)</div>
             <div class="legend-item"><span class="legend-dot" style="background:#581c87; border:2px solid #c084fc;"></span><strong>Journey</strong> (JRN)</div>
             <div class="legend-item"><span class="legend-dot" style="background:#065f46; border:2px solid #34d399; border-radius:50%;"></span><strong>Actor</strong> (ACT)</div>
             <div class="legend-item"><span class="legend-dot" style="background:#0369a1; border:2px solid #38bdf8;"></span><strong>Use Case</strong> (UC)</div>
@@ -1791,6 +1886,19 @@ export function renderDashboardHtml(
           },
           // Typology Styles
           {
+            selector: 'node.type-architecture-introduction',
+            style: {
+              'shape': 'round-rectangle',
+              'background-color': '#0f766e',
+              'border-color': '#2dd4bf',
+              'border-width': 3,
+              'width': 92,
+              'height': 44,
+              'font-weight': 'bold',
+              'text-max-width': '86px'
+            }
+          },
+          {
             selector: 'node.type-journey',
             style: {
               'shape': 'round-rectangle',
@@ -1906,7 +2014,7 @@ export function renderDashboardHtml(
           },
           // Fallback Layer styles if type is missing
           {
-            selector: 'node.layer-product:not(.type-journey):not(.type-actor):not(.type-use-case):not(.type-usecase):not(.type-business-rule):not(.type-rule):not(.type-abuse-case):not(.type-threat-actor)',
+            selector: 'node.layer-product:not(.type-architecture-introduction):not(.type-journey):not(.type-actor):not(.type-use-case):not(.type-usecase):not(.type-business-rule):not(.type-rule):not(.type-abuse-case):not(.type-threat-actor)',
             style: { 'shape': 'diamond', 'background-color': '#0e7490', 'border-color': '#38bdf8', 'width': 50, 'height': 50 }
           },
           {
@@ -1935,6 +2043,10 @@ export function renderDashboardHtml(
             }
           },
           // Semantic Edge Relations
+          {
+            selector: 'edge.relation-identifies, edge.relation-envisions, edge.relation-defines-goal',
+            style: { 'line-color': '#2dd4bf', 'target-arrow-color': '#2dd4bf', 'width': 2 }
+          },
           {
             selector: 'edge.relation-pursues',
             style: { 'line-color': '#c084fc', 'target-arrow-color': '#c084fc', 'width': 2 }
@@ -2075,7 +2187,10 @@ export function renderDashboardHtml(
         var typeName = (data.type || data.layer || 'node').toLowerCase();
         var typeBadgeColor = '#334155';
         var typeTitle = (data.type || data.layer || 'NODE').toUpperCase();
-        if (typeName === 'journey') {
+        if (typeName === 'architecture-introduction') {
+          typeBadgeColor = '#0f766e';
+          typeTitle = 'VISION & GOALS (ARCH-INTRO)';
+        } else if (typeName === 'journey') {
           typeBadgeColor = '#581c87';
           typeTitle = 'JOURNEY (JRN)';
         } else if (typeName === 'actor') {
@@ -2141,6 +2256,11 @@ export function renderDashboardHtml(
       if (!cy) return;
       if (type === 'all') {
         cy.elements().show();
+      } else if (type === 'architecture-introduction') {
+        cy.elements().hide();
+        var nodes = cy.nodes('.type-architecture-introduction');
+        nodes.show();
+        nodes.connectedEdges().show();
       } else if (type === 'journey') {
         cy.elements().hide();
         var nodes = cy.nodes('.type-journey');

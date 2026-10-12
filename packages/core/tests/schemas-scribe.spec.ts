@@ -65,6 +65,7 @@ describe('AI as Scribe & JSON Schema Validation Suite', () => {
     expect(inferArtifactTypeFromId('TEL-SES-DEV-SESSION')).toBe('session-telemetry');
     expect(inferArtifactTypeFromId('AHOF-DEV-TO-QA')).toBe('agent-handoff');
     expect(inferArtifactTypeFromId('MCP-CFG-WORKSPACE')).toBe('mcp-config');
+    expect(inferArtifactTypeFromId('ARCH-INTRO-001')).toBe('architecture-introduction');
   });
 
   it('should validate AI as Scribe generated Product artifacts from natural language prompt', () => {
@@ -592,6 +593,40 @@ unknown-extra-property: "disallowed"
     const mcpResInvalid = validateArtifactSchema(invalidMcpConfig, 'mcp-config', repoRoot);
     expect(mcpResInvalid.valid).toBe(false);
     expect(mcpResInvalid.errors.some((e) => e.includes('command') || e.includes('disallowedProperty'))).toBe(true);
+
+    // 9. architecture-introduction (introduction-and-goals.schema.json)
+    const validArchIntro = {
+      id: 'ARCH-INTRO-001',
+      title: 'Introducción y Metas: Sistema Demo',
+      type: 'architecture-introduction',
+      'naf-perspective': 'Enterprise & Capability',
+      'arc42-section': 1,
+      status: 'draft',
+      owner: 'Product Owner',
+      version: '1.0.0',
+      'cites-product-actors': ['ACT-USER-001'],
+      'cites-quality-goals': ['QR-PERF-001'],
+      'cites-use-cases': ['UC-AUTH-001'],
+    };
+    const archIntroResValid = validateArtifactSchema(validArchIntro, 'architecture-introduction', repoRoot);
+    expect(archIntroResValid.valid).toBe(true);
+    expect(archIntroResValid.errors).toHaveLength(0);
+
+    const invalidArchIntro = {
+      id: 'ARCH-INTRO-INVALID',
+      title: 'Short',
+      type: 'architecture-introduction',
+      'naf-perspective': 'Wrong Perspective',
+      'arc42-section': 2,
+      status: 'draft',
+      owner: 'PO',
+      version: '1.0',
+      'cites-product-actors': [],
+      'cites-quality-goals': [],
+      'cites-use-cases': [],
+    };
+    const archIntroResInvalid = validateArtifactSchema(invalidArchIntro, 'architecture-introduction', repoRoot);
+    expect(archIntroResInvalid.valid).toBe(false);
   });
 
   it('should verify SEC-REQ-DETERMINISTIC-VERIFY schema compliance and cryptographic hashing', () => {

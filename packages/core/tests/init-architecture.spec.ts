@@ -30,23 +30,23 @@ describe('Core initProject: Architecture Granularity Suite', () => {
 
   it('exports valid architecture granularities and helper function', () => {
     expect(VALID_ARCHITECTURE_GRANULARITIES).toEqual(['minimal', 'full', 'complete', 'none']);
-    expect(getArchitectureTemplates('minimal')).toHaveLength(2);
+    expect(getArchitectureTemplates('minimal')).toHaveLength(3);
     expect(getArchitectureTemplates('full')).toHaveLength(13);
     expect(getArchitectureTemplates('complete')).toHaveLength(13);
     expect(getArchitectureTemplates('none')).toHaveLength(0);
   });
 
-  it('scaffolds minimal architecture templates by default (CMP-* and ADR-*)', () => {
+  it('scaffolds minimal architecture templates by default (ARCH-INTRO-*, CMP-* and ADR-*)', () => {
     const result = initProject({ targetDir: tempDir });
     expect(result.success).toBe(true);
     expect(result.architectureGranularity).toBe('minimal');
 
     const archDir = path.join(tempDir, 'templates', 'architecture');
+    expect(fs.existsSync(path.join(archDir, 'introduction-and-goals.template.md'))).toBe(true);
     expect(fs.existsSync(path.join(archDir, 'component.template.md'))).toBe(true);
     expect(fs.existsSync(path.join(archDir, 'adr.template.md'))).toBe(true);
 
     // Advanced arc42 sections must NOT exist in minimal mode
-    expect(fs.existsSync(path.join(archDir, 'introduction-and-goals.template.md'))).toBe(false);
     expect(fs.existsSync(path.join(archDir, 'runtime-view.template.md'))).toBe(false);
     expect(fs.existsSync(path.join(archDir, 'deployment-view.template.md'))).toBe(false);
     expect(fs.existsSync(path.join(archDir, 'quality-requirements.template.md'))).toBe(false);

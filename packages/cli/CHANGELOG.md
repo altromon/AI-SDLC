@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 1.3.2
+
+### Patch Changes
+
+- feat(cli): include `ARCH-INTRO-*` (`introduction-and-goals.template.md`) in `aisdlc init` minimal architecture mode and render `ARCH-INTRO-*` root vision nodes in `aisdlc report dashboard`
+- Updated dependencies
+  - @aisdlc/core@1.3.2
+  - @aisdlc/mcp@1.3.2
+
 ## 1.3.1
 
 ### Patch Changes

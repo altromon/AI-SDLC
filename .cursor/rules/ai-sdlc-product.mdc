@@ -10,6 +10,7 @@ Canonical Reference: [`process/09_agent_protocols.md`](process/09_agent_protocol
 
 ## 1. Identifier Taxonomy and JSON Schemas
 Every generated or modified artifact must follow canonical naming and satisfy its schema in `schemas/`:
+- Enterprise & Capability Vision (Phase 0): `ARCH-INTRO-[NUM3]` (`schemas/architecture/introduction-and-goals.schema.json`)
 - Product Actors: `ACT-[SUFFIX]` (`schemas/product/actor.schema.json`)
 - Use Cases: `UC-[SUFFIX]` (`schemas/product/use-case.schema.json`)
 - Functional Requirements: `FR-[SUFFIX]-[NUM3]` (`schemas/product/requirement.schema.json`)
@@ -20,6 +21,7 @@ Every generated or modified artifact must follow canonical naming and satisfy it
 - Security Requirements: `SEC-REQ-[SUFFIX]` (`schemas/security/security-req.schema.json`)
 
 ## 2. "AI as Scribe" Protocol Rules
+- **Phase 0 (New Product Inception)**: When starting a new product, conduct a 3–5 question discovery interview, instantiate `ARCH-INTRO-001` (`naf-perspective: "Enterprise & Capability"`) in `draft`, and derive `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*`.
 - **Initial Status**: Every new artifact mandatorily starts in `status: draft`. Creating artifacts directly in `active` or `approved` is forbidden.
 - **Gherkin Acceptance Criteria**: In every `FR-*` requirement, include a ```gherkin block with tags `@<ID> @automated @regression` and at least one `Scenario Outline` with an `Examples` data table.
 - **Security Mitigations**: Every `SEC-REQ-*` must include negative tests in Gherkin (`@security @mitigation`).

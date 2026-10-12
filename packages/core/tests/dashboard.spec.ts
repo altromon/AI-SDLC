@@ -207,7 +207,7 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(htmlContent).toMatch(/\.tasks\.md|tasks\.md/);
   });
 
-  it('should discover Journeys, Actors, Business Rules, and Abuse Cases with distinct node typologies and semantic edges', () => {
+  it('should discover Vision (ARCH-INTRO-*), Journeys, Actors, Business Rules, and Abuse Cases with distinct node typologies and semantic edges', () => {
     const rootDir = process.cwd();
     const result = buildGraphElements(rootDir);
 
@@ -215,6 +215,11 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     const edges = result.elements.filter((e) => e.group === 'edges').map((e) => e.data as any);
 
     // Verify node types exist
+    const archIntroNode = nodes.find((n) => n.id === 'ARCH-INTRO-001' || n.type === 'architecture-introduction');
+    expect(archIntroNode).toBeDefined();
+    expect(archIntroNode.type).toBe('architecture-introduction');
+    expect(archIntroNode.layer).toBe('product');
+
     const journeyNode = nodes.find((n) => n.id === 'JRN-UAV-SURVEILLANCE' || n.type === 'journey');
     expect(journeyNode).toBeDefined();
     expect(journeyNode.type).toBe('journey');
@@ -233,6 +238,15 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(abuseNode.type).toBe('abuse-case');
 
     // Verify semantic edges exist
+    const identifiesEdge = edges.find((e) => e.relation === 'identifies' && e.source === 'ARCH-INTRO-001');
+    expect(identifiesEdge).toBeDefined();
+
+    const envisionsEdge = edges.find((e) => e.relation === 'envisions' && e.source === 'ARCH-INTRO-001');
+    expect(envisionsEdge).toBeDefined();
+
+    const definesGoalEdge = edges.find((e) => e.relation === 'defines-goal' && e.source === 'ARCH-INTRO-001');
+    expect(definesGoalEdge).toBeDefined();
+
     const pursuesEdge = edges.find((e) => e.relation === 'pursues');
     expect(pursuesEdge).toBeDefined();
     expect(pursuesEdge.target).toBe('JRN-AI-ASSISTED-SDLC');
@@ -251,11 +265,13 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
 
     // Verify node classes contain type-*
     const nodeElements = result.elements.filter((e) => e.group === 'nodes');
+    const hasTypeArchIntro = nodeElements.some((e) => e.classes?.includes('type-architecture-introduction'));
     const hasTypeJourney = nodeElements.some((e) => e.classes?.includes('type-journey'));
     const hasTypeActor = nodeElements.some((e) => e.classes?.includes('type-actor'));
     const hasTypeRule = nodeElements.some((e) => e.classes?.includes('type-business-rule'));
     const hasTypeAbuse = nodeElements.some((e) => e.classes?.includes('type-abuse-case'));
 
+    expect(hasTypeArchIntro).toBe(true);
     expect(hasTypeJourney).toBe(true);
     expect(hasTypeActor).toBe(true);
     expect(hasTypeRule).toBe(true);
@@ -275,6 +291,7 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     // Visual legend presence
     expect(htmlContent).toContain('class="graph-legend"');
     expect(htmlContent).toContain('Node Typologies');
+    expect(htmlContent).toContain('Vision / Goals');
     expect(htmlContent).toContain('Journey');
     expect(htmlContent).toContain('Actor');
     expect(htmlContent).toContain('Use Case');
@@ -285,18 +302,23 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(htmlContent).toContain('id="type-filter"');
     expect(htmlContent).toContain('All Typologies');
     expect(htmlContent).toContain('filterType(this.value)');
+    expect(htmlContent).toContain('value="architecture-introduction"');
     expect(htmlContent).toContain('value="journey"');
     expect(htmlContent).toContain('value="actor"');
     expect(htmlContent).toContain('value="business-rule"');
     expect(htmlContent).toContain('value="abuse-case"');
 
     // Cytoscape styles for typologies
+    expect(htmlContent).toContain('node.type-architecture-introduction');
     expect(htmlContent).toContain('node.type-journey');
     expect(htmlContent).toContain('node.type-actor');
     expect(htmlContent).toContain('node.type-business-rule');
     expect(htmlContent).toContain('node.type-abuse-case');
 
     // Edge relation styles
+    expect(htmlContent).toContain('edge.relation-identifies');
+    expect(htmlContent).toContain('edge.relation-envisions');
+    expect(htmlContent).toContain('edge.relation-defines-goal');
     expect(htmlContent).toContain('edge.relation-pursues');
     expect(htmlContent).toContain('edge.relation-decomposes-into');
     expect(htmlContent).toContain('edge.relation-governs');

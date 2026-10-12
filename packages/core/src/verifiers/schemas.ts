@@ -31,6 +31,7 @@ export const TYPE_TO_SCHEMA_MAP: Record<string, string> = {
   'threat-actor': 'schemas/security/threat-actor.schema.json',
 
   // Architecture
+  'architecture-introduction': 'schemas/architecture/introduction-and-goals.schema.json',
   'architecture-decision-record': 'schemas/architecture/adr.schema.json',
   component: 'schemas/architecture/component.schema.json',
 
@@ -81,6 +82,7 @@ const PREFIX_TAXONOMY: Array<[string, string]> = [
   ['HAZ-', 'hazard'],
   ['SAF-REQ-', 'safety-requirement'],
   ['SAF-', 'safety-requirement'],
+  ['ARCH-INTRO-', 'architecture-introduction'],
   ['ADR-', 'architecture-decision-record'],
   ['CMP-', 'component'],
   ['MAN-USER-', 'user-manual'],

@@ -19,9 +19,10 @@ This file defines the operational rules and specialized role mappings for Google
 ## 2. Specialized Roles Mapping
 
 ### 1. `agent-product-analyst` (Product Analyst / Scribe)
-- **Mission**: Assist in defining and refining the product model using ProductShape.
+- **Mission**: Capture new product intent via NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`) and define/refine the product model using ProductShape.
+- **Phase 0 (Greenfield Product Inception)**: When creating a new product from scratch (or when `specs/product/` has no baseline), run a concise 3–5 question discovery interview (mission/problem, actors `ACT-*`, MVP capabilities `UC-*`, priority quality goals `QR-*`), draft `ARCH-INTRO-001` (`templates/architecture/introduction-and-goals.template.md`), and derive initial `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` drafts.
 - **Input**: Business intent or natural language specification.
-- **Output**: Markdown artifacts with YAML frontmatter compliant with `schemas/product/` (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`).
+- **Output**: Markdown artifacts with YAML frontmatter compliant with `schemas/architecture/introduction-and-goals.schema.json` (`ARCH-INTRO-*`) and `schemas/product/` (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`).
 - **Guardrails**:
   - `status` always starts in `draft`.
   - In `UC-*`, format section `1. Intent and Outcome` under the standard English structure: `As a <ACT-ID>... I want <action>... To <outcome>...`.
