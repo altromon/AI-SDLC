@@ -26,6 +26,7 @@ In the age of AI-assisted engineering, the speed of code authoring is no longer 
 └────────────────────────────────────────────────────────────────────────┘
 
  [1. PRODUCT DEFINITION] (ProductShape - PDaC)
+  ├── Vision & Goals (ARCH-INTRO-* / NAF v4 Enterprise & Capability)
   ├── Actors (ACT-*) & Journeys (JRN-*)
   ├── Use Cases (UC-*) & Business Rules (BR-*)
   └── Bounded Contexts (BC-*) & Requirements (FR-*, QR-*, CON-*)
@@ -95,7 +96,7 @@ AI-SDLC/
 │   ├── product/                              # Schemas: actor, use-case, requirement, business-rule
 │   ├── security/                             # Schemas: threat-actor, abuse-case, security-req
 │   ├── compliance/                           # Schemas: license-policy, dependency-manifest
-│   ├── architecture/                         # Schemas: component, adr
+│   ├── architecture/                         # Schemas: introduction-and-goals, component, adr
 │   ├── sdd/                                  # Schemas: tasks, handoff
 │   └── manuals/                              # Schemas: user-manual, production-manual
 │
@@ -675,10 +676,10 @@ AI-SDLC generates a self-contained interactive web dashboard and dependency grap
 
 ### 1. Key Features
 - **PDaC / RTM Network Visualizer**:
-  - 4 layers: Product (Upstream), Requirements, Architecture (Midstream), and BDD Tests (Downstream).
+  - 4 layers: Product (Upstream: root Vision / Goals `ARCH-INTRO-*` with `identifies`, `envisions`, and `defines-goal` edges, plus `JRN-*`, `ACT-*`, `UC-*`, `BR-*`), Requirements (`FR-*`, `QR-*`, `SEC-REQ-*`), Architecture (Midstream: `CMP-*`, `ADR-*`, `SEC-ENC-*`), and BDD Tests (Downstream: `.feature`).
   - Deterministic health status: Green (compliant) vs. Red (orphans or SHA-256 drift).
   - **Critical Path Highlighting**: Clicking any node illuminates its full upstream and downstream dependency chain.
-  - Live filters by layer and health, auto-focus search, and multiple layout algorithms.
+  - Live filters by layer, typology (including `Vision / Goals (ARCH-INTRO)`), and health, auto-focus search, and multiple layout algorithms.
 - **360° Traceability Matrix Table**: Interactive table with bidirectional graph navigation.
 - **Quality & Autonomy Governance Metrics**: Executive cards (SEI MI, average CC, Release Gate verdict) and autonomy mode distribution.
 - **Telemetry and Historical KPIs**: Active branch metrics and historical trends tracking KLoC, bugs, DIR, and rework from `reports/releases/*.kpis.json`.
@@ -760,15 +761,16 @@ AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@aisdlc/
 
 ## 🚀 Quick Guide for Human Teams
 
-1. **Define Product Intent**:
+1. **Define Product Intent (Phase 0 Inception & ProductShape)**:
+   - Establish the Enterprise & Capability Vision (`ARCH-INTRO-*`) using `templates/architecture/introduction-and-goals.template.md` (for new Greenfield products or Brownfield retro-inception).
    - Use `templates/product/` to model Actors (`ACT-*`), Use Cases (`UC-*`), and Business Rules (`BR-*`).
-   - Collaborate with analyst agents (`ps:explore`) to surface gaps and derived requirements (`FR-*`, `QR-*`).
+   - Collaborate with analyst agents (`agent-product-analyst` / `ps:explore`) to run a 3–5 question discovery interview, surface gaps, and derive requirements (`FR-*`, `QR-*`).
 2. **Incorporate Shift-Left Cybersecurity**:
    - Model threat actors (`ACT-THREAT-*`) and abuse cases (`ABUSE-*`).
    - Define security requirements (`SEC-REQ-*`) and Zero Trust boundaries before technical design.
 3. **Model arc42 / NAF v4 Architecture**:
    - Use templates in `templates/architecture/` according to selected granularity (`aisdlc init --arch minimal|full|none`).
-   - Standard projects (`minimal`) model components (`CMP-*`) and ADRs (`ADR-*`). Critical projects (`full`) cover all 12 arc42 sections.
+   - Standard projects (`minimal`) model product/system vision & goals (`ARCH-INTRO-*`), components (`CMP-*`), and ADRs (`ADR-*`). Critical projects (`full`) cover all 12 arc42 sections.
    - Each component (`CMP-*`) explicitly cites use cases (`implements-use-cases`) and requirements (`satisfies-requirements`).
 4. **Enforce License Compliance**:
    - Check `license-policy.yaml`. If commercial libraries are needed, file formal requests (`ADR-LIC-*`).
@@ -792,7 +794,7 @@ AI-SDLC defines 10 specialized roles with bounded responsibilities and determini
 
 | Agent Role | Specialty / Mission | Core Deliverables | Critical Guardrails |
 | :--- | :--- | :--- | :--- |
-| **`agent-product-analyst`** | Product Analyst & PDaC Scribe | `ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*` in `specs/product/` | `status: draft`, mandatory Gherkin, zero assumptions. |
+| **`agent-product-analyst`** | Product Analyst & PDaC Scribe | `ARCH-INTRO-*` (Phase 0 Vision), `ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*` | `status: draft`, 3–5 question inception interview, mandatory Gherkin, zero assumptions. |
 | **`agent-threat-modeler`** | Threat Modeling & Shift-Left Security | `ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`, `SEC-ENC-*` | STRIDE / ASVS, negative tests, technical security loop. |
 | **`agent-system-architect`** | arc42 / NAF v4 Systems Architect | `CMP-*`, Mermaid diagrams, `ADR-*` records | Cites `implements-use-cases` and `satisfies-requirements`; returns to threat modeler. |
 | **`agent-qa-engineer`** | QA Engineer & SDET | FAILING BDD suites (nominal, boundary, out of range) | **Zero production code**; blocked if boundary scenarios missing. |

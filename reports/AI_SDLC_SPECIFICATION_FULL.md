@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-09-24 13:04:06 UTC` | *Módulos Integrados:* `13`  
+> *Fecha de Compilación:* `2026-10-12 20:03:14 UTC` | *Módulos Integrados:* `13`  
 
 ---
 
@@ -10,252 +10,252 @@
 
 ### 🏛️ Parte I: Introducción y Arquitectura del Framework
 
-- [**AI-SDLC: Framework de Desarrollo Híbrido para Personas y Agentes**](#doc-readme) *(Fuente: `README.md`)*
-  - [🎯 Visión y Propósito](#doc-readme-vision-y-proposito)
-  - [🏛️ Los 5 Pilares del Framework](#doc-readme-los-5-pilares-del-framework)
-  - [📂 Estructura del Repositorio](#doc-readme-estructura-del-repositorio)
-  - [⚡ Tutorial 1: Creación Rápida de una Funcionalidad (Quickstart en 5 Minutos)](#doc-readme-tutorial-1-creacion-rapida-de-una-funcionalidad-quickstart-en-5-minutos)
-    - [1. Prerrequisitos](#doc-readme-1-prerrequisitos)
-    - [2. Flujo Rápido en 6 Pasos con Comandos Simplificados](#doc-readme-2-flujo-rapido-en-6-pasos-con-comandos-simplificados)
-    - [3. Resumen de Comandos Simplificados del CLI (`aisdlc`)](#doc-readme-3-resumen-de-comandos-simplificados-del-cli-aisdlc)
-  - [📖 Tutorial 2: Flujo Detallado Paso a Paso (End-to-End Deep Dive)](#doc-readme-tutorial-2-flujo-detallado-paso-a-paso-end-to-end-deep-dive)
-    - [Fase 1: Definición Canónica de Producto y Criterios Gherkin (BDD)](#doc-readme-fase-1-definicion-canonica-de-producto-y-criterios-gherkin-bdd)
-    - [Fase 2: Ciberseguridad Shift-Left y Modelado de Amenazas](#doc-readme-fase-2-ciberseguridad-shift-left-y-modelado-de-amenazas)
-    - [Fase 3: Gobernanza de Licencias Open Source (IP & Legal as Code)](#doc-readme-fase-3-gobernanza-de-licencias-open-source-ip-legal-as-code)
-    - [Fase 4: Andamiaje de Entrega SDD y Gobernanza de Autonomía](#doc-readme-fase-4-andamiaje-de-entrega-sdd-y-gobernanza-de-autonomia)
-    - [Fase 5: Gestión Automatizada de Ramas Git (Modelo de 4 Tiers)](#doc-readme-fase-5-gestion-automatizada-de-ramas-git-modelo-de-4-tiers)
-    - [Fase 6: Implementación con TDD y Auditoría de Pruebas](#doc-readme-fase-6-implementacion-con-tdd-y-auditoria-de-pruebas)
-    - [Fase 7: Release Gate de Calidad Multilenguaje y Pre-Vuelo](#doc-readme-fase-7-release-gate-de-calidad-multilenguaje-y-pre-vuelo)
-    - [Fase 8: Matriz de Trazabilidad 360° Automatizada y Pull Request](#doc-readme-fase-8-matriz-de-trazabilidad-360-automatizada-y-pull-request)
-    - [Fase 9: Integración Canónica Post-Implementación a la Línea Base](#doc-readme-fase-9-integracion-canonica-post-implementacion-a-la-linea-base)
-  - [🔬 Tutorial 3: Análisis Estático con AST Real y Soporte Multilenguaje](#doc-readme-tutorial-3-analisis-estatico-con-ast-real-y-soporte-multilenguaje)
-    - [1. Arquitectura Multilenguaje Híbrida](#doc-readme-1-arquitectura-multilenguaje-hibrida)
-    - [2. Ejemplos Prácticos de Referencia en el Repositorio](#doc-readme-2-ejemplos-practicos-de-referencia-en-el-repositorio)
-    - [3. Comandos de Verificación de Calidad](#doc-readme-3-comandos-de-verificacion-de-calidad)
-  - [🛡️ Tutorial 4: Escaneo Dinámico de Licencias y Generación de SBOM (SCA)](#doc-readme-tutorial-4-escaneo-dinamico-de-licencias-y-generacion-de-sbom-sca)
-    - [1. Modos de Escaneo: Nativo Zero-Install y Conectores de Terceros](#doc-readme-1-modos-de-escaneo-nativo-zero-install-y-conectores-de-terceros)
-    - [2. Comandos y Generación de Entregables de Compliance](#doc-readme-2-comandos-y-generacion-de-entregables-de-compliance)
-    - [3. Salidas y Artefactos Producidos](#doc-readme-3-salidas-y-artefactos-producidos)
-  - [🔐 Tutorial 5: Detección Determinista de Secretos y Seguridad Shift-Left (Gitleaks & SAST)](#doc-readme-tutorial-5-deteccion-determinista-de-secretos-y-seguridad-shift-left-gitleaks-sast)
-    - [1. Gate 9: Detección Determinista de Secretos (`verify secrets`)](#doc-readme-1-gate-9-deteccion-determinista-de-secretos-verify-secrets)
-    - [2. Análisis Estático de Vulnerabilidades SAST y Prompt Injection (`verify sast`)](#doc-readme-2-analisis-estatico-de-vulnerabilidades-sast-y-prompt-injection-verify-sast)
-    - [3. Comandos Prácticos de Seguridad](#doc-readme-3-comandos-practicos-de-seguridad)
-    - [4. Salidas y Reportes Generados](#doc-readme-4-salidas-y-reportes-generados)
-  - [🌐 Tutorial 6: Dashboard Web Interactivo y Visualizador de Grafos (Cytoscape.js)](#doc-readme-tutorial-6-dashboard-web-interactivo-y-visualizador-de-grafos-cytoscapejs)
-    - [1. Características Principales](#doc-readme-1-caracteristicas-principales)
-    - [2. Comandos CLI](#doc-readme-2-comandos-cli)
-  - [🔌 Servidor Nativo Model Context Protocol (MCP): Control Total desde tu IDE](#doc-readme-servidor-nativo-model-context-protocol-mcp-control-total-desde-tu-ide)
-    - [1. Comandos Resumen (High-Level Workflows)](#doc-readme-1-comandos-resumen-high-level-workflows)
-    - [2. Catálogo Completo de Herramientas (20 Tools) y Recursos (5 Resources)](#doc-readme-2-catalogo-completo-de-herramientas-20-tools-y-recursos-5-resources)
-    - [3. Configuración en Clientes MCP e IDEs](#doc-readme-3-configuracion-en-clientes-mcp-e-ides)
-  - [🚀 Guía Rápida para Equipos Humanos](#doc-readme-guia-rapida-para-equipos-humanos)
-  - [🤖 Guía Operativa para Agentes de IA](#doc-readme-guia-operativa-para-agentes-de-ia)
-    - [1. Principios y Guardrails Innegociables](#doc-readme-1-principios-y-guardrails-innegociables)
-    - [2. Catálogo Canónico de Agentes Especializados (10 Roles)](#doc-readme-2-catalogo-canonico-de-agentes-especializados-10-roles)
-    - [3. La Tríada de Auditoría Pre-Merge](#doc-readme-3-la-triada-de-auditoria-pre-merge)
-    - [4. Automatización e Infraestructura: `agent-devops` y Guardrail de No Invasión](#doc-readme-4-automatizacion-e-infraestructura-agent-devops-y-guardrail-de-no-invasion)
-    - [Integración Nativa por Entorno de IA](#doc-readme-integracion-nativa-por-entorno-de-ia)
-  - [📜 Licencia](#doc-readme-licencia)
+- [**AI-SDLC: Hybrid Software Development Lifecycle for Humans and AI Agents**](#doc-readme) *(Fuente: `README.md`)*
+  - [🎯 Vision and Purpose](#doc-readme-vision-and-purpose)
+  - [🏛️ The 6 Pillars of the Framework](#doc-readme-the-6-pillars-of-the-framework)
+  - [📂 Repository Structure](#doc-readme-repository-structure)
+  - [⚡ Tutorial 1: Quick Feature Creation (5-Minute Quickstart)](#doc-readme-tutorial-1-quick-feature-creation-5-minute-quickstart)
+    - [1. Prerequisites](#doc-readme-1-prerequisites)
+    - [2. Fast 7-Step Workflow with Simplified Commands](#doc-readme-2-fast-7-step-workflow-with-simplified-commands)
+    - [3. Simplified CLI Commands Summary (`aisdlc`)](#doc-readme-3-simplified-cli-commands-summary-aisdlc)
+  - [📖 Tutorial 2: End-to-End Deep Dive](#doc-readme-tutorial-2-end-to-end-deep-dive)
+    - [Phase 1: Canonical Product Definition and Gherkin Criteria (BDD)](#doc-readme-phase-1-canonical-product-definition-and-gherkin-criteria-bdd)
+    - [Phase 2: Shift-Left Cybersecurity and Threat Modeling](#doc-readme-phase-2-shift-left-cybersecurity-and-threat-modeling)
+    - [Phase 3: Open Source License Governance (IP & Legal as Code)](#doc-readme-phase-3-open-source-license-governance-ip-legal-as-code)
+    - [Phase 4: SDD Delivery Scaffolding and Autonomy Governance](#doc-readme-phase-4-sdd-delivery-scaffolding-and-autonomy-governance)
+    - [Phase 5: Automated Git Branch Management (4-Tier Model)](#doc-readme-phase-5-automated-git-branch-management-4-tier-model)
+    - [Phase 6: Implementation with TDD and Test Audit](#doc-readme-phase-6-implementation-with-tdd-and-test-audit)
+    - [Phase 7: Polyglot Quality Release Gate and Pre-Flight](#doc-readme-phase-7-polyglot-quality-release-gate-and-pre-flight)
+    - [Phase 8: Automated 360° Traceability Matrix and Pull Request](#doc-readme-phase-8-automated-360-traceability-matrix-and-pull-request)
+    - [Phase 9: Post-Implementation Canonical Baseline Integration](#doc-readme-phase-9-post-implementation-canonical-baseline-integration)
+  - [🔬 Tutorial 3: Real AST Static Analysis & Polyglot Support](#doc-readme-tutorial-3-real-ast-static-analysis-polyglot-support)
+    - [1. Hybrid Polyglot Architecture](#doc-readme-1-hybrid-polyglot-architecture)
+    - [2. Practical Reference Examples](#doc-readme-2-practical-reference-examples)
+    - [3. Quality Verification Commands](#doc-readme-3-quality-verification-commands)
+  - [🛡️ Tutorial 4: Dynamic License Scanning & SBOM Generation (SCA)](#doc-readme-tutorial-4-dynamic-license-scanning-sbom-generation-sca)
+    - [1. Scan Modes: Native Zero-Install & Bring-Your-Own-Tool](#doc-readme-1-scan-modes-native-zero-install-bring-your-own-tool)
+    - [2. Compliance Commands](#doc-readme-2-compliance-commands)
+  - [🔐 Tutorial 5: Deterministic Secret Detection & Shift-Left Security (Gitleaks & SAST)](#doc-readme-tutorial-5-deterministic-secret-detection-shift-left-security-gitleaks-sast)
+    - [1. Gate 9: Deterministic Secret Detection (`verify secrets`)](#doc-readme-1-gate-9-deterministic-secret-detection-verify-secrets)
+    - [2. Static Application Security Testing SAST (`verify sast`)](#doc-readme-2-static-application-security-testing-sast-verify-sast)
+    - [3. Practical Security Commands](#doc-readme-3-practical-security-commands)
+  - [🌐 Tutorial 6: Interactive Web Dashboard and Graph Visualizer (Cytoscape.js)](#doc-readme-tutorial-6-interactive-web-dashboard-and-graph-visualizer-cytoscapejs)
+    - [1. Key Features](#doc-readme-1-key-features)
+    - [2. CLI Commands](#doc-readme-2-cli-commands)
+  - [🔌 Native Model Context Protocol (MCP) Server: Full Control from your IDE](#doc-readme-native-model-context-protocol-mcp-server-full-control-from-your-ide)
+    - [1. High-Level Workflows](#doc-readme-1-high-level-workflows)
+    - [2. Complete Tools (20 Tools) and Resources (5 Resources)](#doc-readme-2-complete-tools-20-tools-and-resources-5-resources)
+    - [3. IDE and MCP Client Configuration](#doc-readme-3-ide-and-mcp-client-configuration)
+  - [🚀 Quick Guide for Human Teams](#doc-readme-quick-guide-for-human-teams)
+  - [🤖 Operational Guide for AI Agents](#doc-readme-operational-guide-for-ai-agents)
+    - [1. Non-Negotiable Principles and Guardrails](#doc-readme-1-non-negotiable-principles-and-guardrails)
+    - [2. Canonical Specialized Agents (10 Roles)](#doc-readme-2-canonical-specialized-agents-10-roles)
+    - [3. Pre-Merge Audit Triad](#doc-readme-3-pre-merge-audit-triad)
+    - [4. Automation & Infrastructure: `agent-devops` and Non-Invasion Guardrail](#doc-readme-4-automation-infrastructure-agent-devops-and-non-invasion-guardrail)
+    - [Native Integration by AI Environment](#doc-readme-native-integration-by-ai-environment)
+  - [📜 License](#doc-readme-license)
 
 ### 📘 Parte II: Especificación Normativa del Framework
 
-- [**00. Manifiesto y Principios Fundamentales del AI-SDLC**](#cap-00-principles-and-manifesto) *(Fuente: `process/00_principles_and_manifesto.md`)*
-  - [1. El Manifiesto del AI-SDLC](#cap-00-principles-and-manifesto-1-el-manifiesto-del-ai-sdlc)
-  - [2. Los 7 Principios Rectores](#cap-00-principles-and-manifesto-2-los-7-principios-rectores)
-    - [Principio 1: Todo "As-Code" y Versionado en Git](#cap-00-principles-and-manifesto-principio-1-todo-as-code-y-versionado-en-git)
-    - [Principio 2: Operabilidad Simétrica para Personas y Agentes (Dual-Citizenship)](#cap-00-principles-and-manifesto-principio-2-operabilidad-simetrica-para-personas-y-agentes-dual-citizenship)
-    - [Principio 3: Separación entre Núcleo Determinista y Razonamiento de IA](#cap-00-principles-and-manifesto-principio-3-separacion-entre-nucleo-determinista-y-razonamiento-de-ia)
-    - [Principio 4: Autoridad Humana Irrenunciable en Aprobación y Fusión](#cap-00-principles-and-manifesto-principio-4-autoridad-humana-irrenunciable-en-aprobacion-y-fusion)
-    - [Principio 5: Contratos de Citación Criptográfica (Drift-Free Architecture)](#cap-00-principles-and-manifesto-principio-5-contratos-de-citacion-criptografica-drift-free-architecture)
-    - [Principio 6: Ciberseguridad Shift-Left por Defecto](#cap-00-principles-and-manifesto-principio-6-ciberseguridad-shift-left-por-defecto)
-    - [Principio 7: Gobernanza Proactiva de Licencias Open Source](#cap-00-principles-and-manifesto-principio-7-gobernanza-proactiva-de-licencias-open-source)
+- [**00. AI-SDLC Manifesto and Core Principles**](#cap-00-principles-and-manifesto) *(Fuente: `process/00_principles_and_manifesto.md`)*
+  - [1. The AI-SDLC Manifesto](#cap-00-principles-and-manifesto-1-the-ai-sdlc-manifesto)
+  - [2. The 7 Governing Principles](#cap-00-principles-and-manifesto-2-the-7-governing-principles)
+    - [Principle 1: Everything "As-Code" and Git-Versioned](#cap-00-principles-and-manifesto-principle-1-everything-as-code-and-git-versioned)
+    - [Principle 2: Symmetric Operability for Humans and Agents (Dual-Citizenship)](#cap-00-principles-and-manifesto-principle-2-symmetric-operability-for-humans-and-agents-dual-citizenship)
+    - [Principle 3: Separation of Deterministic Core and AI Reasoning](#cap-00-principles-and-manifesto-principle-3-separation-of-deterministic-core-and-ai-reasoning)
+    - [Principle 4: Inalienable Human Authority in Approval and Merge](#cap-00-principles-and-manifesto-principle-4-inalienable-human-authority-in-approval-and-merge)
+    - [Principle 5: Cryptographic Citation Contracts (Drift-Free Architecture)](#cap-00-principles-and-manifesto-principle-5-cryptographic-citation-contracts-drift-free-architecture)
+    - [Principle 6: Shift-Left Cybersecurity by Default](#cap-00-principles-and-manifesto-principle-6-shift-left-cybersecurity-by-default)
+    - [Principle 7: Proactive Open Source License Governance](#cap-00-principles-and-manifesto-principle-7-proactive-open-source-license-governance)
 
-- [**01. Gobernanza, Roles y Matriz de Colaboración Persona-Agente**](#cap-01-governance-and-roles) *(Fuente: `process/01_governance_and_roles.md`)*
-  - [1. Modelo de Doble Ciudadanía (Human-Agent Dual-Citizen)](#cap-01-governance-and-roles-1-modelo-de-doble-ciudadania-human-agent-dual-citizen)
-  - [2. Catálogo de Roles](#cap-01-governance-and-roles-2-catalogo-de-roles)
-    - [A. Roles Humanos](#cap-01-governance-and-roles-a-roles-humanos)
-    - [B. Roles de Agentes de IA (Especializados por Persona)](#cap-01-governance-and-roles-b-roles-de-agentes-de-ia-especializados-por-persona)
-  - [3. Matriz RACI: Ciclo Completo de Desarrollo](#cap-01-governance-and-roles-3-matriz-raci-ciclo-completo-de-desarrollo)
-  - [4. Modelo Operativo "AI as Scribe, Humano como Revisor, Aprobador e Implementador Crítico"](#cap-01-governance-and-roles-4-modelo-operativo-ai-as-scribe-humano-como-revisor-aprobador-e-implementador-critico)
-    - [A. Inversión de Carga Operativa Mecánica (The Scribe Paradigm)](#cap-01-governance-and-roles-a-inversion-de-carga-operativa-mecanica-the-scribe-paradigm)
-    - [B. Preservación Innegociable del Humano como Implementador](#cap-01-governance-and-roles-b-preservacion-innegociable-del-humano-como-implementador)
-  - [5. Protocolo de Traspaso (Hand-off) y Contratos de Trabajo](#cap-01-governance-and-roles-5-protocolo-de-traspaso-hand-off-y-contratos-de-trabajo)
-  - [6. Matriz de Clasificación de Tareas y Modos de Autonomía Humana](#cap-01-governance-and-roles-6-matriz-de-clasificacion-de-tareas-y-modos-de-autonomia-humana)
-    - [Tabla de Decisión de Autonomía](#cap-01-governance-and-roles-tabla-de-decision-de-autonomia)
-  - [7. Modelo de Fricción Progresiva (Progressive Friction Governance)](#cap-01-governance-and-roles-7-modelo-de-friccion-progresiva-progressive-friction-governance)
-    - [A. Matriz de Perfiles de Cambio (Change Profiles)](#cap-01-governance-and-roles-a-matriz-de-perfiles-de-cambio-change-profiles)
-    - [B. Fuente de Verdad Canónica en Frontmatter](#cap-01-governance-and-roles-b-fuente-de-verdad-canonica-en-frontmatter)
-    - [C. Guardrail Determinista Anti-Bypass (Prevención de Evasión de Gobernanza)](#cap-01-governance-and-roles-c-guardrail-determinista-anti-bypass-prevencion-de-evasion-de-gobernanza)
-  - [8. Protocolo de Revisión y Gobernanza de Pull Requests (Balance `X`/`O` y Puntos Débiles)](#cap-01-governance-and-roles-8-protocolo-de-revision-y-gobernanza-de-pull-requests-balance-xo-y-puntos-debiles)
-    - [A. Obligaciones del Proponente (Agente de IA o Ingeniero)](#cap-01-governance-and-roles-a-obligaciones-del-proponente-agente-de-ia-o-ingeniero)
-    - [B. Criterios de Bloqueo y Aprobación para el Tech Lead (Human Gatekeeper)](#cap-01-governance-and-roles-b-criterios-de-bloqueo-y-aprobacion-para-el-tech-lead-human-gatekeeper)
+- [**01. Governance, Roles, and Human-Agent Collaboration Matrix**](#cap-01-governance-and-roles) *(Fuente: `process/01_governance_and_roles.md`)*
+  - [1. Human-Agent Dual-Citizen Model](#cap-01-governance-and-roles-1-human-agent-dual-citizen-model)
+  - [2. Role Catalog](#cap-01-governance-and-roles-2-role-catalog)
+    - [A. Human Roles](#cap-01-governance-and-roles-a-human-roles)
+    - [B. AI Agent Roles (Specialized by Persona)](#cap-01-governance-and-roles-b-ai-agent-roles-specialized-by-persona)
+  - [3. RACI Matrix: Full Development Lifecycle](#cap-01-governance-and-roles-3-raci-matrix-full-development-lifecycle)
+  - [4. Operating Model: "AI as Scribe, Human as Critical Reviewer, Approver, and Implementer"](#cap-01-governance-and-roles-4-operating-model-ai-as-scribe-human-as-critical-reviewer-approver-and-implementer)
+    - [A. Inversion of Mechanical Operational Overhead (The Scribe Paradigm)](#cap-01-governance-and-roles-a-inversion-of-mechanical-operational-overhead-the-scribe-paradigm)
+    - [B. Non-Negotiable Preservation of the Human as Implementer](#cap-01-governance-and-roles-b-non-negotiable-preservation-of-the-human-as-implementer)
+  - [5. Handoff Protocol and Work Contracts](#cap-01-governance-and-roles-5-handoff-protocol-and-work-contracts)
+  - [6. Task Classification Matrix and Human Autonomy Modes](#cap-01-governance-and-roles-6-task-classification-matrix-and-human-autonomy-modes)
+    - [Autonomy Decision Table](#cap-01-governance-and-roles-autonomy-decision-table)
+  - [7. Progressive Friction Governance Model](#cap-01-governance-and-roles-7-progressive-friction-governance-model)
+    - [A. Change Profiles Matrix](#cap-01-governance-and-roles-a-change-profiles-matrix)
+    - [B. Canonical Source of Truth in Frontmatter](#cap-01-governance-and-roles-b-canonical-source-of-truth-in-frontmatter)
+    - [C. Deterministic Anti-Bypass Guardrail (Governance Evasion Prevention)](#cap-01-governance-and-roles-c-deterministic-anti-bypass-guardrail-governance-evasion-prevention)
+  - [8. Pull Request Review and Governance Protocol (Plan Balance `X`/`O` and Weak Points)](#cap-01-governance-and-roles-8-pull-request-review-and-governance-protocol-plan-balance-xo-and-weak-points)
+    - [A. Proposer Obligations (AI Agent or Human Engineer)](#cap-01-governance-and-roles-a-proposer-obligations-ai-agent-or-human-engineer)
+    - [B. Tech Lead Blocking and Approval Criteria (Human Gatekeeper)](#cap-01-governance-and-roles-b-tech-lead-blocking-and-approval-criteria-human-gatekeeper)
 
-- [**02. Definición del Producto: Metodología ProductShape (PDaC)**](#cap-02-product-definition) *(Fuente: `process/02_product_definition.md`)*
-  - [1. Fundamentos de Product Definition as Code](#cap-02-product-definition-1-fundamentos-de-product-definition-as-code)
-  - [2. Familias de Artefactos de Producto](#cap-02-product-definition-2-familias-de-artefactos-de-producto)
-    - [Detalle de Familias:](#cap-02-product-definition-detalle-de-familias)
-  - [3. El Grafo de Producto y Regla de Dirección Canónica](#cap-02-product-definition-3-el-grafo-de-producto-y-regla-de-direccion-canonica)
-  - [4. Ciclo de Operaciones de Producto](#cap-02-product-definition-4-ciclo-de-operaciones-de-producto)
-  - [5. Estructura de Carpetas de Producto en el Repositorio](#cap-02-product-definition-5-estructura-de-carpetas-de-producto-en-el-repositorio)
-  - [6. Paquetes de Handoff Formal hacia SDD (`HOF-*` Sidecars)](#cap-02-product-definition-6-paquetes-de-handoff-formal-hacia-sdd-hof--sidecars)
-  - [7. Extracción y Catálogo Consolidado de Requerimientos Activos](#cap-02-product-definition-7-extraccion-y-catalogo-consolidado-de-requerimientos-activos)
-  - [8. Responsabilidad Única (SRP), Evolución In-Place y Control de Duplicados](#cap-02-product-definition-8-responsabilidad-unica-srp-evolucion-in-place-y-control-de-duplicados)
-    - [A. Principio de Responsabilidad Única (SRP) en Requisitos](#cap-02-product-definition-a-principio-de-responsabilidad-unica-srp-en-requisitos)
-    - [B. Evolución In-Place vs. Sustitución (`supersedes`)](#cap-02-product-definition-b-evolucion-in-place-vs-sustitucion-supersedes)
-    - [C. Verificador Determinista de Duplicados (Shift-Left Pre-Flight Gate)](#cap-02-product-definition-c-verificador-determinista-de-duplicados-shift-left-pre-flight-gate)
+- [**02. Product Definition: ProductShape Methodology (PDaC)**](#cap-02-product-definition) *(Fuente: `process/02_product_definition.md`)*
+  - [1. Foundations of Product Definition as Code](#cap-02-product-definition-1-foundations-of-product-definition-as-code)
+  - [2. Product Artifact Families](#cap-02-product-definition-2-product-artifact-families)
+    - [Family Breakdown:](#cap-02-product-definition-family-breakdown)
+  - [3. The Product Graph and Canonical Direction Rule](#cap-02-product-definition-3-the-product-graph-and-canonical-direction-rule)
+  - [4. Product Operations Cycle (Phase 0 Inception & Evolution)](#cap-02-product-definition-4-product-operations-cycle-phase-0-inception-evolution)
+    - [A. Phase 0: Greenfield & Brownfield Product Inception (`ARCH-INTRO-*`)](#cap-02-product-definition-a-phase-0-greenfield-brownfield-product-inception-arch-intro-)
+    - [B. Continuous Product Evolution Cycle](#cap-02-product-definition-b-continuous-product-evolution-cycle)
+  - [5. Product Directory Structure in Repository](#cap-02-product-definition-5-product-directory-structure-in-repository)
+  - [6. Formal Handoff Packages to SDD (`HOF-*` Sidecars)](#cap-02-product-definition-6-formal-handoff-packages-to-sdd-hof--sidecars)
+  - [7. Extraction and Consolidated Catalog of Active Requirements](#cap-02-product-definition-7-extraction-and-consolidated-catalog-of-active-requirements)
+  - [8. Single Responsibility Principle (SRP), In-Place Evolution, and Duplicate Control](#cap-02-product-definition-8-single-responsibility-principle-srp-in-place-evolution-and-duplicate-control)
+    - [A. Single Responsibility Principle (SRP) in Requirements](#cap-02-product-definition-a-single-responsibility-principle-srp-in-requirements)
+    - [B. In-Place Evolution vs. Replacement (`supersedes`)](#cap-02-product-definition-b-in-place-evolution-vs-replacement-supersedes)
+    - [C. Deterministic Duplicate Checker (Shift-Left Pre-Flight Gate)](#cap-02-product-definition-c-deterministic-duplicate-checker-shift-left-pre-flight-gate)
 
-- [**03. Ciberseguridad Shift-Left: Security-by-Design as Code**](#cap-03-security-by-design) *(Fuente: `process/03_security_by_design.md`)*
-  - [1. Visión y Enfoque Shift-Left](#cap-03-security-by-design-1-vision-y-enfoque-shift-left)
-  - [2. Familias de Artefactos de Ciberseguridad](#cap-03-security-by-design-2-familias-de-artefactos-de-ciberseguridad)
-    - [1. Actores Maliciosos (`ACT-THREAT-*`)](#cap-03-security-by-design-1-actores-maliciosos-act-threat-)
-    - [2. Casos de Abuso y Maluso (`ABUSE-*`)](#cap-03-security-by-design-2-casos-de-abuso-y-maluso-abuse-)
-    - [3. Modelado de Amenazas STRIDE / OWASP ASVS (`THREAT-*`)](#cap-03-security-by-design-3-modelado-de-amenazas-stride-owasp-asvs-threat-)
-    - [4. Requisitos de Seguridad (`SEC-REQ-*`)](#cap-03-security-by-design-4-requisitos-de-seguridad-sec-req-)
-    - [5. Políticas y Enclaves de Confianza (`SEC-POL-*`, `SEC-ENC-*`)](#cap-03-security-by-design-5-politicas-y-enclaves-de-confianza-sec-pol--sec-enc-)
-  - [3. Trazabilidad Criptográfica de la Mitigación](#cap-03-security-by-design-3-trazabilidad-criptografica-de-la-mitigacion)
-  - [4. Estructura de Carpetas de Seguridad](#cap-03-security-by-design-4-estructura-de-carpetas-de-seguridad)
+- [**03. Shift-Left Cybersecurity: Security-by-Design as Code**](#cap-03-security-by-design) *(Fuente: `process/03_security_by_design.md`)*
+  - [1. Vision and Shift-Left Approach](#cap-03-security-by-design-1-vision-and-shift-left-approach)
+  - [2. Cybersecurity Artifact Families](#cap-03-security-by-design-2-cybersecurity-artifact-families)
+    - [1. Threat Actors (`ACT-THREAT-*`)](#cap-03-security-by-design-1-threat-actors-act-threat-)
+    - [2. Abuse Cases (`ABUSE-*`)](#cap-03-security-by-design-2-abuse-cases-abuse-)
+    - [3. Threat Modeling STRIDE / OWASP ASVS (`THREAT-*`)](#cap-03-security-by-design-3-threat-modeling-stride-owasp-asvs-threat-)
+    - [4. Security Requirements (`SEC-REQ-*`)](#cap-03-security-by-design-4-security-requirements-sec-req-)
+    - [5. Policies and Trust Enclaves (`SEC-POL-*`, `SEC-ENC-*`)](#cap-03-security-by-design-5-policies-and-trust-enclaves-sec-pol--sec-enc-)
+  - [3. Cryptographic Mitigation Traceability](#cap-03-security-by-design-3-cryptographic-mitigation-traceability)
+  - [4. Security Directory Structure](#cap-03-security-by-design-4-security-directory-structure)
 
-- [**04. Gobernanza y Cumplimiento de Licencias Open Source: Libre Uso vs. Adquisición Comercial**](#cap-04-open-source-license-compliance) *(Fuente: `process/04_open_source_license_compliance.md`)*
-  - [1. Visión y Riesgo de Propiedad Intelectual](#cap-04-open-source-license-compliance-1-vision-y-riesgo-de-propiedad-intelectual)
-  - [2. Taxonomía de Licencias en 5 Categorías](#cap-04-open-source-license-compliance-2-taxonomia-de-licencias-en-5-categorias)
-  - [3. Guardrails para Agentes de IA en la Selección de Paquetes](#cap-04-open-source-license-compliance-3-guardrails-para-agentes-de-ia-en-la-seleccion-de-paquetes)
-  - [4. Flujo de Adquisición de Licencia Comercial](#cap-04-open-source-license-compliance-4-flujo-de-adquisicion-de-licencia-comercial)
-  - [5. Validación Determinista en CI/CD y Generación de SBOM](#cap-04-open-source-license-compliance-5-validacion-determinista-en-cicd-y-generacion-de-sbom)
-  - [6. Tutorial Práctico: Auditoría Dinámica de Licencias y Generación de SBOM](#cap-04-open-source-license-compliance-6-tutorial-practico-auditoria-dinamica-de-licencias-y-generacion-de-sbom)
-    - [Paso 1: Auditoría Dinámica Local](#cap-04-open-source-license-compliance-paso-1-auditoria-dinamica-local)
-    - [Paso 2: Generación Personalizada de SBOM CycloneDX 1.5](#cap-04-open-source-license-compliance-paso-2-generacion-personalizada-de-sbom-cyclonedx-15)
-    - [Paso 3: Generación del Archivo de Atribuciones Legales](#cap-04-open-source-license-compliance-paso-3-generacion-del-archivo-de-atribuciones-legales)
-    - [Paso 4: Integración Opcional con Herramientas Externas (Trivy / Syft)](#cap-04-open-source-license-compliance-paso-4-integracion-opcional-con-herramientas-externas-trivy-syft)
-    - [Paso 5: Gestión de Excepciones y Licencias Restringidas](#cap-04-open-source-license-compliance-paso-5-gestion-de-excepciones-y-licencias-restringidas)
+- [**04. Open Source License Governance and Compliance: Free Use vs. Commercial Acquisition**](#cap-04-open-source-license-compliance) *(Fuente: `process/04_open_source_license_compliance.md`)*
+  - [1. Intellectual Property Vision and Risk](#cap-04-open-source-license-compliance-1-intellectual-property-vision-and-risk)
+  - [2. 5-Category License Taxonomy](#cap-04-open-source-license-compliance-2-5-category-license-taxonomy)
+  - [3. Guardrails for AI Agents in Package Selection](#cap-04-open-source-license-compliance-3-guardrails-for-ai-agents-in-package-selection)
+  - [4. Commercial License Acquisition Flow](#cap-04-open-source-license-compliance-4-commercial-license-acquisition-flow)
+  - [5. Deterministic Validation in CI/CD and SBOM Generation](#cap-04-open-source-license-compliance-5-deterministic-validation-in-cicd-and-sbom-generation)
+  - [6. Practical Tutorial: Dynamic License Audit and SBOM Generation](#cap-04-open-source-license-compliance-6-practical-tutorial-dynamic-license-audit-and-sbom-generation)
+    - [Step 1: Local Dynamic Audit](#cap-04-open-source-license-compliance-step-1-local-dynamic-audit)
+    - [Step 2: Custom CycloneDX 1.5 SBOM Generation](#cap-04-open-source-license-compliance-step-2-custom-cyclonedx-15-sbom-generation)
+    - [Step 3: Legal Attribution Notice Generation](#cap-04-open-source-license-compliance-step-3-legal-attribution-notice-generation)
+    - [Step 4: Optional External Tool Integration (Trivy / Syft)](#cap-04-open-source-license-compliance-step-4-optional-external-tool-integration-trivy-syft)
+    - [Step 5: Managing Exceptions and Restricted Licenses](#cap-04-open-source-license-compliance-step-5-managing-exceptions-and-restricted-licenses)
 
-- [**05. Arquitectura de Sistemas: Fusión de arc42 y NAF v4**](#cap-05-architecture-arc42-nafv4) *(Fuente: `process/05_architecture_arc42_nafv4.md`)*
-  - [1. Visión y Necesidad de la Arquitectura en la Era de los Agentes](#cap-05-architecture-arc42-nafv4-1-vision-y-necesidad-de-la-arquitectura-en-la-era-de-los-agentes)
-  - [2. La Matriz de Fusión: arc42 Enriquecido con NAF v4](#cap-05-architecture-arc42-nafv4-2-la-matriz-de-fusion-arc42-enriquecido-con-naf-v4)
-  - [3. Detalle de Secciones Clave en el Paradigma As-Code](#cap-05-architecture-arc42-nafv4-3-detalle-de-secciones-clave-en-el-paradigma-as-code)
-    - [Sección 3: Contexto y Alcance (NAF Operational)](#cap-05-architecture-arc42-nafv4-seccion-3-contexto-y-alcance-naf-operational)
-    - [Sección 5: Vista de Bloques de Construcción (NAF Services & Systems / arc42 Sec. 5)](#cap-05-architecture-arc42-nafv4-seccion-5-vista-de-bloques-de-construccion-naf-services-systems-arc42-sec-5)
-    - [Sección 6: Vista de Ejecución / Runtime (NAF Sequences & Behaviour)](#cap-05-architecture-arc42-nafv4-seccion-6-vista-de-ejecucion-runtime-naf-sequences-behaviour)
-    - [Sección 7: Vista de Despliegue (NAF Resource Deployment)](#cap-05-architecture-arc42-nafv4-seccion-7-vista-de-despliegue-naf-resource-deployment)
-    - [Sección 8: Conceptos Transversales](#cap-05-architecture-arc42-nafv4-seccion-8-conceptos-transversales)
-    - [Sección 9: Decisiones de Arquitectura (ADRs)](#cap-05-architecture-arc42-nafv4-seccion-9-decisiones-de-arquitectura-adrs)
-  - [4. Estructura de Carpetas de Arquitectura](#cap-05-architecture-arc42-nafv4-4-estructura-de-carpetas-de-arquitectura)
-  - [5. Catálogo Canónico de Plantillas de Arquitectura (`templates/architecture/`)](#cap-05-architecture-arc42-nafv4-5-catalogo-canonico-de-plantillas-de-arquitectura-templatesarchitecture)
-    - [5.1 Matriz de Plantillas y Artefactos](#cap-05-architecture-arc42-nafv4-51-matriz-de-plantillas-y-artefactos)
-    - [5.2 Guía de Uso e Instanciación en Proyectos](#cap-05-architecture-arc42-nafv4-52-guia-de-uso-e-instanciacion-en-proyectos)
-    - [5.3 Modos de Granularidad de Arquitectura e Inicialización Automatizada (`aisdlc init`)](#cap-05-architecture-arc42-nafv4-53-modos-de-granularidad-de-arquitectura-e-inicializacion-automatizada-aisdlc-init)
-  - [6. Trazabilidad 360° e Integración Canónica Post-Implementación](#cap-05-architecture-arc42-nafv4-6-trazabilidad-360-e-integracion-canonica-post-implementacion)
+- [**05. Systems Architecture: Fusion of arc42 and NAF v4**](#cap-05-architecture-arc42-nafv4) *(Fuente: `process/05_architecture_arc42_nafv4.md`)*
+  - [1. Vision and Need for Architecture in the Agent Era](#cap-05-architecture-arc42-nafv4-1-vision-and-need-for-architecture-in-the-agent-era)
+  - [2. The Fusion Matrix: arc42 Enriched with NAF v4](#cap-05-architecture-arc42-nafv4-2-the-fusion-matrix-arc42-enriched-with-naf-v4)
+  - [3. Key Sections Detail in the As-Code Paradigm](#cap-05-architecture-arc42-nafv4-3-key-sections-detail-in-the-as-code-paradigm)
+    - [Section 3: Context and Scope (NAF Operational)](#cap-05-architecture-arc42-nafv4-section-3-context-and-scope-naf-operational)
+    - [Section 5: Building Block View (NAF Services & Systems / arc42 Sec. 5)](#cap-05-architecture-arc42-nafv4-section-5-building-block-view-naf-services-systems-arc42-sec-5)
+    - [Section 6: Runtime View (NAF Sequences & Behaviour)](#cap-05-architecture-arc42-nafv4-section-6-runtime-view-naf-sequences-behaviour)
+    - [Section 7: Deployment View (NAF Resource Deployment)](#cap-05-architecture-arc42-nafv4-section-7-deployment-view-naf-resource-deployment)
+    - [Section 8: Cross-Cutting Concepts](#cap-05-architecture-arc42-nafv4-section-8-cross-cutting-concepts)
+    - [Section 9: Architecture Decisions (ADRs)](#cap-05-architecture-arc42-nafv4-section-9-architecture-decisions-adrs)
+  - [4. Architecture Directory Structure](#cap-05-architecture-arc42-nafv4-4-architecture-directory-structure)
+  - [5. Canonical Architecture Templates Catalog (`templates/architecture/`)](#cap-05-architecture-arc42-nafv4-5-canonical-architecture-templates-catalog-templatesarchitecture)
+    - [5.1 Templates and Artifacts Matrix](#cap-05-architecture-arc42-nafv4-51-templates-and-artifacts-matrix)
+    - [5.2 Project Usage and Instantiation Guide](#cap-05-architecture-arc42-nafv4-52-project-usage-and-instantiation-guide)
+    - [5.3 Architecture Granularity Modes and Automated Initialization (`aisdlc init`)](#cap-05-architecture-arc42-nafv4-53-architecture-granularity-modes-and-automated-initialization-aisdlc-init)
+  - [6. 360° Traceability and Post-Implementation Canonical Integration](#cap-05-architecture-arc42-nafv4-6-360-traceability-and-post-implementation-canonical-integration)
 
-- [**06. Entrega e Implementación: Spec-Driven Development (SDD)**](#cap-06-spec-driven-development) *(Fuente: `process/06_spec_driven_development.md`)*
-  - [1. El Puente entre la Definición y el Código](#cap-06-spec-driven-development-1-el-puente-entre-la-definicion-y-el-codigo)
-  - [2. Anatomía de un Incremento SDD (Spec-Delta)](#cap-06-spec-driven-development-2-anatomia-de-un-incremento-sdd-spec-delta)
+- [**06. Delivery and Implementation: Spec-Driven Development (SDD)**](#cap-06-spec-driven-development) *(Fuente: `process/06_spec_driven_development.md`)*
+  - [1. The Bridge Between Definition and Code](#cap-06-spec-driven-development-1-the-bridge-between-definition-and-code)
+  - [2. Anatomy of an SDD Increment (Spec-Delta)](#cap-06-spec-driven-development-2-anatomy-of-an-sdd-increment-spec-delta)
     - [1. `proposal.md`](#cap-06-spec-driven-development-1-proposalmd)
     - [2. `spec.md`](#cap-06-spec-driven-development-2-specmd)
     - [3. `design.md`](#cap-06-spec-driven-development-3-designmd)
     - [4. `tasks.md`](#cap-06-spec-driven-development-4-tasksmd)
-  - [3. Inyección de Contexto Quirúrgica para Agentes de IA](#cap-06-spec-driven-development-3-inyeccion-de-contexto-quirurgica-para-agentes-de-ia)
-  - [4. Ciclo de Ejecución de una Entrega SDD](#cap-06-spec-driven-development-4-ciclo-de-ejecucion-de-una-entrega-sdd)
-  - [5. Integración Automatizada de Requerimientos con Cucumber (BDD)](#cap-06-spec-driven-development-5-integracion-automatizada-de-requerimientos-con-cucumber-bdd)
-  - [6. Adaptadores Formales para Ecosistemas SDD (OpenSpec y Spec Kit)](#cap-06-spec-driven-development-6-adaptadores-formales-para-ecosistemas-sdd-openspec-y-spec-kit)
+  - [3. Surgical Context Injection for AI Agents](#cap-06-spec-driven-development-3-surgical-context-injection-for-ai-agents)
+  - [4. SDD Delivery Execution Lifecycle](#cap-06-spec-driven-development-4-sdd-delivery-execution-lifecycle)
+  - [5. Automated Requirements Integration with Cucumber (BDD)](#cap-06-spec-driven-development-5-automated-requirements-integration-with-cucumber-bdd)
+  - [6. Formal Adapters for SDD Ecosystems (OpenSpec and Spec Kit)](#cap-06-spec-driven-development-6-formal-adapters-for-sdd-ecosystems-openspec-and-spec-kit)
 
-- [**07. Validación Determinista: Ciberseguridad, Licencias y Puertas de Calidad en CI/CD**](#cap-07-security-and-license-validation) *(Fuente: `process/07_security_and_license_validation.md`)*
-  - [1. El Principio de Verificación Multinivel](#cap-07-security-and-license-validation-1-el-principio-de-verificacion-multinivel)
-  - [2. Las 9 Puertas Deterministas de CI/CD (Pipeline Gates)](#cap-07-security-and-license-validation-2-las-9-puertas-deterministas-de-cicd-pipeline-gates)
-  - [3. Especificación Detallada de Seguridad Shift-Left](#cap-07-security-and-license-validation-3-especificacion-detallada-de-seguridad-shift-left)
-    - [3.1 Gate 9: Detección Determinista de Secretos (`aisdlc verify secrets`)](#cap-07-security-and-license-validation-31-gate-9-deteccion-determinista-de-secretos-aisdlc-verify-secrets)
-    - [3.2 Análisis Estático de Vulnerabilidades SAST (`aisdlc verify sast`)](#cap-07-security-and-license-validation-32-analisis-estatico-de-vulnerabilidades-sast-aisdlc-verify-sast)
-  - [4. La Capa de Auditoría Adversarial por Agentes de IA (`sec:audit`)](#cap-07-security-and-license-validation-4-la-capa-de-auditoria-adversarial-por-agentes-de-ia-secaudit)
-  - [5. Códigos de Salida Estandarizados (Exit Codes)](#cap-07-security-and-license-validation-5-codigos-de-salida-estandarizados-exit-codes)
+- [**07. Deterministic Validation: Cybersecurity, Licenses, and CI/CD Quality Gates**](#cap-07-security-and-license-validation) *(Fuente: `process/07_security_and_license_validation.md`)*
+  - [1. The Principle of Multilevel Verification](#cap-07-security-and-license-validation-1-the-principle-of-multilevel-verification)
+  - [2. The 9 Deterministic CI/CD Gates (Pipeline Gates)](#cap-07-security-and-license-validation-2-the-9-deterministic-cicd-gates-pipeline-gates)
+  - [3. Shift-Left Security Detailed Specification](#cap-07-security-and-license-validation-3-shift-left-security-detailed-specification)
+    - [3.1 Gate 9: Deterministic Secret Detection (`aisdlc verify secrets`)](#cap-07-security-and-license-validation-31-gate-9-deterministic-secret-detection-aisdlc-verify-secrets)
+    - [3.2 Static Application Security Testing SAST (`aisdlc verify sast`)](#cap-07-security-and-license-validation-32-static-application-security-testing-sast-aisdlc-verify-sast)
+  - [4. Adversarial Audit Layer by AI Agents (`sec:audit`)](#cap-07-security-and-license-validation-4-adversarial-audit-layer-by-ai-agents-secaudit)
+  - [5. Standardized Exit Codes](#cap-07-security-and-license-validation-5-standardized-exit-codes)
 
-- [**08. Contrato de Citación Criptográfica, Versionado Semántico y Detección de Deriva**](#cap-08-citation-contract-and-drift) *(Fuente: `process/08_citation_contract_and_drift.md`)*
-  - [1. El Modelo de Doble Versionado (Dual-Versioning Architecture)](#cap-08-citation-contract-and-drift-1-el-modelo-de-doble-versionado-dual-versioning-architecture)
-  - [2. Metadatos de Versionabilidad en Plantillas y Artefactos](#cap-08-citation-contract-and-drift-2-metadatos-de-versionabilidad-en-plantillas-y-artefactos)
-    - [Reglas SemVer para Artefactos:](#cap-08-citation-contract-and-drift-reglas-semver-para-artefactos)
-  - [3. Tabla Obligatoria de Historial de Revisiones](#cap-08-citation-contract-and-drift-3-tabla-obligatoria-de-historial-de-revisiones)
-  - [Historial de Revisiones y Control de Versiones](#cap-08-citation-contract-and-drift-historial-de-revisiones-y-control-de-versiones)
-  - [4. Anatomía de una Citación Criptográfica](#cap-08-citation-contract-and-drift-4-anatomia-de-una-citacion-criptografica)
-    - [Componentes del Registro:](#cap-08-citation-contract-and-drift-componentes-del-registro)
-  - [5. Estados de Verificación de una Citación](#cap-08-citation-contract-and-drift-5-estados-de-verificacion-de-una-citacion)
-  - [6. El Ciclo de Vida Libre de Deriva (Drift-Free Lifecycle)](#cap-08-citation-contract-and-drift-6-el-ciclo-de-vida-libre-de-deriva-drift-free-lifecycle)
-  - [7. Empaquetamiento de Citaciones en Sidecars de Handoff (`HOF-*`)](#cap-08-citation-contract-and-drift-7-empaquetamiento-de-citaciones-en-sidecars-de-handoff-hof-)
+- [**08. Cryptographic Citation Contract, Semantic Versioning, and Drift Detection**](#cap-08-citation-contract-and-drift) *(Fuente: `process/08_citation_contract_and_drift.md`)*
+  - [1. The Dual-Versioning Architecture](#cap-08-citation-contract-and-drift-1-the-dual-versioning-architecture)
+  - [2. Versioning Metadata in Templates and Artifacts](#cap-08-citation-contract-and-drift-2-versioning-metadata-in-templates-and-artifacts)
+    - [SemVer Rules for Artifacts:](#cap-08-citation-contract-and-drift-semver-rules-for-artifacts)
+  - [3. Mandatory Revision History Table](#cap-08-citation-contract-and-drift-3-mandatory-revision-history-table)
+  - [Revision History and Version Control](#cap-08-citation-contract-and-drift-revision-history-and-version-control)
+  - [4. Anatomy of a Cryptographic Citation](#cap-08-citation-contract-and-drift-4-anatomy-of-a-cryptographic-citation)
+    - [Citation Record Components:](#cap-08-citation-contract-and-drift-citation-record-components)
+  - [5. Citation Verification States](#cap-08-citation-contract-and-drift-5-citation-verification-states)
+  - [6. The Drift-Free Lifecycle](#cap-08-citation-contract-and-drift-6-the-drift-free-lifecycle)
+  - [7. Citation Packaging in Handoff Sidecars (`HOF-*`)](#cap-08-citation-contract-and-drift-7-citation-packaging-in-handoff-sidecars-hof-)
 
-- [**09. Protocolos de Agentes de IA, Prompts de Sistema y Guardrails**](#cap-09-agent-protocols) *(Fuente: `process/09_agent_protocols.md`)*
-  - [1. Principios de Operación para Agentes de IA](#cap-09-agent-protocols-1-principios-de-operacion-para-agentes-de-ia)
-  - [2. Los 5 Mandamientos Inquebrantables de los Agentes (Guardrails)](#cap-09-agent-protocols-2-los-5-mandamientos-inquebrantables-de-los-agentes-guardrails)
-  - [3. Catálogo de Prompts de Sistema para Agentes Especializados](#cap-09-agent-protocols-3-catalogo-de-prompts-de-sistema-para-agentes-especializados)
-    - [1. `agent-product-analyst` (Analista de Producto)](#cap-09-agent-protocols-1-agent-product-analyst-analista-de-producto)
-    - [2. `agent-threat-modeler` (Modelador de Amenazas y Seguridad)](#cap-09-agent-protocols-2-agent-threat-modeler-modelador-de-amenazas-y-seguridad)
-    - [3. `agent-system-architect` (Arquitecto de Sistemas)](#cap-09-agent-protocols-3-agent-system-architect-arquitecto-de-sistemas)
-    - [4. `agent-qa-engineer` (Ingeniero de QA y SDET)](#cap-09-agent-protocols-4-agent-qa-engineer-ingeniero-de-qa-y-sdet)
-    - [5. `agent-developer` (Desarrollador de Software)](#cap-09-agent-protocols-5-agent-developer-desarrollador-de-software)
-    - [6. `agent-security-auditor` (Auditor Adversarial de Código)](#cap-09-agent-protocols-6-agent-security-auditor-auditor-adversarial-de-codigo)
-    - [7. `agent-compliance-checker` (Auditor de Licencias Open Source)](#cap-09-agent-protocols-7-agent-compliance-checker-auditor-de-licencias-open-source)
-    - [8. `agent-expert-user` (Usuario Experto y Evaluador de Dominio)](#cap-09-agent-protocols-8-agent-expert-user-usuario-experto-y-evaluador-de-dominio)
-    - [9. `agent-code-reviewer` (Revisor Técnico y Arquitectónico de Código)](#cap-09-agent-protocols-9-agent-code-reviewer-revisor-tecnico-y-arquitectonico-de-codigo)
-    - [10. `agent-devops` (Ingeniero de Automatización e Infraestructura)](#cap-09-agent-protocols-10-agent-devops-ingeniero-de-automatizacion-e-infraestructura)
-  - [4. Protocolo Operativo "AI as Scribe" (Redacción Técnica Asistida)](#cap-09-agent-protocols-4-protocolo-operativo-ai-as-scribe-redaccion-tecnica-asistida)
-    - [1. Propósito y Filosofía](#cap-09-agent-protocols-1-proposito-y-filosofia)
-    - [2. Contrato de Entrada / Salida (I/O Contract)](#cap-09-agent-protocols-2-contrato-de-entrada-salida-io-contract)
-    - [3. Taxonomía de Identificadores y Reglas de Correlatividad](#cap-09-agent-protocols-3-taxonomia-de-identificadores-y-reglas-de-correlatividad)
-    - [4. Cálculo Determinista de Digests Criptográficos SHA-256](#cap-09-agent-protocols-4-calculo-determinista-de-digests-criptograficos-sha-256)
-    - [5. Prompts Estandarizados para Agentes Amanuenses (AI as Scribe)](#cap-09-agent-protocols-5-prompts-estandarizados-para-agentes-amanuenses-ai-as-scribe)
-    - [6. Flujo de Revisión y Aprobación Humana](#cap-09-agent-protocols-6-flujo-de-revision-y-aprobacion-humana)
-  - [5. Protocolo de Interfaz Determinista y Salida Estructurada `--json` para Agentes de IA](#cap-09-agent-protocols-5-protocolo-de-interfaz-determinista-y-salida-estructurada---json-para-agentes-de-ia)
-    - [1. Directrices de Consumo para Agentes de IA](#cap-09-agent-protocols-1-directrices-de-consumo-para-agentes-de-ia)
-  - [6. Matriz de Compatibilidad e Integración Nativa con Entornos de Agentes](#cap-09-agent-protocols-6-matriz-de-compatibilidad-e-integracion-nativa-con-entornos-de-agentes)
-    - [Despliegue Automatizado y Selectivo de Agentes (`aisdlc init --agents`)](#cap-09-agent-protocols-despliegue-automatizado-y-selectivo-de-agentes-aisdlc-init---agents)
-    - [Mantenimiento Anti-Deriva Automatizado](#cap-09-agent-protocols-mantenimiento-anti-deriva-automatizado)
-  - [7. Servidor Model Context Protocol (MCP) Nativo (`@ai-sdlc/mcp` / `aisdlc mcp`)](#cap-09-agent-protocols-7-servidor-model-context-protocol-mcp-nativo-ai-sdlcmcp-aisdlc-mcp)
-    - [1. Arquitectura y Mecanismo de Transporte](#cap-09-agent-protocols-1-arquitectura-y-mecanismo-de-transporte)
-    - [2. Catálogo de Herramientas MCP Expuestas (20 Tools)](#cap-09-agent-protocols-2-catalogo-de-herramientas-mcp-expuestas-20-tools)
-    - [3. Recursos Canónicos Expuestos (`aisdlc://`)](#cap-09-agent-protocols-3-recursos-canonicos-expuestos-aisdlc)
-    - [4. Guías de Configuración para Entornos IDE y Agentes](#cap-09-agent-protocols-4-guias-de-configuracion-para-entornos-ide-y-agentes)
-  - [8. Protocolo Canónico de Handoff de Workflow entre Agentes y Ventana de Acción Humana](#cap-09-agent-protocols-8-protocolo-canonico-de-handoff-de-workflow-entre-agentes-y-ventana-de-accion-humana)
-    - [1. Propósito y Principios de Gobernanza](#cap-09-agent-protocols-1-proposito-y-principios-de-gobernanza)
-    - [2. Regla de Activación Condicional por Nivel de Autonomía](#cap-09-agent-protocols-2-regla-de-activacion-condicional-por-nivel-de-autonomia)
-    - [3. Plantilla Canónica Institucional](#cap-09-agent-protocols-3-plantilla-canonica-institucional)
-    - [4. Cadena de Transición Canónica del Ciclo de Vida](#cap-09-agent-protocols-4-cadena-de-transicion-canonica-del-ciclo-de-vida)
+- [**09. AI Agent Protocols, System Prompts, and Guardrails**](#cap-09-agent-protocols) *(Fuente: `process/09_agent_protocols.md`)*
+  - [1. Operational Principles for AI Agents](#cap-09-agent-protocols-1-operational-principles-for-ai-agents)
+  - [2. The 5 Unbreakable Commandments of Agents (Guardrails) | Los 5 Mandamientos Inquebrantables de los Agentes](#cap-09-agent-protocols-2-the-5-unbreakable-commandments-of-agents-guardrails-los-5-mandamientos-inquebrantables-de-los-agentes)
+  - [3. System Prompts Catalog for Specialized Agents](#cap-09-agent-protocols-3-system-prompts-catalog-for-specialized-agents)
+    - [1. `agent-product-analyst` (Product Analyst)](#cap-09-agent-protocols-1-agent-product-analyst-product-analyst)
+    - [2. `agent-threat-modeler` (Threat Modeler and Security Specialist)](#cap-09-agent-protocols-2-agent-threat-modeler-threat-modeler-and-security-specialist)
+    - [3. `agent-system-architect` (System Architect)](#cap-09-agent-protocols-3-agent-system-architect-system-architect)
+    - [4. `agent-qa-engineer` (QA Engineer and SDET)](#cap-09-agent-protocols-4-agent-qa-engineer-qa-engineer-and-sdet)
+    - [5. `agent-developer` (Software Developer)](#cap-09-agent-protocols-5-agent-developer-software-developer)
+    - [6. `agent-security-auditor` (Adversarial Code Auditor)](#cap-09-agent-protocols-6-agent-security-auditor-adversarial-code-auditor)
+    - [7. `agent-compliance-checker` (Open Source License Compliance Auditor)](#cap-09-agent-protocols-7-agent-compliance-checker-open-source-license-compliance-auditor)
+    - [8. `agent-expert-user` (Expert User and Domain Evaluator)](#cap-09-agent-protocols-8-agent-expert-user-expert-user-and-domain-evaluator)
+    - [9. `agent-code-reviewer` (Technical and Architectural Code Reviewer)](#cap-09-agent-protocols-9-agent-code-reviewer-technical-and-architectural-code-reviewer)
+    - [10. `agent-devops` (Automation and Infrastructure Engineer)](#cap-09-agent-protocols-10-agent-devops-automation-and-infrastructure-engineer)
+  - [4. Operational Protocol "AI as Scribe" (Assisted Technical Writing)](#cap-09-agent-protocols-4-operational-protocol-ai-as-scribe-assisted-technical-writing)
+    - [1. Purpose and Philosophy](#cap-09-agent-protocols-1-purpose-and-philosophy)
+    - [2. Input / Output Contract (I/O Contract)](#cap-09-agent-protocols-2-input-output-contract-io-contract)
+    - [3. Identifier Taxonomy and Sequence Rules](#cap-09-agent-protocols-3-identifier-taxonomy-and-sequence-rules)
+    - [4. Deterministic Calculation of SHA-256 Cryptographic Digests](#cap-09-agent-protocols-4-deterministic-calculation-of-sha-256-cryptographic-digests)
+    - [5. Standardized Prompts for Scribe Agents (AI as Scribe)](#cap-09-agent-protocols-5-standardized-prompts-for-scribe-agents-ai-as-scribe)
+    - [6. Human Review and Approval Workflow](#cap-09-agent-protocols-6-human-review-and-approval-workflow)
+  - [5. Deterministic Interface Protocol and Structured `--json` Output for AI Agents](#cap-09-agent-protocols-5-deterministic-interface-protocol-and-structured---json-output-for-ai-agents)
+    - [1. Consumption Guidelines for AI Agents](#cap-09-agent-protocols-1-consumption-guidelines-for-ai-agents)
+  - [6. Compatibility Matrix and Native Integration with Agent Environments](#cap-09-agent-protocols-6-compatibility-matrix-and-native-integration-with-agent-environments)
+    - [Automated Agent Scaffolding (`aisdlc init --agents`)](#cap-09-agent-protocols-automated-agent-scaffolding-aisdlc-init---agents)
+    - [Automated Anti-Drift Verification](#cap-09-agent-protocols-automated-anti-drift-verification)
+  - [7. Native Model Context Protocol (MCP) Server (`@ai-sdlc/mcp` / `aisdlc mcp`)](#cap-09-agent-protocols-7-native-model-context-protocol-mcp-server-ai-sdlcmcp-aisdlc-mcp)
+    - [1. Architecture and Transport Mechanism](#cap-09-agent-protocols-1-architecture-and-transport-mechanism)
+    - [2. Exposed MCP Tools Catalog (20 Tools)](#cap-09-agent-protocols-2-exposed-mcp-tools-catalog-20-tools)
+    - [3. Canonical Resources (`aisdlc://`)](#cap-09-agent-protocols-3-canonical-resources-aisdlc)
+    - [4. Setup Guides for IDEs and Agent Environments](#cap-09-agent-protocols-4-setup-guides-for-ides-and-agent-environments)
+  - [8. Canonical Workflow Handoff Protocol between Agents and Human Action Window](#cap-09-agent-protocols-8-canonical-workflow-handoff-protocol-between-agents-and-human-action-window)
+    - [1. Purpose and Governance Principles](#cap-09-agent-protocols-1-purpose-and-governance-principles)
+    - [2. Autonomy Level Conditional Activation Rule](#cap-09-agent-protocols-2-autonomy-level-conditional-activation-rule)
+    - [3. Canonical Template](#cap-09-agent-protocols-3-canonical-template)
+    - [4. Canonical Lifecycle Transition Chain](#cap-09-agent-protocols-4-canonical-lifecycle-transition-chain)
 
-- [**10. Gestión de Calidad, Reglas de Código y Puertas de Liberación (Release Gates)**](#cap-10-quality-management-and-release-gates) *(Fuente: `process/10_quality_management_and_release_gates.md`)*
-  - [1. Gestión de Calidad en el AI-SDLC: Software Quality as Code](#cap-10-quality-management-and-release-gates-1-gestion-de-calidad-en-el-ai-sdlc-software-quality-as-code)
-  - [2. Reglas de Código Automatizadas (Coding Rules)](#cap-10-quality-management-and-release-gates-2-reglas-de-codigo-automatizadas-coding-rules)
-    - [A. Motores de Inspección Estática](#cap-10-quality-management-and-release-gates-a-motores-de-inspeccion-estatica)
-    - [B. Reglas de Código Obligatorias](#cap-10-quality-management-and-release-gates-b-reglas-de-codigo-obligatorias)
-  - [3. Métricas Estándar de Software y Umbrales de Liberación](#cap-10-quality-management-and-release-gates-3-metricas-estandar-de-software-y-umbrales-de-liberacion)
-  - [3.1 Motor de Análisis Estático Basado en AST Real (Polyglot AST Engine)](#cap-10-quality-management-and-release-gates-31-motor-de-analisis-estatico-basado-en-ast-real-polyglot-ast-engine)
-    - [Ventajas Técnicas y Eliminación de Falsos Positivos:](#cap-10-quality-management-and-release-gates-ventajas-tecnicas-y-eliminacion-de-falsos-positivos)
-  - [4. El Mecanismo del Release Gate (Restricciones a la Liberación)](#cap-10-quality-management-and-release-gates-4-el-mecanismo-del-release-gate-restricciones-a-la-liberacion)
-    - [4.1 Entregables Documentales Obligatorios de Release (Manuales As-Code)](#cap-10-quality-management-and-release-gates-41-entregables-documentales-obligatorios-de-release-manuales-as-code)
-    - [4.2 Puertas de Calidad Adaptativas por Perfil de Riesgo (Progressive Friction Gates)](#cap-10-quality-management-and-release-gates-42-puertas-de-calidad-adaptativas-por-perfil-de-riesgo-progressive-friction-gates)
-    - [4.3 Comando Unificado de Pre-Vuelo con Auto-Fix (`aisdlc check --fix`)](#cap-10-quality-management-and-release-gates-43-comando-unificado-de-pre-vuelo-con-auto-fix-aisdlc-check---fix)
-  - [5. Política de Excepciones y Gestión de Deuda Técnica](#cap-10-quality-management-and-release-gates-5-politica-de-excepciones-y-gestion-de-deuda-tecnica)
-  - [6. Generación Automática del Informe de Calidad (Quality Scorecard as Code)](#cap-10-quality-management-and-release-gates-6-generacion-automatica-del-informe-de-calidad-quality-scorecard-as-code)
-    - [A. Comando de Generación Automática](#cap-10-quality-management-and-release-gates-a-comando-de-generacion-automatica)
-    - [B. Contenido del Informe Generado](#cap-10-quality-management-and-release-gates-b-contenido-del-informe-generado)
-  - [7. Arquitectura de Calidad Multilenguaje (Polyglot Support)](#cap-10-quality-management-and-release-gates-7-arquitectura-de-calidad-multilenguaje-polyglot-support)
-    - [A. Niveles de Neutralidad del Framework](#cap-10-quality-management-and-release-gates-a-niveles-de-neutralidad-del-framework)
-    - [B. Mapeo de Ecosistemas en `quality-policy.yaml`](#cap-10-quality-management-and-release-gates-b-mapeo-de-ecosistemas-en-quality-policyyaml)
-    - [C. El Estándar Universal SARIF (Static Analysis Results Interchange Format)](#cap-10-quality-management-and-release-gates-c-el-estandar-universal-sarif-static-analysis-results-interchange-format)
-  - [7. Telemetría de Commits, Agregación de KPIs y Coste de Calidad (Rework & DIR)](#cap-10-quality-management-and-release-gates-7-telemetria-de-commits-agregacion-de-kpis-y-coste-de-calidad-rework-dir)
-    - [A. Git Trailers Estandarizados](#cap-10-quality-management-and-release-gates-a-git-trailers-estandarizados)
-    - [B. Métricas de Re-trabajo y Observabilidad](#cap-10-quality-management-and-release-gates-b-metricas-de-re-trabajo-y-observabilidad)
-  - [8. Dashboard Web Interactivo y Visualizador de Grafos PDaC / RTM (Cytoscape.js)](#cap-10-quality-management-and-release-gates-8-dashboard-web-interactivo-y-visualizador-de-grafos-pdac-rtm-cytoscapejs)
-    - [Características Principales del Dashboard:](#cap-10-quality-management-and-release-gates-caracteristicas-principales-del-dashboard)
+- [**10. Quality Management, Coding Rules, and Release Gates**](#cap-10-quality-management-and-release-gates) *(Fuente: `process/10_quality_management_and_release_gates.md`)*
+  - [1. Quality Management in AI-SDLC: Software Quality as Code](#cap-10-quality-management-and-release-gates-1-quality-management-in-ai-sdlc-software-quality-as-code)
+  - [2. Automated Coding Rules](#cap-10-quality-management-and-release-gates-2-automated-coding-rules)
+    - [A. Static Inspection Engines](#cap-10-quality-management-and-release-gates-a-static-inspection-engines)
+    - [B. Mandatory Coding Rules](#cap-10-quality-management-and-release-gates-b-mandatory-coding-rules)
+  - [3. Standard Software Metrics and Release Thresholds](#cap-10-quality-management-and-release-gates-3-standard-software-metrics-and-release-thresholds)
+  - [3.1 Real AST-Based Static Analysis Engine (Polyglot AST Engine)](#cap-10-quality-management-and-release-gates-31-real-ast-based-static-analysis-engine-polyglot-ast-engine)
+    - [Technical Advantages and False Positive Elimination:](#cap-10-quality-management-and-release-gates-technical-advantages-and-false-positive-elimination)
+  - [4. The Release Gate Mechanism (Constraints on Release)](#cap-10-quality-management-and-release-gates-4-the-release-gate-mechanism-constraints-on-release)
+    - [4.1 Mandatory Documentary Release Deliverables (Manuals As-Code)](#cap-10-quality-management-and-release-gates-41-mandatory-documentary-release-deliverables-manuals-as-code)
+    - [4.2 Progressive Friction Quality Gates](#cap-10-quality-management-and-release-gates-42-progressive-friction-quality-gates)
+    - [4.3 Unified Pre-Flight Command with Auto-Fix (`aisdlc check --fix`)](#cap-10-quality-management-and-release-gates-43-unified-pre-flight-command-with-auto-fix-aisdlc-check---fix)
+  - [5. Exception Policy and Technical Debt Management](#cap-10-quality-management-and-release-gates-5-exception-policy-and-technical-debt-management)
+  - [6. Automated Quality Report Generation (Quality Scorecard as Code)](#cap-10-quality-management-and-release-gates-6-automated-quality-report-generation-quality-scorecard-as-code)
+    - [A. Automatic Generation Command](#cap-10-quality-management-and-release-gates-a-automatic-generation-command)
+    - [B. Generated Report Contents](#cap-10-quality-management-and-release-gates-b-generated-report-contents)
+  - [7. Polyglot Quality Architecture (Polyglot Support)](#cap-10-quality-management-and-release-gates-7-polyglot-quality-architecture-polyglot-support)
+    - [A. Framework Neutrality Levels](#cap-10-quality-management-and-release-gates-a-framework-neutrality-levels)
+    - [B. Ecosystem Mapping in `quality-policy.yaml`](#cap-10-quality-management-and-release-gates-b-ecosystem-mapping-in-quality-policyyaml)
+    - [C. The Universal SARIF Standard (Static Analysis Results Interchange Format)](#cap-10-quality-management-and-release-gates-c-the-universal-sarif-standard-static-analysis-results-interchange-format)
+  - [8. Commit Telemetry, KPI Aggregation, and Cost of Quality (Rework & DIR)](#cap-10-quality-management-and-release-gates-8-commit-telemetry-kpi-aggregation-and-cost-of-quality-rework-dir)
+    - [A. Standardized Git Trailers](#cap-10-quality-management-and-release-gates-a-standardized-git-trailers)
+    - [B. Observability and Rework Metrics](#cap-10-quality-management-and-release-gates-b-observability-and-rework-metrics)
+  - [9. Interactive Web Dashboard and PDaC / RTM Graph Visualizer (Cytoscape.js)](#cap-10-quality-management-and-release-gates-9-interactive-web-dashboard-and-pdac-rtm-graph-visualizer-cytoscapejs)
+    - [Key Dashboard Features:](#cap-10-quality-management-and-release-gates-key-dashboard-features)
 
-- [**11. Modelo de Ramas Git Jerárquico (4-Tier Git Branching Model)**](#cap-11-git-branching-and-lifecycle) *(Fuente: `process/11_git_branching_and_lifecycle.md`)*
-  - [1. Principios del Modelo de Ramificación](#cap-11-git-branching-and-lifecycle-1-principios-del-modelo-de-ramificacion)
-  - [2. Anatomía de los Cuatro Niveles de Ramas](#cap-11-git-branching-and-lifecycle-2-anatomia-de-los-cuatro-niveles-de-ramas)
-    - [Tier 1: Rama `main` (Línea Base Estable)](#cap-11-git-branching-and-lifecycle-tier-1-rama-main-linea-base-estable)
-    - [Tier 2: Rama de Versión Abierta (`release/vX.Y.Z` o `version/vX.Y.Z`)](#cap-11-git-branching-and-lifecycle-tier-2-rama-de-version-abierta-releasevxyz-o-versionvxyz)
-    - [Tier 3: Rama de Feature, Bug o Parche (`feat/...`, `bug/...`, `patch/...`, `fix/...`)](#cap-11-git-branching-and-lifecycle-tier-3-rama-de-feature-bug-o-parche-feat-bug-patch-fix)
-    - [Tier 4: Rama de Tarea Atómica (`task/...`)](#cap-11-git-branching-and-lifecycle-tier-4-rama-de-tarea-atomica-task)
-  - [3. Diagrama de Flujo de Ramas y Merges](#cap-11-git-branching-and-lifecycle-3-diagrama-de-flujo-de-ramas-y-merges)
-  - [4. Puertas de Calidad y Criterios de Merge por Nivel (PR Gates)](#cap-11-git-branching-and-lifecycle-4-puertas-de-calidad-y-criterios-de-merge-por-nivel-pr-gates)
-  - [5. Guardrails y Reglas para Agentes de IA](#cap-11-git-branching-and-lifecycle-5-guardrails-y-reglas-para-agentes-de-ia)
-  - [6. Automatización de Ramas con el CLI (`aisdlc git checkout`)](#cap-11-git-branching-and-lifecycle-6-automatizacion-de-ramas-con-el-cli-aisdlc-git-checkout)
-    - [Comportamiento Determinista y Garantías:](#cap-11-git-branching-and-lifecycle-comportamiento-determinista-y-garantias)
-  - [7. Integración Continua Multi-Plataforma (Multi-CI Ecosystem)](#cap-11-git-branching-and-lifecycle-7-integracion-continua-multi-plataforma-multi-ci-ecosystem)
-    - [Proveedores Soportados y Variables de Entorno Canónicas](#cap-11-git-branching-and-lifecycle-proveedores-soportados-y-variables-de-entorno-canonicas)
-    - [Flujo de Ejecución en Pipelines](#cap-11-git-branching-and-lifecycle-flujo-de-ejecucion-en-pipelines)
+- [**11. Hierarchical Git Branching Model (4-Tier Git Branching Model)**](#cap-11-git-branching-and-lifecycle) *(Fuente: `process/11_git_branching_and_lifecycle.md`)*
+  - [1. Principles of the Branching Model](#cap-11-git-branching-and-lifecycle-1-principles-of-the-branching-model)
+  - [2. Anatomy of the Four Branch Tiers](#cap-11-git-branching-and-lifecycle-2-anatomy-of-the-four-branch-tiers)
+    - [Tier 1: `main` Branch (Stable Baseline)](#cap-11-git-branching-and-lifecycle-tier-1-main-branch-stable-baseline)
+    - [Tier 2: Open Version Branch (`release/vX.Y.Z` or `version/vX.Y.Z`)](#cap-11-git-branching-and-lifecycle-tier-2-open-version-branch-releasevxyz-or-versionvxyz)
+    - [Tier 3: Feature, Bug, or Patch Branch (`feat/...`, `bug/...`, `patch/...`, `fix/...`)](#cap-11-git-branching-and-lifecycle-tier-3-feature-bug-or-patch-branch-feat-bug-patch-fix)
+    - [Tier 4: Atomic Task Branch (`task/...`)](#cap-11-git-branching-and-lifecycle-tier-4-atomic-task-branch-task)
+  - [3. Branch and Merge Flow Diagram](#cap-11-git-branching-and-lifecycle-3-branch-and-merge-flow-diagram)
+  - [4. Quality Gates and Merge Criteria by Tier (PR Gates)](#cap-11-git-branching-and-lifecycle-4-quality-gates-and-merge-criteria-by-tier-pr-gates)
+  - [5. Guardrails and Rules for AI Agents](#cap-11-git-branching-and-lifecycle-5-guardrails-and-rules-for-ai-agents)
+  - [6. Branch Automation with the CLI (`aisdlc git checkout`)](#cap-11-git-branching-and-lifecycle-6-branch-automation-with-the-cli-aisdlc-git-checkout)
+    - [Deterministic Behavior and Guarantees:](#cap-11-git-branching-and-lifecycle-deterministic-behavior-and-guarantees)
+  - [7. Multi-Platform Continuous Integration (Multi-CI Ecosystem)](#cap-11-git-branching-and-lifecycle-7-multi-platform-continuous-integration-multi-ci-ecosystem)
+    - [Supported Providers and Canonical Environment Variables](#cap-11-git-branching-and-lifecycle-supported-providers-and-canonical-environment-variables)
+    - [Pipeline Execution Flow](#cap-11-git-branching-and-lifecycle-pipeline-execution-flow)
 
 ---
 
@@ -263,118 +263,119 @@
 
 > 📂 **Módulo 1 de 13 [Parte I: Introducción y Arquitectura del Framework]:** `README.md`
 
-# AI-SDLC: Framework de Desarrollo Híbrido para Personas y Agentes
+# AI-SDLC: Hybrid Software Development Lifecycle for Humans and AI Agents
 
-> **Ciclo de Vida de Software de Nueva Generación basado en Git, "As-Code", ProductShape, NAF v4, arc42, Ciberseguridad Integral y Gobernanza de Licencias Open Source.**
-
----
-
-<a id="doc-readme-vision-y-proposito"></a>
-
-## 🎯 Visión y Propósito
-
-En la era de la ingeniería asistida por Inteligencia Artificial, la velocidad de escritura de código ha dejado de ser el cuello de botella. **El factor crítico se ha desplazado hacia la izquierda:**
-- ¿Qué es exactamente el producto y para quién se construye?
-- ¿Qué comportamientos y reglas de negocio lo gobiernan?
-- ¿Qué arquitectura técnica garantiza su escalabilidad, seguridad e interoperabilidad?
-- ¿Cómo prevenimos vulnerabilidades y modelamos las amenazas desde el día cero?
-- ¿Qué licencias de terceros son de uso libre y cuáles exigen adquisición comercial o violan la propiedad intelectual?
-- ¿Cómo entregamos contexto preciso, atómico y verificable a los agentes de IA para que no alucinen código?
-
-**AI-SDLC** es una metodología y marco operativo diseñado para que **personas (ingenieros, arquitectos, product managers, oficiales de seguridad)** y **agentes de IA (analistas, arquitectos, programadores, auditores)** colaboren simétricamente con rigor industrial y sin fricción.
+> **Next-Generation Software Lifecycle based on Git, "As-Code", ProductShape, NAF v4, arc42, End-to-End Cybersecurity, and Open Source License Governance.**
 
 ---
 
-<a id="doc-readme-los-5-pilares-del-framework"></a>
+<a id="doc-readme-vision-and-purpose"></a>
 
-## 🏛️ Los 5 Pilares del Framework
+## 🎯 Vision and Purpose
+
+In the age of AI-assisted engineering, the speed of code authoring is no longer the bottleneck. **The critical bottleneck has shifted to the left:**
+- What exactly is the product, and for whom is it being built?
+- What behaviors and business rules govern it?
+- What technical architecture guarantees scalability, security, and interoperability?
+- How do we prevent vulnerabilities and model threats from day zero?
+- Which third-party dependencies are free for commercial use, and which require acquisition or introduce legal liabilities?
+- How do we feed precise, atomic, and verifiable context to AI agents so they never hallucinate code?
+
+**AI-SDLC** is an operational methodology and framework engineered so that **humans (engineers, architects, product managers, security officers)** and **AI agents (analysts, architects, developers, auditors)** collaborate symmetrically with industrial rigor and zero friction.
+
+---
+
+<a id="doc-readme-the-6-pillars-of-the-framework"></a>
+
+## 🏛️ The 6 Pillars of the Framework
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   AI-SDLC: ARQUITECTURA DEL PROCESO                    │
+│                   AI-SDLC: PROCESS ARCHITECTURE                        │
 └────────────────────────────────────────────────────────────────────────┘
 
- [1. DEFINICIÓN DE PRODUCTO] (ProductShape - PDaC)
-  ├── Actores (ACT-*) & Journeys (JRN-*)
-  ├── Casos de Uso (UC-*) & Reglas de Negocio (BR-*)
-  └── Bounded Contexts (BC-*) & Requisitos (FR-*, QR-*, CON-*)
+ [1. PRODUCT DEFINITION] (ProductShape - PDaC)
+  ├── Vision & Goals (ARCH-INTRO-* / NAF v4 Enterprise & Capability)
+  ├── Actors (ACT-*) & Journeys (JRN-*)
+  ├── Use Cases (UC-*) & Business Rules (BR-*)
+  └── Bounded Contexts (BC-*) & Requirements (FR-*, QR-*, CON-*)
                             │
-                            ▼ (Cita canónica: id + SHA256 digest + anchor)
- [2. CIBERSEGURIDAD BY DESIGN] (STRIDE / ASVS / NAF Security)
-  ├── Actores Maliciosos (ACT-THREAT-*) & Casos de Abuso (ABUSE-*)
-  ├── Requisitos de Seguridad (SEC-REQ-*) & Políticas Zero Trust (SEC-POL-*)
-  └── Enclaves de Seguridad y Zonas de Confianza (SEC-ENC-*)
+                            ▼ (Canonical citation: id + SHA256 digest + anchor)
+ [2. CYBERSECURITY BY DESIGN] (STRIDE / ASVS / NAF Security)
+  ├── Threat Actors (ACT-THREAT-*) & Abuse Cases (ABUSE-*)
+  ├── Security Requirements (SEC-REQ-*) & Zero Trust Policies (SEC-POL-*)
+  └── Security Enclaves and Trust Zones (SEC-ENC-*)
                             │
-                            ▼ (Cita canónica)
- [3. GOBERNANZA DE LICENCIAS OSS] (Legal & IP Compliance as Code)
-  ├── Categorización: Permisivas (Libre) vs. Comerciales/Duales (Pago) vs. Virales (AGPL)
-  ├── license-policy.yaml & Guardrails de Agentes
-  └── Generación de SBOM (CycloneDX) y Verificación en CI/CD
+                            ▼ (Canonical citation)
+ [3. OSS LICENSE GOVERNANCE] (Legal & IP Compliance as Code)
+  ├── Categorization: Permissive (Free) vs Commercial/Dual (Paid) vs Viral (AGPL)
+  ├── license-policy.yaml & Agent Guardrails
+  └── SBOM Generation (CycloneDX) and CI/CD Verification
                             │
-                            ▼ (Cita canónica)
- [4. GESTIÓN DE CALIDAD Y RELEASE GATES] (Software Quality as Code)
-  ├── Coding Rules (Clean Code, Tipado Estricto, Cero Dead Code, ESLint/Prettier)
-  ├── Métricas Estándar: Complejidad Ciclomática (<=10), Cognitiva (<=15), Mantenibilidad (>=50)
-  └── quality-policy.yaml & Verificador Determinista de Release Gate
+                            ▼ (Canonical citation)
+ [4. QUALITY MANAGEMENT & RELEASE GATES] (Software Quality as Code)
+  ├── Coding Rules (Clean Code, Strict Typing, Zero Dead Code, ESLint/Prettier)
+  ├── Standard Metrics: Cyclomatic Complexity (<=10), Cognitive (<=15), Maintainability (>=50)
+  └── quality-policy.yaml & Deterministic Release Gate Verifier
                             │
-                            ▼ (Cita canónica)
- [5. ARQUITECTURA DE SISTEMAS] (arc42 + NAF v4)
-  ├── Contexto y Estrategia (arc42 Sec. 1-4 + NAF Operational)
-  ├── Bloques y Componentes (arc42 Sec. 5 + NAF Services & Systems CMP-*)
-  ├── Runtime y Despliegue (arc42 Sec. 6-7 + NAF Behaviour & Resources)
-  └── Conceptos Transversales y ADRs (arc42 Sec. 8-9 + NAF Governance)
+                            ▼ (Canonical citation)
+ [5. SYSTEMS ARCHITECTURE] (arc42 + NAF v4)
+  ├── Context & Strategy (arc42 Sec. 1-4 + NAF Operational)
+  ├── Building Blocks (arc42 Sec. 5 + NAF Services & Systems CMP-*)
+  ├── Runtime & Deployment (arc42 Sec. 6-7 + NAF Behaviour & Resources)
+  └── Cross-Cutting Concepts & ADRs (arc42 Sec. 8-9 + NAF Governance)
                             │
-                            ▼ (Cita canónica)
- [6. ENTREGA E IMPLEMENTACIÓN] (Spec-Driven Development - SDD)
-  ├── Incrementos acotados (Changes: Proposal, Spec, Design, Tasks)
-  ├── Criterios de Aceptación Gherkin & Pruebas BDD Cucumber
-  ├── Programación por Agentes de IA + Pruebas Unitarias y de Mitigación
-  └── CI/CD Gates Deterministas: Quality Gate, SAST, SCA, SBOM, Licencias y PR Humano
+                            ▼ (Canonical citation)
+ [6. DELIVERY & IMPLEMENTATION] (Spec-Driven Development - SDD)
+  ├── Bounded Increments (Changes: Proposal, Spec, Design, Tasks)
+  ├── Gherkin Acceptance Criteria & Cucumber BDD Tests
+  ├── AI Agent Authoring + Unit & Mitigation Tests
+  └── Deterministic CI/CD Gates: Quality Gate, SAST, SCA, SBOM, Licenses & Human PR
 ```
 
 ---
 
-<a id="doc-readme-estructura-del-repositorio"></a>
+<a id="doc-readme-repository-structure"></a>
 
-## 📂 Estructura del Repositorio
+## 📂 Repository Structure
 
 ```text
 AI-SDLC/
-├── README.md                                 # Esta guía
-├── license-policy.yaml                       # Política declarativa de licencias permitidas/bloqueadas
+├── README.md                                 # This guide
+├── license-policy.yaml                       # Declarative allowed/blocked license policy
 │
 ├── packages/                                 # Monorepo Workspace (pnpm + Changesets)
-│   ├── core/                                 # @ai-sdlc/core: Motor de dominio, verificadores puros y reporters
-│   ├── mcp/                                  # @ai-sdlc/mcp: Servidor nativo Model Context Protocol (npx @ai-sdlc/mcp / aisdlc mcp)
-│   └── cli/                                  # @ai-sdlc/cli: CLI ejecutable binario (npx aisdlc)
+│   ├── core/                                 # @aisdlc/core: Domain engine, pure verifiers, and reporters
+│   ├── mcp/                                  # @aisdlc/mcp: Native Model Context Protocol server (npx @aisdlc/mcp / aisdlc mcp)
+│   └── cli/                                  # @aisdlc/cli: Binary CLI executable (npx aisdlc)
 │
-├── process/                                  # Especificación Normativa del Proceso
-│   ├── 00_principles_and_manifesto.md        # Manifiesto y principios fundamentales
-│   ├── 01_governance_and_roles.md            # Matriz RACI Persona-Agente y autorizaciones
-│   ├── 02_product_definition.md              # Guía ProductShape (Actores, Casos de Uso, Requisitos)
-│   ├── 03_security_by_design.md              # Modelado de amenazas, Abuse Cases y Requisitos de Seguridad
-│   ├── 04_open_source_license_compliance.md  # Clasificación de licencias, uso libre y adquisición comercial
-│   ├── 05_architecture_arc42_nafv4.md        # Estructura arc42 potenciada por el grid NAF v4
-│   ├── 06_spec_driven_development.md         # Ciclo de entrega SDD citando Producto y Arquitectura
-│   ├── 07_security_and_license_validation.md # Gates de CI/CD: SAST, Secret Scan, SBOM y Licencias
-│   ├── 08_citation_contract_and_drift.md     # Protocolo criptográfico anti-deriva
-│   ├── 09_agent_protocols.md                 # Prompts, contratos de skills y guardrails para LLMs
-│   ├── 10_quality_management_and_release_gates.md # Reglas de código, Complejidad Ciclomática y Release Gates
-│   └── 11_git_branching_and_lifecycle.md     # Modelo de ramas Git de 4 tiers (main, release, feat/bug, task)
+├── process/                                  # Normative Process Specification
+│   ├── 00_principles_and_manifesto.md        # Manifesto and core principles
+│   ├── 01_governance_and_roles.md            # Human-Agent RACI matrix and authorization levels
+│   ├── 02_product_definition.md              # ProductShape guide (Actors, Use Cases, Requirements)
+│   ├── 03_security_by_design.md              # Threat modeling, Abuse Cases, and Security Requirements
+│   ├── 04_open_source_license_compliance.md  # License classification, free usage, and commercial acquisition
+│   ├── 05_architecture_arc42_nafv4.md        # arc42 structure augmented with NAF v4 grid
+│   ├── 06_spec_driven_development.md         # SDD delivery lifecycle citing Product and Architecture
+│   ├── 07_security_and_license_validation.md # CI/CD Gates: SAST, Secret Scanning, SBOM, and Licenses
+│   ├── 08_citation_contract_and_drift.md     # Anti-drift cryptographic citation protocol
+│   ├── 09_agent_protocols.md                 # Prompts, skill contracts, and guardrails for LLMs
+│   ├── 10_quality_management_and_release_gates.md # Coding rules, Cyclomatic Complexity, and Release Gates
+│   └── 11_git_branching_and_lifecycle.md     # 4-tier Git branching model (main, release, feat/bug, task)
 │
-├── schemas/                                  # Esquemas JSON (Validación Determinista)
+├── schemas/                                  # JSON Schemas (Deterministic Validation)
 │   ├── product/                              # Schemas: actor, use-case, requirement, business-rule
 │   ├── security/                             # Schemas: threat-actor, abuse-case, security-req
 │   ├── compliance/                           # Schemas: license-policy, dependency-manifest
-│   ├── architecture/                         # Schemas: component, adr
+│   ├── architecture/                         # Schemas: introduction-and-goals, component, adr
 │   ├── sdd/                                  # Schemas: tasks, handoff
 │   └── manuals/                              # Schemas: user-manual, production-manual
 │
-├── templates/                                # Plantillas estándar Markdown con YAML frontmatter
-│   ├── product/                              # Plantillas ACT, JRN, UC, BR, FR, QR, CON
-│   ├── security/                             # Plantillas THREAT, ABUSE, SEC-REQ, SEC-POL
-│   ├── compliance/                           # Plantillas CON-LIC, ADR-LIC, Solicitud de Compra
-│   ├── architecture/                         # Plantillas arc42 (01-12) enriquecidas con NAF v4
+├── templates/                                # Standard Markdown templates with YAML frontmatter
+│   ├── product/                              # ACT, JRN, UC, BR, FR, QR, CON templates
+│   ├── security/                             # THREAT, ABUSE, SEC-REQ, SEC-POL templates
+│   ├── compliance/                           # CON-LIC, ADR-LIC, Commercial Acquisition Request templates
+│   ├── architecture/                         # arc42 templates (01-12) enriched with NAF v4
 │   │   ├── introduction-and-goals.template.md      # Sec. 1 (Enterprise & Capability: ARCH-INTRO-*)
 │   │   ├── architecture-constraints.template.md    # Sec. 2 (Constraints: CON-*, ACON-*)
 │   │   ├── context-and-scope.template.md           # Sec. 3 (Operational: CTX-*, OIE-*)
@@ -388,145 +389,151 @@ AI-SDLC/
 │   │   ├── quality-requirements.template.md        # Sec. 10 (Quality: ARCH-QUAL-*, QR-*)
 │   │   ├── risks-and-technical-debt.template.md    # Sec. 11 (Risk & Debt: RSK-*)
 │   │   └── glossary.template.md                    # Sec. 12 (Taxonomy: TERM-*, BC-*)
-│   ├── sdd/                                  # Plantillas SDD (Proposal, Spec, Design, Tasks, Handoff)
-│   ├── manuals/                              # Plantillas MAN-USER (Manual de Usuario), MAN-PROD (Manual de Producción)
-│   └── ci/                                   # Plantillas de CI/CD (GitLab CI, Azure DevOps, Bitbucket, GitHub Actions)
+│   ├── sdd/                                  # SDD templates (Proposal, Spec, Design, Tasks, Handoff)
+│   ├── manuals/                              # MAN-USER (User Manual), MAN-PROD (Production Manual) templates
+│   └── ci/                                   # CI/CD templates (GitLab CI, Azure DevOps, Bitbucket, GitHub Actions)
 │
-├── reports/                                  # Informes formales autogenerados (RTM 360°, Calidad, Requerimientos Activos)
+├── reports/                                  # Autogenerated formal reports (360° RTM, Quality, Active Reqs)
 │
-└── examples/                                 # Caso de Estudio Realista: "SentinelCore" (SaaS Telemétrico Crítico)
-    ├── product/                              # Modelo canónico de producto
-    ├── security/                             # Modelado de amenazas y mitigaciones
-    ├── compliance/                           # Manifiesto de dependencias evaluadas
-    ├── architecture/                         # Arquitectura arc42 + NAF v4 con enclaves
-    ├── specs/                                # Especificación de entrega SDD con citaciones criptográficas
-    ├── manuals/                              # Manual de Usuario y de Producción del caso de estudio
-    ├── src/                                  # Implementación del caso de estudio (TS, Go, Python)
-    └── tests/                                # Pruebas unitarias, BDD y benchmarks del caso de estudio
+└── examples/                                 # Realistic Case Study: "SentinelCore" (Critical Telemetry SaaS)
+    ├── product/                              # Canonical product model
+    ├── security/                             # Threat modeling and mitigations
+    ├── compliance/                           # Evaluated dependency manifest
+    ├── architecture/                         # arc42 + NAF v4 architecture with enclaves
+    ├── specs/                                # SDD delivery specification with cryptographic citations
+    ├── manuals/                              # User and Production manuals for case study
+    ├── src/                                  # Case study implementation (TS, Go, Python)
+    └── tests/                                # Unit, BDD, and benchmark test suites for case study
 ```
 
 ---
 
-<a id="doc-readme-tutorial-1-creacion-rapida-de-una-funcionalidad-quickstart-en-5-minutos"></a>
+<a id="doc-readme-tutorial-1-quick-feature-creation-5-minute-quickstart"></a>
 
-## ⚡ Tutorial 1: Creación Rápida de una Funcionalidad (Quickstart en 5 Minutos)
+## ⚡ Tutorial 1: Quick Feature Creation (5-Minute Quickstart)
 
-Este flujo acelerado describe cómo crear, implementar, verificar e integrar una nueva funcionalidad desde cero utilizando exclusivamente los **comandos simplificados** del CLI (`aisdlc` o scripts de `pnpm`).
+This accelerated flow demonstrates how to create, implement, verify, and integrate a new feature from scratch using the **simplified CLI commands** (`aisdlc` or `pnpm` scripts).
 
-<a id="doc-readme-1-prerrequisitos"></a>
+<a id="doc-readme-1-prerequisites"></a>
 
-### 1. Prerrequisitos
-- **Node.js** (v18.0 o superior): `node -v`
-- **pnpm** (v9 o v10+): `pnpm -v`
-- **Git** (v2.30 o superior): `git --version`
+### 1. Prerequisites
+- **Node.js** (v18.0 or higher): `node -v`
+- **pnpm** (v9 or v10+): `pnpm -v`
+- **Git** (v2.30 or higher): `git --version`
 
-<a id="doc-readme-2-flujo-rapido-en-6-pasos-con-comandos-simplificados"></a>
+<a id="doc-readme-2-fast-7-step-workflow-with-simplified-commands"></a>
 
-### 2. Flujo Rápido en 6 Pasos con Comandos Simplificados
+### 2. Fast 7-Step Workflow with Simplified Commands
 
 ```bash
-# 1. Crear el andamiaje del cambio SDD y su sidecar PDaC (handoff.yaml) automáticamente
-pnpm run change:new "Notificaciones de Alerta en Tiempo Real" --from UC-STREAM-TELEMETRY
-# o vía npx: npx aisdlc change new "Notificaciones de Alerta en Tiempo Real" --from UC-STREAM-TELEMETRY
-
-# 2. Navegar y crear automáticamente la rama de tarea en la jerarquía de 4 tiers de Git
-pnpm run git:checkout TSK-001
-# o vía npx: npx aisdlc git checkout TSK-001
-
-# 3. Implementar la funcionalidad y sus pruebas (TDD) en src/ y tests/
-#    (El desarrollador o agente implementa código y tests unitarios / BDD)
-
-# 4. Pre-vuelo determinista con auto-fix (sincroniza Gherkin a .feature y digests SHA-256)
+# 1. Define canonical product (ProductShape / PDaC) upstream in specs/product/
+#    Create or derive the Use Case or Requirement (e.g., specs/product/UC-STREAM-TELEMETRY.md) using templates/product/
+#    Pre-flight auto-fix syncs Gherkin scenarios to .feature and validates schemas:
 pnpm run check:fix
-# o vía npx: npx aisdlc check --fix
+# or via npx: npx aisdlc check --fix
 
-# 5. Ejecutar la suite consolidada de CI/CD (9 Gates de calidad y gobernanza)
+# 2. Automatically scaffold the SDD change and its PDaC sidecar (handoff.yaml) citing the product
+pnpm run change:new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
+# or via npx: npx aisdlc change new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
+
+# 3. Automatically navigate and cascade-create the task branch in Git 4-tier hierarchy
+pnpm run git:checkout TSK-001
+# or via npx: npx aisdlc git checkout TSK-001
+
+# 4. Implement feature and tests (TDD) in src/ and tests/
+#    (Developer or agent writes logic and unit/BDD tests)
+
+# 5. Deterministic pre-flight with auto-fix (syncs Gherkin to .feature and recalculates SHA-256 digests)
+pnpm run check:fix
+# or via npx: npx aisdlc check --fix
+
+# 6. Execute consolidated CI/CD suite (all 9 quality and governance gates)
 pnpm run verify:all
-# o vía npx: npx aisdlc verify all
-# o con salida estructurada JSON para agentes de IA / CI: npx aisdlc verify all --json
+# or via npx: npx aisdlc verify all
+# or with structured JSON output for AI agents / CI pipelines: npx aisdlc verify all --json
 
-# 6. Integrar el cambio a la línea base canónica (promoción de requisitos y arquitectura)
+# 7. Integrate change into canonical baseline (promotes requirements and syncs architecture)
 npx aisdlc sdd integrate --auto
-# o especificando el ID: npx aisdlc sdd integrate --change chg-002-notificaciones-de-alerta-en-tiempo-real
+# or specifying the ID: npx aisdlc sdd integrate --change chg-002-real-time-alert-notifications
 ```
 
 > [!TIP]
-> **Integración Desatendida en CI/CD Multi-Plataforma**: En flujos con Pull Request o Merge Request, el paso 6 (`sdd integrate`) se ejecuta automáticamente al fusionar el PR/MR mediante los pipelines configurados para GitHub Actions ([`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml)), GitLab CI (`.gitlab-ci.yml`), Azure DevOps (`azure-pipelines.yml`) o Bitbucket Pipelines (`bitbucket-pipelines.yml`).
+> **Unattended Integration in Multi-Platform CI/CD**: In workflows using Pull Requests or Merge Requests, step 7 (`sdd integrate`) runs automatically upon PR/MR merge via configured CI pipelines for GitHub Actions ([`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml)), GitLab CI (`.gitlab-ci.yml`), Azure DevOps (`azure-pipelines.yml`), or Bitbucket Pipelines (`bitbucket-pipelines.yml`).
 
-<a id="doc-readme-3-resumen-de-comandos-simplificados-del-cli-aisdlc"></a>
+<a id="doc-readme-3-simplified-cli-commands-summary-aisdlc"></a>
 
-### 3. Resumen de Comandos Simplificados del CLI (`aisdlc`)
+### 3. Simplified CLI Commands Summary (`aisdlc`)
 
-| Herramienta / Comando CLI | Comando pnpm equivalente | Fase del Ciclo de Vida | Salida / Acción Realizada |
+| CLI Tool / Command | Equivalent pnpm Command | Lifecycle Phase | Output / Action Performed |
 |---|---|---|---|
-| `npx aisdlc change new <nombre>` | `pnpm run change:new -- <nombre>` | **Andamiaje SDD** | Genera `proposal.md`, `spec.md`, `design.md`, `tasks.md` y sidecar `handoff.yaml` (`HOF-*`) con digests SHA-256 |
-| `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Gestión Git 4-Tiers** | Resuelve versión y crea en cascada: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
-| `npx aisdlc git plan` | `pnpm run git:plan` | **Planificación Git** | Renderiza el árbol visual de jerarquía de ramas antes de trabajar |
-| `npx aisdlc git validate <rama>` | `pnpm run git:validate <rama>` | **Gobierno Git** | Valida la nomenclatura estricta de cualquier rama según su Tier (1 a 4) |
-| `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Telemetría Git** | Instala el hook `prepare-commit-msg` para inyección automática de trailers en commits |
-| `npx aisdlc kpi pr [opciones]` | `pnpm run kpi:pr` | **Métricas Pull Request** | Calcula y genera la tabla Markdown agregada de KPIs (tiempo, tokens, autoría) para el PR (admite `--json`) |
-| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Consolidado de Release** | Computa DIR por modelo/humano, densidad de defectos y coste de re-trabajo (`RELEASE_KPIS_<release>.md`, admite `--json`) |
-| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Pre-vuelo Unificado** | Sincroniza bloques Gherkin a `.feature`, actualiza digests SHA-256 PDaC, audita seguridad y verifica Quality Gates |
-| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Suite CI/CD Consolidada** | Evalúa los 9 Quality Gates (soporta `--json` determinista sin ANSI para agentes autónomos) |
-| `npx aisdlc verify security [opciones]` | `pnpm run verify:security` | **Seguridad Shift-Left (Gate 9)** | Verificación unificada de secretos (Gitleaks) y SAST determinista (OWASP Top 10, `--json`, código de salida 4 en fugas) |
-| `npx aisdlc verify secrets [opciones]` | `pnpm run verify:secrets` | **Escaneo de Secretos** | Detección determinista de credenciales, llaves API y alta entropía (Shannon) con soporte git diff, `--json` y exitCode 4 |
-| `npx aisdlc verify sast [opciones]` | `pnpm run verify:sast` | **Seguridad SAST** | Detección determinista de patrones vulnerables generados por IA (SQLi, exec, eval, SSRF, `--json`) |
-| `npx aisdlc verify quality [--json]` | `pnpm run verify:quality` | **Release Gate de Código** | Evalúa Complejidad Ciclomática ($\le 10$), Cognitiva ($\le 15$) y Mantenibilidad ($\ge 50$) con soporte `--json` |
-| `npx aisdlc verify traceability [--json]`| `pnpm run verify:traceability` | **Matriz 360° RTM** | Valida triangulación obligatoria: Producto (`HOF-*`) ➔ Arquitectura (`CMP-*`) ➔ Tests (`.feature`) |
-| `npx aisdlc verify governance [--json]` | `pnpm run verify:governance` | **Gobierno de Tareas** | Audita modos de autonomía (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc., admite `--json`) |
-| `npx aisdlc verify testing [--json]` | `pnpm run verify:testing` | **Auditoría de Tests** | Comprueba cobertura al 100% de requisitos y tareas con pruebas verificables en disco (`--json`) |
-| `npx aisdlc verify licenses [opciones]` | `pnpm run verify:licenses` | **Gobernanza IP / OSS y SCA** | Escaneo dinámico de dependencias, SBOM CycloneDX 1.5 y atribución legal frente a `license-policy.yaml` (`--json`) |
-| `npx aisdlc verify pdac [--json]` | `pnpm run verify:pdac` | **Integridad Criptográfica**| Detecta derivas (*drift*) en el grafo PDaC comparando hashes SHA-256 (`--json`) |
-| `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Conformidad Estructural** | Valida artefactos Markdown frente a esquemas JSON canónicos (Draft 2020-12, `--json`) |
-| `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancia** | Audita colisiones léxicas y solapamientos de requisitos antes de codificar (`--json`) |
-| `npx aisdlc verify friction [change]` | - | **Fricción Progresiva** | Valida protecciones Anti-Bypass y umbrales según el perfil de riesgo (`patch`/`standard`/`critical`, `--json`) |
-| `npx aisdlc sdd verify` | - | **Conformidad SDD** | Audita que los cambios activos cumplan la especificación y contengan sidecars válidos |
-| `npx aisdlc sdd integrate [--auto]` | - | **Promoción a Baseline** | Promueve requerimientos a `active`, enlaza arquitectura, marca propuesta `applied` y archiva el cambio |
-| `npx aisdlc report quality` | `pnpm run report:quality` | **Reporting Formal** | Genera informe detallado de métricas en `reports/QUALITY_REPORT.md` |
-| `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Catálogo de Producto** | Genera catálogo consolidado de requerimientos en `reports/ACTIVE_REQUIREMENTS.md` |
-| `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | **Dossier Maestro** | Compila documentación y manuales con TOC interactiva en `reports/AI_SDLC_SPECIFICATION_FULL.md` |
-| `npx aisdlc init [dir] [--ci <prov>] [--arch <minimal|full|none>]` | - | **Inicialización** | Inicializa un nuevo repo con carpetas, esquemas, políticas, pipeline CI/CD y plantillas de arquitectura seleccionadas (`minimal`, `full`, `none`) |
-| `npx aisdlc mcp` / `npx @ai-sdlc/mcp` | `pnpm run mcp` | **Servidor MCP Nativo** | Arranca el servidor Model Context Protocol sobre `stdio` con 20 herramientas tipadas (incluyendo `new`, `verify`, `report`) y 5 recursos canónicos |
-
+| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository structure, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`), CI/CD pipelines (`--ci <github\|gitlab\|azure\|bitbucket>`), AI agent rules (`--agents <all\|cursor\|claude\|antigravity\|copilot\|mcp\|none>`), and architecture templates (`--arch <minimal\|full\|none>`). Supports `--dry-run`, `--json`, and interactive console wizard |
+| `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry Setup** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
+| `npx aisdlc mcp` / `npx @aisdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 20 typed tools (including `new`, `verify`, `report`) and 5 canonical resources |
+| `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | **SDD Scaffolding** | Generates `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` sidecar (`HOF-*`) with SHA-256 digests |
+| `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancy** | Audits lexical collisions and requirement overlaps before coding (`--json`) |
+| `npx aisdlc verify friction [change]` | - | **Progressive Friction** | Validates Anti-Bypass rules and thresholds according to risk profile (`patch`/`standard`/`critical`, `--json`) |
+| `npx aisdlc git plan` | `pnpm run git:plan` | **Git Planning** | Renders visual branch hierarchy tree before starting work |
+| `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Git 4-Tier Branching** | Resolves version and cascade-creates: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
+| `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | **Git Governance** | Validates strict naming rules for any branch according to its Tier (1 to 4) |
+| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Unified Pre-Flight** | Syncs Gherkin to `.feature`, updates PDaC SHA-256 digests, audits security, and checks Quality Gates |
+| `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Structural Compliance** | Validates Markdown artifacts against canonical JSON schemas (Draft 2020-12, `--json`) |
+| `npx aisdlc verify pdac [--json]` | `pnpm run verify:pdac` | **Cryptographic Integrity** | Detects drift in PDaC graph comparing SHA-256 hashes (`--json`) |
+| `npx aisdlc verify quality [--json]` | `pnpm run verify:quality` | **Code Release Gate** | Evaluates Cyclomatic Complexity ($\le 10$), Cognitive ($\le 15$), and Maintainability ($\ge 50$) with `--json` |
+| `npx aisdlc verify security [options]` | `pnpm run verify:security` | **Shift-Left Security (Gate 9)** | Unified secret verification (Gitleaks) and deterministic SAST (OWASP Top 10, `--json`, exit code 4 on leaks) |
+| `npx aisdlc verify secrets [options]` | `pnpm run verify:secrets` | **Secret Scanning** | Deterministic detection of credentials, API keys, and Shannon entropy with Git diff support, `--json`, and exitCode 4 |
+| `npx aisdlc verify sast [options]` | `pnpm run verify:sast` | **SAST Security** | Deterministic detection of AI-generated vulnerable patterns (SQLi, exec, eval, SSRF, `--json`) |
+| `npx aisdlc verify testing [--json]` | `pnpm run verify:testing` | **Testing Audit** | Verifies 100% test coverage for requirements and tasks with physical disk tests (`--json`) |
+| `npx aisdlc verify traceability [--json]` | `pnpm run verify:traceability` | **360° RTM Matrix** | Enforces mandatory triangulation: Product (`HOF-*`) ➔ Architecture (`CMP-*`) ➔ Tests (`.feature`) |
+| `npx aisdlc verify governance [--json]` | `pnpm run verify:governance` | **Task Governance** | Audits task autonomy modes (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc., supports `--json`) |
+| `npx aisdlc verify licenses [options]` | `pnpm run verify:licenses` | **IP / OSS Governance & SCA** | Dynamic dependency scan, CycloneDX 1.5 SBOM, and legal attribution against `license-policy.yaml` (`--json`) |
+| `npx aisdlc sdd verify` | - | **SDD Compliance** | Audits active changes for specification compliance and valid sidecars |
+| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 9 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
+| `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship) for PRs (supports `--json`) |
+| `npx aisdlc sdd integrate [--auto]` | - | **Baseline Promotion** | Promotes requirements to `active`, links architecture, marks proposal `applied`, and archives change |
+| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Release Summary** | Computes DIR per model/human, defect density, and rework costs (`RELEASE_KPIS_<release>.md`, supports `--json`) |
+| `npx aisdlc report quality` | `pnpm run report:quality` | **Formal Reporting** | Generates detailed metrics report in `reports/QUALITY_REPORT.md` |
+| `npx aisdlc report dashboard` | `pnpm run report:dashboard` | **Interactive Dashboard** | Generates self-contained HTML dashboard and PDaC/RTM visual graph (supports `--open`, `--output`) |
+| `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Product Catalog** | Generates consolidated requirement catalog in `reports/ACTIVE_REQUIREMENTS.md` |
+| `npx tsx scripts/bundle-documentation.ts` | `pnpm run report:docs` | **Master Dossier** | Compiles full documentation and manuals with interactive TOC in `reports/AI_SDLC_SPECIFICATION_FULL.md` |
 
 ---
 
-<a id="doc-readme-tutorial-2-flujo-detallado-paso-a-paso-end-to-end-deep-dive"></a>
+<a id="doc-readme-tutorial-2-end-to-end-deep-dive"></a>
 
-## 📖 Tutorial 2: Flujo Detallado Paso a Paso (End-to-End Deep Dive)
+## 📖 Tutorial 2: End-to-End Deep Dive
 
-Este tutorial exhaustivo describe cómo construir una nueva funcionalidad desde cero utilizando todas las fases, plantillas y controles deterministas de **AI-SDLC**, aprovechando los **comandos simplificados** del CLI para agilizar cada etapa con cero derivas y máxima trazabilidad.
+This comprehensive walkthrough details how to build a new feature using all phases, templates, and deterministic controls of **AI-SDLC**, leveraging simplified CLI commands for zero drift and full traceability.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│               FLUJO DETALLADO DE CREACIÓN DE UNA NUEVA FUNCIONALIDAD                   │
+│                      DETAILED NEW FEATURE CREATION WORKFLOW                            │
 └────────────────────────────────────────────────────────────────────────────────────────┘
-  [1. Producto & BDD]    ➔ Modelar UC/FR/BR y sincronizar Gherkin (.feature) vía `check:fix`
-  [2. Threat Modeling]   ➔ Modelar ABUSE, requisitos SEC-REQ y enclaves Zero Trust
-  [3. Licencias OSS]     ➔ Validar dependencias con `verify:licenses` y license-policy.yaml
-  [4. Andamiaje SDD]     ➔ Scaffolding automatizado con `change:new` y sidecar HOF-*
-  [5. 4-Tier Branching]  ➔ Crear ramas en cascada: main ➔ release ➔ feat ➔ task con `git checkout`
-  [6. Coder / Agent]     ➔ Implementación TDD e inyección quirúrgica de contexto
-  [7. Pre-vuelo & Calidad]➔ `check:fix` para sincronizar digests y `verify:quality` para métricas
-  [8. Trazabilidad 360°] ➔ Matriz RTM (`verify:traceability`), suite completa (`verify:all`) y PR
-  [9. Integración SDD]   ➔ `sdd integrate --auto` para promover a baseline y archivar el cambio
+  [1. Product & BDD]     ➔ Model UC/FR/BR and sync Gherkin (.feature) via `check:fix`
+  [2. Threat Modeling]   ➔ Model ABUSE, SEC-REQ requirements, and Zero Trust enclaves
+  [3. OSS Licenses]      ➔ Validate dependencies with `verify:licenses` and license-policy.yaml
+  [4. SDD Scaffolding]   ➔ Automated scaffolding with `change:new` and HOF-* sidecar
+  [5. 4-Tier Branching]  ➔ Cascade branch creation: main ➔ release ➔ feat ➔ task via `git checkout`
+  [6. Coder / Agent]     ➔ TDD implementation and surgical context injection
+  [7. Pre-Flight & Qual] ➔ `check:fix` to sync digests and `verify:quality` for metrics
+  [8. 360° Traceability] ➔ RTM matrix (`verify:traceability`), full suite (`verify:all`), and PR
+  [9. SDD Integration]   ➔ `sdd integrate --auto` to promote to baseline and archive change
 ```
 
 ---
 
-<a id="doc-readme-fase-1-definicion-canonica-de-producto-y-criterios-gherkin-bdd"></a>
+<a id="doc-readme-phase-1-canonical-product-definition-and-gherkin-criteria-bdd"></a>
 
-### Fase 1: Definición Canónica de Producto y Criterios Gherkin (BDD)
+### Phase 1: Canonical Product Definition and Gherkin Criteria (BDD)
 
-Toda nueva funcionalidad parte de una necesidad de negocio canónica:
+Every feature starts from a canonical business need:
 
-1. **Definir o Derivar el Requerimiento Funcional**:
-   Puedes crear el archivo en `specs/product/` utilizando la plantilla de `templates/product/requirement.template.md` (o dejar que el comando de andamiaje `aisdlc change new` de la Fase 4 lo genere automáticamente como borrador si se trata de un desarrollo *greenfield*):
+1. **Define or Derive the Functional Requirement**:
+   Create the file in `specs/product/` using `templates/product/requirement.template.md` (or let the `aisdlc change new` command in Phase 4 generate a draft automatically for greenfield features):
    ```markdown
    ---
    id: "FR-002-ALERT-NOTIFICATIONS-001"
    type: "requirement"
-   title: "Notificaciones de Alerta en Tiempo Real"
+   title: "Real-Time Alert Notifications"
    status: "draft"
    version: "1.0.0"
    schema-version: "1.0"
@@ -540,58 +547,58 @@ Toda nueva funcionalidad parte de una necesidad de negocio canónica:
      - "@automated"
    ---
 
-   # FR-002-ALERT-NOTIFICATIONS-001: Notificaciones de Alerta en Tiempo Real
+   # FR-002-ALERT-NOTIFICATIONS-001: Real-Time Alert Notifications
 
-   ## 1. Enunciado Normativo
-   El sistema DEBE emitir alertas en tiempo real con latencia inferior a 500ms ante anomalías telemétricas detectadas.
+   ## 1. Normative Statement
+   The system MUST emit real-time alert notifications with latency under 500ms upon detected telemetry anomalies.
 
    ---
 
-   ## 2. Criterios de Aceptación (Gherkin BDD)
+   ## 2. Acceptance Criteria (Gherkin BDD)
 
    ```gherkin
    @FR-002-ALERT-NOTIFICATIONS-001 @automated
-   Feature: Notificaciones de Alerta en Tiempo Real
-     Scenario: Disparo de alerta ante desviación crítica de altitud
-       Given un dron transmitiendo telemetría con altitud fuera del límite seguro
-       When el motor de telemetría procesa la trama de datos
-       Then se genera una notificación de severidad CRITICAL
-       And la alerta se entrega a los suscriptores en menos de 500 ms
+   Feature: Real-Time Alert Notifications
+     Scenario: Alert trigger on critical altitude deviation
+       Given a drone transmitting telemetry with altitude outside safe boundaries
+       When telemetry engine processes data packet
+       Then a notification with severity CRITICAL is generated
+       And alert is delivered to subscribers in under 500 ms
    ```
    ```
 
-2. **Sincronización Automática con Cucumber (.feature)**:
-   En lugar de copiar o extraer manualmente los escenarios, ejecuta el comando simplificado de pre-vuelo:
+2. **Automated Cucumber Synchronization (.feature)**:
+   Instead of manual copy-paste, run the pre-flight command:
    ```bash
    pnpm run check:fix
-   # o específicamente: pnpm run extract:gherkin:all (npx aisdlc gherkin extract --all)
+   # or specifically: pnpm run extract:gherkin:all (npx aisdlc gherkin extract --all)
    ```
-   *Efecto*: Escanea los documentos de producto, extrae los bloques ````gherkin```` y genera o actualiza de forma determinista los archivos `.feature` en `tests/features/`.
+   *Effect*: Scans product specs, extracts ````gherkin```` blocks, and generates or updates `.feature` files under `tests/features/`.
 
-3. **Validación Estructural de Esquemas**:
+3. **Structural Schema Validation**:
    ```bash
    pnpm run verify:schemas
-   # o: npx aisdlc verify schemas --path specs/product
+   # or: npx aisdlc verify schemas --path specs/product
    ```
-   *Efecto*: Valida que el frontmatter YAML y el contenido cumplan con el esquema JSON canónico de producto (Draft 2020-12).
+   *Effect*: Validates that YAML frontmatter satisfies JSON Schema Draft 2020-12.
 
 ---
 
-<a id="doc-readme-fase-2-ciberseguridad-shift-left-y-modelado-de-amenazas"></a>
+<a id="doc-readme-phase-2-shift-left-cybersecurity-and-threat-modeling"></a>
 
-### Fase 2: Ciberseguridad Shift-Left y Modelado de Amenazas
+### Phase 2: Shift-Left Cybersecurity and Threat Modeling
 
-1. **Modelar Amenazas con STRIDE / ASVS**:
-   Identifica los vectores de ataque y casos de abuso utilizando las plantillas de `templates/security/`:
-   - Actor malicioso: `templates/security/threat-actor.template.md` (ej. `specs/security/ACT-THREAT-INJECTOR.md`)
-   - Caso de abuso: `templates/security/abuse-case.template.md` (ej. `specs/security/ABUSE-ALERT-INJECTION.md`)
-   - Requisito de seguridad: `templates/security/security-req.template.md` (ej. `specs/security/SEC-REQ-ALERT-HMAC.md`)
+1. **Threat Modeling with STRIDE / ASVS**:
+   Identify attack vectors and abuse cases using `templates/security/`:
+   - Threat actor: `templates/security/threat-actor.template.md` (e.g., `specs/security/ACT-THREAT-INJECTOR.md`)
+   - Abuse case: `templates/security/abuse-case.template.md` (e.g., `specs/security/ABUSE-ALERT-INJECTION.md`)
+   - Security requirement: `templates/security/security-req.template.md` (e.g., `specs/security/SEC-REQ-ALERT-HMAC.md`)
 
-2. **Vincular Mitigaciones a Enclaves Zero Trust**:
+2. **Bind Mitigations to Zero Trust Enclaves**:
    ```markdown
    ---
    id: "SEC-REQ-ALERT-HMAC"
-   title: "Firma HMAC Obligatoria para Mensajes de Alerta"
+   title: "Mandatory HMAC Signature for Alert Notifications"
    status: "approved"
    category: "integrity"
    mitigates:
@@ -602,73 +609,72 @@ Toda nueva funcionalidad parte de una necesidad de negocio canónica:
    ---
    ```
 
-3. **Validar Conformidad de Artefactos de Seguridad**:
+3. **Validate Security Artifacts**:
    ```bash
    npx aisdlc verify schemas --path specs/security
    ```
 
 ---
 
-<a id="doc-readme-fase-3-gobernanza-de-licencias-open-source-ip-legal-as-code"></a>
+<a id="doc-readme-phase-3-open-source-license-governance-ip-legal-as-code"></a>
 
-### Fase 3: Gobernanza de Licencias Open Source (IP & Legal as Code)
+### Phase 3: Open Source License Governance (IP & Legal as Code)
 
-Antes de incorporar cualquier dependencia o paquete de terceros:
-1. **Consultar `license-policy.yaml`**:
-   - 🟢 **Permisivas (Aprobadas)**: `MIT`, `Apache-2.0`, `BSD-3-Clause`, `ISC`, `MS-PL` (uso libre en cualquier capa).
-   - 🟡 **Copyleft Débil (Condicionadas)**: `LGPL-3.0`, `MPL-2.0`, `MS-RL` (solo consumo como librería dinámica, sin modificaciones internas).
-   - 🔴 **Virales (Prohibidas)**: `GPL-2.0`, `GPL-3.0`, `AGPL-3.0` (bloqueadas para proteger la propiedad intelectual del código propietario y SaaS).
-   - ⚠️ **Comerciales / Duales (Pago Requerido)**: `BSL-1.1`, `SSPL-1.0` (requieren aprobación y formulario formal en `templates/compliance/commercial-acquisition-request.template.md`).
+Before introducing any third-party dependency:
+1. **Consult `license-policy.yaml`**:
+   - 🟢 **Permissive (Approved)**: `MIT`, `Apache-2.0`, `BSD-3-Clause`, `ISC`, `MS-PL` (unrestricted usage).
+   - 🟡 **Weak Copyleft (Conditional)**: `LGPL-3.0`, `MPL-2.0`, `MS-RL` (dynamic linking only, no internal modifications).
+   - 🔴 **Viral (Disallowed)**: `GPL-2.0`, `GPL-3.0`, `AGPL-3.0` (blocked to protect proprietary IP and SaaS boundaries).
+   - ⚠️ **Commercial / Dual (Paid)**: `BSL-1.1`, `SSPL-1.0` (requires approval via `templates/compliance/commercial-acquisition-request.template.md`).
 
-2. **Auditar Licencias y Composición de Software (SCA) con el Comando Simplificado**:
+2. **Audit Licenses and Software Composition (SCA)**:
    ```bash
    pnpm run verify:licenses
-   # o: npx aisdlc verify licenses
+   # or: npx aisdlc verify licenses
    
-   # Opcional: Generar SBOM CycloneDX 1.5 y Notices de Atribución en un solo paso
+   # Optional: Generate CycloneDX 1.5 SBOM and Attribution Notices in one pass
    npx aisdlc verify licenses --sbom reports/sbom.cdx.json --notices THIRD_PARTY_NOTICES.md
    ```
-   *Efecto*:
-   - Ejecuta un escaneo dinámico determinista sobre los paquetes reales instalados en `node_modules` y `.pnpm` (o mediante `--tool trivy` / `--tool syft` si están instalados).
-   - Bloquea la entrega si detecta licencias prohibidas o comerciales no homologadas.
-   - Genera `reports/LICENSE_COMPLIANCE_REPORT.md` con el estado formal del Quality Gate.
-   - Si se solicita `--sbom`, exporta el inventario estándar en formato CycloneDX 1.5 JSON.
-   - Si se solicita `--notices`, consolida las atribuciones legales y textos de copyright en Markdown.
+   *Effect*:
+   - Runs deterministic dynamic scan over installed dependencies in `node_modules` and `.pnpm`.
+   - Blocks delivery if unapproved or viral licenses are detected.
+   - Generates `reports/LICENSE_COMPLIANCE_REPORT.md`.
+   - If `--sbom` is requested, exports CycloneDX 1.5 JSON.
+   - If `--notices` is requested, generates `THIRD_PARTY_NOTICES.md`.
 
 ---
 
-<a id="doc-readme-fase-4-andamiaje-de-entrega-sdd-y-gobernanza-de-autonomia"></a>
+<a id="doc-readme-phase-4-sdd-delivery-scaffolding-and-autonomy-governance"></a>
 
-### Fase 4: Andamiaje de Entrega SDD y Gobernanza de Autonomía
+### Phase 4: SDD Delivery Scaffolding and Autonomy Governance
 
-Para implementar la funcionalidad, genera el paquete del cambio SDD de forma automatizada en un único comando:
+Generate the SDD delivery package in a single automated step:
 
-1. **Crear el Cambio con el Comando Simplificado**:
+1. **Create Change with Simplified Command**:
    ```bash
-   pnpm run change:new "Notificaciones de Alerta en Tiempo Real" --from UC-STREAM-TELEMETRY
-   # o: npx aisdlc change new "Notificaciones de Alerta en Tiempo Real" --from UC-STREAM-TELEMETRY --profile standard
+   pnpm run change:new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
+   # or: npx aisdlc change new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY --profile standard
    ```
-   *Efecto Determinista*:
-   - Crea el directorio del cambio en `specs/changes/active/chg-002-notificaciones-de-alerta-en-tiempo-real/`.
-   - Genera el cuarteto SDD preconfigurado:
-     - `proposal.md`: Justificación, impacto y citaciones inmutables con hashes SHA-256.
-     - `spec.md`: Escenarios funcionales y de mitigación de seguridad.
-     - `design.md`: DTOs, interfaces, endpoints y arquitectura arc42 / NAF v4.
-     - `tasks.md`: Plan de tareas atómicas gobernadas y verificables.
-   - Genera y deposita automáticamente el sidecar PDaC formal `handoff.yaml` (`HOF-002-NOTIFICACIONES-DE-ALERTA-EN-TIEMPO-REAL`) con los hashes SHA-256 de los artefactos citados.
-   - *(Si no se proporciona `--from`, el comando crea automáticamente un requerimiento borrador `FR-*-001.md` en `specs/product/`)*.
+   *Deterministic Effect*:
+   - Creates directory `specs/changes/active/chg-002-real-time-alert-notifications/`.
+   - Generates preconfigured SDD quartet:
+     - `proposal.md`: Rationale, impact, and SHA-256 citations.
+     - `spec.md`: Functional and security mitigation scenarios.
+     - `design.md`: DTOs, interfaces, endpoints, and arc42 / NAF v4 mapping.
+     - `tasks.md`: Governed and verifiable atomic tasks.
+   - Generates and deposits formal PDaC sidecar `handoff.yaml` (`HOF-002-REAL-TIME-ALERT-NOTIFICATIONS`) with SHA-256 digests.
+   - *(If `--from` is omitted, the command creates a draft requirement `FR-*-001.md` in `specs/product/`)*.
 
-2. **Configurar Tareas y Modos de Autonomía en `tasks.md`**:
-   Cada tarea define su nivel de riesgo y modo de supervisión humana:
-   - `AUTONOMOUS`: Tarea de bajo riesgo; el agente planifica e implementa de forma autónoma.
-   - `HUMAN_REVIEW_PLAN`: Tarea de riesgo medio; el agente propone el diseño y espera confirmación antes de codificar.
-   - `HIGH_RISK_MANUAL`: Tarea crítica (credenciales, migraciones destructivas); reservada a humanos.
-   - `AMBIGUOUS`: Tarea bloqueada por ambigüedad de requisitos; requiere refinamiento previo.
+2. **Configure Tasks and Autonomy Modes in `tasks.md`**:
+   - `AUTONOMOUS`: Low-risk task; agent plans and implements autonomously.
+   - `HUMAN_REVIEW_PLAN`: Medium-risk; agent proposes design and pauses for approval before coding.
+   - `HIGH_RISK_MANUAL`: Critical task (credentials, destructive migrations); reserved for humans.
+   - `AMBIGUOUS`: Blocked task due to missing requirements; requires human refinement.
 
-   *Ejemplo en `tasks.md`:*
+   *Example in `tasks.md`:*
    ```yaml
    - id: "TSK-001"
-     title: "Definición de DTOs e Interfaces de Alerta"
+     title: "Alert DTO and Interface Definition"
      complexity: "LOW"
      risk-level: "LOW"
      autonomy-mode: "AUTONOMOUS"
@@ -678,7 +684,7 @@ Para implementar la funcionalidad, genera el paquete del cambio SDD de forma aut
        command-or-criteria: "pnpm run verify:quality"
 
    - id: "TSK-002"
-     title: "Implementación del Motor de Alerta y Firma HMAC"
+     title: "Alert Engine and HMAC Signature Implementation"
      complexity: "MEDIUM"
      risk-level: "MEDIUM"
      autonomy-mode: "HUMAN_REVIEW_PLAN"
@@ -688,446 +694,391 @@ Para implementar la funcionalidad, genera el paquete del cambio SDD de forma aut
        command-or-criteria: "pnpm test -- tests/unit/alert_engine.spec.ts"
    ```
 
-3. **Auditar el Gobierno de Tareas y Conformidad SDD**:
+3. **Audit Task Governance and SDD Compliance**:
    ```bash
-   pnpm run verify:governance                    # o: npx aisdlc verify governance
-   npx aisdlc sdd verify                         # Audita sidecars HOF-*, espacios SDD y colisiones pre-vuelo
+   pnpm run verify:governance                    # or: npx aisdlc verify governance
+   npx aisdlc sdd verify                         # Audits HOF-* sidecars, SDD spaces, and pre-flight collisions
    ```
-   *Salida*: Genera `reports/TASKS_GOVERNANCE_REPORT.md` validando que no existan tareas sin verificación o asignaciones indebidas.
 
-4. **Compuerta Pre-Implementación de Duplicados (Shift-Left Pre-Flight Gate)**:
+4. **Shift-Left Pre-Flight Duplicate Gate**:
    ```bash
-   pnpm run verify:duplicates                    # o: npx aisdlc verify duplicates
+   pnpm run verify:duplicates                    # or: npx aisdlc verify duplicates
    ```
-   *Efecto*: Audita que los nuevos requisitos no colisionen en ID, textos normativos idénticos, títulos redundantes ($\ge 85\%$) ni pruebas BDD con la línea base activa. Respeta el Principio de Responsabilidad Única (SRP) permitiendo múltiples requisitos atómicos por Caso de Uso (`UC-*`) y admite evolución *in-place*. Bloquea el proceso antes de gastar recursos de computación y tokens en código.
+   *Effect*: Audits new requirements for collisions in IDs, identical text, redundant titles ($\ge 85\%$), or duplicate BDD tests against the active baseline. Respects Single Responsibility Principle (SRP) and permits in-place evolution. Blocks early to save compute and tokens.
 
 ---
 
-<a id="doc-readme-fase-5-gestion-automatizada-de-ramas-git-modelo-de-4-tiers"></a>
+<a id="doc-readme-phase-5-automated-git-branch-management-4-tier-model"></a>
 
-### Fase 5: Gestión Automatizada de Ramas Git (Modelo de 4 Tiers)
+### Phase 5: Automated Git Branch Management (4-Tier Model)
 
-1. **Navegación y Creación en Cascada por Tarea (Comando Simplificado Recomendado)**:
+1. **Cascade Navigation and Creation per Task (Recommended)**:
    ```bash
    pnpm run git:checkout TSK-001
-   # o: npx aisdlc git checkout TSK-001
+   # or: npx aisdlc git checkout TSK-001
    ```
-   *Qué hace el CLI bajo el capó*:
-   - Localiza `TSK-001` dentro de `specs/changes/active/*/tasks.md`.
-   - Resuelve la versión de release asociada y construye la jerarquía estricta de 4 tiers:
+   *Under the Hood*:
+   - Locates `TSK-001` in `specs/changes/active/*/tasks.md`.
+   - Resolves associated release version and builds strict 4-tier hierarchy:
      `Tier 1: main` ➔ `Tier 2: release/vX.Y.Z` ➔ `Tier 3: feat/CHG-XXX` ➔ `Tier 4: task/CHG-XXX/TSK-001-...`
-   - Crea en cascada las ramas intermedias que no existan y sitúa la sesión de trabajo directamente en la rama de la tarea.
+   - Cascade-creates missing intermediate branches and checks out task branch directly.
 
-2. **Herramientas de Planificación y Validación de Ramas**:
+2. **Branch Planning and Validation Tools**:
    ```bash
-   # Visualizar la jerarquía de ramas antes de iniciar
-   pnpm run git:plan                             # o: npx aisdlc git plan --release v1.2.0 --feature CHG-002-alerting --tasks TSK-001,TSK-002
+   # Visualize branch hierarchy before starting
+   pnpm run git:plan                             # or: npx aisdlc git plan --release v1.2.0 --feature CHG-002-alerting --tasks TSK-001,TSK-002
 
-   # Validar la nomenclatura de cualquier rama activa
-   pnpm run git:validate task/CHG-002/TSK-001-alert-dto # o: npx aisdlc git validate <rama>
+   # Validate branch naming rules
+   pnpm run git:validate task/CHG-002/TSK-001-alert-dto # or: npx aisdlc git validate <branch>
    ```
 
 ---
 
-<a id="doc-readme-fase-6-implementacion-con-tdd-y-auditoria-de-pruebas"></a>
+<a id="doc-readme-phase-6-implementation-with-tdd-and-test-audit"></a>
 
-### Fase 6: Implementación con TDD y Auditoría de Pruebas
+### Phase 6: Implementation with TDD and Test Audit
 
-1. **Inyección Quirúrgica de Contexto**:
-   El desarrollador o agente de IA (`agent-developer`) solo debe recibir como contexto `spec.md`, `design.md` y `license-policy.yaml`. Esto evita distracciones y alucinaciones.
+1. **Surgical Context Injection**:
+   The developer or agent (`agent-developer`) receives strictly `spec.md`, `design.md`, and `license-policy.yaml`.
 2. **Test-Driven Development (TDD)**:
-   Se desarrollan las pruebas unitarias y de mitigación (`SEC-TEST-*`) en `tests/` antes o junto con la implementación en `src/`.
-3. **Auditar la Cobertura Total de Pruebas**:
+   Unit tests and mitigation tests (`SEC-TEST-*`) are authored in `tests/` before or alongside logic in `src/`.
+3. **Audit Total Test Coverage**:
    ```bash
    pnpm run verify:testing
-   # o: npx aisdlc verify testing
+   # or: npx aisdlc verify testing
    ```
-   *Salida*: Genera `reports/TEST_VERIFICATION_AUDIT.md`. Bloquea la entrega si algún requisito o tarea carece de pruebas verificables en disco.
+   *Output*: Generates `reports/TEST_VERIFICATION_AUDIT.md`. Blocks delivery if any requirement or task lacks verifiable tests on disk.
 
 ---
 
-<a id="doc-readme-fase-7-release-gate-de-calidad-multilenguaje-y-pre-vuelo"></a>
+<a id="doc-readme-phase-7-polyglot-quality-release-gate-and-pre-flight"></a>
 
-### Fase 7: Release Gate de Calidad Multilenguaje y Pre-Vuelo
+### Phase 7: Polyglot Quality Release Gate and Pre-Flight
 
-Verifica que el código cumpla con los umbrales de calidad definidos en `quality-policy.yaml`:
-- **Complejidad Ciclomática (McCabe)**: $\le 10$ por función.
-- **Complejidad Cognitiva**: $\le 15$ por función.
-- **Índice de Mantenibilidad (SEI MI)**: $\ge 50.0$ (Objetivo: $>65.0$).
-- **Longitud Máxima de Función**: $\le 40$ líneas.
+Verify code meets quality thresholds in `quality-policy.yaml`:
+- **Cyclomatic Complexity (McCabe)**: $\le 10$ per function.
+- **Cognitive Complexity**: $\le 15$ per function.
+- **Maintainability Index (SEI MI)**: $\ge 50.0$ (Target: $>65.0$).
+- **Maximum Function Length**: $\le 40$ lines.
 
-1. **Ejecutar Pre-Vuelo con Auto-Fix**:
+1. **Run Pre-Flight with Auto-Fix**:
    ```bash
    pnpm run check:fix
-   # o: npx aisdlc check --fix
+   # or: npx aisdlc check --fix
    ```
-   *Efecto*: Sincroniza escenarios Gherkin, recalcula digests PDaC SHA-256 de las citaciones y verifica los gates de calidad.
 
-2. **Evaluar el Release Gate de Calidad**:
+2. **Evaluate Quality Release Gate**:
    ```bash
    pnpm run verify:quality
-   # o: npx aisdlc verify quality
+   # or: npx aisdlc verify quality
    ```
 
-3. **Generar Informe Formal de Calidad**:
+3. **Generate Formal Quality Report**:
    ```bash
    pnpm run report:quality
-   # o: npx aisdlc report quality
+   # or: npx aisdlc report quality
    ```
-   *Salida*: Genera `reports/QUALITY_REPORT.md` analizando TypeScript, JavaScript, Python, Go, Java, C#, Rust, C/C++.
+   *Output*: Generates `reports/QUALITY_REPORT.md` analyzing TypeScript, JavaScript, Python, Go, Java, C#, Rust, C/C++.
 
 ---
 
-<a id="doc-readme-fase-8-matriz-de-trazabilidad-360-automatizada-y-pull-request"></a>
+<a id="doc-readme-phase-8-automated-360-traceability-matrix-and-pull-request"></a>
 
-### Fase 8: Matriz de Trazabilidad 360° Automatizada y Pull Request
+### Phase 8: Automated 360° Traceability Matrix and Pull Request
 
-1. **Auditar Trazabilidad 360° sin Fragilidad Textual**:
+1. **Audit 360° Traceability via Reverse Lookup**:
    ```bash
    pnpm run verify:traceability
-   # o: npx aisdlc verify traceability
+   # or: npx aisdlc verify traceability
    ```
-   *Salida*: Genera `reports/TRACEABILITY_MATRIX.md` verificando deterministamente la triangulación obligatoria:
-   - **Producto (Upstream)**: Handoff PDaC (`HOF-*`) con subgrafo de casos de uso (`UC-*`), reglas (`BR-*`) y casos de abuso (`ABUSE-*`).
-   - **Arquitectura (Midstream)**: Vistas arc42 / NAF v4 (`CMP-*`, `ADR-*`, `SEC-ENC-*`).
-   - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) y pruebas unitarias correspondientes.
+   *Output*: Generates `reports/TRACEABILITY_MATRIX.md` deterministically validating triangulation:
+   - **Product (Upstream)**: PDaC Handoff (`HOF-*`) with use cases (`UC-*`), rules (`BR-*`), and abuse cases (`ABUSE-*`).
+   - **Architecture (Midstream)**: arc42 / NAF v4 views (`CMP-*`, `ADR-*`, `SEC-ENC-*`).
+   - **Testing (Downstream)**: BDD/Gherkin suites (`.feature`) and unit tests.
 
-2. **Ejecución Consolidada de la Suite de CI/CD (9 Quality Gates)**:
+2. **Consolidated CI/CD Suite Execution (All 9 Quality Gates)**:
    ```bash
    pnpm run verify:all
-   # o: npx aisdlc verify all
+   # or: npx aisdlc verify all
    ```
-   *Compuertas evaluadas*: 1) Quality Gate (Complejidad y Calidad AST), 2) Trazabilidad 360° (RTM), 3) Gobierno de Tareas y Autonomía, 4) Cobertura de Pruebas (Reqs & Tasks), 5) Licencias Open Source y SCA, 6) PDaC & Deriva Criptográfica SHA-256, 7) Esquemas JSON de Artefactos, 8) Verificación de Duplicados (Shift-Left Gate), 9) Seguridad Shift-Left (Detección de Secretos Gitleaks & SAST).
+   *Gates evaluated*: 1) Quality Gate (AST Complexity & Cleanliness), 2) 360° Traceability (RTM), 3) Task Governance & Autonomy, 4) Test Coverage (Reqs & Tasks), 5) Open Source Licenses & SCA, 6) PDaC Cryptographic Integrity & Drift, 7) JSON Schemas Compliance, 8) Duplicate Check (Shift-Left Gate), 9) Shift-Left Security (Secret Scanning & SAST).
 
-
-3. **Pull Request y Aprobación Humana**:
-   - Se abre el Pull Request de la tarea hacia la rama feature, y luego hacia la rama release.
-   - **Intervención Humana Innegociable**: El Tech Lead humano inspecciona el diff y los informes autogenerados en `reports/` antes de autorizar el merge final a producción.
-
-> [!TIP]
-> **Modelo de Trazabilidad Invertida (Inverted Traceability)**:
-> Los requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`) no acoplan rutas de implementación ni de tests descendentes. Son los componentes (`satisfies-requirements`) y las pruebas (`@<REQ-ID>` o citaciones en tests) los que referencian hacia arriba a los requerimientos. La herramienta compila la matriz 360° deterministamente mediante resolución inversa (*Reverse Lookup*), protegiendo la inmutabilidad y los hashes SHA-256 de las especificaciones canónicas de producto.
+3. **Pull Request and Human Approval**:
+   - PR is opened from task branch to feature branch, and onward to release branch.
+   - **Non-Negotiable Human Sign-Off**: The human Tech Lead inspects diffs and autogenerated reports in `reports/` before approving the final production merge.
 
 ---
 
-<a id="doc-readme-fase-9-integracion-canonica-post-implementacion-a-la-linea-base"></a>
+<a id="doc-readme-phase-9-post-implementation-canonical-baseline-integration"></a>
 
-### Fase 9: Integración Canónica Post-Implementación a la Línea Base
+### Phase 9: Post-Implementation Canonical Baseline Integration
 
-Una vez concluida la implementación del cambio y verificado que todas las tareas en `tasks.md` están en estado `COMPLETED`:
+Once change implementation finishes and all tasks in `tasks.md` are `COMPLETED`:
 
-1. **Automatización Desatendida en CI/CD (Recomendado)**:
-   - Al fusionar (*merge*) el Pull Request hacia `main` o ramas `release/*`, el workflow de GitHub Actions [`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml) se ejecuta automáticamente.
-   - Detecta deterministamente el cambio activo asociado a la rama o commit del PR, ejecuta la integración canónica de forma segura y realiza commit y push automatizado con mensaje `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
-   - **Para el desarrollador**: solo es necesario ejecutar `git pull` en su rama local para ver los cambios reflejados.
+1. **Unattended CI/CD Automation (Recommended)**:
+   - Upon merging the Pull Request into `main` or release branches (`release/*`), GitHub Actions workflow [`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml) triggers automatically.
+   - Detects the active change, executes canonical integration safely, and commits/pushes with `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
+   - **Developer workflow**: Simply run `git pull` locally to receive the updated baseline.
 
-2. **Ejecución Local / Manual (Comando Simplificado)**:
+2. **Local / Manual Execution (Simplified Command)**:
    ```bash
-   # Detección y resolución automática del cambio activo completado:
+   # Auto-detect completed active change:
    npx aisdlc sdd integrate --auto
 
-   # O indicando explícitamente el ID del cambio:
-   npx aisdlc sdd integrate --change chg-002-notificaciones-de-alerta-en-tiempo-real
+   # Or explicitly specifying change ID:
+   npx aisdlc sdd integrate --change chg-002-real-time-alert-notifications
    ```
-
-   *Efectos y Transformaciones Deterministas*:
-   - **Requerimientos de Producto**: Se promueven automáticamente a estado `active` en `specs/product/` y se añade una entrada en su historial de revisiones referenciando el `changeId`.
-   - **Arquitectura**: Se actualizan los bloques de componente en `specs/architecture/` enlazando los requerimientos recién satisfechos en `satisfies-requirements`.
-   - **Archivado Atómico**: El directorio del cambio se mueve de `specs/changes/active/<id>/` a `specs/changes/completed/<id>/`.
-   - **Propuesta**: Se actualiza `proposal.md` fijando `status: applied`.
+   *Transformations*:
+   - **Product Requirements**: Promoted to `active` in `specs/product/` with revision history updated.
+   - **Architecture**: Component blocks in `specs/architecture/` updated with satisfied requirements in `satisfies-requirements`.
+   - **Atomic Archiving**: Change moved from `specs/changes/active/<id>/` to `specs/changes/completed/<id>/`.
+   - **Proposal**: Marked as `status: applied`.
 
 ---
 
-<a id="doc-readme-tutorial-3-analisis-estatico-con-ast-real-y-soporte-multilenguaje"></a>
+<a id="doc-readme-tutorial-3-real-ast-static-analysis-polyglot-support"></a>
 
-## 🔬 Tutorial 3: Análisis Estático con AST Real y Soporte Multilenguaje
+## 🔬 Tutorial 3: Real AST Static Analysis & Polyglot Support
 
-AI-SDLC incluye un motor de análisis estático basado en **Árbol de Sintaxis Abstracta (AST) Real** para medir con precisión matemática la Complejidad Ciclomática (McCabe), Complejidad Cognitiva (SonarQube), Líneas de Código (LOC) e Índice de Mantenibilidad (MI), erradicando por completo los falsos positivos derivados de expresiones regulares heurísticas o conteo ingenuo de llaves.
+AI-SDLC includes a static analysis engine based on **Real Abstract Syntax Trees (AST)** to measure Cyclomatic Complexity (McCabe), Cognitive Complexity (SonarQube), Lines of Code (LOC), and Maintainability Index (MI) with mathematical precision, eliminating false positives from heuristics or naive brace counting.
 
-<a id="doc-readme-1-arquitectura-multilenguaje-hibrida"></a>
+<a id="doc-readme-1-hybrid-polyglot-architecture"></a>
 
-### 1. Arquitectura Multilenguaje Híbrida
+### 1. Hybrid Polyglot Architecture
 
-- **TypeScript, JavaScript, TSX y JSX**: Analizados mediante [`ts-morph`](https://github.com/dsherret/ts-morph) (licencia MIT) directamente sobre el AST en memoria.
-  - Reconoce con precisión componentes React funcionales, callbacks, closures, getters/setters y constructores.
-  - Inmune a plantillas con llaves anidadas `${{ a: 1 }}`, atributos JSX (`style={{ ... }}`) y comentarios.
-  - Detecta el uso prohibido de `any` semántico (`SyntaxKind.AnyKeyword`) sin falsos positivos en variables como `company`.
-- **Go, Rust, Java, C#, C, C++ y Python**: Analizados mediante un escáner léxico token-aware determinista.
-  - Aísla comentarios de línea (`//`, `#`) y bloque (`/* ... */`, `""" ... """`).
-  - Protege cadenas de texto, caracteres escapados y raw strings (ej. `r#"..."#` en Rust o backticks en Go).
+- **TypeScript, JavaScript, TSX, and JSX**: Analyzed via [`ts-morph`](https://github.com/dsherret/ts-morph) (MIT license) directly on in-memory AST.
+  - Demarcates React functional components, callbacks, closures, getters/setters, and constructors.
+  - Immune to nested template literals `${{ a: 1 }}`, JSX attributes (`style={{ ... }}`), and comments.
+  - Detects prohibited `any` usage (`SyntaxKind.AnyKeyword`) without false positives on words like `company`.
+- **Go, Rust, Java, C#, C, C++, and Python**: Analyzed via deterministic token-aware lexical scanner.
+  - Isolates line comments (`//`, `#`) and block comments (`/* ... */`, `""" ... """`).
+  - Protects strings, escaped characters, and raw strings (e.g., `r#"..."#` in Rust or backticks in Go).
 
-<a id="doc-readme-2-ejemplos-practicos-de-referencia-en-el-repositorio"></a>
+<a id="doc-readme-2-practical-reference-examples"></a>
 
-### 2. Ejemplos Prácticos de Referencia en el Repositorio
+### 2. Practical Reference Examples
 
-El directorio [`examples/ast-analysis/`](examples/ast-analysis/) contiene casos de prueba y módulos representativos en cada lenguaje:
-- [`examples/ast-analysis/component.tsx`](examples/ast-analysis/component.tsx): Componente TSX con hooks, closures y templates anidados.
-- [`examples/ast-analysis/gateway.go`](examples/ast-analysis/gateway.go): Módulo Go con JSON embebido y comentarios con llaves.
-- [`examples/ast-analysis/pipeline.rs`](examples/ast-analysis/pipeline.rs): Módulo Rust con raw strings JSON y pattern matching.
-- [`examples/ast-analysis/analytics.py`](examples/ast-analysis/analytics.py): Módulo Python con docstrings multilínea conteniendo llaves.
-- [`examples/ast-analysis/OrderService.cs`](examples/ast-analysis/OrderService.cs): Servicio C# con interpolación de strings.
-- [`examples/ast-analysis/TelemetryHandler.java`](examples/ast-analysis/TelemetryHandler.java): Clase Java con métodos y try-with-resources.
+The [`examples/ast-analysis/`](examples/ast-analysis/) directory contains representative samples:
+- [`examples/ast-analysis/component.tsx`](examples/ast-analysis/component.tsx): TSX component with hooks and closures.
+- [`examples/ast-analysis/gateway.go`](examples/ast-analysis/gateway.go): Go module with embedded JSON.
+- [`examples/ast-analysis/pipeline.rs`](examples/ast-analysis/pipeline.rs): Rust module with raw string JSON and pattern matching.
+- [`examples/ast-analysis/analytics.py`](examples/ast-analysis/analytics.py): Python module with multiline docstrings containing braces.
+- [`examples/ast-analysis/OrderService.cs`](examples/ast-analysis/OrderService.cs): C# service with string interpolation.
+- [`examples/ast-analysis/TelemetryHandler.java`](examples/ast-analysis/TelemetryHandler.java): Java class with try-with-resources.
 
-<a id="doc-readme-3-comandos-de-verificacion-de-calidad"></a>
+<a id="doc-readme-3-quality-verification-commands"></a>
 
-### 3. Comandos de Verificación de Calidad
-
-Para evaluar la calidad de todo el código del repositorio frente a `quality-policy.yaml`:
+### 3. Quality Verification Commands
 
 ```bash
-# Ejecutar verificación de calidad aislada
+# Isolated quality check
 pnpm run verify:quality
-# o mediante npx:
+# or via npx:
 npx aisdlc verify quality
 
-# Ejecutar el pre-vuelo consolidado que incluye la compuerta de calidad AST
+# Consolidated pre-flight including AST quality gate
 pnpm run check
 ```
 
 ---
 
-<a id="doc-readme-tutorial-4-escaneo-dinamico-de-licencias-y-generacion-de-sbom-sca"></a>
+<a id="doc-readme-tutorial-4-dynamic-license-scanning-sbom-generation-sca"></a>
 
-## 🛡️ Tutorial 4: Escaneo Dinámico de Licencias y Generación de SBOM (SCA)
+## 🛡️ Tutorial 4: Dynamic License Scanning & SBOM Generation (SCA)
 
-AI-SDLC incluye un motor de análisis de composición de software (SCA) y gobernanza de licencias dinámico con capacidad de introspección directa sobre el árbol instalado de dependencias (`node_modules` / `.pnpm`), generación de SBOM estándar **CycloneDX 1.5** y consolidación automática de atribuciones legales (`THIRD_PARTY_NOTICES.md`).
+AI-SDLC includes a dynamic software composition analysis (SCA) engine that inspects installed dependencies (`node_modules` / `.pnpm`), generates standard **CycloneDX 1.5 SBOMs**, and consolidates legal attribution (`THIRD_PARTY_NOTICES.md`).
 
-<a id="doc-readme-1-modos-de-escaneo-nativo-zero-install-y-conectores-de-terceros"></a>
+<a id="doc-readme-1-scan-modes-native-zero-install-bring-your-own-tool"></a>
 
-### 1. Modos de Escaneo: Nativo Zero-Install y Conectores de Terceros
+### 1. Scan Modes: Native Zero-Install & Bring-Your-Own-Tool
 
-- **Escaneo Dinámico Nativo (Por Defecto)**:
-  - Inspecciona deterministamente las dependencias reales instaladas en disco (`node_modules` y carpetas de monorepos pnpm), resolviendo paquetes físicos y enlaces simbólicos.
-  - Extrae metadatos precisos de `package.json`, resuelve expresiones compuestas (`AND` / `OR`) y detecta ficheros de licencia físicos (`LICENSE`, `COPYING`, `NOTICE`) para incorporar los textos completos de atribución.
-  - No requiere la instalación de binarios externos ni herramientas adicionales.
-- **Conectores Opcionales Bring-Your-Own-Tool (`--tool`)**:
-  - Si el entorno dispone de herramientas corporativas como **Trivy** (`--tool trivy`) o **Syft** (`--tool syft`), AI-SDLC se conecta a sus salidas JSON/CycloneDX nativas.
-  - Implementa *graceful fallback*: si el binario especificado no se encuentra en el sistema, retrocede automáticamente al escáner nativo sin romper el pipeline.
+- **Native Dynamic Scan (Default)**:
+  - Deterministically inspects installed dependencies on disk, resolving physical packages and symlinks.
+  - Extracts metadata from `package.json`, resolves compound expressions (`AND` / `OR`), and extracts full license texts (`LICENSE`, `COPYING`, `NOTICE`).
+  - Requires no external binaries or third-party tools.
+- **Optional Bring-Your-Own-Tool Connectors (`--tool`)**:
+  - Connects to **Trivy** (`--tool trivy`) or **Syft** (`--tool syft`) if installed in the host environment.
+  - Provides graceful fallback: reverts automatically to native scanner if the binary is absent.
 
-<a id="doc-readme-2-comandos-y-generacion-de-entregables-de-compliance"></a>
+<a id="doc-readme-2-compliance-commands"></a>
 
-### 2. Comandos y Generación de Entregables de Compliance
+### 2. Compliance Commands
 
 ```bash
-# Verificación estándar de licencias dinámicas frente a license-policy.yaml
+# Standard dynamic scan against license-policy.yaml
 pnpm run verify:licenses
-# o mediante npx:
-npx aisdlc verify licenses
+# or: npx aisdlc verify licenses
 
-# Generar SBOM en formato CycloneDX 1.5 JSON para auditorías o inventario
+# Generate CycloneDX 1.5 JSON SBOM
 npx aisdlc verify licenses --sbom reports/sbom.cdx.json
 
-# Generar el dossier legal consolidado de atribución THIRD_PARTY_NOTICES.md
+# Generate consolidated THIRD_PARTY_NOTICES.md
 npx aisdlc verify licenses --notices THIRD_PARTY_NOTICES.md
 
-# Generar simultáneamente SBOM y Notices limitando el escaneo a dependencias directas
+# Generate both SBOM and Notices limiting to direct dependencies
 npx aisdlc verify licenses --sbom reports/sbom.cdx.json --notices THIRD_PARTY_NOTICES.md --depth direct
 
-# Integrar con Trivy o Syft en runners corporativos de CI/CD
+# Run with Trivy or Syft in corporate CI runners
 npx aisdlc verify licenses --tool trivy --sbom reports/trivy-sbom.cdx.json
 ```
 
-<a id="doc-readme-3-salidas-y-artefactos-producidos"></a>
-
-### 3. Salidas y Artefactos Producidos
-
-- **`reports/LICENSE_COMPLIANCE_REPORT.md`**: Informe formal con desglose por categoría (Permisivas, Copyleft, Comerciales, Prohibidas), dependencias analizadas y estado del Quality Gate.
-- **`reports/sbom.cdx.json`**: Software Bill of Materials (CycloneDX 1.5) con metadatos completos de componentes, hashes y licencias SPDX.
-- **`THIRD_PARTY_NOTICES.md`**: Archivo de atribución legal que agrupa paquetes por licencia y reproduce los textos íntegros de copyright requeridos por licencias MIT, Apache-2.0, BSD, etc.
-
 ---
 
-<a id="doc-readme-tutorial-5-deteccion-determinista-de-secretos-y-seguridad-shift-left-gitleaks-sast"></a>
+<a id="doc-readme-tutorial-5-deterministic-secret-detection-shift-left-security-gitleaks-sast"></a>
 
-## 🔐 Tutorial 5: Detección Determinista de Secretos y Seguridad Shift-Left (Gitleaks & SAST)
+## 🔐 Tutorial 5: Deterministic Secret Detection & Shift-Left Security (Gitleaks & SAST)
 
-AI-SDLC implementa una defensa en profundidad determinista para erradicar la exposición involuntaria de credenciales y la introducción de patrones de vulnerabilidad comunes en código sintetizado por modelos de lenguaje (LLMs).
+AI-SDLC implements deterministic defense-in-depth to eliminate exposed credentials and vulnerable code patterns common in LLM-generated code.
 
-<a id="doc-readme-1-gate-9-deteccion-determinista-de-secretos-verify-secrets"></a>
+<a id="doc-readme-1-gate-9-deterministic-secret-detection-verify-secrets"></a>
 
-### 1. Gate 9: Detección Determinista de Secretos (`verify secrets`)
+### 1. Gate 9: Deterministic Secret Detection (`verify secrets`)
 
-El escaneo de secretos inspecciona el repositorio en busca de credenciales, llaves API, tokens de autenticación o certificados embebidos antes de que alcancen el repositorio remoto o el entorno de producción.
+Scans the repository for credentials, API keys, tokens, or private certificates before code reaches remote repositories:
+- **Zero-Dependency Hybrid Engine**:
+  - Rules for RSA/EC/DSA/OpenSSH Private Keys, GitHub tokens, AWS Access Keys, Google API Keys, Slack tokens, Stripe keys, OpenAI keys, JWTs, and generic token assignments.
+  - **Shannon Entropy** analysis ($\ge 4.5$ default) to catch high-entropy random secrets.
+- **Incremental Git Diff Scanning**:
+  - `--diff` inspects only unstaged/staged Git changes in milliseconds.
+  - `--base <branch>` compares against target branch in PR pipelines.
+- **Gitleaks Integration (`--gitleaks`)**:
+  - Delegates to official `gitleaks` binary if installed, with graceful fallback.
+- **Secure Masking**: Secrets are never output in plain text (`AKIA****************`).
+- **Controlled Suppressions**: Inline comments allow explicit test mocks:
+  ```typescript
+  const testPlaceholder = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // ai-sdlc:allow-secret
+  ```
+- **Exit Code 4**: Any detected secret exits with code 4, immediately failing CI.
 
-#### Características Principales:
-- **Motor Híbrido Zero-Dependencies**:
-  - Reglas deterministas para Claves Privadas (RSA, EC, DSA, OpenSSH), tokens de GitHub (`ghp_`, `gho_`, etc.), AWS Access Keys (`AKIA...`), Google API Keys (`AIza...`), Slack API tokens (`xox[baprs]-...`), Stripe API keys (`sk_live_...`, `rk_live_...`), OpenAI API keys (`sk-...`), JSON Web Tokens (`eyJ...`) y asignaciones genéricas de tokens.
-  - Análisis de **Entropía de Shannon** para identificar cadenas aleatorias de alta entropía ($\ge 4.5$ por defecto) comúnmente empleadas en claves y contraseñas.
-- **Escaneo Incremental Git Diff**:
-  - Mediante el flag `--diff`, analiza únicamente las modificaciones en el área de trabajo o *staging* de Git, reduciendo el tiempo de escaneo a milisegundos en tareas y commits diarios.
-  - El flag opcional `--base <rama>` permite comparar contra la rama de destino (ej. `origin/main` o `release/v1.0.0`) en pipelines de Pull Request.
-- **Delegación en Gitleaks (`--gitleaks`)**:
-  - Si el binario oficial de `gitleaks` está instalado localmente o en el runner de CI/CD, el CLI puede delegar el escaneo en Gitleaks para máxima cobertura.
-  - Implementa *graceful fallback*: si `gitleaks` no está presente, retrocede transparentemente al motor determinista interno.
-- **Enmascaramiento Estricto de Seguridad**:
-  - Los secretos nunca se vuelcan en texto claro en la consola ni en los artefactos generados. Todas las salidas se anonimizan (`AKIA****************`).
-- **Supresiones Controladas**:
-  - Cuando un valor similar a un secreto es un identificador legítimo o un mock seguro de test, se puede suprimir el hallazgo añadiendo el comentario en línea:
-    ```typescript
-    const testPlaceholder = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // ai-sdlc:allow-secret
-    ```
-- **Código de Salida 4**:
-  - Cualquier violación detectada finaliza con **exit code 4**, bloqueando de inmediato el pipeline de integración continua.
+<a id="doc-readme-2-static-application-security-testing-sast-verify-sast"></a>
 
-<a id="doc-readme-2-analisis-estatico-de-vulnerabilidades-sast-y-prompt-injection-verify-sast"></a>
+### 2. Static Application Security Testing SAST (`verify sast`)
 
-### 2. Análisis Estático de Vulnerabilidades SAST y Prompt Injection (`verify sast`)
+Evaluates code against critical OWASP patterns:
+1. **SQL Injection (CWE-89)**: Direct concatenation in SQL queries.
+2. **Command Injection (CWE-78)**: OS execution (`exec`, `spawn`) with unsanitized variables.
+3. **Dynamic Code Evaluation (CWE-95)**: `eval(...)` or `new Function(...)`.
+4. **Server-Side Request Forgery - SSRF (CWE-918)**: Outbound requests constructed from user inputs.
+5. **Path Traversal (CWE-22)**: File operations without boundary checks.
+6. **Prompt Injection (OWASP LLM01 / CWE-1427)**: Direct concatenation in LLM prompts (`SAST-006`) and jailbreak overrides (`SAST-007`).
+   - *Runtime Guard*: In-memory `detectPromptInjection(text)` exported by `@aisdlc/core`.
 
-Los asistentes de IA generativa pueden sintetizar soluciones sintácticamente elegantes pero intrínsecamente vulnerables. El motor SAST shift-left evalúa el código frente a los patrones de riesgo más críticos de OWASP y OWASP Top 10 for LLMs:
-1. **SQL Injection (CWE-89)**: Concatenación directa o interpolación en sentencias SQL (`SELECT ... + userInput`).
-2. **Command Injection (CWE-78)**: Llamadas al sistema operativo (`exec`, `execSync`, `spawn`) con interpolación de cadenas sin parametrización.
-3. **Dynamic Code Evaluation (CWE-95)**: Uso de `eval(...)` o `new Function(...)` con variables no confiables.
-4. **Server-Side Request Forgery - SSRF (CWE-918)**: Solicitudes HTTP salientes (`fetch`, `axios`, `http.get`) donde la URL o dominio se construye con entradas del usuario.
-5. **Path Traversal (CWE-22)**: Acceso a archivos (`fs.readFile`, `fs.open`) con interpolación directa sin resolución o *jail* de ruta.
-6. **Prompt Injection Inseguro (OWASP LLM01 / CWE-1427)**:
-   - *Concatenación Directa (`SAST-006`)*: Construcción de prompts o mensajes hacia LLMs interpolando entradas del usuario sin delimitadores defensivos (`prompt = $"Summarize: {userInput}"`, `prompt = "Translate: " + req.query.text`).
-   - *Jailbreaks y Firmas Adversariales (`SAST-007`)*: Directivas que intentan anular o forzar modos desprotegidos (*"ignore previous instructions"*, *"system prompt override"*, *"DAN mode"*, rupturas `</system>`).
-   - *Runtime Guard*: Función exportada `detectPromptInjection(text)` en `@ai-sdlc/core` para validación programática en memoria.
+#### Universal Multilingual Coverage:
+TypeScript/JavaScript, Python, C#, Java/Kotlin/Scala, C/C++, Go, Rust, PHP, Ruby, Swift, and `.prompt` files.
 
-#### Cobertura Multilingüe Universal:
-El motor SAST escanea código fuente en lenguajes generalistas y plantillas de IA: **TypeScript/JavaScript** (`.ts`, `.js`), **Python** (`.py`), **C#** (`.cs`), **Java/Kotlin/Scala** (`.java`, `.kt`, `.scala`), **C/C++** (`.c`, `.cpp`, `.cc`), **Go** (`.go`), **Rust** (`.rs`), **PHP** (`.php`), **Ruby** (`.rb`), **Swift** (`.swift`) y plantillas de prompts (`.prompt`).
+<a id="doc-readme-3-practical-security-commands"></a>
 
-Opcionalmente, `--semgrep` permite delegar la ejecución en el motor corporativo de Semgrep si está presente en el entorno.
-
-
-<a id="doc-readme-3-comandos-practicos-de-seguridad"></a>
-
-### 3. Comandos Prácticos de Seguridad
+### 3. Practical Security Commands
 
 ```bash
-# 1. Escaneo completo de secretos en el árbol de trabajo
+# 1. Full secret scan on working tree
 pnpm run verify:secrets
-# o vía npx:
-npx aisdlc verify secrets
+# or: npx aisdlc verify secrets
 
-# 2. Escaneo ultra-rápido sobre el diff local de Git (ideal para pre-commit hooks)
+# 2. Fast scan on local Git diff (ideal for pre-commit)
 npx aisdlc verify secrets --diff
 
-# 3. Escaneo de diff frente a una rama base en CI (Pull Request)
+# 3. Diff scan against PR target branch
 npx aisdlc verify secrets --diff --base origin/main
 
-# 4. Ajuste de sensibilidad de entropía de Shannon (ej. 5.0 para menor sensibilidad)
-npx aisdlc verify secrets --entropy 5.0
-
-# 5. Escaneo de secretos delegando en el binario oficial de Gitleaks
-npx aisdlc verify secrets --gitleaks
-
-# 6. Escaneo estático SAST shift-left de vulnerabilidades generadas por IA
+# 4. SAST vulnerability scan
 pnpm run verify:sast
-# o vía npx:
-npx aisdlc verify sast
+# or: npx aisdlc verify sast
 
-# 7. Escaneo SAST con delegación opcional en Semgrep
-npx aisdlc verify sast --semgrep
-
-# 8. Pre-vuelo consolidado (incluye Gate 9 de secretos)
+# 5. Consolidated pre-flight (includes Gate 9 secrets & SAST)
 pnpm run check
 ```
 
-<a id="doc-readme-4-salidas-y-reportes-generados"></a>
-
-### 4. Salidas y Reportes Generados
-
-- **`reports/SECRET_SCAN_REPORT.md`**: Informe formal de auditoría de secretos con regla infringida, severidad, fichero, línea y token enmascarado.
-- **`reports/SAST_REPORT.md`**: Informe formal de vulnerabilidades SAST con tipo de fallo, severidad, fichero, línea y fragmento de código de muestra.
-
 ---
 
-<a id="doc-readme-tutorial-6-dashboard-web-interactivo-y-visualizador-de-grafos-cytoscapejs"></a>
+<a id="doc-readme-tutorial-6-interactive-web-dashboard-and-graph-visualizer-cytoscapejs"></a>
 
-## 🌐 Tutorial 6: Dashboard Web Interactivo y Visualizador de Grafos (Cytoscape.js)
+## 🌐 Tutorial 6: Interactive Web Dashboard and Graph Visualizer (Cytoscape.js)
 
-AI-SDLC incluye un generador de dashboard web interactivo y visualizador de redes de dependencias (`reports/dashboard.html`) basado en **Cytoscape.js (MIT)**, diseñado para Product Owners, CISOs, directores de ingeniería y auditores.
+AI-SDLC generates a self-contained interactive web dashboard and dependency graph (`reports/dashboard.html`) powered by **Cytoscape.js (MIT)**.
 
-<a id="doc-readme-1-caracteristicas-principales"></a>
+<a id="doc-readme-1-key-features"></a>
 
-### 1. Características Principales
-- **Visualizador de Red PDaC / RTM**:
-  - Navegación multinivel por 4 capas: Producto (Upstream), Requerimientos, Arquitectura (Midstream) y Pruebas BDD (Downstream).
-  - Semáforo de conformidad determinista: Nodos verdes (conformes) vs. nodos rojos (huérfanos o con deriva de digest SHA-256).
-  - **Resaltado de Camino Crítico**: Al pulsar en cualquier requerimiento o nodo, se ilumina toda su cadena de impacto upstream y downstream.
-  - Filtros en vivo por capa y por estado de salud, búsqueda con auto-foco y layouts intercambiables (jerárquico, COSE, concéntrico).
-- **Matriz de Trazabilidad 360° en Tabla**:
-  - Búsqueda en tiempo real con salto interactivo directo hacia el grafo.
-- **Métricas de Calidad & Gobernanza de Autonomía**:
-  - Indicadores ejecutivos (Mantenibilidad SEI MI, CC promedio, veredicto de Release Gate).
-  - Desglose de tareas por modo de autonomía (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
-- **Telemetría y KPIs con Histórico**:
-  - Métricas de la rama activa (commits, líneas añadidas/eliminadas, tiempo de desarrollo activo, consumo de tokens y coste computacional en USD).
-  - Registro histórico consolidado de releases desde `reports/releases/*.kpis.json` para monitorizar KLoC, bugs, DIR y costes a lo largo del tiempo.
-- **Cero Infraestructura Externa (100% Offline)**:
-  - Todo el código JavaScript de Cytoscape.js y los estilos están incrustados en un único archivo HTML autocontenido. Se abre localmente con doble clic o se publica en GitHub/GitLab Pages sin requerir servidores locales ni conexión a internet.
+### 1. Key Features
+- **PDaC / RTM Network Visualizer**:
+  - 4 layers: Product (Upstream: root Vision / Goals `ARCH-INTRO-*` with `identifies`, `envisions`, and `defines-goal` edges, plus `JRN-*`, `ACT-*`, `UC-*`, `BR-*`), Requirements (`FR-*`, `QR-*`, `SEC-REQ-*`), Architecture (Midstream: `CMP-*`, `ADR-*`, `SEC-ENC-*`), and BDD Tests (Downstream: `.feature`).
+  - Deterministic health status: Green (compliant) vs. Red (orphans or SHA-256 drift).
+  - **Critical Path Highlighting**: Clicking any node illuminates its full upstream and downstream dependency chain.
+  - Live filters by layer, typology (including `Vision / Goals (ARCH-INTRO)`), and health, auto-focus search, and multiple layout algorithms.
+- **360° Traceability Matrix Table**: Interactive table with bidirectional graph navigation.
+- **Quality & Autonomy Governance Metrics**: Executive cards (SEI MI, average CC, Release Gate verdict) and autonomy mode distribution.
+- **Telemetry and Historical KPIs**: Active branch metrics and historical trends tracking KLoC, bugs, DIR, and rework from `reports/releases/*.kpis.json`.
+- **Zero External Infrastructure (100% Offline)**: Embedded JavaScript and styles in a single HTML file. Opens directly via `file:///` or hosts statically on GitHub/GitLab Pages.
 
-<a id="doc-readme-2-comandos-cli"></a>
+<a id="doc-readme-2-cli-commands"></a>
 
-### 2. Comandos CLI
+### 2. CLI Commands
 
 ```bash
-# 1. Generar el dashboard en reports/dashboard.html
+# Generate dashboard at reports/dashboard.html
 npx aisdlc report dashboard
-# o vía script pnpm:
+# or via pnpm:
 pnpm run report:dashboard
 
-# 2. Generar y abrir automáticamente en el navegador web
+# Generate and immediately open in browser
 npx aisdlc report dashboard --open
 
-# 3. Personalizar ruta de salida y título del dashboard
+# Custom path and title
 npx aisdlc report dashboard --output docs/dashboard.html --title "SentinelCore Mission Control"
 ```
 
 ---
 
-<a id="doc-readme-servidor-nativo-model-context-protocol-mcp-control-total-desde-tu-ide"></a>
+<a id="doc-readme-native-model-context-protocol-mcp-server-full-control-from-your-ide"></a>
 
-## 🔌 Servidor Nativo Model Context Protocol (MCP): Control Total desde tu IDE
+## 🔌 Native Model Context Protocol (MCP) Server: Full Control from your IDE
 
-El framework AI-SDLC incluye un servidor oficial **Model Context Protocol (MCP)** en `@ai-sdlc/mcp` que expone todo el ciclo de vida metodológico a asistentes y agentes de IA en tiempo real sobre `stdio`. Cualquier desarrollador humano o agente puede invocar las herramientas de AI-SDLC directamente desde **Cursor, Claude Desktop / Code, Google Antigravity, VS Code o GitHub Copilot**.
+AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@aisdlc/mcp` running over `stdio`. Developers and AI agents can invoke AI-SDLC tools directly within **Cursor, Claude Desktop / Code, Google Antigravity, VS Code, or GitHub Copilot**.
 
-<a id="doc-readme-1-comandos-resumen-high-level-workflows"></a>
+<a id="doc-readme-1-high-level-workflows"></a>
 
-### 1. Comandos Resumen (High-Level Workflows)
-Para simplificar la interacción y minimizar el número de pasos, el servidor MCP ofrece 3 herramientas agregadas principales:
-- **`new`**: Inicializa un nuevo proyecto o adopta AI-SDLC en un repositorio existente, configurando carpetas metodológicas, esquemas, políticas (`quality-policy.yaml`, `license-policy.yaml`) y plantillas de CI (`github`, `gitlab`, `azure`, `bitbucket`).
-- **`verify`**: Ejecuta la suite consolidada de los 9 Quality Gates deterministas a la vez (`quality`, `traceability`, `governance`, `licenses`, `schemas`, `duplicates`, `security`, `testing`, `pdac`), devolviendo el veredicto consolidado y el detalle de cada gate.
-- **`report`**: Genera simultáneamente el panel interactivo HTML (`reports/dashboard.html`) y el informe consolidado en Markdown (`reports/QUALITY_REPORT.md`).
+### 1. High-Level Workflows
+- **`new`**: Initializes a project or adopts AI-SDLC in an existing repo, configuring folders, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`), and CI templates (`github`, `gitlab`, `azure`, `bitbucket`).
+- **`verify`**: Runs all 9 deterministic Quality Gates simultaneously (`quality`, `traceability`, `governance`, `licenses`, `schemas`, `duplicates`, `security`, `testing`, `pdac`).
+- **`report`**: Concurrently generates interactive HTML dashboard (`reports/dashboard.html`) and Markdown quality report (`reports/QUALITY_REPORT.md`).
 
-<a id="doc-readme-2-catalogo-completo-de-herramientas-20-tools-y-recursos-5-resources"></a>
+<a id="doc-readme-2-complete-tools-20-tools-and-resources-5-resources"></a>
 
-### 2. Catálogo Completo de Herramientas (20 Tools) y Recursos (5 Resources)
-- **Ciclo SDD**: `sdd_init`, `sdd_new`, `sdd_deposit`, `sdd_integrate`.
-- **Quality Gates Individuales**: `verify_quality`, `verify_traceability`, `verify_governance`, `verify_licenses`, `verify_schemas`, `verify_duplicates`, `verify_security`, `verify_testing`, `verify_pdac`.
-- **Informes & KPIs**: `report_markdown`, `report_dashboard`, `kpi_pr`, `git_detect_author`.
-- **Recursos Canónicos (`aisdlc://`)**: `aisdlc://policies/quality`, `aisdlc://policies/licenses`, `aisdlc://changes/active`, `aisdlc://changes/completed`, `aisdlc://status/summary`.
+### 2. Complete Tools (20 Tools) and Resources (5 Resources)
+- **SDD Lifecycle**: `sdd_init`, `sdd_new`, `sdd_deposit`, `sdd_integrate`.
+- **Individual Quality Gates**: `verify_quality`, `verify_traceability`, `verify_governance`, `verify_licenses`, `verify_schemas`, `verify_duplicates`, `verify_security`, `verify_testing`, `verify_pdac`.
+- **Reports & KPIs**: `report_markdown`, `report_dashboard`, `kpi_pr`, `git_detect_author`.
+- **Canonical Resources (`aisdlc://`)**: `aisdlc://policies/quality`, `aisdlc://policies/licenses`, `aisdlc://changes/active`, `aisdlc://changes/completed`, `aisdlc://status/summary`.
 
-<a id="doc-readme-3-configuracion-en-clientes-mcp-e-ides"></a>
+<a id="doc-readme-3-ide-and-mcp-client-configuration"></a>
 
-### 3. Configuración en Clientes MCP e IDEs
+### 3. IDE and MCP Client Configuration
 
-#### En Cursor (`.cursor/mcp.json`):
+#### Cursor (`.cursor/mcp.json`):
 ```json
 {
   "mcpServers": {
     "ai-sdlc": {
       "command": "npx",
-      "args": ["@ai-sdlc/mcp"]
+      "args": ["@aisdlc/mcp"]
     }
   }
 }
 ```
 
-#### En Claude Desktop (`claude_desktop_config.json`):
+#### Claude Desktop (`claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
     "ai-sdlc": {
       "command": "npx",
-      "args": ["@ai-sdlc/mcp"]
+      "args": ["@aisdlc/mcp"]
     }
   }
 }
 ```
 
-#### En Google Antigravity / Gemini CLI (`antigravity.mcp.json`):
+#### Google Antigravity / Gemini CLI (`antigravity.mcp.json`):
 ```json
 {
   "mcpServers": {
@@ -1139,98 +1090,98 @@ Para simplificar la interacción y minimizar el número de pasos, el servidor MC
 }
 ```
 
-> Para el detalle completo de los esquemas Zod y opciones avanzadas, consulta [process/09_agent_protocols.md](process/09_agent_protocols.md#7-servidor-model-context-protocol-mcp-nativo-ai-sdlcmcp--aisdlc-mcp).
+> For complete Zod schemas and options, consult [process/09_agent_protocols.md](process/09_agent_protocols.md#7-native-model-context-protocol-mcp-server-ai-sdlcmcp--aisdlc-mcp).
 
 ---
 
-<a id="doc-readme-guia-rapida-para-equipos-humanos"></a>
+<a id="doc-readme-quick-guide-for-human-teams"></a>
 
-## 🚀 Guía Rápida para Equipos Humanos
+## 🚀 Quick Guide for Human Teams
 
-
-1. **Definir la Intención del Producto**:
-   - Usa plantillas en `templates/product/` para modelar Actores (`ACT-*`), Casos de Uso (`UC-*`) y Reglas de Negocio (`BR-*`).
-   - Apóyate en agentes analistas (`ps:explore`) para identificar lagunas y requerimientos derivados (`FR-*`, `QR-*`).
-2. **Incorporar Ciberseguridad Shift-Left**:
-   - Modela actores maliciosos (`ACT-THREAT-*`) y casos de abuso (`ABUSE-*`).
-   - Define requisitos de seguridad (`SEC-REQ-*`) y restricciones Zero Trust antes de diseñar la solución técnica.
-3. **Modelar la Arquitectura arc42 / NAF v4**:
-   - Utiliza las plantillas desplegadas en `templates/architecture/` según la granularidad seleccionada al inicializar (`aisdlc init --arch minimal|full|none`, detallado en [process/05_architecture_arc42_nafv4.md](process/05_architecture_arc42_nafv4.md)).
-   - En proyectos estándar (`minimal`), modela componentes (`component.template.md` ➔ `CMP-*`) y decisiones inmutables (`adr.template.md` ➔ `ADR-*`). En sistemas críticos (`full`), cubre las 12 secciones completas de arc42 y perspectivas NAF v4.
-   - Cada componente (`CMP-*`) debe citar explícitamente los casos de uso (`implements-use-cases`) y requerimientos (`satisfies-requirements`) que implementa para asegurar la trazabilidad 360°.
-4. **Verificar Cumplimiento de Licencias**:
-   - Consulta `license-policy.yaml`. Si se necesita una librería comercial o dual, tramita la solicitud formal (`ADR-LIC-*`).
-5. **Revisión y Aprobación Humana**:
-   - Toda propuesta de cambio se valida con linters/schemas en CI. La aprobación y merge es prerrogativa humana exclusiva.
+1. **Define Product Intent (Phase 0 Inception & ProductShape)**:
+   - Establish the Enterprise & Capability Vision (`ARCH-INTRO-*`) using `templates/architecture/introduction-and-goals.template.md` (for new Greenfield products or Brownfield retro-inception).
+   - Use `templates/product/` to model Actors (`ACT-*`), Use Cases (`UC-*`), and Business Rules (`BR-*`).
+   - Collaborate with analyst agents (`agent-product-analyst` / `ps:explore`) to run a 3–5 question discovery interview, surface gaps, and derive requirements (`FR-*`, `QR-*`).
+2. **Incorporate Shift-Left Cybersecurity**:
+   - Model threat actors (`ACT-THREAT-*`) and abuse cases (`ABUSE-*`).
+   - Define security requirements (`SEC-REQ-*`) and Zero Trust boundaries before technical design.
+3. **Model arc42 / NAF v4 Architecture**:
+   - Use templates in `templates/architecture/` according to selected granularity (`aisdlc init --arch minimal|full|none`).
+   - Standard projects (`minimal`) model product/system vision & goals (`ARCH-INTRO-*`), components (`CMP-*`), and ADRs (`ADR-*`). Critical projects (`full`) cover all 12 arc42 sections.
+   - Each component (`CMP-*`) explicitly cites use cases (`implements-use-cases`) and requirements (`satisfies-requirements`).
+4. **Enforce License Compliance**:
+   - Check `license-policy.yaml`. If commercial libraries are needed, file formal requests (`ADR-LIC-*`).
+5. **Human Review and Approval**:
+   - Every proposal is validated by CI linters and schemas. Final approval and merge is strictly a human prerogative.
 
 ---
 
-<a id="doc-readme-guia-operativa-para-agentes-de-ia"></a>
+<a id="doc-readme-operational-guide-for-ai-agents"></a>
 
-## 🤖 Guía Operativa para Agentes de IA
+## 🤖 Operational Guide for AI Agents
 
-<a id="doc-readme-1-principios-y-guardrails-innegociables"></a>
+<a id="doc-readme-1-non-negotiable-principles-and-guardrails"></a>
 
-### 1. Principios y Guardrails Innegociables
-1. **Lectura de Contexto mediante Citaciones**: Nunca asumas comportamientos ni inventes reglas. Lee los artefactos canónicos citados en la especificación (`SPEC-*`).
-2. **Respeto a los Guardrails de Seguridad**: Todo código generado debe cumplir con los principios OWASP Secure Coding. Si la tarea implementa un `SEC-REQ-*`, debes generar obligatoriamente la prueba automatizada correspondiente (`SEC-TEST-*`).
-3. **Inspección Previa de Licencias de Dependencias**: Antes de modificar manifiestos de paquetes (`package.json`, etc.), consulta la licencia del paquete frente a `license-policy.yaml`. Quedan prohibidas dependencias virales (`GPL`/`AGPL`) o comerciales de pago sin aprobación previa.
-4. **Instanciación y Evolución Arquitectural**: Al modelar nuevos módulos o servicios, copia la plantilla correspondiente desde `templates/architecture/` hacia `docs/architecture/` (o diseña en `specs/changes/active/.../design.md`). Completa rigurosamente el frontmatter YAML y valida con `npx aisdlc verify schemas` y `npx aisdlc verify traceability`.
-5. **Validación Determinista y Cero Auto-Aprobación**: Al finalizar, ejecuta los linters y verificadores de esquemas (`pnpm run check:fix` y `pnpm run verify:all`). Nunca intentes auto-aprobar o forzar el merge de un PR: la aprobación y fusión es prerrogativa humana exclusiva.
+### 1. Non-Negotiable Principles and Guardrails
+1. **Context via Citations**: Never assume behaviors or invent rules. Read canonical cited artifacts (`SPEC-*`).
+2. **Security Guardrails**: All code must satisfy OWASP Secure Coding standards. If a task implements `SEC-REQ-*`, generate the corresponding automated test (`SEC-TEST-*`).
+3. **Pre-Inspection of Dependencies**: Before editing dependency manifests (`package.json`, etc.), verify package SPDX against `license-policy.yaml`. Viral (`GPL`/`AGPL`) or commercial paid licenses without approval are forbidden.
+4. **Architectural Instantiation**: Copy templates from `templates/architecture/` to `docs/architecture/` (or design in `specs/changes/active/.../design.md`). Fill YAML frontmatter and validate via `npx aisdlc verify schemas` and `npx aisdlc verify traceability`.
+5. **Deterministic Validation & Zero Auto-Approval**: Run pre-flight commands (`pnpm run check:fix` and `pnpm run verify:all`). Never attempt to auto-approve or merge a PR: merging is strictly a human prerogative.
 
-<a id="doc-readme-2-catalogo-canonico-de-agentes-especializados-10-roles"></a>
+<a id="doc-readme-2-canonical-specialized-agents-10-roles"></a>
 
-### 2. Catálogo Canónico de Agentes Especializados (10 Roles)
+### 2. Canonical Specialized Agents (10 Roles)
 
-AI-SDLC define 10 roles especializados con responsabilidades demarcadas, contratos de entrada/salida y compuertas deterministas (ver detalle canónico en [process/09_agent_protocols.md](process/09_agent_protocols.md) y [process/01_governance_and_roles.md](process/01_governance_and_roles.md)):
+AI-SDLC defines 10 specialized roles with bounded responsibilities and deterministic gates (see details in [process/09_agent_protocols.md](process/09_agent_protocols.md) and [process/01_governance_and_roles.md](process/01_governance_and_roles.md)):
 
-| Rol de Agente | Especialidad / Misión | Entregables Principales | Guardrails Críticos |
+| Agent Role | Specialty / Mission | Core Deliverables | Critical Guardrails |
 | :--- | :--- | :--- | :--- |
-| **`agent-product-analyst`** | Analista de Producto y Scribe PDaC | `ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*` en `specs/product/` | `status: draft`, estructura Gherkin obligatoria, sin asunciones. |
-| **`agent-threat-modeler`** | Modelado de Amenazas y Shift-Left Security | `ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`, `SEC-ENC-*` | STRIDE / ASVS, pruebas negativas, bucle de retorno de seguridad técnica. |
-| **`agent-system-architect`** | Arquitecto de Sistemas arc42 / NAF v4 | `CMP-*`, diagramas Mermaid, registros `ADR-*` | Citación de `implements-use-cases` y `satisfies-requirements`; retorno a threat modeler. |
-| **`agent-qa-engineer`** | Ingeniero de QA y SDET | Suites BDD en ROJO (`nominal`, `límite`, `fuera de rango`) | **Cero código de producción**; bloqueo si falta límite o fuera de rango. |
-| **`agent-developer`** | Desarrollador de Software | Código en verde (`src/`), tests unitarios, TDD | Umbrales `quality-policy.yaml` (CC $\le 10$, MI $\ge 50$); handoff post-desarrollo. |
-| **`agent-expert-user`** | Usuario Experto y Evaluador de Dominio | Feedback MVP (diseño) / Atestación funcional (post-dev) | Bimodal: MVP estricto upstream vs. validación funcional CLI/UI downstream. |
-| **`agent-security-auditor`** | Auditor Adversarial de Código (Pre-Merge) | Informe CVSS v3.1, auditoría SAST / secretos | Mentalidad atacante; bloqueo de PRs ante vulnerabilidades críticas o altas. |
-| **`agent-compliance-checker`** | Auditor de Licencias y Propiedad Intelectual | Dictamen de compatibilidad legal de dependencias | Verificación SPDX contra `license-policy.yaml`; bloqueo de virales/comerciales. |
-| **`agent-code-reviewer`** | Revisor Técnico y Arquitectónico (Pre-Merge) | Auditoría Clean Code, SOLID, DRY, YAGNI, AST | Umbrales CC $\le 10$, MI $\ge 50$; categorización `[BLOQUEANTE]` vs `[SUGERENCIA]`. |
-| **`agent-devops`** | Ingeniero de Automatización e Infraestructura | `.github/workflows/`, Dockerfiles, IaC, scripts | **NO INVASIÓN**: Prohibido modificar código de aplicación en `src/`. |
+| **`agent-product-analyst`** | Product Analyst & PDaC Scribe | `ARCH-INTRO-*` (Phase 0 Vision), `ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*` | `status: draft`, 3–5 question inception interview, mandatory Gherkin, zero assumptions. |
+| **`agent-threat-modeler`** | Threat Modeling & Shift-Left Security | `ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`, `SEC-ENC-*` | STRIDE / ASVS, negative tests, technical security loop. |
+| **`agent-system-architect`** | arc42 / NAF v4 Systems Architect | `CMP-*`, Mermaid diagrams, `ADR-*` records | Cites `implements-use-cases` and `satisfies-requirements`; returns to threat modeler. |
+| **`agent-qa-engineer`** | QA Engineer & SDET | FAILING BDD suites (nominal, boundary, out of range) | **Zero production code**; blocked if boundary scenarios missing. |
+| **`agent-developer`** | Software Developer | Green code (`src/`), unit tests, TDD | Thresholds in `quality-policy.yaml` (CC $\le 10$, MI $\ge 50$); post-dev handoff. |
+| **`agent-expert-user`** | Expert User & Domain Evaluator | MVP feedback (design) / Functional attestation (post-dev) | Bimodal: strict upstream MVP vs downstream UI/CLI functional validation. |
+| **`agent-security-auditor`** | Adversarial Code Auditor (Pre-Merge) | CVSS v3.1 report, SAST / secret audit | Attacker mindset; blocks PRs on critical/high findings. |
+| **`agent-compliance-checker`** | License & IP Compliance Auditor | Legal dependency compatibility verdict | SPDX audit against `license-policy.yaml`; blocks viral/commercial. |
+| **`agent-code-reviewer`** | Technical & Architecture Reviewer (Pre-Merge) | Clean Code, SOLID, DRY, YAGNI, AST audit | CC $\le 10$, MI $\ge 50$; categorizes `[BLOCKING]` vs `[SUGGESTION]`. |
+| **`agent-devops`** | Automation & Infrastructure Engineer | `.github/workflows/`, Dockerfiles, IaC, scripts | **NON-INVASION**: Strictly forbidden from touching application code in `src/`. |
 
-<a id="doc-readme-3-la-triada-de-auditoria-pre-merge"></a>
+<a id="doc-readme-3-pre-merge-audit-triad"></a>
 
-### 3. La Tríada de Auditoría Pre-Merge
-Antes de someter cualquier Pull Request a la aprobación humana del Tech Lead, tres agentes especializados auditan concurrentemente el diff:
-1. **`agent-code-reviewer`**: Audita la salud técnica, legibilidad, patrones de diseño, ausencia de deuda técnica y respeto a las métricas de complejidad AST.
-2. **`agent-security-auditor`**: Examina la superficie de ataque, vectores de inyección, sanitización y controles criptográficos.
-3. **`agent-compliance-checker`**: Audita manifiestos, bloquea licencias incompatibles y verifica el SBOM.
+### 3. Pre-Merge Audit Triad
+Before a PR reaches human Tech Lead review, three agents audit the diff concurrently:
+1. **`agent-code-reviewer`**: Audits technical health, design patterns, clean code, and AST complexity metrics.
+2. **`agent-security-auditor`**: Examines attack surface, injection vectors, sanitization, and cryptography.
+3. **`agent-compliance-checker`**: Audits manifests, blocks incompatible licenses, and verifies SBOM.
 
-<a id="doc-readme-4-automatizacion-e-infraestructura-agent-devops-y-guardrail-de-no-invasion"></a>
+<a id="doc-readme-4-automation-infrastructure-agent-devops-and-non-invasion-guardrail"></a>
 
-### 4. Automatización e Infraestructura: `agent-devops` y Guardrail de No Invasión
-El agente `agent-devops` asume la evolución y mantenimiento de pipelines de CI/CD, imágenes de contenedor y scripts de infraestructura. Opera bajo un **guardrail de no invasión estricto**:
-- **Ámbito permitido**: `.github/workflows/`, `Dockerfile*`, `docker-compose*.yml`, manifiestos IaC y `scripts/`.
-- **Ámbito prohibido**: Prohibido terminantemente modificar o refactorizar archivos de código fuente de la aplicación (`src/`, `packages/*/src/app/`). La lógica de negocio es competencia exclusiva de `agent-developer`.
+### 4. Automation & Infrastructure: `agent-devops` and Non-Invasion Guardrail
+The `agent-devops` agent maintains CI/CD pipelines, container images, and infrastructure scripts under a **strict non-invasion guardrail**:
+- **Permitted scope**: `.github/workflows/`, `Dockerfile*`, `docker-compose*.yml`, IaC manifests, and `scripts/`.
+- **Prohibited scope**: Modifying application source code files (`src/`, `packages/*/src/app/`) is strictly forbidden. Business logic belongs exclusively to `agent-developer`.
 
-<a id="doc-readme-integracion-nativa-por-entorno-de-ia"></a>
+<a id="doc-readme-native-integration-by-ai-environment"></a>
 
-### Integración Nativa por Entorno de IA
+### Native Integration by AI Environment
 
-El repositorio cuenta con archivos de contexto estándar listos para su carga automática:
-- **Cursor**: Reglas modulares en [`.cursor/rules/`](.cursor/rules/) (`ai-sdlc-core.mdc`, `ai-sdlc-product.mdc`, `ai-sdlc-quality.mdc`).
-- **Claude Code**: Directrices de ejecución, commits y pre-vuelo en [`CLAUDE.md`](CLAUDE.md).
-- **GitHub Copilot**: Contexto de ciclo de vida SDD y políticas en [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
-- **Google Antigravity / Gemini CLI**: Mapeo de roles y guardrails en [`.agent/rules/ai-sdlc.md`](.agent/rules/ai-sdlc.md).
+Standard configuration files are ready for automated loading:
+- **Cursor**: Modular rules in [`.cursor/rules/`](.cursor/rules/) (`ai-sdlc-core.mdc`, `ai-sdlc-product.mdc`, `ai-sdlc-quality.mdc`).
+- **Claude Code**: Guidelines, commits, and pre-flight in [`CLAUDE.md`](CLAUDE.md).
+- **GitHub Copilot**: SDD lifecycle context in [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
+- **Google Antigravity / Gemini CLI**: Roles and guardrails in [`.agent/rules/ai-sdlc.md`](.agent/rules/ai-sdlc.md).
 
-> Para más detalles, consulta la [Matriz de Compatibilidad en process/09_agent_protocols.md](process/09_agent_protocols.md#6-matriz-de-compatibilidad-e-integración-nativa-con-entornos-de-agentes).
+> For details, consult the [Compatibility Matrix in process/09_agent_protocols.md](process/09_agent_protocols.md#6-compatibility-matrix-and-native-integration-with-agent-environments).
 
 ---
 
-<a id="doc-readme-licencia"></a>
+<a id="doc-readme-license"></a>
 
-## 📜 Licencia
+## 📜 License
 
-Este framework está publicado bajo licencia [MIT](https://opensource.org/licenses/MIT).
+This framework is published under the [MIT](https://opensource.org/licenses/MIT) license.
 
 ---
 
@@ -1238,67 +1189,67 @@ Este framework está publicado bajo licencia [MIT](https://opensource.org/licens
 
 > 📂 **Módulo 2 de 13 [Parte II: Especificación Normativa del Framework]:** `process/00_principles_and_manifesto.md`
 
-# 00. Manifiesto y Principios Fundamentales del AI-SDLC
+# 00. AI-SDLC Manifesto and Core Principles
 
-<a id="cap-00-principles-and-manifesto-1-el-manifiesto-del-ai-sdlc"></a>
+<a id="cap-00-principles-and-manifesto-1-the-ai-sdlc-manifesto"></a>
 
-## 1. El Manifiesto del AI-SDLC
+## 1. The AI-SDLC Manifesto
 
-Durante décadas, la fase más lenta y costosa del desarrollo de software fue la escritura manual de código. Los equipos estructuraron sus procesos alrededor de ese cuello de botella: historias de usuario condensadas, tickets de Jira efímeros, especificaciones "just-in-time" y conocimiento del producto disperso en la memoria de un par de ingenieros veteranos.
+For decades, the slowest and most expensive phase of software development was writing code manually. Teams designed their processes around that bottleneck: condensed user stories, ephemeral Jira tickets, "just-in-time" specifications, and product knowledge scattered in the memory of a handful of senior engineers.
 
-**El auge de la ingeniería asistida por Inteligencia Artificial y agentes autónomos transforma radicalmente la ecuación:**
-> *Un agente de IA capaz de generar miles de líneas de código en minutos amplifica el entendimiento que recibe. Si se le entrega un ticket ambiguo o descontextualizado, producirá código rápido, seguro de sí mismo y verosímil... para un producto que nadie definió y con una arquitectura incoherente.*
+**The rise of AI-assisted engineering and autonomous agents fundamentally transforms the equation:**
+> *An AI agent capable of generating thousands of lines of code in minutes amplifies the understanding it receives. If fed an ambiguous or decontextualized ticket, it will produce code rapidly, confidently, and plausibly... for a product nobody defined, backed by an incoherent architecture.*
 
-El recurso escaso ya no es la capacidad de teclear código; **el recurso escaso es una definición de producto y una arquitectura de sistemas rigurosa, trazable y digna de ser implementada**.
+The scarce resource is no longer the ability to type code; **the scarce resource is a rigorous, traceable product definition and system architecture worthy of being implemented**.
 
 ---
 
-<a id="cap-00-principles-and-manifesto-2-los-7-principios-rectores"></a>
+<a id="cap-00-principles-and-manifesto-2-the-7-governing-principles"></a>
 
-## 2. Los 7 Principios Rectores
+## 2. The 7 Governing Principles
 
-<a id="cap-00-principles-and-manifesto-principio-1-todo-as-code-y-versionado-en-git"></a>
+<a id="cap-00-principles-and-manifesto-principle-1-everything-as-code-and-git-versioned"></a>
 
-### Principio 1: Todo "As-Code" y Versionado en Git
-Tanto la definición del producto, como la arquitectura técnica, las políticas de ciberseguridad, las reglas de licencias y las especificaciones de entrega residen en el repositorio Git como texto plano estructurado (Markdown con metadatos en YAML frontmatter). No existen fuentes de verdad dispersas en wikis externas o bases de datos aisladas.
+### Principle 1: Everything "As-Code" and Git-Versioned
+Product definition, technical architecture, cybersecurity policies, license rules, and delivery specifications all reside in the Git repository as structured plain text (Markdown with YAML frontmatter metadata). No single source of truth is scattered across external wikis or isolated databases.
 
-<a id="cap-00-principles-and-manifesto-principio-2-operabilidad-simetrica-para-personas-y-agentes-dual-citizenship"></a>
+<a id="cap-00-principles-and-manifesto-principle-2-symmetric-operability-for-humans-and-agents-dual-citizenship"></a>
 
-### Principio 2: Operabilidad Simétrica para Personas y Agentes (Dual-Citizenship)
-Cualquier documento o artefacto generado en el proceso debe cumplir una doble condición:
-- **Ser transparente y legible para un humano** (prosa clara en Markdown, diagramas visuales en Mermaid).
-- **Ser estrictamente computable para un agente de IA** (esquemas JSON formales, identificadores inmutables normalizados, campos tipados).
+### Principle 2: Symmetric Operability for Humans and Agents (Dual-Citizenship)
+Every document or artifact generated across the process must satisfy two conditions:
+- **Transparent and readable for a human** (clear Markdown prose, visual Mermaid diagrams).
+- **Strictly computable for an AI agent** (formal JSON schemas, normalized immutable identifiers, typed fields).
 
-<a id="cap-00-principles-and-manifesto-principio-3-separacion-entre-nucleo-determinista-y-razonamiento-de-ia"></a>
+<a id="cap-00-principles-and-manifesto-principle-3-separation-of-deterministic-core-and-ai-reasoning"></a>
 
-### Principio 3: Separación entre Núcleo Determinista y Razonamiento de IA
-- **El núcleo determinista gobierna la estructura:** Validación de esquemas, resolución de IDs, cálculo de hashes criptográficos SHA-256, detección de ciclos en grafos y linters son 100% deterministas. Producen el mismo resultado exacto en cualquier máquina.
-- **La IA gobierna la semántica:** Exploración de ideas, análisis de impacto conceptual, modelado inicial de casos de uso y generación de código de prueba son tareas semánticas donde los agentes destacan como copilotos o ejecutores autónomos bajo supervisión.
+### Principle 3: Separation of Deterministic Core and AI Reasoning
+- **The deterministic core governs structure:** Schema validation, ID resolution, SHA-256 cryptographic digest computation, graph cycle detection, and linters are 100% deterministic. They produce the exact same outcome on any machine.
+- **AI governs semantics:** Idea exploration, conceptual impact analysis, initial use case modeling, and test code generation are semantic tasks where agents excel as copilot assistants or autonomous executors under human supervision.
 
-<a id="cap-00-principles-and-manifesto-principio-4-autoridad-humana-irrenunciable-en-aprobacion-y-fusion"></a>
+<a id="cap-00-principles-and-manifesto-principle-4-inalienable-human-authority-in-approval-and-merge"></a>
 
-### Principio 4: Autoridad Humana Irrenunciable en Aprobación y Fusión
-Los agentes de IA tienen capacidad de:
-- Explorar y proponer deltas (`Product Changes`, `Specs`, `Code PRs`).
-- Validar esquemas y ejecutar pruebas.
-- Identificar riesgos y violaciones de políticas.
+### Principle 4: Inalienable Human Authority in Approval and Merge
+AI agents possess the capability to:
+- Explore and propose deltas (`Product Changes`, `Specs`, `Code PRs`).
+- Validate schemas and execute test suites.
+- Identify risks and policy violations.
 
-**Sin embargo, ningún agente ni herramienta de software tiene permitido auto-aprobarse, auto-fusionarse (`merge`) ni tomar decisiones de negocio/riesgo en nombre de la organización.** La aprobación de un cambio de producto y el merge de un PR a la rama principal es una responsabilidad exclusivamente humana.
+**However, no agent or automated software tool is ever permitted to self-approve, self-merge, or make business/risk decisions on behalf of the organization.** Product change approval and PR merge into the canonical branch are strictly human responsibilities.
 
-<a id="cap-00-principles-and-manifesto-principio-5-contratos-de-citacion-criptografica-drift-free-architecture"></a>
+<a id="cap-00-principles-and-manifesto-principle-5-cryptographic-citation-contracts-drift-free-architecture"></a>
 
-### Principio 5: Contratos de Citación Criptográfica (Drift-Free Architecture)
-Los documentos de entrega (especificaciones SDD, tareas de agentes, código) nunca reescriben ni duplican los requisitos o las reglas de negocio. En su lugar, los **citan** mediante su identificador único (`id`) y el digest criptográfico (`SHA-256`) del contenido canónico. Si un requerimiento cambia en la rama principal, cualquier citación dependiente queda marcada automáticamente como obsoleta (`stale`), eliminando la deriva silenciosa.
+### Principle 5: Cryptographic Citation Contracts (Drift-Free Architecture)
+Delivery documents (SDD specifications, agent tasks, code) never rewrite or duplicate requirements or business rules. Instead, they **cite** them via their unique identifier (`id`) and the cryptographic digest (`SHA-256`) of the canonical content. If a requirement mutates in the canonical branch, dependent citations are automatically flagged as stale, eliminating silent drift.
 
-<a id="cap-00-principles-and-manifesto-principio-6-ciberseguridad-shift-left-por-defecto"></a>
+<a id="cap-00-principles-and-manifesto-principle-6-shift-left-cybersecurity-by-default"></a>
 
-### Principio 6: Ciberseguridad Shift-Left por Defecto
-La ciberseguridad no es un control reactivo al final del ciclo de desarrollo. Desde la concepción del producto se modelan los actores maliciosos (`ACT-THREAT-*`), los casos de abuso (`ABUSE-*`) y los requisitos de mitigación (`SEC-REQ-*`). En la validación, los gates deterministas (SAST, SCA, Secret Scanning) y los agentes de auditoría adversarial verifican cada cambio antes de su despliegue.
+### Principle 6: Shift-Left Cybersecurity by Default
+Cybersecurity is never a reactive audit at the end of the development lifecycle. From product inception, threat actors (`ACT-THREAT-*`), abuse cases (`ABUSE-*`), and mitigation requirements (`SEC-REQ-*`) are modeled up front. During validation, deterministic gates (SAST, SCA, Secret Scanning) and adversarial audit agents verify every change prior to deployment.
 
-<a id="cap-00-principles-and-manifesto-principio-7-gobernanza-proactiva-de-licencias-open-source"></a>
+<a id="cap-00-principles-and-manifesto-principle-7-proactive-open-source-license-governance"></a>
 
-### Principio 7: Gobernanza Proactiva de Licencias Open Source
-El software externo utilizado se evalúa formalmente frente a políticas declarativas (`license-policy.yaml`). Los agentes tienen prohibido incorporar dependencias con licencias virales (GPL/AGPL) o que requieran pago comercial sin la autorización y adquisición formal de licencias por parte de los responsables legales y técnicos humanos.
+### Principle 7: Proactive Open Source License Governance
+External dependencies are formally evaluated against declarative policies (`license-policy.yaml`). Agents are strictly forbidden from introducing packages with viral licenses (GPL/AGPL) or commercial acquisition requirements without formal human legal and technical authorization.
 
 ---
 
@@ -1306,243 +1257,244 @@ El software externo utilizado se evalúa formalmente frente a políticas declara
 
 > 📂 **Módulo 3 de 13 [Parte II: Especificación Normativa del Framework]:** `process/01_governance_and_roles.md`
 
-# 01. Gobernanza, Roles y Matriz de Colaboración Persona-Agente
+# 01. Governance, Roles, and Human-Agent Collaboration Matrix
 
-<a id="cap-01-governance-and-roles-1-modelo-de-doble-ciudadania-human-agent-dual-citizen"></a>
+<a id="cap-01-governance-and-roles-1-human-agent-dual-citizen-model"></a>
 
-## 1. Modelo de Doble Ciudadanía (Human-Agent Dual-Citizen)
+## 1. Human-Agent Dual-Citizen Model
 
-El framework AI-SDLC organiza a las personas y a los agentes de IA dentro de un modelo de gobernanza claro y equilibrado. Los agentes actúan como multiplicadores de fuerza técnica y cognitiva, mientras que los humanos actúan como garantes estratégicos, éticos, legales y de negocio.
+The AI-SDLC framework organizes humans and AI agents into a clear, balanced governance model. Agents act as technical and cognitive force multipliers, while humans serve as strategic, ethical, legal, and business guarantors.
 
 ---
 
-<a id="cap-01-governance-and-roles-2-catalogo-de-roles"></a>
+<a id="cap-01-governance-and-roles-2-role-catalog"></a>
 
-## 2. Catálogo de Roles
+## 2. Role Catalog
 
-<a id="cap-01-governance-and-roles-a-roles-humanos"></a>
+<a id="cap-01-governance-and-roles-a-human-roles"></a>
 
-### A. Roles Humanos
+### A. Human Roles
 1. **Product Owner / Product Manager (PO)**:
-   - Define la visión, los objetivos estratégicos y prioriza el backlog.
-   - Tiene la autoridad exclusiva para **aprobar cambios en el modelo de producto** (`Product Changes`).
-2. **Lead Architect / Arquitecto de Software**:
-   - Define la estrategia de solución técnica, límites de contexto y patrones estructurales (arc42 + NAF v4).
-   - Aprueba los Registros de Decisión Arquitectónica (`ADR-*`).
+   - Defines vision and strategic objectives, and prioritizes the backlog.
+   - Holds exclusive authority to **approve changes to the product model** (`Product Changes`).
+2. **Lead Architect / Software Architect**:
+   - Defines technical solution strategy, context boundaries, and structural patterns (arc42 + NAF v4).
+   - Approves Architecture Decision Records (`ADR-*`).
 3. **Security Officer / CISO / SecOps**:
-   - Valida el modelado de amenazas, aprueba requisitos de seguridad (`SEC-REQ-*`) y revisa excepciones de riesgo.
+   - Validates threat modeling, approves security requirements (`SEC-REQ-*`), and reviews risk exceptions.
 4. **Legal / IP & Compliance Officer**:
-   - Valida el uso de licencias de terceros, aprueba la adquisición de licencias comerciales o excepciones de copyleft.
+   - Validates third-party license usage, approves commercial license acquisitions, or grants copyleft exceptions.
 5. **Tech Lead / Senior Developer**:
-   - Revisa el código generado por los agentes en los Pull Requests utilizando obligatoriamente la plantilla institucional (`.github/PULL_REQUEST_TEMPLATE.md`).
-   - Evalúa la **Matriz de Ejecución del Plan y Estado de Pruebas (`X` vs `O`)**:
-     - Exige la inclusión de **todos y cada uno** de los puntos identificados para implementar en la entrega.
-     - Aplica el **criterio de bloqueo inmediato**: rechaza cualquier PR que contenga ítems planificados omitidos o ítems marcados con `[O]` (Problema / Bloqueo) que carezcan de justificación obligatoria (causa raíz, impacto, mitigación y referencia a issue de seguimiento o `ADR-TECH-DEBT-*`).
-   - Audita exhaustivamente el **Mapa de Puntos Débiles (Weak Points Hotspots)**:
-     - Inspecciona los "Hotspots de Complejidad" para garantizar el cumplimiento estricto de `quality-policy.yaml`.
-     - Evalúa de forma crítica las "Asunciones de la IA" para erradicar alucinaciones, heurísticas arbitrarias o atajos técnicos antes de autorizar el merge final.
+   - Reviews agent-generated code in Pull Requests using the mandatory institutional template (`.github/PULL_REQUEST_TEMPLATE.md`).
+   - Evaluates the **Plan Execution Matrix and Testing Status (`X` vs `O`)**:
+     - Requires the inclusion of **each and every** item identified for implementation in the delivery.
+     - Enforces the **immediate blocking criterion**: rejects any PR containing omitted planned items or items marked with `[O]` (Problem / Blocked) that lack mandatory justification (root cause, impact, mitigation, and tracking issue or `ADR-TECH-DEBT-*` reference).
+   - Exhaustively audits the **Weak Points Map (Weak Points Hotspots)**:
+     - Inspects "Complexity Hotspots" to ensure strict compliance with `quality-policy.yaml`.
+     - Critically evaluates "AI Assumptions" to eradicate hallucinations, arbitrary heuristics, or technical shortcuts prior to authorizing the final merge.
 
-<a id="cap-01-governance-and-roles-b-roles-de-agentes-de-ia-especializados-por-persona"></a>
+<a id="cap-01-governance-and-roles-b-ai-agent-roles-specialized-by-persona"></a>
 
-### B. Roles de Agentes de IA (Especializados por Persona)
-1. **Agente Analista de Producto (`agent-product-analyst`)**:
-   - Ejecuta habilidades de exploración (`ps:explore`), redacta borradores de artefactos de producto (`ACT-*`, `UC-*`, `BR-*`, `FR-*`), y detecta ambigüedades.
-2. **Agente Modelador de Amenazas y Seguridad (`agent-threat-modeler`)**:
-   - Aplica STRIDE y OWASP ASVS sobre los casos de uso (`UC-*`) y sobre artefactos técnicos de arquitectura (`CMP-*`, diagramas Mermaid, ADRs) en el bucle de retorno técnico procedente del arquitecto, proponiendo actores maliciosos (`ACT-THREAT-*`), casos de abuso (`ABUSE-*`) y requisitos de seguridad (`SEC-REQ-*`).
-3. **Agente Arquitecto de Sistemas (`agent-system-architect`)**:
-   - Genera diagramas de secuencia Mermaid, especificaciones OpenAPI, modelos de datos y propuestas de descomposición en bloques (`SRV-*`, `CMP-*`, `SYS-*`). Emite un bucle de retorno de seguridad técnica hacia `agent-threat-modeler` ante decisiones de infraestructura o persistencia con impacto en superficie de ataque.
-4. **Agente Desarrollador / Coder (`agent-developer`)**:
-   - Lee especificaciones de entrega SDD y genera código fuente limpio, modular y con tipado estricto, respetando los contratos de arquitectura.
-5. **Agente de Pruebas / QA (`agent-test-engineer` / `agent-qa-engineer`)**:
-   - Genera pruebas unitarias, de integración, pruebas de contrato y suites BDD/Gherkin exhaustivas en ROJO antes de la implementación.
-6. **Agente Auditor de Código y Seguridad (`agent-security-auditor`)**:
-   - Realiza revisiones adversariales del código en el PR buscando vulnerabilidades lógicas, inyecciones y fallos de autorización.
-7. **Agente de Cumplimiento de Licencias (`agent-compliance-checker`)**:
-   - Inspecciona manifiestos de dependencias contra `license-policy.yaml`, alerta sobre licencias comerciales y genera borradores de atribución.
-8. **Agente Usuario Experto y Evaluador de Dominio (`agent-expert-user`)**:
-   - Opera de forma bimodal: en fase de diseño define el corte MVP estricto y banco de sugerencias de roadmap (`templates/product/user-design-feedback.template.md`); en fase post-desarrollo realiza la validación funcional de extremo a extremo contrastando la interfaz y el comportamiento CLI frente a `UC-*` y `FR-*` antes de la auditoría de seguridad pre-merge.
-9. **Agente Revisor Técnico y Arquitectónico (`agent-code-reviewer`)**:
-   - Audita Pull Requests evaluando legibilidad, cumplimiento de principios SOLID/DRY, ausencia de code smells y límites de complejidad ciclomática y cognitiva, conformando la Tríada de Auditoría Pre-Merge.
-10. **Agente Ingeniero de DevOps e Infraestructura (`agent-devops`)**:
-    - Mantiene y evoluciona la infraestructura automatizada: flujos de CI/CD, Dockerfiles, manifiestos IaC y scripts de soporte, bajo el guardrail estricto de no invasión sobre el código fuente de la aplicación (`src/`).
+### B. AI Agent Roles (Specialized by Persona)
+1. **Product Analyst Agent (`agent-product-analyst`)**:
+   - Executes Phase 0 Product Inception (3–5 question discovery interview and `ARCH-INTRO-*` Enterprise & Capability Vision), exploration skills (`ps:explore`), drafts product artifact candidates (`ACT-*`, `UC-*`, `BR-*`, `FR-*`, `QR-*`), and detects ambiguities.
+2. **Threat Modeler and Security Agent (`agent-threat-modeler`)**:
+   - Applies STRIDE and OWASP ASVS across use cases (`UC-*`) and technical architecture artifacts (`CMP-*`, Mermaid diagrams, ADRs) in the technical feedback loop from the architect, proposing threat actors (`ACT-THREAT-*`), abuse cases (`ABUSE-*`), and security requirements (`SEC-REQ-*`).
+3. **Systems Architect Agent (`agent-system-architect`)**:
+   - Generates Mermaid sequence diagrams, OpenAPI specifications, data models, and block decomposition proposals (`SRV-*`, `CMP-*`, `SYS-*`). Emits a technical security feedback loop toward `agent-threat-modeler` upon infrastructure or persistence decisions impacting the attack surface.
+4. **Developer / Coder Agent (`agent-developer`)**:
+   - Reads SDD delivery specifications and generates clean, modular, strictly-typed source code adhering to architectural contracts.
+5. **Test / QA Agent (`agent-test-engineer` / `agent-qa-engineer`)**:
+   - Generates exhaustive unit, integration, contract, and BDD/Gherkin test suites in RED prior to implementation.
+6. **Code and Security Auditor Agent (`agent-security-auditor`)**:
+   - Conducts adversarial PR code reviews searching for logic vulnerabilities, injection flaws, and authorization bypasses.
+7. **License Compliance Agent (`agent-compliance-checker`)**:
+   - Inspects dependency manifests against `license-policy.yaml`, flags commercial licenses, and generates attribution drafts.
+8. **Expert User and Domain Evaluator Agent (`agent-expert-user`)**:
+   - Operates bimodally: in design phase defines strict MVP boundaries and roadmap suggestion bank (`templates/product/user-design-feedback.template.md`); in post-development phase conducts end-to-end functional validation contrasting UI and CLI behavior against `UC-*` and `FR-*` prior to pre-merge security audit.
+9. **Technical and Architectural Reviewer Agent (`agent-code-reviewer`)**:
+   - Audits Pull Requests evaluating readability, SOLID/DRY adherence, absence of code smells, and cyclomatic/cognitive complexity limits, completing the Pre-Merge Audit Triad.
+10. **DevOps and Infrastructure Engineer Agent (`agent-devops`)**:
+    - Maintains and evolves automated infrastructure: CI/CD workflows, Dockerfiles, IaC manifests, and support scripts, under the strict non-invasion guardrail protecting application source code (`src/`).
 
 ---
 
-<a id="cap-01-governance-and-roles-3-matriz-raci-ciclo-completo-de-desarrollo"></a>
+<a id="cap-01-governance-and-roles-3-raci-matrix-full-development-lifecycle"></a>
 
-## 3. Matriz RACI: Ciclo Completo de Desarrollo
+## 3. RACI Matrix: Full Development Lifecycle
 
-> **Leyenda RACI:**
-> - **R (Responsible)**: Quien ejecuta la tarea.
-> - **A (Accountable)**: Quien tiene la autoridad final de aprobación (único).
-> - **C (Consulted)**: Quien aporta información y contexto.
-> - **I (Informed)**: Quien recibe la notificación del resultado.
+> **RACI Legend:**
+> - **R (Responsible)**: Executes the task.
+> - **A (Accountable)**: Holds sole final approval authority (singular).
+> - **C (Consulted)**: Contributes information and context.
+> - **I (Informed)**: Receives notifications of outcomes.
 
-| **Fase / Actividad** | PO (Humano) | Arquitecto (Humano) | SecOps (Humano) | Legal (Humano) | Tech Lead / Dev (Humano) | Agente IA Especializado | Guardrail / Regla Determinista |
+| **Phase / Activity** | PO (Human) | Architect (Human) | SecOps (Human) | Legal (Human) | Tech Lead / Dev (Human) | Specialized AI Agent | Guardrail / Deterministic Rule |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Exploración y Redacción PDaC (Scribe)** | A | C | C | I | C | R (Analista Scribe) | IA redacta borrador conforme; no aprueba |
-| **Aprobación de Product Change** | **A** | C | C | I | I | - | **Prohibido para agentes (Solo humano)** |
-| **Evaluación de Diseño de Usuario (MVP vs Roadmap)** | **A** | C | C | I | C | R (Usuario Experto) | Aplica plantilla canónica; PO humano decide alcance |
-| **Modelado de Amenazas (Scribe y Retorno Técnico)** | C | C | A | I | C | R (Threat Modeler Scribe) | Inferencia STRIDE/ASVS sobre UC-* y retorno técnico desde CMP-* |
-| **Diseño Arquitectónico (arc42/NAF)** | I | **A** | C | I | C | R (Arquitecto) | Bloques deben citar casos de uso `UC-*` válidos |
-| **Aprobación de ADRs** | C | **A** | C | I | C | - | **Solo humanos aprueban decisiones técnicas** |
-| **Evaluación de Licencias OSS** | I | C | I | **A** | C | R (Compliance) | Detección automática en `license-policy.yaml` |
-| **Compra de Licencia Comercial** | I | I | I | **A** | C | - | **Agentes no firman contratos ni pagan licencias** |
-| **Elaboración de Spec SDD** | I | C | C | I | A | R (Desarrollador) | Citación criptográfica obligatoria (`id + digest`) y sidecar `handoff.yaml` |
-| **Generación de Código & Tests** | I | I | I | I | A | R (Coder / QA) | Linter y compilación estricta sin errores |
-| **Validación Funcional Post-Desarrollo** | **A** | C | I | I | C | R (Usuario Experto) | Contraste de UI/CLI contra UC-* y FR-* previo a auditoría de seguridad |
-| **Tareas de Alto Riesgo (`HIGH_RISK_MANUAL`)** | I | A | A | I | **R (Ejecutor Humano Exclusivo)** | - | **Bloqueada para IA. Solo implementación humana** |
-| **Tareas Interactivas (`HUMAN_REVIEW_PLAN`)** | I | C | C | I | **A (Aprobador Paso a Paso)** | R (Planificador / Co-implementador) | El agente se detiene en cada paso; el humano aprueba |
-| **Revisión de Código Pre-Merge (SOLID / Clean Code)** | I | C | I | I | **A (Garante)** | R (Code Reviewer) | Inspección de CC <= 10, MI >= 50, code smells y principios SOLID |
-| **Auditoría de Vulnerabilidades y SAST** | I | I | A | I | C | R (Security Auditor) | SAST determinista + Agente adversarial |
-| **Infraestructura como Código y CI/CD** | I | C | C | I | **A** | R (DevOps) | Modificación exclusiva de .github/, Dockerfiles y scripts (prohibido src/) |
-| **Integración Canónica SDD** | C | C | I | I | **A** | R (Desarrollador / CLI) | Todas las tareas en `tasks.md` deben estar `COMPLETED` |
-| **Revisión de PR y Balance del Plan (`X`/`O`)** | I | C | C | I | **A (Garante y Aprobador)** | R (Declara matriz, puntos débiles y asunciones) | Obligatoria inclusión de todos y cada uno de los puntos; justificación de todo `[O]` |
-| **Merge del Pull Request** | I | I | I | I | **A** | - | **Prohibido auto-merge por IA (Bloqueado por CI)** |
+| **PDaC Exploration & Scribing** | A | C | C | I | C | R (Analyst Scribe) | AI drafts compliant proposal; does not approve |
+| **Product Change Approval** | **A** | C | C | I | I | - | **Forbidden for agents (Human only)** |
+| **User Design Evaluation (MVP vs Roadmap)** | **A** | C | C | I | C | R (Expert User) | Applies canonical template; human PO decides scope |
+| **Threat Modeling (Scribing & Feedback Loop)** | C | C | A | I | C | R (Threat Modeler Scribe) | STRIDE/ASVS inference on UC-* and technical feedback from CMP-* |
+| **Architectural Design (arc42/NAF)** | I | **A** | C | I | C | R (Architect) | Blocks must cite valid `UC-*` use cases |
+| **ADR Approval** | C | **A** | C | I | C | - | **Humans alone approve architectural decisions** |
+| **OSS License Evaluation** | I | C | I | **A** | C | R (Compliance) | Automated detection in `license-policy.yaml` |
+| **Commercial License Acquisition** | I | I | I | **A** | C | - | **Agents cannot sign contracts or purchase licenses** |
+| **SDD Delivery Spec Drafting** | I | C | C | I | A | R (Developer) | Mandatory cryptographic citation (`id + digest`) and `handoff.yaml` sidecar |
+| **Code & Test Generation** | I | I | I | I | A | R (Coder / QA) | Linter and strict compilation with zero errors |
+| **Post-Development Functional Validation** | **A** | C | I | I | C | R (Expert User) | UI/CLI contrast against UC-* and FR-* prior to security audit |
+| **High-Risk Operations (`HIGH_RISK_MANUAL`)** | I | A | A | I | **R (Exclusive Human Executor)** | - | **Blocked for AI. Human execution only** |
+| **Interactive Tasks (`HUMAN_REVIEW_PLAN`)** | I | C | C | I | **A (Step-by-Step Approver)** | R (Planner / Co-implementer) | Agent halts at each step; human approves |
+| **Pre-Merge Code Review (SOLID / Clean Code)** | I | C | I | I | **A (Guarantor)** | R (Code Reviewer) | Verification of CC <= 10, MI >= 50, code smells, and SOLID principles |
+| **Vulnerability Audit and SAST** | I | I | A | I | C | R (Security Auditor) | Deterministic SAST + Adversarial Agent |
+| **Infrastructure as Code & CI/CD** | I | C | C | I | **A** | R (DevOps) | Exclusive modification of .github/, Dockerfiles, scripts (forbidden on src/) |
+| **SDD Canonical Integration** | C | C | I | I | **A** | R (Developer / CLI) | All tasks in `tasks.md` must be `COMPLETED` |
+| **PR Review and Plan Balance (`X`/`O`)** | I | C | C | I | **A (Guarantor & Approver)** | R (Declares matrix, weak points, and assumptions) | Mandatory inclusion of each and every item; justification for any `[O]` |
+| **Pull Request Merge** | I | I | I | I | **A** | - | **AI auto-merge forbidden (Blocked by CI)** |
 
 ---
 
-<a id="cap-01-governance-and-roles-4-modelo-operativo-ai-as-scribe-humano-como-revisor-aprobador-e-implementador-critico"></a>
+<a id="cap-01-governance-and-roles-4-operating-model-ai-as-scribe-human-as-critical-reviewer-approver-and-implementer"></a>
 
-## 4. Modelo Operativo "AI as Scribe, Humano como Revisor, Aprobador e Implementador Crítico"
+## 4. Operating Model: "AI as Scribe, Human as Critical Reviewer, Approver, and Implementer"
 
-<a id="cap-01-governance-and-roles-a-inversion-de-carga-operativa-mecanica-the-scribe-paradigm"></a>
+<a id="cap-01-governance-and-roles-a-inversion-of-mechanical-operational-overhead-the-scribe-paradigm"></a>
 
-### A. Inversión de Carga Operativa Mecánica (The Scribe Paradigm)
-Tradicionalmente, la redacción de especificaciones de producto y modelos de seguridad impone una severa fricción burocrática sobre los equipos de ingeniería: copiar plantillas Markdown (`templates/product/`, `templates/security/`), recordar taxonomías de IDs (`ACT-*`, `UC-*`, `FR-*`, `SEC-REQ-*`), estructurar frontmatters YAML con tipado estricto y redactar a mano escenarios ejecutables BDD/Gherkin con matrices `Examples`.
+### A. Inversion of Mechanical Operational Overhead (The Scribe Paradigm)
+Traditionally, writing product specifications and security models imposes heavy bureaucratic friction on engineering teams: copying Markdown templates (`templates/product/`, `templates/security/`), memorizing ID taxonomies (`ACT-*`, `UC-*`, `FR-*`, `SEC-REQ-*`), structuring strictly-typed YAML frontmatter, and hand-crafting executable BDD/Gherkin scenarios with `Examples` data tables.
 
-El modelo **AI as Scribe** invierte esta carga operativa:
-1. **Intención en Lenguaje Natural**: El Product Owner, Tech Lead o SecOps describe la necesidad funcional o técnica en un prompt simple o descripción breve.
-2. **Redacción Técnica Automatizada (AI as Scribe)**:
-   - Los agentes especializados (`agent-product-analyst` y `agent-threat-modeler`) actúan como amanuenses técnicos:
-     * Asignan automáticamente IDs correlativos inmutables libres de colisiones.
-     * Completan el frontmatter YAML exacto conforme con el esquema JSON canónico (Draft 2020-12), marcándolo inicialmente con `status: draft`.
-     * Redactan el enunciado normativo y los criterios de aceptación en Gherkin ejecutable (`Feature`, `Background`, `Scenario`, `Scenario Outline` con tabla de datos `Examples`).
-     * Calculan los digests criptográficos SHA-256 para las citaciones de artefactos ascendentes (Upstream).
-3. **Auto-Validación Determinista Inmediata**:
-   - Antes de presentar el borrador al humano, el agente ejecuta internamente `aisdlc verify schemas`. Si detecta cualquier violación de esquema o tipo, autocorrige la sintaxis de forma inmediata, garantizando **0 fallos sintácticos** al llegar a la revisión humana.
-4. **Revisión y Aprobación Exclusiva Humana**:
-   - El humano no pierde tiempo maquetando YAML ni depurando sintaxis; inspecciona el borrador evaluando exclusivamente el valor de negocio, la viabilidad técnica y la suficiencia de las mitigaciones.
-   - Una vez conforme, el humano cambia el estado a `status: approved` / `status: active` o aprueba el Pull Request correspondiente.
+The **AI as Scribe** model inverts this operational burden:
+1. **Natural Language Intent**: The Product Owner, Tech Lead, or SecOps describes the functional or technical need in a simple prompt or brief description.
+2. **Automated Technical Scribing (AI as Scribe)**:
+   - Specialized agents (`agent-product-analyst` and `agent-threat-modeler`) act as technical amanuenses:
+     * Automatically assign collision-free sequential immutable IDs.
+     * Fill exact YAML frontmatter conforming to canonical JSON Schema (Draft 2020-12), initially tagging with `status: draft`.
+     * Draft normative statements and acceptance criteria in executable Gherkin (`Feature`, `Background`, `Scenario`, `Scenario Outline` with `Examples` tables).
+     * Compute SHA-256 cryptographic digests for upstream artifact citations.
+3. **Immediate Deterministic Self-Validation**:
+   - Before presenting the draft to the human, the agent internally runs `aisdlc verify schemas`. If schema or type violations are found, it immediately self-corrects syntax, ensuring **zero syntax errors** upon reaching human review.
+4. **Exclusive Human Review and Approval**:
+   - Humans waste no time formatting YAML or debugging syntax; they inspect drafts focusing strictly on business value, technical feasibility, and mitigation adequacy.
+   - Once satisfied, the human updates the state to `status: approved` / `status: active` or approves the corresponding Pull Request.
 
-<a id="cap-01-governance-and-roles-b-preservacion-innegociable-del-humano-como-implementador"></a>
+<a id="cap-01-governance-and-roles-b-non-negotiable-preservation-of-the-human-as-implementer"></a>
 
-### B. Preservación Innegociable del Humano como Implementador
-La automatización de borradores mecánicos **no desplaza ni sustituye al ser humano como implementador**. En AI-SDLC, el rol del humano como implementador activo es innegociable a través de tres pilares de gobernanza:
+### B. Non-Negotiable Preservation of the Human as Implementer
+Automating mechanical drafting **does not displace or replace the human as implementer**. In AI-SDLC, the active implementer role of humans is non-negotiable across three governance pillars:
 
-1. **Tareas de Alto Riesgo (`HIGH_RISK_MANUAL`) - Implementación Exclusivamente Humana**:
-   - En tareas críticas donde un error puede comprometer la seguridad, integridad o continuidad del negocio (migraciones de datos en producción, manipulación de secretos o claves maestras criptográficas, aprovisionamiento de infraestructura productiva, código de seguridad del núcleo), **está estrictamente prohibida la ejecución autónoma por IA**.
-   - Estas tareas son **ejecutadas única y directamente por ingenieros humanos**. La IA puede actuar como asistente de consulta o verificador de soporte, pero las modificaciones las realiza el humano.
-2. **Pair-Programming Guiado Paso a Paso (`HUMAN_REVIEW_PLAN`)**:
-   - En tareas de riesgo medio o con impacto arquitectónico, el agente de IA **debe detenerse** tras formular el plan de acción detallado.
-   - El humano aprueba cada paso de manera interactiva o co-implementa junto con el agente, pudiendo asumir el control del teclado en cualquier momento para modificar el código o los artefactos.
-3. **Soberanía y Autoría Directa de la Ingeniería**:
-   - Cualquier ingeniero humano tiene siempre el derecho y la libertad de crear, editar o refactorizar directamente cualquier archivo de producto, arquitectura o código fuente sin intermediación de agentes. El framework AI-SDLC valida deterministamente el resultado mediante `aisdlc verify all`, garantizando la misma calidad y trazabilidad con independencia del autor.
-
----
-
-<a id="cap-01-governance-and-roles-5-protocolo-de-traspaso-hand-off-y-contratos-de-trabajo"></a>
-
-## 5. Protocolo de Traspaso (Hand-off) y Contratos de Trabajo
-
-Para evitar pérdidas de contexto o asunciones no válidas:
-
-1. **De Definición a Arquitectura**:
-   - El arquitecto (humano o agente) solo puede consumir artefactos de producto que hayan sido aprobados y fusionados en la rama principal (`docs/product/model/`). No se modela arquitectura sobre borradores no aprobados.
-2. **De Definición de Producto a Ecosistemas SDD (Handoff PDaC Formal y Sidecars)**:
-   - El producto emite formalmente un subgrafo de entrega inmutable con identificador `HOF-*` (casos de uso, requerimientos, reglas de negocio y citaciones SHA-256).
-   - Los adaptadores formales de ecosistemas SDD (OpenSpec y GitHub Spec Kit) o el generador de cambios (`aisdlc change new`) depositan este subgrafo como un archivo de acompañamiento `handoff.yaml` dentro del espacio del cambio (`specs/changes/active/<id>/` o `specs/<id>/`).
-3. **De Arquitectura a Especificación SDD**:
-   - Cada entrega SDD debe referenciar un subconjunto acotado de requerimientos (`FR-*`, `SEC-REQ-*`), bloques de arquitectura (`SRV-*`, `SYS-*`) y suites BDD (`.feature`).
-4. **Integración Canónica Post-Implementación**:
-   - Al concluir la implementación y superar la verificación determinista, el cambio se integra en la especificación canónica mediante `aisdlc sdd integrate`, actualizando el estado de los requerimientos y los mapas arquitectónicos de dependencias.
-5. **De Agente a Agente (Subagent Delegation)**:
-   - Los agentes delegan tareas mediante contratos estructurados: objetivo claro, enlaces a artefactos canónicos citados, restricciones de tiempo/formato y comandos deterministas para verificar el resultado.
-6. **Handoff entre Agentes del Workflow y Ventana de Acción Humana**:
-   - Para garantizar que al usuario le quede nítido quién o quiénes son los siguientes en actuar dentro del flujo, los agentes adoptan el protocolo canónico de **Workflow Handoff** basado en la plantilla institucional [`templates/workflow/agent-handoff.template.md`](../templates/workflow/agent-handoff.template.md).
-   - **Regla de Activación Condicional por Nivel de Autonomía**:
-     * 🟢 **Modo `AUTONOMOUS`** (o tareas donde el humano supervisa únicamente la ejecución final en el PR o pipeline de CI): **NO se solicita ni emite este handoff interactivo**, permitiendo al agente ejecutar de manera desatendida y continua sin fricciones innecesarias.
-     * 🟡 **Nivel de Autonomía $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **es OBLIGATORIO emitir el bloque de Workflow Handoff y DETENERSE**, exponiendo los entregables completados, sugiriendo el siguiente rol en el flujo y **dejando siempre la ventana abierta para que el usuario tome acción** (revisar, editar a mano, pausar, desviar o delegar al siguiente agente).
-   - **Cadena de Transición Canónica del Ciclo de Vida**:
-     $$\text{PO Humano} \rightarrow \text{agent-product-analyst} \rightarrow \text{agent-expert-user} \rightarrow \text{agent-threat-modeler} \rightarrow \text{agent-system-architect} \rightarrow \text{agent-developer} \rightarrow \text{agent-test-engineer} \rightarrow \text{agent-security-auditor} \rightarrow \text{agent-compliance-checker} \rightarrow \text{Tech Lead Humano}$$
+1. **High-Risk Tasks (`HIGH_RISK_MANUAL`) - Exclusively Human Implementation**:
+   - For critical tasks where errors could compromise security, integrity, or business continuity (production database migrations, cryptographic secret/master key handling, production infra provisioning, core security logic), **autonomous AI execution is strictly forbidden**.
+   - These tasks are **executed solely and directly by human engineers**. AI may serve as reference assistant or support checker, but modifications are performed by humans.
+2. **Step-by-Step Guided Pair Programming (`HUMAN_REVIEW_PLAN`)**:
+   - For medium-risk tasks or architectural deltas, the AI agent **must halt** after formulating the detailed action plan.
+   - The human approves each step interactively or co-implements alongside the agent, retaining keyboard sovereignty to modify code or artifacts at any time.
+3. **Direct Engineering Sovereignty and Authorship**:
+   - Any human engineer retains the right and freedom to author, edit, or refactor any product, architecture, or code file directly without agent mediation. The AI-SDLC framework deterministically verifies outcomes via `aisdlc verify all`, ensuring identical quality and traceability regardless of author.
 
 ---
 
-<a id="cap-01-governance-and-roles-6-matriz-de-clasificacion-de-tareas-y-modos-de-autonomia-humana"></a>
+<a id="cap-01-governance-and-roles-5-handoff-protocol-and-work-contracts"></a>
 
-## 6. Matriz de Clasificación de Tareas y Modos de Autonomía Humana
+## 5. Handoff Protocol and Work Contracts
 
-Toda feature o cambio de software se descompone en un plan de tareas atómicas (`tasks.md`) donde **cada tarea debe ser verificable y poseer una clasificación explícita de riesgo y autonomía**:
+To prevent context loss or invalid assumptions:
+
+1. **From Definition to Architecture**:
+   - The architect (human or agent) may only consume product artifacts approved and merged into the canonical branch (`docs/product/model/`). Architecture must not be built upon unapproved drafts.
+2. **From Product Definition to SDD Ecosystems (Formal PDaC Handoff & Sidecars)**:
+   - Product formally emits an immutable delivery subgraph with identifier `HOF-*` (use cases, requirements, business rules, and SHA-256 citations).
+   - SDD ecosystem adapters (OpenSpec, GitHub Spec Kit) or the change generator (`aisdlc change new`) deposit this subgraph as a companion `handoff.yaml` file inside the change directory (`specs/changes/active/<id>/` or `specs/<id>/`).
+3. **From Architecture to SDD Specification**:
+   - Each SDD increment must reference a bounded subset of requirements (`FR-*`, `SEC-REQ-*`), architectural blocks (`SRV-*`, `SYS-*`), and BDD suites (`.feature`).
+4. **Post-Implementation Canonical Integration**:
+   - Upon completing implementation and passing deterministic verification, the change is integrated into canonical specifications via `aisdlc sdd integrate`, updating requirement statuses and architectural dependency maps.
+5. **From Agent to Agent (Subagent Delegation)**:
+   - Agents delegate tasks via structured contracts: clear objective, links to cited canonical artifacts, time/format constraints, and deterministic verification commands.
+6. **Workflow Agent Handoff and Human Action Window**:
+   - To provide clarity regarding next acting roles within the workflow, agents adopt the canonical **Workflow Handoff** protocol based on [`templates/workflow/agent-handoff.template.md`](../templates/workflow/agent-handoff.template.md).
+   - **Conditional Activation Rule by Autonomy Level**:
+     * 🟢 **`AUTONOMOUS` Mode** (or tasks where humans supervise solely final PR execution or CI pipelines): **This interactive handoff is NOT emitted**, allowing unattended, frictionless agent execution.
+     * 🟡 **Autonomy Level $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **Emitting the Workflow Handoff block and HALTING is MANDATORY**, exposing completed deliverables, suggesting next roles, and **preserving an open window for human action** (review, edit, pause, divert, or delegate).
+   - **Canonical Lifecycle Transition Chain**:
+     $$\text{Human PO} \rightarrow \text{agent-product-analyst} \rightarrow \text{agent-expert-user} \rightarrow \text{agent-threat-modeler} \rightarrow \text{agent-system-architect} \rightarrow \text{agent-developer} \rightarrow \text{agent-test-engineer} \rightarrow \text{agent-security-auditor} \rightarrow \text{agent-compliance-checker} \rightarrow \text{Human Tech Lead}$$
+
+---
+
+<a id="cap-01-governance-and-roles-6-task-classification-matrix-and-human-autonomy-modes"></a>
+
+## 6. Task Classification Matrix and Human Autonomy Modes
+
+Every feature or software delta is decomposed into an atomic task plan (`tasks.md`) where **each task must be verifiable and carry an explicit risk and autonomy classification**:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│             MATRIZ DE GOBIERNO DE AUTONOMÍA HUMANA (AI-SDLC)           │
+│             HUMAN AUTONOMY GOVERNANCE MATRIX (AI-SDLC)                 │
+│                 Matriz de Ejecución del Plan                           │
 └────────────────────────────────────────────────────────────────────────┘
 
- 🟢 MODO 1: AUTONOMOUS (Plan + Ejecución Autónoma)
-    ├── Criterio: Riesgo BAJO, complejidad baja/moderada, especificación clara.
-    ├── Comportamiento: El agente de IA planifica y ejecuta sin interrupción.
-    └── Supervisión: El humano revisa únicamente el Pull Request y los reportes de CI.
+ 🟢 MODE 1: AUTONOMOUS (Autonomous Plan + Execution)
+    ├── Criterion: LOW risk, low/moderate complexity, unambiguous specification.
+    ├── Behavior: AI agent plans and executes without interruption.
+    └── Supervision: Human reviews only the Pull Request and CI reports.
 
- 🟡 MODO 2: HUMAN_REVIEW_PLAN (Revisión Previa de Plan Obligatoria)
-    ├── Criterio: Riesgo MEDIO, cambio de interfaces/contratos, impacto arquitectónico.
-    ├── Comportamiento: El agente genera el plan de implementación, pero SE DETIENE.
-    └── Supervisión: El humano DEBE revisar y aprobar el plan ANTES de escribir código.
+ 🟡 MODE 2: HUMAN_REVIEW_PLAN (Mandatory Prior Plan Review)
+    ├── Criterion: MEDIUM risk, interface/contract modifications, architectural impact.
+    ├── Behavior: Agent generates implementation plan, but HALTS.
+    └── Supervision: Human MUST review and approve the plan BEFORE code is written.
 
- 🟠 MODO 3: AMBIGUOUS (Tarea Ambigua / Bloqueada para Implementación)
-    ├── Criterio: Requisitos incompletos, criterios difusos, conflicto de reglas.
-    ├── Comportamiento: PROHIBIDO CODIFICAR O ASUMIR REQUISITOS.
-    └── Supervisión: El agente formula preguntas para refinamiento humano previo.
+ 🟠 MODE 3: AMBIGUOUS (Ambiguous Task / Blocked for Implementation)
+    ├── Criterion: Incomplete requirements, diffuse criteria, conflicting rules.
+    ├── Behavior: FORBIDDEN TO CODE OR ASSUME REQUIREMENTS.
+    └── Supervision: Agent asks clarifying questions for prior human refinement.
 
- 🔴 MODO 4: HIGH_RISK_MANUAL (Alto Riesgo / Ejecución Exclusiva Humana)
-    ├── Criterio: Riesgo CRÍTICO (migraciones DB, claves criptográficas, infra prod).
-    ├── Comportamiento: PROHIBIDA LA EJECUCIÓN AUTÓNOMA POR IA.
-    └── Supervisión: Ejecución directa por ingenieros humanos o pair-programming estricto.
+ 🔴 MODE 4: HIGH_RISK_MANUAL (Critical Risk / Exclusive Human Execution)
+    ├── Criterion: CRITICAL risk (DB migrations, cryptographic keys, production infra).
+    ├── Behavior: AUTONOMOUS AI EXECUTION IS FORBIDDEN.
+    └── Supervision: Direct execution by human engineers or strict pair programming.
 ```
 
-<a id="cap-01-governance-and-roles-tabla-de-decision-de-autonomia"></a>
+<a id="cap-01-governance-and-roles-autonomy-decision-table"></a>
 
-### Tabla de Decisión de Autonomía
-| Nivel de Riesgo | Complejidad | Ambigüedad | Modo de Autonomía Resultante | Acción Requerida |
+### Autonomy Decision Table
+| Risk Level | Complexity | Ambiguity | Resulting Autonomy Mode | Required Action |
 | :---: | :---: | :---: | :---: | :--- |
-| **LOW** | LOW / MED | Cero (Especificada) | **`AUTONOMOUS`** 🟢 | Agente planifica y codifica de extremo a extremo. |
-| **MEDIUM** | CUALQUIERA | Cero (Especificada) | **`HUMAN_REVIEW_PLAN`** 🟡 | Agente genera `implementation_plan.md` y espera aprobación. |
-| **HIGH** | HIGH | Cero (Especificada) | **`HUMAN_REVIEW_PLAN`** 🟡 | Requiere aprobación formal del Tech Lead o Arquitecto. |
-| **CUALQUIERA** | CUALQUIERA | Alta / Dudas | **`AMBIGUOUS`** 🟠 | **Bloqueada**. Requiere sesión de refinamiento con el usuario. |
-| **CRITICAL** | CUALQUIERA | CUALQUIERA | **`HIGH_RISK_MANUAL`** 🔴 | **Bloqueada para IA**. Solo intervención manual de ingenieros. |
+| **LOW** | LOW / MED | Zero (Specified) | **`AUTONOMOUS`** 🟢 | Agent plans and codes end-to-end. |
+| **MEDIUM** | ANY | Zero (Specified) | **`HUMAN_REVIEW_PLAN`** 🟡 | Agent drafts `implementation_plan.md` and awaits approval. |
+| **HIGH** | HIGH | Zero (Specified) | **`HUMAN_REVIEW_PLAN`** 🟡 | Requires formal approval from Tech Lead or Architect. |
+| **ANY** | ANY | High / Questions | **`AMBIGUOUS`** 🟠 | **Blocked**. Requires refinement session with user. |
+| **CRITICAL** | ANY | ANY | **`HIGH_RISK_MANUAL`** 🔴 | **Blocked for AI**. Manual engineer intervention only. |
 
 ---
 
-<a id="cap-01-governance-and-roles-7-modelo-de-friccion-progresiva-progressive-friction-governance"></a>
+<a id="cap-01-governance-and-roles-7-progressive-friction-governance-model"></a>
 
-## 7. Modelo de Fricción Progresiva (Progressive Friction Governance)
+## 7. Progressive Friction Governance Model
 
-Para optimizar la agilidad del desarrollo y erradicar la fatiga de proceso en correcciones menores sin degradar los controles en componentes críticos, el framework AI-SDLC formaliza el **Modelo de Fricción Progresiva**.
+To maximize development agility and eradicate process fatigue on minor fixes without compromising controls on critical components, the AI-SDLC framework formalizes the **Progressive Friction Model**.
 
-<a id="cap-01-governance-and-roles-a-matriz-de-perfiles-de-cambio-change-profiles"></a>
+<a id="cap-01-governance-and-roles-a-change-profiles-matrix"></a>
 
-### A. Matriz de Perfiles de Cambio (Change Profiles)
+### A. Change Profiles Matrix
 
-El nivel de ceremonia documental, modelado formal de seguridad y ramificación Git se adapta dinámicamente según el perfil de cambio:
+Ceremony depth, formal security modeling, and Git branching dynamically adapt based on change profile:
 
-| Perfil | Nivel de Riesgo Típico | Artefactos Mínimos Exigidos | Modelado STRIDE / Seguridad | Jerarquía Git Permitida | Aprobación Humana Requerida |
+| Profile | Typical Risk Level | Minimum Required Artifacts | STRIDE / Security Modeling | Permitted Git Hierarchy | Required Human Approval |
 | :--- | :---: | :--- | :--- | :--- | :--- |
-| **`patch`** (Baja Fricción) | `LOW` | Únicamente `spec.md` condensado con bloque `verification` | **Exento** si no altera enclaves `SEC-ENC-*` ni interfaces externas | Rama directa `fix/<slug>` o `patch/<slug>` (Sin Tier 4 `task/*`) | Tech Lead único (revisión de PR y test verde) |
-| **`standard`** (Fricción Nominal) | `MEDIUM` / `HIGH` | Andamiaje SDD completo (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.yaml`) | Exigido para endpoints o lógica de negocio nueva | Modelo estándar de 4 tiers (`main` $\rightarrow$ `release` $\rightarrow$ `feat/bug` $\rightarrow$ `task`) | Tech Lead formal |
-| **`critical`** (Alta Fricción) | `CRITICAL` | Andamiaje SDD completo + `ADR-*` de arquitectura + Checklist Zero Trust | **Obligatorio e ineludible** (Amenazas, vectores de abuso y mitigación) | Modelo estricto de 4 tiers con protección máxima | **Doble aprobación humana**: Tech Lead + Lead Architect / SecOps |
+| **`patch`** (Low Friction) | `LOW` | Concise `spec.md` with `verification` block only | **Exempt** if not altering `SEC-ENC-*` or external interfaces | Direct branch `fix/<slug>` or `patch/<slug>` (No Tier 4 `task/*`) | Single Tech Lead (PR review and green tests) |
+| **`standard`** (Nominal Friction) | `MEDIUM` / `HIGH` | Full SDD scaffolding (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.yaml`) | Required for new endpoints or business logic | Standard 4-tier model (`main` $\rightarrow$ `release` $\rightarrow$ `feat/bug` $\rightarrow$ `task`) | Formal Tech Lead |
+| **`critical`** (High Friction) | `CRITICAL` | Full SDD scaffolding + Architecture `ADR-*` + Zero Trust Checklist | **Mandatory and unavoidable** (Threats, abuse vectors, mitigation) | Strict 4-tier model with maximum protection | **Dual human approval**: Tech Lead + Lead Architect / SecOps |
 
-<a id="cap-01-governance-and-roles-b-fuente-de-verdad-canonica-en-frontmatter"></a>
+<a id="cap-01-governance-and-roles-b-canonical-source-of-truth-in-frontmatter"></a>
 
-### B. Fuente de Verdad Canónica en Frontmatter
+### B. Canonical Source of Truth in Frontmatter
 
-La clasificación del nivel de fricción reside **de forma obligatoria en el frontmatter YAML de `spec.md`**:
+Friction classification resides **mandatorily in the YAML frontmatter of `spec.md`**:
 ```yaml
 ---
 id: SPEC-PATCH-002-LINTER-FIX
 type: delivery-spec
 change-id: PATCH-002-LINTER-FIX
-title: "Corrección de advertencias de linter"
-profile: patch # <-- Fuente de verdad canónica: 'patch' | 'standard' | 'critical'
+title: "Linter warnings fix"
+profile: patch # <-- Canonical source of truth: 'patch' | 'standard' | 'critical'
 status: approved
 verification:
   method: automated-unit-test
@@ -1550,60 +1502,60 @@ verification:
 ---
 ```
 
-> **Flexibilidad en Nomenclatura de Carpetas e IDs:**  
-> A nivel de sistema de archivos e identificadores de cambio se admiten tanto prefijos tradicionales (`chg-XXX-<slug>` / `CHG-XXX`) como prefijos explícitos de parche (`patch-XXX-<slug>` / `PATCH-XXX`). El tooling y los verificadores deterministas consultan prioritariamente el atributo `profile` del frontmatter para validar los requisitos mínimos aplicables.
+> **Folder and ID Naming Flexibility:**  
+> Both traditional prefixes (`chg-XXX-<slug>` / `CHG-XXX`) and explicit patch prefixes (`patch-XXX-<slug>` / `PATCH-XXX`) are supported on filesystems and change IDs. Tooling and deterministic verifiers consult the `profile` frontmatter attribute first when validating minimum applicable requirements.
 
-<a id="cap-01-governance-and-roles-c-guardrail-determinista-anti-bypass-prevencion-de-evasion-de-gobernanza"></a>
+<a id="cap-01-governance-and-roles-c-deterministic-anti-bypass-guardrail-governance-evasion-prevention"></a>
 
-### C. Guardrail Determinista Anti-Bypass (Prevención de Evasión de Gobernanza)
+### C. Deterministic Anti-Bypass Guardrail (Governance Evasion Prevention)
 
-Queda terminantemente prohibido utilizar el perfil `patch` como atajo para evadir controles arquitectónicos o de seguridad. Si un cambio declara `profile: patch` pero modifica:
-1. Esquemas JSON canónicos (`schemas/`).
-2. Enclaves o actores de ciberseguridad (`examples/security/`, `SEC-ENC-*`, certificados/secretos).
-3. Políticas maestras organizacionales (`quality-policy.yaml`, `license-policy.yaml`).
-4. Scripts o infraestructura crítica de despliegue.
+Using the `patch` profile to circumvent architectural or security controls is strictly forbidden. If a change declares `profile: patch` but touches:
+1. Canonical JSON schemas (`schemas/`).
+2. Cybersecurity enclaves or actors (`examples/security/`, `SEC-ENC-*`, certificates/secrets).
+3. Organizational master policies (`quality-policy.yaml`, `license-policy.yaml`).
+4. Critical deployment infrastructure or scripts.
 
-El comando de verificación determinista (`aisdlc verify`) **bloqueará inmediatamente el pipeline (EXIT 1)** exigiendo reclasificar el cambio como `standard` o `critical`.
+The deterministic verification command (`aisdlc verify`) will **immediately block the pipeline (EXIT 1)**, mandating change reclassification as `standard` or `critical`.
 
 ---
 
-<a id="cap-01-governance-and-roles-8-protocolo-de-revision-y-gobernanza-de-pull-requests-balance-xo-y-puntos-debiles"></a>
+<a id="cap-01-governance-and-roles-8-pull-request-review-and-governance-protocol-plan-balance-xo-and-weak-points"></a>
 
-## 8. Protocolo de Revisión y Gobernanza de Pull Requests (Balance `X`/`O` y Puntos Débiles)
+## 8. Pull Request Review and Governance Protocol (Plan Balance `X`/`O` and Weak Points)
 
-El Pull Request representa la última frontera de control y garantía antes de integrar código en ramas estables. Con el objetivo de erradicar la deuda técnica oculta y las alucinaciones silenciosas en el código generado por IA, se formaliza la gobernanza basada en `.github/PULL_REQUEST_TEMPLATE.md`:
+The Pull Request represents the final gate of assurance before code merges into stable branches. To eliminate hidden technical debt and silent AI hallucinations, governance is anchored on `.github/PULL_REQUEST_TEMPLATE.md`:
 
-<a id="cap-01-governance-and-roles-a-obligaciones-del-proponente-agente-de-ia-o-ingeniero"></a>
+<a id="cap-01-governance-and-roles-a-proposer-obligations-ai-agent-or-human-engineer"></a>
 
-### A. Obligaciones del Proponente (Agente de IA o Ingeniero)
-1. **Exhaustividad Total Innegociable en la Matriz de Ejecución**:
-   - Se deben transcribir e incluir en la tabla **todos y cada uno de los puntos identificados para implementar** en el plan de entrega (procedentes de `tasks.md`, de la especificación SDD o de los criterios de aceptación del issue).
-   - Queda terminantemente prohibido agrupar tareas en descripciones genéricas o presentar listados parciales/selectivos.
-2. **Convención Determinista de Marcado (`[X]` vs `[O]`)**:
-   - **`[X]` (Completado y Probado)**: Solo aplicable si el ítem está 100% implementado y respaldado por pruebas automatizadas verificables en disco (`tests/` o `.feature`) con resultado verde sin fallos.
-   - **`[O]` (Problema / Bloqueo)**: Si existió cualquier dificultad, limitación técnica, test diferido o bloqueo, se debe marcar con `[O]` y es **obligatoria su justificación completa**:
-     - Causa raíz técnica o limitación encontrada.
-     - Impacto real sobre el incremento o la arquitectura.
-     - Mitigación inmediata o justificación de por qué se pospone.
-     - Referencia formal al issue de seguimiento (GitHub Issue o `ADR-TECH-DEBT-*`).
-3. **Mapeo Explícito de Puntos Débiles**:
-   - Identificar funciones que rozan los límites de complejidad de `quality-policy.yaml` (Hotspots de Complejidad).
-   - Listar casos límite no cubiertos por pruebas unitarias automatizadas (Casos Límite y Puntos Ciegos).
-   - Explicitar todas las asunciones no triviales asumidas por la IA durante la implementación (Asunciones de la IA).
+### A. Proposer Obligations (AI Agent or Human Engineer)
+1. **Non-Negotiable Total Exhaustiveness in Plan Execution Matrix**:
+   - Transcribe and include in the table **each and every** item identified for implementation in the delivery plan (from `tasks.md`, SDD spec, or issue acceptance criteria).
+   - Grouping tasks into generic descriptions or presenting partial/selective lists is strictly forbidden.
+2. **Deterministic Marking Convention (`[X]` vs `[O]`)**:
+   - **`[X]` (Completed and Tested)**: Only applicable if item is 100% implemented and backed by verifiable automated tests on disk (`tests/` or `.feature`) with green results.
+   - **`[O]` (Problem / Blocked)**: If any issue, technical constraint, deferred test, or blocker was encountered, it must be marked with `[O]` and **mandatory full justification is required**:
+     - Technical root cause or encountered constraint.
+     - Real impact on increment or architecture.
+     - Immediate mitigation or justification for deferral.
+     - Formal reference to tracking issue (GitHub Issue or `ADR-TECH-DEBT-*`).
+3. **Explicit Weak Points Mapping**:
+   - Identify functions nearing complexity thresholds in `quality-policy.yaml` (Complexity Hotspots).
+   - List edge cases not covered by automated unit tests (Edge Cases and Blind Spots).
+   - Detail all non-trivial assumptions made by AI during implementation (AI Assumptions).
 
-<a id="cap-01-governance-and-roles-b-criterios-de-bloqueo-y-aprobacion-para-el-tech-lead-human-gatekeeper"></a>
+<a id="cap-01-governance-and-roles-b-tech-lead-blocking-and-approval-criteria-human-gatekeeper"></a>
 
-### B. Criterios de Bloqueo y Aprobación para el Tech Lead (Human Gatekeeper)
-El Tech Lead actúa como árbitro decisorio y garante humano de la integridad de la solución:
-1. **Criterios de Bloqueo Mandatorio Inmediato**:
-   - **Omisión de ítems planificados**: Si la tabla no lista todos y cada uno de los puntos del plan original.
-   - **Ítems `[O]` no justificados**: Si existe cualquier ítem `[O]` sin su justificación técnica cuádruple (causa, impacto, mitigación y enlace de seguimiento).
-   - **Hotspots de Complejidad no mitigados**: Si alguna función viola los umbrales de `quality-policy.yaml` (CC $\le 10$, Cognitiva $\le 15$, LOC $\le 40$, MI $\ge 50$).
-   - **Asunciones de la IA no convalidadas**: Si se detectan heurísticas o fallbacks asumidos por el agente que no corresponden con la visión de arquitectura o producto.
-2. **Criterios de Aprobación**:
-   - La totalidad de puntos planificados están presentes en la matriz con estado `[X]` (o `[O]` justificados y aceptados formalmente mediante `ADR-TECH-DEBT-*`).
-   - El checklist determinista de pre-vuelo pasa al 100% (`pnpm run verify:all` y `pnpm run typecheck`).
-   - El plan de contingencia, observabilidad y procedimiento de rollback están adecuadamente definidos.
+### B. Tech Lead Blocking and Approval Criteria (Human Gatekeeper)
+The Tech Lead serves as human gatekeeper and arbiter of system integrity:
+1. **Mandatory Immediate Blocking Criteria**:
+   - **Omission of planned items**: If the table fails to list each and every item from the original plan.
+   - **Unjustified `[O]` items**: If any `[O]` item lacks quadruple technical justification (cause, impact, mitigation, tracking link).
+   - **Unmitigated Complexity Hotspots**: If any function breaches `quality-policy.yaml` thresholds (CC $\le 10$, Cognitive $\le 15$, LOC $\le 40$, MI $\ge 50$).
+   - **Unvalidated AI Assumptions**: If heuristics or fallbacks assumed by the agent do not align with product or architecture vision.
+2. **Approval Criteria**:
+   - All planned items are present in the matrix with `[X]` status (or justified `[O]` formally accepted via `ADR-TECH-DEBT-*`).
+   - Deterministic pre-flight checklist passes 100% (`pnpm run verify:all` and `pnpm run typecheck`).
+   - Contingency plan, observability metrics, and rollback procedure are adequately defined.
 
 ---
 
@@ -1611,129 +1563,156 @@ El Tech Lead actúa como árbitro decisorio y garante humano de la integridad de
 
 > 📂 **Módulo 4 de 13 [Parte II: Especificación Normativa del Framework]:** `process/02_product_definition.md`
 
-# 02. Definición del Producto: Metodología ProductShape (PDaC)
+# 02. Product Definition: ProductShape Methodology (PDaC)
 
-<a id="cap-02-product-definition-1-fundamentos-de-product-definition-as-code"></a>
+<a id="cap-02-product-definition-1-foundations-of-product-definition-as-code"></a>
 
-## 1. Fundamentos de Product Definition as Code
+## 1. Foundations of Product Definition as Code
 
-ProductShape establece que **la definición canónica del producto vive en el repositorio Git como texto plano estructurado en Markdown con frontmatter YAML**, situada *antes* del backlog y *antes* del código de implementación.
+ProductShape establishes that **the canonical product definition resides in the Git repository as structured plain text in Markdown with YAML frontmatter**, positioned *upstream* of the backlog and *upstream* of implementation code.
 
-Un backlog es una cola de trabajo temporal: dice qué hacer a continuación, pero no qué *es* el producto. Las historias completadas acumulan deuda arqueológica. ProductShape sustituye esa dispersión por un **Grafo de Producto Canónico** compuesto por familias de artefactos atómicos con identificadores inmutables.
+A backlog is a temporary work queue: it dictates what to do next, but never defines what the product *is*. Completed stories accumulate archaeological debt. ProductShape replaces that fragmentation with a **Canonical Product Graph** composed of atomic artifact families with immutable identifiers.
 
 ---
 
-<a id="cap-02-product-definition-2-familias-de-artefactos-de-producto"></a>
+<a id="cap-02-product-definition-2-product-artifact-families"></a>
 
-## 2. Familias de Artefactos de Producto
+## 2. Product Artifact Families
 
-Cada artefacto representa un nodo en el grafo y declara sus relaciones mediante metadatos tipados en su frontmatter:
+Each artifact represents a node in the graph and declares its relationships via typed metadata in its frontmatter, anchored upstream by the **NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`)**:
 
 ```
-                  ┌──────────────────────┐
-                  │     ACTOR (ACT)      │
-                  └──────────┬───────────┘
-                             │ persigue
-                             ▼
-                  ┌──────────────────────┐
-                  │    JOURNEY (JRN)     │
-                  └──────────┬───────────┘
-                             │ se descompone en
-                             ▼
-                  ┌──────────────────────┐
-                  │    USE CASE (UC)     │
-                  └──────┬────────┬──────┘
-                         │        │
-           gobernado por │        │ deriva en
-                         ▼        ▼
-       ┌────────────────────┐   ┌───────────────────────────────┐
-       │ BUSINESS RULE (BR) │   │ REQUIREMENTS (FR, QR, CON)   │
-       └─────────┬──────────┘   └───────────────────────────────┘
-                 │ usa
-                 ▼
-       ┌────────────────────┐
-       │ DOMAIN TERM (TERM) │ ─── definido en ──► BOUNDED CONTEXT (BC)
-       └────────────────────┘
+          ┌──────────────────────────────────────────────┐
+          │ ENTERPRISE & CAPABILITY VISION (ARCH-INTRO)  │
+          │         (NAF v4 Concept / Phase 0)           │
+          └───────┬──────────────┬───────────────┬───────┘
+                  │ identifies   │ defines MVP   │ sets priority
+                  ▼              │ capabilities  │ quality goals
+          ┌───────────────┐      │               │
+          │  ACTOR (ACT)  │      │               │
+          └───────┬───────┘      │               │
+                  │ pursues      │               │
+                  ▼              │               │
+          ┌───────────────┐      │               │
+          │ JOURNEY (JRN) │      │               │
+          └───────┬───────┘      │               │
+                  │ decomposes   │               │
+                  ▼              ▼               │
+          ┌──────────────────────────────┐       │
+          │        USE CASE (UC)         │       │
+          └───────┬──────────────┬───────┘       │
+                  │              │               │
+    governed by   │              │ derives into  │
+                  ▼              ▼               ▼
+┌────────────────────┐   ┌───────────────────────────────┐
+│ BUSINESS RULE (BR) │   │ REQUIREMENTS (FR, QR, CON)   │
+└─────────┬──────────┘   └───────────────────────────────┘
+          │ uses
+          ▼
+┌────────────────────┐
+│ DOMAIN TERM (TERM) │ ─── defined in ──► BOUNDED CONTEXT (BC)
+└────────────────────┘
 ```
 
-<a id="cap-02-product-definition-detalle-de-familias"></a>
+<a id="cap-02-product-definition-family-breakdown"></a>
 
-### Detalle de Familias:
-1. **Actores (`ACT-*`)**:
-   - Quien o qué interactúa con el producto para obtener un resultado (usuarios, sistemas externos, sensores).
+### Family Breakdown:
+0. **Enterprise & Capability Vision (`ARCH-INTRO-*` — Phase 0 / NAF v4 Concept)**:
+   - Captures the executive product intent at inception (`templates/architecture/introduction-and-goals.template.md`, validated by `schemas/architecture/introduction-and-goals.schema.json`): mission statement, core problem solved, primary stakeholders (`ACT-*`), core MVP capabilities (`UC-*`), and top 3–5 priority quality goals (`QR-*`).
+1. **Actors (`ACT-*`)**:
+   - Who or what interacts with the product to achieve an outcome (users, external systems, sensors).
 2. **Journeys (`JRN-*`)**:
-   - Resultados de extremo a extremo que un actor persigue a lo largo del tiempo, abarcando múltiples casos de uso.
-3. **Casos de Uso (`UC-*`)**:
-   - Interacciones concretas y delimitadas a través de las cuales un actor alcanza un objetivo de negocio.
-4. **Reglas de Negocio (`BR-*`)**:
-   - Invariantes, políticas y restricciones de dominio que gobiernan el comportamiento del sistema.
-5. **Términos de Dominio (`TERM-*`) & Bounded Contexts (`BC-*`)**:
-   - Glosario formal de lenguaje ubicuo. Cada término declara exactamente en qué contexto delimitado (`defined-in: BC-*`) tiene validez su significado.
-6. **Requerimientos (`REQ-*`)**:
-   - **Requerimientos Funcionales (`FR-*`)**: Capacidades concretas del sistema derivadas de los casos de uso.
-   - **Requerimientos de Calidad (`QR-*`)**: Criterios no funcionales medibles (rendimiento, disponibilidad, latencia).
-   - **Restricciones de Producto (`CON-*`)**: Límites tecnológicos, regulatorios o de negocio impuestos a la solución.
+   - End-to-end outcomes an actor pursues over time, spanning multiple use cases.
+3. **Use Cases (`UC-*`)**:
+   - Concrete, bounded interactions through which an actor accomplishes a business goal.
+4. **Business Rules (`BR-*`)**:
+   - Invariants, policies, and domain constraints governing system behavior.
+5. **Domain Terms (`TERM-*`) & Bounded Contexts (`BC-*`)**:
+   - Formal ubiquitous language glossary. Each term declares explicitly in which bounded context (`defined-in: BC-*`) its meaning holds validity.
+6. **Requirements (`REQ-*`)**:
+   - **Functional Requirements (`FR-*`)**: Concrete system capabilities derived from use cases.
+   - **Quality Requirements (`QR-*`)**: Measurable non-functional criteria (performance, availability, latency).
+   - **Product Constraints (`CON-*`)**: Technological, regulatory, or business limits imposed on the solution.
 
 ---
 
-<a id="cap-02-product-definition-3-el-grafo-de-producto-y-regla-de-direccion-canonica"></a>
+<a id="cap-02-product-definition-3-the-product-graph-and-canonical-direction-rule"></a>
 
-## 3. El Grafo de Producto y Regla de Dirección Canónica
+## 3. The Product Graph and Canonical Direction Rule
 
-Para evitar inconsistencias y enlaces recíprocos rotos:
-- **Toda relación se escribe en exactamente UNA dirección canónica:**
-  - Un `use-case` declara `primary-actor`, `governed-by` y `uses-terms`.
-  - Un `domain-term` declara `defined-in`.
-  - Un `functional-requirement` declara `derives-from`.
-- **Las vistas inversas siempre son derivadas y compiladas automáticamente:**
-  - Ningún archivo de contexto escribe `owns-terms`; la herramienta compila qué términos pertenecen al contexto evaluando los `defined-in`.
-  - Ningún actor escribe `participates-in-use-cases`; se compila a partir de los casos de uso.
-- **Trazabilidad Invertida hacia Requisitos (Dependency Inversion):**
-  - Ningún requisito (`FR-*`, `QR-*`, `SEC-REQ-*`) almacena punteros descendentes como servicios donde se implementa o rutas de archivos de prueba donde se verifica.
-  - Esto evita acoplar el producto abstracto al código concreto, previene conflictos de merge en Git y elimina falsas invalidaciones de los digests criptográficos SHA-256 de PDaC.
-  - Son los artefactos descendentes los que declaran la satisfacción hacia arriba:
-    - Los servicios de arquitectura (`SRV-*`) declaran `satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`.
-    - Las pruebas unitarias, de integración y escenarios BDD declaran etiquetas `@<REQ-ID>` o citaciones en sus cabeceras.
-  - El motor de calidad (`aisdlc verify traceability`) compila la **Matriz de Trazabilidad 360°** de forma determinista mediante resolución inversa (*Reverse Lookup*).
+To prevent inconsistencies and broken reciprocal links:
+- **Every relationship is authored in exactly ONE canonical direction:**
+  - A `use-case` declares `primary-actor`, `governed-by`, and `uses-terms`.
+  - A `domain-term` declares `defined-in`.
+  - A `functional-requirement` declares `derives-from`.
+- **Inverse views are always derived and compiled automatically:**
+  - No context file writes `owns-terms`; tooling compiles which terms belong to the context by evaluating `defined-in`.
+  - No actor writes `participates-in-use-cases`; compiled automatically from use cases.
+- **Inverted Traceability toward Requirements (Dependency Inversion):**
+  - No requirement (`FR-*`, `QR-*`, `SEC-REQ-*`) stores downstream pointers such as services where it is implemented or test file paths where it is verified.
+  - This decouples abstract product specs from concrete code, eliminates Git merge conflicts, and prevents false invalidation of PDaC SHA-256 cryptographic digests.
+  - Downstream artifacts declare satisfaction upwards:
+    - Architecture services (`SRV-*` / `CMP-*`) declare `satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`.
+    - Unit tests, integration tests, and BDD scenarios declare `@<REQ-ID>` tags or citations in their headers.
+  - The quality engine (`aisdlc verify traceability`) compiles the **360° Traceability Matrix** deterministically via reverse lookup.
 
 ---
 
-<a id="cap-02-product-definition-4-ciclo-de-operaciones-de-producto"></a>
+<a id="cap-02-product-definition-4-product-operations-cycle-phase-0-inception-evolution"></a>
 
-## 4. Ciclo de Operaciones de Producto
+## 4. Product Operations Cycle (Phase 0 Inception & Evolution)
+
+<a id="cap-02-product-definition-a-phase-0-greenfield-brownfield-product-inception-arch-intro-"></a>
+
+### A. Phase 0: Greenfield & Brownfield Product Inception (`ARCH-INTRO-*`)
+When starting a new product from scratch (or when adopting AI-SDLC in a Brownfield repository without an `ARCH-INTRO-*` root vision artifact), `agent-product-analyst` executes a structured inception flow before any feature change (`change:new`) or code is written:
+1. **Structured Discovery Interview (3–5 Questions)**: The agent interviews the human Product Owner on:
+   - Core problem, mission statement, and value proposition.
+   - Primary stakeholders and actors (`ACT-*`).
+   - Essential MVP capabilities (`UC-*`) vs. future roadmap.
+   - Top 3–5 priority quality goals (`QR-*`) and constraints (`CON-*`).
+2. **Enterprise & Capability Vision (`ARCH-INTRO-001`)**: Instantiates `templates/architecture/introduction-and-goals.template.md` (`naf-perspective: "Enterprise & Capability"`, `status: draft`).
+3. **Initial ProductShape Baseline Derivation (Greenfield) or Retro-Inception Linking (Brownfield)**:
+   - **Greenfield**: Derives draft `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` artifacts (`status: draft`) linked to `ARCH-INTRO-001` for human review and approval.
+   - **Brownfield (Retro-Inception)**: Synthesizes `ARCH-INTRO-001` from existing product/architecture artifacts and source code, linking directly to existing `cites-product-actors` (`ACT-*`), `cites-use-cases` (`UC-*`), and `cites-quality-goals` (`QR-*`) so the PDaC graph and Interactive Dashboard (`aisdlc report dashboard`) immediately reflect the root product vision.
+
+<a id="cap-02-product-definition-b-continuous-product-evolution-cycle"></a>
+
+### B. Continuous Product Evolution Cycle
 
 ```text
- Idea / Necesidad
-        │
-        ▼
-   ps:explore ────────────► Agente IA razona sobre el grafo existente,
-        │                   detecta lagunas y afina la propuesta
-        ▼
-  Product Change ─────────► changes/active/<chg-id>/: delta semántico con
-        │                   los artefactos propuestos en su estado futuro
-        ▼
-  change validate ────────► Valida el overlay sobre la línea base sin tocar
-        │                   archivos canónicos (100% determinista)
-        ▼
-     Aprobación ──────────► Un humano (Product Owner) revisa y aprueba.
-        │                   Ninguna IA puede realizar esta acción.
-        ▼
-   change apply ──────────► Aplica los cambios en la rama de trabajo y archiva
-        │                   la propuesta. Materializado, no aceptado.
-        ▼
-   Pull Request ──────────► CI valida el grafo completo; revisión humana y merge.
-                            El merge es la aceptación formal de la línea base.
+  Idea / Need (or Phase 0 New Product Intent)
+      │
+      ▼
+  ps:explore ────────────► agent-product-analyst conducts 3-5 question
+      │                   discovery (if new product -> ARCH-INTRO-001) or
+      │                   reasons over existing graph to identify gaps
+      ▼
+Product Change ─────────► changes/active/<chg-id>/: semantic delta with
+      │                   proposed artifacts in their future state
+      ▼
+change validate ────────► Validates overlay on baseline without touching
+      │                   canonical files (100% deterministic)
+      ▼
+    Approval ────────────► A human (Product Owner) reviews and approves.
+      │                   No AI can perform this action.
+      ▼
+  change apply ──────────► Applies changes to working branch and archives
+      │                   proposal. Materialized, not accepted.
+      ▼
+  Pull Request ──────────► CI validates complete graph; human review and merge.
+                          The merge is formal baseline acceptance.
 ```
 
 ---
 
-<a id="cap-02-product-definition-5-estructura-de-carpetas-de-producto-en-el-repositorio"></a>
+<a id="cap-02-product-definition-5-product-directory-structure-in-repository"></a>
 
-## 5. Estructura de Carpetas de Producto en el Repositorio
+## 5. Product Directory Structure in Repository
 
 ```text
 docs/product/
-├── model/                               # Línea base canónica aceptada
+├── model/                               # Canonical accepted baseline
 │   ├── actors/                          # ACT-*.md
 │   ├── journeys/                        # JRN-*.md
 │   ├── use-cases/                       # UC-*.md
@@ -1741,84 +1720,84 @@ docs/product/
 │   ├── contexts/                        # BC-*.md
 │   ├── terms/                           # TERM-*.md
 │   └── requirements/                    # FR-*, QR-*, CON-*.md
-└── changes/                             # Deltas de evolución
-    ├── active/                          # Cambios en elaboración o revisión
-    └── completed/                       # Historial inmutable de cambios aplicados
+└── changes/                             # Evolution deltas
+    ├── active/                          # Changes under drafting or review
+    └── completed/                       # Immutable history of applied changes
 ```
 
 ---
 
-<a id="cap-02-product-definition-6-paquetes-de-handoff-formal-hacia-sdd-hof--sidecars"></a>
+<a id="cap-02-product-definition-6-formal-handoff-packages-to-sdd-hof--sidecars"></a>
 
-## 6. Paquetes de Handoff Formal hacia SDD (`HOF-*` Sidecars)
+## 6. Formal Handoff Packages to SDD (`HOF-*` Sidecars)
 
-Para transferir la definición de producto a la fase de implementación sin introducir ambigüedades ni rupturas de contexto, PDaC emite paquetes formales de entrega (**Product Handoffs**) con prefijo `HOF-*`:
+To transfer product definitions to implementation without introducing ambiguity or context breaks, PDaC emits formal delivery packages (**Product Handoffs**) prefixed with `HOF-*`:
 
-1. **Subgrafo Inmutable de Entrega**:
-   - Cada paquete de handoff empaqueta un subconjunto autocontenido del grafo de producto:
-     - Casos de uso (`UC-*`) y actores involucrados.
-     - Reglas de negocio gobernantes (`BR-*`).
-     - Requerimientos funcionales (`FR-*`), de calidad (`QR-*`) y de seguridad (`SEC-REQ-*`).
-     - Casos de abuso mitigados (`ABUSE-*`).
-     - Citaciones canónicas con sus digests criptográficos **SHA-256**.
+1. **Immutable Delivery Subgraph**:
+   - Each handoff package encapsulates a self-contained product graph subset:
+     - Use cases (`UC-*`) and involved actors.
+     - Governing business rules (`BR-*`).
+     - Functional (`FR-*`), quality (`QR-*`), and security (`SEC-REQ-*`) requirements.
+     - Mitigated abuse cases (`ABUSE-*`).
+     - Canonical citations with **SHA-256** cryptographic digests.
 
-2. **Depósito como Archivos de Acompañamiento (*Sidecars*)**:
-   - Mediante los adaptadores formales del AI-SDLC (`OpenSpecAdapter` y `SpecKitAdapter`) o el comando de andamiaje `aisdlc change new`, el handoff se deposita como un archivo `handoff.yaml` directamente en el espacio de trabajo del cambio (`specs/changes/active/<change-id>/` o `specs/<change-id>/`).
-   - El esquema formal [`schemas/sdd/handoff.schema.json`](file:///c:/Users/reypo/Documents/Workspace/AI-SDLC/schemas/sdd/handoff.schema.json) garantiza que ningún agente pueda corromper el contrato de entrega emitido por PDaC.
+2. **Deposit as Companion Files (*Sidecars*)**:
+   - Via AI-SDLC formal adapters (`OpenSpecAdapter` and `SpecKitAdapter`) or scaffolding command `aisdlc change new`, the handoff is deposited as a `handoff.yaml` companion file directly in the change workspace (`specs/changes/active/<change-id>/` or `specs/<change-id>/`).
+   - The formal schema [`schemas/sdd/handoff.schema.json`](file:///c:/Users/reypo/Documents/Workspace/AI-SDLC/schemas/sdd/handoff.schema.json) guarantees no agent can corrupt the delivery contract emitted by PDaC.
 
 ---
 
-<a id="cap-02-product-definition-7-extraccion-y-catalogo-consolidado-de-requerimientos-activos"></a>
+<a id="cap-02-product-definition-7-extraction-and-consolidated-catalog-of-active-requirements"></a>
 
-## 7. Extracción y Catálogo Consolidado de Requerimientos Activos
+## 7. Extraction and Consolidated Catalog of Active Requirements
 
-Para auditar y consultar en cualquier momento la totalidad de los requisitos en vigor sin tener que navegar por decenas de archivos dispersos, el framework proporciona el generador determinista:
+To audit and inspect all active requirements at any time without navigating dozens of scattered files, the framework provides a deterministic generator:
 
 ```bash
-# Generar catálogo en reports/ACTIVE_REQUIREMENTS.md
+# Generate catalog in reports/ACTIVE_REQUIREMENTS.md
 pnpm run report:requirements
 
-# O especificando un destino alternativo
-npx tsx scripts/export-active-requirements.ts --out reports/CATALOGO_REQUERIMIENTOS.md
+# Or specifying an alternative destination
+npx tsx scripts/export-active-requirements.ts --out reports/ACTIVE_REQUIREMENTS.md
 ```
 
-El motor escanea los metadatos YAML de la especificación canónica, filtrando aquellos en estado `active` (o `accepted` en arquitectura) y consolidando un documento clasificado en tres secciones:
-1. **Requerimientos Funcionales (`FR-*`)**: Título, versión, trazabilidad a casos de uso (`derives-from`), método de verificación, etiquetas Cucumber BDD y enunciado normativo.
-2. **Requerimientos de Ciberseguridad (`SEC-REQ-*`)**: Dominio de seguridad, mitigación de casos de abuso (`mitigates-abuse-case`), enclave asignado, marcos normativos (ej. NIST Zero Trust) y controles técnicos.
-3. **Requerimientos y Componentes de Arquitectura (`QR-*`, `CON-*`, `CMP-*`, `ADR-*`)**: Atributos de calidad, restricciones técnicas, componentes arc42/NAF v4 y decisiones aceptadas.
+The engine scans canonical specification YAML metadata, filtering artifacts in `active` state (or `accepted` in architecture) and compiling a classified document across three sections:
+1. **Functional Requirements (`FR-*`)**: Title, version, use case traceability (`derives-from`), verification method, Cucumber BDD tags, and normative statement.
+2. **Cybersecurity Requirements (`SEC-REQ-*`)**: Security domain, abuse case mitigation (`mitigates-abuse-case`), assigned enclave, normative frameworks (e.g. NIST Zero Trust), and technical controls.
+3. **Architecture Requirements & Components (`QR-*`, `CON-*`, `CMP-*`, `ADR-*`)**: Quality attributes, technical constraints, arc42/NAF v4 components, and accepted decisions.
 
 ---
 
-<a id="cap-02-product-definition-8-responsabilidad-unica-srp-evolucion-in-place-y-control-de-duplicados"></a>
+<a id="cap-02-product-definition-8-single-responsibility-principle-srp-in-place-evolution-and-duplicate-control"></a>
 
-## 8. Responsabilidad Única (SRP), Evolución In-Place y Control de Duplicados
+## 8. Single Responsibility Principle (SRP), In-Place Evolution, and Duplicate Control
 
-<a id="cap-02-product-definition-a-principio-de-responsabilidad-unica-srp-en-requisitos"></a>
+<a id="cap-02-product-definition-a-single-responsibility-principle-srp-in-requirements"></a>
 
-### A. Principio de Responsabilidad Única (SRP) en Requisitos
-Un Caso de Uso (`UC-*`) describe una meta o flujo de negocio completo de un actor. Por diseño metodológico, **un único Caso de Uso se descompone legítimamente en múltiples requerimientos atómicos y especializados**:
-- Requerimientos funcionales discretos (`FR-*`).
-- Requerimientos de calidad (`QR-*`).
-- Requerimientos de ciberseguridad (`SEC-REQ-*`).
+### A. Single Responsibility Principle (SRP) in Requirements
+A Use Case (`UC-*`) describes a complete goal or business flow of an actor. By methodological design, **a single Use Case legitimately decomposes into multiple atomic, specialized requirements**:
+- Discrete functional requirements (`FR-*`).
+- Quality requirements (`QR-*`).
+- Cybersecurity requirements (`SEC-REQ-*`).
 
-Compartir un `UC-*` en el campo `derives-from` es la norma de diseño y **no constituye duplicidad**.
+Sharing a `UC-*` in the `derives-from` field is standard design and **does not constitute duplication**.
 
-<a id="cap-02-product-definition-b-evolucion-in-place-vs-sustitucion-supersedes"></a>
+<a id="cap-02-product-definition-b-in-place-evolution-vs-replacement-supersedes"></a>
 
-### B. Evolución In-Place vs. Sustitución (`supersedes`)
-Para evitar la rotura de referencias en el grafo de arquitectura y suites de pruebas:
-1. **Evolución In-Place (Recomendada)**: Si una capacidad evoluciona, se conserva el `id` inmutable (`FR-TELEMETRY-STREAM-001`), se incrementa la versión SemVer (`version: 1.1.0`) y se registra el cambio en la tabla de historial. Todos los enlaces existentes (`CMP-*`, `UC-*`, `@FR-...`) se mantienen estables.
-2. **Sustitución Formal (`supersedes`)**: Se reserva exclusivamente para cuando un requisito nuevo reemplaza o revoca conceptualmente a uno obsoleto que pasa a estado `deprecated` o `retired`.
+### B. In-Place Evolution vs. Replacement (`supersedes`)
+To avoid breaking references across the architectural graph and test suites:
+1. **In-Place Evolution (Recommended)**: When a capability evolves, preserve the immutable `id` (`FR-TELEMETRY-STREAM-001`), bump the SemVer version (`version: 1.1.0`), and record the change in the revision history table. All existing references (`CMP-*`, `UC-*`, `@FR-...`) remain stable.
+2. **Formal Replacement (`supersedes`)**: Reserved exclusively for when a new requirement conceptually replaces or revokes an obsolete one transitioning to `deprecated` or `retired` status.
 
-<a id="cap-02-product-definition-c-verificador-determinista-de-duplicados-shift-left-pre-flight-gate"></a>
+<a id="cap-02-product-definition-c-deterministic-duplicate-checker-shift-left-pre-flight-gate"></a>
 
-### C. Verificador Determinista de Duplicados (Shift-Left Pre-Flight Gate)
-Antes de iniciar la codificación, el comando:
+### C. Deterministic Duplicate Checker (Shift-Left Pre-Flight Gate)
+Prior to starting implementation, the command:
 ```bash
 pnpm run verify:duplicates
-# o: npx aisdlc verify duplicates
+# or: npx aisdlc verify duplicates
 ```
-Audita el repositorio para bloquear (`exit 1`) colisiones de IDs en archivos distintos, textos normativos idénticos (copia-pega), títulos con $\ge 85\%$ de redundancia léxica o colisión total de etiquetas BDD Cucumber, previniendo el desperdicio de recursos antes de escribir código.
+Audits the repository to block (`exit 1`) cross-file ID collisions, identical normative texts (copy-paste), titles with $\ge 85\%$ lexical redundancy, or complete Cucumber BDD tag collisions, preventing resource waste before code is written.
 
 ---
 
@@ -1826,37 +1805,37 @@ Audita el repositorio para bloquear (`exit 1`) colisiones de IDs en archivos dis
 
 > 📂 **Módulo 5 de 13 [Parte II: Especificación Normativa del Framework]:** `process/03_security_by_design.md`
 
-# 03. Ciberseguridad Shift-Left: Security-by-Design as Code
+# 03. Shift-Left Cybersecurity: Security-by-Design as Code
 
-<a id="cap-03-security-by-design-1-vision-y-enfoque-shift-left"></a>
+<a id="cap-03-security-by-design-1-vision-and-shift-left-approach"></a>
 
-## 1. Visión y Enfoque Shift-Left
+## 1. Vision and Shift-Left Approach
 
-En los sistemas modernos y en particular en aquellos asistidos por agentes autónomos, la seguridad no puede relegarse a una auditoría estática previa a producción. **La ciberseguridad debe ser modelada de forma nativa desde la fase de definición del producto y la arquitectura (Security-by-Design as Code)**.
+In modern systems, and specifically those assisted by autonomous agents, security cannot be relegated to static pre-production audits. **Cybersecurity must be natively modeled from the product definition and architecture phase (Security-by-Design as Code)**.
 
-Todo sistema define quién lo usa legítimamente (`ACT-*`); en AI-SDLC es **obligatorio** modelar también quién intenta atacarlo o vulnerarlo (`ACT-THREAT-*`), cómo lo intenta (`ABUSE-*`) y qué controles formales lo impiden (`SEC-REQ-*`).
+Every system defines who uses it legitimately (`ACT-*`); in AI-SDLC it is **mandatory** to also model who attempts to attack or compromise it (`ACT-THREAT-*`), how they attempt it (`ABUSE-*`), and what formal controls prevent it (`SEC-REQ-*`).
 
 ---
 
-<a id="cap-03-security-by-design-2-familias-de-artefactos-de-ciberseguridad"></a>
+<a id="cap-03-security-by-design-2-cybersecurity-artifact-families"></a>
 
-## 2. Familias de Artefactos de Ciberseguridad
+## 2. Cybersecurity Artifact Families
 
 ```
            ┌───────────────────────┐
            │ THREAT ACTOR (ACT-THREAT) │
            └───────────┬───────────┘
-                       │ ejecuta
+                       │ executes
                        ▼
            ┌───────────────────────┐
-           │   ABUSE CASE (ABUSE)  │ ◄──── amenaza sobre ──── USE CASE (UC)
+           │   ABUSE CASE (ABUSE)  │ ◄──── threat against ──── USE CASE (UC)
            └───────────┬───────────┘
-                       │ clasificado por
+                       │ classified by
                        ▼
            ┌───────────────────────┐
            │ THREAT MODEL (THREAT) │ (STRIDE / ASVS / MITRE)
            └───────────┬───────────┘
-                       │ mitigado por
+                       │ mitigated by
                        ▼
         ┌─────────────────────────────┐
         │ SECURITY REQUIREMENT (SEC)  │
@@ -1866,74 +1845,74 @@ Todo sistema define quién lo usa legítimamente (`ACT-*`); en AI-SDLC es **obli
        ▼                               ▼
 ┌─────────────────────────┐     ┌─────────────────────────┐
 │ ARCHITECTURE CONTROLS   │     │ SECURITY TESTS          │
-│ (arc42 Sec. 8 / SEC-ENC)│     │ (SEC-TEST-* en CI/CD)   │
+│ (arc42 Sec. 8 / SEC-ENC)│     │ (SEC-TEST-* in CI/CD)   │
 └─────────────────────────┘     └─────────────────────────┘
 ```
 
-<a id="cap-03-security-by-design-1-actores-maliciosos-act-threat-"></a>
+<a id="cap-03-security-by-design-1-threat-actors-act-threat-"></a>
 
-### 1. Actores Maliciosos (`ACT-THREAT-*`)
-- Caracterización del adversario: atacante no autenticado en internet, usuario interno malicioso con privilegios limitados, atacante en la cadena de suministro, etc.
-- Atributos: motivación, nivel de recursos, vectores de acceso potenciales.
+### 1. Threat Actors (`ACT-THREAT-*`)
+- Adversary characterization: unauthenticated internet attacker, malicious insider with limited privileges, supply-chain attacker, etc.
+- Attributes: motivation, resource level, potential access vectors.
 
-<a id="cap-03-security-by-design-2-casos-de-abuso-y-maluso-abuse-"></a>
+<a id="cap-03-security-by-design-2-abuse-cases-abuse-"></a>
 
-### 2. Casos de Abuso y Maluso (`ABUSE-*`)
-- Escenarios deliberados de explotación o comportamiento anómalo que atentan contra la confidencialidad, integridad, disponibilidad o autenticidad del producto.
-- Todo `ABUSE-*` debe declarar a qué caso de uso legítimo (`targets-use-case: UC-*`) intenta explotar o desviar.
+### 2. Abuse Cases (`ABUSE-*`)
+- Deliberate exploitation scenarios or anomalous behaviors targeting product confidentiality, integrity, availability, or authenticity.
+- Every `ABUSE-*` must declare which legitimate use case (`targets-use-case: UC-*`) it attempts to exploit or subvert.
 
-<a id="cap-03-security-by-design-3-modelado-de-amenazas-stride-owasp-asvs-threat-"></a>
+<a id="cap-03-security-by-design-3-threat-modeling-stride-owasp-asvs-threat-"></a>
 
-### 3. Modelado de Amenazas STRIDE / OWASP ASVS (`THREAT-*`)
-- Clasificación estructurada del vector de ataque:
-  - **S**poofing (Suplantación de identidad).
-  - **T**ampering (Manipulación no autorizada de datos).
-  - **R**epudiation (Repudio de acciones realizadas).
-  - **I**nformation Disclosure (Fuga de información confidencial).
-  - **D**enial of Service (Denegación de servicio / agotamiento de recursos).
-  - **E**levation of Privilege (Escalado de privilegios).
-- Mapeo directo a los niveles de verificación de OWASP ASVS (L1, L2, L3) o CWEs conocidos.
+### 3. Threat Modeling STRIDE / OWASP ASVS (`THREAT-*`)
+- Structured classification of attack vectors:
+  - **S**poofing (Identity spoofing).
+  - **T**ampering (Unauthorized data manipulation).
+  - **R**epudiation (Repudiating executed actions).
+  - **I**nformation Disclosure (Confidential data leakage).
+  - **D**enial of Service (Service exhaustion / resource depletion).
+  - **E**levation of Privilege (Privilege escalation).
+- Direct mapping to OWASP ASVS verification levels (L1, L2, L3) or known CWEs.
 
-<a id="cap-03-security-by-design-4-requisitos-de-seguridad-sec-req-"></a>
+<a id="cap-03-security-by-design-4-security-requirements-sec-req-"></a>
 
-### 4. Requisitos de Seguridad (`SEC-REQ-*`)
-- Requerimientos técnicos y normativos derivados directamente para neutralizar un `ABUSE-*`.
-- Ejemplos: Autenticación mTLS obligatoria, rotación de claves cada 90 días, cifrado en reposo AES-GCM-256, sanitización estricta de prompts/entradas, rate-limiting distribuido.
+### 4. Security Requirements (`SEC-REQ-*`)
+- Technical and normative requirements derived directly to neutralize an `ABUSE-*`.
+- Examples: Mandatory mTLS authentication, 90-day key rotation, AES-GCM-256 encryption at rest, strict prompt/input sanitization, distributed rate-limiting.
 
-<a id="cap-03-security-by-design-5-politicas-y-enclaves-de-confianza-sec-pol--sec-enc-"></a>
+<a id="cap-03-security-by-design-5-policies-and-trust-enclaves-sec-pol--sec-enc-"></a>
 
-### 5. Políticas y Enclaves de Confianza (`SEC-POL-*`, `SEC-ENC-*`)
-- Fronteras de seguridad arquitectónicas: redes perimetrales (DMZ), zonas de datos confidenciales, enclaves seguros con autenticación mutua, y políticas Zero Trust de mínimos privilegios.
-
----
-
-<a id="cap-03-security-by-design-3-trazabilidad-criptografica-de-la-mitigacion"></a>
-
-## 3. Trazabilidad Criptográfica de la Mitigación
-
-Para garantizar que ninguna amenaza quede sin mitigar:
-1. **Regla de Grafo Obligatoria**:
-   - Todo `ABUSE-*` debe estar vinculado a al menos un `SEC-REQ-*` mediante la relación `mitigated-by`.
-2. **Regla de Implementación**:
-   - Toda especificación de entrega (`SPEC-*`) que implemente un servicio o componente debe citar los `SEC-REQ-*` aplicables.
-3. **Regla de Verificación (Threat-to-Test) y Trazabilidad Invertida**:
-   - Todo `SEC-REQ-*` implementado debe contar con al menos una prueba automatizada (`SEC-TEST-*`, `.spec.ts` o `.feature`) que valide activamente el rechazo del ataque o el cumplimiento del control criptográfico.
-   - Siguiendo el modelo de trazabilidad invertida, el archivo `SEC-REQ-*` no almacena rutas de pruebas; son los archivos de prueba los que etiquetan (`@SEC-REQ-*`) o citan el requisito en sus comentarios de cabecera, permitiendo la resolución inversa y preservando la inmutabilidad criptográfica de la especificación de seguridad.
+### 5. Policies and Trust Enclaves (`SEC-POL-*`, `SEC-ENC-*`)
+- Architectural security boundaries: perimeter networks (DMZ), confidential data zones, secure enclaves with mutual authentication, and least-privilege Zero Trust policies.
 
 ---
 
-<a id="cap-03-security-by-design-4-estructura-de-carpetas-de-seguridad"></a>
+<a id="cap-03-security-by-design-3-cryptographic-mitigation-traceability"></a>
 
-## 4. Estructura de Carpetas de Seguridad
+## 3. Cryptographic Mitigation Traceability
+
+To guarantee no threat remains unmitigated:
+1. **Mandatory Graph Rule**:
+   - Every `ABUSE-*` must be linked to at least one `SEC-REQ-*` via `mitigated-by`.
+2. **Implementation Rule**:
+   - Every delivery specification (`SPEC-*`) implementing a service or component must cite applicable `SEC-REQ-*`.
+3. **Verification Rule (Threat-to-Test) and Inverted Traceability**:
+   - Every implemented `SEC-REQ-*` must have at least one automated test (`SEC-TEST-*`, `.spec.ts`, or `.feature`) actively validating attack rejection or cryptographic control compliance.
+   - Following the inverted traceability model, the `SEC-REQ-*` file stores no test paths; test files tag (`@SEC-REQ-*`) or cite the requirement in their headers, enabling reverse lookup and preserving the cryptographic immutability of the security specification.
+
+---
+
+<a id="cap-03-security-by-design-4-security-directory-structure"></a>
+
+## 4. Security Directory Structure
 
 ```text
 docs/security/
 ├── actors/                               # ACT-THREAT-*.md
 ├── abuse-cases/                          # ABUSE-*.md
-├── threats/                              # THREAT-*.md (Modelado STRIDE/ASVS)
+├── threats/                              # THREAT-*.md (STRIDE/ASVS modeling)
 ├── requirements/                         # SEC-REQ-*.md
-├── policies/                             # SEC-POL-*.md (Políticas Zero Trust, etc.)
-└── enclaves/                             # SEC-ENC-*.md (Fronteras y enclaves de confianza)
+├── policies/                             # SEC-POL-*.md (Zero Trust policies, etc.)
+└── enclaves/                             # SEC-ENC-*.md (Trust boundaries & enclaves)
 ```
 
 ---
@@ -1942,162 +1921,162 @@ docs/security/
 
 > 📂 **Módulo 6 de 13 [Parte II: Especificación Normativa del Framework]:** `process/04_open_source_license_compliance.md`
 
-# 04. Gobernanza y Cumplimiento de Licencias Open Source: Libre Uso vs. Adquisición Comercial
+# 04. Open Source License Governance and Compliance: Free Use vs. Commercial Acquisition
 
-<a id="cap-04-open-source-license-compliance-1-vision-y-riesgo-de-propiedad-intelectual"></a>
+<a id="cap-04-open-source-license-compliance-1-intellectual-property-vision-and-risk"></a>
 
-## 1. Visión y Riesgo de Propiedad Intelectual
+## 1. Intellectual Property Vision and Risk
 
-El uso indiscriminado de dependencias externas por parte de desarrolladores humanos o agentes de IA expone a la organización a riesgos severos:
-1. **Riesgo de Infección Viral (Copyleft Fuerte / AGPL)**: Obligación legal de publicar el código fuente privado del producto.
-2. **Riesgo de Infracción Comercial (Dual-License / Source-Available / BSL / SSPL)**: Uso no autorizado de software que requiere pago de licencias o suscripciones comerciales para entornos productivos o modelos SaaS.
-3. **Riesgo de Falta de Atribución**: Incumplimiento de los términos de licencias permisivas al omitir los avisos de copyright.
+Indiscriminate dependency usage by human developers or AI agents exposes the organization to severe legal and financial risks:
+1. **Viral Infection Risk (Strong Copyleft / AGPL)**: Legal mandate requiring proprietary source code disclosure.
+2. **Commercial Infringement Risk (Dual-License / Source-Available / BSL / SSPL)**: Unauthorized usage of software requiring license payments or commercial subscriptions for production or SaaS environments.
+3. **Missing Attribution Risk**: Non-compliance with permissive license terms by omitting copyright and permission notices.
 
-AI-SDLC implementa un marco **License Compliance as Code** con evaluación determinista continua.
+AI-SDLC implements a **License Compliance as Code** framework backed by continuous deterministic evaluation.
 
 ---
 
-<a id="cap-04-open-source-license-compliance-2-taxonomia-de-licencias-en-5-categorias"></a>
+<a id="cap-04-open-source-license-compliance-2-5-category-license-taxonomy"></a>
 
-## 2. Taxonomía de Licencias en 5 Categorías
+## 2. 5-Category License Taxonomy
 
-Toda dependencia directa o transitiva se clasifica dentro de una de las siguientes cinco categorías operativas:
+Every direct or transitive dependency is classified into one of the following five operational categories:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│               TAXONOMÍA DE LICENCIAS OPEN SOURCE Y TERCEROS             │
+│               OPEN SOURCE AND THIRD-PARTY LICENSE TAXONOMY             │
 └────────────────────────────────────────────────────────────────────────┘
 
- [CATEGORÍA A: PERMISIVAS (LIBRE USO COMERCIAL)] ──► ALLOWLIST
-  │ Ejemplos: MIT, Apache-2.0, BSD-2/3, ISC, Unlicense, CC0, MS-PL (.NET)
-  └─► Permiten uso comercial, modificación y cierre de código. Solo exigen atribución.
+ [CATEGORY A: PERMISSIVE (FREE COMMERCIAL USE)] ────────► ALLOWLIST
+  │ Examples: MIT, Apache-2.0, BSD-2/3, ISC, Unlicense, CC0, MS-PL (.NET)
+  └─► Permit commercial use, modification, and closed distribution. Attribution only.
 
- [CATEGORÍA B: COPYLEFT DÉBIL (USO CONDICIONADO)] ──► CONDITIONAL REVIEW
-  │ Ejemplos: LGPL-2.1/3.0, MPL-2.0, EPL-2.0, CDDL, MS-RL (.NET), MS-LPL, MS-LRL
-  └─► Permitidas solo si se consumen como librería externa dinámica o módulo separado.
+ [CATEGORY B: WEAK COPYLEFT (CONDITIONED USE)] ─────────► CONDITIONAL REVIEW
+  │ Examples: LGPL-2.1/3.0, MPL-2.0, EPL-2.0, CDDL, MS-RL (.NET), MS-LPL, MS-LRL
+  └─► Permitted only if consumed as an external dynamic library or separate module.
 
- [CATEGORÍA C: COPYLEFT FUERTE / VIRAL] ────────────► DENYLIST
-  │ Ejemplos: GPL-2.0/3.0, AGPL-3.0, EUPL, OSL
-  └─► PROHIBIDAS en software propietario o SaaS para evitar obligación de liberar código.
+ [CATEGORY C: STRONG / VIRAL COPYLEFT] ─────────────────► DENYLIST
+  │ Examples: GPL-2.0/3.0, AGPL-3.0, EUPL, OSL
+  └─► PROHIBITED in proprietary software or SaaS to prevent mandatory source disclosure.
 
- [CATEGORÍA D: DUAL / SOURCE-AVAILABLE / PAGO] ─────► COMMERCIAL ACQUISITION
-  │ Ejemplos: SSPL (MongoDB), BSL (Redis/Terraform), Elastic-2.0, Comerciales
-  └─► CÓDIGO VISIBLE PERO NO LIBRE: Requiere formalizar y pagar licencia comercial.
+ [CATEGORY D: DUAL / SOURCE-AVAILABLE / PAID] ──────────► COMMERCIAL ACQUISITION
+  │ Examples: SSPL (MongoDB), BSL (Redis/Terraform), Elastic-2.0, Commercial
+  └─► VISIBLE BUT NOT FREE: Requires formal procurement and commercial license payment.
 
- [CATEGORÍA E: DESCONOCIDAS / AMBIGUAS] ────────────► HARD BLOCK
-  │ Ejemplos: Sin archivo LICENSE, licencias inventadas ("JSON License")
-  └─► BLOQUEO INMEDIATO: Prohibidas hasta resolución legal formal.
+ [CATEGORY E: UNKNOWN / AMBIGUOUS] ─────────────────────► HARD BLOCK
+  │ Examples: Missing LICENSE file, non-standard licenses ("JSON License")
+  └─► IMMEDIATE BLOCK: Prohibited until formal legal resolution.
 ```
 
 ---
 
-<a id="cap-04-open-source-license-compliance-3-guardrails-para-agentes-de-ia-en-la-seleccion-de-paquetes"></a>
+<a id="cap-04-open-source-license-compliance-3-guardrails-for-ai-agents-in-package-selection"></a>
 
-## 3. Guardrails para Agentes de IA en la Selección de Paquetes
+## 3. Guardrails for AI Agents in Package Selection
 
-Los agentes de IA que actúan como desarrolladores (`agent-developer`) o arquitectos deben cumplir estrictamente las siguientes reglas operativas:
+AI agents acting as developers (`agent-developer`) or architects must strictly observe the following operational guardrails:
 
-1. **Inspección Previa Mandatoria**:
-   - Antes de sugerir o añadir un paquete a manifiestos (`package.json`, `pom.xml`, `go.mod`, `Cargo.toml`, `pyproject.toml`, etc.), el agente debe consultar los metadatos de licencia del paquete en el registro oficial.
-2. **Rechazo Automático de Licencias Virales**:
-   - Si el paquete utiliza GPL o AGPL, el agente **no debe agregarlo**. Debe buscar activamente y proponer una alternativa con licencia permisiva (MIT o Apache-2.0).
-3. **Detección y Notificación de Licencias de Pago (Categoría D)**:
-   - Si un paquete opera bajo BSL, SSPL o modelo dual comercial, el agente **debe emitir una alerta explícita** en la propuesta o Pull Request:
-   > ⚠️ **ALERTA DE LICENCIA COMERCIAL**: El paquete `[nombre]` utiliza la licencia `[licencia]`. Su uso en este producto requiere la **adquisición formal de una licencia comercial o contrato de pago**. Se requiere aprobación del responsable legal y de compras antes de continuar.
-4. **Validación contra `license-policy.yaml`**:
-   - El agente debe comprobar que el identificador SPDX de la licencia esté explícitamente listado en la sección `permissive_free` de la política local.
+1. **Mandatory Pre-Inspection**:
+   - Before suggesting or adding a package to manifests (`package.json`, `pom.xml`, `go.mod`, `Cargo.toml`, `pyproject.toml`, etc.), the agent must inspect package license metadata in the official registry.
+2. **Automatic Rejection of Viral Licenses**:
+   - If a package uses GPL or AGPL, the agent **must not add it**. It must actively search for and propose an alternative with a permissive license (MIT or Apache-2.0).
+3. **Detection and Notification of Paid Licenses (Category D)**:
+   - If a package operates under BSL, SSPL, or a commercial dual-license model, the agent **must output an explicit warning** in the proposal or Pull Request:
+   > ⚠️ **COMMERCIAL LICENSE ALERT**: Package `[name]` uses the `[license]` license. Its use in this product requires **formal commercial license acquisition or payment agreement**. Approval from legal and procurement leads is required before proceeding.
+4. **Validation Against `license-policy.yaml`**:
+   - The agent must verify that the license SPDX identifier is explicitly listed under the `permissive_free` section of the local policy.
 
 ---
 
-<a id="cap-04-open-source-license-compliance-4-flujo-de-adquisicion-de-licencia-comercial"></a>
+<a id="cap-04-open-source-license-compliance-4-commercial-license-acquisition-flow"></a>
 
-## 4. Flujo de Adquisición de Licencia Comercial
+## 4. Commercial License Acquisition Flow
 
-Cuando una funcionalidad crítica requiera una librería de Categoría D:
+When a critical capability requires a Category D library:
 
 ```text
- Necesidad de Dependencia de Pago
-                │
-                ▼
- Agente emite Solicitud / PR con etiqueta 'needs-commercial-license'
-                │
-                ▼
- Revisión Humana: Tech Lead + Asesor Legal + Responsable de Compras
-                │
-         ┌──────┴──────┐
-         ▼             ▼
-   [ RECHAZADA ]  [ APROBADA ]
-         │             │
-         │             ▼
-         │       Contratación / Pago formal de la licencia comercial
-         │             │
-         │             ▼
-         │       Registro de excepción formal en docs/compliance/adrs/
-         │             │
-         ▼             ▼
-   Búsqueda de      Incorporación del paquete en el manifiesto con
-   alternativa      declaración formal de compra registrada
+ Need for Commercial Dependency
+               │
+               ▼
+ Agent files Request / PR tagged 'needs-commercial-license'
+               │
+               ▼
+ Human Review: Tech Lead + Legal Counsel + Procurement Lead
+               │
+        ┌──────┴──────┐
+        ▼             ▼
+  [ REJECTED ]   [ APPROVED ]
+        │             │
+        │             ▼
+        │       Commercial license formal procurement / payment
+        │             │
+        │             ▼
+        │       Formal exception logged in docs/compliance/adrs/
+        │             │
+        ▼             ▼
+  Search for    Package added to manifest with formal purchase
+  alternative   record registered
 ```
 
 ---
 
-<a id="cap-04-open-source-license-compliance-5-validacion-determinista-en-cicd-y-generacion-de-sbom"></a>
+<a id="cap-04-open-source-license-compliance-5-deterministic-validation-in-cicd-and-sbom-generation"></a>
 
-## 5. Validación Determinista en CI/CD y Generación de SBOM
+## 5. Deterministic Validation in CI/CD and SBOM Generation
 
-En cada ejecución del pipeline de integración continua y en la compuerta de pre-vuelo (`aisdlc check`):
-1. **Inspección Dinámica de Dependencias (SCA)**:
-   - El motor nativo de `@ai-sdlc/core` inspecciona el árbol real de paquetes instalados (`node_modules` y almacén `.pnpm`) sin requerir manifiestos redactados a mano.
-   - Resuelve metadatos de `package.json`, identifica archivos de licencia (`LICENSE`, `LICENSE.md`, `LICENSE.txt`), normaliza identificadores SPDX y analiza expresiones compuestas (`AND`/`OR`).
-2. **Generación de SBOM (Software Bill of Materials)**:
-   - Se compila el inventario completo de dependencias directas y transitivas en formato estándar **CycloneDX 1.5 JSON** (`reports/sbom.cdx.json`).
-3. **Escaneo y Clasificación Automatizada contra `license-policy.yaml`**:
-   - Cada paquete se evalúa contra las listas de licencias permitidas (`permissive_free`), restringidas (`weak_copyleft_conditional` / `commercial_acquisition_required`) y bloqueadas (`strong_copyleft_viral`).
-   - Si se detecta cualquier licencia en la `denylist` (GPL/AGPL sin excepción) o desconocida, el pipeline **falla de inmediato (exit code 1)**.
-4. **Generación Automática de Atribuciones**:
-   - Se genera el artefacto derivado `THIRD_PARTY_NOTICES.md` recopilando autores, copyrights, URLs de repositorio y textos de licencias permisivas para cumplimiento legal.
+On every CI pipeline run and pre-flight gate (`aisdlc check`):
+1. **Dynamic Dependency Inspection (SCA)**:
+   - The native `@ai-sdlc/core` engine inspects the installed package tree (`node_modules` and `.pnpm` store) without requiring hand-crafted manifests.
+   - Resolves `package.json` metadata, identifies license files (`LICENSE`, `LICENSE.md`, `LICENSE.txt`), normalizes SPDX identifiers, and analyzes compound expressions (`AND`/`OR`).
+2. **SBOM (Software Bill of Materials) Generation**:
+   - Compiles the full direct and transitive dependency inventory in standard **CycloneDX 1.5 JSON** format (`reports/sbom.cdx.json`).
+3. **Automated Scanning and Classification Against `license-policy.yaml`**:
+   - Each package is evaluated against permitted (`permissive_free`), restricted (`weak_copyleft_conditional` / `commercial_acquisition_required`), and denylisted (`strong_copyleft_viral`) lists.
+   - If any denylisted (unexcepted GPL/AGPL) or unknown license is detected, the pipeline **fails immediately (exit code 1)**.
+4. **Automated Legal Attribution Generation**:
+   - Generates the derived `THIRD_PARTY_NOTICES.md` artifact compiling authors, copyrights, repository URLs, and permissive license texts for legal compliance.
 
 ---
 
-<a id="cap-04-open-source-license-compliance-6-tutorial-practico-auditoria-dinamica-de-licencias-y-generacion-de-sbom"></a>
+<a id="cap-04-open-source-license-compliance-6-practical-tutorial-dynamic-license-audit-and-sbom-generation"></a>
 
-## 6. Tutorial Práctico: Auditoría Dinámica de Licencias y Generación de SBOM
+## 6. Practical Tutorial: Dynamic License Audit and SBOM Generation
 
-<a id="cap-04-open-source-license-compliance-paso-1-auditoria-dinamica-local"></a>
+<a id="cap-04-open-source-license-compliance-step-1-local-dynamic-audit"></a>
 
-### Paso 1: Auditoría Dinámica Local
-Para verificar el cumplimiento del árbol completo de dependencias antes de confirmar código o abrir un Pull Request:
+### Step 1: Local Dynamic Audit
+To verify compliance across the full dependency tree before committing code or opening a Pull Request:
 
 ```bash
-# Ejecución estándar (inspección nativa de node_modules)
+# Standard execution (native node_modules inspection)
 npx aisdlc verify licenses
 
-# Inspección restringida únicamente a dependencias directas de producción
+# Restricted inspection for production direct dependencies only
 npx aisdlc verify licenses --depth direct
 ```
 
-Salida esperada en consola:
+Expected terminal output:
 ```text
-🔍 [AI-SDLC] Verificando Cumplimiento de Licencias Open Source (SCA)...
-  Dependencias evaluadas:   408
-  Dependencias conformes:   408
-  Violaciones de licencia:  0
-  SBOM CycloneDX generado:  reports/sbom.cdx.json
-  Avisos legales generados: THIRD_PARTY_NOTICES.md
+🔍 [AI-SDLC] Verifying Open Source License Compliance (SCA)...
+  Evaluated dependencies:   408
+  Compliant dependencies:   408
+  License violations:       0
+  Generated CycloneDX SBOM: reports/sbom.cdx.json
+  Generated legal notices:  THIRD_PARTY_NOTICES.md
 
-✔ Gobernanza de Licencias OSS CONFORME
+✔ OSS License Governance COMPLIANT
 ```
 
-<a id="cap-04-open-source-license-compliance-paso-2-generacion-personalizada-de-sbom-cyclonedx-15"></a>
+<a id="cap-04-open-source-license-compliance-step-2-custom-cyclonedx-15-sbom-generation"></a>
 
-### Paso 2: Generación Personalizada de SBOM CycloneDX 1.5
-Si se requiere emitir el archivo SBOM en una ubicación específica para su ingesta por plataformas de seguridad (como Dependency-Track o Snyk):
+### Step 2: Custom CycloneDX 1.5 SBOM Generation
+When exporting an SBOM file to a specific destination for security platforms (such as Dependency-Track or Snyk):
 
 ```bash
 npx aisdlc verify licenses --sbom build/artifacts/sbom.cdx.json
 ```
 
-El archivo generado cumple rigurosamente con la especificación CycloneDX 1.5:
+The generated file strictly complies with the CycloneDX 1.5 specification:
 ```json
 {
   "bomFormat": "CycloneDX",
@@ -2120,33 +2099,33 @@ El archivo generado cumple rigurosamente con la especificación CycloneDX 1.5:
 }
 ```
 
-<a id="cap-04-open-source-license-compliance-paso-3-generacion-del-archivo-de-atribuciones-legales"></a>
+<a id="cap-04-open-source-license-compliance-step-3-legal-attribution-notice-generation"></a>
 
-### Paso 3: Generación del Archivo de Atribuciones Legales
-Para generar el resumen formal de copyright y textos de licencias para distribución del producto:
+### Step 3: Legal Attribution Notice Generation
+To generate the formal copyright and license text summary for product distribution:
 
 ```bash
 npx aisdlc verify licenses --notices dist/THIRD_PARTY_NOTICES.md
 ```
 
-<a id="cap-04-open-source-license-compliance-paso-4-integracion-opcional-con-herramientas-externas-trivy-syft"></a>
+<a id="cap-04-open-source-license-compliance-step-4-optional-external-tool-integration-trivy-syft"></a>
 
-### Paso 4: Integración Opcional con Herramientas Externas (Trivy / Syft)
-En entornos que requieran invocar herramientas corporativas adicionales instaladas en el sistema o en la imagen Docker de CI:
+### Step 4: Optional External Tool Integration (Trivy / Syft)
+In environments requiring additional corporate scanning tools installed on the system or CI Docker image:
 
 ```bash
-# Escaneo mediante Aqua Security Trivy
+# Scan via Aqua Security Trivy
 npx aisdlc verify licenses --tool trivy
 
-# Escaneo mediante Anchore Syft
+# Scan via Anchore Syft
 npx aisdlc verify licenses --tool syft
 ```
-*Nota*: Si la herramienta especificada no está disponible en el `PATH`, el CLI realiza un fallback transparente al motor nativo emitiendo una notificación informativa.
+*Note*: If the specified tool is unavailable in `PATH`, the CLI transparently falls back to the native engine with an informational notice.
 
-<a id="cap-04-open-source-license-compliance-paso-5-gestion-de-excepciones-y-licencias-restringidas"></a>
+<a id="cap-04-open-source-license-compliance-step-5-managing-exceptions-and-restricted-licenses"></a>
 
-### Paso 5: Gestión de Excepciones y Licencias Restringidas
-Si una dependencia legítima opera bajo licencia dual o comercial aprobada (ej. `BSL-1.1`), registre la excepción formal en `license-policy.yaml`:
+### Step 5: Managing Exceptions and Restricted Licenses
+If a legitimate dependency operates under an approved dual or commercial license (e.g. `BSL-1.1`), register the formal exception in `license-policy.yaml`:
 
 ```yaml
 exceptions:
@@ -2155,7 +2134,7 @@ exceptions:
       license: "BSL-1.1"
       reason: "APPROVED_BY_LEGAL_REF_ADR_004"
 ```
-Al re-ejecutar `aisdlc verify licenses`, el paquete será aceptado como justificado sin bloquear el release gate.
+Upon re-running `aisdlc verify licenses`, the package is accepted as justified without blocking the release gate.
 
 ---
 
@@ -2163,182 +2142,182 @@ Al re-ejecutar `aisdlc verify licenses`, el paquete será aceptado como justific
 
 > 📂 **Módulo 7 de 13 [Parte II: Especificación Normativa del Framework]:** `process/05_architecture_arc42_nafv4.md`
 
-# 05. Arquitectura de Sistemas: Fusión de arc42 y NAF v4
+# 05. Systems Architecture: Fusion of arc42 and NAF v4
 
-<a id="cap-05-architecture-arc42-nafv4-1-vision-y-necesidad-de-la-arquitectura-en-la-era-de-los-agentes"></a>
+<a id="cap-05-architecture-arc42-nafv4-1-vision-and-need-for-architecture-in-the-agent-era"></a>
 
-## 1. Visión y Necesidad de la Arquitectura en la Era de los Agentes
+## 1. Vision and Need for Architecture in the Agent Era
 
-ProductShape define *qué* es el producto y *para quién*. Sin embargo, los agentes de IA necesitan instrucciones arquitectónicas precisas sobre *cómo* se estructuran los servicios, qué protocolos de red se emplean, cómo se desacoplan los módulos y qué límites de seguridad rigen cada componente.
+ProductShape defines *what* the product is and *for whom*. However, AI agents require precise architectural instructions on *how* services are structured, what network protocols are utilized, how modules decouple, and what security boundaries govern each component.
 
-**AI-SDLC unifica dos estándares líderes:**
-1. **arc42**: Proporciona el marco pragmático, comprensible y estructurado en 12 secciones que los desarrolladores y los LLMs comprenden de forma natural.
-2. **NAF v4 (NATO Architecture Framework v4)**: Aporta el rigor formal de la matriz de arquitectura empresarial (perspectivas de Capacidades, Operacional, de Servicios y de Recursos/Sistemas), ideal para sistemas críticos, escalables e interoperables.
+**AI-SDLC unifies two leading standards:**
+1. **arc42**: Provides a pragmatic, understandable, 12-section structured framework that developers and LLMs naturally grasp.
+2. **NAF v4 (NATO Architecture Framework v4)**: Contributes the formal rigor of enterprise architecture grids (Capabilities, Operational, Services, and Resource/System perspectives), ideal for critical, scalable, and interoperable systems.
 
 ---
 
-<a id="cap-05-architecture-arc42-nafv4-2-la-matriz-de-fusion-arc42-enriquecido-con-naf-v4"></a>
+<a id="cap-05-architecture-arc42-nafv4-2-the-fusion-matrix-arc42-enriched-with-naf-v4"></a>
 
-## 2. La Matriz de Fusión: arc42 Enriquecido con NAF v4
+## 2. The Fusion Matrix: arc42 Enriched with NAF v4
 
-Cada sección de **arc42** se materializa en el repositorio como documentos Markdown modulares con YAML frontmatter, integrando los conceptos clave del grid de **NAF v4**:
+Each section of **arc42** materializes in the repository as modular Markdown documents with YAML frontmatter, integrating key concepts from the **NAF v4** grid:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   MAPEO CANÓNICO: arc42 + NAF v4                       │
+│                   CANONICAL MAPPING: arc42 + NAF v4                    │
 └────────────────────────────────────────────────────────────────────────┘
 
- arc42 Sección                        Perspectiva NAF v4       Artefactos AI-SDLC
+ arc42 Section                        NAF v4 Perspective       AI-SDLC Artifacts
  ─────────────────────────────────── ──────────────────────── ──────────────────────────
- 1. Introducción y Objetivos         Enterprise & Capability  Cita ProductShape ACT & UC
- 2. Restricciones de Arquitectura    Architecture Constraints CON-*, ACON-*, LIC-POL-*
- 3. Contexto y Alcance               Operational Perspective  CTX-*, OIE-* (Info Exchange)
- 4. Estrategia de Solución           Service & Resource Strat STRAT-*
- 5. Vista de Bloques (Building)      Services & Systems       CMP-* (Whitebox L1-L3)
- 6. Vista de Ejecución (Runtime)     Behaviour & Sequences    SEQ-*, FLW-*
- 7. Vista de Despliegue              Resource / Deployment    RES-*, DEP-* (Nodos, Infra)
- 8. Conceptos Transversales          Information & Security   DATA-*, SEC-ENC-*, SEC-POL-*
- 9. Decisiones de Arquitectura       Governance & Architecture ADR-* (Decisiones Inmutables)
- 10. Requerimientos de Calidad       Quality Perspective      Cita ProductShape QR-*
- 11. Riesgos y Deuda Técnica         Risk & Technical Debt    RSK-*
- 12. Glosario                        Taxonomy & Terms         Cita ProductShape TERM-*, BC-*
+ 1. Introduction and Goals           Enterprise & Capability  Cites ProductShape ACT & UC
+ 2. Architecture Constraints         Architecture Constraints CON-*, ACON-*, LIC-POL-*
+ 3. Context and Scope                Operational Perspective  CTX-*, OIE-* (Info Exchange)
+ 4. Solution Strategy                Service & Resource Strat STRAT-*
+ 5. Building Block View              Services & Systems       CMP-* (Whitebox L1-L3)
+ 6. Runtime View                     Behaviour & Sequences    SEQ-*, FLW-*
+ 7. Deployment View                  Resource / Deployment    RES-*, DEP-* (Nodes, Infra)
+ 8. Cross-Cutting Concepts           Information & Security   DATA-*, SEC-ENC-*, SEC-POL-*
+ 9. Architecture Decisions           Governance & Architecture ADR-* (Immutable Decisions)
+ 10. Quality Requirements            Quality Perspective      Cites ProductShape QR-*
+ 11. Risks and Technical Debt        Risk & Technical Debt    RSK-*
+ 12. Glossary                        Taxonomy & Terms         Cites ProductShape TERM-*, BC-*
 ```
 
 ---
 
-<a id="cap-05-architecture-arc42-nafv4-3-detalle-de-secciones-clave-en-el-paradigma-as-code"></a>
+<a id="cap-05-architecture-arc42-nafv4-3-key-sections-detail-in-the-as-code-paradigm"></a>
 
-## 3. Detalle de Secciones Clave en el Paradigma As-Code
+## 3. Key Sections Detail in the As-Code Paradigm
 
-<a id="cap-05-architecture-arc42-nafv4-seccion-3-contexto-y-alcance-naf-operational"></a>
+<a id="cap-05-architecture-arc42-nafv4-section-3-context-and-scope-naf-operational"></a>
 
-### Sección 3: Contexto y Alcance (NAF Operational)
-- Modela el límite del sistema respecto a actores externos y sistemas vecinos.
-- **Intercambios de Información Operativa (`OIE-*`)**: Define los mensajes, eventos o cargas útiles que cruzan la frontera del sistema.
+### Section 3: Context and Scope (NAF Operational)
+- Models the system boundary relative to external actors and adjacent systems.
+- **Operational Information Exchanges (`OIE-*`)**: Defines messages, events, or payloads crossing system boundaries.
 
-<a id="cap-05-architecture-arc42-nafv4-seccion-5-vista-de-bloques-de-construccion-naf-services-systems-arc42-sec-5"></a>
+<a id="cap-05-architecture-arc42-nafv4-section-5-building-block-view-naf-services-systems-arc42-sec-5"></a>
 
-### Sección 5: Vista de Bloques de Construcción (NAF Services & Systems / arc42 Sec. 5)
-Modela la estructura interna del sistema mediante un **esquema único universal de componente (`CMP-*`)**, permitiendo una descomposición recursiva multinivel que se adapta a sistemas distribuidos, monolitos modulares y arquitecturas basadas en plugins o DLLs:
+### Section 5: Building Block View (NAF Services & Systems / arc42 Sec. 5)
+Models internal system structure through a **single universal component schema (`CMP-*`)**, enabling recursive multilevel decomposition adaptable to distributed systems, modular monoliths, and plugin/DLL architectures:
 
-#### Niveles de Arquitectura Recomendados:
-1. **Nivel 1: Sistema Raíz / Bounded Context (DDD)**:
-   - Delimita una frontera conceptual, lingüística y de dominio explícita (`bounded-context: "Nombre"`).
-   - Metadatos: `level: 1`, `parent-component: null`.
-   - Implementación: `implementation-type: composite` (para agrupar lógicamente subsistemas/contenedores sin código ejecutable propio) o `service` / `function` si el sistema es un ejecutable autónomo.
-2. **Nivel 2: Subsistemas / Módulos de Despliegue / Contenedores**:
-   - Define las unidades de despliegue o contenedores de ejecución del Bounded Context.
-   - Metadatos: `level: 2`, `parent-component: CMP-CONTEXT-ROOT`.
-   - Implementación:
-     - `service`: Microservicios, daemons en red o workers asíncronos con interfaces de red (`REST/HTTP`, `gRPC`, `WebSocket`, `Kafka`, `MQTT`, `IPC`).
-     - `dll`: Bibliotecas dinámicas principales o subsistemas compartidos.
-     - `function`: Módulos de aplicación de proceso único o monolitos.
-3. **Nivel 3: Unidades de Ejecución / Componentes Internos**:
-   - Descomposición de grano fino dentro de un contenedor o subsistema.
-   - Metadatos: `level: 3`, `parent-component: CMP-SUBSYSTEM-ROOT`.
-   - Implementación:
-     - `dll`: Plugins nativos o librerías de enlace dinámico (.dll, .so, .dylib) con contratos binarios (`C-ABI`, `Native-ABI`, `FFI`).
-     - `function`: Módulos de cálculo matemático, parsers o lógica de dominio pura con contratos in-process (`Function-Call`, `In-Process API`, `CLI`).
-4. **Nivel 4 (Opcional): Clases / Algoritmos Atómicos Críticos**:
-   - Reservado para componentes hipercríticos (criptografía, algoritmos cinemáticos de seguridad) donde funciones individuales requieren auditoría y trazabilidad RTM unitaria.
+#### Recommended Architecture Levels:
+1. **Level 1: Root System / Bounded Context (DDD)**:
+   - Delimits an explicit conceptual, linguistic, and domain boundary (`bounded-context: "Name"`).
+   - Metadata: `level: 1`, `parent-component: null`.
+   - Implementation: `implementation-type: composite` (to logically group subsystems/containers without standalone executable code) or `service` / `function` if the system is a standalone executable.
+2. **Level 2: Subsystems / Deployment Modules / Containers**:
+   - Defines deployment units or execution containers within the Bounded Context.
+   - Metadata: `level: 2`, `parent-component: CMP-CONTEXT-ROOT`.
+   - Implementation:
+     - `service`: Microservices, network daemons, or asynchronous workers with network interfaces (`REST/HTTP`, `gRPC`, `WebSocket`, `Kafka`, `MQTT`, `IPC`).
+     - `dll`: Major dynamic libraries or shared subsystems.
+     - `function`: Single-process application modules or monoliths.
+3. **Level 3: Execution Units / Internal Components**:
+   - Fine-grained decomposition inside a container or subsystem.
+   - Metadata: `level: 3`, `parent-component: CMP-SUBSYSTEM-ROOT`.
+   - Implementation:
+     - `dll`: Native plugins or dynamic link libraries (.dll, .so, .dylib) with binary contracts (`C-ABI`, `Native-ABI`, `FFI`).
+     - `function`: Pure mathematical calculation modules, parsers, or domain logic with in-process contracts (`Function-Call`, `In-Process API`, `CLI`).
+4. **Level 4 (Optional): Critical Atomic Classes / Algorithms**:
+   - Reserved for hyper-critical components (cryptography, safety kinematic algorithms) where individual functions require unit RTM traceability and audits.
 
-#### Regla de Trazabilidad Multinivel:
-- Todo componente `CMP-*` declara qué casos de uso implementa (`implements-use-cases: [UC-*]`) y qué requerimientos funcionales, de calidad o de seguridad satisface (`satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`).
-- Si un requerimiento se satisface en un componente especializado de Nivel 3 (p. ej., una DLL o función), el motor de trazabilidad 360° resuelve la cobertura tanto a nivel del componente ejecutor como de su contexto padre (`parent-component`).
-- El campo `hosted-in-enclave: SEC-ENC-*` solo es obligatorio cuando el componente se despliega en un enclave de red físico o lógico segmentado. Para DLLs o funciones in-process, es opcional.
+#### Multilevel Traceability Rule:
+- Every `CMP-*` component declares which use cases it implements (`implements-use-cases: [UC-*]`) and which functional, quality, or security requirements it satisfies (`satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`).
+- When a requirement is satisfied in a Level 3 specialized component (e.g. a DLL or function), the 360° traceability engine resolves coverage at both the executing component level and its parent context (`parent-component`).
+- The `hosted-in-enclave: SEC-ENC-*` field is mandatory only when the component deploys into a physically or logically segmented network enclave. For DLLs or in-process functions, it is optional.
 
-<a id="cap-05-architecture-arc42-nafv4-seccion-6-vista-de-ejecucion-runtime-naf-sequences-behaviour"></a>
+<a id="cap-05-architecture-arc42-nafv4-section-6-runtime-view-naf-sequences-behaviour"></a>
 
-### Sección 6: Vista de Ejecución / Runtime (NAF Sequences & Behaviour)
-- Diagramas de secuencia y flujos de estados (modelados mediante sintaxis nativa de **Mermaid**).
-- Describe la orquestación entre servicios ante peticiones de negocio o eventos asíncronos.
+### Section 6: Runtime View (NAF Sequences & Behaviour)
+- Sequence diagrams and state flows (modeled via native **Mermaid** syntax).
+- Describes orchestration across services upon business requests or asynchronous events.
 
-<a id="cap-05-architecture-arc42-nafv4-seccion-7-vista-de-despliegue-naf-resource-deployment"></a>
+<a id="cap-05-architecture-arc42-nafv4-section-7-deployment-view-naf-resource-deployment"></a>
 
-### Sección 7: Vista de Despliegue (NAF Resource Deployment)
-- Mapeo de los bloques de software a infraestructura física o en la nube (Kubernetes Pods, Serverless functions, bases de datos gestionadas, enclaves perimetrales).
+### Section 7: Deployment View (NAF Resource Deployment)
+- Mapping software building blocks to physical or cloud infrastructure (Kubernetes Pods, Serverless functions, managed databases, perimeter enclaves).
 
-<a id="cap-05-architecture-arc42-nafv4-seccion-8-conceptos-transversales"></a>
+<a id="cap-05-architecture-arc42-nafv4-section-8-cross-cutting-concepts"></a>
 
-### Sección 8: Conceptos Transversales
-- **Modelos de Datos (`DATA-*`)**: Esquemas de datos lógicos y físicos (DDL, contratos OpenAPI/AsyncAPI, Protobuf).
-- **Concepto de Seguridad (`SEC-CONCEPT-*`)**: Identidad, autenticación mTLS, gestión de secretos, rotación de claves y cifrado.
-- **Concepto de Observabilidad**: Trazabilidad distribuida (OpenTelemetry), métricas y logs estructurados.
+### Section 8: Cross-Cutting Concepts
+- **Data Models (`DATA-*`)**: Logical and physical data schemas (DDL, OpenAPI/AsyncAPI contracts, Protobuf).
+- **Security Concept (`SEC-CONCEPT-*`)**: Identity, mTLS authentication, secret management, key rotation, and encryption.
+- **Observability Concept**: Distributed tracing (OpenTelemetry), metrics, and structured logging.
 
-<a id="cap-05-architecture-arc42-nafv4-seccion-9-decisiones-de-arquitectura-adrs"></a>
+<a id="cap-05-architecture-arc42-nafv4-section-9-architecture-decisions-adrs"></a>
 
-### Sección 9: Decisiones de Arquitectura (ADRs)
-- Cada decisión técnica relevante (elección de base de datos, patrón de mensajería, selección de frameworks de terceros) se registra mediante un **ADR inmutable**:
-  - Estado: `proposed`, `accepted`, `superseded`.
-  - Contexto, decisión adoptada y consecuencias (positivas y negativas).
-  - Aprobación exclusivamente humana.
+### Section 9: Architecture Decisions (ADRs)
+- Every significant technical decision (database selection, messaging pattern, third-party framework adoption) is recorded via an **immutable ADR**:
+  - Status: `proposed`, `accepted`, `superseded`.
+  - Context, decision adopted, and consequences (positive and negative).
+  - Strictly human approval.
 
 ---
 
-<a id="cap-05-architecture-arc42-nafv4-4-estructura-de-carpetas-de-arquitectura"></a>
+<a id="cap-05-architecture-arc42-nafv4-4-architecture-directory-structure"></a>
 
-## 4. Estructura de Carpetas de Arquitectura
+## 4. Architecture Directory Structure
 
 ```text
 docs/architecture/
-├── 01_introduction_and_goals.md        # Instanciado desde introduction-and-goals.template.md
-├── 02_architecture_constraints.md       # Instanciado desde architecture-constraints.template.md
-├── 03_context_and_scope/                # Instanciado desde context-and-scope.template.md
+├── 01_introduction_and_goals.md        # Instantiated from introduction-and-goals.template.md
+├── 02_architecture_constraints.md       # Instantiated from architecture-constraints.template.md
+├── 03_context_and_scope/                # Instantiated from context-and-scope.template.md
 │   ├── business_context.md
 │   └── technical_context.md
-├── 04_solution_strategy.md              # Instanciado desde solution-strategy.template.md
+├── 04_solution_strategy.md              # Instantiated from solution-strategy.template.md
 ├── 05_building_blocks/
-│   ├── level_1_whitebox.md              # Instanciado desde level-1-whitebox.template.md
-│   └── components/                      # CMP-*.md instanciados desde component.template.md
-├── 06_runtime_view/                     # SEQ-*.md instanciados desde runtime-view.template.md
-├── 07_deployment_view/                  # DEP-*.md instanciados desde deployment-view.template.md
+│   ├── level_1_whitebox.md              # Instantiated from level-1-whitebox.template.md
+│   └── components/                      # CMP-*.md instantiated from component.template.md
+├── 06_runtime_view/                     # SEQ-*.md instantiated from runtime-view.template.md
+├── 07_deployment_view/                  # DEP-*.md instantiated from deployment-view.template.md
 ├── 08_cross_cutting/
-│   ├── data_models/                     # DATA-*.md y schemas
-│   └── security_concept.md              # Instanciado desde cross-cutting-concepts.template.md
-├── 09_decisions/                        # ADR-*.md instanciados desde adr.template.md
-├── 10_quality_requirements.md           # Instanciado desde quality-requirements.template.md
-├── 11_risks_and_technical_debt.md       # Instanciado desde risks-and-technical-debt.template.md
-└── 12_glossary.md                       # Instanciado desde glossary.template.md
+│   ├── data_models/                     # DATA-*.md and schemas
+│   └── security_concept.md              # Instantiated from cross-cutting-concepts.template.md
+├── 09_decisions/                        # ADR-*.md instantiated from adr.template.md
+├── 10_quality_requirements.md           # Instantiated from quality-requirements.template.md
+├── 11_risks_and_technical_debt.md       # Instantiated from risks-and-technical-debt.template.md
+└── 12_glossary.md                       # Instantiated from glossary.template.md
 ```
 
 ---
 
-<a id="cap-05-architecture-arc42-nafv4-5-catalogo-canonico-de-plantillas-de-arquitectura-templatesarchitecture"></a>
+<a id="cap-05-architecture-arc42-nafv4-5-canonical-architecture-templates-catalog-templatesarchitecture"></a>
 
-## 5. Catálogo Canónico de Plantillas de Arquitectura (`templates/architecture/`)
+## 5. Canonical Architecture Templates Catalog (`templates/architecture/`)
 
-AI-SDLC provee un conjunto completo y estandarizado de plantillas Markdown con **YAML frontmatter** estructurado bajo `templates/architecture/`, cubriendo exhaustivamente las 12 secciones de arc42 y sus correspondencias en NAF v4:
+AI-SDLC provides a comprehensive standardized set of Markdown templates with structured **YAML frontmatter** under `templates/architecture/`, exhaustively covering the 12 arc42 sections and NAF v4 correspondences:
 
-<a id="cap-05-architecture-arc42-nafv4-51-matriz-de-plantillas-y-artefactos"></a>
+<a id="cap-05-architecture-arc42-nafv4-51-templates-and-artifacts-matrix"></a>
 
-### 5.1 Matriz de Plantillas y Artefactos
+### 5.1 Templates and Artifacts Matrix
 
-| Sección arc42 | Perspectiva NAF v4 | Archivo de Plantilla | Artefactos / IDs | Propósito y Contenido Clave |
+| arc42 Section | NAF v4 Perspective | Template File | Artifacts / IDs | Key Purpose and Contents |
 | :---: | :--- | :--- | :--- | :--- |
-| **01** | Enterprise & Capability | [`introduction-and-goals.template.md`](../templates/architecture/introduction-and-goals.template.md) | `ARCH-INTRO-*` | Visión ejecutiva, objetivos de calidad (`QR-*`) y stakeholders (`ACT-*`). |
-| **02** | Architecture Constraints | [`architecture-constraints.template.md`](../templates/architecture/architecture-constraints.template.md) | `CON-*`, `ACON-*` | Restricciones técnicas, organizativas y políticas de licencia OSS (`license-policy.yaml`). |
-| **03** | Operational Perspective | [`context-and-scope.template.md`](../templates/architecture/context-and-scope.template.md) | `CTX-*`, `OIE-*` | Delimitación de fronteras, contexto de negocio/técnico e intercambios de información. |
-| **04** | Service & Resource Strat | [`solution-strategy.template.md`](../templates/architecture/solution-strategy.template.md) | `STRAT-*` | Decisiones tecnológicas base, patrones fundamentales (DDD, Event-Driven) y tradeoffs. |
-| **05** | Services & Systems (L1) | [`level-1-whitebox.template.md`](../templates/architecture/level-1-whitebox.template.md) | `ARCH-L1-*` | Caja blanca macro Nivel 1, Bounded Contexts y descomposición en subsistemas. |
-| **05** | Services & Systems (L1-L3) | [`component.template.md`](../templates/architecture/component.template.md) | `CMP-*` | Especificación recursiva de componentes (servicios, DLLs, funciones, contratos). |
-| **06** | Behaviour & Sequences | [`runtime-view.template.md`](../templates/architecture/runtime-view.template.md) | `SEQ-*`, `FLW-*` | Escenarios nominales, excepciones y seguridad con diagramas Mermaid nativos. |
-| **07** | Resource / Deployment | [`deployment-view.template.md`](../templates/architecture/deployment-view.template.md) | `RES-*`, `DEP-*` | Topología de nodos físicos/cloud, clusters y enclaves segmentados (`SEC-ENC-*`). |
-| **08** | Information & Security | [`cross-cutting-concepts.template.md`](../templates/architecture/cross-cutting-concepts.template.md) | `DATA-*`, `SEC-*` | Concepto de seguridad Zero Trust, modelos de datos (`DATA-*`) y observabilidad. |
-| **09** | Governance & Architecture | [`adr.template.md`](../templates/architecture/adr.template.md) | `ADR-*` | Registros inmutables de decisiones arquitectónicas con consecuencias y aprobación. |
-| **10** | Quality Perspective | [`quality-requirements.template.md`](../templates/architecture/quality-requirements.template.md) | `ARCH-QUAL-*` | Árbol de calidad jerárquico (ISO/IEC 25010) y escenarios evaluables citando `QR-*`. |
-| **11** | Risk & Technical Debt | [`risks-and-technical-debt.template.md`](../templates/architecture/risks-and-technical-debt.template.md) | `RSK-*` | Matriz de riesgos técnicos, severidad, impacto, mitigación y registro de deuda técnica. |
-| **12** | Taxonomy & Terms | [`glossary.template.md`](../templates/architecture/glossary.template.md) | `TERM-*`, `BC-*` | Glosario unificado citando términos de dominio (`TERM-*`) y Bounded Contexts (`BC-*`). |
+| **01** | Enterprise & Capability | [`introduction-and-goals.template.md`](../templates/architecture/introduction-and-goals.template.md) | `ARCH-INTRO-*` | Executive vision, quality goals (`QR-*`), and stakeholders (`ACT-*`). |
+| **02** | Architecture Constraints | [`architecture-constraints.template.md`](../templates/architecture/architecture-constraints.template.md) | `CON-*`, `ACON-*` | Technical and organizational constraints, and OSS license policies (`license-policy.yaml`). |
+| **03** | Operational Perspective | [`context-and-scope.template.md`](../templates/architecture/context-and-scope.template.md) | `CTX-*`, `OIE-*` | Boundary delimitation, business/technical context, and information exchanges. |
+| **04** | Service & Resource Strat | [`solution-strategy.template.md`](../templates/architecture/solution-strategy.template.md) | `STRAT-*` | Core tech decisions, fundamental patterns (DDD, Event-Driven), and tradeoffs. |
+| **05** | Services & Systems (L1) | [`level-1-whitebox.template.md`](../templates/architecture/level-1-whitebox.template.md) | `ARCH-L1-*` | Level 1 macro whitebox, Bounded Contexts, and subsystem decomposition. |
+| **05** | Services & Systems (L1-L3) | [`component.template.md`](../templates/architecture/component.template.md) | `CMP-*` | Recursive component spec (services, DLLs, functions, contracts). |
+| **06** | Behaviour & Sequences | [`runtime-view.template.md`](../templates/architecture/runtime-view.template.md) | `SEQ-*`, `FLW-*` | Nominal, exception, and security scenarios with native Mermaid diagrams. |
+| **07** | Resource / Deployment | [`deployment-view.template.md`](../templates/architecture/deployment-view.template.md) | `RES-*`, `DEP-*` | Physical/cloud node topology, clusters, and segmented enclaves (`SEC-ENC-*`). |
+| **08** | Information & Security | [`cross-cutting-concepts.template.md`](../templates/architecture/cross-cutting-concepts.template.md) | `DATA-*`, `SEC-*` | Zero Trust security concept, data models (`DATA-*`), and observability. |
+| **09** | Governance & Architecture | [`adr.template.md`](../templates/architecture/adr.template.md) | `ADR-*` | Immutable architecture decision records with consequences and approvals. |
+| **10** | Quality Perspective | [`quality-requirements.template.md`](../templates/architecture/quality-requirements.template.md) | `ARCH-QUAL-*` | Hierarchical quality tree (ISO/IEC 25010) and evaluable scenarios citing `QR-*`. |
+| **11** | Risk & Technical Debt | [`risks-and-technical-debt.template.md`](../templates/architecture/risks-and-technical-debt.template.md) | `RSK-*` | Technical risks matrix, severity, impact, mitigation, and technical debt log. |
+| **12** | Taxonomy & Terms | [`glossary.template.md`](../templates/architecture/glossary.template.md) | `TERM-*`, `BC-*` | Unified glossary citing domain terms (`TERM-*`) and Bounded Contexts (`BC-*`). |
 
 ---
 
-<a id="cap-05-architecture-arc42-nafv4-52-guia-de-uso-e-instanciacion-en-proyectos"></a>
+<a id="cap-05-architecture-arc42-nafv4-52-project-usage-and-instantiation-guide"></a>
 
-### 5.2 Guía de Uso e Instanciación en Proyectos
+### 5.2 Project Usage and Instantiation Guide
 
-1. **Instanciación Inicial de la Arquitectura del Sistema**:
-   Al arrancar un proyecto o módulo mayor, copie las plantillas estructurales hacia `docs/architecture/`:
+1. **Initial System Architecture Instantiation**:
+   When starting a project or major module, copy structural templates to `docs/architecture/`:
    ```bash
-   # Crear estructura base de documentación de arquitectura
+   # Create architecture documentation base structure
    mkdir -p docs/architecture/03_context_and_scope
    mkdir -p docs/architecture/05_building_blocks/components
    mkdir -p docs/architecture/06_runtime_view
@@ -2346,7 +2325,7 @@ AI-SDLC provee un conjunto completo y estandarizado de plantillas Markdown con *
    mkdir -p docs/architecture/08_cross_cutting/data_models
    mkdir -p docs/architecture/09_decisions
 
-   # Instanciar las plantillas base
+   # Instantiate base templates
    cp templates/architecture/introduction-and-goals.template.md docs/architecture/01_introduction_and_goals.md
    cp templates/architecture/architecture-constraints.template.md docs/architecture/02_architecture_constraints.md
    cp templates/architecture/solution-strategy.template.md docs/architecture/04_solution_strategy.md
@@ -2356,70 +2335,70 @@ AI-SDLC provee un conjunto completo y estandarizado de plantillas Markdown con *
    cp templates/architecture/glossary.template.md docs/architecture/12_glossary.md
    ```
 
-2. **Creación de Componentes (`CMP-*`) y Decisiones (`ADR-*`)**:
-   Para cada nuevo microservicio, DLL o librería modular:
+2. **Creating Components (`CMP-*`) and Decisions (`ADR-*`)**:
+   For each new microservice, DLL, or modular library:
    ```bash
-   cp templates/architecture/component.template.md docs/architecture/05_building_blocks/components/CMP-MI-SERVICIO.md
+   cp templates/architecture/component.template.md docs/architecture/05_building_blocks/components/CMP-MY-SERVICE.md
    ```
-   Rellene en el frontmatter YAML los campos `level`, `implementation-type`, `implements-use-cases` y `satisfies-requirements`.
+   Fill in YAML frontmatter fields `level`, `implementation-type`, `implements-use-cases`, and `satisfies-requirements`.
 
-   Para registrar decisiones técnicas vinculantes:
+   To register binding technical decisions:
    ```bash
-   cp templates/architecture/adr.template.md docs/architecture/09_decisions/ADR-001-STACK-SELECCIONADO.md
+   cp templates/architecture/adr.template.md docs/architecture/09_decisions/ADR-001-CHOSEN-STACK.md
    ```
 
-3. **Verificación Determinista y Trazabilidad**:
-   Una vez instanciados o modificados los artefactos de arquitectura, audite la conformidad de esquemas y la resolución 360°:
+3. **Deterministic Verification and Traceability**:
+   Once architecture artifacts are instantiated or edited, audit schema compliance and 360° resolution:
    ```bash
-   # Validar esquemas JSON de los componentes y ADRs
+   # Validate JSON schemas for components and ADRs
    npx aisdlc verify schemas --path docs/architecture
 
-   # Validar trazabilidad 360° RTM (Upstream -> Midstream -> Downstream)
+   # Validate 360° RTM traceability (Upstream -> Midstream -> Downstream)
    npx aisdlc verify traceability
    ```
 
 ---
 
-<a id="cap-05-architecture-arc42-nafv4-53-modos-de-granularidad-de-arquitectura-e-inicializacion-automatizada-aisdlc-init"></a>
+<a id="cap-05-architecture-arc42-nafv4-53-architecture-granularity-modes-and-automated-initialization-aisdlc-init"></a>
 
-### 5.3 Modos de Granularidad de Arquitectura e Inicialización Automatizada (`aisdlc init`)
+### 5.3 Architecture Granularity Modes and Automated Initialization (`aisdlc init`)
 
-Para evitar tener que copiar o borrar plantillas manualmente según la complejidad del proyecto, el comando de inicialización `aisdlc init` incorpora selección de granularidad arquitectónica (interactiva o mediante la opción `--arch, --architecture`):
+To prevent manually copying or deleting templates depending on project complexity, the initialization command `aisdlc init` incorporates architectural granularity selection (interactive or via option `--arch, --architecture`):
 
 ```bash
-# Inicialización interactiva (solicita seleccionar la granularidad por consola):
+# Interactive initialization (prompts for granularity selection in console):
 npx aisdlc init
 
-# Inicialización con granularidad explícita (desatendida o CI/CD):
-npx aisdlc init --arch minimal    # [Recomendado] Solo componentes (CMP-*) y decisiones (ADR-*)
-npx aisdlc init --arch full       # Catálogo exhaustivo de 12 secciones arc42 + NAF v4 (13 plantillas)
-npx aisdlc init --arch none       # Sin plantillas de arquitectura (scripts, utilidades o libs simples)
+# Initialization with explicit granularity (unattended or CI/CD):
+npx aisdlc init --arch minimal    # [Recommended] Vision (ARCH-INTRO-*), components (CMP-*), and decisions (ADR-*)
+npx aisdlc init --arch full       # Full 12-section arc42 + NAF v4 catalog (13 templates)
+npx aisdlc init --arch none       # No architecture templates (scripts, utilities, or simple libs)
 ```
 
-| Nivel de Granularidad | Plantillas Desplegadas en `templates/architecture/` | Casos de Uso Recomendados | Cumplimiento RTM |
+| Granularity Level | Templates Deployed in `templates/architecture/` | Recommended Use Cases | RTM Compliance |
 |---|---|---|---|
-| **`minimal`** *(Por defecto)* | `component.template.md`, `adr.template.md` | Microservicios, APIs, librerías, SaaS estándar y desarrollo ágil. | **100% de Trazabilidad RTM**. Permite mapear `CMP-*` a `UC-*` y `FR-*`, y documentar `ADR-*` sin sobrecarga documental. |
-| **`full` / `complete`** | 13 plantillas completas (Secciones 1 a 12 arc42 + NAF v4) | Sistemas críticos (defensa, aeronáutica, banca/fintech, telecomunicaciones, plataformas multicontenedor). | Rigor formal exhaustivo en todas las perspectivas (Capacidades, Operacional, Despliegue, Riesgos). |
-| **`none`** | Ninguna plantilla desplegada en `templates/architecture/` | Herramientas internas de línea de comandos, scripts de soporte o utilidades sin arquitectura formal. | Proyectos exentos de modelado formal de componentes. |
+| **`minimal`** *(Default)* | `introduction-and-goals.template.md`, `component.template.md`, `adr.template.md` | Microservices, APIs, libraries, standard SaaS, and agile development. | **100% RTM Traceability & Phase 0 Vision**. Captures NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`), maps `CMP-*` to `UC-*` and `FR-*`, and documents `ADR-*` without documentation overhead. |
+| **`full` / `complete`** | 13 complete templates (Sections 1 to 12 arc42 + NAF v4) | Critical systems (defense, aerospace, banking/fintech, telecoms, multi-container platforms). | Exhaustive formal rigor across all perspectives (Capabilities, Operational, Deployment, Risks). |
+| **`none`** | No templates deployed in `templates/architecture/` | Internal CLI tools, support scripts, or utilities without formal architecture. | Projects exempt from formal component modeling. |
 
 ---
 
-<a id="cap-05-architecture-arc42-nafv4-6-trazabilidad-360-e-integracion-canonica-post-implementacion"></a>
+<a id="cap-05-architecture-arc42-nafv4-6-360-traceability-and-post-implementation-canonical-integration"></a>
 
-## 6. Trazabilidad 360° e Integración Canónica Post-Implementación
+## 6. 360° Traceability and Post-Implementation Canonical Integration
 
-Para garantizar que los modelos arquitectónicos no diverjan del software ejecutado ni del producto:
+To ensure architectural models never diverge from running software or product specifications:
 
-1. **Trazabilidad 360° Determinista e Invertida (Midstream)**:
-   - Bajo el modelo de trazabilidad invertida, los requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`) no contienen punteros descendentes. En su lugar, son los componentes de arquitectura (`CMP-*`) los que declaran explícitamente en `satisfies-requirements` qué requerimientos satisfacen.
-   - El verificador `aisdlc verify traceability` valida mediante resolución inversa que todo componente (`CMP-*`), decisión (`ADR-*`) y vista de ejecución (`06_runtime_view.md`) esté vinculado a los identificadores `HOF-*` de entrega y a sus pruebas asociadas, sin introducir acoplamiento descendente en el producto.
-   - Si un requerimiento se satisface en un componente hijo de Nivel 3 (DLL o función), el motor resuelve la cobertura ascendente hacia el Bounded Context de Nivel 1 mediante `parent-component`.
-   - Elimina la necesidad de inspección manual de documentos o diagramas desactualizados.
+1. **Deterministic and Inverted 360° Traceability (Midstream)**:
+   - Under the inverted traceability model, requirements (`FR-*`, `QR-*`, `SEC-REQ-*`) contain no downstream pointers. Instead, architectural components (`CMP-*`) explicitly declare in `satisfies-requirements` which requirements they satisfy.
+   - The `aisdlc verify traceability` verifier confirms via reverse lookup that every component (`CMP-*`), decision (`ADR-*`), and execution view (`06_runtime_view.md`) is linked to delivery `HOF-*` identifiers and associated tests, without coupling product to code.
+   - When a requirement is satisfied in a Level 3 child component (DLL or function), the engine resolves upstream coverage to the Level 1 Bounded Context via `parent-component`.
+   - Eliminates the need for manual inspection of stale documents or diagrams.
 
-2. **Integración Canónica Post-Implementación**:
-   - Una vez que la entrega concluye con éxito y supera todos los tests, el comando `aisdlc sdd integrate --change <id>` actualiza automáticamente los bloques de arquitectura en `specs/architecture/`:
-     - Inserta los nuevos requerimientos implementados en la lista `satisfies-requirements` de cada componente responsable.
-     - Garantiza que la arquitectura refleje el estado real y verificado del sistema en producción.
+2. **Post-Implementation Canonical Integration**:
+   - Once delivery finishes successfully and passes all tests, `aisdlc sdd integrate --change <id>` automatically updates architectural building blocks in `specs/architecture/`:
+     - Inserts newly implemented requirements into the `satisfies-requirements` list of each responsible component.
+     - Ensures architecture continuously mirrors the verified production state of the system.
 
 ---
 
@@ -2427,182 +2406,182 @@ Para garantizar que los modelos arquitectónicos no diverjan del software ejecut
 
 > 📂 **Módulo 8 de 13 [Parte II: Especificación Normativa del Framework]:** `process/06_spec_driven_development.md`
 
-# 06. Entrega e Implementación: Spec-Driven Development (SDD)
+# 06. Delivery and Implementation: Spec-Driven Development (SDD)
 
-<a id="cap-06-spec-driven-development-1-el-puente-entre-la-definicion-y-el-codigo"></a>
+<a id="cap-06-spec-driven-development-1-the-bridge-between-definition-and-code"></a>
 
-## 1. El Puente entre la Definición y el Código
+## 1. The Bridge Between Definition and Code
 
-Spec-Driven Development (SDD) es el estándar que garantiza que **los agentes de IA nunca escriban código directamente a partir de ideas ambiguas o prompts desestructurados**. 
+Spec-Driven Development (SDD) is the standard ensuring that **AI agents never write code directly from ambiguous ideas or unstructured prompts**.
 
-Un incremento SDD responde a una pregunta delimitada:
-> *¿Cómo modifica este incremento específico el software para cumplir con los requerimientos aprobados?*
+An SDD increment answers a well-bounded question:
+> *How does this specific increment modify the software to fulfill the approved requirements?*
 
-El incremento SDD **hereda y cita** la línea base canónica (Producto, Arquitectura y Ciberseguridad), establece el diseño concreto de implementación y define tareas atómicas ejecutables por agentes.
+The SDD increment **inherits and cites** the canonical baseline (Product, Architecture, and Cybersecurity), establishes the concrete implementation design, and defines atomic tasks executable by agents.
 
 ---
 
-<a id="cap-06-spec-driven-development-2-anatomia-de-un-incremento-sdd-spec-delta"></a>
+<a id="cap-06-spec-driven-development-2-anatomy-of-an-sdd-increment-spec-delta"></a>
 
-## 2. Anatomía de un Incremento SDD (Spec-Delta)
+## 2. Anatomy of an SDD Increment (Spec-Delta)
 
-Cada cambio de entrega se organiza en un directorio aislado (`specs/changes/active/<change-id>/`) con cuatro documentos canónicos y su archivo de acompañamiento (*sidecar*):
+Each delivery change is organized in an isolated directory (`specs/changes/active/<change-id>/`) with four canonical documents and its sidecar file:
 
 ```
 specs/changes/active/chg-001-telemetry-stream/
-├── proposal.md       # Motivación, alcance del incremento y enlaces canónicos
-├── spec.md           # Requisitos de la entrega y escenarios de prueba
-├── design.md         # Decisiones de bajo nivel, APIs y estructuras de datos
-├── tasks.md          # Lista secuencial de tareas atómicas para agentes
-└── handoff.yaml      # Sidecar canónico PDaC (HOF-*) con subgrafo y citaciones SHA-256
+├── proposal.md       # Motivation, increment scope, and canonical links
+├── spec.md           # Delivery requirements and test scenarios
+├── design.md         # Low-level decisions, APIs, and data structures
+├── tasks.md          # Sequential list of atomic tasks for agents
+└── handoff.yaml      # Canonical PDaC sidecar (HOF-*) with subgraph and SHA-256 citations
 ```
 
-> **Andamiaje Automatizado (Scaffolding):**
-> En lugar de crear carpetas y copiar plantillas manualmente, el comando compuesto:
+> **Automated Scaffolding:**
+> Rather than manually creating folders and copying templates, the composite command:
 > ```bash
-> npx aisdlc change new "<Nombre>" [--from <ID>]
+> npx aisdlc change new "<Name>" [--from <ID>]
 > ```
-> (o su alias `npx aisdlc sdd new ...`) genera deterministamente la estructura completa, calcula el correlativo incremental (`chg-XXX-...`), resuelve o crea los requerimientos citados calculando sus hashes SHA-256 reales, y deposita el sidecar `handoff.yaml` validado contra sus esquemas JSON.
-
+> (or its alias `npx aisdlc sdd new ...`) deterministically generates the complete structure, computes the incremental sequence (`chg-XXX-...`), resolves or creates cited requirements calculating their real SHA-256 hashes, and deposits the `handoff.yaml` sidecar validated against JSON schemas.
 
 <a id="cap-06-spec-driven-development-1-proposalmd"></a>
 
 ### 1. `proposal.md`
-- Justificación del cambio, valor aportado y análisis de impacto.
-- **Citaciones Obligatorias**: IDs y digests de los casos de uso (`UC-*`), requerimientos (`FR-*`), requisitos de seguridad (`SEC-REQ-*`) y bloques de arquitectura (`SRV-*`) involucrados.
+- Change rationale, delivered value, and impact analysis.
+- **Mandatory Citations**: IDs and digests of involved use cases (`UC-*`), functional requirements (`FR-*`), security requirements (`SEC-REQ-*`), and architecture building blocks (`SRV-*`).
 
 <a id="cap-06-spec-driven-development-2-specmd"></a>
 
 ### 2. `spec.md`
-- Comportamiento esperado detallado mediante especificaciones ejecutables (formato Given-When-Then / Gherkin o escenarios de aserción).
-- Incluye explícitamente **escenarios de mitigación de seguridad** derivados de los casos de abuso (`ABUSE-*`).
+- Detailed expected behavior using executable specifications (**mandatory BDD Gherkin format** from change declaration: `acceptance-format: gherkin` and ```gherkin ... ``` blocks).
+- Explicitly includes functional scenarios and **security mitigation scenarios** derived from abuse cases (`ABUSE-*`).
+- Immediately extractable to executable Cucumber `.feature` files via `aisdlc gherkin extract` or `aisdlc check --fix`.
 
 <a id="cap-06-spec-driven-development-3-designmd"></a>
 
 ### 3. `design.md`
-- Mapeo directo a los bloques de arquitectura arc42 / NAF v4 (`SRV-*`, `SYS-*`).
-- Firma de interfaces, modelos de datos, manejo de errores, endpoints y selección de librerías permitidas por `license-policy.yaml`.
+- Direct mapping to arc42 / NAF v4 architecture blocks (`SRV-*`, `SYS-*`).
+- Interface signatures, data models, error handling, endpoints, and library selection permitted by `license-policy.yaml`.
 
 <a id="cap-06-spec-driven-development-4-tasksmd"></a>
 
 ### 4. `tasks.md`
-- Desglose estructurado de **tareas atómicas y 100% verificables** validadas por `schemas/sdd/tasks.schema.json`.
-- Cada tarea declara obligatoriamente:
-  1. **Nivel de Complejidad y Riesgo**: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`.
-  2. **Modo de Autonomía Humana**:
-     - `AUTONOMOUS`: Plan y ejecución autónoma por el agente de IA.
-     - `HUMAN_REVIEW_PLAN`: El agente elabora el plan y se detiene; requiere aprobación humana previa antes de codificar.
-     - `AMBIGUOUS`: Tarea bloqueada por falta de requisitos o ambigüedad; requiere refinamiento previo con el usuario.
-     - `HIGH_RISK_MANUAL`: Tarea de riesgo crítico (migraciones destructivas, credenciales); ejecución reservada exclusivamente a ingenieros humanos.
-  3. **Criterio de Verificación Concreto**: Comando determinista o prueba objetiva para dar la tarea por completada (`npm test`, `npx cucumber-js`, `npx tsx scripts/verify-quality-gate.ts`).
-- Auditado automáticamente por [`scripts/verify-tasks-governance.ts`](file:///c:/Users/reypo/Documents/Workspace/AI-SDLC/scripts/verify-tasks-governance.ts).
+- Structured breakdown of **atomic and 100% verifiable tasks** validated by `schemas/sdd/tasks.schema.json`.
+- Each task mandatorily declares:
+  1. **Complexity and Risk Level**: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`.
+  2. **Human Autonomy Mode**:
+     - `AUTONOMOUS`: Autonomous planning and execution by the AI agent.
+     - `HUMAN_REVIEW_PLAN`: The agent creates the plan and pauses; requires human approval prior to coding.
+     - `AMBIGUOUS`: Task blocked due to missing requirements or ambiguity; requires prior refinement with user.
+     - `HIGH_RISK_MANUAL`: Critical risk task (destructive migrations, credentials); execution reserved exclusively to human engineers.
+  3. **Concrete Verification Criterion**: Deterministic command or objective test marking the task complete (`npm test`, `npx cucumber-js`, `npx tsx scripts/verify-quality-gate.ts`).
+- Automatically audited by [`scripts/verify-tasks-governance.ts`](file:///c:/Users/reypo/Documents/Workspace/AI-SDLC/scripts/verify-tasks-governance.ts).
 
 ---
 
-<a id="cap-06-spec-driven-development-3-inyeccion-de-contexto-quirurgica-para-agentes-de-ia"></a>
+<a id="cap-06-spec-driven-development-3-surgical-context-injection-for-ai-agents"></a>
 
-## 3. Inyección de Contexto Quirúrgica para Agentes de IA
+## 3. Surgical Context Injection for AI Agents
 
-Uno de los mayores causantes de alucinaciones en agentes de codificación es la sobrecarga o contaminación de contexto ("dumping" de todo el repositorio). 
+A primary root cause of hallucinations in coding agents is context overload or contamination ("repo dumping").
 
-El modelo de citaciones del AI-SDLC permite una **inyección quirúrgica**:
-1. El agente programador recibe **únicamente**:
-   - El archivo `spec.md` y `design.md` de la tarea actual.
-   - El extracto canónico verificado de los artefactos citados (`FR-*`, `SEC-REQ-*`, `SRV-*`).
-   - La política de licencias `license-policy.yaml`.
-2. El agente no necesita buscar en cientos de archivos dispersos ni inferir requisitos; su universo operativo está estrictamente acotado y acoplado por hashes criptográficos.
+The AI-SDLC citation model enables **surgical context injection**:
+1. The developer agent receives **only**:
+   - The current task's `spec.md` and `design.md`.
+   - The verified canonical extract of cited artifacts (`FR-*`, `SEC-REQ-*`, `SRV-*`).
+   - The licensing policy `license-policy.yaml`.
+2. The agent never needs to search hundreds of scattered files or guess requirements; its operational context is strictly bounded and cryptographically coupled by hashes.
 
 ---
 
-<a id="cap-06-spec-driven-development-4-ciclo-de-ejecucion-de-una-entrega-sdd"></a>
+<a id="cap-06-spec-driven-development-4-sdd-delivery-execution-lifecycle"></a>
 
-## 4. Ciclo de Ejecución de una Entrega SDD
+## 4. SDD Delivery Execution Lifecycle
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Dev as Tech Lead (Humano)
-    participant SpecAgent as Agente Redactor SDD
-    participant Gate as Validador Determinista
-    participant CodeAgent as Agente Desarrollador
-    participant QA as Agente QA / Tests
+    actor Dev as Tech Lead (Human)
+    participant SpecAgent as SDD Author Agent
+    participant Gate as Deterministic Validator
+    participant CodeAgent as Developer Agent
+    participant QA as QA / Test Agent
 
-    Dev->>SpecAgent: Solicitar incremento para UC-001 y SEC-REQ-001
-    SpecAgent->>Gate: Validar citaciones (prodshape verify)
-    Gate-->>SpecAgent: Citaciones vigentes (status: current)
-    SpecAgent->>Dev: Presentar proposal.md, spec.md y tasks.md
-    Dev->>Dev: Revisión y aprobación humana de la especificación
-    Dev->>CodeAgent: Asignar tarea 1: Implementar pruebas y lógica
-    CodeAgent->>CodeAgent: Escribir código + SEC-TEST-*
-    CodeAgent->>QA: Solicitar validación
-    QA->>Gate: Ejecutar SAST + Escaneo de Licencias + Tests
-    Gate-->>Dev: Pipeline en Verde (100% aprobado)
-    Dev->>Dev: Merge final del Pull Request
+    Dev->>SpecAgent: Request increment for UC-001 and SEC-REQ-001
+    SpecAgent->>Gate: Validate citations (prodshape verify)
+    Gate-->>SpecAgent: Citations up-to-date (status: current)
+    SpecAgent->>Dev: Present proposal.md, spec.md, and tasks.md
+    Dev->>Dev: Human review and approval of specification
+    Dev->>CodeAgent: Assign task 1: Implement tests and logic
+    CodeAgent->>CodeAgent: Write code + SEC-TEST-*
+    CodeAgent->>QA: Request validation
+    QA->>Gate: Run SAST + License Scan + Tests
+    Gate-->>Dev: Pipeline Green (100% passed)
+    Dev->>Dev: Final Pull Request merge
 ```
 
 ---
 
-<a id="cap-06-spec-driven-development-5-integracion-automatizada-de-requerimientos-con-cucumber-bdd"></a>
+<a id="cap-06-spec-driven-development-5-automated-requirements-integration-with-cucumber-bdd"></a>
 
-## 5. Integración Automatizada de Requerimientos con Cucumber (BDD)
+## 5. Automated Requirements Integration with Cucumber (BDD)
 
-Para que los requerimientos no sean texto pasivo, el AI-SDLC adopta la sintaxis **Gherkin** como estándar nativo de criterios de aceptación:
+To keep requirements from becoming passive documentation, AI-SDLC adopts **Gherkin** syntax as its native standard for acceptance criteria:
 
-1. **Especificación en Markdown**:
-   - Cada requerimiento (`FR-*`, `QR-*`, `SEC-REQ-*`) incluye un bloque ````gherkin ... ```` con etiquetas (`@FR-001`, `@automated`, `@smoke`).
-2. **Extracción Automatizada por Convención**:
-   - Mediante el extractor determinista `npx aisdlc gherkin extract --all` o el comando unificado de pre-vuelo `npx aisdlc check --fix`, el framework genera o sincroniza archivos `.feature` de Cucumber en `tests/features/` siguiendo convenciones de subcarpeta (ej. `tests/features/product/<id>.feature`), sin requerir rutas físicas acopladas dentro del requerimiento Markdown.
-3. **Ejecución y Cierre de Ciclo**:
-   - Los agentes desarrolladores y de QA generan los step definitions correspondientes en Cucumber.js / Cucumber-JVM.
-   - El pipeline de CI/CD ejecuta `cucumber-js` como una puerta de paso obligatoria, garantizando que el software implementado satisface exactamente los escenarios definidos en el producto.
-4. **Verificación Pre-Vuelo Obligatoria (`aisdlc check --fix`)**:
-   - Antes de abrir un Pull Request, el desarrollador o agente ejecuta `npx aisdlc check --fix` para extraer automáticamente los escenarios desfasados, sincronizar digests de citaciones PDaC y verificar el paso de todos los Quality Gates en un único dashboard de consola.
+1. **Specification in Markdown**:
+   - Each requirement (`FR-*`, `QR-*`, `SEC-REQ-*`) includes a ````gherkin ... ```` block with tags (`@FR-001`, `@automated`, `@smoke`).
+2. **Automated Extraction by Convention**:
+   - Using the deterministic extractor `npx aisdlc gherkin extract --all` or the unified pre-flight command `npx aisdlc check --fix`, the framework extracts or synchronizes Cucumber `.feature` files in `tests/features/` following folder conventions (e.g., `tests/features/product/<id>.feature`), without requiring tightly coupled physical paths in Markdown requirements.
+3. **Execution and Closing the Loop**:
+   - Developer and QA agents generate corresponding step definitions in Cucumber.js / Cucumber-JVM.
+   - The CI/CD pipeline runs `cucumber-js` as a mandatory quality gate, guaranteeing that implemented software exactly satisfies product scenarios.
+4. **Mandatory Pre-Flight Verification (`aisdlc check --fix`)**:
+   - Prior to opening a Pull Request, the developer or agent runs `npx aisdlc check --fix` to automatically extract outdated scenarios, synchronize PDaC citation digests, and verify all Quality Gates pass in a single console dashboard.
 
 ---
 
-<a id="cap-06-spec-driven-development-6-adaptadores-formales-para-ecosistemas-sdd-openspec-y-spec-kit"></a>
+<a id="cap-06-spec-driven-development-6-formal-adapters-for-sdd-ecosystems-openspec-and-spec-kit"></a>
 
-## 6. Adaptadores Formales para Ecosistemas SDD (OpenSpec y Spec Kit)
+## 6. Formal Adapters for SDD Ecosystems (OpenSpec and Spec Kit)
 
-AI-SDLC estructura su carpeta `specs/` conectándola con herramientas reconocidas de Spec-Driven Development (OpenSpec y GitHub Spec Kit), depositando el subgrafo del producto como archivos de acompañamiento (*sidecars*) dentro del espacio de trabajo del cambio:
+AI-SDLC structures its `specs/` directory connecting to established Spec-Driven Development ecosystems (OpenSpec and GitHub Spec Kit), depositing the product subgraph as sidecar files within the change workspace:
 
-1. **Integración con OpenSpec y Spec Kit**:
-   - Utiliza adaptadores formales (`OpenSpecAdapter` y `SpecKitAdapter`, compatibles conceptualmente con `@prodshape/integration-openspec` y `@prodshape/integration-speckit`) para depositar `handoff.yaml` dentro de `specs/changes/active/<change-id>/` o `specs/<change-id>/`.
-   - Cada archivo `handoff.yaml` encapsula el subgrafo inmutable de entrega emitido por PDaC, con prefijo `HOF-*` (ej. `HOF-001-TELEMETRY-INGESTION`), declarando requerimientos (`FR-*`, `QR-*`, `SEC-REQ-*`), casos de uso (`UC-*`), reglas de negocio (`BR-*`) y citaciones con digests SHA-256.
+1. **OpenSpec and Spec Kit Integration**:
+   - Employs formal adapters (`OpenSpecAdapter` and `SpecKitAdapter`, conceptually compatible with `@prodshape/integration-openspec` and `@prodshape/integration-speckit`) to deposit `handoff.yaml` inside `specs/changes/active/<change-id>/` or `specs/<change-id>/`.
+   - Each `handoff.yaml` file encapsulates the immutable delivery subgraph emitted by PDaC, prefixed with `HOF-*` (e.g., `HOF-001-TELEMETRY-INGESTION`), declaring requirements (`FR-*`, `QR-*`, `SEC-REQ-*`), use cases (`UC-*`), business rules (`BR-*`), and citations with SHA-256 digests.
 
-2. **Trazabilidad 360° Automatizada mediante Resolución Inversa (Inverted Traceability)**:
-   - El verificador `aisdlc verify traceability` y `scripts/verify-traceability.ts` erradica análisis textuales frágiles basados en heurísticas de cadenas y desacopla los requerimientos de la implementación concreta. Comprueba rigurosamente la cobertura completa en tres dimensiones mediante resolución inversa (*Reverse Lookup*):
-     - **Producto (Upstream)**: Todo requerimiento declara sus dependencias ascendentes (`derives-from: [UC-*]`, `mitigates: [ABUSE-*]`) y proviene formalmente de un paquete `HOF-*` emitido por el handoff de PDaC.
-     - **Arquitectura (Midstream)**: Vistas de arquitectura arc42 / NAF v4 donde los servicios (`SRV-*`) declaran explícitamente `satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`.
-     - **Pruebas (Downstream)**: Suites BDD/Gherkin (`.feature`) con escenarios etiquetados con `@<reqId>` y suites de código (`.spec.*`, benchmarks) que citan los identificadores de requerimiento.
-   - Ningún requerimiento almacena punteros hacia abajo, blindando la especificación canónica contra derivas criptográficas de hash SHA-256 cuando se modifican o reorganizan tests y servicios.
+2. **Automated 360° Traceability via Inverted Lookup**:
+   - The `aisdlc verify traceability` verifier and `scripts/verify-traceability.ts` eradicate brittle string-matching heuristics and decouple requirements from concrete implementation. They rigorously verify complete coverage across three dimensions via reverse lookup:
+     - **Product (Upstream)**: Every requirement declares upstream dependencies (`derives-from: [UC-*]`, `mitigates: [ABUSE-*]`) and formally originates from a `HOF-*` package emitted by PDaC handoff.
+     - **Architecture (Midstream)**: arc42 / NAF v4 architecture views where services (`SRV-*`) explicitly declare `satisfies-requirements: [FR-*, QR-*, SEC-REQ-*]`.
+     - **Testing (Downstream)**: BDD/Gherkin suites (`.feature`) with scenarios tagged `@<reqId>` and test code suites (`.spec.*`, benchmarks) citing requirement IDs.
+   - No requirement stores downstream pointers, shielding the canonical specification from SHA-256 hash drift when tests or services are refactored or reorganized.
 
-3. **Integración Canónica Post-Implementación y Automatización en CI/CD**:
-   - Una vez concluida la implementación del cambio y verificado que todas las tareas en `tasks.md` están `COMPLETED`:
-     - Los requerimientos asociados en `specs/product/` se promueven a estado `active` y se les añade entrada en el historial de revisiones referenciando el `changeId`.
-     - Las especificaciones de arquitectura en `specs/architecture/` actualizan sus mapas de dependencias y servicios que satisfacen los requerimientos (`satisfies-requirements`).
-     - El directorio del cambio se archiva de forma atómica a `specs/changes/completed/<change-id>/`.
-     - Si existe una propuesta de especificación (`proposal.md`), su estado se actualiza a `applied`.
-   - **Automatización Desatendida en CI/CD (`.github/workflows/sdd-integrate-on-merge.yml`)**:
-     - Para evitar desalineaciones por omisión humana previa al merge, el framework traslada la responsabilidad de la integración canónica al pipeline de CI/CD tras la fusión del Pull Request hacia `main` o ramas de versión `release/*`.
-     - **Motor de Detección Automática**: Correlaciona deterministamente el cambio activo analizando en orden jerárquico: la rama origen del PR (`headRef`), el título y cuerpo del PR (`CHG-*`), los archivos modificados bajo `specs/changes/active/`, o la existencia de un único cambio activo con tareas completadas.
-     - **Seguridad y Trazabilidad Git**: Se ejecuta mediante GitHub Actions con permisos de mínimos privilegios (`contents: write`). El bot (`github-actions[bot]`) realiza commit y push automatizado con formato convencional `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
-     - **Experiencia de Desarrollo**: Los ingenieros y agentes no necesitan ejecutar manualmente `sdd integrate` antes de abrir el PR; una vez fusionado el PR, basta con ejecutar `git pull` en la copia local para obtener el catálogo canónico actualizado.
+3. **Post-Implementation Canonical Integration and CI/CD Automation**:
+   - Once change implementation finishes and all tasks in `tasks.md` are verified `COMPLETED`:
+     - Associated requirements in `specs/product/` are promoted to `active` status and receive a revision history entry referencing `changeId`.
+     - Architecture specifications in `specs/architecture/` update their dependency maps and services satisfying requirements (`satisfies-requirements`).
+     - The change directory is atomically archived to `specs/changes/completed/<change-id>/`.
+     - If a specification proposal exists (`proposal.md`), its status is updated to `applied`.
+   - **Unattended CI/CD Automation (`.github/workflows/sdd-integrate-on-merge.yml`)**:
+     - To avoid misalignment from human omission prior to merge, the framework shifts canonical integration responsibility to the CI/CD pipeline following Pull Request merge into `main` or release branches (`release/*`).
+     - **Automatic Detection Engine**: Deterministically identifies the active change analyzing hierarchically: PR source branch (`headRef`), PR title and body (`CHG-*`), modified files under `specs/changes/active/`, or the existence of a single active change with completed tasks.
+     - **Git Security and Traceability**: Runs via GitHub Actions under least privilege permissions (`contents: write`). The bot (`github-actions[bot]`) makes an automated commit and push using conventional commits format `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
+     - **Developer Experience**: Engineers and agents do not need to manually run `sdd integrate` before opening a PR; once merged, running `git pull` locally synchronizes the updated canonical catalog.
 
-4. **Comandos CLI Operativos**:
-   - `npx aisdlc check [--fix] [--json]`: Ejecuta la suite consolidada de pre-vuelo sobre todos los Quality Gates con auto-fix no destructivo opcional.
-   - `npx aisdlc change new "<nombre>" [--from <id>] [--profile <patch|standard|critical>] [--json]`: Genera el andamiaje completo de un nuevo cambio SDD con las 4 plantillas y el sidecar `handoff.yaml`.
-   - `npx aisdlc sdd new "<nombre>"`: Alias conveniente de `change new`.
-   - `npx aisdlc sdd deposit --change <id> [--framework <openspec|speckit>] [--requirements <reqs>] [--json]`: Deposita el sidecar `handoff.yaml` en el cambio activo.
-   - `npx aisdlc sdd verify [--json]`: Audita la conformidad de todos los espacios de trabajo y sidecars de handoff, ejecutando la compuerta pre-vuelo de duplicados.
-   - `npx aisdlc sdd integrate [--change <id>] [--auto] [--json]`: Integra y promueve el cambio completado a las especificaciones canónicas (soporta resolución manual o automática).
-   - `npx aisdlc gherkin extract [--all] [--path <path>] [--json]`: Extrae y sincroniza escenarios BDD Gherkin a archivos `.feature` en disco.
-   - `npx aisdlc init [directory] [--dry-run] [--ci <provider>] [--agents <list>] [--json]`: Inicializa la gobernanza, esquemas y políticas en un nuevo repositorio.
-   - `npx aisdlc verify all [--json]`: Ejecuta los 9 Quality Gates deterministas emitiendo resumen estructurado o texto humano.
+4. **Operational CLI Commands**:
+   - `npx aisdlc check [--fix] [--json]`: Executes the consolidated pre-flight suite across all Quality Gates with optional non-destructive auto-fix.
+   - `npx aisdlc change new "<name>" [--from <id>] [--profile <patch|standard|critical>] [--json]`: Generates complete scaffolding for a new SDD change with the 4 templates and `handoff.yaml` sidecar.
+   - `npx aisdlc sdd new "<name>"`: Convenient alias for `change new`.
+   - `npx aisdlc sdd deposit --change <id> [--framework <openspec|speckit>] [--requirements <reqs>] [--json]`: Deposits the `handoff.yaml` sidecar into the active change.
+   - `npx aisdlc sdd verify [--json]`: Audits conformity of all workspaces and handoff sidecars, running the duplicate pre-flight gate.
+   - `npx aisdlc sdd integrate [--change <id>] [--auto] [--json]`: Integrates and promotes the completed change into canonical specifications (supports manual or auto-detection).
+   - `npx aisdlc gherkin extract [--all] [--path <path>] [--json]`: Extracts and synchronizes Gherkin BDD scenarios to `.feature` files on disk.
+   - `npx aisdlc init [directory] [--dry-run] [--ci <provider>] [--agents <list>] [--json]`: Initializes governance, schemas, and policies in a new repository.
+   - `npx aisdlc verify all [--json]`: Executes all 9 deterministic Quality Gates outputting structured JSON or human-readable summary.
 
-5. **Consumo Programático y Automatizado por Agentes de IA (`--json` y `AISDLC_FORMAT=json`)**:
-   - **Salida JSON Pura Sin Caracteres de Escape**: Todos los comandos (`check`, `sdd *`, `gherkin extract`, `init`, `verify *`) soportan el flag `--json` o `-F, --format json`, suprimiendo de forma estricta colores y secuencias de escape ANSI (`picocolors`).
-   - **Variable de Entorno Global**: Configurar `export AISDLC_FORMAT=json` (o `AISDLC_OUTPUT=json`) activa la emisión JSON estructurada en todas las invocaciones de la CLI de manera transparente, permitiendo que orquestadores, agentes desatendidos y pipelines CI/CD consuman payloads parseables mediante `JSON.parse()` con códigos de salida estandarizados (0 = éxito, 1 = bloqueo/violación).
+5. **Programmatic Consumption by AI Agents (`--json` and `AISDLC_FORMAT=json`)**:
+   - **Pure JSON Output Without Escape Characters**: All commands (`check`, `sdd *`, `gherkin extract`, `init`, `verify *`) support `--json` or `-F, --format json`, strictly suppressing ANSI color codes (`picocolors`).
+   - **Global Environment Variable**: Setting `export AISDLC_FORMAT=json` (or `AISDLC_OUTPUT=json`) activates structured JSON output across all CLI invocations transparently, allowing orchestrators, autonomous agents, and CI/CD pipelines to consume parseable payloads via `JSON.parse()` with standardized exit codes (0 = success, 1 = failure/violation).
 
 ---
 
@@ -2610,133 +2589,133 @@ AI-SDLC estructura su carpeta `specs/` conectándola con herramientas reconocida
 
 > 📂 **Módulo 9 de 13 [Parte II: Especificación Normativa del Framework]:** `process/07_security_and_license_validation.md`
 
-# 07. Validación Determinista: Ciberseguridad, Licencias y Puertas de Calidad en CI/CD
+# 07. Deterministic Validation: Cybersecurity, Licenses, and CI/CD Quality Gates
 
-<a id="cap-07-security-and-license-validation-1-el-principio-de-verificacion-multinivel"></a>
+<a id="cap-07-security-and-license-validation-1-the-principle-of-multilevel-verification"></a>
 
-## 1. El Principio de Verificación Multinivel
+## 1. The Principle of Multilevel Verification
 
-En un flujo de desarrollo con agentes de IA, el código puede generarse a gran velocidad. Para mantener la integridad absoluta de la base de código, la validación se estructura en **dos capas complementarias**:
-1. **Capa Determinista (Puertas de CI/CD)**: Herramientas estáticas, linters y validadores algorítmicos que se ejecutan sin intervención de IA y con resultados reproducibles (mismo código, mismo veredicto).
-2. **Capa Semántica y Adversarial (Agentes Auditores)**: Agentes de IA especializados que examinan el código buscando vulnerabilidades lógicas, vectores de evasión y coherencia con la arquitectura.
+In an AI-agent driven development workflow, code can be produced at high velocity. To safeguard codebase integrity, validation is structured into **two complementary layers**:
+1. **Deterministic Layer (CI/CD Gates)**: Static tools, linters, and algorithmic validators executing without AI intervention, yielding reproducible outcomes (same code, same verdict).
+2. **Semantic and Adversarial Layer (Auditing Agents)**: Specialized AI agents that scrutinize code looking for business logic flaws, evasion vectors, and architectural consistency.
 
 ---
 
-<a id="cap-07-security-and-license-validation-2-las-9-puertas-deterministas-de-cicd-pipeline-gates"></a>
+<a id="cap-07-security-and-license-validation-2-the-9-deterministic-cicd-gates-pipeline-gates"></a>
 
-## 2. Las 9 Puertas Deterministas de CI/CD (Pipeline Gates)
+## 2. The 9 Deterministic CI/CD Gates (Pipeline Gates)
 
-Todo Pull Request propuesto por un desarrollador humano o por un agente debe superar de forma obligatoria las siguientes 9 puertas automáticas:
+Every Pull Request submitted by a human engineer or an AI agent must pass the following 9 automated gates:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   PIPELINE DETERMINISTA DE CI/CD (9 GATES)             │
+│                   DETERMINISTIC CI/CD PIPELINE (9 GATES)               │
 └────────────────────────────────────────────────────────────────────────┘
 
- [GATE 1: RELEASE GATE DE CÓDIGO Y CALIDAD AST] (aisdlc verify quality)
-  └─► Mide Complejidad Ciclomática (<=10), Cognitiva (<=15) y Mantenibilidad (>=50) con AST real.
+ [GATE 1: CODE & AST QUALITY RELEASE GATE] (aisdlc verify quality)
+  └─► Measures Cyclomatic Complexity (<=10), Cognitive Complexity (<=15), and Maintainability (>=50) using real AST.
 
- [GATE 2: MATRIZ DE TRAZABILIDAD 360° DETERMINISTA] (aisdlc verify traceability)
-  └─► Comprueba la triangulación inquebrantable entre los paquetes de handoff PDaC (HOF-*),
-      las vistas de arquitectura arc42 / NAF v4 (CMP-*) y los escenarios BDD/Gherkin y tests.
+ [GATE 2: DETERMINISTIC 360° TRACEABILITY MATRIX] (aisdlc verify traceability)
+  └─► Verifies unbroken triangulation across PDaC handoff packages (HOF-*),
+      arc42 / NAF v4 architecture views (CMP-*), and BDD/Gherkin scenarios and test suites.
 
- [GATE 3: GOBIERNO DE TAREAS Y AUTONOMÍA] (aisdlc verify governance)
-  └─► Audita modos de autonomía (AUTONOMOUS, HUMAN_REVIEW_PLAN, HIGH_RISK_MANUAL) y verificación.
+ [GATE 3: TASK GOVERNANCE AND AUTONOMY] (aisdlc verify governance)
+  └─► Audits autonomy modes (AUTONOMOUS, HUMAN_REVIEW_PLAN, HIGH_RISK_MANUAL) and verification criteria.
 
- [GATE 4: AUDITORÍA DE PRUEBAS EN REQUISITOS Y TAREAS] (aisdlc verify testing)
-  └─► Comprueba mediante resolución inversa que el 100% de los requisitos cuenten con pruebas
-      físicas en disco (.feature etiquetadas o .spec citando los IDs) y comandos de verificación.
+ [GATE 4: TEST AUDIT ON REQUIREMENTS AND TASKS] (aisdlc verify testing)
+  └─► Verifies via reverse lookup that 100% of requirements have physical tests
+      on disk (tagged .feature or .spec citing IDs) and deterministic verification commands.
 
- [GATE 5: AUDITORÍA DE LICENCIAS OSS Y GENERACIÓN SBOM] (aisdlc verify licenses)
-  └─► Escaneo dinámico nativo de dependencias instaladas frente a license-policy.yaml.
-      Falla si hay licencias virales (AGPL) o comerciales no aprobadas. Genera SBOM CycloneDX 1.5.
+ [GATE 5: OSS LICENSE AUDIT AND SBOM GENERATION] (aisdlc verify licenses)
+  └─► Native dynamic scan of installed dependencies against license-policy.yaml.
+      Fails on viral (AGPL) or unapproved commercial licenses. Generates CycloneDX 1.5 SBOM.
 
- [GATE 6: INTEGRIDAD CRIPTOGRÁFICA Y DERIVA PDAC] (aisdlc verify pdac)
-  └─► Comprueba que los hashes SHA-256 de los requerimientos citados en handoffs coincidan.
+ [GATE 6: CRYPTOGRAPHIC INTEGRITY AND PDAC DRIFT] (aisdlc verify pdac)
+  └─► Verifies SHA-256 hashes of requirements cited in handoffs match canonical targets.
 
- [GATE 7: VALIDACIÓN DE ESQUEMAS Y GRAFO] (aisdlc verify schemas)
-  └─► Verifica que los archivos frontmatter respeten los esquemas canónicos JSON (Draft 2020-12).
+ [GATE 7: SCHEMA AND GRAPH VALIDATION] (aisdlc verify schemas)
+  └─► Verifies frontmatter files comply with canonical JSON schemas (Draft 2020-12).
 
- [GATE 8: PRE-FLIGHT DE DUPLICADOS Y COLISIONES] (aisdlc verify duplicates)
-  └─► Audita que los nuevos requisitos no colisionen en ID, textos normativos idénticos ni títulos.
+ [GATE 8: DUPLICATE AND COLLISION PRE-FLIGHT] (aisdlc verify duplicates)
+  └─► Audits new requirements for collisions in IDs, identical normative text, or duplicate titles.
 
- [GATE 9: SEGURIDAD SHIFT-LEFT: SECRETOS Y SAST] (aisdlc verify security)
-  └─► Cero tolerancia a credenciales, llaves API o tokens (Gitleaks Gate) y detección determinista
-      de vulnerabilidades OWASP generadas por IA (SQLi, exec, eval, SSRF, path traversal).
+ [GATE 9: SHIFT-LEFT SECURITY: SECRETS AND SAST] (aisdlc verify security)
+  └─► Zero-tolerance for credentials, API keys, or tokens (Gitleaks Gate) and deterministic
+      detection of AI-generated OWASP vulnerabilities (SQLi, exec, eval, SSRF, path traversal).
 ```
 
 ---
 
-<a id="cap-07-security-and-license-validation-3-especificacion-detallada-de-seguridad-shift-left"></a>
+<a id="cap-07-security-and-license-validation-3-shift-left-security-detailed-specification"></a>
 
-## 3. Especificación Detallada de Seguridad Shift-Left
+## 3. Shift-Left Security Detailed Specification
 
-<a id="cap-07-security-and-license-validation-31-gate-9-deteccion-determinista-de-secretos-aisdlc-verify-secrets"></a>
+<a id="cap-07-security-and-license-validation-31-gate-9-deterministic-secret-detection-aisdlc-verify-secrets"></a>
 
-### 3.1 Gate 9: Detección Determinista de Secretos (`aisdlc verify secrets`)
+### 3.1 Gate 9: Deterministic Secret Detection (`aisdlc verify secrets`)
 
-El escaneo de secretos previene la fuga involuntaria de credenciales en el código fuente:
-- **Ámbito de Escaneo Flexible**: Permite escanear todo el árbol de trabajo o únicamente el diff incremental de Git (`--diff`, opcionalmente contra una rama base con `--base <rama>`).
-- **Motor Híbrido Zero-Dependencies**:
-  - Reglas deterministas para Claves Privadas RSA/EC/OpenSSH, tokens de GitHub, AWS Access Keys, OpenAI API Keys, Google API Keys, Slack Tokens, Stripe Keys, Bearer JWTs y asignaciones genéricas de tokens.
-  - Filtro heurístico de **Entropía de Shannon** para identificar cadenas con aleatoriedad sospechosa (umbral por defecto $\ge 4.5$).
-- **Integración con Gitleaks (`--gitleaks`)**: Delegación opcional en el binario oficial de `gitleaks` si está disponible en el entorno o en el CI runner.
-- **Enmascaramiento Seguro**: Los secretos nunca se imprimen en claro ni en consola ni en informes (`AKIA...` ➔ `AKIA***************`).
-- **Supresión Justificada**: Se permite ignorar falsos positivos específicos mediante el comentario en línea `// ai-sdlc:allow-secret`.
-- **Salida Formal**: Genera el informe `reports/SECRET_SCAN_REPORT.md` y emite **código de salida 4** en caso de infracciones.
+Secret scanning prevents inadvertent credential leaks into the codebase:
+- **Flexible Scan Scope**: Scan the entire working tree or strictly Git incremental diffs (`--diff`, optionally against a base branch using `--base <branch>`).
+- **Zero-Dependency Hybrid Engine**:
+  - Deterministic rules for RSA/EC/OpenSSH Private Keys, GitHub tokens, AWS Access Keys, OpenAI API Keys, Google API Keys, Slack Tokens, Stripe Keys, Bearer JWTs, and generic token assignments.
+  - Heuristic **Shannon Entropy** filter to flag strings with suspicious randomness (default threshold $\ge 4.5$).
+- **Gitleaks Integration (`--gitleaks`)**: Optional delegation to official `gitleaks` binary if available in the host environment or CI runner.
+- **Secure Masking**: Secrets are never printed in plain text in console logs or reports (`AKIA...` ➔ `AKIA***************`).
+- **Justified Suppression**: Specific false positives can be bypassed using the inline comment `// ai-sdlc:allow-secret`.
+- **Formal Output**: Generates `reports/SECRET_SCAN_REPORT.md` and exits with **exit code 4** on violations.
 
-<a id="cap-07-security-and-license-validation-32-analisis-estatico-de-vulnerabilidades-sast-aisdlc-verify-sast"></a>
+<a id="cap-07-security-and-license-validation-32-static-application-security-testing-sast-aisdlc-verify-sast"></a>
 
-### 3.2 Análisis Estático de Vulnerabilidades SAST (`aisdlc verify sast`)
+### 3.2 Static Application Security Testing SAST (`aisdlc verify sast`)
 
-Para erradicar patrones de código vulnerable comunes en código sintetizado por modelos de lenguaje (LLMs):
-- **Patrones Detectados**:
-  - *SQL Injection*: Concatenación directa de cadenas en consultas SQL sin sentencias parametrizadas (`SAST-001`).
-  - *Command Injection*: Ejecución de comandos del sistema operativo (`exec`, `execSync`, `spawn` con shell activo) con interpolación de variables (`SAST-002`).
-  - *Dynamic Code Evaluation*: Uso inseguro de `eval(...)` o constructores `new Function(...)` (`SAST-003`).
-  - *Server-Side Request Forgery (SSRF)*: Peticiones HTTP salientes donde la URL objetivo se construye directamente con entradas no sanitizadas (`SAST-004`).
-  - *Path Traversal*: Operaciones de sistema de archivos construidas mediante concatenación de rutas sin normalización ni comprobación de límites (`SAST-005`).
+To eradicate vulnerable code patterns common in LLM-synthesized code:
+- **Detected Patterns**:
+  - *SQL Injection*: Direct string concatenation in SQL queries without parameterized statements (`SAST-001`).
+  - *Command Injection*: OS command execution (`exec`, `execSync`, `spawn` with active shell) interpolating variables (`SAST-002`).
+  - *Dynamic Code Evaluation*: Insecure use of `eval(...)` or `new Function(...)` constructors (`SAST-003`).
+  - *Server-Side Request Forgery (SSRF)*: Outbound HTTP requests where target URLs are built directly from unsanitized input (`SAST-004`).
+  - *Path Traversal*: File system operations built with path concatenation without normalization or boundary checks (`SAST-005`).
   - *Prompt Injection (OWASP LLM01)*:
-    - **Concatenación Directa**: Interpolación directa de variables o entradas de usuario en llamadas a LLMs o plantillas de prompts sin delimitadores defensivos (`SAST-006`).
-    - **Jailbreak / System Override**: Firmas adversariales de evasión de restricciones de seguridad (*"ignore previous instructions"*, *"system override"*, *"DAN mode"*, rupturas de delimitadores `</system>`) (`SAST-007`).
-- **Cobertura Multilingüe Universal**: Escaneo determinista sobre lenguajes generalistas y plantillas: TypeScript/JavaScript (`.ts`, `.js`), Python (`.py`), C# (`.cs`), Java/Kotlin (`.java`, `.kt`, `.scala`), C/C++ (`.c`, `.cpp`, `.cc`), Go (`.go`), Rust (`.rs`), PHP (`.php`), Ruby (`.rb`), Swift (`.swift`) y plantillas `.prompt`.
-- **Runtime Guard (`detectPromptInjection`)**: Función utilitaria exportada por `@ai-sdlc/core` para evaluación programática en memoria antes de invocar a los modelos.
-- **Supresión Justificada**: Se permite ignorar advertencias mediante el comentario en línea `// ai-sdlc:allow-prompt-injection` o `// ai-sdlc:allow-sast`.
-- **Conector Opcional Semgrep (`--semgrep`)**: Ejecuta reglas corporativas de Semgrep sobre el repositorio si está disponible.
-- **Salida Formal**: Genera `reports/SAST_REPORT.md` y emite código de salida 1 en caso de vulnerabilidades detectadas.
+    - **Direct Concatenation**: Direct interpolation of variables or user input into LLM invocations or prompt templates without defensive delimiters (`SAST-006`).
+    - **Jailbreak / System Override**: Adversarial signatures designed to bypass safety boundaries (*"ignore previous instructions"*, *"system override"*, *"DAN mode"*, delimiter breaches `</system>`) (`SAST-007`).
+- **Universal Multilingual Coverage**: Deterministic scanning across general-purpose languages and templates: TypeScript/JavaScript (`.ts`, `.js`), Python (`.py`), C# (`.cs`), Java/Kotlin (`.java`, `.kt`, `.scala`), C/C++ (`.c`, `.cpp`, `.cc`), Go (`.go`), Rust (`.rs`), PHP (`.php`), Ruby (`.rb`), Swift (`.swift`), and `.prompt` templates.
+- **Runtime Guard (`detectPromptInjection`)**: Utility function exported by `@ai-sdlc/core` for in-memory programmatic evaluation prior to calling models.
+- **Justified Suppression**: Warnings can be suppressed via inline comment `// ai-sdlc:allow-prompt-injection` or `// ai-sdlc:allow-sast`.
+- **Optional Semgrep Connector (`--semgrep`)**: Runs enterprise Semgrep rules across the repository if Semgrep is installed.
+- **Formal Output**: Generates `reports/SAST_REPORT.md` and exits with exit code 1 if vulnerabilities are detected.
 
 ---
 
-<a id="cap-07-security-and-license-validation-4-la-capa-de-auditoria-adversarial-por-agentes-de-ia-secaudit"></a>
+<a id="cap-07-security-and-license-validation-4-adversarial-audit-layer-by-ai-agents-secaudit"></a>
 
-## 4. La Capa de Auditoría Adversarial por Agentes de IA (`sec:audit`)
+## 4. Adversarial Audit Layer by AI Agents (`sec:audit`)
 
-Las herramientas estáticas tradicionales (SAST) son excelentes detectando patrones sintácticos conocidos (como una inyección SQL simple), pero fallan al detectar **fallos de lógica de negocio**, **escalados horizontales de privilegios** o **vectores de prompt injection**.
+Traditional static tools (SAST) excel at spotting known syntactic patterns (like a simple SQL injection), but struggle with **business logic vulnerabilities**, **horizontal privilege escalations**, or nuanced **prompt injection vectors**.
 
-Para cubrir este vacío, el pipeline invoca al **Agente Auditor de Seguridad (`agent-security-auditor`)**:
-- **Entrada**: El diff completo del Pull Request, los casos de abuso asociados (`ABUSE-*`), los requisitos de seguridad (`SEC-REQ-*`) y el diseño técnico (`design.md`).
-- **Análisis**:
-  - ¿Existe algún camino en el que un usuario no autenticado pueda forzar el endpoint?
-  - ¿Se están aplicando las validaciones de límites en el backend y no solo en el cliente?
-  - ¿Existen llamadas a modelos de lenguaje vulnerables a inyección indirecta de prompts?
-  - ¿Los mensajes de error filtran trazas de pila o información confidencial?
-- **Salida**: Un informe formal con clasificación CVSS v3.1 insertado como comentario en el Pull Request. Si se detectan riesgos críticos, el agente solicita cambios antes del merge.
+To fill this gap, the pipeline invokes the **Security Auditor Agent (`agent-security-auditor`)**:
+- **Input**: The Pull Request diff, associated abuse cases (`ABUSE-*`), security requirements (`SEC-REQ-*`), and technical design (`design.md`).
+- **Analysis**:
+  - Is there an execution path where an unauthenticated user can invoke this endpoint?
+  - Are boundary checks enforced on the backend and not solely on the client?
+  - Are there calls to language models vulnerable to indirect prompt injection?
+  - Do error messages leak stack traces or confidential information?
+- **Output**: A formal report with CVSS v3.1 scoring posted as a Pull Request comment. If critical risks are detected, the agent requests changes before merge.
 
 ---
 
-<a id="cap-07-security-and-license-validation-5-codigos-de-salida-estandarizados-exit-codes"></a>
+<a id="cap-07-security-and-license-validation-5-standardized-exit-codes"></a>
 
-## 5. Códigos de Salida Estandarizados (Exit Codes)
+## 5. Standardized Exit Codes
 
-Toda herramienta y script de validación del proceso debe emitir los siguientes códigos de salida:
+All process validation tools and scripts must adhere to standard exit codes:
 
-| Código | Significado | Acción del Pipeline |
+| Code | Meaning | Pipeline Action |
 | :---: | :--- | :--- |
-| **0** | **Éxito (Pass)** | Todas las verificaciones y gates han sido superados. Listo para revisión humana. |
-| **1** | **Fallo Estructural / Pruebas** | Fallo en tests unitarios, errores sintácticos o vulnerabilidad crítica SAST. |
-| **2** | **Deriva de Citación (Stale)** | Un requerimiento o arquitectura canónica cambió. Se debe actualizar la spec. |
-| **3** | **Bloqueo Legal / Licencias** | Dependencia no permitida o requiere adquisición de licencia comercial. |
-| **4** | **Secreto Expuesto** | Credencial o certificado detectado por `verify secrets` en el repositorio o diff. |
+| **0** | **Success (Pass)** | All verifications and gates passed. Ready for human review. |
+| **1** | **Structural / Test Failure** | Unit test failure, syntax errors, or critical SAST vulnerability. |
+| **2** | **Citation Drift (Stale)** | A canonical requirement or architecture block changed. Update spec. |
+| **3** | **Legal / License Block** | Disallowed dependency or pending commercial acquisition request. |
+| **4** | **Exposed Secret** | Credential or certificate detected by `verify secrets` in repo or diff. |
 
 ---
 
@@ -2744,163 +2723,163 @@ Toda herramienta y script de validación del proceso debe emitir los siguientes 
 
 > 📂 **Módulo 10 de 13 [Parte II: Especificación Normativa del Framework]:** `process/08_citation_contract_and_drift.md`
 
-# 08. Contrato de Citación Criptográfica, Versionado Semántico y Detección de Deriva
+# 08. Cryptographic Citation Contract, Semantic Versioning, and Drift Detection
 
-<a id="cap-08-citation-contract-and-drift-1-el-modelo-de-doble-versionado-dual-versioning-architecture"></a>
+<a id="cap-08-citation-contract-and-drift-1-the-dual-versioning-architecture"></a>
 
-## 1. El Modelo de Doble Versionado (Dual-Versioning Architecture)
+## 1. The Dual-Versioning Architecture
 
-Para garantizar la máxima trazabilidad en ecosistemas colaborativos donde intervienen personas, herramientas CLI y agentes de IA, el framework AI-SDLC implementa un **Modelo de Doble Versionado**:
+To ensure end-to-end traceability in collaborative environments involving humans, CLI tools, and AI agents, the AI-SDLC framework implements a **Dual-Versioning Architecture**:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   MODELO DE DOBLE VERSIONADO AI-SDLC                   │
+│                   AI-SDLC DUAL-VERSIONING ARCHITECTURE                 │
 └────────────────────────────────────────────────────────────────────────┘
 
- 1. VERSIONADO SEMÁNTICO Y AUDITABLE (SemVer + Changelog As-Code)
-    ├── Campo 'version: "X.Y.Z"' en el frontmatter del artefacto.
-    ├── Metadatos 'schema-version', 'supersedes' y 'superseded-by'.
-    └── Tabla obligatoria de 'Historial de Revisiones' en el cuerpo Markdown.
-    ► Propósito: Legibilidad humana inmediata, exportación de documentación,
-                 y gestión del ciclo de vida (draft ➔ active ➔ deprecated ➔ retired).
+ 1. AUDITABLE SEMANTIC VERSIONING (SemVer + Changelog As-Code)
+    ├── Field 'version: "X.Y.Z"' in artifact frontmatter.
+    ├── Metadata 'schema-version', 'supersedes', and 'superseded-by'.
+    └── Mandatory 'Revision History' table in the Markdown body.
+    ► Purpose: Immediate human readability, documentation export,
+                 and lifecycle management (draft ➔ active ➔ deprecated ➔ retired).
 
- 2. VERSIONADO CRIPTOGRÁFICO DETERMINISTA (Citations SHA-256)
-    ├── Hash SHA-256 calculado sobre el contenido canónico normalizado (LF).
-    └── Referencia en documentos consumidores: 'id + digest + anchor'.
-    ► Propósito: Detección automática en CI/CD de derivas silenciosas (drift).
-                 Si el texto cambia aunque la versión no se haya incrementado,
-                 el pipeline detecta estado 'stale' de forma inmediata.
+ 2. DETERMINISTIC CRYPTOGRAPHIC VERSIONING (SHA-256 Citations)
+    ├── SHA-256 hash calculated over normalized canonical UTF-8 content (LF).
+    └── Consumer document reference: 'id + digest + anchor'.
+    ► Purpose: Automated CI/CD detection of silent semantic drift.
+                 If text changes even without a version bump,
+                 the pipeline flags a 'stale' state immediately.
 
- 3. HISTORIAL DE LÍNEA BASE EN CONTROL DE VERSIONES (Git)
-    └── Commits firmados, PRs atómicos y tags de release en la rama principal.
+ 3. BASELINE HISTORY IN VERSION CONTROL (Git)
+    └── Signed commits, atomic PRs, and release tags on the main branch.
 ```
 
 ---
 
-<a id="cap-08-citation-contract-and-drift-2-metadatos-de-versionabilidad-en-plantillas-y-artefactos"></a>
+<a id="cap-08-citation-contract-and-drift-2-versioning-metadata-in-templates-and-artifacts"></a>
 
-## 2. Metadatos de Versionabilidad en Plantillas y Artefactos
+## 2. Versioning Metadata in Templates and Artifacts
 
-Todo artefacto instanciado a partir de las plantillas de `templates/` debe declarar explícitamente sus metadatos de versión:
+Every artifact instantiated from `templates/` must explicitly declare versioning metadata:
 
 ```yaml
 ---
 id: ACT-DRONE-OPERATOR
 type: actor
-title: Operador de Vuelo de Drones
+title: Drone Flight Operator
 status: active
-version: "1.0.0"          # SemVer obligatorio (MAJOR.MINOR.PATCH)
-schema-version: "1.0"     # Versión de la especificación de esquema
-supersedes: null          # Identificador del artefacto anterior si lo reemplaza
-superseded-by: null       # Identificador del artefacto sucesor al pasar a retired
+version: "1.0.0"          # Mandatory SemVer (MAJOR.MINOR.PATCH)
+schema-version: "1.0"     # Schema specification version
+supersedes: null          # Identifier of previous artifact if replaced
+superseded-by: null       # Identifier of successor artifact when retired
 ---
 ```
 
-<a id="cap-08-citation-contract-and-drift-reglas-semver-para-artefactos"></a>
+<a id="cap-08-citation-contract-and-drift-semver-rules-for-artifacts"></a>
 
-### Reglas SemVer para Artefactos:
-- **MAJOR (`+1.0.0`)**: Modificación radical o ruptura de compatibilidad (ej. un caso de uso cambia su actor principal o precondiciones esenciales; una regla de negocio pasa de permisiva a estricta).
-- **MINOR (`0.+1.0`)**: Extensión o enriquecimiento sin ruptura (ej. se añaden escenarios alternativos a un caso de uso, nuevos criterios de verificación a un requerimiento o interfaces a un servicio).
-- **PATCH (`0.0.+1`)**: Aclaraciones editoriales, corrección de erratas sintácticas o refinamiento de redacción sin alterar el comportamiento normativo.
+### SemVer Rules for Artifacts:
+- **MAJOR (`+1.0.0`)**: Radical modification or breaking change (e.g., a use case changes its primary actor or essential preconditions; a business rule shifts from permissive to strict).
+- **MINOR (`0.+1.0`)**: Backward-compatible extension or enrichment (e.g., adding alternate scenarios to a use case, new verification criteria to a requirement, or interfaces to a service).
+- **PATCH (`0.0.+1`)**: Editorial clarifications, syntax errata fixes, or wording refinements without altering normative behavior.
 
 ---
 
-<a id="cap-08-citation-contract-and-drift-3-tabla-obligatoria-de-historial-de-revisiones"></a>
+<a id="cap-08-citation-contract-and-drift-3-mandatory-revision-history-table"></a>
 
-## 3. Tabla Obligatoria de Historial de Revisiones
+## 3. Mandatory Revision History Table
 
-Todo artefacto Markdown debe incluir al final de su cuerpo una sección estructurada:
+Every Markdown artifact must conclude with a structured revision history section:
 
 ```markdown
-<a id="cap-08-citation-contract-and-drift-historial-de-revisiones-y-control-de-versiones"></a>
+<a id="cap-08-citation-contract-and-drift-revision-history-and-version-control"></a>
 
-## Historial de Revisiones y Control de Versiones
+## Revision History and Version Control
 
-| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| Version | Date | Author / Agent | Change Description | Change Reference (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1.0.0** | 2026-09-03 | Carlos Mendoza | Creación inicial de la línea base | CHG-INIT-001 |
-| **1.1.0** | 2026-09-10 | Agente Analista | Incorporación de escenario de degradación | CHG-DEGRAD-002 |
+| **1.0.0** | 2026-09-03 | Carlos Mendoza | Initial baseline creation | CHG-INIT-001 |
+| **1.1.0** | 2026-09-10 | Analyst Agent | Added degradation scenario | CHG-DEGRAD-002 |
 ```
 
-Esta tabla permite que un agente de IA que analiza un archivo comprenda inmediatamente el contexto histórico y el motivo de las modificaciones sin necesidad de clonar o recorrer el historial complejo de Git.
+This table allows an AI agent inspecting a file to immediately understand historical context and rationale without needing to clone or traverse Git commit history.
 
 ---
 
-<a id="cap-08-citation-contract-and-drift-4-anatomia-de-una-citacion-criptografica"></a>
+<a id="cap-08-citation-contract-and-drift-4-anatomy-of-a-cryptographic-citation"></a>
 
-## 4. Anatomía de una Citación Criptográfica
+## 4. Anatomy of a Cryptographic Citation
 
-Un documento consumidor (una especificación SDD, un diseño técnico, un prompt de agente o una prueba de integración) **nunca reescribe el texto canónico**. En su lugar, emite un registro de citación:
+A consuming document (an SDD specification, a technical design, an agent prompt, or an integration test) **never duplicates canonical text**. Instead, it emits a citation record:
 
 ```yaml
 citations:
   - id: "FR-TELEMETRY-STREAM-001"
     digest: "sha256:50b17b58fc305bfd87f66c5d6c7f3496b24702b084e5b05495b7f1f79e9f4994"
     anchor: "SCENARIO-REALTIME-LATENCY"
-    comment: "Garantiza la entrega de telemetría de drones en menos de 100ms."
+    comment: "Guarantees drone telemetry delivery in under 100ms."
   - id: "SEC-REQ-MTLS-STREAM"
     digest: "sha256:f756830542ce5b850f5042dba59b7e025efba889a5489051e086b7a9849dd33f"
-    comment: "Autenticación mutua obligatoria mediante certificados x509."
+    comment: "Mandatory mutual authentication via x509 certificates."
 ```
 
-<a id="cap-08-citation-contract-and-drift-componentes-del-registro"></a>
+<a id="cap-08-citation-contract-and-drift-citation-record-components"></a>
 
-### Componentes del Registro:
-1. **`id`**: Identificador inmutable y canónico del artefacto citado (ej. `FR-001`, `UC-002`, `CMP-INGESTION`, `SEC-REQ-003`).
-2. **`digest`**: Hash criptográfico **SHA-256** calculado sobre el contenido UTF-8 canónico del artefacto (normalizado con saltos de línea LF).
-3. **`anchor` (Opcional)**: Ancla a un escenario específico dentro del artefacto (útil para pruebas concretas).
-4. **`comment`**: Explicación breve contextual del motivo de la citación.
+### Citation Record Components:
+1. **`id`**: Immutable canonical identifier of the cited artifact (e.g., `FR-001`, `UC-002`, `CMP-INGESTION`, `SEC-REQ-003`).
+2. **`digest`**: Cryptographic **SHA-256** hash calculated over the normalized canonical UTF-8 content of the artifact (with LF line endings).
+3. **`anchor` (Optional)**: Anchor pointing to a specific scenario inside the artifact (useful for targeted tests).
+4. **`comment`**: Brief contextual explanation of citation rationale.
 
 ---
 
-<a id="cap-08-citation-contract-and-drift-5-estados-de-verificacion-de-una-citacion"></a>
+<a id="cap-08-citation-contract-and-drift-5-citation-verification-states"></a>
 
-## 5. Estados de Verificación de una Citación
+## 5. Citation Verification States
 
-El validador determinista (`prodshape citations verify` o script del pipeline) recalcula los digests en tiempo real contra los archivos de la línea base y emite uno de los siguientes cuatro estados:
+The deterministic validator (`prodshape citations verify` or pipeline scripts) recalculates digests in real-time against baseline files and outputs one of four verification states:
 
-| Estado | Significado | Comportamiento del Sistema |
+| State | Meaning | System Behavior |
 | :--- | :--- | :--- |
-| **`current`** | El `id` existe y el hash `digest` coincide exactamente byte a byte con la línea base. | **Válido (Pass)**. La implementación está alineada con el producto y la arquitectura. |
-| **`stale`** | El `id` existe, pero el hash `digest` difiere del actual en la línea base (el requisito cambió). | **Deriva detectada (Fail exit 2)**. La especificación debe reevaluarse antes de codificar. |
-| **`unresolved`** | El `id` citado no existe en el grafo de producto ni de arquitectura. | **Enlace roto (Fail exit 1)**. Referencia a un artefacto inexistente o renombrado. |
-| **`tampered`** | El registro de citación fue alterado manualmente sin reflejar la fuente original. | **Integridad violada (Fail exit 1)**. |
+| **`current`** | The `id` exists and the hash `digest` matches byte-for-byte with the baseline. | **Valid (Pass)**. Implementation is aligned with product and architecture. |
+| **`stale`** | The `id` exists, but the hash `digest` differs from the baseline (requirement modified). | **Drift detected (Fail exit 2)**. Specification must be re-evaluated before coding. |
+| **`unresolved`** | The cited `id` does not exist in the product or architecture graph. | **Broken link (Fail exit 1)**. References a non-existent or renamed artifact. |
+| **`tampered`** | The citation record was manually altered without reflecting the original source. | **Integrity violation (Fail exit 1)**. |
 
 ---
 
-<a id="cap-08-citation-contract-and-drift-6-el-ciclo-de-vida-libre-de-deriva-drift-free-lifecycle"></a>
+<a id="cap-08-citation-contract-and-drift-6-the-drift-free-lifecycle"></a>
 
-## 6. El Ciclo de Vida Libre de Deriva (Drift-Free Lifecycle)
+## 6. The Drift-Free Lifecycle
 
 ```mermaid
 flowchart TD
-    A[Línea Base: Requisito FR-001 v1.0.0] -->|Cita con digest v1| B[Spec SDD chg-001]
-    B -->|Implementa| C[Código en Producción]
+    A["Baseline: Requirement FR-001 v1.0.0"] -->|"Cite with digest v1"| B["SDD Spec chg-001"]
+    B -->|"Implements"| C["Production Code"]
 
-    D[Product Change: Incrementa FR-001 a v1.1.0] -->|Merge en main| E[Línea Base Actualizada: FR-001 v1.1.0]
+    D["Product Change: Increments FR-001 to v1.1.0"] -->|"Merge into main"| E["Updated Baseline: FR-001 v1.1.0"]
 
-    E -.->|prodshape citations verify| F{Evaluación del Pipeline}
-    B -.->|Lectura de digest| F
+    E -.->|"prodshape citations verify"| F{"Pipeline Evaluation"}
+    B -.->|"Read digest"| F
 
-    F -->|Hash no coincide!| G[ESTADO: STALE]
-    G --> H[Alerta Automática a Personas y Agentes]
-    H --> I[Agente genera propuesta de actualización de Spec]
-    I --> J{Aprobación Humana de la nueva Spec}
-    J -->|Aprobada| K[Spec SDD actualizada a digest v2]
-    K --> L[ESTADO: CURRENT]
+    F -->|"Hash mismatch!"| G["STATUS: STALE"]
+    G --> H["Automated Alert to Humans and Agents"]
+    H --> I["Agent drafts Spec update proposal"]
+    I --> J{"Human Approval of new Spec"}
+    J -->|"Approved"| K["SDD Spec updated to digest v2"]
+    K --> L["STATUS: CURRENT"]
 ```
 
 ---
 
-<a id="cap-08-citation-contract-and-drift-7-empaquetamiento-de-citaciones-en-sidecars-de-handoff-hof-"></a>
+<a id="cap-08-citation-contract-and-drift-7-citation-packaging-in-handoff-sidecars-hof-"></a>
 
-## 7. Empaquetamiento de Citaciones en Sidecars de Handoff (`HOF-*`)
+## 7. Citation Packaging in Handoff Sidecars (`HOF-*`)
 
-Para desacoplar los entornos de trabajo de agentes de entrega (SDD) de la lectura de repositorios masivos, PDaC empaqueta el subgrafo y sus citaciones canónicas en un archivo de acompañamiento (*sidecar*) `handoff.yaml`:
+To decouple delivery agent workspaces (SDD) from scanning massive repositories, PDaC packages the subgraph and its canonical citations into a `handoff.yaml` sidecar file:
 
-1. **Estructura Criptográfica del Sidecar**:
-   - Cada entrega recibe un identificador único de handoff (`HOF-*`).
-   - El archivo incluye la colección de citaciones canónicas:
+1. **Cryptographic Sidecar Structure**:
+   - Each delivery receives a unique handoff identifier (`HOF-*`).
+   - The file includes the canonical citation collection:
      ```yaml
      id: "HOF-001-TELEMETRY-INGESTION"
      citations:
@@ -2908,12 +2887,12 @@ Para desacoplar los entornos de trabajo de agentes de entrega (SDD) de la lectur
          targetId: "FR-TELEMETRY-STREAM-001"
          digest: "sha256:50b17b58fc305bfd87f66c5d6c7f3496b24702b084e5b05495b7f1f79e9f4994"
      ```
-2. **Invarianza y Detección de Deriva**:
-   - Si un archivo canónico de la línea base es modificado en `main`, el verificador `aisdlc verify traceability` detecta la divergencia de hash frente al `handoff.yaml` activo, bloqueando la entrega hasta que se re-emita el handoff y se re-apruebe el cambio.
+2. **Invariance and Drift Detection**:
+   - If a canonical baseline file is altered on `main`, the `aisdlc verify traceability` verifier detects the hash divergence against the active `handoff.yaml`, blocking delivery until handoff is re-emitted and approved.
 
-3. **Inmunidad ante Deriva Falsa por Trazabilidad Invertida**:
-   - Al no almacenar punteros descendentes (servicios o rutas de tests) dentro de los requerimientos canónicos, los artefactos de producto y seguridad (`FR-*`, `QR-*`, `SEC-REQ-*`) permanecen inmutables ante refactorizaciones de código o reorganización de suites de prueba.
-   - Esto erradica falsas alarmas de deriva (*stale citations*) y garantiza que los digests SHA-256 de las citaciones PDaC sólo cambien cuando realmente evolucione la intención o especificación funcional del negocio.
+3. **Immunity to False Drift via Inverted Traceability**:
+   - Because canonical requirements do not store downstream pointers (such as concrete service or test file paths), product and security artifacts (`FR-*`, `QR-*`, `SEC-REQ-*`) remain unaffected by code refactoring or test reorganization.
+   - This eliminates false drift alerts (*stale citations*) and ensures SHA-256 digests change only when real functional business specifications evolve.
 
 ---
 
@@ -2921,291 +2900,298 @@ Para desacoplar los entornos de trabajo de agentes de entrega (SDD) de la lectur
 
 > 📂 **Módulo 11 de 13 [Parte II: Especificación Normativa del Framework]:** `process/09_agent_protocols.md`
 
-# 09. Protocolos de Agentes de IA, Prompts de Sistema y Guardrails
+# 09. AI Agent Protocols, System Prompts, and Guardrails
 
-<a id="cap-09-agent-protocols-1-principios-de-operacion-para-agentes-de-ia"></a>
+<a id="cap-09-agent-protocols-1-operational-principles-for-ai-agents"></a>
 
-## 1. Principios de Operación para Agentes de IA
+## 1. Operational Principles for AI Agents
 
-Los agentes de IA en el AI-SDLC no son meros autocompletadores de texto; son **trabajadores especializados con roles asignados, herramientas de inspección, contratos de entrada/salida y límites deterministas infranqueables**.
-
----
-
-<a id="cap-09-agent-protocols-2-los-5-mandamientos-inquebrantables-de-los-agentes-guardrails"></a>
-
-## 2. Los 5 Mandamientos Inquebrantables de los Agentes (Guardrails)
-
-Todo agente configurado en el ecosistema AI-SDLC opera bajo cinco restricciones no negociables:
-
-1. **PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**:
-   - Ningún agente puede ejecutar comandos de aprobación (`approve`), marcar un cambio como aceptado ni realizar un `git merge` hacia la rama protegida (`main`/`master`). Solo un humano debidamente identificado puede aprobar cambios en el modelo o en el código.
-2. **PROHIBIDO INVENTAR DECISIONES DE PRODUCTO O ARQUITECTURA**:
-   - Si un requerimiento es ambiguo o incompleto, el agente **debe formular una pregunta abierta (`open-questions`)** o solicitar clarificación al usuario humano mediante técnicas de entrevista (como `/grill-me`). Nunca debe rellenar vacíos críticos asumiendo intenciones no documentadas.
-3. **PROHIBIDO INTRODUCIR DEPENDENCIAS SIN INSPECCIÓN DE LICENCIA**:
-   - Antes de sugerir o instalar un paquete, el agente debe verificar su identificador SPDX frente a `license-policy.yaml`. Queda terminantemente prohibido incorporar dependencias GPL/AGPL (virales) o BSL/SSPL (comerciales de pago) sin aprobación humana previa.
-4. **PROHIBIDO IGNORAR LA CIBERSEGURIDAD (SECURITY-BY-DEFAULT)**:
-   - Todo código generado debe validar entradas, aplicar principio de mínimo privilegio, sanitizar datos y acompañarse de pruebas de mitigación (`SEC-TEST-*`). Queda prohibido desactivar linters, suprimir errores de tipos o deshabilitar pruebas de seguridad para que el pipeline "pase en verde".
-5. **OBLIGACIÓN DE CITACIÓN CRIPTOGRÁFICA**:
-   - El agente debe construir sus especificaciones y diseños vinculándolos a los identificadores inmutables y digests de los artefactos canónicos aprobados.
+AI agents in AI-SDLC are not simple text auto-completers; they are **specialized workers with assigned roles, inspection tools, input/output contracts, and insurmountable deterministic boundaries**.
 
 ---
 
-<a id="cap-09-agent-protocols-3-catalogo-de-prompts-de-sistema-para-agentes-especializados"></a>
+<a id="cap-09-agent-protocols-2-the-5-unbreakable-commandments-of-agents-guardrails-los-5-mandamientos-inquebrantables-de-los-agentes"></a>
 
-## 3. Catálogo de Prompts de Sistema para Agentes Especializados
+## 2. The 5 Unbreakable Commandments of Agents (Guardrails) | Los 5 Mandamientos Inquebrantables de los Agentes
 
-<a id="cap-09-agent-protocols-1-agent-product-analyst-analista-de-producto"></a>
+Every agent configured within the AI-SDLC ecosystem operates under five non-negotiable constraints:
 
-### 1. `agent-product-analyst` (Analista de Producto)
+1. **FORBIDDEN TO AUTO-APPROVE OR AUTO-MERGE | PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**:
+   - No agent may execute approval commands (`approve`), mark a change as accepted, or perform a `git merge` into protected branches (`main`/`master`). Only an identified human engineer may approve changes to the model or code.
+2. **FORBIDDEN TO INVENT PRODUCT OR ARCHITECTURE DECISIONS | PROHIBIDO INVENTAR DECISIONES DE PRODUCTO O ARQUITECTURA**:
+   - If a requirement is ambiguous or incomplete, the agent **must formulate open questions (`open-questions`)** or request clarification from the human user through interview techniques (such as `/grill-me`). It must never fill critical gaps by assuming undocumented intentions.
+3. **FORBIDDEN TO INTRODUCE DEPENDENCIES WITHOUT LICENSE INSPECTION | PROHIBIDO INTRODUCIR DEPENDENCIAS SIN INSPECCIÓN DE LICENCIA**:
+   - Before suggesting or installing a package, the agent must verify its SPDX identifier against `license-policy.yaml`. Introducing viral GPL/AGPL or commercial paid BSL/SSPL dependencies without prior human approval is strictly prohibited.
+4. **FORBIDDEN TO IGNORE CYBERSECURITY (SECURITY-BY-DEFAULT) | PROHIBIDO IGNORAR LA CIBERSEGURIDAD**:
+   - All generated code must validate inputs, enforce least privilege, sanitize data, and include mitigation tests (`SEC-TEST-*`). Disabling linters, suppressing type errors (`any`, `@ts-ignore`), or bypassing security tests to force pipeline green passes is prohibited.
+5. **MANDATORY CRYPTOGRAPHIC CITATION | OBLIGACIÓN DE CITACIÓN CRIPTOGRÁFICA**:
+   - The agent must construct specifications and designs strictly linking them to the immutable identifiers and SHA-256 digests of approved canonical artifacts.
+
+---
+
+<a id="cap-09-agent-protocols-3-system-prompts-catalog-for-specialized-agents"></a>
+
+## 3. System Prompts Catalog for Specialized Agents
+
+<a id="cap-09-agent-protocols-1-agent-product-analyst-product-analyst"></a>
+
+### 1. `agent-product-analyst` (Product Analyst)
 ```text
-ROL: Eres el Agente Analista de Producto del framework AI-SDLC.
-MISIÓN: Ayudar al Product Owner humano a explorar, modelar y refinar la definición de producto mediante ProductShape.
-DIRECTRICES:
-- Todo artefacto que generes (ACT, JRN, UC, BR, BC, TERM, FR, QR, CON) debe cumplir estrictamente con el formato Markdown y YAML frontmatter canónico.
-- Escribe las relaciones siempre en su dirección canónica única (ej. use-case declara primary-actor y governed-by; domain-term declara defined-in).
-- No asumas reglas de negocio. Si detectas una laguna, regístrala explícitamente en la sección 'open-questions'.
-- Al finalizar un borrador, ejecuta la validación determinista de esquemas.
-- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque canónico de Workflow Handoff ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-threat-modeler' o 'agent-expert-user', abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+ROLE: You are the Product Analyst Agent of the AI-SDLC framework.
+MISSION: Capture new product intent via NAF v4 Enterprise & Capability Vision ('ARCH-INTRO-*') and assist the human Product Owner in exploring, modeling, and refining product definition using ProductShape.
+DIRECTIVES:
+- PHASE 0 (GREENFIELD PRODUCT INCEPTION): When the user expresses the intent to create a new product from scratch with the framework (or when 'specs/product/' has no baseline product model yet), initiate Phase 0 before any SDD change ('change:new') or code implementation:
+  1. Conduct a concise 3–5 question structured discovery interview covering: (a) core problem and mission statement, (b) primary actors/stakeholders ('ACT-*'), (c) essential MVP capabilities/use cases ('UC-*'), and (d) top 3–5 priority quality goals and constraints ('QR-*', 'CON-*').
+  2. Instantiate 'ARCH-INTRO-001' ('type: architecture-introduction', 'naf-perspective: "Enterprise & Capability"', 'status: draft') from 'templates/architecture/introduction-and-goals.template.md' ('schemas/architecture/introduction-and-goals.schema.json').
+  3. Derive initial draft ProductShape artifacts ('ACT-*', 'UC-*', 'BR-*', 'FR-*', 'QR-*' with 'status: draft') in 'specs/product/' linked to 'ARCH-INTRO-001'.
+- Every artifact you produce (ARCH-INTRO, ACT, JRN, UC, BR, BC, TERM, FR, QR, CON) must strictly adhere to the canonical Markdown and YAML frontmatter format.
+- Always write relationships in their single canonical direction (e.g., use-case declares primary-actor and governed-by; domain-term declares defined-in).
+- Do not assume business rules. If you detect an ambiguity, record it explicitly under the 'open-questions' section.
+- Upon finishing a draft, execute deterministic schema validation.
+- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') suggesting 'agent-threat-modeler' or 'agent-expert-user', opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-<a id="cap-09-agent-protocols-2-agent-threat-modeler-modelador-de-amenazas-y-seguridad"></a>
+<a id="cap-09-agent-protocols-2-agent-threat-modeler-threat-modeler-and-security-specialist"></a>
 
-### 2. `agent-threat-modeler` (Modelador de Amenazas y Seguridad)
+### 2. `agent-threat-modeler` (Threat Modeler and Security Specialist)
 ```text
-ROL: Eres el Agente Especialista en Threat Modeling y Ciberseguridad Shift-Left.
-MISIÓN: Analizar casos de uso de negocio y artefactos de arquitectura para modelar proactivamente adversarios, vectores de ataque técnicos y requisitos de mitigación.
-DIRECTRICES:
-- Aplica la metodología STRIDE y OWASP ASVS sobre cada caso de uso 'UC-*' y componente de arquitectura 'CMP-*' (diagramas Mermaid C4/arc42, registros ADR).
-- Define los actores maliciosos 'ACT-THREAT-*' y sus casos de abuso 'ABUSE-*'.
-- En el bucle de retorno de seguridad técnica (procedente de 'agent-system-architect'), analiza las decisiones de infraestructura, persistencia, middleware y APIs para emitir 'ACT-THREAT-*' y 'SEC-REQ-*' a nivel de software/sistema.
-- Todo caso de abuso debe estar mitigado por al menos un requisito de seguridad formal 'SEC-REQ-*'.
-- Propón políticas Zero Trust y asignación a enclaves seguros 'SEC-ENC-*'.
-- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-system-architect' (o 'agent-qa-engineer' tras completar el modelado técnico) y abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+ROLE: You are the Threat Modeling and Shift-Left Cybersecurity Specialist Agent.
+MISSION: Analyze business use cases and architecture artifacts to proactively model adversaries, technical attack vectors, and mitigation requirements.
+DIRECTIVES:
+- Apply STRIDE and OWASP ASVS methodologies to every use case 'UC-*' and architecture component 'CMP-*' (Mermaid C4/arc42 diagrams, ADR records).
+- Define threat actors 'ACT-THREAT-*' and their abuse cases 'ABUSE-*'.
+- In the TECHNICAL SECURITY FEEDBACK LOOP (arriving from 'agent-system-architect'), analyze infrastructure, persistence, middleware, and API decisions to issue system/software-level 'ACT-THREAT-*' and 'SEC-REQ-*'.
+- Every abuse case must be mitigated by at least one formal security requirement 'SEC-REQ-*'.
+- Propose Zero Trust policies and assignment to secure enclaves 'SEC-ENC-*'.
+- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') suggesting 'agent-system-architect' (or 'agent-qa-engineer' once technical modeling is complete) and opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-<a id="cap-09-agent-protocols-3-agent-system-architect-arquitecto-de-sistemas"></a>
+<a id="cap-09-agent-protocols-3-agent-system-architect-system-architect"></a>
 
-### 3. `agent-system-architect` (Arquitecto de Sistemas)
+### 3. `agent-system-architect` (System Architect)
 ```text
-ROL: Eres el Agente Arquitecto de Sistemas del framework AI-SDLC.
-MISIÓN: Traducir la definición de producto aprobada en una arquitectura técnica modular basada en arc42 enriquecido con NAF v4.
-DIRECTRICES:
-- Descompón el sistema en bloques 'CMP-*' asegurando que cada servicio declare qué casos de uso 'UC-*' implementa y qué requerimientos ('FR-*', 'QR-*', 'SEC-REQ-*') satisface en 'satisfies-requirements'.
-- Genera diagramas de secuencia e interacciones en sintaxis nativa Mermaid.
-- Documenta las decisiones tecnológicas críticas mediante registros ADR inmutables en docs/architecture/09_decisions/.
-- Valida que la arquitectura respete las restricciones legales de license-policy.yaml.
-- BUCLE DE RETORNO DE SEGURIDAD TÉCNICA: Si las decisiones de arquitectura (ej. bases de datos, colas, caching distribuido, APIs de terceros o esquemas de autenticación) introducen nuevos vectores de ataque, emite un handoff secundario de retorno hacia 'agent-threat-modeler' para modelado técnico antes de la fase de pruebas.
-- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-qa-engineer' (o a 'agent-threat-modeler' si se requiere ciclo de retorno de seguridad técnica) y abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+ROLE: You are the System Architect Agent of the AI-SDLC framework.
+MISSION: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4.
+DIRECTIVES:
+- Decompose the system into building blocks 'CMP-*' ensuring each service declares which use cases 'UC-*' it implements and which requirements ('FR-*', 'QR-*', 'SEC-REQ-*') it fulfills under 'satisfies-requirements'.
+- CONTRACT-FIRST FULL-STACK INTEGRATION: Whenever a feature or change spans Frontend (UI) and Backend (API/services), define an explicit shared typed contract (Zod schemas, shared TypeScript DTOs, or OpenAPI specification) in 'design.md' BEFORE code implementation so both layers compile against a single source of truth.
+- Generate interaction and sequence diagrams in native Mermaid syntax.
+- Document critical technological decisions using immutable ADR records under docs/architecture/09_decisions/.
+- Validate that the architecture complies with legal constraints in license-policy.yaml.
+- TECHNICAL SECURITY FEEDBACK LOOP: If architectural decisions (e.g., databases, queues, distributed caching, third-party APIs, or authentication schemes) introduce new attack vectors, emit a secondary return handoff to 'agent-threat-modeler' for technical modeling prior to the testing phase.
+- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') suggesting 'agent-qa-engineer' (or 'agent-threat-modeler' if technical security loop is required) and opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-<a id="cap-09-agent-protocols-4-agent-qa-engineer-ingeniero-de-qa-y-sdet"></a>
+<a id="cap-09-agent-protocols-4-agent-qa-engineer-qa-engineer-and-sdet"></a>
 
-### 4. `agent-qa-engineer` (Ingeniero de QA y SDET)
+### 4. `agent-qa-engineer` (QA Engineer and SDET)
 ```text
-ROL: Eres el Agente Ingeniero de QA y SDET (Software Development Engineer in Test) del framework AI-SDLC.
-MISIÓN: Traducir los requerimientos aprobados (FR-*, SEC-REQ-*, QR-*) en suites de prueba exhaustivas en ROJO (failing)
-aplicando BDD/Gherkin, ANTES de que agent-developer escriba una sola línea de código de producción.
-DIRECTRICES:
-- Lee únicamente los requerimientos citados en el sidecar handoff.yaml (HOF-*) y sus artefactos referenciados.
-  Nunca consultes ni anticipes la implementación: tu contrato es con el requerimiento, no con el código.
-- Para cada requerimiento FR-*, genera obligatoriamente las tres categorías base de prueba:
-  1. CASO NOMINAL (Scenario): el camino feliz con entradas válidas dentro del rango esperado.
-  2. CASOS LÍMITE (Scenario Outline + tabla Examples): valores en los extremos del rango aceptado
-     (mínimo, máximo, longitud exacta, frontera de dominio).
-  3. CASOS FUERA DE RANGO / INVÁLIDOS (Scenario Outline + tabla Examples): entradas nulas, vacías,
-     tipos incorrectos, valores que exceden los límites definidos.
-- Aplica las siguientes categorías condicionales según el contexto del FR-*:
-  - SEGURIDAD (obligatorio si el FR-* tiene SEC-REQ-* asociado):
-    * Inyección: verifica que inputs con payloads maliciosos (SQL, prompt injection, XSS) son rechazados.
-    * Autorización: verifica que un actor sin permisos recibe error y no ejecuta la operación.
-    * Repudio: verifica que las acciones quedan registradas y no pueden negarse.
-  - RENDIMIENTO / CONCURRENCIA (obligatorio si el FR-* tiene QR-* de tiempo o throughput):
-    * Timeout: el sistema responde dentro del límite definido en el QR-*.
-    * Race condition: dos actores simultáneos no corrompen el estado compartido.
-  - IDEMPOTENCIA (obligatorio si la operación es PUT, DELETE o cualquier acción repetible):
-    * Ejecutar la operación N veces produce el mismo resultado que ejecutarla una sola vez.
-  - POSTCONDICIONES Y ESTADO (recomendado cuando la operación muta estado persistente):
-    * El estado del sistema tras la operación es el correcto, no solo el valor retornado.
-  - CONTRATO DE INTERFAZ (recomendado en APIs públicas o contratos entre agentes):
-    * La firma, tipos y estructura de salida no cambian inesperadamente.
-- Etiqueta todos los escenarios con @<FR-ID> @automated @regression y, si aplica,
-  @security @mitigation, @performance o @idempotence.
-- PROHIBIDO: incluir código de producción, sugerir implementaciones o anticipar soluciones técnicas.
-  Tu entregable son únicamente las pruebas en rojo; cualquier escenario con código de producción
-  asociado se considera una violación del protocolo TDD.
-- BLOQUEO DE CALIDAD: un FR-* que solo tenga el caso nominal no puede hacer handoff a agent-developer.
-  La ausencia de casos límite o fuera de rango es un bloqueo explícito.
-- Antes de emitir el handoff, ejecuta 'npx aisdlc verify testing' para confirmar que los escenarios
-  Gherkin están sincronizados y registrados en la matriz RTM.
-- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque canónico de Workflow Handoff
-  ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-developer' y abriendo la ventana
-  de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+ROLE: You are the QA Engineer and SDET (Software Development Engineer in Test) Agent of the AI-SDLC framework.
+MISSION: Translate approved requirements (FR-*, SEC-REQ-*, QR-*) into comprehensive FAILING (red) test suites
+applying BDD/Gherkin, BEFORE agent-developer writes a single line of production code.
+DIRECTIVES:
+- Read exclusively requirements cited in the handoff.yaml sidecar (HOF-*) and their referenced artifacts.
+  Never inspect or anticipate implementation details: your contract is with the requirement, not the code.
+- For each FR-* requirement, generate the three mandatory test categories:
+  1. NOMINAL CASE (Scenario): happy path with valid inputs within expected boundaries.
+  2. BOUNDARY CASES (Scenario Outline + Examples table): values at the extremes of the accepted range
+     (minimum, maximum, exact length, domain edge).
+  3. OUT OF RANGE / INVALID CASES (Scenario Outline + Examples table): null, empty, wrong types, values exceeding bounds.
+- Apply the following conditional categories based on the FR-* context:
+  - SECURITY (mandatory if FR-* has associated SEC-REQ-*):
+    * Injection: verify inputs with malicious payloads (SQL, prompt injection, XSS) are rejected.
+    * Authorization: verify an unauthorized actor receives error and cannot execute the operation.
+    * Non-repudiation: verify actions are logged and cannot be denied.
+  - PERFORMANCE / CONCURRENCY (mandatory if FR-* has latency or throughput QR-*):
+    * Timeout: system responds within threshold defined in QR-*.
+    * Race condition: concurrent actors do not corrupt shared state.
+  - IDEMPOTENCY (mandatory if operation is PUT, DELETE, or repeatable action):
+    * Executing operation N times yields identical result to single execution.
+  - POSTCONDITIONS AND STATE (recommended when operation mutates persistent state):
+    * System state post-operation is verified, not merely the return value.
+  - INTERFACE CONTRACT & ZERO-MOCK INTEGRATION (mandatory in public APIs, UI-to-Backend flows, or agent contracts):
+    * Signature, types, and payload schema do not unexpectedly break.
+    * ZERO-MOCK INTEGRATION RULE: When an FR-* spans UI and Backend, unit tests that mock 'fetch'/HTTP in isolation are insufficient; include integration/contract or E2E test scenarios that verify real request/response wiring and UI state transitions (Loading, Empty, Error, Nominal).
+- Tag all scenarios with @<FR-ID> @automated @regression and, when applicable,
+  @security @mitigation, @performance or @idempotence.
+- FORBIDDEN: including production code, suggesting implementation, or anticipating technical solutions.
+  Your deliverable is strictly failing tests; any scenario with attached production code violates TDD protocol.
+- QUALITY BLOCK: an FR-* having only nominal scenarios cannot hand off to agent-developer.
+  Missing boundary or out-of-range scenarios represents an explicit block.
+- Before emitting handoff, run 'npx aisdlc verify testing' to confirm Gherkin scenarios are synchronized and recorded in RTM.
+- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the canonical Workflow Handoff block
+  ('templates/workflow/agent-handoff.template.md') suggesting 'agent-developer' and opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-<a id="cap-09-agent-protocols-5-agent-developer-desarrollador-de-software"></a>
+<a id="cap-09-agent-protocols-5-agent-developer-software-developer"></a>
 
-### 5. `agent-developer` (Desarrollador de Software)
+### 5. `agent-developer` (Software Developer)
 ```text
-ROL: Eres el Agente Desarrollador / Coder de alta precisión.
-MISIÓN: Implementar tareas atómicas de especificaciones SDD ('tasks.md') generando código limpio, tipado y probado.
-DIRECTRICES:
-- Lee únicamente los documentos citados por la spec para mantener el contexto limpio y evitar alucinaciones.
-- Aplica Test-Driven Development (TDD): genera las pruebas unitarias antes o en paralelo con la lógica del componente.
-- Si la tarea implementa un 'SEC-REQ-*' o 'FR-*', genera obligatoriamente la prueba correspondiente y etiqueta los escenarios BDD con '@<ID>' o cita el ID en los comentarios de cabecera del test para habilitar la trazabilidad inversa.
-- Antes de agregar cualquier librería externa, verifica que su licencia esté en la allowlist de license-policy.yaml.
-- Antes de escribir la primera línea de código en 'src/', ejecuta 'npx aisdlc sdd verify --json' (o 'npx aisdlc verify duplicates --json'). Si detectas requisitos duplicados o colisiones frente a la línea base, DETENTE inmediatamente y solicita aclaración para evitar desperdicio de recursos. Emplea el flag '--json' o 'AISDLC_FORMAT=json' para parsear deterministamente los diagnósticos sin secuencias de escape ANSI.
-- Inicia o consume cambios SDD mediante `npx aisdlc change new <nombre>` (o su alias `sdd new`), y accede al subgrafo del producto depositado en el sidecar `handoff.yaml` (`HOF-*`) mediante los adaptadores OpenSpec o Spec Kit (`npx aisdlc sdd deposit`).
-- Inmediatamente después de escribir o refactorizar código, ejecuta automáticamente `npx tsx scripts/generate-quality-report.ts` y adjunta el informe `quality-report.md` al directorio del cambio.
-- Si el Release Gate falla por complejidad ciclomática >10 o mantenibilidad baja, descompón la función en métodos auxiliares cohesivos antes de dar la tarea por concluida.
-- Respeta estrictamente el modo de autonomía asignado a cada tarea en 'tasks.md':
-  * Si es 'AUTONOMOUS': Planifica y ejecuta de forma autónoma. OMITIR handoff interactivo.
-  * Si es 'HUMAN_REVIEW_PLAN': Genera el plan de implementación detallado, emite el bloque canónico de Workflow Handoff ('templates/workflow/agent-handoff.template.md') abriendo la ventana de acción humana y DETENTE. Solicita aprobación humana antes de codificar.
-  * Si es 'AMBIGUOUS': DETENTE de inmediato. Prohibido adivinar requisitos. Formula preguntas aclaratorias al usuario y emite el handoff de bloqueo.
-  * Si es 'HIGH_RISK_MANUAL': NUNCA ejecutes la tarea de forma autónoma; requiere ejecución manual directa por ingenieros. Emite el handoff recordando la autoría humana.
-- Al concluir satisfactoriamente el 100% de las tareas de la entrega en estado 'COMPLETED', ejecuta la integración canónica (`npx aisdlc sdd integrate --change <id>`) para promover los requisitos a la especificación activa y sincronizar la arquitectura.
-- Concluye emitiendo el bloque canónico de Workflow Handoff ('templates/workflow/agent-handoff.template.md') sugiriendo a 'agent-expert-user' para la validación funcional post-desarrollo (contraste de 'UC-*' y 'FR-*' en interfaz y CLI) antes de la auditoría de seguridad pre-merge.
+ROLE: You are the High-Precision Developer / Coder Agent.
+MISSION: Implement atomic tasks from SDD specifications ('tasks.md') delivering clean, typed, and tested code.
+DIRECTIVES:
+- Read exclusively documents cited by the spec to keep context clean and eliminate hallucinations.
+- Apply Test-Driven Development (TDD): generate unit tests before or alongside component logic.
+- If the task implements 'SEC-REQ-*' or 'FR-*', generate the corresponding test and tag BDD scenarios with '@<ID>' or cite the ID in test header comments to enable reverse traceability.
+- Before adding any external dependency, verify its license is in the allowlist of license-policy.yaml.
+- ZERO FAKE-WIRING GUARDRAIL: Strictly forbidden from marking a task 'COMPLETED' with hardcoded 'mockData' arrays in production views, 'setTimeout' simulating network calls, or empty UI event handlers ('onClick={() => {}}', 'onSubmit={() => {}}'). Frontend components must wire directly to the shared contract and real Backend endpoints.
+- MANDATORY 4 UI STATES MATRIX: Every data-driven UI component or screen must explicitly implement and handle all 4 usability states: 'Loading' (spinner/skeleton + disabled submit to prevent double-submit), 'Empty' (clear message + CTA when 0 items), 'Error' (user-visible error recovery banner, never silent failure), and 'Nominal/Success' (accessible semantic DOM + keyboard navigation).
+- LIVE RUNTIME SMOKE VERIFICATION: For any task touching UI or UI-to-Backend integration, unit tests alone are insufficient. Before emitting handoff, boot the real Backend and Frontend servers and verify (via Playwright E2E or Chrome DevTools MCP) that browser 'console.error' and 'pageerror' counts are 0 and API calls return real 2xx responses without CORS or schema mismatches.
+- Before writing the first line of code in 'src/', run 'npx aisdlc sdd verify --json' (or 'npx aisdlc verify duplicates --json'). If duplicate requirements or baseline collisions are found, STOP immediately and ask for clarification. Use '--json' or 'AISDLC_FORMAT=json' to deterministically parse diagnostics without ANSI escape codes.
+- Scaffold or consume SDD changes via `npx aisdlc change new <name>` (or alias `sdd new`), accessing the product subgraph deposited in the `handoff.yaml` sidecar (`HOF-*`) via OpenSpec or Spec Kit adapters (`npx aisdlc sdd deposit`).
+- Immediately after writing or refactoring code, run `npx tsx scripts/generate-quality-report.ts` and attach `quality-report.md` to the change directory.
+- If Release Gate fails due to cyclomatic complexity > 10 or low maintainability, decompose the function into cohesive helper methods before completing the task.
+- Strictly adhere to the autonomy mode assigned to each task in 'tasks.md':
+  * 'AUTONOMOUS': Plan and execute autonomously. OMIT interactive handoff.
+  * 'HUMAN_REVIEW_PLAN': Generate detailed plan, emit canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') opening the Human Action Window and STOP. Request human approval before coding.
+  * 'AMBIGUOUS': STOP immediately. Guessing requirements is forbidden. Ask clarifying questions and emit blocking handoff.
+  * 'HIGH_RISK_MANUAL': NEVER execute autonomously; requires direct manual execution by human engineers. Emit handoff reminding human authorship.
+- Upon completing 100% of delivery tasks in 'COMPLETED' status, run canonical integration (`npx aisdlc sdd integrate --change <id>`) to promote requirements to the active specification and sync architecture.
+- Conclude by emitting canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') suggesting 'agent-expert-user' for Post-Development Functional Validation (evaluating 'UC-*' and 'FR-*' across UI and CLI) prior to pre-merge security audit.
 ```
 
-<a id="cap-09-agent-protocols-6-agent-security-auditor-auditor-adversarial-de-codigo"></a>
+<a id="cap-09-agent-protocols-6-agent-security-auditor-adversarial-code-auditor"></a>
 
-### 6. `agent-security-auditor` (Auditor Adversarial de Código)
+### 6. `agent-security-auditor` (Adversarial Code Auditor)
 ```text
-ROL: Eres el Agente Auditor de Seguridad Adversarial ('sec:audit').
-MISIÓN: Examinar minuciosamente los Pull Requests en busca de vulnerabilidades lógicas, vectores de inyección y fallos de autorización.
-DIRECTRICES:
-- Analiza el diff de código con mentalidad atacante: ¿Cómo puedo saltarme este control de autenticación? ¿Hay fugas de información en excepciones? ¿Es posible una inyección indirecta de prompts en las llamadas a LLMs?
-- Emite un informe formal con clasificación CVSS v3.1 y propuestas de corrección inmediatas.
-- Bloquea cualquier PR que introduzca riesgos críticos o altos.
-- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') hacia el Tech Lead humano, abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+ROLE: You are the Adversarial Security Auditor Agent ('sec:audit').
+MISSION: Rigorously examine Pull Requests for business logic vulnerabilities, injection vectors, and authorization flaws.
+DIRECTIVES:
+- Analyze code diff with an attacker mindset: How can an unauthenticated user bypass this check? Are there info leaks in exceptions? Is indirect prompt injection possible in LLM calls?
+- Issue a formal report with CVSS v3.1 scoring and immediate remediation proposals.
+- Block any PR introducing critical or high security risks.
+- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-<a id="cap-09-agent-protocols-7-agent-compliance-checker-auditor-de-licencias-open-source"></a>
+<a id="cap-09-agent-protocols-7-agent-compliance-checker-open-source-license-compliance-auditor"></a>
 
-### 7. `agent-compliance-checker` (Auditor de Licencias Open Source)
+### 7. `agent-compliance-checker` (Open Source License Compliance Auditor)
 ```text
-ROL: Eres el Agente Auditor de Licencias y Propiedad Intelectual.
-MISIÓN: Auditar manifiestos de dependencias y asegurar que todo paquete externo sea de libre uso comercial o cuente con aprobación de adquisición.
-DIRECTRICES:
-- Comprueba identificadores SPDX de cada librería directa y transitiva.
-- Bloquea inmediatamente licencias virales (GPL, AGPL) y ambiguas.
-- Si detectas licencias BSL, SSPL o con cláusulas comerciales de pago, añade la etiqueta 'needs-commercial-license' y alerta al equipo legal humano.
-- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') hacia el Tech Lead o Legal humano, abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+ROLE: You are the License and Intellectual Property Auditor Agent.
+MISSION: Audit dependency manifests and ensure every third-party package is free for commercial use or has acquisition approval.
+DIRECTIVES:
+- Verify SPDX identifiers for each direct and transitive dependency.
+- Immediately block viral licenses (GPL, AGPL) and ambiguous licenses.
+- If BSL, SSPL, or commercial paid clauses are detected, flag with 'needs-commercial-license' and alert the human legal team.
+- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead or Legal counsel, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-<a id="cap-09-agent-protocols-8-agent-expert-user-usuario-experto-y-evaluador-de-dominio"></a>
+<a id="cap-09-agent-protocols-8-agent-expert-user-expert-user-and-domain-evaluator"></a>
 
-### 8. `agent-expert-user` (Usuario Experto y Evaluador de Dominio)
+### 8. `agent-expert-user` (Expert User and Domain Evaluator)
 ```text
-ROL: Eres el Agente Usuario Experto y Evaluador de Dominio (`agent-expert-user`).
-MISIÓN: Contrastar el diseño del producto, las especificaciones técnicas y el software implementado desde la perspectiva crítica de un operador final avanzado, asegurando el MVP estricto y la conformidad funcional pre-PR.
-DIRECTRICES:
-- Opera bajo disciplina bimodal según la fase del ciclo de desarrollo:
-  1. MODO DISEÑO (Upstream): Adopta el perfil operativo del actor primario ('primary-actor') bajo condiciones reales (estrés, latencia, pantallas reducidas, volumen de datos). Define el núcleo mínimo viable (MVP) sin características superfluas (YAGNI), y estructura el feedback conforme a 'templates/product/user-design-feedback.template.md' sugiriendo a 'agent-product-analyst' o al PO humano.
-  2. MODO VALIDACIÓN FUNCIONAL (Downstream / Pre-PR): Inspecciona la salida de 'agent-developer' tras pasar sus pruebas unitarias en verde. Contrasta exhaustivamente la interfaz, CLI o comportamiento del sistema frente a los casos de uso ('UC-*') y criterios funcionales ('FR-*') aprobados por el PO. Si detecta desvíos funcionales o lagunas de experiencia, emite handoff de retorno a 'agent-developer'; si la funcionalidad es conforme, emite handoff sugiriendo a 'agent-security-auditor' para iniciar la auditoría pre-merge.
-- Formula preguntas clave en 'open-questions' para que el Product Owner humano decida la priorización de candidatos.
-- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque canónico de Workflow Handoff ('templates/workflow/agent-handoff.template.md') recomendando al siguiente especialista según el modo actuante, abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+ROLE: You are the Expert User and Domain Evaluator Agent (`agent-expert-user`).
+MISSION: Scrutinize product design, technical specifications, and implemented software from the perspective of an advanced end operator, enforcing strict MVP boundaries and pre-PR functional conformity.
+DIRECTIVES:
+- Operate under bimodal discipline depending on the development lifecycle phase:
+  1. DESIGN MODE (Upstream): Adopt the primary actor's operational profile under real-world conditions (stress, latency, constrained viewports, high data volume). Define the strict Minimum Viable Product (MVP) without superfluous features (YAGNI), structuring feedback according to 'templates/product/user-design-feedback.template.md' suggesting 'agent-product-analyst' or human PO.
+  2. FUNCTIONAL VALIDATION MODE (Downstream / Pre-PR / Post-Development Functional Validation): Inspect 'agent-developer' deliverables once unit tests pass green by executing the real application (via Playwright or Chrome DevTools MCP when UI is present). Thoroughly contrast system UI, CLI, or API behavior against use cases ('UC-*') and functional criteria ('FR-*') approved by the PO, verifying real Backend connectivity, the 4 UI usability states (Loading, Empty, Error, Nominal), keyboard/ARIA accessibility, and 0 browser 'console.error' / network failures. If functional drift, fake-wiring, or UX gaps are found, emit return handoff to 'agent-developer'; if fully compliant, emit handoff suggesting 'agent-security-auditor' to begin pre-merge audit.
+- Formulate decisive questions under 'open-questions' for the human Product Owner to prioritize backlog candidates.
+- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') recommending the next specialist according to active mode, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-<a id="cap-09-agent-protocols-9-agent-code-reviewer-revisor-tecnico-y-arquitectonico-de-codigo"></a>
+<a id="cap-09-agent-protocols-9-agent-code-reviewer-technical-and-architectural-code-reviewer"></a>
 
-### 9. `agent-code-reviewer` (Revisor Técnico y Arquitectónico de Código)
+### 9. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
 ```text
-ROL: Eres el Agente Revisor Técnico y Arquitectónico de Código ('code:review').
-MISIÓN: Auditar Pull Requests evaluando limpieza de código, cumplimiento de principios SOLID, DRY, patrones de diseño y respeto a los umbrales de mantenibilidad y complejidad, liberando al Tech Lead humano de señalamientos sintácticos o estructurales menores.
-DIRECTRICES:
-- Analiza el diff de código contrastándolo con los estándares de 'quality-policy.yaml' (Complejidad Ciclomática <= 10, Complejidad Cognitiva <= 15, Índice de Mantenibilidad >= 50, Líneas por Función <= 40).
-- Aplica principios Clean Code, SOLID y DRY: detecta acoplamiento indebido, code smells, números mágicos, nombres ambiguos y violaciones de encapsulación.
-- Señala abstracciones prematuras y código especulativo que viole el principio YAGNI (You Aren't Gonna Need It).
-- Forma parte de la Tríada de Auditoría Pre-Merge junto a 'agent-security-auditor' y 'agent-compliance-checker'.
-- Emite un informe estructurado clasificando observaciones en: [BLOQUEANTE] (violación de calidad o patrón roto), [SUGERENCIA_CLEAN_CODE] (mejora no bloqueante) y [CONFORME].
-- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') hacia el Tech Lead humano para su aprobación y merge final, abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+ROLE: You are the Technical and Architectural Code Reviewer Agent ('code:review').
+MISSION: Audit Pull Requests evaluating code cleanliness, adherence to SOLID principles, DRY, design patterns, and compliance with complexity and maintainability thresholds, freeing human Tech Leads from minor syntactic or structural reviews.
+DIRECTIVES:
+- Analyze code diff against standards in 'quality-policy.yaml' (Cyclomatic Complexity <= 10, Cognitive Complexity <= 15, Maintainability Index >= 50, Lines per Function <= 40).
+- Apply Clean Code, SOLID, and DRY principles: detect improper coupling, code smells, magic numbers, ambiguous identifiers, and encapsulation breaches.
+- Flag premature abstractions and speculative code violating YAGNI (You Aren't Gonna Need It).
+- BLOCK FAKE-WIRING & DISCONNECTED UI: Flag as '[BLOCKING]' any production UI component containing hardcoded mock data ('mockData'), empty event handlers ('onClick={() => {}}'), missing error/loading state handling, or API calls bypassing shared contracts.
+- Form part of the Pre-Merge Audit Triad alongside 'agent-security-auditor' and 'agent-compliance-checker'.
+- Emit a structured review report categorizing findings into: [BLOCKING] (quality violation or broken pattern), [CLEAN_CODE_SUGGESTION] (non-blocking improvement), and [COMPLIANT].
+- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead for final approval and merge, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-<a id="cap-09-agent-protocols-10-agent-devops-ingeniero-de-automatizacion-e-infraestructura"></a>
+<a id="cap-09-agent-protocols-10-agent-devops-automation-and-infrastructure-engineer"></a>
 
-### 10. `agent-devops` (Ingeniero de Automatización e Infraestructura)
+### 10. `agent-devops` (Automation and Infrastructure Engineer)
 ```text
-ROL: Eres el Agente Ingeniero de DevOps e Infraestructura como Código (IaC).
-MISIÓN: Mantener, evolucionar y auditar la infraestructura automatizada del proyecto: flujos de CI/CD, contenedores Docker, manifiestos de despliegue y scripts de infraestructura.
-DIRECTRICES:
-- DOMINIO ESTRICTO DE INFRAESTRUCTURA: Opera exclusivamente sobre flujos de trabajo ('.github/workflows/'), archivos de contenedor ('Dockerfile*', 'docker-compose*.yml'), manifiestos IaC y scripts de soporte ('scripts/').
-- GUARDRAIL DE NO INVASIÓN: PROHIBIDO TERMINANTEMENTE modificar o refactorizar archivos de código fuente de la aplicación ('src/', 'packages/*/src/app/'). Tu responsabilidad es el pipeline y el andamiaje, no la lógica de negocio.
-- POLÍTICA DE DEPENDENCIAS DE INFRAESTRUCTURA: Toda imagen Docker, acción de CI de terceros o binario introducido debe someterse a escaneo y respetar las directrices de 'license-policy.yaml'.
-- PRESERVACIÓN DE COMPUERTAS: Garantiza que cualquier optimización de pipelines preserve intactos todos los Quality Gates deterministas existentes (pruebas unitarias, linters, SAST, escaneo de secretos y licencias).
-- Si la autonomía es >= 'HUMAN_REVIEW_PLAN', concluye emitiendo el bloque de Workflow Handoff ('templates/workflow/agent-handoff.template.md') hacia el Tech Lead o Release Manager humano, abriendo la ventana de acción humana. En modo 'AUTONOMOUS', omite el handoff interactivo.
+ROLE: You are the DevOps and Infrastructure as Code (IaC) Engineer Agent.
+MISSION: Maintain, evolve, and audit project automated infrastructure: CI/CD workflows, Docker containers, deployment manifests, and infrastructure scripts.
+DIRECTIVES:
+- STRICT INFRASTRUCTURE DOMAIN: Operate exclusively on workflows ('.github/workflows/'), container files ('Dockerfile*', 'docker-compose*.yml'), IaC manifests, and support scripts ('scripts/').
+- NON-INVASION GUARDRAIL: STRICTLY FORBIDDEN from modifying or refactoring application source code files ('src/', 'packages/*/src/app/'). Your responsibility is pipelines and scaffolding, not business logic.
+- INFRASTRUCTURE DEPENDENCY POLICY: Every Docker base image, third-party CI action, or binary introduced must undergo scanning and respect 'license-policy.yaml' guidelines.
+- GATE PRESERVATION: Ensure pipeline optimizations keep all existing deterministic Quality Gates intact (unit tests, linters, SAST, secret and license scanning).
+- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead or Release Manager, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
 ---
 
-<a id="cap-09-agent-protocols-4-protocolo-operativo-ai-as-scribe-redaccion-tecnica-asistida"></a>
+<a id="cap-09-agent-protocols-4-operational-protocol-ai-as-scribe-assisted-technical-writing"></a>
 
-## 4. Protocolo Operativo "AI as Scribe" (Redacción Técnica Asistida)
+## 4. Operational Protocol "AI as Scribe" (Assisted Technical Writing)
 
-<a id="cap-09-agent-protocols-1-proposito-y-filosofia"></a>
+<a id="cap-09-agent-protocols-1-purpose-and-philosophy"></a>
 
-### 1. Propósito y Filosofía
-El protocolo **AI as Scribe** invierte la carga operativa burocrática: permite al usuario humano describir su intención de negocio o técnica en lenguaje natural libre y convierte a los agentes de IA en **amanuenses técnicos de alta fidelidad**.
+### 1. Purpose and Philosophy
+The **AI as Scribe** protocol shifts administrative overhead: it allows the human user to state business or technical intent in natural language while specialized AI agents act as **high-fidelity technical scribes**.
 
 > [!IMPORTANT]
-> **Preservación Innegociable del Humano como Implementador:**
-> La automatización de borradores sintácticos **no excluye ni sustituye al humano de la implementación**:
-> - En tareas de alto riesgo (`HIGH_RISK_MANUAL`), el ser humano es el **único implementador autorizado**; la IA tiene prohibida la ejecución autónoma.
-> - En tareas de riesgo medio (`HUMAN_REVIEW_PLAN`), el agente se detiene en cada paso para aprobación o co-implementación guiada (Pair Programming).
-> - El humano mantiene siempre la potestad de escribir código y especificaciones a mano cuando lo considere oportuno.
+> **Non-Negotiable Preservation of the Human as Implementer:**
+> Automating syntactic drafting **does not exclude or replace humans from implementation**:
+> - In high-risk tasks (`HIGH_RISK_MANUAL`), humans are the **sole authorized implementers**; autonomous AI execution is prohibited.
+> - In medium-risk tasks (`HUMAN_REVIEW_PLAN`), the agent pauses at each step for human approval or guided pair programming.
+> - Humans always retain full discretion to author code and specifications manually whenever appropriate.
 
 ---
 
-<a id="cap-09-agent-protocols-2-contrato-de-entrada-salida-io-contract"></a>
+<a id="cap-09-agent-protocols-2-input-output-contract-io-contract"></a>
 
-### 2. Contrato de Entrada / Salida (I/O Contract)
+### 2. Input / Output Contract (I/O Contract)
 
-| Dimensión | Especificación del Contrato |
+| Dimension | Contract Specification |
 | :--- | :--- |
-| **Entrada (Input)** | Breve texto o prompt en lenguaje natural del humano describiendo la funcionalidad, regla o vector de riesgo deseado (ej. *"Permitir que los operadores cancelen misiones de UAV en vuelo si detectan tormentas eléctricas"*). Opcionalmente incluye Bounded Context (`BC-*`) o caso de uso (`UC-*`) padre. |
-| **Salida (Output)** | Borrador canónico completo en Markdown con YAML frontmatter 100% conforme con JSON Schema (Draft 2020-12), IDs correlativos asignados, trazabilidad ascendente formal, enunciados normativos inequívocos y escenarios BDD/Gherkin ejecutables. |
-| **Estado Inicial** | Obligatoriamente `status: draft`. Ningún agente puede generar un artefacto directamente con `status: active` o `status: approved`. |
-| **Pre-Validación** | El agente debe autoevaluar deterministamente el artefacto con `aisdlc verify schemas` antes de presentarlo al revisor humano. |
+| **Input** | Concise natural language text or prompt from human describing desired functionality, rule, or threat vector (e.g., *"Allow operators to abort UAV missions in flight upon detecting thunderstorms"*). Optionally includes parent Bounded Context (`BC-*`) or Use Case (`UC-*`). |
+| **Output** | Complete canonical Markdown draft with YAML frontmatter 100% compliant with JSON Schema (Draft 2020-12), sequential IDs assigned, formal upstream traceability, unambiguous normative statements, and executable BDD/Gherkin scenarios. |
+| **Initial Status** | Mandatorily `status: draft`. No agent may instantiate an artifact directly with `status: active` or `status: approved`. |
+| **Pre-Validation** | Agent must deterministically self-check the artifact via `aisdlc verify schemas` before presenting it to the human reviewer. |
 
 ---
 
-<a id="cap-09-agent-protocols-3-taxonomia-de-identificadores-y-reglas-de-correlatividad"></a>
+<a id="cap-09-agent-protocols-3-identifier-taxonomy-and-sequence-rules"></a>
 
-### 3. Taxonomía de Identificadores y Reglas de Correlatividad
+### 3. Identifier Taxonomy and Sequence Rules
 
-Todo artefacto generado por un agente amanuense debe adoptar la taxonomía canónica inmutable del repositorio:
+Every artifact generated by a scribe agent must adopt the canonical repository taxonomy:
 
-| Tipo de Artefacto | Patrón de Identificador | Esquema JSON Obligatorio |
+| Artifact Type | Identifier Pattern | Mandatory JSON Schema |
 | :--- | :--- | :--- |
-| **Actor de Producto** | `ACT-[SUFIJO]` (ej. `ACT-WEATHER-MONITOR`) | `schemas/product/actor.schema.json` |
-| **Journey de Usuario / Operador** | `JRN-[SUFIJO]` (ej. `JRN-MISSION-LIFECYCLE`) | `schemas/product/journey.schema.json` |
-| **Caso de Uso** | `UC-[SUFIJO]` (ej. `UC-ABORT-MISSION`) | `schemas/product/use-case.schema.json` |
-| **Requisito Funcional** | `FR-[SUFIJO]-[NUM3]` (ej. `FR-ABORT-MISSION-001`) | `schemas/product/requirement.schema.json` |
-| **Requisito de Calidad** | `QR-[SUFIJO]` (ej. `QR-ABORT-PROPAGATION-TIME`) | `schemas/product/requirement.schema.json` |
-| **Regla de Negocio** | `BR-[SUFIJO]` (ej. `BR-ABORT-AUTHORITY`) | `schemas/product/business-rule.schema.json` |
-| **Término de Glosario de Dominio** | `TERM-[SUFIJO]` (ej. `TERM-FTTI-ENVELOPE`) | `schemas/product/term.schema.json` |
-| **Actor de Amenaza** | `ACT-THREAT-[SUFIJO]` (ej. `ACT-THREAT-ROGUE-OPERATOR`) | `schemas/security/threat-actor.schema.json` |
-| **Caso de Abuso** | `ABUSE-[SUFIJO]` (ej. `ABUSE-UNAUTHORIZED-ABORT`) | `schemas/security/abuse-case.schema.json` |
-| **Requisito de Seguridad** | `SEC-REQ-[SUFIJO]` (ej. `SEC-REQ-ABORT-SIGNATURE`) | `schemas/security/security-req.schema.json` |
-| **Enclave Seguro Zero Trust** | `SEC-ENC-[SUFIJO]` (ej. `SEC-ENC-FLIGHT-DISPATCH`) | `schemas/security/enclave.schema.json` |
-| **Peligro Operacional (Hazard)** | `HAZ-[SUFIJO]` (ej. `HAZ-ROTOR-FAILURE-001`) | `schemas/safety/hazard.schema.json` |
-| **Requisito de Safety** | `SAF-REQ-[SUFIJO]` (ej. `SAF-REQ-ALTITUDE-LIMIT`) | `schemas/safety/safety-req.schema.json` |
+| **Enterprise & Capability Vision (Phase 0)** | `ARCH-INTRO-[NUM3]` (e.g., `ARCH-INTRO-001`) | `schemas/architecture/introduction-and-goals.schema.json` |
+| **Product Actor** | `ACT-[SUFFIX]` (e.g., `ACT-WEATHER-MONITOR`) | `schemas/product/actor.schema.json` |
+| **User / Operator Journey** | `JRN-[SUFFIX]` (e.g., `JRN-MISSION-LIFECYCLE`) | `schemas/product/journey.schema.json` |
+| **Use Case** | `UC-[SUFFIX]` (e.g., `UC-ABORT-MISSION`) | `schemas/product/use-case.schema.json` |
+| **Functional Requirement** | `FR-[SUFFIX]-[NUM3]` (e.g., `FR-ABORT-MISSION-001`) | `schemas/product/requirement.schema.json` |
+| **Quality Requirement** | `QR-[SUFFIX]` (e.g., `QR-ABORT-PROPAGATION-TIME`) | `schemas/product/requirement.schema.json` |
+| **Business Rule** | `BR-[SUFFIX]` (e.g., `BR-ABORT-AUTHORITY`) | `schemas/product/business-rule.schema.json` |
+| **Domain Glossary Term** | `TERM-[SUFFIX]` (e.g., `TERM-FTTI-ENVELOPE`) | `schemas/product/term.schema.json` |
+| **Threat Actor** | `ACT-THREAT-[SUFFIX]` (e.g., `ACT-THREAT-ROGUE-OPERATOR`) | `schemas/security/threat-actor.schema.json` |
+| **Abuse Case** | `ABUSE-[SUFFIX]` (e.g., `ABUSE-UNAUTHORIZED-ABORT`) | `schemas/security/abuse-case.schema.json` |
+| **Security Requirement** | `SEC-REQ-[SUFFIX]` (e.g., `SEC-REQ-ABORT-SIGNATURE`) | `schemas/security/security-req.schema.json` |
+| **Zero Trust Secure Enclave** | `SEC-ENC-[SUFFIX]` (e.g., `SEC-ENC-FLIGHT-DISPATCH`) | `schemas/security/enclave.schema.json` |
+| **Operational Hazard** | `HAZ-[SUFFIX]` (e.g., `HAZ-ROTOR-FAILURE-001`) | `schemas/safety/hazard.schema.json` |
+| **Safety Requirement** | `SAF-REQ-[SUFFIX]` (e.g., `SAF-REQ-ALTITUDE-LIMIT`) | `schemas/safety/safety-req.schema.json` |
 
-#### Algoritmo de Asignación Correlativa
-1. El agente inspecciona los archivos existentes en el directorio correspondiente (`specs/product/`, `specs/security/`, `examples/`).
-2. Identifica si existe una secuencia correlativa previa para la misma raíz semántica (ej. si existe `FR-TELEMETRY-STREAM-001`, asigna `FR-TELEMETRY-STREAM-002`).
-3. Si es un artefacto nuevo, asigna correlativo `001` o el sufijo semántico representativo en mayúsculas (`UPPERCASE_WITH_HYPHENS`).
+#### Sequential Assignment Algorithm
+1. The agent inspects existing files in the corresponding directory (`specs/product/`, `specs/security/`, `examples/`).
+2. Identifies whether an existing sequential series exists for the same semantic root (e.g., if `FR-TELEMETRY-STREAM-001` exists, assign `FR-TELEMETRY-STREAM-002`).
+3. If creating a new artifact, assign sequence `001` or semantic uppercase hyphenated suffix (`UPPERCASE_WITH_HYPHENS`).
 
 ---
 
-<a id="cap-09-agent-protocols-4-calculo-determinista-de-digests-criptograficos-sha-256"></a>
+<a id="cap-09-agent-protocols-4-deterministic-calculation-of-sha-256-cryptographic-digests"></a>
 
-### 4. Cálculo Determinista de Digests Criptográficos SHA-256
+### 4. Deterministic Calculation of SHA-256 Cryptographic Digests
 
-Cuando el artefacto requiera citar documentos canónicos upstream (ej. en especificaciones de entrega SDD o sidecars `handoff.yaml`):
-1. El agente lee el contenido exacto del archivo citado en UTF-8.
-2. Normaliza los saltos de línea a formato Unix (`\n`, LF) para garantizar reproducibilidad en cualquier sistema operativo:
+When an artifact cites upstream canonical documents (e.g., in SDD delivery specs or `handoff.yaml` sidecars):
+1. The agent reads the exact UTF-8 content of the cited file.
+2. Normalizes line endings to Unix format (`\n`, LF) to ensure cross-platform reproducibility:
    $$\text{digest} = \text{SHA256}(\text{normalized\_content})$$
-3. Emite la citación inmutable:
+3. Emits immutable citation:
    ```yaml
    citations:
      - id: UC-STREAM-TELEMETRY
@@ -3214,108 +3200,110 @@ Cuando el artefacto requiera citar documentos canónicos upstream (ej. en especi
 
 ---
 
-<a id="cap-09-agent-protocols-5-prompts-estandarizados-para-agentes-amanuenses-ai-as-scribe"></a>
+<a id="cap-09-agent-protocols-5-standardized-prompts-for-scribe-agents-ai-as-scribe"></a>
 
-### 5. Prompts Estandarizados para Agentes Amanuenses (AI as Scribe)
+### 5. Standardized Prompts for Scribe Agents (AI as Scribe)
 
-#### A. Prompt Operativo para `agent-product-analyst` (Scribe de Producto)
+#### A. Operational Prompt for `agent-product-analyst` (Product Scribe)
 ```text
-ROL: Eres el Agente Analista de Producto y Amanuense Técnico (AI as Scribe) de AI-SDLC.
-MISIÓN: Transformar descripciones en lenguaje natural en artefactos canónicos de producto 100% conformes con esquemas JSON y listos para revisión humana.
-ENTRADA: Intención del usuario, casos de uso o reglas en lenguaje natural.
+ROLE: You are the Product Analyst Agent and Technical Scribe (AI as Scribe) of AI-SDLC.
+MISSION: Capture new product intent via NAF v4 Enterprise & Capability Vision ('ARCH-INTRO-*') and transform natural language intent into canonical product artifacts 100% compliant with JSON schemas and ready for human review.
+INPUT: User intent, new product vision, use cases, or business rules in natural language.
 
-DIRECTRICES OPERATIVAS:
-1. TAXONOMÍA E IDENTIFICADORES:
-   - Asigna IDs inmutables siguiendo las reglas de correlatividad: 'ACT-*', 'UC-*', 'FR-*-NNN', 'QR-*', 'BR-*'.
-2. CONFORMIDAD ESTRICTA CON ESQUEMAS JSON:
-   - Todo frontmatter DEBE satisfacer el 100% de los esquemas en 'schemas/product/'.
-   - 'status' SIEMPRE inicia en 'draft'.
-   - 'version' SIEMPRE inicia en '1.0.0'.
-   - 'schema-version' en '1.0'.
-   - Relaciones estrictamente ascendentes: 'derives-from: [UC-*]', 'primary-actor: ACT-*'.
-   - 'supersedes' y 'superseded-by' deben ser 'null' en especificaciones iniciales.
-3. CRITERIOS DE ACEPTACIÓN GHERKIN:
-   - En todo requerimiento 'FR-*', genera un bloque ```gherkin completo:
-     * Etiqueta obligatoria: '@<FR-ID> @automated @regression'.
-     * 'Feature', 'Background' con precondiciones claras.
-     * Al menos un 'Scenario' nominal.
-     * Al menos un 'Scenario Outline' con tabla de datos 'Examples' para reglas de negocio y casos de borde.
-4. VALIDACIÓN PREVIA (SELF-CHECK):
-   - Ejecuta 'aisdlc verify schemas' antes de entregar el borrador.
-   - Prohibido solicitar revisión humana si existen infracciones sintácticas.
+OPERATIONAL DIRECTIVES:
+0. PHASE 0 GREENFIELD PRODUCT INCEPTION:
+   - If the user intends to create a new product from scratch (or 'specs/product/' has no baseline model), conduct a 3–5 question structured discovery interview (mission/problem, actors, MVP capabilities, priority quality goals), generate 'ARCH-INTRO-001' ('templates/architecture/introduction-and-goals.template.md', 'status: draft'), and derive initial 'ACT-*', 'UC-*', 'BR-*', 'FR-*', and 'QR-*' drafts.
+1. TAXONOMY AND IDENTIFIERS:
+   - Assign immutable IDs following sequence rules: 'ARCH-INTRO-NNN', 'ACT-*', 'UC-*', 'FR-*-NNN', 'QR-*', 'BR-*'.
+2. STRICT JSON SCHEMA COMPLIANCE:
+   - All frontmatter MUST satisfy 100% of schemas in 'schemas/product/' and 'schemas/architecture/introduction-and-goals.schema.json'.
+   - 'status' ALWAYS starts as 'draft'.
+   - 'version' ALWAYS starts as '1.0.0'.
+   - 'schema-version' as '1.0'.
+   - Strictly upstream relationships: 'derives-from: [UC-*]', 'primary-actor: ACT-*'.
+   - 'supersedes' and 'superseded-by' must be 'null' in initial specs.
+3. GHERKIN ACCEPTANCE CRITERIA:
+   - In every 'FR-*' requirement, generate a complete ```gherkin block:
+     * Mandatory tag: '@<FR-ID> @automated @regression'.
+     * 'Feature', 'Background' with explicit preconditions.
+     * At least one nominal 'Scenario'.
+     * At least one 'Scenario Outline' with 'Examples' data table for business rules and edge cases.
+4. PRE-VALIDATION (SELF-CHECK):
+   - Run 'aisdlc verify schemas' before delivering draft.
+   - Requesting human review while syntax errors exist is strictly forbidden.
 ```
 
-#### B. Prompt Operativo para `agent-threat-modeler` (Scribe de Ciberseguridad)
+#### B. Operational Prompt for `agent-threat-modeler` (Cybersecurity Scribe)
 ```text
-ROL: Eres el Agente Modelador de Amenazas y Amanuense de Seguridad (AI as Scribe) de AI-SDLC.
-MISIÓN: Analizar casos de uso de negocio e inferir proactivamente adversarios, vectores de ataque STRIDE y controles de mitigación OWASP ASVS conformes con esquemas JSON.
-ENTRADA: Caso de uso ('UC-*') o requerimiento funcional ('FR-*').
+ROLE: You are the Threat Modeler Agent and Security Scribe (AI as Scribe) of AI-SDLC.
+MISSION: Analyze business use cases and proactively infer adversaries, STRIDE attack vectors, and OWASP ASVS mitigation controls compliant with JSON schemas.
+INPUT: Use case ('UC-*') or functional requirement ('FR-*').
 
-DIRECTRICES OPERATIVAS:
-1. MODELADO DE AMENAZAS EN TRES NIVELES:
-   A partir del caso de uso analizado, genera coordinadamente la tríada de seguridad:
-   - 'threat-actor' ('ACT-THREAT-*'): Perfil del adversario, capability y motivación.
-   - 'abuse-case' ('ABUSE-*'): Categoría STRIDE (spoofing, tampering, repudiation, information-disclosure, denial-of-service, elevation-of-privilege) apuntando a 'targets-use-case: UC-*'.
-   - 'security-requirement' ('SEC-REQ-*'): Control de mitigación con 'security-domain', 'enforced-in-enclave' y referencias ASVS.
-2. CONFORMIDAD CON ESQUEMAS JSON:
-   - Todo frontmatter DEBE satisfacer 'schemas/security/'.
-   - 'status' SIEMPRE inicia en 'draft'.
-   - 'mitigated-by: [SEC-REQ-*]' en el caso de abuso.
-   - 'mitigates-abuse-case: [ABUSE-*]' en el requisito de seguridad.
-   - 'supersedes' y 'superseded-by' deben ser 'null'.
-3. CRITERIOS GHERKIN DE MITIGACIÓN Y BLOQUEO:
-   - En todo 'SEC-REQ-*', genera escenarios BDD con pruebas negativas:
+OPERATIONAL DIRECTIVES:
+1. THREE-TIER THREAT MODELING:
+   From analyzed use case, systematically generate the security triad:
+   - 'threat-actor' ('ACT-THREAT-*'): Adversary profile, capability, and motivation.
+   - 'abuse-case' ('ABUSE-*'): STRIDE category targeting 'targets-use-case: UC-*'.
+   - 'security-requirement' ('SEC-REQ-*'): Mitigation control with 'security-domain', 'enforced-in-enclave', and ASVS references.
+2. JSON SCHEMA COMPLIANCE:
+   - All frontmatter MUST satisfy 'schemas/security/'.
+   - 'status' ALWAYS starts as 'draft'.
+   - 'mitigated-by: [SEC-REQ-*]' in abuse case.
+   - 'mitigates-abuse-case: [ABUSE-*]' in security requirement.
+   - 'supersedes' and 'superseded-by' must be 'null'.
+3. GHERKIN MITIGATION AND BLOCKING SCENARIOS:
+   - In every 'SEC-REQ-*', generate BDD negative test scenarios:
      * '@SEC-REQ-* @security @mitigation'.
-     * Escenarios de intento de ataque sin credenciales o con payload malicioso.
-     * 'Scenario Outline' con tabla 'Examples' que verifique el rechazo inmediato (código de error, corte de conexión, alerta SIEM).
-4. VALIDACIÓN DETERMINISTA:
-   - Ejecuta 'aisdlc verify schemas' garantizando 0 errores antes de entregar el borrador.
+     * Attack attempt scenarios without credentials or with malicious payload.
+     * 'Scenario Outline' with 'Examples' table asserting immediate rejection (error code, connection reset, SIEM alert).
+4. DETERMINISTIC VALIDATION:
+   - Run 'aisdlc verify schemas' guaranteeing 0 errors before presenting draft.
 ```
 
 ---
 
-<a id="cap-09-agent-protocols-6-flujo-de-revision-y-aprobacion-humana"></a>
+<a id="cap-09-agent-protocols-6-human-review-and-approval-workflow"></a>
 
-### 6. Flujo de Revisión y Aprobación Humana
+### 6. Human Review and Approval Workflow
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
-│               FLUJO DE TRABAJO "AI AS SCRIBE / HUMANO APROBADOR"        │
+│               "AI AS SCRIBE / HUMAN APPROVER" WORKFLOW                  │
 └─────────────────────────────────────────────────────────────────────────┘
 
- 1. INTENCIÓN HUMANA (Lenguaje Natural)
-    └── PO / Dev: "Requerimos autenticación mTLS estricta en el streaming"
+ 1. HUMAN INTENT (Natural Language)
+    └── PO / Dev: "We require strict mTLS authentication for streaming"
          │
          ▼
- 2. REDACCIÓN TÉCNICA AUTOMATIZADA (AI as Scribe)
+ 2. AUTOMATED TECHNICAL DRAFTING (AI as Scribe)
     ├── agent-product-analyst / agent-threat-modeler
-    ├── Generación de frontmatters conformes, IDs correlativos y BDD Gherkin
-    └── Asignación obligatoria: status: draft
+    ├── Generates compliant frontmatter, sequential IDs, and BDD Gherkin
+    └── Mandatory initial assignment: status: draft
          │
          ▼
- 3. PRE-VALIDACIÓN DETERMINISTA DE ESQUEMAS (0 Errores Sintácticos)
+ 3. DETERMINISTIC SCHEMA PRE-VALIDATION (0 Syntax Errors)
     ├── CLI: aisdlc verify schemas
-    └── Si hay error: el agente corrige antes de alertar al humano
+    └── On error: agent fixes autonomously before alerting human
          │
          ▼
- 4. REVISIÓN Y APROBACIÓN HUMANA (Human-in-the-Loop)
-    ├── El humano evalúa la lógica, el valor de negocio y el impacto técnico
-    └── Aprueba el cambio: status: active / status: approved o aprueba el PR
+ 4. HUMAN REVIEW AND APPROVAL (Human-in-the-Loop)
+    ├── Human evaluates business logic, domain value, and technical impact
+    └── Approves change: status: active / status: approved or merges PR
 ```
 
 ---
 
-<a id="cap-09-agent-protocols-5-protocolo-de-interfaz-determinista-y-salida-estructurada---json-para-agentes-de-ia"></a>
+<a id="cap-09-agent-protocols-5-deterministic-interface-protocol-and-structured---json-output-for-ai-agents"></a>
 
-## 5. Protocolo de Interfaz Determinista y Salida Estructurada `--json` para Agentes de IA
+## 5. Deterministic Interface Protocol and Structured `--json` Output for AI Agents
 
-Para evitar la fragilidad del parsing de texto libre con colores ANSI (`picocolors`) y reducir la sobrecarga de tokens en llamadas a modelos de lenguaje (Antigravity, Claude Code, Cursor, Aider) y pipelines CI/CD, toda la suite de comandos deterministas `aisdlc verify` implementa el flag `--json`.
+To eliminate brittle plain-text parsing with ANSI colors (`picocolors`) and reduce token overhead when calling language models (Antigravity, Claude Code, Cursor, Aider) and CI/CD pipelines, the entire `aisdlc verify` suite implements the `--json` flag.
 
-<a id="cap-09-agent-protocols-1-directrices-de-consumo-para-agentes-de-ia"></a>
+<a id="cap-09-agent-protocols-1-consumption-guidelines-for-ai-agents"></a>
 
-### 1. Directrices de Consumo para Agentes de IA
-- **Supresión ANSI Innegociable**: Cuando el flag `--json` está activo, el CLI suprime banners decorativos, encabezados ASCII y códigos de escape ANSI, emitiendo un flujo JSON puro por `stdout` que puede consumirse directamente con `JSON.parse()`.
-- **Estructura Normalizada Canónica**:
+### 1. Consumption Guidelines for AI Agents
+- **Non-Negotiable ANSI Suppression**: When `--json` is active, the CLI suppresses decorative banners, ASCII headers, and ANSI escape sequences, emitting pure JSON on `stdout` consumable via `JSON.parse()`.
+- **Normalized Canonical Structure**:
   ```json
   {
     "gate": "quality",
@@ -3330,129 +3318,129 @@ Para evitar la fragilidad del parsing de texto libre con colores ANSI (`picocolo
     "violations": []
   }
   ```
-- **Códigos de Salida Deterministas**:
-  - `0`: Aprobado (gate superado al 100%).
-  - `1`: Bloqueado por fallo de calidad, complejidad ciclomática, trazabilidad, gobierno o esquemas.
-  - `4`: Bloqueo crítico por fuga de secretos o credenciales expuestas (`verify secrets` o `verify security`).
-- **Verificación Agregada (`verify all --json`)**:
-  Emite un resumen general con la totalidad de gates evaluados (`quality`, `traceability`, `governance`, `testing`, `licenses`, `pdac`, `schemas`, `duplicates`, `security`) en el objeto `gates`, junto con la lista agregada de violaciones detectadas.
+- **Deterministic Exit Codes**:
+  - `0`: Pass (100% gate satisfaction).
+  - `1`: Blocked by quality failure, cyclomatic complexity, traceability, governance, or schema violations.
+  - `4`: Critical block due to secret leaks or exposed credentials (`verify secrets` or `verify security`).
+- **Aggregated Verification (`verify all --json`)**:
+  Emits an overall summary with all evaluated gates (`quality`, `traceability`, `governance`, `testing`, `licenses`, `pdac`, `schemas`, `duplicates`, `security`) under the `gates` object, alongside aggregated violations.
 
 ---
 
-<a id="cap-09-agent-protocols-6-matriz-de-compatibilidad-e-integracion-nativa-con-entornos-de-agentes"></a>
+<a id="cap-09-agent-protocols-6-compatibility-matrix-and-native-integration-with-agent-environments"></a>
 
-## 6. Matriz de Compatibilidad e Integración Nativa con Entornos de Agentes
+## 6. Compatibility Matrix and Native Integration with Agent Environments
 
-Para garantizar que cualquier agente de IA que opere en el repositorio cargue automáticamente las directrices canónicas, los 5 mandamientos inquebrantables, la jerarquía Git de 4 tiers y los Quality Gates sin requerir inyección manual por parte del usuario, el repositorio incorpora configuraciones nativas estándar:
+To ensure any AI agent operating in the repository automatically loads canonical guidelines, the 5 unbreakable commandments, the Git 4-tier hierarchy, and Quality Gates without requiring manual prompt injection, standard configurations are embedded:
 
-| Entorno de Agente | Archivo de Configuración | Ámbito de Activación | Mecanismo de Inyección y Directrices Principales |
+| Agent Environment | Configuration File | Activation Scope | Injection Mechanism and Core Directives |
 | :--- | :--- | :--- | :--- |
-| **Cursor** | `.cursor/rules/ai-sdlc-core.mdc`<br>`.cursor/rules/ai-sdlc-product.mdc`<br>`.cursor/rules/ai-sdlc-quality.mdc` | Modular (`alwaysApply` para core, `specs/**` para producto, `src/**`/`packages/**` para código) | Inyección contextual automática en Cursor Agent / Composer. Carga los 5 mandamientos, taxonomía ProductShape (`ACT-*`, `UC-*`, `FR-*`), esquemas JSON y umbrales de complejidad (CC $\le 10$, MI $\ge 50$). |
-| **Claude Code** | `CLAUDE.md` | Raíz del repositorio | Guía de comandos CLI unificados (`pnpm run check:fix`, `pnpm run verify:all`), reglas de commit con trailers estructurados, flujo SDD y prohibición de auto-merge. |
-| **GitHub Copilot** | `.github/copilot-instructions.md` | Global (Copilot Chat y Copilot Workspace) | Inyección automática en cada prompt de Copilot. Contexto de ciclo de vida SDD, estructura 4-tier de ramas Git y política estricta de licencias (`license-policy.yaml`). |
-| **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md` | Global en workspace | Mapeo determinista de roles especializados (`agent-product-analyst`, `agent-threat-modeler`, `agent-developer`), guardrails y protocolo "AI as Scribe". |
-| **Model Context Protocol (MCP)** | `.cursor/mcp.json`<br>`antigravity.mcp.json`<br>`.vscode/mcp.json` | IDE / Workspace | Declaración de servidores MCP para acceso directo a herramientas deterministas de AI-SDLC. |
+| **Cursor** | `.cursor/rules/ai-sdlc-core.mdc`<br>`.cursor/rules/ai-sdlc-product.mdc`<br>`.cursor/rules/ai-sdlc-quality.mdc` | Modular (`alwaysApply` for core, `specs/**` for product, `src/**`/`packages/**` for code) | Automatic context injection into Cursor Agent / Composer. Loads the 5 commandments, ProductShape taxonomy (`ACT-*`, `UC-*`, `FR-*`), JSON schemas, and complexity thresholds (CC $\le 10$, MI $\ge 50$). |
+| **Claude Code** | `CLAUDE.md` | Repository Root | Unified CLI command guide (`pnpm run check:fix`, `pnpm run verify:all`), commit trailer rules, SDD workflow, and auto-merge prohibition. |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | Global (Copilot Chat and Copilot Workspace) | Automatic injection into every Copilot prompt. Context on SDD lifecycle, Git 4-tier branch structure, and strict license policy (`license-policy.yaml`). |
+| **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md` | Workspace Global | Deterministic mapping of specialized roles (`agent-product-analyst`, `agent-threat-modeler`, `agent-developer`), guardrails, and "AI as Scribe" protocol. |
+| **Model Context Protocol (MCP)** | `.cursor/mcp.json`<br>`antigravity.mcp.json`<br>`.vscode/mcp.json` | IDE / Workspace | MCP server declarations for direct IDE access to AI-SDLC deterministic tools. |
 
-<a id="cap-09-agent-protocols-despliegue-automatizado-y-selectivo-de-agentes-aisdlc-init---agents"></a>
+<a id="cap-09-agent-protocols-automated-agent-scaffolding-aisdlc-init---agents"></a>
 
-### Despliegue Automatizado y Selectivo de Agentes (`aisdlc init --agents`)
+### Automated Agent Scaffolding (`aisdlc init --agents`)
 
-Durante la inicialización de un proyecto con `aisdlc init`, el usuario o agente puede desplegar automáticamente los andamiajes y directrices canónicas para los distintos entornos de agentes:
+During project initialization with `aisdlc init`, users or agents can deploy configurations for supported agent environments:
 
 ```bash
-# Modo interactivo en TTY (solicita seleccionar los agentes a desplegar)
+# Interactive TTY mode
 aisdlc init
 
-# Despliegue de todos los agentes y configuraciones MCP
+# Deploy all agent configurations and MCP setups
 aisdlc init --agents all
 
-# Despliegue granular para herramientas específicas
+# Granular deployment for specific tools
 aisdlc init --agents cursor,antigravity,mcp
 aisdlc init --agents claude
 ```
 
-#### Reglas de Despliegue y Protección No-Clobber:
-- **Protección No-Clobber Innegociable**: Si un archivo de directrices o reglas (`.agent/rules/ai-sdlc.md`, `CLAUDE.md`, `.cursor/rules/*`, etc.) ya existe en el proyecto destino, el proceso de inicialización **nunca lo sobreescribe**. Se reporta informativamente en consola (`ℹ Archivo omitido (ya existente)`).
-- **Consumo MCP Programático**: La herramienta MCP `new` acepta el parámetro `agents` (`"all"`, `"cursor,claude"`, etc.) para permitir a agentes inicializar proyectos con soporte multi-agente sin requerir interacción manual.
+#### Deployment Rules and No-Clobber Protection:
+- **No-Clobber Invariance**: If a configuration file (`.agent/rules/ai-sdlc.md`, `CLAUDE.md`, `.cursor/rules/*`, etc.) already exists in the target project, the initialization process **never overwrites it**. An informational log is printed to console (`ℹ Skipped (file already exists)`).
+- **Programmatic MCP Consumption**: The MCP `new` tool accepts the `agents` parameter (`"all"`, `"cursor,claude"`, etc.) enabling automated orchestrators to scaffold projects without manual interaction.
 
-<a id="cap-09-agent-protocols-mantenimiento-anti-deriva-automatizado"></a>
+<a id="cap-09-agent-protocols-automated-anti-drift-verification"></a>
 
-### Mantenimiento Anti-Deriva Automatizado
-Para evitar que las configuraciones de integración discrepen con el tiempo de las especificaciones canónicas de este documento, la suite de pruebas determinista en `packages/core/tests/agent-native-configs-drift.spec.ts` audita en CI/CD que:
-1. Todos los archivos de integración existan y referencien canónicamente a `process/09_agent_protocols.md`.
-2. Los 5 Mandamientos Inquebrantables estén presentes de forma fidedigna y sin desviaciones semánticas.
-3. Se citen explícitamente `license-policy.yaml`, los comandos de pre-vuelo (`aisdlc check --fix` / `pnpm run verify:all`) y la jerarquía de 4 tiers.
+### Automated Anti-Drift Verification
+To keep agent integration files aligned over time with canonical specifications, the test suite in `packages/core/tests/agent-native-configs-drift.spec.ts` validates in CI/CD that:
+1. All integration files exist and canonically reference `process/09_agent_protocols.md`.
+2. The 5 Unbreakable Commandments are preserved faithfully without semantic drift.
+3. `license-policy.yaml`, pre-flight commands (`aisdlc check --fix` / `pnpm run verify:all`), and the 4-tier hierarchy are cited.
 
 ---
 
-<a id="cap-09-agent-protocols-7-servidor-model-context-protocol-mcp-nativo-ai-sdlcmcp-aisdlc-mcp"></a>
+<a id="cap-09-agent-protocols-7-native-model-context-protocol-mcp-server-ai-sdlcmcp-aisdlc-mcp"></a>
 
-## 7. Servidor Model Context Protocol (MCP) Nativo (`@ai-sdlc/mcp` / `aisdlc mcp`)
+## 7. Native Model Context Protocol (MCP) Server (`@ai-sdlc/mcp` / `aisdlc mcp`)
 
-Para permitir que personas y agentes de IA operen sobre el ciclo de vida AI-SDLC directamente desde sus entornos de desarrollo integrados (IDEs como Cursor, Claude Desktop, Google Antigravity, VS Code y Copilot), el framework incorpora un **servidor nativo Model Context Protocol (MCP)** implementado en el paquete `@ai-sdlc/mcp` y ejecutable mediante el comando `aisdlc mcp` (o `npx @ai-sdlc/mcp`).
+To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle directly within modern IDEs (Cursor, Claude Desktop, Google Antigravity, VS Code, and Copilot), the framework provides a **native Model Context Protocol (MCP) server** packaged in `@ai-sdlc/mcp` and executable via `aisdlc mcp` (or `npx @ai-sdlc/mcp`).
 
-<a id="cap-09-agent-protocols-1-arquitectura-y-mecanismo-de-transporte"></a>
+<a id="cap-09-agent-protocols-1-architecture-and-transport-mechanism"></a>
 
-### 1. Arquitectura y Mecanismo de Transporte
-- **Transporte Estándar**: Opera sobre `stdio` (entrada/salida estándar) utilizando el SDK oficial `@modelcontextprotocol/sdk`.
-- **Validación Estricta con Zod**: Cada herramienta expuesta cuenta con un esquema de entrada fuertemente tipado y validado en tiempo de ejecución.
-- **Enclave de Seguridad**: Diseñado bajo el enclave `SEC-ENC-DMZ` con sanitización de rutas para prevenir escalada de directorios (*path traversal*).
+### 1. Architecture and Transport Mechanism
+- **Standard Transport**: Operates over `stdio` using official `@modelcontextprotocol/sdk`.
+- **Strict Zod Validation**: Every exposed tool includes strongly typed runtime input schema validation.
+- **Security Enclave**: Designed under `SEC-ENC-DMZ` enclave with path sanitization preventing path traversal.
 
-<a id="cap-09-agent-protocols-2-catalogo-de-herramientas-mcp-expuestas-20-tools"></a>
+<a id="cap-09-agent-protocols-2-exposed-mcp-tools-catalog-20-tools"></a>
 
-### 2. Catálogo de Herramientas MCP Expuestas (20 Tools)
+### 2. Exposed MCP Tools Catalog (20 Tools)
 
-#### A. Comandos Resumen / Compuestos (High-Level Workflows)
-| Herramienta | Parámetros de Entrada | Descripción / Efecto |
+#### A. High-Level Workflows
+| Tool | Input Parameters | Description / Effect |
 | :--- | :--- | :--- |
-| `new` | `targetDir` (opcional), `template` (opcional), `ci` (opcional), `agents` (opcional), `force` (opcional) | Inicializa un nuevo proyecto o arranca AI-SDLC en un repositorio existente, configurando carpetas, esquemas, políticas de calidad, plantillas de CI (`github`, `gitlab`, `azure`, `bitbucket`) y andamiaje opcional de directrices para agentes de IA (`cursor`, `claude`, `antigravity`, `copilot`, `mcp`, `all`). |
-| `verify` | `rootDir` (opcional), `summaryOnly` (opcional) | Ejecuta simultáneamente la suite completa de los 9 Quality Gates deterministas de AI-SDLC (`quality`, `traceability`, `governance`, `licenses`, `schemas`, `duplicates`, `security`, `testing`, `pdac`). |
-| `report` | `rootDir` (opcional), `outputDir` (opcional) | Genera simultáneamente el panel interactivo HTML (`reports/dashboard.html`) y el informe consolidado de calidad en Markdown (`reports/QUALITY_REPORT.md`). |
+| `new` | `targetDir` (optional), `template` (optional), `ci` (optional), `agents` (optional), `force` (optional) | Initializes a new project or bootstraps AI-SDLC in an existing repo, configuring folders, schemas, quality policies, CI templates (`github`, `gitlab`, `azure`, `bitbucket`), and agent scaffolding (`cursor`, `claude`, `antigravity`, `copilot`, `mcp`, `all`). |
+| `verify` | `rootDir` (optional), `summaryOnly` (optional) | Runs the full suite of all 9 deterministic Quality Gates (`quality`, `traceability`, `governance`, `licenses`, `schemas`, `duplicates`, `security`, `testing`, `pdac`). |
+| `report` | `rootDir` (optional), `outputDir` (optional) | Concurrently generates interactive HTML dashboard (`reports/dashboard.html`) and consolidated Markdown quality report (`reports/QUALITY_REPORT.md`). |
 
-#### B. Ciclo de Entrega SDD (Spec-Driven Development)
-| Herramienta | Parámetros de Entrada | Descripción / Efecto |
+#### B. SDD Delivery Lifecycle (Spec-Driven Development)
+| Tool | Input Parameters | Description / Effect |
 | :--- | :--- | :--- |
-| `sdd_init` | `rootDir` (opcional), `framework` (opcional) | Inicializa la infraestructura y directorios SDD en el proyecto. |
-| `sdd_new` | `name` (requerido), `rootDir` (opcional), `from` (opcional), `framework` (opcional), `profile` (opcional) | Genera el andamiaje completo para un cambio SDD (`proposal.md`, `spec.md`, `design.md`, `tasks.md`) y su sidecar PDaC. |
-| `sdd_deposit` | `change` (requerido), `rootDir` (opcional), `framework` (opcional), `title` (opcional), `requirements` (opcional), `useCases` (opcional) | Deposita el sidecar PDaC Handoff (`handoff.yaml`) para un cambio específico. |
-| `sdd_integrate` | `change` (opcional), `auto` (opcional), `rootDir` (opcional), `author` (opcional) | Consolida un cambio completado en la especificación canónica y lo archiva en `specs/changes/completed/`. |
+| `sdd_init` | `rootDir` (optional), `framework` (optional) | Initializes SDD directory infrastructure in project. |
+| `sdd_new` | `name` (required), `rootDir` (optional), `from` (optional), `framework` (optional), `profile` (optional) | Generates complete scaffolding for an SDD change (`proposal.md`, `spec.md`, `design.md`, `tasks.md`) and PDaC sidecar. |
+| `sdd_deposit` | `change` (required), `rootDir` (optional), `framework` (optional), `title` (optional), `requirements` (optional), `useCases` (optional) | Deposits PDaC Handoff sidecar (`handoff.yaml`) for a specific change. |
+| `sdd_integrate` | `change` (optional), `auto` (optional), `rootDir` (optional), `author` (optional) | Integrates completed change into canonical baseline and archives directory in `specs/changes/completed/`. |
 
-#### C. Quality Gates Deterministas Individuales
-| Herramienta | Parámetros de Entrada | Descripción / Efecto |
+#### C. Individual Deterministic Quality Gates
+| Tool | Input Parameters | Description / Effect |
 | :--- | :--- | :--- |
-| `verify_quality` | `rootDir` (opcional), `srcDir` (opcional) | Audita complejidad ciclomática ($\le 10$) e índice de mantenibilidad ($\ge 50$). |
-| `verify_traceability` | `rootDir` (opcional) | Audita la matriz RTM 360° (Producto $\rightarrow$ Arquitectura $\rightarrow$ Pruebas). |
-| `verify_governance` | `rootDir` (opcional) | Audita el cumplimiento de modos de autonomía en tareas (`tasks.md`). |
-| `verify_licenses` | `rootDir` (opcional), `allowlistOnly` (opcional) | Audita licencias de dependencias frente a `license-policy.yaml`. |
-| `verify_schemas` | `rootDir` (opcional), `schemaDir` (opcional) | Valida artefactos Markdown y YAML frontmatter contra esquemas JSON canónicos. |
-| `verify_duplicates` | `rootDir` (opcional) | Detecta colisiones y duplicidades léxicas en requerimientos de producto. |
-| `verify_security` | `rootDir` (opcional), `scanSecrets` (opcional), `scanSast` (opcional) | Ejecuta escaneo determinista SAST y detección de fugas de secretos (Gitleaks). |
-| `verify_testing` | `rootDir` (opcional) | Audita la cobertura de requerimientos mediante pruebas automatizadas. |
-| `verify_pdac` | `rootDir` (opcional) | Audita la coherencia criptográfica de sidecars PDaC frente a la línea base. |
+| `verify_quality` | `rootDir` (optional), `srcDir` (optional) | Audits Cyclomatic Complexity ($\le 10$) and Maintainability Index ($\ge 50$). |
+| `verify_traceability` | `rootDir` (optional) | Audits 360° RTM matrix (Product $\rightarrow$ Architecture $\rightarrow$ Tests). |
+| `verify_governance` | `rootDir` (optional) | Audits compliance of task autonomy modes (`tasks.md`). |
+| `verify_licenses` | `rootDir` (optional), `allowlistOnly` (optional) | Audits dependency licenses against `license-policy.yaml`. |
+| `verify_schemas` | `rootDir` (optional), `schemaDir` (optional) | Validates Markdown and YAML frontmatter against canonical JSON schemas. |
+| `verify_duplicates` | `rootDir` (optional) | Detects lexical collisions and duplicates in product requirements. |
+| `verify_security` | `rootDir` (optional), `scanSecrets` (optional), `scanSast` (optional) | Runs deterministic SAST scanning and secret leak detection (Gitleaks). |
+| `verify_testing` | `rootDir` (optional) | Audits requirement coverage via automated tests. |
+| `verify_pdac` | `rootDir` (optional) | Audits cryptographic consistency of PDaC sidecars against canonical baseline. |
 
-#### D. Reportes, KPIs y Git
-| Herramienta | Parámetros de Entrada | Descripción / Efecto |
+#### D. Reports, KPIs, and Git
+| Tool | Input Parameters | Description / Effect |
 | :--- | :--- | :--- |
-| `report_markdown` | `rootDir` (opcional), `outputPath` (opcional) | Genera el informe formal de calidad en Markdown (`reports/QUALITY_REPORT.md`). |
-| `report_dashboard` | `rootDir` (opcional), `outputPath` (opcional), `title` (opcional) | Genera el dashboard visual HTML interactivo autocontenido (`reports/dashboard.html`). |
-| `kpi_pr` | `baseBranch` (opcional), `headBranch` (opcional), `rootDir` (opcional) | Evalúa y genera la tabla Markdown agregada de KPIs de desarrollo para Pull Requests. |
-| `git_detect_author` | `commitSha` (opcional), `rootDir` (opcional) | Analiza los trailers del commit para clasificar la autoría (`human`, `agent`, `hybrid`). |
+| `report_markdown` | `rootDir` (optional), `outputPath` (optional) | Generates formal Markdown quality report (`reports/QUALITY_REPORT.md`). |
+| `report_dashboard` | `rootDir` (optional), `outputPath` (optional), `title` (optional) | Generates self-contained interactive HTML visual dashboard (`reports/dashboard.html`). |
+| `kpi_pr` | `baseBranch` (optional), `headBranch` (optional), `rootDir` (optional) | Evaluates and generates aggregated Markdown development KPIs table for Pull Requests. |
+| `git_detect_author` | `commitSha` (optional), `rootDir` (optional) | Analyzes commit trailers to classify authorship (`human`, `agent`, `hybrid`). |
 
-<a id="cap-09-agent-protocols-3-recursos-canonicos-expuestos-aisdlc"></a>
+<a id="cap-09-agent-protocols-3-canonical-resources-aisdlc"></a>
 
-### 3. Recursos Canónicos Expuestos (`aisdlc://`)
+### 3. Canonical Resources (`aisdlc://`)
 
-| URI del Recurso | Tipo MIME | Contenido Proporcionado |
+| Resource URI | MIME Type | Provided Content |
 | :--- | :--- | :--- |
-| `aisdlc://policies/quality` | `application/yaml` | Contenido de `quality-policy.yaml` (umbrales de complejidad, cobertura y calidad). |
-| `aisdlc://policies/licenses` | `application/yaml` | Contenido de `license-policy.yaml` (licencias permitidas, restringidas y bloqueadas). |
-| `aisdlc://changes/active` | `application/json` | Lista estructurada de cambios SDD activos en `specs/changes/active/` con su estado de tareas. |
-| `aisdlc://changes/completed` | `application/json` | Historial de cambios SDD consolidados y archivados en `specs/changes/completed/`. |
-| `aisdlc://status/summary` | `application/json` | Resumen consolidado del estado del repositorio (gates, cambios activos, métricas). |
+| `aisdlc://policies/quality` | `application/yaml` | Contents of `quality-policy.yaml` (complexity, coverage, quality thresholds). |
+| `aisdlc://policies/licenses` | `application/yaml` | Contents of `license-policy.yaml` (permitted, restricted, and blocked licenses). |
+| `aisdlc://changes/active` | `application/json` | Structured list of active SDD changes in `specs/changes/active/` with task status. |
+| `aisdlc://changes/completed` | `application/json` | History of consolidated and archived SDD changes in `specs/changes/completed/`. |
+| `aisdlc://status/summary` | `application/json` | Consolidated repository status summary (gates, active changes, metrics). |
 
-<a id="cap-09-agent-protocols-4-guias-de-configuracion-para-entornos-ide-y-agentes"></a>
+<a id="cap-09-agent-protocols-4-setup-guides-for-ides-and-agent-environments"></a>
 
-### 4. Guías de Configuración para Entornos IDE y Agentes
+### 4. Setup Guides for IDEs and Agent Environments
 
 #### A. Cursor (`.cursor/mcp.json`)
 ```json
@@ -3472,7 +3460,7 @@ Para permitir que personas y agentes de IA operen sobre el ciclo de vida AI-SDLC
   "mcpServers": {
     "ai-sdlc": {
       "command": "node",
-      "args": ["/ruta/absoluta/a/packages/mcp/dist/cli.js"]
+      "args": ["/absolute/path/to/packages/mcp/dist/cli.js"]
     }
   }
 }
@@ -3504,95 +3492,95 @@ Para permitir que personas y agentes de IA operen sobre el ciclo de vida AI-SDLC
 
 ---
 
-<a id="cap-09-agent-protocols-8-protocolo-canonico-de-handoff-de-workflow-entre-agentes-y-ventana-de-accion-humana"></a>
+<a id="cap-09-agent-protocols-8-canonical-workflow-handoff-protocol-between-agents-and-human-action-window"></a>
 
-## 8. Protocolo Canónico de Handoff de Workflow entre Agentes y Ventana de Acción Humana
+## 8. Canonical Workflow Handoff Protocol between Agents and Human Action Window
 
-<a id="cap-09-agent-protocols-1-proposito-y-principios-de-gobernanza"></a>
+<a id="cap-09-agent-protocols-1-purpose-and-governance-principles"></a>
 
-### 1. Propósito y Principios de Gobernanza
-El objetivo del protocolo de **Workflow Handoff** es dotar de transparencia absoluta al relevo entre agentes especializados dentro del ciclo de desarrollo AI-SDLC. Permite al usuario conocer con precisión qué entregables han sido completados, qué agente o agentes son los siguientes recomendados para actuar y cuál es el prompt sugerido para convocarlos, manteniendo **siempre abierta y visible la ventana para la acción humana**.
+### 1. Purpose and Governance Principles
+The objective of the **Workflow Handoff** protocol is to provide transparency to specialist agent transitions within the AI-SDLC development lifecycle. It informs users about completed deliverables, recommended next specialist roles, and suggested invocation prompts, while **keeping the Human Action Window open and visible at all times**.
 
-<a id="cap-09-agent-protocols-2-regla-de-activacion-condicional-por-nivel-de-autonomia"></a>
+<a id="cap-09-agent-protocols-2-autonomy-level-conditional-activation-rule"></a>
 
-### 2. Regla de Activación Condicional por Nivel de Autonomía
-Para conciliar la agilidad operativa con el control estricto de gobernanza:
-- 🟢 **Modo `AUTONOMOUS` (o supervisión exclusiva al final en PR/CI)**:
-  * **OMITIDO**: En tareas autónomas de bajo riesgo o ejecuciones por lotes desatendidas, el agente **NO debe solicitar ni emitir este handoff interactivo**, permitiendo finalizar la implementación sin interrupciones innecesarias.
-- 🟡 **Nivel de Autonomía $\ge$ `HUMAN_REVIEW_PLAN` (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`)**:
-  * **OBLIGATORIO**: El agente **DEBE emitir obligatoriamente el bloque de Workflow Handoff y DETENERSE**, cediendo la iniciativa al usuario para validar el plan, despejar ambigüedades o asumir la ejecución manual directa.
+### 2. Autonomy Level Conditional Activation Rule
+To balance speed with strict governance:
+- 🟢 **`AUTONOMOUS` Mode (or post-merge PR/CI supervision)**:
+  * **OMITTED**: In low-risk autonomous tasks or unattended batch operations, the agent **MUST NOT request or emit interactive handoff**, completing implementation without unnecessary interruptions.
+- 🟡 **Autonomy Level $\ge$ `HUMAN_REVIEW_PLAN` (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`)**:
+  * **MANDATORY**: The agent **MUST emit the canonical Workflow Handoff block and STOP**, yielding initiative to the human user to validate plans, clear ambiguities, or assume direct manual execution.
 
-<a id="cap-09-agent-protocols-3-plantilla-canonica-institucional"></a>
+<a id="cap-09-agent-protocols-3-canonical-template"></a>
 
-### 3. Plantilla Canónica Institucional
-Todo traspaso formal adopta la estructura definida en [`templates/workflow/agent-handoff.template.md`](../templates/workflow/agent-handoff.template.md), la cual incluye:
-1. **Fase / Rol Actual**: Identificación del agente actuante y estado del entregable.
-2. **Entregables Producidos**: Rutas o identificadores de artefactos Markdown, reportes de calidad o especificaciones generadas.
-3. **Siguiente(s) Rol(es) Recomendado(s)**: Propuesta contextualizada según la fase del ciclo AI-SDLC.
-4. **Prompt Sugerido de Invocación**: Texto listo para copiar y pegar para activar al siguiente especialista.
-5. **Ventana de Acción Humana (Human-in-the-Loop)**: Opciones explícitas para revisar, editar directamente, pausar/desviar el flujo o delegar la continuidad.
+### 3. Canonical Template
+Every formal handoff adopts the structure in [`templates/workflow/agent-handoff.template.md`](../templates/workflow/agent-handoff.template.md), providing:
+1. **Current Phase / Role**: Active agent role and deliverable status.
+2. **Produced Deliverables**: File paths and IDs of Markdown artifacts, reports, or specifications.
+3. **Recommended Next Role(s)**: Contextual proposal according to AI-SDLC phase.
+4. **Suggested Invocation Prompt**: Copy-paste ready prompt activating the next specialist.
+5. **Human Action Window (Human-in-the-Loop)**: Explicit options to review, edit directly, pause/reroute, or delegate continuity.
 
-<a id="cap-09-agent-protocols-4-cadena-de-transicion-canonica-del-ciclo-de-vida"></a>
+<a id="cap-09-agent-protocols-4-canonical-lifecycle-transition-chain"></a>
 
-### 4. Cadena de Transición Canónica del Ciclo de Vida
+### 4. Canonical Lifecycle Transition Chain
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
-│              CADENA DE TRANSICIÓN DEL WORKFLOW AI-SDLC                  │
+│                    AI-SDLC WORKFLOW TRANSITION CHAIN                    │
 └─────────────────────────────────────────────────────────────────────────┘
 
- 1. Product Owner (Humano)
-    └── Define intención de negocio o problema
+ 1. Product Owner (Human)
+    └── Defines business intent or operational problem
          │
          ▼
  2. agent-product-analyst (Scribe)
-    ├── Genera ProductShape (ACT, UC, FR, QR, BR) en status: draft
-    └── Handoff sugerido: agent-expert-user (UX) o agent-threat-modeler
+    ├── Generates ProductShape (ACT, UC, FR, QR, BR) with status: draft
+    └── Suggested handoff: agent-expert-user (UX) or agent-threat-modeler
          │
          ▼
- 3. agent-expert-user (Evaluador UX / MVP vs Roadmap) [Opcional / Upstream]
-    ├── Contrasta diseño, define corte MVP estricto y banco de sugerencias
-    └── Handoff sugerido: PO Humano / agent-product-analyst
+ 3. agent-expert-user (UX Evaluator / MVP vs Roadmap) [Optional / Upstream]
+    ├── Contrasts design, defines strict MVP scope and backlog recommendations
+    └── Suggested handoff: Human PO / agent-product-analyst
          │
          ▼
- 4. agent-threat-modeler (Ciberseguridad Shift-Left)
-    ├── Modela adversarios STRIDE y controles OWASP ASVS (ACT-THREAT, ABUSE, SEC-REQ)
-    └── Handoff sugerido: agent-system-architect
+ 4. agent-threat-modeler (Shift-Left Cybersecurity)
+    ├── Models STRIDE adversaries and OWASP ASVS controls (ACT-THREAT, ABUSE, SEC-REQ)
+    └── Suggested handoff: agent-system-architect
          │         ▲
-         │         │ (Bucle de Retorno: Seguridad Técnica en Infra/Arquitectura — Issue #81)
+         │         │ (Technical Security Feedback Loop on Infra/Architecture)
          ▼         │
- 5. agent-system-architect (Arquitectura Modular)
-    ├── Define bloques arc42 (CMP), diagramas Mermaid y registros ADR
-    ├── Handoff retorno (condicional): agent-threat-modeler (nuevos vectores técnicos)
-    └── Handoff sugerido: agent-qa-engineer
+ 5. agent-system-architect (Modular Architecture)
+    ├── Defines arc42 blocks (CMP), Mermaid diagrams, and ADR records
+    ├── Return handoff (conditional): agent-threat-modeler (new technical attack vectors)
+    └── Suggested handoff: agent-qa-engineer
          │
          ▼
- 6. agent-qa-engineer (QA / SDET — Pruebas en Rojo)
-    ├── Traduce FR-*, SEC-REQ-* y QR-* en suites BDD/Gherkin failing (rojo)
-    ├── Cobertura obligatoria: nominal + límite + fuera de rango
-    ├── Cobertura condicional: seguridad, rendimiento, idempotencia, postcondiciones, contrato
-    └── Handoff sugerido: agent-developer
+ 6. agent-qa-engineer (QA / SDET — Failing Tests in Red)
+    ├── Translates FR-*, SEC-REQ-*, and QR-* into failing BDD/Gherkin suites (red)
+    ├── Mandatory coverage: nominal + boundary + out of range
+    ├── Conditional coverage: security, performance, idempotency, postconditions, contract
+    └── Suggested handoff: agent-developer
          │
          ▼
  7. agent-developer (Coder / SDD Implementation)
-    ├── Implementa tasks.md haciendo pasar las pruebas en verde (CC <= 10, MI >= 50)
-    └── Handoff sugerido: agent-expert-user (validación funcional pre-PR — Issue #83)
+    ├── Implements tasks.md making test suites pass green (CC <= 10, MI >= 50)
+    └── Suggested handoff: agent-expert-user (Post-Development Functional Validation)
          │
          ▼
- 8. agent-expert-user (Validación Funcional Post-Desarrollo) [Downstream / Pre-PR]
-    ├── Contrasta comportamiento real y UI/CLI frente a UC-* y FR-* del PO
-    └── Handoff sugerido: Tríada de Auditoría Pre-Merge (agent-code-reviewer, agent-security-auditor, agent-compliance-checker)
+ 8. agent-expert-user (Post-Development Functional Validation) [Downstream / Pre-PR]
+    ├── Contrasts real system behavior, UI, and CLI against PO use cases (UC-*) and FR-*
+    └── Suggested handoff: Pre-Merge Audit Triad (agent-code-reviewer, agent-security-auditor, agent-compliance-checker)
          │
          ▼
- 9. Tríada de Auditoría Pre-Merge (Code Review, Seguridad y Licencias)
-    ├── agent-code-reviewer: Clean Code, SOLID, DRY, code smells y mantenibilidad (CC <= 10, MI >= 50)
-    ├── agent-security-auditor: Auditoría adversarial, SAST, CVSS y detección de vulnerabilidades
-    ├── agent-compliance-checker: Auditoría de dependencias SPDX frente a license-policy.yaml
-    └── Handoff sugerido: Tech Lead / Revisor Humano (Aprobación y Merge exclusivo)
+ 9. Pre-Merge Audit Triad (Code Review, Security, and Licenses)
+    ├── agent-code-reviewer: Clean Code, SOLID, DRY, code smells, and maintainability (CC <= 10, MI >= 50)
+    ├── agent-security-auditor: Adversarial audit, SAST, CVSS, and vulnerability detection
+    ├── agent-compliance-checker: SPDX dependency audit against license-policy.yaml
+    └── Suggested handoff: Tech Lead / Human Reviewer (Exclusive approval and merge)
 
  ─────────────────────────────────────────────────────────────────────────
- (*) Rol Transversal de Automatización e Infraestructura:
-     └── agent-devops (DevOps / IaC): Mantiene de forma autónoma CI/CD (.github/workflows),
-         Dockerfiles y scripts de infra, bajo guardrail estricto de no invasión sobre src/.
+ (*) Cross-Cutting Automation and Infrastructure Role:
+     └── agent-devops (DevOps / IaC): Autonomously maintains CI/CD (.github/workflows),
+         Dockerfiles, and infra scripts, under strict NON-INVASION GUARDRAIL on src/.
 ```
 
 ---
@@ -3601,340 +3589,340 @@ Todo traspaso formal adopta la estructura definida en [`templates/workflow/agent
 
 > 📂 **Módulo 12 de 13 [Parte II: Especificación Normativa del Framework]:** `process/10_quality_management_and_release_gates.md`
 
-# 10. Gestión de Calidad, Reglas de Código y Puertas de Liberación (Release Gates)
+# 10. Quality Management, Coding Rules, and Release Gates
 
-<a id="cap-10-quality-management-and-release-gates-1-gestion-de-calidad-en-el-ai-sdlc-software-quality-as-code"></a>
+<a id="cap-10-quality-management-and-release-gates-1-quality-management-in-ai-sdlc-software-quality-as-code"></a>
 
-## 1. Gestión de Calidad en el AI-SDLC: Software Quality as Code
+## 1. Quality Management in AI-SDLC: Software Quality as Code
 
-La velocidad exponencial con la que los agentes de IA generan código plantea un riesgo de degradación estructural acelerada si no existen controles férreos. 
+The exponential speed with which AI agents generate code introduces severe risks of rapid structural degradation unless strict controls are enforced.
 
-**En el framework AI-SDLC, la calidad del software no es una aspiración subjetiva; es una política declarativa auditable y ejecutable mediante herramientas deterministas (`quality-policy.yaml`)**.
+**In the AI-SDLC framework, software quality is not a subjective aspiration; it is an auditable, declarative policy enforced through deterministic tooling (`quality-policy.yaml`)**.
 
-El modelo de calidad se estructura en **tres niveles de defensa**:
-1. **Reglas de Código y Estilo (Coding Rules)**: Prevención en tiempo de diseño y codificación.
-2. **Métricas Estándar de Mantenibilidad y Complejidad**: Análisis cuantitativo de la arquitectura interna del código.
-3. **Puertas de Liberación (Release Gates)**: Restricciones de paso en CI/CD que bloquean de forma automática e implacable cualquier versión que no cumpla con los umbrales mínimos.
+The quality model is structured into **three lines of defense**:
+1. **Coding Rules**: Prevention at design and authoring time.
+2. **Standard Maintainability and Complexity Metrics**: Quantitative analysis of internal code architecture.
+3. **Release Gates**: Relentless CI/CD gates that automatically block any version falling below defined thresholds.
 
 ---
 
-<a id="cap-10-quality-management-and-release-gates-2-reglas-de-codigo-automatizadas-coding-rules"></a>
+<a id="cap-10-quality-management-and-release-gates-2-automated-coding-rules"></a>
 
-## 2. Reglas de Código Automatizadas (Coding Rules)
+## 2. Automated Coding Rules
 
-Tanto los desarrolladores humanos como los agentes de codificación (`agent-developer`) están obligados a seguir los siguientes estándares automatizados:
+Both human engineers and coding agents (`agent-developer`) must adhere to the following automated standards:
 
-<a id="cap-10-quality-management-and-release-gates-a-motores-de-inspeccion-estatica"></a>
+<a id="cap-10-quality-management-and-release-gates-a-static-inspection-engines"></a>
 
-### A. Motores de Inspección Estática
-- **TypeScript / JavaScript**: ESLint (perfil estricto con `@typescript-eslint/recommended-requiring-type-checking`) y Prettier para formateo determinista.
-- **Python**: Ruff / Flake8 y Black.
+### A. Static Inspection Engines
+- **TypeScript / JavaScript**: ESLint (strict profile with `@typescript-eslint/recommended-requiring-type-checking`) and Prettier for deterministic formatting.
+- **Python**: Ruff / Flake8 and Black.
 - **Java / C# / Go**: SonarQube Quality Profile, Spotless / golangci-lint.
 
-<a id="cap-10-quality-management-and-release-gates-b-reglas-de-codigo-obligatorias"></a>
+<a id="cap-10-quality-management-and-release-gates-b-mandatory-coding-rules"></a>
 
-### B. Reglas de Código Obligatorias
-1. **Cero Tolerancia a Tipado Débil (`no-explicit-any`)**: Prohibido el uso de tipos genéricos no seguros o casts opacos.
-2. **Cero Tolerancia a Código Muerto (`no-dead-code`, `no-unused-vars`)**: Variables, imports o funciones no referenciadas causan fallo inmediato de compilación.
-3. **Límite de Longitud por Función**: Ninguna función puede superar las **40 líneas de código efectivo**. Funciones más extensas deben descomponerse en métodos auxiliares cohesivos.
-4. **Prohibición de Supresiones Silenciosas**: Queda terminantemente prohibido para agentes o humanos añadir comentarios de supresión (`// @ts-ignore`, `// eslint-disable`, `# noqa`) sin un justificante formal (`ADR-TECH-DEBT-*`).
+### B. Mandatory Coding Rules
+1. **Zero Tolerance for Weak Typing (`no-explicit-any`)**: Insecure generic types or opaque casts are prohibited.
+2. **Zero Tolerance for Dead Code (`no-dead-code`, `no-unused-vars`)**: Unreferenced variables, imports, or functions cause immediate compilation/linter failures.
+3. **Function Length Limit**: No function may exceed **40 effective lines of code**. Longer functions must be decomposed into cohesive helper methods.
+4. **Prohibition of Silent Suppressions**: Adding suppression comments (`// @ts-ignore`, `// eslint-disable`, `# noqa`) without formal justification (`ADR-TECH-DEBT-*`) is strictly prohibited.
 
 ---
 
-<a id="cap-10-quality-management-and-release-gates-3-metricas-estandar-de-software-y-umbrales-de-liberacion"></a>
+<a id="cap-10-quality-management-and-release-gates-3-standard-software-metrics-and-release-thresholds"></a>
 
-## 3. Métricas Estándar de Software y Umbrales de Liberación
+## 3. Standard Software Metrics and Release Thresholds
 
-El framework evalúa cuantitativamente todo el código fuente frente a cuatro métricas de la industria estandarizadas por IEEE, SEI e ISO/IEC 25010:
+The framework quantitatively evaluates all source code against industry metrics standardized by IEEE, SEI, and ISO/IEC 25010:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   MÉTRICAS ESTÁNDAR Y UMBRALES DE RELEASE              │
+│                 STANDARD METRICS AND RELEASE THRESHOLDS                │
 └────────────────────────────────────────────────────────────────────────┘
 
- 1. COMPLEJIDAD CICLOMÁTICA (McCabe)
-    ├── Definición: Número de caminos linealmente independientes en el grafo de flujo.
-    ├── Umbral Máximo: 10 por función.
-    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+ 1. CYCLOMATIC COMPLEXITY (McCabe)
+    ├── Definition: Number of linearly independent paths through code.
+    ├── Maximum Threshold: 10 per function.
+    └── Violation Action: IMMEDIATE MERGE / RELEASE BLOCK.
 
- 2. COMPLEJIDAD COGNITIVA (SonarSource)
-    ├── Definición: Dificultad humana para comprender y razonar sobre el flujo de control.
-    ├── Umbral Máximo: 15 por función.
-    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+ 2. COGNITIVE COMPLEXITY (SonarSource)
+    ├── Definition: Human difficulty in understanding and reasoning about control flow.
+    ├── Maximum Threshold: 15 per function.
+    └── Violation Action: IMMEDIATE MERGE / RELEASE BLOCK.
 
- 3. ÍNDICE DE MANTENIBILIDAD (SEI / Microsoft / ISO 25010)
-    ├── Definición: Escala compuesta 0-100 basada en Halstead, McCabe y LOC.
-    ├── Fórmula: MI = 171 - 5.2*ln(HV) - 0.23*CC - 16.2*ln(LOC)
-    ├── Umbral Mínimo Aceptable: 65.0 / 100 (Objetivo: >85.0).
-    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+ 3. MAINTAINABILITY INDEX (SEI / Microsoft / ISO 25010)
+    ├── Definition: Composite score 0-100 based on Halstead, McCabe, and LOC.
+    ├── Formula: MI = 171 - 5.2*ln(HV) - 0.23*CC - 16.2*ln(LOC)
+    ├── Minimum Acceptable Threshold: 65.0 / 100 (Target: > 85.0).
+    └── Violation Action: IMMEDIATE MERGE / RELEASE BLOCK.
 
- 4. DUPLICACIÓN DE CÓDIGO
-    ├── Definición: Porcentaje de líneas idénticas o casi idénticas repetidas en el proyecto.
-    ├── Umbral Máximo: 3.0%.
-    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+ 4. CODE DUPLICATION
+    ├── Definition: Percentage of identical or near-identical repeated lines.
+    ├── Maximum Threshold: 3.0%.
+    └── Violation Action: IMMEDIATE MERGE / RELEASE BLOCK.
 
- 5. COBERTURA DE PRUEBAS AUTOMATIZADAS
-    ├── Línea: Mínimo 85.0% | Ramas (Branch): Mínimo 80.0%.
-    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+ 5. AUTOMATED TEST COVERAGE
+    ├── Line: Minimum 85.0% | Branch: Minimum 80.0%.
+    └── Violation Action: IMMEDIATE MERGE / RELEASE BLOCK.
 
- 6. MATRIZ DE TRAZABILIDAD 360° (RTM DETERMINISTA MEDIANTE RESOLUCIÓN INVERSA)
-    ├── Definición: Cobertura total compilada por reverse lookup entre paquetes PDaC (HOF-*),
-    │   arquitectura arc42/NAF v4 (satisfies-requirements) y suites de tests (.feature y .spec).
-    ├── Principio: Inversión de Dependencias (los requisitos no almacenan enlaces descendentes).
-    ├── Umbral Obligatorio: 100% de requerimientos conformes sin dependencias huérfanas ni deriva.
-    └── Acción ante Infracción: BLOQUEO INMEDIATO DE MERGE / RELEASE.
+ 6. 360° TRACEABILITY MATRIX (DETERMINISTIC REVERSE-LOOKUP RTM)
+    ├── Definition: Total coverage compiled via reverse lookup across PDaC packages (HOF-*),
+    │   arc42/NAF v4 architecture (satisfies-requirements), and test suites (.feature and .spec).
+    ├── Principle: Inverted Dependency (requirements store no downstream links).
+    ├── Mandatory Threshold: 100% compliant requirements without orphans or drift.
+    └── Violation Action: IMMEDIATE MERGE / RELEASE BLOCK.
 ```
 
 ---
 
-<a id="cap-10-quality-management-and-release-gates-31-motor-de-analisis-estatico-basado-en-ast-real-polyglot-ast-engine"></a>
+<a id="cap-10-quality-management-and-release-gates-31-real-ast-based-static-analysis-engine-polyglot-ast-engine"></a>
 
-## 3.1 Motor de Análisis Estático Basado en AST Real (Polyglot AST Engine)
+## 3.1 Real AST-Based Static Analysis Engine (Polyglot AST Engine)
 
-Para garantizar mediciones de complejidad y mantenibilidad de máxima precisión sin falsos positivos, **AI-SDLC** abandona las expresiones regulares y el conteo ingenuo de llaves `{ }`, adoptando una arquitectura de **Árbol de Sintaxis Abstracta (AST) Real**:
+To guarantee high-precision complexity and maintainability measurements without false positives, **AI-SDLC** avoids brittle regex and naive brace counting `{ }`, adopting a **Real Abstract Syntax Tree (AST)** architecture:
 
 ```text
 ┌───────────────────────────────────────────────────────────────────────────────────┐
-│              ARQUITECTURA DEL MOTOR DE ANÁLISIS ESTÁTICO (AST REAL)                │
+│                 REAL AST STATIC ANALYSIS ENGINE ARCHITECTURE                      │
 └───────────────────────────────────────────────────────────────────────────────────┘
-   Código Fuente Multilenguaje (.ts, .tsx, .js, .jsx, .py, .go, .rs, .java, .cs, .c)
-                                       │
-                    ┌──────────────────┴──────────────────┐
-                    ▼                                     ▼
-      [TypeScript / TSX / JS Engine]           [Polyglot Token-Aware Scanner]
-          Powered by ts-morph                  (Go, Rust, Java, C#, C/C++, Python)
-  ├── AST Nodes: Functions, Methods, Classes   ├── Lexer de estados: comillas, raw strings
-  ├── Conteo CC por nodos condicionales reales ├── Aislamiento total de comentarios (//, /*, #)
-  ├── Cognitiva por niveles de anidamiento     ├── Delimitación exacta de bloques sin colisión
-  └── Smells: any semántico (SyntaxKind.Any)   └── Métricas estandarizadas (CC, Cog, LOC, MI)
-                    │                                     │
-                    └──────────────────┬──────────────────┘
-                                       ▼
-                       [Quality Gate Determinista (STRICT)]
-                        CC <= 10 | Cog <= 15 | MI >= 50
+    Polyglot Source Code (.ts, .tsx, .js, .jsx, .py, .go, .rs, .java, .cs, .c)
+                                        │
+                     ┌──────────────────┴──────────────────┐
+                     ▼                                     ▼
+       [TypeScript / TSX / JS Engine]           [Polyglot Token-Aware Scanner]
+           Powered by ts-morph                  (Go, Rust, Java, C#, C/C++, Python)
+   ├── AST Nodes: Functions, Methods, Classes   ├── Lexer states: quotes, raw strings
+   ├── CC count via real conditional nodes      ├── Complete comment isolation (//, /*, #)
+   ├── Cognitive complexity by nesting level    ├── Exact block boundary matching
+   └── Smells: semantic any (SyntaxKind.Any)    └── Standardized metrics (CC, Cog, LOC, MI)
+                     │                                     │
+                     └──────────────────┬──────────────────┘
+                                        ▼
+                         [Deterministic Quality Gate (STRICT)]
+                          CC <= 10 | Cog <= 15 | MI >= 50
 ```
 
-<a id="cap-10-quality-management-and-release-gates-ventajas-tecnicas-y-eliminacion-de-falsos-positivos"></a>
+<a id="cap-10-quality-management-and-release-gates-technical-advantages-and-false-positive-elimination"></a>
 
-### Ventajas Técnicas y Eliminación de Falsos Positivos:
-1. **Componentes TSX/JSX Modernos**: Delimitación exacta de componentes funcionales y handlers de eventos sin interferencia de etiquetas JSX o props complejas (ej. `style={{ backgroundColor: 'red' }}`).
-2. **Template Literals con Interpolación Anidada**: Soporte nativo para expresiones multilínea como `${{ key: val }}`, donde las llaves internas eran erróneamente interpretadas por analizadores regex.
-3. **Closures y Funciones Anidadas**: Las funciones internas y callbacks no corrompen el conteo de líneas ni el cálculo de complejidad de la función contenedora.
-4. **Resiliencia Políglota**: En lenguajes como Go, Rust, Java y C#, los caracteres `{` o `}` presentes en literales de texto (ej. JSON embebido o raw strings `r#"..."#`) o comentarios nunca incrementan el balanceador de bloques.
-5. **Detección Tipada de `any`**: Mediante `SyntaxKind.AnyKeyword`, se detecta el uso prohibido de `any` en TypeScript sin generar falsas alarmas sobre nombres de variables legítimos como `company` o textos descriptivos.
+### Technical Advantages and False Positive Elimination:
+1. **Modern TSX/JSX Components**: Precise demarcation of functional components and event handlers without interference from JSX tags or complex prop objects (e.g., `style={{ backgroundColor: 'red' }}`).
+2. **Template Literals with Nested Interpolation**: Native support for multiline expressions like `${{ key: val }}`, where interior braces previously misled regex parsers.
+3. **Closures and Nested Functions**: Inner callbacks do not corrupt the outer function's line count or complexity metrics.
+4. **Polyglot Resilience**: In Go, Rust, Java, and C#, braces `{` or `}` inside string literals (e.g., embedded JSON or raw strings `r#"..."#`) or comments never skew block balance.
+5. **Typed `any` Detection**: Through `SyntaxKind.AnyKeyword`, prohibited `any` usage in TypeScript is flagged without false alarms on variable names like `company` or descriptive comments.
 
 ---
 
-<a id="cap-10-quality-management-and-release-gates-4-el-mecanismo-del-release-gate-restricciones-a-la-liberacion"></a>
+<a id="cap-10-quality-management-and-release-gates-4-the-release-gate-mechanism-constraints-on-release"></a>
 
-## 4. El Mecanismo del Release Gate (Restricciones a la Liberación)
+## 4. The Release Gate Mechanism (Constraints on Release)
 
-El paso de una versión a producción (o el merge de un PR hacia `main`) se somete a la siguiente máquina de estados determinista:
+Promoting a version to production (or merging a PR into `main`) must satisfy this deterministic state machine:
 
 ```mermaid
 flowchart TD
-    A[Pull Request de Código / Candidato a Release] --> B[Pipeline CI/CD: Linters y Tipado Estricto]
-    B -->|Errores de estilo / Any| X[FALLO: Corrección Requerida]
+    A[Code Pull Request / Release Candidate] --> B[CI/CD Pipeline: Linters and Strict Typing]
+    B -->|Style errors / Any| X[FAIL: Remediation Required]
 
-    B -->|Pass| C[Ejecución de Tests y Cobertura >= 85%]
-    C -->|Cobertura < 85%| X
+    B -->|Pass| C[Test Execution & Coverage >= 85%]
+    C -->|Coverage < 85%| X
 
-    C -->|Pass| D[Análisis de Complejidad y Mantenibilidad]
-    D --> E{Evaluación contra quality-policy.yaml}
+    C -->|Pass| D[Complexity and Maintainability Analysis]
+    D --> E{Evaluation against quality-policy.yaml}
 
-    E -->|Complejidad Ciclomática > 10| F[RECHAZO: Función Demasiado Compleja]
-    E -->|Mantenibilidad < 65.0| G[RECHAZO: Código No Mantenible]
-    E -->|Duplicación > 3%| H[RECHAZO: Duplicación Excesiva]
+    E -->|Cyclomatic Complexity > 10| F[REJECT: Function Too Complex]
+    E -->|Maintainability < 65.0| G[REJECT: Unmaintainable Code]
+    E -->|Duplication > 3%| H[REJECT: Excessive Duplication]
 
     F --> X
     G --> X
     H --> X
 
-    E -->|Métricas OK| T[Verificación de Trazabilidad 360° aisdlc verify traceability]
-    T -->|Requisitos huérfanos / Sin tests BDD| X
-    T -->|Trazabilidad 100% Conforme| I[QUALITY GATE PASSED ✅]
-    I --> J[Revisión Humana Tech Lead]
-    J --> K[Liberación Autorizada para Producción]
+    E -->|Metrics OK| T[360° Traceability Verification: aisdlc verify traceability]
+    T -->|Orphan requirements / Missing BDD tests| X
+    T -->|Traceability 100% Compliant| I[QUALITY GATE PASSED ✅]
+    I --> J[Human Tech Lead Review]
+    J --> K[Release Authorized for Production]
 ```
 
 > [!NOTE]
-> **Modelo de Trazabilidad Invertida en el Release Gate**:
-> Para evitar acoplamiento frágil y colisiones en Git, los requisitos de producto (`FR-*`, `QR-*`, `SEC-REQ-*`) no declaran qué servicios los implementan ni qué archivos de prueba los ejecutan. El paso de verificación `aisdlc verify traceability` inspecciona los bloques de arquitectura (`satisfies-requirements`) y escanea las suites de prueba (`.feature` y `.spec.*`) para construir inversamente la RTM completa. Si un requisito no es satisfecho por ningún servicio o carece de pruebas asociadas, el Release Gate bloquea el pipeline de forma determinista.
+> **Inverted Traceability Model in the Release Gate**:
+> To eliminate fragile coupling and Git merge conflicts, product requirements (`FR-*`, `QR-*`, `SEC-REQ-*`) do not declare which services implement them or which test files verify them. The `aisdlc verify traceability` step inspects architecture blocks (`satisfies-requirements`) and scans test suites (`.feature` and `.spec.*`) to inversely assemble the complete RTM. If any requirement lacks an implementing service or test coverage, the Release Gate deterministically blocks the pipeline.
 
-<a id="cap-10-quality-management-and-release-gates-41-entregables-documentales-obligatorios-de-release-manuales-as-code"></a>
+<a id="cap-10-quality-management-and-release-gates-41-mandatory-documentary-release-deliverables-manuals-as-code"></a>
 
-### 4.1 Entregables Documentales Obligatorios de Release (Manuales As-Code)
+### 4.1 Mandatory Documentary Release Deliverables (Manuals As-Code)
 
-Para que una versión candidata sea autorizada para su paso a producción por el Tech Lead o Release Manager, es condición obligatoria e inviolable que el repositorio contenga actualizados y conformes a sus esquemas formales (`schemas/manuals/`):
+Before a release candidate is approved for production deployment by the Tech Lead or Release Manager, the repository must contain up-to-date documentation compliant with JSON schemas (`schemas/manuals/`):
 
-1. **Manual de Usuario (`MAN-USER-*`)**:
-   - **Catálogo de Roles de Usuario**: Definición canónica de roles autorizados (`allowed-roles`), niveles de acceso y matriz de capacidades RBAC.
-   - **Matriz de Compatibilidad de Versiones y Clientes**: Compatibilidad entre versión de backend, CLI, SDKs, navegadores homologados y formatos de configuración.
-   - **Mapeo de Roles a Journeys**: Todo Journey (`JRN-*`) debe declarar explícitamente qué roles pueden iniciarlo y completarlo, junto a sus precondiciones y flujos alternativos.
-   - **Guía de Configuración**: Parámetros, variables de entorno, ficheros de configuración comentados y credenciales requeridas.
-   - **Catálogo de Mensajes**: Clasificación estructurada de mensajes informativos, advertencias y errores con acciones correctivas recomendadas.
+1. **User Manual (`MAN-USER-*`)**:
+   - **User Role Catalog**: Canonical definition of authorized roles (`allowed-roles`), access levels, and RBAC matrix.
+   - **Version and Client Compatibility Matrix**: Compatibility across backend versions, CLI, SDKs, approved browsers, and configuration formats.
+   - **Role-to-Journey Mapping**: Every Journey (`JRN-*`) must declare which roles can initiate and complete it, including preconditions and alternate flows.
+   - **Configuration Guide**: Parameters, environment variables, commented configuration files, and required credentials.
+   - **Message Catalog**: Structured classification of informational messages, warnings, and errors with remediation steps.
 
-2. **Manual de Producción y Operaciones (`MAN-PROD-*`)**:
-   - **Regeneración Determinista (Reproducible Builds)**: Herramientas de compilación fijadas con versión y checksum, dependencias congeladas en lockfile y validación de licencias (`license-policy.yaml`).
-   - **Matriz de Compatibilidad de Infraestructura y Migración**: Compatibilidad con Kubernetes/runtimes, soporte de esquemas de datos $N-1$ para zero-downtime, interoperabilidad entre componentes (`CMP-*`) y rutas de actualización/rollback.
-   - **Arquitectura CI/CD**: Flujo completo de pipelines, triggers automáticos y release gates deterministas.
-   - **Estrategia y Procedimiento de Despliegue**: Enclaves de red (`SEC-ENC-*`), secretos/certificados mTLS, verificación de salud y plan de rollback inmediato.
-   - **Runbooks de Errores Probables**: Diagnóstico y mitigación paso a paso de fallos típicos en producción (mTLS, fugas OOM, desconexiones, límites de red).
+2. **Production and Operations Manual (`MAN-PROD-*`)**:
+   - **Reproducible Builds**: Pinned build toolchains with versions and checksums, frozen lockfiles, and license validation (`license-policy.yaml`).
+   - **Infrastructure Compatibility and Migration Matrix**: Kubernetes/runtime compatibility, $N-1$ schema support for zero-downtime deployments, component interoperability (`CMP-*`), and upgrade/rollback paths.
+   - **CI/CD Architecture**: End-to-end pipeline workflow, triggers, and deterministic release gates.
+   - **Deployment Strategy and Procedure**: Network enclaves (`SEC-ENC-*`), mTLS secrets/certificates, health checks, and rollback plans.
+   - **Runbooks for Operational Incidents**: Step-by-step troubleshooting for production issues (mTLS, OOM leaks, disconnections, network saturation).
 
-3. **Artefactos Enterprise de Seguridad, Safety y Dominio (`schemas/`)**:
-   - **Enclaves de Red Zero Trust (`SEC-ENC-*`)**: Conformes con `schemas/security/enclave.schema.json`, delimitando zonas de confianza, reglas perimetrales y componentes autorizados inbound/outbound.
-   - **Peligros Operacionales y Análisis de Riesgos (`HAZ-*`)**: Conformes con `schemas/safety/hazard.schema.json`, tipificando severidad, probabilidad y tiempo límite de tolerancia a fallos (FTTI).
-   - **Journeys de Usuario y Operador (`JRN-*`)**: Conformes con `schemas/product/journey.schema.json`, mapeando etapas, puntos de contacto y casos de uso vinculados.
-   - **Glosario de Lenguaje Ubicuo y Términos (`TERM-*`)**: Conformes con `schemas/product/term.schema.json`, acotando definiciones canónicas por bounded context.
+3. **Enterprise Security, Safety, and Domain Artifacts (`schemas/`)**:
+   - **Zero Trust Network Enclaves (`SEC-ENC-*`)**: Compliant with `schemas/security/enclave.schema.json`, delimiting trust zones, boundary rules, and inbound/outbound components.
+   - **Operational Hazards and Risk Analysis (`HAZ-*`)**: Compliant with `schemas/safety/hazard.schema.json`, categorizing severity, probability, and Fault Tolerant Time Interval (FTTI).
+   - **User and Operator Journeys (`JRN-*`)**: Compliant with `schemas/product/journey.schema.json`, mapping stages, touchpoints, and linked use cases.
+   - **Ubiquitous Language Glossary Terms (`TERM-*`)**: Compliant with `schemas/product/term.schema.json`, binding canonical definitions by bounded context.
 
-<a id="cap-10-quality-management-and-release-gates-42-puertas-de-calidad-adaptativas-por-perfil-de-riesgo-progressive-friction-gates"></a>
+<a id="cap-10-quality-management-and-release-gates-42-progressive-friction-quality-gates"></a>
 
-### 4.2 Puertas de Calidad Adaptativas por Perfil de Riesgo (Progressive Friction Gates)
+### 4.2 Progressive Friction Quality Gates
 
-Las compuertas de liberación no imponen la misma fricción burocrática a todos los cambios; evalúan los artefactos y exigencias en función del campo `profile` declarado en el frontmatter de `spec.md`:
+Release gates adapt governance friction according to the `profile` field declared in `spec.md` frontmatter:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│             PUERTAS DE CALIDAD POR PERFIL DE FRICCIÓN                  │
+│                 PROGRESSIVE FRICTION QUALITY GATES                     │
 └────────────────────────────────────────────────────────────────────────┘
 
- 1. PERFIL PATCH (Baja Fricción / Hotfixes & Refactors Cosméticos)
-    ├── Frontmatter: profile: patch en spec.md
-    ├── Gates Obligatorios:
-    │   • Linters y Tipado Estricto (cero errores / cero any).
-    │   • Ejecución exitosa del comando de verificación declarado en spec.md.
-    │   • Guardrail Determinista Anti-Patch Bypass (100% libre de rutas protegidas).
-    └── Exenciones Formales:
-        • Exento de RTM 360° inversa (no requiere handoff.yaml).
-        • Exento de modelado STRIDE formal.
-        • Exento de actualización de manuales MAN-USER-* y MAN-PROD-*.
+ 1. PATCH PROFILE (Low Friction / Hotfixes & Cosmetic Refactoring)
+    ├── Frontmatter: profile: patch in spec.md
+    ├── Mandatory Gates:
+    │   • Linters and Strict Typing (zero errors / zero any).
+    │   • Successful execution of verification command in spec.md.
+    │   • Deterministic Anti-Patch Bypass Guardrail (100% free of protected paths).
+    └── Formal Exemptions:
+        • Exempt from reverse 360° RTM (does not require handoff.yaml).
+        • Exempt from formal STRIDE threat modeling.
+        • Exempt from updating MAN-USER-* and MAN-PROD-* manuals.
 
- 2. PERFIL STANDARD (Fricción Nominal / Casos de Uso Estándar)
-    ├── Frontmatter: profile: standard en spec.md
-    └── Gates Obligatorios:
-        • Suite completa CI/CD: Linters, tipado y tests unitarios.
-        • Calidad de código: CC <= 10, MI >= 50, Duplicación <= 3%, Cobertura >= 85%.
-        • RTM 360° Conforme (reverse lookup entre HOF-*, arc42 y .feature).
-        • Todas las tareas de tasks.md en estado COMPLETED.
+ 2. STANDARD PROFILE (Nominal Friction / Standard Business Use Cases)
+    ├── Frontmatter: profile: standard in spec.md
+    └── Mandatory Gates:
+        • Full CI/CD suite: Linters, typing, and unit tests.
+        • Code quality: CC <= 10, MI >= 50, Duplication <= 3%, Coverage >= 85%.
+        • 360° RTM Compliant (reverse lookup across HOF-*, arc42, and .feature).
+        • All tasks in tasks.md in COMPLETED state.
 
- 3. PERFIL CRITICAL (Alta Fricción / Criptografía, Secretos y Enclaves)
-    ├── Frontmatter: profile: critical en spec.md
-    └── Gates Obligatorios:
-        • Todas las compuertas del Perfil Standard al 100%.
-        • Modelado formal de amenazas STRIDE / OWASP ASVS aprobado.
-        • Registro de Decisión Arquitectónica (ADR-*) formalmente aprobado.
-        • Verificación de enclaves Zero Trust (SEC-ENC-*).
-        • Doble aprobación humana en PR (Tech Lead + SecOps/Arquitecto).
+ 3. CRITICAL PROFILE (High Friction / Cryptography, Secrets, and Enclaves)
+    ├── Frontmatter: profile: critical in spec.md
+    └── Mandatory Gates:
+        • 100% of Standard Profile gates.
+        • Approved formal STRIDE / OWASP ASVS threat model.
+        • Formally approved Architecture Decision Record (ADR-*).
+        • Zero Trust enclave verification (SEC-ENC-*).
+        • Dual human sign-off on PR (Tech Lead + SecOps/Architect).
 
- 4. GUARDRAIL DETERMINISTA ANTI-PATCH BYPASS
-    ├── Disparador: Cambio declarado con profile: patch en su spec.md.
-    ├── Condición de Fallo Inmediato: Si el diff incluye modificaciones en:
+ 4. DETERMINISTIC ANTI-PATCH BYPASS GUARDRAIL
+    ├── Trigger: Change declared with profile: patch in spec.md.
+    ├── Immediate Failure Condition: Diff touches any of:
     │   • schemas/**
-    │   • quality-policy.yaml o license-policy.yaml
-    │   • examples/security/** o enclaves SEC-ENC-*
-    │   • Migraciones de base de datos o almacenamiento persistente
-    └── Acción: RECHAZO AUTOMÁTICO DE CI/CD (EXIT 1) con exigencia de reclasificación.
+    │   • quality-policy.yaml or license-policy.yaml
+    │   • examples/security/** or enclaves SEC-ENC-*
+    │   • Database migrations or persistent schema definitions
+    └── Action: AUTOMATIC CI/CD REJECTION (EXIT 1) with reclassification requirement.
 ```
 
-<a id="cap-10-quality-management-and-release-gates-43-comando-unificado-de-pre-vuelo-con-auto-fix-aisdlc-check---fix"></a>
+<a id="cap-10-quality-management-and-release-gates-43-unified-pre-flight-command-with-auto-fix-aisdlc-check---fix"></a>
 
-### 4.3 Comando Unificado de Pre-Vuelo con Auto-Fix (`aisdlc check --fix`)
+### 4.3 Unified Pre-Flight Command with Auto-Fix (`aisdlc check --fix`)
 
-Para evitar rechazos mecánicos en los pipelines de CI/CD por fallos menores de sincronización (escenarios Gherkin modificados en Markdown pero no extraídos a `.feature`, o desfases menores en digests criptográficos tras ajustes de formato), los ingenieros y agentes de IA deben ejecutar el comando unificado de pre-vuelo antes de abrir o actualizar una Pull Request:
+To prevent mechanical CI/CD failures caused by minor synchronization gaps (Gherkin scenarios edited in Markdown but unextracted to `.feature`, or minor SHA-256 digest shifts after formatting adjustments), engineers and AI agents run the pre-flight command before opening or updating a PR:
 
 ```bash
 npx aisdlc check --fix
 ```
 
-#### Fases de Ejecución:
-1. **Sincronización Automática Previa (No Destructiva)**:
-   - **Extracción BDD**: Detecta si los bloques ` ```gherkin ` en especificaciones de producto o seguridad difieren de los archivos `.feature` en disco y los sincroniza automáticamente.
-   - **Sincronización Anti-Deriva PDaC**: Sincroniza los digests criptográficos SHA-256 de las citaciones canónicas (`citations: - id: ... digest: ...`) si el contenido destino existe y está actualizado.
-2. **Ejecución Consolidada de Quality Gates**:
-   - Corre deterministamente todos los verificadores maestros del framework:
-     - Calidad de código (CC $\le 10$, MI $\ge 50$, LOC $\le 40$).
-     - Trazabilidad 360° RTM inversa (cero requerimientos huérfanos).
-     - Gobernanza y modos de autonomía en tareas (`tasks.md`).
-     - Cobertura de pruebas en requisitos y tareas.
-     - Licencias Open Source conformes con `license-policy.yaml`.
-     - Integridad PDaC libre de deriva de digests.
-     - Conformidad con esquemas JSON formales (Draft 2020-12).
-3. **Dashboard Accionable en Terminal**:
-   - Vuelca un resumen visual estructurado indicando el estado de cada compuerta (`PASSED`, `AUTO-FIXED`, `FAILED`).
-   - En caso de errores bloqueantes no subsanables automáticamente, detalla la causa exacta y el comando de remediación, devolviendo código de salida determinista (0 en éxito, 1 si existen infracciones).
+#### Execution Phases:
+1. **Automated Non-Destructive Pre-Synchronization**:
+   - **BDD Extraction**: Detects if ` ```gherkin ` blocks in product or security specifications differ from `.feature` files on disk and automatically synchronizes them.
+   - **PDaC Anti-Drift Sync**: Synchronizes SHA-256 cryptographic digests of canonical citations (`citations: - id: ... digest: ...`) if target content exists and is valid.
+2. **Consolidated Quality Gate Execution**:
+   - Deterministically executes all master verifiers:
+     - Code quality (CC $\le 10$, MI $\ge 50$, LOC $\le 40$).
+     - 360° reverse RTM traceability (zero orphan requirements).
+     - Task governance and autonomy modes (`tasks.md`).
+     - Test coverage across requirements and tasks.
+     - Open source license compliance with `license-policy.yaml`.
+     - PDaC cryptographic integrity free of digest drift.
+     - Formal JSON schema compliance (Draft 2020-12).
+3. **Actionable Console Dashboard**:
+   - Outputs a visual summary of gate statuses (`PASSED`, `AUTO-FIXED`, `FAILED`).
+   - If non-recoverable blocking errors occur, details root causes and remediation commands with deterministic exit codes (0 on success, 1 on violations).
 
 ---
 
-<a id="cap-10-quality-management-and-release-gates-5-politica-de-excepciones-y-gestion-de-deuda-tecnica"></a>
+<a id="cap-10-quality-management-and-release-gates-5-exception-policy-and-technical-debt-management"></a>
 
-## 5. Política de Excepciones y Gestión de Deuda Técnica
+## 5. Exception Policy and Technical Debt Management
 
-Si por razones de rendimiento extremo (ej. bucle de procesamiento gráfico o parser telemétrico de bajo nivel) una función necesita superar la complejidad ciclomática de 10:
-1. **Procedimiento Obligatorio**:
-   - Se debe registrar un **ADR de Deuda Técnica** (`docs/architecture/09_decisions/ADR-TECH-DEBT-*.md`).
-   - El ADR debe contener: justificación del impacto, benchmark comparativo y un plan de mitigación con fecha límite o hito de refactorización.
-2. **Autoridad**:
-   - Solo el **Lead Architect** y el **Tech Lead humano** pueden aprobar la excepción. Ningún agente de IA puede auto-concederse una excepción de calidad.
+If for extreme performance reasons (e.g., graphics processing loops or low-level telemetry parsers) a function must exceed cyclomatic complexity of 10:
+1. **Mandatory Procedure**:
+   - A **Technical Debt ADR** must be registered (`docs/architecture/09_decisions/ADR-TECH-DEBT-*.md`).
+   - The ADR must include: impact justification, comparative benchmark, and mitigation plan with refactoring milestone/deadline.
+2. **Authority**:
+   - Only the **Lead Architect** and **human Tech Lead** may grant an exception. AI agents cannot self-grant quality exemptions.
 
 ---
 
-<a id="cap-10-quality-management-and-release-gates-6-generacion-automatica-del-informe-de-calidad-quality-scorecard-as-code"></a>
+<a id="cap-10-quality-management-and-release-gates-6-automated-quality-report-generation-quality-scorecard-as-code"></a>
 
-## 6. Generación Automática del Informe de Calidad (Quality Scorecard as Code)
+## 6. Automated Quality Report Generation (Quality Scorecard as Code)
 
-El framework incorpora la capacidad de **generar automáticamente el informe formal de calidad** tan pronto como el código es escrito o modificado por un desarrollador o agente:
+The framework can **automatically generate formal quality reports** as soon as code is authored or modified by a developer or agent:
 
-<a id="cap-10-quality-management-and-release-gates-a-comando-de-generacion-automatica"></a>
+<a id="cap-10-quality-management-and-release-gates-a-automatic-generation-command"></a>
 
-### A. Comando de Generación Automática
+### A. Automatic Generation Command
 ```bash
-# 1. Informe global del proyecto
+# 1. Global project report
 npx tsx scripts/generate-quality-report.ts
 
-# 2. Informe acotado a un incremento o cambio SDD específico
+# 2. Scoped to a specific SDD change
 npx tsx scripts/generate-quality-report.ts --change chg-001-telemetry-ingestion --target src/telemetry
 
-# 3. Informe con destino personalizado
+# 3. Custom output destination
 npx tsx scripts/generate-quality-report.ts --target src/ --output reports/SPRINT_QUALITY.md
 ```
 
-<a id="cap-10-quality-management-and-release-gates-b-contenido-del-informe-generado"></a>
+<a id="cap-10-quality-management-and-release-gates-b-generated-report-contents"></a>
 
-### B. Contenido del Informe Generado
-El documento producido (`reports/QUALITY_REPORT.md` o `specs/changes/active/<chg-id>/quality-report.md`) incluye:
-1. **Calificación Global (SQALE Rating A-F)** basada en métricas ponderadas.
-2. **Veredicto Determinista del Release Gate** (`AUTORIZADO (PASS)` o `BLOQUEADO (FAIL)`).
-3. **Distribución Gráfica de Complejidad Ciclomática** (Baja [1-5], Moderada [6-10], Crítica [>10]).
-4. **Tabla Desglosada por Función**: SLOC, Complejidad Ciclomática, Complejidad Cognitiva, Índice de Mantenibilidad y detección de code smells.
-5. **Instrucciones Accionables de Refactorización**: Si el Release Gate falla, el informe emite automáticamente los prompts y pautas de descomposición para que el agente de IA lo subsane sin intervención manual.
+### B. Generated Report Contents
+The generated document (`reports/QUALITY_REPORT.md` or `specs/changes/active/<chg-id>/quality-report.md`) provides:
+1. **Global Rating (SQALE Rating A-F)** based on weighted metrics.
+2. **Deterministic Release Gate Verdict** (`AUTHORIZED (PASS)` or `BLOCKED (FAIL)`).
+3. **Graphical Cyclomatic Complexity Distribution** (Low [1-5], Moderate [6-10], Critical [>10]).
+4. **Per-Function Breakdown Table**: SLOC, Cyclomatic Complexity, Cognitive Complexity, Maintainability Index, and code smell detection.
+5. **Actionable Refactoring Guidance**: If Release Gate fails, the report automatically provides decomposition prompts for AI agents to resolve violations without manual intervention.
 
 ---
 
-<a id="cap-10-quality-management-and-release-gates-7-arquitectura-de-calidad-multilenguaje-polyglot-support"></a>
+<a id="cap-10-quality-management-and-release-gates-7-polyglot-quality-architecture-polyglot-support"></a>
 
-## 7. Arquitectura de Calidad Multilenguaje (Polyglot Support)
+## 7. Polyglot Quality Architecture (Polyglot Support)
 
-El framework AI-SDLC está concebido como una **plataforma políglota universal**. Ni la metodología ni los mecanismos de validación están atados a un único lenguaje de programación.
+The AI-SDLC framework is conceived as a **universal polyglot platform**. Neither methodology nor validation mechanisms are bound to a single programming language.
 
-<a id="cap-10-quality-management-and-release-gates-a-niveles-de-neutralidad-del-framework"></a>
+<a id="cap-10-quality-management-and-release-gates-a-framework-neutrality-levels"></a>
 
-### A. Niveles de Neutralidad del Framework
+### A. Framework Neutrality Levels
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   ARQUITECTURA DE CALIDAD POLÍGLOTA                    │
+│                     POLYGLOT QUALITY ARCHITECTURE                      │
 └────────────────────────────────────────────────────────────────────────┘
 
- 1. CAPA CONCEPTUAL Y METODOLÓGICA (100% Agnóstica de Lenguaje)
-    ├── Definición de Producto: ProductShape en Markdown + JSON Schema
-    ├── Arquitectura de Sistemas: arc42 (12 secciones) + NAF v4 Grid
-    ├── Ciberseguridad Shift-Left: STRIDE, OWASP ASVS, Enclaves DMZ
-    ├── Gobernanza de Licencias: SPDX, allowlist/denylist, SBOM CycloneDX
-    └── Criterios BDD: Gherkin estándar (.feature) ejecutable en cualquier runtime
+ 1. METHODOLOGICAL & CONCEPTUAL LAYER (100% Language-Agnostic)
+    ├── Product Definition: ProductShape in Markdown + JSON Schema
+    ├── Systems Architecture: arc42 (12 sections) + NAF v4 Grid
+    ├── Shift-Left Cybersecurity: STRIDE, OWASP ASVS, DMZ Enclaves
+    ├── License Governance: SPDX, allowlist/denylist, CycloneDX SBOM
+    └── BDD Criteria: Standard Gherkin (.feature) runnable on any test runtime
 
- 2. MOTOR NATIVO EMBEBIDO (Out-of-the-box en scripts/)
-    ├── Analizador sintáctico universal para métricas McCabe (CC), MI y LOC
-    └── Lenguajes soportados directamente:
+ 2. NATIVE EMBEDDED ENGINE (Out-of-the-box in scripts/)
+    ├── Universal parser for McCabe (CC), MI, and LOC metrics
+    └── Supported languages:
         • TypeScript / JavaScript (.ts, .js)
         • Python (.py)
         • Java / Kotlin (.java, .kt)
@@ -3943,118 +3931,118 @@ El framework AI-SDLC está concebido como una **plataforma políglota universal*
         • Rust (.rs)
         • C / C++ (.c, .cpp)
 
- 3. ADAPTADORES DE ECOSISTEMA NATIVO Y ESTÁNDARES EMPRESARIALES
+ 3. NATIVE ECOSYSTEM ADAPTERS AND ENTERPRISE STANDARDS
     ├── Python: Ruff, Black, Radon, Xenon, PyTest, Coverage.py
     ├── Java: Checkstyle, SpotBugs, PMD, JUnit 5, JaCoCo
     ├── Go: golangci-lint, gocyclo, go test -cover
     ├── C#/.NET: dotnet format, Roslyn Analyzers, Coverlet
     ├── Rust: cargo clippy, rustfmt, cargo-tarpaulin
-    └── Agregadores Empresariales: SonarQube / SonarCloud y formato SARIF (OASIS)
+    └── Enterprise Aggregators: SonarQube / SonarCloud and SARIF format (OASIS)
 ```
 
-<a id="cap-10-quality-management-and-release-gates-b-mapeo-de-ecosistemas-en-quality-policyyaml"></a>
+<a id="cap-10-quality-management-and-release-gates-b-ecosystem-mapping-in-quality-policyyaml"></a>
 
-### B. Mapeo de Ecosistemas en `quality-policy.yaml`
+### B. Ecosystem Mapping in `quality-policy.yaml`
 
-El archivo de configuración permite orquestar linters y motores de cobertura específicos para cada lenguaje manteniendo umbrales cuantitativos homogéneos (`CC <= 10`, `MI >= 50`, `Coverage >= 85%`).
+The configuration file allows orchestrating language-specific linters and coverage engines while maintaining homogeneous quantitative thresholds (`CC <= 10`, `MI >= 50`, `Coverage >= 85%`).
 
-<a id="cap-10-quality-management-and-release-gates-c-el-estandar-universal-sarif-static-analysis-results-interchange-format"></a>
+<a id="cap-10-quality-management-and-release-gates-c-the-universal-sarif-standard-static-analysis-results-interchange-format"></a>
 
-### C. El Estándar Universal SARIF (Static Analysis Results Interchange Format)
-Para integraciones complejas en grandes organizaciones, el AI-SDLC adopta el estándar **SARIF (JSON OASIS)**. Cualquier analizador de cualquier lenguaje (Roslyn, Clang-Tidy, ESLint, Bandit, Flake8) puede volcar sus diagnósticos a formato SARIF, siendo consolidado de forma transparente por el pipeline de release.
+### C. The Universal SARIF Standard (Static Analysis Results Interchange Format)
+For enterprise integrations, AI-SDLC adopts the **SARIF (JSON OASIS)** standard. Any analyzer from any language ecosystem (Roslyn, Clang-Tidy, ESLint, Bandit, Flake8) can output diagnostics in SARIF format, seamlessly ingested by the release pipeline.
 
 ---
 
-<a id="cap-10-quality-management-and-release-gates-7-telemetria-de-commits-agregacion-de-kpis-y-coste-de-calidad-rework-dir"></a>
+<a id="cap-10-quality-management-and-release-gates-8-commit-telemetry-kpi-aggregation-and-cost-of-quality-rework-dir"></a>
 
-## 7. Telemetría de Commits, Agregación de KPIs y Coste de Calidad (Rework & DIR)
+## 8. Commit Telemetry, KPI Aggregation, and Cost of Quality (Rework & DIR)
 
-Para gobernar el desarrollo simétrico personas-agentes con trazabilidad económica y técnica real, el framework implementa un sistema determinista y automatizado de **Telemetría en Tres Niveles**:
+To govern human-agent co-development with economic and technical visibility, the framework implements an automated **Three-Tier Telemetry System**:
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
-│             TELEMETRÍA DETERMINISTA Y CONTROL DE CALIDAD               │
+│               DETERMINISTIC TELEMETRY AND QUALITY CONTROL              │
 └────────────────────────────────────────────────────────────────────────┘
 
- 1. NIVEL COMMIT (Inyección Cero-Fricción vía Git Hook)
-    ├── Hook: .git/hooks/prepare-commit-msg (instalado con `aisdlc git hook install`)
-    ├── Detección de Autoría: Humano vs. Agente (modelo LLM)
-    └── Trailers inmutables: Task-ID, Parent-Ref, Tokens (Prompt/Completion), Active-Time
+ 1. COMMIT LEVEL (Zero-Friction Injection via Git Hook)
+    ├── Hook: .git/hooks/prepare-commit-msg (installed via `aisdlc git hook install`)
+    ├── Authorship Detection: Human vs. Agent (LLM model)
+    └── Immutable Trailers: Task-ID, Parent-Ref, Tokens (Prompt/Completion), Active-Time
 
- 2. NIVEL PULL REQUEST (Agregación Automática)
-    ├── Comando: `aisdlc kpi pr` (y workflow GitHub Actions pr-kpi-summary.yml)
-    ├── Agrupación: Desglose de commits, líneas (+/-), tiempo y tokens por autor/modelo
-    └── Inyección: Sección 8 en PULL_REQUEST_TEMPLATE.md delimitada por marcadores
+ 2. PULL REQUEST LEVEL (Automated Aggregation)
+    ├── Command: `aisdlc kpi pr` (and GitHub Actions workflow pr-kpi-summary.yml)
+    ├── Grouping: Breakdown of commits, lines (+/-), time, and tokens per author/model
+    └── Injection: Section 8 in PULL_REQUEST_TEMPLATE.md bounded by markers
 
- 3. NIVEL RELEASE (Informe Consolidado de Calidad y Defectos)
-    ├── Comando: `aisdlc kpi release --release <branch>`
-    ├── Defect Injection Rate (DIR): Bugs confirmados por KLoC por modelo y humano
-    ├── Ratios de Re-trabajo (Cost of Quality): % tiempo y % tokens dedicados a bugs
-    └── Artefactos canónicos: reports/releases/RELEASE_KPIS_<release>.md y .json
+ 3. RELEASE LEVEL (Consolidated Quality and Defect Report)
+    ├── Command: `aisdlc kpi release --release <branch>`
+    ├── Defect Injection Rate (DIR): Confirmed bugs per KLoC per model and human
+    ├── Rework Ratios (Cost of Quality): % time and % tokens spent on defects
+    └── Canonical Artifacts: reports/releases/RELEASE_KPIS_<release>.md and .json
 ```
 
-<a id="cap-10-quality-management-and-release-gates-a-git-trailers-estandarizados"></a>
+<a id="cap-10-quality-management-and-release-gates-a-standardized-git-trailers"></a>
 
-### A. Git Trailers Estandarizados
-En cada commit se inyectan trailers sin intervención manual:
+### A. Standardized Git Trailers
+Trailers are injected into every commit without manual friction:
 ```git
 Task-ID: TSK-002
 Parent-Ref: CHG-001
 Author-Type: agent              # agent | human
-AI-Model: claude-3-7-sonnet     # modelo LLM o n/a para humanos
+AI-Model: claude-3-7-sonnet     # LLM model or n/a for humans
 Prompt-Tokens: 14500
 Completion-Tokens: 1850
 Active-Time-Seconds: 420
 ```
 
-<a id="cap-10-quality-management-and-release-gates-b-metricas-de-re-trabajo-y-observabilidad"></a>
+<a id="cap-10-quality-management-and-release-gates-b-observability-and-rework-metrics"></a>
 
-### B. Métricas de Re-trabajo y Observabilidad
-- **Defect Injection Rate (DIR)**: $\text{DIR} = \frac{\text{Bugs Introducidos}}{\text{KLoC generadas por el autor/modelo}}$.
-- **Ratio de Re-trabajo en Tiempo**: $\%T_{\text{rework}} = \frac{\sum T_{\text{bugs}}}{T_{\text{total\_release}}} \times 100$.
-- **Ratio de Re-trabajo en Tokens**: $\%\text{Tokens}_{\text{rework}} = \frac{\sum \text{Tokens}_{\text{bugs}}}{\text{Tokens}_{\text{total\_release}}} \times 100$.
+### B. Observability and Rework Metrics
+- **Defect Injection Rate (DIR)**: $\text{DIR} = \frac{\text{Bugs Introduced}}{\text{KLoC generated by author/model}}$.
+- **Time Rework Ratio**: $\%T_{\text{rework}} = \frac{\sum T_{\text{bugs}}}{T_{\text{total\_release}}} \times 100$.
+- **Token Rework Ratio**: $\%\text{Tokens}_{\text{rework}} = \frac{\sum \text{Tokens}_{\text{bugs}}}{\text{Tokens}_{\text{total\_release}}} \times 100$.
 
-Estas métricas son puramente observacionales y analíticas, proporcionando a los líderes de ingeniería visibilidad sobre qué modelos LLM son más fiables y cuál es el impacto real de los defectos en el presupuesto del proyecto.
+These metrics provide engineering leaders with empirical insight into LLM reliability and the real financial and temporal impact of defects across sprints.
 
 ---
 
-<a id="cap-10-quality-management-and-release-gates-8-dashboard-web-interactivo-y-visualizador-de-grafos-pdac-rtm-cytoscapejs"></a>
+<a id="cap-10-quality-management-and-release-gates-9-interactive-web-dashboard-and-pdac-rtm-graph-visualizer-cytoscapejs"></a>
 
-## 8. Dashboard Web Interactivo y Visualizador de Grafos PDaC / RTM (Cytoscape.js)
+## 9. Interactive Web Dashboard and PDaC / RTM Graph Visualizer (Cytoscape.js)
 
-Para stakeholders no técnicos (Product Owners, CISOs, auditores y directores de ingeniería), explorar la red completa de dependencias de producto (`Actores ➔ Casos de Uso ➔ Reglas de Negocio ➔ Requisitos ➔ Componentes arc42 ➔ Tests BDD`) en documentos Markdown estáticos genera fricción cognitiva.
+For non-technical stakeholders (Product Owners, CISOs, auditors, and engineering executives), exploring the complete product dependency network (`Vision / Goals ARCH-INTRO-* ➔ Actors ➔ Use Cases ➔ Business Rules ➔ Requirements ➔ arc42 Components ➔ BDD Tests`) across static Markdown documents introduces cognitive load.
 
-El comando CLI `npx aisdlc report dashboard` compila la totalidad del grafo PDaC, la matriz RTM 360°, las métricas de calidad y la telemetría histórica de KPIs en un artefacto HTML autocontenido (`reports/dashboard.html`):
+The CLI command `npx aisdlc report dashboard` compiles the entire PDaC graph, 360° RTM matrix, quality metrics, and historical KPI telemetry into a self-contained HTML artifact (`reports/dashboard.html`):
 
 ```bash
-# Generar el dashboard en reports/dashboard.html
+# Generate dashboard at reports/dashboard.html
 npx aisdlc report dashboard
 
-# Generar y abrir inmediatamente en el navegador predeterminado
+# Generate and immediately open in default browser
 npx aisdlc report dashboard --open
 
-# Personalizar ruta de destino y título
+# Custom destination and title
 npx aisdlc report dashboard --output dist/governance.html --title "SentinelCore Enterprise SDLC"
 ```
 
-<a id="cap-10-quality-management-and-release-gates-caracteristicas-principales-del-dashboard"></a>
+<a id="cap-10-quality-management-and-release-gates-key-dashboard-features"></a>
 
-### Características Principales del Dashboard:
-1. **Visualizador de Red con Cytoscape.js (MIT)**:
-   - Capas semánticas diferenciadas por geometría y color: Producto (rombos cian), Requisitos (rectángulos verdes/rojos), Arquitectura (hexágonos índigo) y Pruebas (elipses esmeralda).
-   - Coloreado determinista de estado: 🟢 Verde para nodos conformes sin derivas; 🔴 Rojo para requisitos huérfanos o con deriva criptográfica SHA-256 (`DRIFT`).
-   - Controles de navegación: Zoom, encuadre centrado, layouts intercambiables (jerárquico por capas, COSE, concéntrico, circular).
-   - **Resaltado de Camino Crítico**: Al hacer clic sobre cualquier nodo, se iluminan sus dependencias upstream y downstream, atenuando el resto del grafo.
-2. **Matriz de Trazabilidad 360° Interactiva**:
-   - Tabla con filtrado en tiempo real por texto o estado, con enlace bidireccional que enfoca y centra el nodo seleccionado en el grafo.
-3. **Métricas de Calidad y Gobernanza**:
-   - Tarjetas de resumen ejecutivo (Release Gate PASS/FAIL, Mantenibilidad SEI MI, Complejidad Ciclomática, Cobertura BDD).
-   - Desglose de distribución de modos de autonomía de tareas (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
-4. **Telemetría Activa e Histórico de KPIs**:
-   - Métricas de la rama activa (commits, líneas añadidas/eliminadas, tiempo de desarrollo activo, consumo de tokens y coste computacional en USD).
-   - Tabla y tendencias históricas consolidadas procedentes de `reports/releases/*.kpis.json` para análisis de KLoC, bugs, DIR y re-trabajo a lo largo de los sprints.
-5. **Cero Infraestructura Externa (100% Offline)**:
-   - El archivo generado incrusta todos los scripts y estilos necesarios, permitiendo su apertura directa con doble clic local (`file:///...`) o su publicación estática en GitHub Pages / GitLab Pages sin necesidad de backend.
+### Key Dashboard Features:
+1. **Network Visualizer with Cytoscape.js (MIT)**:
+   - Geometric and color-coded semantic layers: Product Upstream (including root `Vision / Goals` `ARCH-INTRO-*` with `identifies`, `envisions`, and `defines-goal` semantic edges, `JRN-*`, `ACT-*`, `UC-*`, `BR-*`), Requirements (`FR-*`, `QR-*`, `SEC-REQ-*`), Architecture Midstream (`CMP-*`, `ADR-*`, `SEC-ENC-*`), and Testing Downstream (`.feature`).
+   - Deterministic status coloring: 🟢 Green for compliant nodes; 🔴 Red for orphan requirements or nodes with cryptographic SHA-256 drift (`DRIFT`).
+   - Navigation controls: Zoom, pan, center view, typology filter (including `Vision / Goals (ARCH-INTRO)`), and switchable layouts (hierarchical layered, COSE, concentric, circular).
+   - **Critical Path Highlighting**: Clicking any node illuminates its upstream and downstream dependencies while dimming unrelated elements.
+2. **Interactive 360° Traceability Matrix**:
+   - Real-time search and filterable table with bidirectional navigation focusing and centering selected nodes in the graph.
+3. **Quality and Governance Metrics**:
+   - Executive scorecards (Release Gate PASS/FAIL, SEI MI Maintainability, Cyclomatic Complexity, BDD Coverage).
+   - Autonomy mode distribution breakdown (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
+4. **Active Telemetry and Historical KPIs**:
+   - Active branch metrics (commits, lines added/deleted, active development time, token consumption, estimated USD compute cost).
+   - Historical trend tables consolidated from `reports/releases/*.kpis.json` tracking KLoC, bugs, DIR, and rework across releases.
+5. **Zero External Infrastructure (100% Offline)**:
+   - Self-contained file embedding all scripts and styles, opening directly via local file protocol (`file:///...`) or hosted on static pages (GitHub Pages, GitLab Pages) without a backend.
 
 ---
 
@@ -4062,98 +4050,98 @@ npx aisdlc report dashboard --output dist/governance.html --title "SentinelCore 
 
 > 📂 **Módulo 13 de 13 [Parte II: Especificación Normativa del Framework]:** `process/11_git_branching_and_lifecycle.md`
 
-# 11. Modelo de Ramas Git Jerárquico (4-Tier Git Branching Model)
+# 11. Hierarchical Git Branching Model (4-Tier Git Branching Model)
 
-<a id="cap-11-git-branching-and-lifecycle-1-principios-del-modelo-de-ramificacion"></a>
+<a id="cap-11-git-branching-and-lifecycle-1-principles-of-the-branching-model"></a>
 
-## 1. Principios del Modelo de Ramificación
+## 1. Principles of the Branching Model
 
-Para gobernar el desarrollo colaborativo entre humanos y agentes de IA con máxima estabilidad y trazabilidad, el framework AI-SDLC implementa un **modelo jerárquico estricto de 4 niveles de ramas Git**:
+To govern collaborative development between humans and AI agents with maximum stability and traceability, the AI-SDLC framework implements a **strict hierarchical 4-tier Git branching model**:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│               JERARQUÍA DE RAMAS GIT EN EL AI-SDLC (4 TIERS)          │
+│               GIT BRANCH HIERARCHY IN AI-SDLC (4 TIERS)                │
 └────────────────────────────────────────────────────────────────────────┘
 
- TIER 1: main (Última versión estable en producción)
+ TIER 1: main (Latest stable production release)
    │
-   └── TIER 2: release/vX.Y.Z (Rama de versión abierta)
+   └── TIER 2: release/vX.Y.Z (Open version branch)
          │
-         └── TIER 3: feat/<FEAT-ID>-<slug> | bug/<BUG-ID>-<slug> (Feature o Bug)
+         └── TIER 3: feat/<FEAT-ID>-<slug> | bug/<BUG-ID>-<slug> (Feature or Bug)
                │
-               └── TIER 4: task/<PARENT-ID>/<TSK-ID>-<slug> (Tarea atómica)
+               └── TIER 4: task/<PARENT-ID>/<TSK-ID>-<slug> (Atomic task)
 ```
 
 ---
 
-<a id="cap-11-git-branching-and-lifecycle-2-anatomia-de-los-cuatro-niveles-de-ramas"></a>
+<a id="cap-11-git-branching-and-lifecycle-2-anatomy-of-the-four-branch-tiers"></a>
 
-## 2. Anatomía de los Cuatro Niveles de Ramas
+## 2. Anatomy of the Four Branch Tiers
 
-<a id="cap-11-git-branching-and-lifecycle-tier-1-rama-main-linea-base-estable"></a>
+<a id="cap-11-git-branching-and-lifecycle-tier-1-main-branch-stable-baseline"></a>
 
-### Tier 1: Rama `main` (Línea Base Estable)
-- **Propósito**: Contiene exclusivamente el código en su última versión estable desplegada o lista para producción.
-- **Reglas de Acceso**:
-  - **Protegida (Protected Branch)**: Prohibido cualquier `push` directo.
-  - Solo acepta código mediante **Pull Request** fusionado desde una rama de versión abierta (`release/vX.Y.Z`).
-  - Cada merge hacia `main` va acompañado de una etiqueta Git inmutable de versión semántica (ej. `v1.0.0`, `v1.1.0`).
-
----
-
-<a id="cap-11-git-branching-and-lifecycle-tier-2-rama-de-version-abierta-releasevxyz-o-versionvxyz"></a>
-
-### Tier 2: Rama de Versión Abierta (`release/vX.Y.Z` o `version/vX.Y.Z`)
-- **Propósito**: Agrupa todas las features, mejoras y correcciones programadas para una versión específica (milestone/release).
-- **Origen**: Se bifurca (`fork`) directamente a partir de `main`.
-- **Nomenclatura Estándar**: `release/v<MAJOR>.<MINOR>.<PATCH>` (ej. `release/v1.1.0`).
-- **Ciclo de Vida**:
-  - Permanece abierta durante el ciclo de desarrollo de la versión.
-  - Recibe los merges de las ramas de features y bugs asignados al release.
-  - Una vez superado el **Release Gate** y la auditoría final, se fusiona hacia `main` y se archiva o elimina.
+### Tier 1: `main` Branch (Stable Baseline)
+- **Purpose**: Exclusively contains code in its latest stable release deployed or ready for production.
+- **Access Rules**:
+  - **Protected Branch**: Direct `push` is strictly forbidden.
+  - Accepts code solely via **Pull Request** merged from an open version branch (`release/vX.Y.Z`).
+  - Every merge into `main` is tagged with an immutable semantic version Git tag (e.g. `v1.0.0`, `v1.1.0`).
 
 ---
 
-<a id="cap-11-git-branching-and-lifecycle-tier-3-rama-de-feature-bug-o-parche-feat-bug-patch-fix"></a>
+<a id="cap-11-git-branching-and-lifecycle-tier-2-open-version-branch-releasevxyz-or-versionvxyz"></a>
 
-### Tier 3: Rama de Feature, Bug o Parche (`feat/...`, `bug/...`, `patch/...`, `fix/...`)
-- **Propósito**: Desarrolla una funcionalidad (`feature`), resuelve un defecto (`bug`) o aplica un parche menor (`patch`/`fix`).
-- **Origen**: Se bifurca a partir de la rama de versión abierta (`release/vX.Y.Z`) o directamente desde la rama base correspondiente.
-- **Nomenclatura Estándar**:
-  - Features: `feat/<VERSION>/<FEAT-ID>-<slug>` o `feat/<FEAT-ID>-<slug>`
-    - Ejemplos: `feat/CHG-001-telemetry-ingestion`, `feat/v1.1.0/FEAT-002-collision-detector`
-  - Bugs / Parches: `bug/<BUG-ID>-<slug>`, `fix/<BUG-ID>-<slug>` o `patch/<PATCH-ID>-<slug>`
-    - Ejemplos: `bug/BUG-042-timestamp-drift`, `patch/PATCH-002-linter-fix`, `fix/CHG-003-typo`
-- **Ciclo de Vida y Fricción Progresiva**:
-  - **Perfil Standard / Critical**: Contiene el andamiaje SDD completo (`proposal.md`, `spec.md`, `design.md`, `tasks.md`). Recibe merges desde ramas Tier 4 (`task/*`) y se fusiona hacia la versión con Quality Gate completo.
-  - **Perfil Patch (Flujo Simplificado)**: Contiene únicamente `spec.md` condensado. **Exento de ramas Tier 4 (`task/*`)**: los ingenieros y agentes de IA pueden trabajar directamente sobre la rama `patch/*` o `fix/*` y abrir el Pull Request directo.
+### Tier 2: Open Version Branch (`release/vX.Y.Z` or `version/vX.Y.Z`)
+- **Purpose**: Aggregates all features, improvements, and bug fixes scheduled for a specific version milestone.
+- **Origin**: Forked directly from `main`.
+- **Standard Naming**: `release/v<MAJOR>.<MINOR>.<PATCH>` (e.g. `release/v1.1.0`).
+- **Lifecycle**:
+  - Remains open throughout the version's active development cycle.
+  - Receives merges from feature and bug branches assigned to the release.
+  - Once the **Release Gate** and final audits pass, it merges into `main` and is archived or deleted.
 
 ---
 
-<a id="cap-11-git-branching-and-lifecycle-tier-4-rama-de-tarea-atomica-task"></a>
+<a id="cap-11-git-branching-and-lifecycle-tier-3-feature-bug-or-patch-branch-feat-bug-patch-fix"></a>
 
-### Tier 4: Rama de Tarea Atómica (`task/...`)
-- **Propósito**: Unidad mínima de trabajo ejecutable por un desarrollador o agente de IA (`agent-developer`).
-- **Origen**: Se bifurca **obligatoriamente a partir de la rama de feature o bug** correspondiente.
-- **Nomenclatura Estándar**: `task/<PARENT-ID>/<TSK-ID>-<slug>`
-  - Ejemplos:
+### Tier 3: Feature, Bug, or Patch Branch (`feat/...`, `bug/...`, `patch/...`, `fix/...`)
+- **Purpose**: Develops a functionality (`feature`), resolves a defect (`bug`), or applies a minor patch (`patch`/`fix`).
+- **Origin**: Forked from the open version branch (`release/vX.Y.Z`) or directly from the corresponding base branch.
+- **Standard Naming**:
+  - Features: `feat/<VERSION>/<FEAT-ID>-<slug>` or `feat/<FEAT-ID>-<slug>`
+    - Examples: `feat/CHG-001-telemetry-ingestion`, `feat/v1.1.0/FEAT-002-collision-detector`
+  - Bugs / Patches: `bug/<BUG-ID>-<slug>`, `fix/<BUG-ID>-<slug>`, or `patch/<PATCH-ID>-<slug>`
+    - Examples: `bug/BUG-042-timestamp-drift`, `patch/PATCH-002-linter-fix`, `fix/CHG-003-typo`
+- **Lifecycle and Progressive Friction**:
+  - **Standard / Critical Profile**: Contains full SDD scaffolding (`proposal.md`, `spec.md`, `design.md`, `tasks.md`). Receives merges from Tier 4 (`task/*`) branches and merges into the version branch with full Quality Gate verification.
+  - **Patch Profile (Streamlined Flow)**: Contains only concise `spec.md`. **Exempt from Tier 4 (`task/*`) branches**: engineers and AI agents work directly on `patch/*` or `fix/*` branches and open direct Pull Requests.
+
+---
+
+<a id="cap-11-git-branching-and-lifecycle-tier-4-atomic-task-branch-task"></a>
+
+### Tier 4: Atomic Task Branch (`task/...`)
+- **Purpose**: Minimal executable unit of work for a developer or AI agent (`agent-developer`).
+- **Origin**: Forked **mandatorily from the corresponding feature or bug branch**.
+- **Standard Naming**: `task/<PARENT-ID>/<TSK-ID>-<slug>`
+  - Examples:
     - `task/CHG-001/TSK-001-dto-interfaces`
     - `task/CHG-001/TSK-002-wss-mtls-gateway`
     - `task/BUG-042/TSK-001-fix-clock-sync`
-- **Ciclo de Vida**:
-  - Un desarrollador o agente implementa el código y las pruebas específicas de esa tarea.
-  - Se valida localmente ejecutando el comando de verificación declarado en `tasks.md`.
-  - Se fusiona hacia la rama de feature mediante PR atómico.
+- **Lifecycle**:
+  - Developer or agent implements code and specific tests for that task.
+  - Locally validated by running the verification command declared in `tasks.md`.
+  - Merged into the feature branch via atomic PR.
 
 ---
 
-<a id="cap-11-git-branching-and-lifecycle-3-diagrama-de-flujo-de-ramas-y-merges"></a>
+<a id="cap-11-git-branching-and-lifecycle-3-branch-and-merge-flow-diagram"></a>
 
-## 3. Diagrama de Flujo de Ramas y Merges
+## 3. Branch and Merge Flow Diagram
 
 ```mermaid
 gitGraph
-    commit id: "v1.0.0 (Base Estable)"
+    commit id: "v1.0.0 (Stable Baseline)"
     branch release/v1.1.0 order: 1
     checkout release/v1.1.0
     commit id: "Init v1.1.0 Scope"
@@ -4166,13 +4154,13 @@ gitGraph
     checkout task/CHG-001/TSK-001-dto
     commit id: "Implement DTOs"
     checkout feat/CHG-001-telemetry
-    merge task/CHG-001/TSK-001-dto id: "PR: TSK-001 (Verificado)"
+    merge task/CHG-001/TSK-001-dto id: "PR: TSK-001 (Verified)"
 
     branch task/CHG-001/TSK-002-gateway order: 3
     checkout task/CHG-001/TSK-002-gateway
     commit id: "Implement Gateway"
     checkout feat/CHG-001-telemetry
-    merge task/CHG-001/TSK-002-gateway id: "PR: TSK-002 (Verificado)"
+    merge task/CHG-001/TSK-002-gateway id: "PR: TSK-002 (Verified)"
 
     checkout release/v1.1.0
     merge feat/CHG-001-telemetry id: "PR: Feature CHG-001 (Quality Gate OK)"
@@ -4184,90 +4172,90 @@ gitGraph
 
 ---
 
-<a id="cap-11-git-branching-and-lifecycle-4-puertas-de-calidad-y-criterios-de-merge-por-nivel-pr-gates"></a>
+<a id="cap-11-git-branching-and-lifecycle-4-quality-gates-and-merge-criteria-by-tier-pr-gates"></a>
 
-## 4. Puertas de Calidad y Criterios de Merge por Nivel (PR Gates)
+## 4. Quality Gates and Merge Criteria by Tier (PR Gates)
 
-Cada nivel de integración cuenta con criterios de validación crecientes:
+Each integration level carries progressively rigorous validation criteria:
 
-| Nivel de Merge | Origen ➔ Destino | Requisitos Obligatorios para Autorizar Merge |
+| Merge Level | Source ➔ Destination | Mandatory Merge Authorization Requirements |
 | :--- | :--- | :--- |
-| **Paso 1 (Tarea)** | `task/*` ➔ `feat/*` / `bug/*` | 1. Cumplimiento del comando de verificación declarado en `tasks.md`.<br>2. Pruebas unitarias de la tarea pasando al 100%.<br>3. Cero errores de sintaxis y linter (`pnpm run typecheck`).<br>4. Pull Request documentado con `.github/PULL_REQUEST_TEMPLATE.md`. |
-| **Paso 2 (Feature)** | `feat/*` / `bug/*` ➔ `release/*` | 1. Plantilla institucional `.github/PULL_REQUEST_TEMPLATE.md` cumplimentada exhaustivamente.<br>2. Matriz de Ejecución del Plan (`X` vs `O`) aprobada por el Tech Lead (todos los ítems incluidos; cero `[O]` no justificados).<br>3. Todas las tareas de `tasks.md` en estado `COMPLETED`.<br>4. Ejecución exitosa de escenarios BDD Cucumber (`.feature`).<br>5. Quality Gate superado (`verify:quality`): CC $\le 10$, MI $\ge 50$.<br>6. Auditoría de licencias aprobada (`verify:licenses`).<br>7. Revisión y aprobación humana mandataria del Tech Lead. |
-| **Paso 3 (Release)** | `release/*` ➔ `main` | 1. Pull Request institucional `.github/PULL_REQUEST_TEMPLATE.md` con checklist de pre-vuelo 100% verificado.<br>2. Matriz de trazabilidad 360° al 100% (`verify:traceability`).<br>3. Informe de calidad consolidado generado (`report:quality`).<br>4. Generación y firma de SBOM CycloneDX/SPDX.<br>5. Aprobación final formal de Product Owner y Release Manager. |
+| **Step 1 (Task)** | `task/*` ➔ `feat/*` / `bug/*` | 1. Verification command declared in `tasks.md` passes.<br>2. Unit tests for task 100% passing.<br>3. Zero syntax or linter errors (`pnpm run typecheck`).<br>4. Pull Request documented using `.github/PULL_REQUEST_TEMPLATE.md`. |
+| **Step 2 (Feature)** | `feat/*` / `bug/*` ➔ `release/*` | 1. Institutional template `.github/PULL_REQUEST_TEMPLATE.md` exhaustively completed.<br>2. Plan Execution Matrix (`X` vs `O`) approved by Tech Lead (all items included; zero unjustified `[O]`).<br>3. All tasks in `tasks.md` in `COMPLETED` state.<br>4. Successful execution of Cucumber BDD scenarios (`.feature`).<br>5. Quality Gate passed (`verify:quality`): CC $\le 10$, MI $\ge 50$.<br>6. License audit approved (`verify:licenses`).<br>7. Mandatory human review and approval from Tech Lead. |
+| **Step 3 (Release)** | `release/*` ➔ `main` | 1. Institutional Pull Request `.github/PULL_REQUEST_TEMPLATE.md` with 100% verified pre-flight checklist.<br>2. 360° Traceability matrix at 100% (`verify:traceability`).<br>3. Consolidated quality report generated (`report:quality`).<br>4. CycloneDX/SPDX SBOM generated and cryptographically signed.<br>5. Formal final approval from Product Owner and Release Manager. |
 
 ---
 
-<a id="cap-11-git-branching-and-lifecycle-5-guardrails-y-reglas-para-agentes-de-ia"></a>
+<a id="cap-11-git-branching-and-lifecycle-5-guardrails-and-rules-for-ai-agents"></a>
 
-## 5. Guardrails y Reglas para Agentes de IA
+## 5. Guardrails and Rules for AI Agents
 
-1. **Aislamiento Estricto de Ramas**:
-   - En cambios `standard` y `critical`, los agentes de codificación (`agent-developer`) **solo pueden operar y realizar commits dentro de ramas `task/*`**.
-   - En cambios con `profile: patch` (flujo simplificado), el agente está formalmente autorizado a operar y comitear directamente en la rama `patch/*` o `fix/*`, quedando exento de crear ramas Tier 4.
-   - Queda terminantemente bloqueado que un agente realice commits directos sobre `release/*` o `main`.
-2. **Creación Automática y Verificación de Origen**:
-   - Antes de crear una rama de tarea, el agente debe verificar que la rama base sea la rama de feature correspondiente.
-   - Antes de crear una rama de feature, debe validarse que se derive de la rama de release activa.
-3. **Respeto de Modos de Autonomía**:
-   - Si la tarea es `HUMAN_REVIEW_PLAN`, el agente solo puede crear la rama de tarea **después** de que el humano haya aprobado el plan en el issue o PR de la feature.
+1. **Strict Branch Isolation**:
+   - In `standard` and `critical` changes, coding agents (`agent-developer`) **may only operate and commit inside `task/*` branches**.
+   - In changes with `profile: patch` (streamlined flow), the agent is formally authorized to operate and commit directly on `patch/*` or `fix/*` branches, exempt from creating Tier 4 branches.
+   - Committing directly to `release/*` or `main` is strictly blocked for agents.
+2. **Automatic Creation and Base Verification**:
+   - Before creating a task branch, the agent must verify the base branch is the corresponding feature branch.
+   - Before creating a feature branch, it must validate it derives from the active release branch.
+3. **Respecting Autonomy Modes**:
+   - If a task is `HUMAN_REVIEW_PLAN`, the agent may only create the task branch **after** a human approves the plan in the feature issue or PR.
 
 ---
 
-<a id="cap-11-git-branching-and-lifecycle-6-automatizacion-de-ramas-con-el-cli-aisdlc-git-checkout"></a>
+<a id="cap-11-git-branching-and-lifecycle-6-branch-automation-with-the-cli-aisdlc-git-checkout"></a>
 
-## 6. Automatización de Ramas con el CLI (`aisdlc git checkout`)
+## 6. Branch Automation with the CLI (`aisdlc git checkout`)
 
-Para eliminar la fricción operativa y prevenir errores tipográficos en la nomenclatura de los 4 tiers, el framework proporciona navegación y bifurcación automática:
+To eliminate operational friction and prevent typographical errors across the 4 tiers, the framework provides automatic navigation and branching:
 
 ```bash
 npx aisdlc git checkout <task-id>
 ```
 
-<a id="cap-11-git-branching-and-lifecycle-comportamiento-determinista-y-garantias"></a>
+<a id="cap-11-git-branching-and-lifecycle-deterministic-behavior-and-guarantees"></a>
 
-### Comportamiento Determinista y Garantías:
-1. **Localización de Tarea**: Escanea los cambios activos en `specs/changes/active/*/tasks.md` identificando el cambio activo (`CHG-*`) al que pertenece la tarea especificada.
-2. **Detección de Versión**: Resuelve la versión semántica asociada o la rama `release/vX.Y.Z` activa.
-3. **Creación en Cascada (Cascading Branching)**:
-   - Si la rama `release/vX.Y.Z` (Tier 2) no existe localmente ni en origen remoto, se crea a partir de `main` (Tier 1).
-   - Si la rama de feature `feat/CHG-*` (Tier 3) no existe, se crea a partir de la rama de versión (Tier 2).
-   - Si la rama de tarea atómica `task/<PARENT-ID>/<TSK-ID>-<slug>` (Tier 4) no existe, se crea a partir de la rama de feature (Tier 3).
-4. **Checkout Inmediato**: Ejecuta el cambio automático de rama (`git checkout`), dejando al desarrollador o agente de IA directamente en su rama atómica de trabajo Tier 4.
-5. **Manejo de Errores**: Si la tarea no se encuentra en ningún cambio activo, emite un diagnóstico claro y enumera las tareas disponibles con sus respectivos cambios activos.
+### Deterministic Behavior and Guarantees:
+1. **Task Resolution**: Scans active changes in `specs/changes/active/*/tasks.md` identifying the active change (`CHG-*`) containing the specified task.
+2. **Version Detection**: Resolves the associated semantic version or active `release/vX.Y.Z` branch.
+3. **Cascading Branching**:
+   - If `release/vX.Y.Z` (Tier 2) does not exist locally or on remote origin, it is created from `main` (Tier 1).
+   - If feature branch `feat/CHG-*` (Tier 3) does not exist, it is created from the version branch (Tier 2).
+   - If atomic task branch `task/<PARENT-ID>/<TSK-ID>-<slug>` (Tier 4) does not exist, it is created from the feature branch (Tier 3).
+4. **Immediate Checkout**: Executes automatic branch switch (`git checkout`), placing developer or AI agent directly on Tier 4 atomic task branch.
+5. **Error Handling**: If task is not found in active changes, outputs clear diagnosis listing available tasks with active change IDs.
 
 ---
 
-<a id="cap-11-git-branching-and-lifecycle-7-integracion-continua-multi-plataforma-multi-ci-ecosystem"></a>
+<a id="cap-11-git-branching-and-lifecycle-7-multi-platform-continuous-integration-multi-ci-ecosystem"></a>
 
-## 7. Integración Continua Multi-Plataforma (Multi-CI Ecosystem)
+## 7. Multi-Platform Continuous Integration (Multi-CI Ecosystem)
 
-El framework AI-SDLC es formalmente agnóstico al proveedor de CI/CD, garantizando paridad estricta de ejecución de Quality Gates y promoción automatizada post-merge en entornos corporativos heterogéneos:
+The AI-SDLC framework is CI/CD provider-agnostic, guaranteeing strict parity for Quality Gate execution and automated post-merge promotion across corporate environments:
 
-<a id="cap-11-git-branching-and-lifecycle-proveedores-soportados-y-variables-de-entorno-canonicas"></a>
+<a id="cap-11-git-branching-and-lifecycle-supported-providers-and-canonical-environment-variables"></a>
 
-### Proveedores Soportados y Variables de Entorno Canónicas
+### Supported Providers and Canonical Environment Variables
 
-| Proveedor CI/CD | Variables de Rama / Head Ref | Variables de Pull / Merge Request | Emisión de Outputs | Plantilla Canónica |
+| CI/CD Provider | Branch / Head Ref Variables | Pull / Merge Request Variables | Output Mechanism | Canonical Template |
 | :--- | :--- | :--- | :--- | :--- |
 | **GitHub Actions** | `PR_HEAD_REF`, `GITHUB_HEAD_REF`, `GITHUB_REF_NAME` | `PR_TITLE`, `PR_BODY`, `PR_NUMBER` | `$GITHUB_OUTPUT` | `templates/ci/github-workflows/` |
 | **GitLab CI/CD** | `CI_MERGE_REQUEST_SOURCE_BRANCH_NAME`, `CI_COMMIT_REF_NAME`, `CI_COMMIT_BRANCH` | `CI_MERGE_REQUEST_TITLE`, `CI_MERGE_REQUEST_DESCRIPTION`, `CI_MERGE_REQUEST_IID` | `sdd-integrate.env` / `$GITLAB_ENV` | `templates/ci/.gitlab-ci.yml` |
 | **Azure DevOps Pipelines** | `SYSTEM_PULLREQUEST_SOURCEBRANCH`, `BUILD_SOURCEBRANCH`, `BUILD_SOURCEBRANCHNAME` | `SYSTEM_PULLREQUEST_PULLREQUESTTITLE`, `SYSTEM_PULLREQUEST_PULLREQUESTID` | `##vso[task.setvariable]` | `templates/ci/azure-pipelines.yml` |
 | **Bitbucket Pipelines** | `BITBUCKET_BRANCH`, `BITBUCKET_PR_DESTINATION_BRANCH` | `BITBUCKET_PR_ID` | `sdd-integrate.env` / `$CI_OUTPUT_FILE` | `templates/ci/bitbucket-pipelines.yml` |
 
-<a id="cap-11-git-branching-and-lifecycle-flujo-de-ejecucion-en-pipelines"></a>
+<a id="cap-11-git-branching-and-lifecycle-pipeline-execution-flow"></a>
 
-### Flujo de Ejecución en Pipelines
+### Pipeline Execution Flow
 
-1. **Pre-vuelo y Quality Gates (PR / MR / Branch)**:
-   - Toda propuesta de cambio ejecuta `npx aisdlc check` y `npx aisdlc verify all`.
-   - Bloqueo determinista ante violaciones de complejidad ciclomática, trazabilidad huérfana, secretos detectados o licencias prohibidas.
-2. **Promoción e Integración Canónica Post-Merge (`sdd-integrate-ci.ts`)**:
-   - Al consolidar un Pull Request o Merge Request hacia `main` o ramas `release/vX.Y.Z`, el runner invoca `npx tsx scripts/sdd-integrate-ci.ts`.
-   - El script detecta de manera agnóstica el cambio SDD activo basándose en las variables del proveedor, verifica que todas las tareas en `tasks.md` estén `COMPLETED`, consolida los requerimientos y componentes canónicos, y archiva el cambio a `specs/changes/completed/`.
-3. **Andamiaje Rápido con el CLI**:
+1. **Pre-Flight & Quality Gates (PR / MR / Branch)**:
+   - Every change proposal runs `npx aisdlc check` and `npx aisdlc verify all`.
+   - Deterministic blocking on cyclomatic complexity, orphan traceability, detected secrets, or prohibited licenses.
+2. **Post-Merge Canonical Promotion & Integration (`sdd-integrate-ci.ts`)**:
+   - Upon consolidating a Pull Request or Merge Request into `main` or `release/vX.Y.Z` branches, the runner invokes `npx tsx scripts/sdd-integrate-ci.ts`.
+   - The script detects active SDD changes from provider environment variables, validates all tasks in `tasks.md` are `COMPLETED`, consolidates canonical requirements and components, and archives the change to `specs/changes/completed/`.
+3. **Quick Scaffolding via CLI**:
    ```bash
-   # Inicializar proyecto con pipeline específico
+   # Initialize project with specific CI pipeline
    npx aisdlc init --ci gitlab
    npx aisdlc init --ci azure
    npx aisdlc init --ci bitbucket

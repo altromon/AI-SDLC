@@ -373,7 +373,7 @@ These metrics provide engineering leaders with empirical insight into LLM reliab
 
 ## 9. Interactive Web Dashboard and PDaC / RTM Graph Visualizer (Cytoscape.js)
 
-For non-technical stakeholders (Product Owners, CISOs, auditors, and engineering executives), exploring the complete product dependency network (`Actors ➔ Use Cases ➔ Business Rules ➔ Requirements ➔ arc42 Components ➔ BDD Tests`) across static Markdown documents introduces cognitive load.
+For non-technical stakeholders (Product Owners, CISOs, auditors, and engineering executives), exploring the complete product dependency network (`Vision / Goals ARCH-INTRO-* ➔ Actors ➔ Use Cases ➔ Business Rules ➔ Requirements ➔ arc42 Components ➔ BDD Tests`) across static Markdown documents introduces cognitive load.
 
 The CLI command `npx aisdlc report dashboard` compiles the entire PDaC graph, 360° RTM matrix, quality metrics, and historical KPI telemetry into a self-contained HTML artifact (`reports/dashboard.html`):
 
@@ -390,9 +390,9 @@ npx aisdlc report dashboard --output dist/governance.html --title "SentinelCore 
 
 ### Key Dashboard Features:
 1. **Network Visualizer with Cytoscape.js (MIT)**:
-   - Geometric and color-coded semantic layers: Product (cyan diamonds), Requirements (green/red rectangles), Architecture (indigo hexagons), and Testing (emerald ellipses).
+   - Geometric and color-coded semantic layers: Product Upstream (including root `Vision / Goals` `ARCH-INTRO-*` with `identifies`, `envisions`, and `defines-goal` semantic edges, `JRN-*`, `ACT-*`, `UC-*`, `BR-*`), Requirements (`FR-*`, `QR-*`, `SEC-REQ-*`), Architecture Midstream (`CMP-*`, `ADR-*`, `SEC-ENC-*`), and Testing Downstream (`.feature`).
    - Deterministic status coloring: 🟢 Green for compliant nodes; 🔴 Red for orphan requirements or nodes with cryptographic SHA-256 drift (`DRIFT`).
-   - Navigation controls: Zoom, pan, center view, and switchable layouts (hierarchical layered, COSE, concentric, circular).
+   - Navigation controls: Zoom, pan, center view, typology filter (including `Vision / Goals (ARCH-INTRO)`), and switchable layouts (hierarchical layered, COSE, concentric, circular).
    - **Critical Path Highlighting**: Clicking any node illuminates its upstream and downstream dependencies while dimming unrelated elements.
 2. **Interactive 360° Traceability Matrix**:
    - Real-time search and filterable table with bidirectional navigation focusing and centering selected nodes in the graph.

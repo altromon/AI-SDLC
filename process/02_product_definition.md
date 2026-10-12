@@ -87,15 +87,17 @@ To prevent inconsistencies and broken reciprocal links:
 
 ## 4. Product Operations Cycle (Phase 0 Inception & Evolution)
 
-### A. Phase 0: Greenfield Product Inception (Creating a New Product)
-When starting a new product from scratch (or when `specs/product/` has no baseline product model yet), `agent-product-analyst` executes a structured inception flow before any feature change (`change:new`) or code is written:
+### A. Phase 0: Greenfield & Brownfield Product Inception (`ARCH-INTRO-*`)
+When starting a new product from scratch (or when adopting AI-SDLC in a Brownfield repository without an `ARCH-INTRO-*` root vision artifact), `agent-product-analyst` executes a structured inception flow before any feature change (`change:new`) or code is written:
 1. **Structured Discovery Interview (3–5 Questions)**: The agent interviews the human Product Owner on:
    - Core problem, mission statement, and value proposition.
    - Primary stakeholders and actors (`ACT-*`).
    - Essential MVP capabilities (`UC-*`) vs. future roadmap.
    - Top 3–5 priority quality goals (`QR-*`) and constraints (`CON-*`).
 2. **Enterprise & Capability Vision (`ARCH-INTRO-001`)**: Instantiates `templates/architecture/introduction-and-goals.template.md` (`naf-perspective: "Enterprise & Capability"`, `status: draft`).
-3. **Initial ProductShape Baseline Derivation**: Derives draft `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` artifacts (`status: draft`) linked to `ARCH-INTRO-001` for human review and approval.
+3. **Initial ProductShape Baseline Derivation (Greenfield) or Retro-Inception Linking (Brownfield)**:
+   - **Greenfield**: Derives draft `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` artifacts (`status: draft`) linked to `ARCH-INTRO-001` for human review and approval.
+   - **Brownfield (Retro-Inception)**: Synthesizes `ARCH-INTRO-001` from existing product/architecture artifacts and source code, linking directly to existing `cites-product-actors` (`ACT-*`), `cites-use-cases` (`UC-*`), and `cites-quality-goals` (`QR-*`) so the PDaC graph and Interactive Dashboard (`aisdlc report dashboard`) immediately reflect the root product vision.
 
 ### B. Continuous Product Evolution Cycle
 

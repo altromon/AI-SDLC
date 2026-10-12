@@ -1,17 +1,18 @@
 # Catálogo Consolidado de Requerimientos Activos (AI-SDLC)
 
-> **Línea Base Canónica Generada el:** 2026-09-23  
+> **Línea Base Canónica Generada el:** 2026-10-12  
 > **Estado de Requerimientos:** `active` / `accepted`  
-> **Total Requerimientos Activos:** 15
+> **Total Requerimientos Activos:** 18
 
 ## Resumen Ejecutivo de Requerimientos en Producción
 
 | Capa / Tipo de Requerimiento | Cantidad | Prefijos Canónicos | Marco Metodológico |
 | :--- | :---: | :--- | :--- |
-| **Funcionales** | 8 | `FR-*` | Product Definition as Code (PDaC) |
-| **Ciberseguridad** | 1 | `SEC-REQ-*` | Security-by-Design & Zero Trust |
+| **Funcionales** | 9 | `FR-*` | Product Definition as Code (PDaC) |
+| **Ciberseguridad** | 2 | `SEC-REQ-*` | Security-by-Design & Zero Trust |
 | **Seguridad Operacional (Safety)** | 0 | `SAF-REQ-*`, `SAF-*` | Functional Safety & Hazard Analysis (STPA / FMEA) |
 | **Arquitectura y Calidad** | 6 | `QR-*`, `CON-*`, `CMP-*`, `ADR-*` | arc42 / NAF v4 Building Blocks |
+| **Otras Especificaciones Normativas** | 1 | Desconocido / Personalizado | Extensión Libre |
 
 ---
 
@@ -28,6 +29,7 @@ Representan las capacidades y comportamientos del software derivados de los Caso
 | **`FR-029-EXPERT-USER-AGENT-001`** | Generación Automática de Informes de Feedback de Usuario Experto | `1.0.0` | `UC-029-EXPERT-USER-AGENT` | `automated-unit-test` | `N/A` |
 | **`FR-030-INIT-AGENT-SCAFFOLDING-001`** | Scaffolding de Reglas Cursor y Antigravity en Comando Init | `1.0.0` | `UC-030-INIT-AGENT-SCAFFOLDING` | `automated-unit-test` | `N/A` |
 | **`FR-031-WORKFLOW-AGENT-HANDOFF-001`** | Gestión y Emisión de Handoffs de Flujo entre Agentes | `1.0.0` | `UC-031-WORKFLOW-AGENT-HANDOFF` | `automated-unit-test` | `N/A` |
+| **`FR-033-ARCHITECTURE-TEMPLATES-001`** | Plantillas Canónicas de Arquitectura arc42 y NAF v4 | `1.0.0` | `UC-033-ARCHITECTURE-TEMPLATES` | `automated-unit-test` | `N/A` |
 | **`FR-TELEMETRY-STREAM-001`** | Ingesta Continua de Tramas Telemétricas UAV | `1.0.0` | `UC-STREAM-TELEMETRY` | `cucumber-bdd` | `@FR-TELEMETRY-STREAM-001 @telemetry @automated` |
 
 ### Detalle Normativo
@@ -74,6 +76,12 @@ Representan las capacidades y comportamientos del software derivados de los Caso
 - **Enunciado Normativo:**
   > El sistema DEBE proveer herramientas y directivas para que los agentes emitan bloques de handoff interactivos al concluir tareas en niveles de autonomía `>= HUMAN_REVIEW_PLAN`, especificando entregables producidos, rol recomendado y prompt de invocación para el siguiente agente, reservando siempre una ventana explícita de supervisión humana.
 
+#### [FR-033-ARCHITECTURE-TEMPLATES-001] Plantillas Canónicas de Arquitectura arc42 y NAF v4
+- **Archivo Canónico:** [`product/requirements/FR-033-ARCHITECTURE-TEMPLATES-001.md`](file:///C:/Users/reypo/Documents/Workspace/AI-SDLC/product/requirements/FR-033-ARCHITECTURE-TEMPLATES-001.md)
+- **Versión SemVer:** `1.0.0` | **Estado:** `active`
+- **Enunciado Normativo:**
+  > El sistema DEBE suministrar en `templates/architecture/` un conjunto integral y determinista de plantillas Markdown para las 12 secciones de la fusión arc42 + NAF v4, incorporando YAML frontmatter con metadatos estructurados para facilitar la trazabilidad bidireccional, el análisis automatizado y la interoperabilidad con agentes de IA y herramientas de gobernanza.
+
 #### [FR-TELEMETRY-STREAM-001] Ingesta Continua de Tramas Telemétricas UAV
 - **Archivo Canónico:** [`examples/sentinel-core/product/FR-TELEMETRY-STREAM-001.md`](file:///C:/Users/reypo/Documents/Workspace/AI-SDLC/examples/sentinel-core/product/FR-TELEMETRY-STREAM-001.md)
 - **Versión SemVer:** `1.0.0` | **Estado:** `active`
@@ -88,9 +96,16 @@ Representan los controles técnicos y defensas frente a Casos de Abuso (`ABUSE-*
 
 | ID Requerimiento | Título | Dominio de Seguridad | Mitiga Caso Abuso | Enclave Asignado | Estándar / Cumplimiento |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| **`SEC-REQ-DETERMINISTIC-VERIFY`** | Verificación Criptográfica y Validación de Esquemas Obligatoria | `input-validation` | `ABUSE-UNVERIFIED-SPEC-BYPASS` | `N/A` | `N/A` |
 | **`SEC-REQ-MTLS-STREAM`** | Autenticación Criptográfica Mutua (mTLS) en Ingesta | `authentication` | `ABUSE-TELEMETRY-SPOOFING` | `SEC-ENC-DMZ-INGEST` | `NIST-SP-800-207-ZeroTrust` |
 
 ### Detalle Normativo
+
+#### [SEC-REQ-DETERMINISTIC-VERIFY] Verificación Criptográfica y Validación de Esquemas Obligatoria
+- **Archivo Canónico:** [`security/requirements/SEC-REQ-DETERMINISTIC-VERIFY.md`](file:///C:/Users/reypo/Documents/Workspace/AI-SDLC/security/requirements/SEC-REQ-DETERMINISTIC-VERIFY.md)
+- **Dominio:** `input-validation` | **Enclave:** `Global`
+- **Control Técnico:**
+  > El sistema debe validar todas las especificaciones y esquemas mediante hashes SHA-256 inmutables y ejecución determinista del comando `verify` antes de permitir la integración o release de cualquier código generado por agentes de IA.
 
 #### [SEC-REQ-MTLS-STREAM] Autenticación Criptográfica Mutua (mTLS) en Ingesta
 - **Archivo Canónico:** [`examples/sentinel-core/security/SEC-REQ-MTLS-STREAM.md`](file:///C:/Users/reypo/Documents/Workspace/AI-SDLC/examples/sentinel-core/security/SEC-REQ-MTLS-STREAM.md)
@@ -116,7 +131,7 @@ Comprende requerimientos de calidad (`QR-*`), restricciones técnicas (`CON-*`),
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`ADR-001-WEBSOCKET-STACK`** | Decisión (ADR) | Selección de la Pila WebSocket y Motor de Concurrencia para Ingesta | `N/A` | `N/A` | Status: accepted |
 | **`CMP-CLI`** | Componente arc42 | Interfaz de Línea de Comandos AI-SDLC (@ai-sdlc/cli) | `Nivel 2` | `FR-025-STRUCTURED-JSON-VERIFY-001, FR-027-ENV-OUTPUT-JSON-001, FR-030-INIT-AGENT-SCAFFOLDING-001` | CLI Command Line Interface (CLI) |
-| **`CMP-CORE`** | Componente arc42 | Motor Central AI-SDLC (@ai-sdlc/core) | `Nivel 1` | `FR-025-STRUCTURED-JSON-VERIFY-001, FR-026-AGENT-NATIVE-CONFIGS-001, FR-029-EXPERT-USER-AGENT-001, FR-030-INIT-AGENT-SCAFFOLDING-001, FR-031-WORKFLOW-AGENT-HANDOFF-001` | TypeScript API Engine (In-Process API) |
+| **`CMP-CORE`** | Componente arc42 | Motor Central AI-SDLC (@ai-sdlc/core) | `Nivel 1` | `FR-025-STRUCTURED-JSON-VERIFY-001, FR-026-AGENT-NATIVE-CONFIGS-001, FR-027-NORMALIZE-IDE-RULESETS-001, FR-029-EXPERT-USER-AGENT-001, FR-030-INIT-AGENT-SCAFFOLDING-001, FR-031-WORKFLOW-AGENT-HANDOFF-001, FR-033-ARCHITECTURE-TEMPLATES-001, SEC-REQ-DETERMINISTIC-VERIFY` | TypeScript API Engine (In-Process API) |
 | **`CMP-MCP-SERVER`** | Componente arc42 | Servidor Model Context Protocol (@ai-sdlc/mcp) | `Nivel 2` | `FR-028-NATIVE-MCP-SERVER-001` | Stdio MCP Protocol Interface (IPC) |
 | **`CMP-TELEMETRY-INGEST`** | Componente arc42 | Componente de Ingesta Telemétrica y Deserialización de Alta Frecuencia | `Nivel 2` | `FR-TELEMETRY-STREAM-001, QR-LATENCY-REALTIME, SEC-REQ-MTLS-STREAM` | Drone WSS Telemetry Endpoint (WebSocket); Internal Kafka Telemetry Stream (Kafka) |
 | **`QR-LATENCY-REALTIME`** | Requisito de Calidad | Latencia de Procesamiento e Ingesta Sub-100ms | `quality` | `N/A` | N/A |
@@ -139,7 +154,7 @@ Comprende requerimientos de calidad (`QR-*`), restricciones técnicas (`CON-*`),
 #### [CMP-CORE] Motor Central AI-SDLC (@ai-sdlc/core)
 - **Archivo Canónico:** [`architecture/components/CMP-CORE.md`](file:///C:/Users/reypo/Documents/Workspace/AI-SDLC/architecture/components/CMP-CORE.md)
 - **Tipo:** `component` | **Versión:** `1.0.0` | **Estado:** `accepted`
-- **Satisface Requerimientos:** `FR-025-STRUCTURED-JSON-VERIFY-001, FR-026-AGENT-NATIVE-CONFIGS-001, FR-029-EXPERT-USER-AGENT-001, FR-030-INIT-AGENT-SCAFFOLDING-001, FR-031-WORKFLOW-AGENT-HANDOFF-001`
+- **Satisface Requerimientos:** `FR-025-STRUCTURED-JSON-VERIFY-001, FR-026-AGENT-NATIVE-CONFIGS-001, FR-027-NORMALIZE-IDE-RULESETS-001, FR-029-EXPERT-USER-AGENT-001, FR-030-INIT-AGENT-SCAFFOLDING-001, FR-031-WORKFLOW-AGENT-HANDOFF-001, FR-033-ARCHITECTURE-TEMPLATES-001, SEC-REQ-DETERMINISTIC-VERIFY`
 - **Definición / Límite Arquitectónico:**
   > Biblioteca central que contiene la lógica de negocio, adaptadores SDD (SpecKit, OpenSpec), motores de verificación determinista (esquemas, trazabilidad, calidad de código, gobernanza de ramas, licencias OSS, AST) y generadores de reportes.
 
@@ -162,6 +177,16 @@ Comprende requerimientos de calidad (`QR-*`), restricciones técnicas (`CON-*`),
 - **Tipo:** `requirement` | **Versión:** `1.0.0` | **Estado:** `active`
 - **Definición / Límite Arquitectónico:**
   > El 99.9% de los paquetes telemétricos (p99.9) recibidos en el gateway de ingesta DEBEN ser procesados, validados y enrutados hacia la memoria de estado del espacio aéreo en menos de 50 milisegundos desde su recepción en el socket.
+
+---
+
+## 5. Otras Especificaciones Normativas Activas
+
+Artefactos activos detectados sin capa específica registrada en el modelo de capas.
+
+| ID Artefacto | Título | Tipo | Estado |
+| :--- | :--- | :--- | :---: |
+| **`ARCH-INTRO-001`** | 01. Introducción y Metas del Sistema: AI-SDLC Framework | `architecture-introduction` | `accepted` |
 
 ---
 

@@ -64,7 +64,7 @@ The `aisdlc` CLI provides comprehensive commands across 6 functional categories 
 
 | Command | Description | Key Options |
 | --- | --- | --- |
-| `aisdlc init [directory]` | Bootstraps a repository with AI-SDLC folders, JSON schemas, policy files (`quality-policy.yaml`, `license-policy.yaml`), CI/CD templates, and AI agent rules. | `-d, --dry-run`, `--ci <github\|gitlab\|azure\|bitbucket>`, `--agents <all\|cursor\|claude\|antigravity\|copilot\|mcp>`, `--arch <minimal\|full\|none>`, `--json` |
+| `aisdlc init [directory]` | Bootstraps a repository with AI-SDLC folders, JSON schemas, policy files (`quality-policy.yaml`, `license-policy.yaml`), CI/CD templates, and AI agent rules. `--arch minimal` (default) scaffolds 3 architecture templates: Phase 0 Vision & Goals (`ARCH-INTRO-*`), components (`CMP-*`), and ADRs (`ADR-*`); `full` scaffolds all arc42 sections. | `-d, --dry-run`, `--ci <github\|gitlab\|azure\|bitbucket>`, `--agents <all\|cursor\|claude\|antigravity\|copilot\|mcp>`, `--arch <minimal\|full\|none>`, `--json` |
 | `aisdlc check` | Unified pre-flight gate: runs Quality Gate checks with optional auto-repair (syncs Gherkin to `.feature` and recalculates PDaC SHA-256 digests). | `--fix`, `-r, --root <path>`, `--json`, `-F, --format <format>` |
 | `aisdlc mcp` | Starts the native Model Context Protocol (MCP) server over `stdio` exposing 23 deterministic tools and 5 context resources. | `-r, --root <path>` |
 
