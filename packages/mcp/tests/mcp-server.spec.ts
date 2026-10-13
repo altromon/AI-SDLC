@@ -137,8 +137,8 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       }
       expect(content.success).toBe(true);
       expect(content.profile).toBe('full');
-      expect(content.totalGates).toBe(9);
-      expect(content.passedGates).toBe(9);
+      expect(content.totalGates).toBe(11);
+      expect(content.passedGates).toBe(11);
       expect(content.failedGates).toBe(0);
     });
 

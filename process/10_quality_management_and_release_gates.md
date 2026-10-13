@@ -226,14 +226,18 @@ npx aisdlc check --fix
    - **BDD Extraction**: Detects if ` ```gherkin ` blocks in product or security specifications differ from `.feature` files on disk and automatically synchronizes them.
    - **PDaC Anti-Drift Sync**: Synchronizes SHA-256 cryptographic digests of canonical citations (`citations: - id: ... digest: ...`) if target content exists and is valid.
 2. **Consolidated Quality Gate Execution**:
-   - Deterministically executes all master verifiers:
+   - Deterministically executes all 11 master verifiers:
      - Code quality (CC $\le 10$, MI $\ge 50$, LOC $\le 40$).
      - 360° reverse RTM traceability (zero orphan requirements).
      - Task governance and autonomy modes (`tasks.md`).
      - Test coverage across requirements and tasks.
+     - BDD Gherkin synchronization against specifications.
      - Open source license compliance with `license-policy.yaml`.
      - PDaC cryptographic integrity free of digest drift.
-     - Formal JSON schema compliance (Draft 2020-12).
+     - Formal JSON schema compliance (Draft 2020-12, including `handoff.yaml` sidecars).
+     - Duplicate requirement and title collision detection.
+     - Progressive friction and anti-bypass guardrails.
+     - Shift-left security (secrets and SAST).
 3. **Actionable Console Dashboard**:
    - Outputs a visual summary of gate statuses (`PASSED`, `AUTO-FIXED`, `FAILED`).
    - If non-recoverable blocking errors occur, details root causes and remediation commands with deterministic exit codes (0 on success, 1 on violations).

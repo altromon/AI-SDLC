@@ -11,9 +11,11 @@ import {
   PreflightCheckResult,
   PreflightGateSummary,
   syncPdacDigests,
+  verifyArtifactDuplicates,
   verifyArtifactsSchemas,
   verifyLicenses,
   verifyPdacGraph,
+  verifyProgressiveFriction,
   verifyQualityGate,
   verifySast,
   verifySecrets,
@@ -243,6 +245,42 @@ export function auditSecurityGate(rootDir: string): PreflightGateSummary {
   };
 }
 
+export function auditDuplicatesGate(rootDir: string): PreflightGateSummary {
+  const res = verifyArtifactDuplicates({ rootDir });
+  if (res.success) {
+    return {
+      name: 'Duplicate Requirements & Redundancy',
+      status: 'PASSED',
+      message: `${res.totalRequirements} requirements evaluated (0 collisions, ${res.warningCount} warnings)`,
+    };
+  }
+  const firstErr = res.issues.find((i) => i.severity === 'ERROR')?.message || 'Collision detected';
+  return {
+    name: 'Duplicate Requirements & Redundancy',
+    status: 'FAILED',
+    message: `${res.errorCount} duplication error(s): ${firstErr}`,
+    remediation: "Run 'aisdlc verify duplicates' and resolve duplicate requirement IDs or statements.",
+  };
+}
+
+export function auditFrictionGate(rootDir: string): PreflightGateSummary {
+  const res = verifyProgressiveFriction({ rootDir });
+  if (res.success) {
+    return {
+      name: 'Progressive Friction & Anti-Bypass Guardrails',
+      status: 'PASSED',
+      message: `Profile '${res.profile}' compliant (${res.evaluatedFiles.length} evaluated paths)`,
+    };
+  }
+  const firstViolation = res.bypassedRules[0] || res.errors[0] || 'Anti-bypass guardrail triggered';
+  return {
+    name: 'Progressive Friction & Anti-Bypass Guardrails',
+    status: 'FAILED',
+    message: firstViolation,
+    remediation: "Reclassify change profile to 'standard' or 'critical', or revert protected path changes.",
+  };
+}
+
 export function renderDashboard(
   gates: PreflightGateSummary[],
   autoFixExecuted: boolean,
@@ -310,6 +348,8 @@ export function executePreflightCheck(options: CheckCommandOptions = {}): Prefli
     auditTestingGate(rootDir),
     auditLicensesGate(rootDir),
     auditSchemasGate(rootDir),
+    auditDuplicatesGate(rootDir),
+    auditFrictionGate(rootDir),
     auditSecurityGate(rootDir),
   ];
 

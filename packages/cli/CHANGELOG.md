@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 1.3.3
+
+### Patch Changes
+
+- feat(dashboard): support interactive multi-selection and typology toggle filtering in `aisdlc report dashboard`
+- Updated dependencies
+  - @aisdlc/core@1.3.3
+  - @aisdlc/mcp@1.3.3
+
 ## 1.3.2
 
 ### Patch Changes

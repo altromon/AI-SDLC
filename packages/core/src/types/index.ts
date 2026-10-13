@@ -876,9 +876,68 @@ export interface DashboardResult {
     autonomyDistribution: Record<string, number>;
     traceabilityRatio: number;
     bddCoverageRatio: number;
+    userManualCoverageRatio?: number;
+    productionManualCoverageRatio?: number;
+    manualsCount?: number;
   };
   html: string;
 }
+
+// --- Operational Manuals (MAN-USER & MAN-PROD) Verification Types ---
+export interface ManualDocumentItem {
+  id: string;
+  type: 'user-manual' | 'production-manual';
+  title: string;
+  status: string;
+  version: string;
+  appliesToVersion: string;
+  filePath: string;
+  targetAudience: string[];
+  allowedRoles: string[];
+  journeysCovered: string[];
+  useCasesCovered: string[];
+  componentsCovered: string[];
+  enclavesInvolved: string[];
+  body: string;
+}
+
+export interface ManualsCoverageSummary {
+  totalJourneys: number;
+  coveredJourneys: number;
+  uncoveredJourneys: string[];
+  totalUseCases: number;
+  coveredUseCases: number;
+  uncoveredUseCases: string[];
+  userCoveragePct: number;
+  totalComponents: number;
+  coveredComponents: number;
+  uncoveredComponents: string[];
+  totalEnclaves: number;
+  coveredEnclaves: number;
+  uncoveredEnclaves: string[];
+  productionCoveragePct: number;
+}
+
+export interface ManualsVerificationOptions {
+  rootDir?: string;
+  branch?: string;
+  profile?: ChangeProfile;
+  strict?: boolean;
+}
+
+export interface ManualsVerificationResult {
+  success: boolean;
+  status: 'PASSED' | 'WARNING' | 'FAILED';
+  enforcementMode: 'ADVISORY' | 'STRICT_RELEASE';
+  branch: string;
+  profile: ChangeProfile;
+  userManuals: ManualDocumentItem[];
+  productionManuals: ManualDocumentItem[];
+  coverage: ManualsCoverageSummary;
+  warnings: string[];
+  violations: string[];
+}
+
 
 
 

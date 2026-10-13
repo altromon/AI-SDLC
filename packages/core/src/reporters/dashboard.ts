@@ -17,6 +17,7 @@ import {
   DashboardResult,
   GraphNodeLayer,
   GraphNodeStatus,
+  ManualsVerificationResult,
 } from '../types/index.js';
 import { ReleaseKpiReport } from './release-kpis.js';
 import { verifyPdacGraph } from '../verifiers/pdac-graph.js';
@@ -24,6 +25,7 @@ import { verifyTraceability } from '../verifiers/traceability.js';
 import { verifyQualityGate } from '../verifiers/quality-gate.js';
 import { verifyTasksGovernance } from '../verifiers/governance.js';
 import { verifyTestingCoverage } from '../verifiers/testing-coverage.js';
+import { verifyManuals } from '../verifiers/manuals.js';
 import { walkMdFiles } from '../utils/fs.js';
 import { aggregatePrKpis } from './pr-kpis.js';
 import { getCytoscapeScript } from './cytoscape-bundle.js';
@@ -906,6 +908,7 @@ export function collectDashboardMetrics(rootDir: string) {
   const gov = verifyTasksGovernance({ rootDir });
   const cov = verifyTestingCoverage({ rootDir });
   const trace = verifyTraceability({ rootDir });
+  const manuals = verifyManuals({ rootDir });
   const history = collectHistoricalKpis(rootDir);
 
   let activePrKpi = null;
@@ -967,6 +970,7 @@ export function collectDashboardMetrics(rootDir: string) {
     cov,
     codeCoverage,
     trace,
+    manuals,
     history,
     activePrKpi,
     activeBranch,
@@ -1107,6 +1111,77 @@ function renderAutonomyModeSection(
       </td>
     </tr>
   `;
+}
+
+function renderManualsTab(manuals: ManualsVerificationResult): string {
+  const c = manuals.coverage;
+  const badgeClass =
+    manuals.status === 'PASSED' ? 'badge-green' : manuals.status === 'WARNING' ? 'badge-amber' : 'badge-rose';
+  const findings = [...manuals.violations, ...manuals.warnings];
+  const allManuals = [...manuals.userManuals, ...manuals.productionManuals];
+
+  const findingsHtml =
+    findings.length === 0
+      ? '<p style="color: var(--accent-emerald); font-size: 0.85rem;">✔ Todos los Journeys, Use Cases, Componentes y Enclaves activos están cubiertos por los manuales.</p>'
+      : `<ul style="font-size: 0.82rem; color: #fbbf24; padding-left: 18px; display: flex; flex-direction: column; gap: 4px;">${findings
+          .map((f) => `<li>${escapeHtml(f)}</li>`)
+          .join('')}</ul>`;
+
+  const rowsHtml =
+    allManuals.length === 0
+      ? '<tr><td colspan="6" style="color: var(--text-muted);">No hay manuales MAN-USER-* / MAN-PROD-* en <code>manuals/</code>.</td></tr>'
+      : allManuals
+          .map(
+            (m) => `
+            <tr onclick="showManual('${escapeHtml(m.id)}')" style="cursor: pointer;">
+              <td><strong><code>${escapeHtml(m.id)}</code></strong></td>
+              <td>${m.type === 'user-manual' ? '👤 Usuario' : '🛠️ Producción'}</td>
+              <td>${escapeHtml(m.title)}</td>
+              <td><code>${escapeHtml(m.appliesToVersion)}</code></td>
+              <td><span class="badge ${m.status === 'active' ? 'badge-green' : 'badge-amber'}">${escapeHtml(m.status)}</span></td>
+              <td><code>${escapeHtml(m.filePath)}</code></td>
+            </tr>`
+          )
+          .join('');
+
+  return `
+        <h2>Operational Manuals (User &amp; Production)</h2>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">
+          Modo de cumplimiento: <span class="badge ${badgeClass}">${manuals.status}</span>
+          <code>${manuals.enforcementMode}</code> &middot; rama <code>${escapeHtml(manuals.branch)}</code> &middot; perfil <code>${manuals.profile}</code>.
+          Avisos en desarrollo diario; bloqueante en <code>release/*</code> o perfil <code>critical</code>.
+        </p>
+        <div class="grid-cards">
+          <div class="metric-card">
+            <span class="title">Cobertura Manual de Usuario</span>
+            <span class="value">${c.userCoveragePct}%</span>
+            <span class="subtitle">${c.coveredJourneys}/${c.totalJourneys} JRN &middot; ${c.coveredUseCases}/${c.totalUseCases} UC</span>
+          </div>
+          <div class="metric-card">
+            <span class="title">Cobertura Manual de Producción</span>
+            <span class="value">${c.productionCoveragePct}%</span>
+            <span class="subtitle">${c.coveredComponents}/${c.totalComponents} CMP &middot; ${c.coveredEnclaves}/${c.totalEnclaves} SEC-ENC</span>
+          </div>
+          <div class="metric-card">
+            <span class="title">Manuales Registrados</span>
+            <span class="value">${allManuals.length}</span>
+            <span class="subtitle">${manuals.userManuals.length} MAN-USER &middot; ${manuals.productionManuals.length} MAN-PROD</span>
+          </div>
+        </div>
+        <div class="chart-container">
+          <h3>Hallazgos de Cobertura</h3>
+          ${findingsHtml}
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>ID</th><th>Tipo</th><th>Título</th><th>Aplica a</th><th>Estado</th><th>Fichero</th></tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+        <div class="chart-container" id="manual-viewer-container" style="display: none;">
+          <h3 id="manual-viewer-title"></h3>
+          <div id="manual-viewer" style="font-size: 0.82rem; line-height: 1.5; color: #cbd5e1;"></div>
+        </div>`;
 }
 
 /**
@@ -1377,6 +1452,28 @@ export function renderDashboardHtml(
       gap: 6px;
       color: #e2e8f0;
       font-size: 0.72rem;
+      cursor: pointer;
+      user-select: none;
+      padding: 3px 6px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .legend-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .legend-item.active {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
+    }
+    .graph-legend.has-filter .legend-item:not(.active) {
+      opacity: 0.45;
+    }
+    .graph-legend.has-filter .legend-item:not(.active):hover {
+      opacity: 0.85;
     }
     .legend-dot {
       width: 12px;
@@ -1404,6 +1501,7 @@ export function renderDashboardHtml(
     <button class="tab-btn active" onclick="switchTab('graph')">🌐 PDaC / RTM Graph</button>
     <button class="tab-btn" onclick="switchTab('rtm')">📋 360° RTM Matrix</button>
     <button class="tab-btn" onclick="switchTab('quality')">📊 Quality & Governance</button>
+    <button class="tab-btn" onclick="switchTab('manuals')">📖 Manuals (User & Prod)</button>
     <button class="tab-btn" onclick="switchTab('kpis')">📈 Telemetry & Historical KPIs</button>
   </nav>
 
@@ -1464,15 +1562,15 @@ export function renderDashboardHtml(
         <div class="graph-legend">
           <div class="legend-header">Node Typologies</div>
           <div class="legend-items">
-            <div class="legend-item"><span class="legend-dot" style="background:#0f766e; border:2px solid #2dd4bf;"></span><strong>Vision / Goals</strong> (ARCH-INTRO)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#581c87; border:2px solid #c084fc;"></span><strong>Journey</strong> (JRN)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#065f46; border:2px solid #34d399; border-radius:50%;"></span><strong>Actor</strong> (ACT)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#0369a1; border:2px solid #38bdf8;"></span><strong>Use Case</strong> (UC)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#b45309; border:2px solid #fbbf24; transform:rotate(45deg);"></span><strong>Business Rule</strong> (BR)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#881337; border:2px solid #f43f5e;"></span><strong>Abuse Case</strong> (ABUSE)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#1e293b; border:2px solid #64748b;"></span><strong>Requirement</strong> (FR/QR/SEC)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#312e81; border:2px solid #818cf8;"></span><strong>Architecture</strong> (CMP/ADR)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#047857; border:2px solid #10b981;"></span><strong>Test</strong> (BDD/Test)</div>
+            <div class="legend-item" data-type="architecture-introduction" onclick="handleTypologyClick(event, 'architecture-introduction')" title="Filter Vision / Goals (Ctrl+Click for multi)"><span class="legend-dot" style="background:#0f766e; border:2px solid #2dd4bf;"></span><strong>Vision / Goals</strong> (ARCH-INTRO)</div>
+            <div class="legend-item" data-type="journey" onclick="handleTypologyClick(event, 'journey')" title="Filter Journey (Ctrl+Click for multi)"><span class="legend-dot" style="background:#581c87; border:2px solid #c084fc;"></span><strong>Journey</strong> (JRN)</div>
+            <div class="legend-item" data-type="actor" onclick="handleTypologyClick(event, 'actor')" title="Filter Actor (Ctrl+Click for multi)"><span class="legend-dot" style="background:#065f46; border:2px solid #34d399; border-radius:50%;"></span><strong>Actor</strong> (ACT)</div>
+            <div class="legend-item" data-type="use-case" onclick="handleTypologyClick(event, 'use-case')" title="Filter Use Case (Ctrl+Click for multi)"><span class="legend-dot" style="background:#0369a1; border:2px solid #38bdf8;"></span><strong>Use Case</strong> (UC)</div>
+            <div class="legend-item" data-type="business-rule" onclick="handleTypologyClick(event, 'business-rule')" title="Filter Business Rule (Ctrl+Click for multi)"><span class="legend-dot" style="background:#b45309; border:2px solid #fbbf24; transform:rotate(45deg);"></span><strong>Business Rule</strong> (BR)</div>
+            <div class="legend-item" data-type="abuse-case" onclick="handleTypologyClick(event, 'abuse-case')" title="Filter Abuse Case (Ctrl+Click for multi)"><span class="legend-dot" style="background:#881337; border:2px solid #f43f5e;"></span><strong>Abuse Case</strong> (ABUSE)</div>
+            <div class="legend-item" data-type="requirement" onclick="handleTypologyClick(event, 'requirement')" title="Filter Requirement (Ctrl+Click for multi)"><span class="legend-dot" style="background:#1e293b; border:2px solid #64748b;"></span><strong>Requirement</strong> (FR/QR/SEC)</div>
+            <div class="legend-item" data-type="architecture" onclick="handleTypologyClick(event, 'architecture')" title="Filter Architecture (Ctrl+Click for multi)"><span class="legend-dot" style="background:#312e81; border:2px solid #818cf8;"></span><strong>Architecture</strong> (CMP/ADR)</div>
+            <div class="legend-item" data-type="test" onclick="handleTypologyClick(event, 'test')" title="Filter Test (Ctrl+Click for multi)"><span class="legend-dot" style="background:#047857; border:2px solid #10b981;"></span><strong>Test</strong> (BDD/Test)</div>
           </div>
         </div>
       </div>
@@ -1572,6 +1670,13 @@ export function renderDashboardHtml(
             </tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- TAB: OPERATIONAL MANUALS (MAN-USER & MAN-PROD) -->
+    <div id="tab-manuals" class="tab-panel">
+      <div class="content-container">
+        ${renderManualsTab(metricsData.manuals)}
       </div>
     </div>
 
@@ -1723,7 +1828,18 @@ export function renderDashboardHtml(
   <script>
     var elements = ${elementsJson};
     var govTasks = ${safeJsonForScript(metricsData.gov.tasks || [])};
+    var manualsData = ${safeJsonForScript([...metricsData.manuals.userManuals, ...metricsData.manuals.productionManuals])};
     var cy = null;
+
+    function showManual(id) {
+      var manual = manualsData.find(function(m) { return m.id === id; });
+      var container = document.getElementById('manual-viewer-container');
+      if (!manual || !container) return;
+      document.getElementById('manual-viewer-title').textContent = manual.id + ' — ' + manual.title;
+      document.getElementById('manual-viewer').innerHTML = renderMarkdown(manual.body);
+      container.style.display = 'block';
+      container.scrollIntoView({ behavior: 'smooth' });
+    }
 
     var reqHoverTimer = null;
     var currentHoverNodeId = null;
@@ -2187,41 +2303,52 @@ export function renderDashboardHtml(
         var typeName = (data.type || data.layer || 'node').toLowerCase();
         var typeBadgeColor = '#334155';
         var typeTitle = (data.type || data.layer || 'NODE').toUpperCase();
+        var typologyKey = 'requirement';
         if (typeName === 'architecture-introduction') {
           typeBadgeColor = '#0f766e';
           typeTitle = 'VISION & GOALS (ARCH-INTRO)';
+          typologyKey = 'architecture-introduction';
         } else if (typeName === 'journey') {
           typeBadgeColor = '#581c87';
           typeTitle = 'JOURNEY (JRN)';
+          typologyKey = 'journey';
         } else if (typeName === 'actor') {
           typeBadgeColor = '#065f46';
           typeTitle = 'ACTOR (ACT)';
+          typologyKey = 'actor';
         } else if (typeName === 'threat-actor') {
           typeBadgeColor = '#4c0519';
           typeTitle = 'THREAT ACTOR (ACT-THREAT)';
+          typologyKey = 'actor';
         } else if (typeName === 'use-case' || typeName === 'usecase') {
           typeBadgeColor = '#0369a1';
           typeTitle = 'USE CASE (UC)';
+          typologyKey = 'use-case';
         } else if (typeName === 'business-rule' || typeName === 'rule') {
           typeBadgeColor = '#b45309';
           typeTitle = 'BUSINESS RULE (BR)';
+          typologyKey = 'business-rule';
         } else if (typeName === 'abuse-case') {
           typeBadgeColor = '#881337';
           typeTitle = 'ABUSE CASE (ABUSE)';
+          typologyKey = 'abuse-case';
         } else if (typeName === 'requirement' || typeName === 'security-requirement') {
           typeBadgeColor = '#1e293b';
           typeTitle = 'REQUIREMENT (' + (data.id.split('-')[0] || 'REQ') + ')';
+          typologyKey = 'requirement';
         } else if (typeName === 'component' || typeName === 'adr' || typeName === 'security-enclave') {
           typeBadgeColor = '#312e81';
           typeTitle = 'ARCHITECTURE (' + (data.id.split('-')[0] || 'ARCH') + ')';
+          typologyKey = 'architecture';
         } else if (typeName === 'bdd-feature' || typeName === 'code-test') {
           typeBadgeColor = '#047857';
           typeTitle = 'TEST VERIFICATION';
+          typologyKey = 'test';
         }
 
         var html = '<div class="sidebar-field"><strong>ID / Identifier:</strong> <code>' + data.id + '</code></div>';
         html += '<div class="sidebar-field"><strong>Title:</strong> ' + (data.title || data.label || data.id) + '</div>';
-        html += '<div class="sidebar-field"><strong>Typology:</strong> <span class="badge" style="background:' + typeBadgeColor + '; border:1px solid rgba(255,255,255,0.2);">' + typeTitle + '</span></div>';
+        html += '<div class="sidebar-field"><strong>Typology:</strong> <span class="badge" onclick="handleTypologyClick(event, \'' + typologyKey + '\')" title="Click to filter by ' + typologyKey + ' (Ctrl+Click for multi)" style="background:' + typeBadgeColor + '; border:1px solid rgba(255,255,255,0.2); cursor:pointer;">' + typeTitle + '</span></div>';
         html += '<div class="sidebar-field"><strong>Status:</strong> <span class="badge ' + (isConform ? 'badge-green' : 'badge-amber') + '">' + (data.status || 'UNKNOWN') + '</span></div>';
         if (data.filePath) {
           var cleanMetaPath = data.filePath.split('\\\\').join('/');
@@ -2252,62 +2379,91 @@ export function renderDashboardHtml(
       cy.layout({ name: name, directed: true, padding: 30, animate: true, animationDuration: 400 }).run();
     }
 
+    var TYPOLOGY_SELECTORS = {
+      'architecture-introduction': '.type-architecture-introduction',
+      'journey': '.type-journey',
+      'actor': '.type-actor, .type-threat-actor',
+      'use-case': '.type-use-case, .type-usecase',
+      'business-rule': '.type-business-rule, .type-rule',
+      'abuse-case': '.type-abuse-case, .type-threat-actor',
+      'requirement': '.type-requirement, .type-security-requirement, .layer-requirement',
+      'architecture': '.type-component, .type-adr, .type-security-enclave, .layer-architecture',
+      'test': '.type-bdd-feature, .type-code-test, .layer-test'
+    };
+
+    var activeTypologies = new Set();
+
+    function handleTypologyClick(evt, type) {
+      var isMulti = evt && (evt.ctrlKey || evt.metaKey);
+      if (isMulti) {
+        if (activeTypologies.has(type)) {
+          activeTypologies.delete(type);
+        } else {
+          activeTypologies.add(type);
+        }
+      } else {
+        if (activeTypologies.has(type)) {
+          activeTypologies.delete(type);
+        } else {
+          activeTypologies.clear();
+          activeTypologies.add(type);
+        }
+      }
+      applyTypologyFilter();
+    }
+
+    function applyTypologyFilter() {
+      if (!cy) return;
+      var legendEl = document.querySelector('.graph-legend');
+      var legendItems = document.querySelectorAll('.legend-item');
+      var typeSelect = document.getElementById('type-filter');
+
+      if (activeTypologies.size === 0) {
+        if (legendEl) legendEl.classList.remove('has-filter');
+        legendItems.forEach(function(item) { item.classList.remove('active'); });
+        if (typeSelect) typeSelect.value = 'all';
+        cy.elements().show();
+      } else {
+        if (legendEl) legendEl.classList.add('has-filter');
+        legendItems.forEach(function(item) {
+          var t = item.getAttribute('data-type');
+          if (t && activeTypologies.has(t)) {
+            item.classList.add('active');
+          } else {
+            item.classList.remove('active');
+          }
+        });
+
+        if (typeSelect) {
+          if (activeTypologies.size === 1) {
+            var single = Array.from(activeTypologies)[0];
+            typeSelect.value = single;
+          } else {
+            typeSelect.value = 'all';
+          }
+        }
+
+        var selectors = [];
+        activeTypologies.forEach(function(t) {
+          selectors.push(TYPOLOGY_SELECTORS[t] || ('.type-' + t));
+        });
+        var matchedNodes = cy.nodes(selectors.join(', '));
+        cy.elements().hide();
+        matchedNodes.show();
+        matchedNodes.edgesWith(matchedNodes).show();
+      }
+      cy.fit(30);
+    }
+
     function filterType(type) {
       if (!cy) return;
       if (type === 'all') {
-        cy.elements().show();
-      } else if (type === 'architecture-introduction') {
-        cy.elements().hide();
-        var nodes = cy.nodes('.type-architecture-introduction');
-        nodes.show();
-        nodes.connectedEdges().show();
-      } else if (type === 'journey') {
-        cy.elements().hide();
-        var nodes = cy.nodes('.type-journey');
-        nodes.show();
-        nodes.connectedEdges().show();
-      } else if (type === 'actor') {
-        cy.elements().hide();
-        var nodes = cy.nodes('.type-actor, .type-threat-actor');
-        nodes.show();
-        nodes.connectedEdges().show();
-      } else if (type === 'use-case') {
-        cy.elements().hide();
-        var nodes = cy.nodes('.type-use-case, .type-usecase');
-        nodes.show();
-        nodes.connectedEdges().show();
-      } else if (type === 'business-rule') {
-        cy.elements().hide();
-        var nodes = cy.nodes('.type-business-rule, .type-rule');
-        nodes.show();
-        nodes.connectedEdges().show();
-      } else if (type === 'abuse-case') {
-        cy.elements().hide();
-        var nodes = cy.nodes('.type-abuse-case, .type-threat-actor');
-        nodes.show();
-        nodes.connectedEdges().show();
-      } else if (type === 'requirement') {
-        cy.elements().hide();
-        var nodes = cy.nodes('.type-requirement, .type-security-requirement, .layer-requirement');
-        nodes.show();
-        nodes.connectedEdges().show();
-      } else if (type === 'architecture') {
-        cy.elements().hide();
-        var nodes = cy.nodes('.type-component, .type-adr, .type-security-enclave, .layer-architecture');
-        nodes.show();
-        nodes.connectedEdges().show();
-      } else if (type === 'test') {
-        cy.elements().hide();
-        var nodes = cy.nodes('.type-bdd-feature, .type-code-test, .layer-test');
-        nodes.show();
-        nodes.connectedEdges().show();
+        activeTypologies.clear();
       } else {
-        cy.elements().hide();
-        var nodes = cy.nodes('.type-' + type);
-        nodes.show();
-        nodes.connectedEdges().show();
+        activeTypologies.clear();
+        activeTypologies.add(type);
       }
-      cy.fit(30);
+      applyTypologyFilter();
     }
 
     function filterLayer(layer) {
@@ -2598,6 +2754,9 @@ export function generateDashboardReport(options: DashboardOptions = {}): Dashboa
       autonomyDistribution: metricsData.gov.modeCounts || {},
       traceabilityRatio,
       bddCoverageRatio,
+      userManualCoverageRatio: metricsData.manuals.coverage.userCoveragePct,
+      productionManualCoverageRatio: metricsData.manuals.coverage.productionCoveragePct,
+      manualsCount: metricsData.manuals.userManuals.length + metricsData.manuals.productionManuals.length,
     },
     html,
   };

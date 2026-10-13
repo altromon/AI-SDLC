@@ -108,13 +108,13 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   // Tool: verify (Consolidated execution of all Quality Gates)
   server.tool(
     'verify',
-    'Executes deterministic AI-SDLC Quality Gates (all 9 gates in "full" profile, or essential gates [quality, security, licenses] in "lite" profile) in a consolidated run and returns overall repository health.',
+    'Executes deterministic AI-SDLC Quality Gates (all 11 gates in "full" profile, or essential gates [quality, security, licenses] in "lite" profile) in a consolidated run and returns overall repository health.',
     {
       root: z.string().optional().describe('Project root directory (optional)'),
       profile: z
         .enum(['full', 'lite'])
         .optional()
-        .describe('Quality Gate evaluation profile: "full" (default, executes all 9 gates) or "lite" (essential gates: quality, security, and licenses for personal/solo projects)'),
+        .describe('Quality Gate evaluation profile: "full" (default, executes all 11 gates) or "lite" (essential gates: quality, security, and licenses for personal/solo projects)'),
     },
     async (params) => {
       try {
@@ -129,19 +129,23 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
         const tr = !isLite ? verifyTraceability({ rootDir: root }) : undefined;
         const gv = !isLite ? verifyTasksGovernance({ rootDir: root }) : undefined;
         const tc = !isLite ? verifyTestingCoverage({ rootDir: root }) : undefined;
+        const gh = !isLite ? checkGherkinInSync({ rootDir: root }) : undefined;
         const pd = !isLite ? verifyPdacGraph({ rootDir: root }) : undefined;
         const sc = !isLite ? verifyArtifactsSchemas({ rootDir: root }) : undefined;
         const dp = !isLite ? verifyArtifactDuplicates({ rootDir: root }) : undefined;
+        const fr = !isLite ? verifyProgressiveFriction({ rootDir: root }) : undefined;
 
         const gates = [
           { name: 'quality', success: qg.success, summary: `${qg.passCount}/${qg.totalFunctions} compliant functions` },
           ...(tr ? [{ name: 'traceability', success: tr.success, summary: `${tr.orphanCount} orphan requirements` }] : []),
           ...(gv ? [{ name: 'governance', success: gv.success, summary: `${gv.totalTasks} audited tasks` }] : []),
           ...(tc ? [{ name: 'testing', success: tc.success, summary: `${tc.passedRequirements}/${tc.totalRequirements} covered requirements` }] : []),
+          ...(gh ? [{ name: 'gherkin', success: gh.inSync, summary: `${gh.totalFeatures} synchronized features` }] : []),
           { name: 'licenses', success: lc.success, summary: `${lc.totalEvaluated} analyzed dependencies` },
           ...(pd ? [{ name: 'pdac', success: pd.success, summary: `${pd.totalNodes} aligned nodes` }] : []),
           ...(sc ? [{ name: 'schemas', success: sc.success, summary: `${sc.validCount}/${sc.totalEvaluated} valid artifacts` }] : []),
           ...(dp ? [{ name: 'duplicates', success: dp.success, summary: `${dp.errorCount} errors, ${dp.warningCount} warnings` }] : []),
+          ...(fr ? [{ name: 'friction', success: fr.success, summary: `profile: ${fr.profile}, ${fr.bypassedRules.length} violations` }] : []),
           { name: 'security', success: sec.success && sast.success, summary: `${sec.findingsCount} secrets, ${sast.violationsCount} SAST` },
         ];
 

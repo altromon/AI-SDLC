@@ -4,6 +4,7 @@
 
 import pc from 'picocolors';
 import {
+  checkGherkinInSync,
   verifyArtifactDuplicates,
   verifyArtifactsSchemas,
   verifyLicenses,
@@ -891,6 +892,69 @@ export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boole
   return okS && okA;
 }
 
+export function runVerifyGherkin(options: VerifyBaseOptions = {}): boolean {
+  const rootDir = options.root || process.cwd();
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
+
+  if (!isSilent) {
+    console.log(
+      pc.bold(pc.cyan('\n🥒 [AI-SDLC] Verifying BDD Synchronization (Gherkin -> .feature)...'))
+    );
+  }
+
+  const result = checkGherkinInSync({ rootDir });
+
+  if (useJson) {
+    const violations = [
+      ...result.missingFiles.map((f) => ({
+        type: 'MISSING_FEATURE',
+        file: f,
+        message: `Missing .feature file: ${f}`,
+      })),
+      ...result.outOfSyncFiles.map((f) => ({
+        type: 'OUT_OF_SYNC_FEATURE',
+        file: f,
+        message: `Out-of-sync .feature file: ${f}`,
+      })),
+    ];
+    const payload: VerifyJsonPayload = {
+      gate: 'gherkin',
+      success: result.inSync,
+      exitCode: result.inSync ? 0 : 1,
+      summary: {
+        totalFeatures: result.totalFeatures,
+        missingCount: result.missingFiles.length,
+        outOfSyncCount: result.outOfSyncFiles.length,
+      },
+      violations,
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return result.inSync;
+  }
+
+  if (!options.silent) {
+    const totalOut = result.missingFiles.length + result.outOfSyncFiles.length;
+    console.log(`  Evaluated features:      ${pc.bold(String(result.totalFeatures))}`);
+    console.log(
+      `  Out-of-sync / missing:   ${totalOut > 0 ? pc.red(String(totalOut)) : pc.green('0')}`
+    );
+    for (const f of result.missingFiles) {
+      console.log(`    ${pc.red('✖')} [MISSING] ${f}`);
+    }
+    for (const f of result.outOfSyncFiles) {
+      console.log(`    ${pc.red('✖')} [OUT_OF_SYNC] ${f}`);
+    }
+    console.log(
+      result.inSync
+        ? pc.green('\n✔ BDD Synchronization COMPLIANT\n')
+        : pc.red('\n✖ BDD Synchronization BLOCKED\n')
+    );
+  }
+
+  return result.inSync;
+}
+
 export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
@@ -905,10 +969,12 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
   const okTrace = runVerifyTraceability({ root, silent: isSilent, json: false });
   const okGov = runVerifyGovernance({ root, silent: isSilent, json: false });
   const okTest = runVerifyTesting({ root, silent: isSilent, json: false });
+  const okGherkin = runVerifyGherkin({ root, silent: isSilent, json: false });
   const okLic = runVerifyLicenses({ root, silent: isSilent, json: false });
   const okPdac = runVerifyPdac({ root, silent: isSilent, json: false });
   const okSchemas = runVerifySchemas({ root, silent: isSilent, json: false });
   const okDuplicates = runVerifyDuplicates({ root, silent: isSilent, json: false });
+  const okFriction = runVerifyFriction({ root, silent: isSilent, json: false });
   const okSecurity = runVerifySecurity({ root, silent: isSilent, json: false });
 
   const allPassed =
@@ -916,10 +982,12 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
     okTrace &&
     okGov &&
     okTest &&
+    okGherkin &&
     okLic &&
     okPdac &&
     okSchemas &&
     okDuplicates &&
+    okFriction &&
     okSecurity;
 
   if (useJson) {
@@ -928,15 +996,18 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
       traceability: { success: okTrace },
       governance: { success: okGov },
       testing: { success: okTest },
+      gherkin: { success: okGherkin },
       licenses: { success: okLic },
       pdac: { success: okPdac },
       schemas: { success: okSchemas },
       duplicates: { success: okDuplicates },
+      friction: { success: okFriction },
       security: { success: okSecurity },
     };
 
+    const totalGates = Object.keys(gatesSummary).length;
     const passedCount = Object.values(gatesSummary).filter((g) => g.success).length;
-    const failedCount = 9 - passedCount;
+    const failedCount = totalGates - passedCount;
     const exitCode = allPassed ? 0 : (!okSecurity ? 4 : 1);
 
     const violations = Object.entries(gatesSummary)
@@ -948,7 +1019,7 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
       success: allPassed,
       exitCode,
       summary: {
-        totalGates: 9,
+        totalGates,
         passedGates: passedCount,
         failedGates: failedCount,
       },
@@ -962,15 +1033,17 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
   if (!options.silent) {
     console.log(pc.bold(pc.magenta('================================================================')));
     console.log(pc.bold('CI/CD EVALUATION SUMMARY:'));
-    console.log(`  1. Quality Gate (Complexity/Maintainability): ${okQuality ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  2. 360° Traceability (RTM):                  ${okTrace ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  3. Governance and Autonomy Modes:            ${okGov ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  4. Test Coverage (Reqs & Tasks):             ${okTest ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  5. Open Source Licenses:                     ${okLic ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  6. PDaC & Cryptographic Drift:               ${okPdac ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  7. Artifact JSON Schemas:                    ${okSchemas ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  8. Duplicate Requirements (Shift-Left Gate): ${okDuplicates ? pc.green('PASSED') : pc.red('FAILED')}`);
-    console.log(`  9. Shift-Left Security (Secrets & SAST):     ${okSecurity ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  1.  Quality Gate (Complexity/Maintainability): ${okQuality ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  2.  360° Traceability (RTM):                   ${okTrace ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  3.  Governance and Autonomy Modes:             ${okGov ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  4.  Test Coverage (Reqs & Tasks):              ${okTest ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  5.  BDD Synchronization (Gherkin -> .feature): ${okGherkin ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  6.  Open Source Licenses:                      ${okLic ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  7.  PDaC & Cryptographic Drift:                ${okPdac ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  8.  Artifact JSON Schemas (+ Handoff YAML):    ${okSchemas ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  9.  Duplicate Requirements (Shift-Left Gate):  ${okDuplicates ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  10. Progressive Friction & Anti-Bypass:        ${okFriction ? pc.green('PASSED') : pc.red('FAILED')}`);
+    console.log(`  11. Shift-Left Security (Secrets & SAST):      ${okSecurity ? pc.green('PASSED') : pc.red('FAILED')}`);
     console.log(pc.bold(pc.magenta('================================================================')));
 
     if (allPassed) {

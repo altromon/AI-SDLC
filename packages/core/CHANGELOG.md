@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 1.3.3
+
+### Patch Changes
+
+- feat(dashboard): add interactive multi-selection and toggle filtering to Cytoscape node typologies legend; support single-click isolation, `Ctrl+click` / `Cmd+click` multi-selection displaying cross-typology relationship edges, and toggle-off cancellation on selected types.
+
 ## 1.3.2
 
 ### Patch Changes

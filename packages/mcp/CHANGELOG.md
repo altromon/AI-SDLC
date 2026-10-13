@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 1.3.3
+
+### Patch Changes
+
+- feat(dashboard): support interactive typology filter and multi-selection in `report_dashboard` MCP tool
+- Updated dependencies
+  - @aisdlc/core@1.3.3
+
 ## 1.3.2
 
 ### Patch Changes

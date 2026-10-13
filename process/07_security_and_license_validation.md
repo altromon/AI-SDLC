@@ -8,13 +8,13 @@ In an AI-agent driven development workflow, code can be produced at high velocit
 
 ---
 
-## 2. The 9 Deterministic CI/CD Gates (Pipeline Gates)
+## 2. The 11 Deterministic CI/CD Gates (Pipeline Gates)
 
-Every Pull Request submitted by a human engineer or an AI agent must pass the following 9 automated gates:
+Every Pull Request submitted by a human engineer or an AI agent must pass the following 11 automated gates:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   DETERMINISTIC CI/CD PIPELINE (9 GATES)               │
+│                   DETERMINISTIC CI/CD PIPELINE (11 GATES)              │
 └────────────────────────────────────────────────────────────────────────┘
 
  [GATE 1: CODE & AST QUALITY RELEASE GATE] (aisdlc verify quality)
@@ -31,20 +31,27 @@ Every Pull Request submitted by a human engineer or an AI agent must pass the fo
   └─► Verifies via reverse lookup that 100% of requirements have physical tests
       on disk (tagged .feature or .spec citing IDs) and deterministic verification commands.
 
- [GATE 5: OSS LICENSE AUDIT AND SBOM GENERATION] (aisdlc verify licenses)
+ [GATE 5: BDD GHERKIN SYNCHRONIZATION GATE] (aisdlc verify gherkin)
+  └─► Validates that test suite .feature files are 100% in sync with specification
+      Gherkin scenarios with identical SHA-256 digests.
+
+ [GATE 6: OSS LICENSE AUDIT AND SBOM GENERATION] (aisdlc verify licenses)
   └─► Native dynamic scan of installed dependencies against license-policy.yaml.
       Fails on viral (AGPL) or unapproved commercial licenses. Generates CycloneDX 1.5 SBOM.
 
- [GATE 6: CRYPTOGRAPHIC INTEGRITY AND PDAC DRIFT] (aisdlc verify pdac)
+ [GATE 7: CRYPTOGRAPHIC INTEGRITY AND PDAC DRIFT] (aisdlc verify pdac)
   └─► Verifies SHA-256 hashes of requirements cited in handoffs match canonical targets.
 
- [GATE 7: SCHEMA AND GRAPH VALIDATION] (aisdlc verify schemas)
-  └─► Verifies frontmatter files comply with canonical JSON schemas (Draft 2020-12).
+ [GATE 8: SCHEMA AND GRAPH VALIDATION] (aisdlc verify schemas)
+  └─► Verifies frontmatter files and handoff.yaml sidecars comply with canonical JSON schemas (Draft 2020-12).
 
- [GATE 8: DUPLICATE AND COLLISION PRE-FLIGHT] (aisdlc verify duplicates)
+ [GATE 9: DUPLICATE AND COLLISION PRE-FLIGHT] (aisdlc verify duplicates)
   └─► Audits new requirements for collisions in IDs, identical normative text, or duplicate titles.
 
- [GATE 9: SHIFT-LEFT SECURITY: SECRETS AND SAST] (aisdlc verify security)
+ [GATE 10: PROGRESSIVE FRICTION AND ANTI-BYPASS] (aisdlc verify friction)
+  └─► Enforces risk-profile guardrails (patch, standard, critical) and prevents patch changes from touching protected paths.
+
+ [GATE 11: SHIFT-LEFT SECURITY: SECRETS AND SAST] (aisdlc verify security)
   └─► Zero-tolerance for credentials, API keys, or tokens (Gitleaks Gate) and deterministic
       detection of AI-generated OWASP vulnerabilities (SQLi, exec, eval, SSRF, path traversal).
 ```
@@ -53,7 +60,7 @@ Every Pull Request submitted by a human engineer or an AI agent must pass the fo
 
 ## 3. Shift-Left Security Detailed Specification
 
-### 3.1 Gate 9: Deterministic Secret Detection (`aisdlc verify secrets`)
+### 3.1 Gate 11: Deterministic Secret Detection (`aisdlc verify secrets`)
 
 Secret scanning prevents inadvertent credential leaks into the codebase:
 - **Flexible Scan Scope**: Scan the entire working tree or strictly Git incremental diffs (`--diff`, optionally against a base branch using `--base <branch>`).

@@ -148,8 +148,9 @@ AI-SDLC structures its `specs/` directory connecting to established Spec-Driven 
    - `npx aisdlc sdd verify [--json]`: Audits conformity of all workspaces and handoff sidecars, running the duplicate pre-flight gate.
    - `npx aisdlc sdd integrate [--change <id>] [--auto] [--json]`: Integrates and promotes the completed change into canonical specifications (supports manual or auto-detection).
    - `npx aisdlc gherkin extract [--all] [--path <path>] [--json]`: Extracts and synchronizes Gherkin BDD scenarios to `.feature` files on disk.
+   - `npx aisdlc verify gherkin [--path <path>] [--all] [--json]`: Validates that `.feature` files match specification Gherkin scenarios with identical hashes.
    - `npx aisdlc init [directory] [--dry-run] [--ci <provider>] [--agents <list>] [--json]`: Initializes governance, schemas, and policies in a new repository.
-   - `npx aisdlc verify all [--json]`: Executes all 9 deterministic Quality Gates outputting structured JSON or human-readable summary.
+   - `npx aisdlc verify all [--json]`: Executes all 11 deterministic Quality Gates outputting structured JSON or human-readable summary.
 
 5. **Programmatic Consumption by AI Agents (`--json` and `AISDLC_FORMAT=json`)**:
    - **Pure JSON Output Without Escape Characters**: All commands (`check`, `sdd *`, `gherkin extract`, `init`, `verify *`) support `--json` or `-F, --format json`, strictly suppressing ANSI color codes (`picocolors`).

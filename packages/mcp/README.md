@@ -101,7 +101,7 @@ Add `@aisdlc/mcp` to your IDE or agent configuration (Claude Desktop, Cursor, Go
 | Tool | Description | Parameters |
 | --- | --- | --- |
 | `new` | Initializes a new project or configures AI-SDLC governance and structure in an existing repository (policies, templates, hooks, and optional CI). | `targetDir` *(string)*, `ci` *(enum: github, gitlab, azure, bitbucket)*, `dryRun` *(boolean)*, `agents` *(string)*, `architecture` *(enum: minimal, full, complete, none)* |
-| `verify` | Executes deterministic AI-SDLC Quality Gates (all 9 gates in `full` profile, or essential gates [quality, security, licenses] in `lite` profile) in a consolidated run and returns overall repository health. | `root` *(string)*, `profile` *(enum: full, lite)* |
+| `verify` | Executes deterministic AI-SDLC Quality Gates (all 11 gates in `full` profile, or essential gates [quality, security, licenses] in `lite` profile) in a consolidated run and returns overall repository health. | `root` *(string)*, `profile` *(enum: full, lite)* |
 | `report` | Generates all AI-SDLC reports combined: interactive web dashboard with PDaC graph (HTML) and formal code quality report (Markdown). | `root` *(string)*, `dashboardOutput` *(string)*, `qualityPolicy` *(string)* |
 
 ### 2. Spec-Driven Development (SDD) Tools

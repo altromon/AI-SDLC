@@ -132,6 +132,46 @@ export function extractFrontmatter(content: string): Record<string, unknown> | n
   }
 }
 
+const EXCLUDED_SCHEMA_DIRS = new Set([
+  'node_modules', '.git', 'dist', 'bin', 'obj', 'build', 'out', 'target',
+  'coverage', '.changeset', 'scratch', 'test-scaffold', 'fixtures',
+  'templates', 'examples', '.agent', '.agents', '.claude', '.cursor',
+  '.github', '.vscode', '.vs', '.idea',
+]);
+
+function walkHandoffSidecars(dir: string, fileList: string[] = []): string[] {
+  try {
+    if (!fs.existsSync(dir)) return fileList;
+    for (const file of fs.readdirSync(dir)) {
+      const fullPath = path.join(dir, file);
+      if (fs.statSync(fullPath).isDirectory()) {
+        if (!EXCLUDED_SCHEMA_DIRS.has(file) && !file.startsWith('temp-') && !file.startsWith('.temp-')) {
+          walkHandoffSidecars(fullPath, fileList);
+        }
+      } else if (file === 'handoff.yaml' || file === 'handoff.template.yaml') {
+        fileList.push(fullPath);
+      }
+    }
+  } catch {
+    // Ignore concurrent fs errors
+  }
+  return fileList;
+}
+
+function extractArtifactData(filePath: string, content: string): Record<string, unknown> | null {
+  if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
+    try {
+      const parsed = yaml.load(content);
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : null;
+    } catch {
+      return null;
+    }
+  }
+  return extractFrontmatter(content);
+}
+
 export interface JsonSchemaRule {
   type?: string | string[];
   const?: unknown;
@@ -426,13 +466,13 @@ export function verifyArtifactsSchemas(
       : path.join(rootDir, options.targetPath);
     if (fs.existsSync(target)) {
       if (fs.statSync(target).isDirectory()) {
-        filesToScan = walkMdFiles(target);
-      } else if (target.endsWith('.md')) {
+        filesToScan = [...walkMdFiles(target), ...walkHandoffSidecars(target)];
+      } else if (target.endsWith('.md') || target.endsWith('.yaml') || target.endsWith('.yml')) {
         filesToScan = [target];
       }
     }
   } else {
-    filesToScan = walkMdFiles(rootDir);
+    filesToScan = [...walkMdFiles(rootDir), ...walkHandoffSidecars(rootDir)];
   }
 
   const violations: ArtifactSchemaViolation[] = [];
@@ -461,7 +501,7 @@ export function verifyArtifactsSchemas(
 
     try {
       const content = fs.readFileSync(file, 'utf-8');
-      const frontmatter = extractFrontmatter(content);
+      const frontmatter = extractArtifactData(file, content);
       if (!frontmatter || !frontmatter.id) {
         continue;
       }

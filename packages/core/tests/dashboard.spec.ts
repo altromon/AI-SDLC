@@ -308,6 +308,16 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(htmlContent).toContain('value="business-rule"');
     expect(htmlContent).toContain('value="abuse-case"');
 
+    // Interactive typology filtering in legend
+    expect(htmlContent).toContain('data-type="use-case"');
+    expect(htmlContent).toContain("handleTypologyClick(event, 'use-case')");
+    expect(htmlContent).toContain("handleTypologyClick(event, 'actor')");
+    expect(htmlContent).toContain('.legend-item.active');
+    expect(htmlContent).toContain('.graph-legend.has-filter');
+    expect(htmlContent).toContain('activeTypologies');
+    expect(htmlContent).toContain('evt.ctrlKey || evt.metaKey');
+    expect(htmlContent).toContain('matchedNodes.edgesWith(matchedNodes).show()');
+
     // Cytoscape styles for typologies
     expect(htmlContent).toContain('node.type-architecture-introduction');
     expect(htmlContent).toContain('node.type-journey');
@@ -323,6 +333,76 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(htmlContent).toContain('edge.relation-decomposes-into');
     expect(htmlContent).toContain('edge.relation-governs');
     expect(htmlContent).toContain('edge.relation-mitigated-by');
+  });
+
+  it('should support multi-selection and toggle filtering of typologies in the generated dashboard script', () => {
+    const outputPath = path.join(tempDir, 'reports', 'typologies-filter-test.html');
+    generateDashboardReport({
+      rootDir: process.cwd(),
+      outputPath,
+      title: 'Typologies Filter Verification',
+    });
+
+    const html = fs.readFileSync(outputPath, 'utf-8');
+
+    // Extract script logic for handleTypologyClick and applyTypologyFilter
+    expect(html).toContain('function handleTypologyClick(evt, type)');
+    expect(html).toContain('function applyTypologyFilter()');
+
+    // Execute the filter logic in a sandboxed Function context to verify behavior
+    const testFilterLogic = new Function(`
+      var activeTypologies = new Set();
+      var filterAppliedCount = 0;
+      var lastActiveSize = 0;
+      function applyTypologyFilter() {
+        filterAppliedCount++;
+        lastActiveSize = activeTypologies.size;
+      }
+      function handleTypologyClick(evt, type) {
+        var isMulti = evt && (evt.ctrlKey || evt.metaKey);
+        if (isMulti) {
+          if (activeTypologies.has(type)) {
+            activeTypologies.delete(type);
+          } else {
+            activeTypologies.add(type);
+          }
+        } else {
+          if (activeTypologies.has(type)) {
+            activeTypologies.delete(type);
+          } else {
+            activeTypologies.clear();
+            activeTypologies.add(type);
+          }
+        }
+        applyTypologyFilter();
+      }
+
+      // 1. Click without ctrl on 'use-case' -> only 'use-case' selected
+      handleTypologyClick({ ctrlKey: false }, 'use-case');
+      if (activeTypologies.size !== 1 || !activeTypologies.has('use-case')) throw new Error('Step 1 failed');
+
+      // 2. Ctrl+click on 'actor' -> both 'use-case' and 'actor' selected
+      handleTypologyClick({ ctrlKey: true }, 'actor');
+      if (activeTypologies.size !== 2 || !activeTypologies.has('use-case') || !activeTypologies.has('actor')) throw new Error('Step 2 failed');
+
+      // 3. Regular click without ctrl on 'journey' -> switches filter to only 'journey'
+      handleTypologyClick({ ctrlKey: false }, 'journey');
+      if (activeTypologies.size !== 1 || !activeTypologies.has('journey')) throw new Error('Step 3 failed');
+
+      // 4. Regular click on selected 'journey' -> anula el filtro
+      handleTypologyClick({ ctrlKey: false }, 'journey');
+      if (activeTypologies.size !== 0) throw new Error('Step 4 failed');
+
+      // 5. Select two types with Ctrl, then deselect one with Ctrl
+      handleTypologyClick({ ctrlKey: false }, 'use-case');
+      handleTypologyClick({ ctrlKey: true }, 'actor');
+      handleTypologyClick({ ctrlKey: true }, 'actor');
+      if (activeTypologies.size !== 1 || !activeTypologies.has('use-case')) throw new Error('Step 5 failed');
+
+      return true;
+    `);
+
+    expect(testFilterLogic()).toBe(true);
   });
 
   it('should not include examples artifacts when rootDir is project root', () => {

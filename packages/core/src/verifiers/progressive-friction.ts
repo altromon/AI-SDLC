@@ -2,6 +2,7 @@
  * AI-SDLC: Progressive Friction & Anti-Bypass Verifier
  */
 
+import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
@@ -55,6 +56,43 @@ export function isPathProtectedFromPatch(filePath: string): boolean {
   return PROTECTED_BYPASS_PATTERNS.some((pattern) => pattern.test(normalized));
 }
 
+function resolveActiveChangeDir(rootDir: string): string | undefined {
+  const activeRoot = path.join(rootDir, 'specs', 'changes', 'active');
+  if (!fs.existsSync(activeRoot)) return undefined;
+  try {
+    const dirs = fs
+      .readdirSync(activeRoot, { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .map((d) => path.join(activeRoot, d.name));
+    return dirs.find((d) => detectProfileFromChange(d) === 'patch') || dirs[0];
+  } catch {
+    return undefined;
+  }
+}
+
+function detectGitDiffFiles(rootDir: string): string[] {
+  if (!fs.existsSync(path.join(rootDir, '.git'))) return [];
+  try {
+    const tracked = execFileSync('git', ['diff', '--name-only', 'HEAD'], {
+      cwd: rootDir,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'ignore'],
+    });
+    const untracked = execFileSync('git', ['ls-files', '--others', '--exclude-standard'], {
+      cwd: rootDir,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'ignore'],
+    });
+    const combined = `${tracked}\n${untracked}`
+      .split(/\r?\n/)
+      .map((f) => f.trim())
+      .filter(Boolean);
+    return Array.from(new Set(combined));
+  } catch {
+    return [];
+  }
+}
+
 export function verifyProgressiveFriction(
   options: ProgressiveFrictionOptions = {}
 ): ProgressiveFrictionResult {
@@ -74,13 +112,18 @@ export function verifyProgressiveFriction(
         break;
       }
     }
+  } else if (!changeDir) {
+    changeDir = resolveActiveChangeDir(rootDir);
   }
-
-  const modifiedFiles = options.diffFiles || options.modifiedFiles || [];
 
   const profile: ChangeProfile = changeDir
     ? detectProfileFromChange(changeDir)
     : 'standard';
+
+  const modifiedFiles =
+    options.diffFiles ||
+    options.modifiedFiles ||
+    (profile === 'patch' ? detectGitDiffFiles(rootDir) : []);
 
   const violations: string[] = [];
 

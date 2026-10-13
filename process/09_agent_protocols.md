@@ -430,13 +430,13 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
 - **Strict Zod Validation**: Every exposed tool includes strongly typed runtime input schema validation.
 - **Security Enclave**: Designed under `SEC-ENC-DMZ` enclave with path sanitization preventing path traversal.
 
-### 2. Exposed MCP Tools Catalog (20 Tools)
+### 2. Exposed MCP Tools Catalog (23 Tools)
 
 #### A. High-Level Workflows
 | Tool | Input Parameters | Description / Effect |
 | :--- | :--- | :--- |
 | `new` | `targetDir` (optional), `template` (optional), `ci` (optional), `agents` (optional), `force` (optional) | Initializes a new project or bootstraps AI-SDLC in an existing repo, configuring folders, schemas, quality policies, CI templates (`github`, `gitlab`, `azure`, `bitbucket`), and agent scaffolding (`cursor`, `claude`, `antigravity`, `copilot`, `mcp`, `all`). |
-| `verify` | `rootDir` (optional), `summaryOnly` (optional) | Runs the full suite of all 9 deterministic Quality Gates (`quality`, `traceability`, `governance`, `licenses`, `schemas`, `duplicates`, `security`, `testing`, `pdac`). |
+| `verify` | `rootDir` (optional), `summaryOnly` (optional) | Runs the full suite of all 11 deterministic Quality Gates (`quality`, `traceability`, `governance`, `testing`, `gherkin`, `licenses`, `pdac`, `schemas`, `duplicates`, `friction`, `security`). |
 | `report` | `rootDir` (optional), `outputDir` (optional) | Concurrently generates interactive HTML dashboard (`reports/dashboard.html`) and consolidated Markdown quality report (`reports/QUALITY_REPORT.md`). |
 
 #### B. SDD Delivery Lifecycle (Spec-Driven Development)
@@ -446,6 +446,7 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
 | `sdd_new` | `name` (required), `rootDir` (optional), `from` (optional), `framework` (optional), `profile` (optional) | Generates complete scaffolding for an SDD change (`proposal.md`, `spec.md`, `design.md`, `tasks.md`) and PDaC sidecar. |
 | `sdd_deposit` | `change` (required), `rootDir` (optional), `framework` (optional), `title` (optional), `requirements` (optional), `useCases` (optional) | Deposits PDaC Handoff sidecar (`handoff.yaml`) for a specific change. |
 | `sdd_integrate` | `change` (optional), `auto` (optional), `rootDir` (optional), `author` (optional) | Integrates completed change into canonical baseline and archives directory in `specs/changes/completed/`. |
+| `get_active_handoff` | `change` (required), `rootDir` (optional) | Queries in-memory PDaC subgraph and contents of an active change for surgical context injection. |
 
 #### C. Individual Deterministic Quality Gates
 | Tool | Input Parameters | Description / Effect |
@@ -456,6 +457,7 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
 | `verify_licenses` | `rootDir` (optional), `allowlistOnly` (optional) | Audits dependency licenses against `license-policy.yaml`. |
 | `verify_schemas` | `rootDir` (optional), `schemaDir` (optional) | Validates Markdown and YAML frontmatter against canonical JSON schemas. |
 | `verify_duplicates` | `rootDir` (optional) | Detects lexical collisions and duplicates in product requirements. |
+| `verify_friction` | `change` (optional), `diffFiles` (optional), `rootDir` (optional) | Evaluates progressive friction rules and anti-bypass guardrails according to risk profile. |
 | `verify_security` | `rootDir` (optional), `scanSecrets` (optional), `scanSast` (optional) | Runs deterministic SAST scanning and secret leak detection (Gitleaks). |
 | `verify_testing` | `rootDir` (optional) | Audits requirement coverage via automated tests. |
 | `verify_pdac` | `rootDir` (optional) | Audits cryptographic consistency of PDaC sidecars against canonical baseline. |
@@ -466,6 +468,7 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
 | `report_markdown` | `rootDir` (optional), `outputPath` (optional) | Generates formal Markdown quality report (`reports/QUALITY_REPORT.md`). |
 | `report_dashboard` | `rootDir` (optional), `outputPath` (optional), `title` (optional) | Generates self-contained interactive HTML visual dashboard (`reports/dashboard.html`). |
 | `kpi_pr` | `baseBranch` (optional), `headBranch` (optional), `rootDir` (optional) | Evaluates and generates aggregated Markdown development KPIs table for Pull Requests. |
+| `kpi_release` | `release` (required), `base` (optional), `outputDir` (optional), `rootDir` (optional) | Calculates consolidated Release metrics (DIR, defect density, rework costs, token costs). |
 | `git_detect_author` | `commitSha` (optional), `rootDir` (optional) | Analyzes commit trailers to classify authorship (`human`, `agent`, `hybrid`). |
 
 ### 3. Canonical Resources (`aisdlc://`)

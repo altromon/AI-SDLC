@@ -82,19 +82,20 @@ The `aisdlc` CLI provides comprehensive commands across 6 functional categories 
 
 | Command | Description | Key Options |
 | --- | --- | --- |
-| `aisdlc verify [all]` | Executes the consolidated CI/CD suite evaluating all 9 quality and governance gates simultaneously. | `-r, --root <path>`, `-p, --policy <path>`, `-C <max-cc>`, `-K <max-cog>`, `-M <min-mi>`, `-L <max-lines>`, `-m <mode>`, `--json` |
+| `aisdlc verify [all]` | Executes the consolidated CI/CD suite evaluating all 11 quality and governance gates simultaneously. | `-r, --root <path>`, `-p, --policy <path>`, `-C <max-cc>`, `-K <max-cog>`, `-M <min-mi>`, `-L <max-lines>`, `-m <mode>`, `--json` |
 | `aisdlc verify quality` | AST-based release gate evaluating Cyclomatic Complexity ($\le 10$), Cognitive ($\le 15$), Maintainability ($\ge 50$), and function length ($\le 40$). | `-p, --policy <path>`, `-C, --max-cyclomatic <n>`, `-K, --max-cognitive <n>`, `-M, --min-maintainability <n>`, `-m <STRICT\|PERMISSIVE>`, `--json` |
 | `aisdlc verify traceability` | Audits the 360° Requirements Traceability Matrix (Product HOF $\leftrightarrow$ Architecture CMP $\leftrightarrow$ Tests `.feature`). | `-r, --root <path>`, `--json` |
 | `aisdlc verify governance` | Audits task governance, human review plans, and autonomy modes (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc.). | `-r, --root <path>`, `--json` |
 | `aisdlc verify testing` | Audits that 100% of requirements and tasks have corresponding verifiable tests on disk. | `-r, --root <path>`, `--json` |
+| `aisdlc verify gherkin` | Verifies that `.feature` files match specification Gherkin scenarios with identical SHA-256 digests. | `-p, --path <path>`, `-a, --all`, `-r, --root <path>`, `--json` |
 | `aisdlc verify licenses` | Audits Open Source license compliance against `license-policy.yaml` with dynamic SCA scan, CycloneDX 1.5 SBOM, and legal notices. | `-p, --policy <path>`, `--sbom [path]`, `--notices [path]`, `--tool <native\|trivy\|syft>`, `--depth <direct\|transitive>`, `--json` |
 | `aisdlc verify pdac` | Verifies the Product Definition as Code graph and checks for cryptographic drift against SHA-256 digests. | `-r, --root <path>`, `--json` |
-| `aisdlc verify schemas` | Validates specification Markdown artifacts against canonical JSON Schemas (Draft 2020-12). | `-p, --path <path>`, `-r, --root <path>`, `--json` |
+| `aisdlc verify schemas` | Validates specification Markdown artifacts and `handoff.yaml` sidecars against canonical JSON Schemas (Draft 2020-12). | `-p, --path <path>`, `-r, --root <path>`, `--json` |
 | `aisdlc verify duplicates` | Detects redundant requirements, ID collisions, title lexical redundancy ($\ge 85\%$), and BDD overlaps before coding. | `-s, --similarity <number>` *(default: 0.85)*, `-r, --root <path>`, `--json` |
+| `aisdlc verify friction [change]` | Evaluates progressive friction and Anti-Bypass rules (verifies change scope matches risk profile: `patch`, `standard`, `critical`). | `-r, --root <path>`, `--json` |
 | `aisdlc verify security` | Unified shift-left security gate: deterministic secret scanning (Gitleaks) and SAST (OWASP Top 10 vulnerabilities). | `-d, --diff`, `-b, --base <branch>`, `-g, --gitleaks`, `-s, --semgrep`, `-e, --entropy <n>`, `-m, --min-severity <level>`, `--json` |
 | `aisdlc verify secrets` | Scans for exposed credentials, API keys, tokens, and high-entropy secrets (Shannon entropy $\ge 4.3$). Fails with exit code 4. | `-d, --diff`, `-b, --base <branch>`, `-g, --gitleaks`, `-e, --entropy <n>`, `--json` |
 | `aisdlc verify sast` | Static Application Security Testing for SQL injection, command injection, eval, SSRF, path traversal, and prompt injection. | `-s, --semgrep`, `-m, --min-severity <CRITICAL\|HIGH\|MEDIUM>`, `--json` |
-| `aisdlc verify friction [change]` | Evaluates progressive friction and Anti-Bypass rules (verifies change scope matches risk profile: `patch`, `standard`, `critical`). | `-r, --root <path>`, `--json` |
 
 ### 4. Git 4-Tier Branch Management (`aisdlc git`)
 
@@ -136,7 +137,7 @@ aisdlc git checkout TSK-001
 # 4. Run pre-flight check with auto-fix (syncs Gherkin and digests)
 aisdlc check --fix
 
-# 5. Run the consolidated CI/CD verification suite (all 9 gates)
+# 5. Run the consolidated CI/CD verification suite (all 11 gates)
 aisdlc verify all
 
 # 6. Generate the interactive web dashboard and open it in the browser

@@ -170,7 +170,7 @@ pnpm run git:checkout TSK-001
 pnpm run check:fix
 # or via npx: npx aisdlc check --fix
 
-# 6. Execute consolidated CI/CD suite (all 9 quality and governance gates)
+# 6. Execute consolidated CI/CD suite (all 11 quality and governance gates)
 pnpm run verify:all
 # or via npx: npx aisdlc verify all
 # or with structured JSON output for AI agents / CI pipelines: npx aisdlc verify all --json
@@ -189,18 +189,19 @@ npx aisdlc sdd integrate --auto
 |---|---|---|---|
 | `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository structure, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`), CI/CD pipelines (`--ci <github\|gitlab\|azure\|bitbucket>`), AI agent rules (`--agents <all\|cursor\|claude\|antigravity\|copilot\|mcp\|none>`), and architecture templates (`--arch <minimal\|full\|none>`). Supports `--dry-run`, `--json`, and interactive console wizard |
 | `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry Setup** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
-| `npx aisdlc mcp` / `npx @aisdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 20 typed tools (including `new`, `verify`, `report`) and 5 canonical resources |
+| `npx aisdlc mcp` / `npx @aisdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 23 typed tools (including `new`, `verify`, `report`) and 5 canonical resources |
 | `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | **SDD Scaffolding** | Generates `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` sidecar (`HOF-*`) with SHA-256 digests |
 | `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancy** | Audits lexical collisions and requirement overlaps before coding (`--json`) |
 | `npx aisdlc verify friction [change]` | - | **Progressive Friction** | Validates Anti-Bypass rules and thresholds according to risk profile (`patch`/`standard`/`critical`, `--json`) |
 | `npx aisdlc git plan` | `pnpm run git:plan` | **Git Planning** | Renders visual branch hierarchy tree before starting work |
 | `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Git 4-Tier Branching** | Resolves version and cascade-creates: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
 | `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | **Git Governance** | Validates strict naming rules for any branch according to its Tier (1 to 4) |
-| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Unified Pre-Flight** | Syncs Gherkin to `.feature`, updates PDaC SHA-256 digests, audits security, and checks Quality Gates |
-| `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Structural Compliance** | Validates Markdown artifacts against canonical JSON schemas (Draft 2020-12, `--json`) |
+| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Unified Pre-Flight** | Syncs Gherkin to `.feature`, updates PDaC SHA-256 digests, audits security, and checks all 11 Quality Gates |
+| `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Structural Compliance** | Validates Markdown artifacts and `handoff.yaml` sidecars against canonical JSON schemas (Draft 2020-12, `--json`) |
 | `npx aisdlc verify pdac [--json]` | `pnpm run verify:pdac` | **Cryptographic Integrity** | Detects drift in PDaC graph comparing SHA-256 hashes (`--json`) |
 | `npx aisdlc verify quality [--json]` | `pnpm run verify:quality` | **Code Release Gate** | Evaluates Cyclomatic Complexity ($\le 10$), Cognitive ($\le 15$), and Maintainability ($\ge 50$) with `--json` |
-| `npx aisdlc verify security [options]` | `pnpm run verify:security` | **Shift-Left Security (Gate 9)** | Unified secret verification (Gitleaks) and deterministic SAST (OWASP Top 10, `--json`, exit code 4 on leaks) |
+| `npx aisdlc verify gherkin [--json]` | - | **BDD Synchronization** | Verifies `.feature` files match specification Gherkin scenarios with identical hashes (`--json`) |
+| `npx aisdlc verify security [options]` | `pnpm run verify:security` | **Shift-Left Security (Gate 11)** | Unified secret verification (Gitleaks) and deterministic SAST (OWASP Top 10, `--json`, exit code 4 on leaks) |
 | `npx aisdlc verify secrets [options]` | `pnpm run verify:secrets` | **Secret Scanning** | Deterministic detection of credentials, API keys, and Shannon entropy with Git diff support, `--json`, and exitCode 4 |
 | `npx aisdlc verify sast [options]` | `pnpm run verify:sast` | **SAST Security** | Deterministic detection of AI-generated vulnerable patterns (SQLi, exec, eval, SSRF, `--json`) |
 | `npx aisdlc verify testing [--json]` | `pnpm run verify:testing` | **Testing Audit** | Verifies 100% test coverage for requirements and tasks with physical disk tests (`--json`) |
@@ -208,7 +209,7 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc verify governance [--json]` | `pnpm run verify:governance` | **Task Governance** | Audits task autonomy modes (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc., supports `--json`) |
 | `npx aisdlc verify licenses [options]` | `pnpm run verify:licenses` | **IP / OSS Governance & SCA** | Dynamic dependency scan, CycloneDX 1.5 SBOM, and legal attribution against `license-policy.yaml` (`--json`) |
 | `npx aisdlc sdd verify` | - | **SDD Compliance** | Audits active changes for specification compliance and valid sidecars |
-| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 9 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
+| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 11 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
 | `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship) for PRs (supports `--json`) |
 | `npx aisdlc sdd integrate [--auto]` | - | **Baseline Promotion** | Promotes requirements to `active`, links architecture, marks proposal `applied`, and archives change |
 | `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Release Summary** | Computes DIR per model/human, defect density, and rework costs (`RELEASE_KPIS_<release>.md`, supports `--json`) |
@@ -499,12 +500,12 @@ Verify code meets quality thresholds in `quality-policy.yaml`:
    - **Architecture (Midstream)**: arc42 / NAF v4 views (`CMP-*`, `ADR-*`, `SEC-ENC-*`).
    - **Testing (Downstream)**: BDD/Gherkin suites (`.feature`) and unit tests.
 
-2. **Consolidated CI/CD Suite Execution (All 9 Quality Gates)**:
+2. **Consolidated CI/CD Suite Execution (All 11 Quality Gates)**:
    ```bash
    pnpm run verify:all
    # or: npx aisdlc verify all
    ```
-   *Gates evaluated*: 1) Quality Gate (AST Complexity & Cleanliness), 2) 360° Traceability (RTM), 3) Task Governance & Autonomy, 4) Test Coverage (Reqs & Tasks), 5) Open Source Licenses & SCA, 6) PDaC Cryptographic Integrity & Drift, 7) JSON Schemas Compliance, 8) Duplicate Check (Shift-Left Gate), 9) Shift-Left Security (Secret Scanning & SAST).
+   *Gates evaluated*: 1) Quality Gate (AST Complexity & Cleanliness), 2) 360° Traceability (RTM), 3) Task Governance & Autonomy, 4) Test Coverage (Reqs & Tasks), 5) BDD Gherkin Synchronization, 6) Open Source Licenses & SCA, 7) PDaC Cryptographic Integrity & Drift, 8) JSON Schemas Compliance (including `handoff.yaml` sidecars), 9) Duplicate Check (Shift-Left Gate), 10) Progressive Friction (Risk Profile Gates), 11) Shift-Left Security (Secret Scanning & SAST).
 
 3. **Pull Request and Human Approval**:
    - PR is opened from task branch to feature branch, and onward to release branch.
@@ -615,7 +616,7 @@ npx aisdlc verify licenses --tool trivy --sbom reports/trivy-sbom.cdx.json
 
 AI-SDLC implements deterministic defense-in-depth to eliminate exposed credentials and vulnerable code patterns common in LLM-generated code.
 
-### 1. Gate 9: Deterministic Secret Detection (`verify secrets`)
+### 1. Gate 11: Deterministic Secret Detection (`verify secrets`)
 
 Scans the repository for credentials, API keys, tokens, or private certificates before code reaches remote repositories:
 - **Zero-Dependency Hybrid Engine**:
@@ -664,7 +665,7 @@ npx aisdlc verify secrets --diff --base origin/main
 pnpm run verify:sast
 # or: npx aisdlc verify sast
 
-# 5. Consolidated pre-flight (includes Gate 9 secrets & SAST)
+# 5. Consolidated pre-flight (includes Gate 11 secrets & SAST)
 pnpm run check
 ```
 
@@ -708,13 +709,13 @@ AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@aisdlc/
 
 ### 1. High-Level Workflows
 - **`new`**: Initializes a project or adopts AI-SDLC in an existing repo, configuring folders, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`), and CI templates (`github`, `gitlab`, `azure`, `bitbucket`).
-- **`verify`**: Runs all 9 deterministic Quality Gates simultaneously (`quality`, `traceability`, `governance`, `licenses`, `schemas`, `duplicates`, `security`, `testing`, `pdac`).
+- **`verify`**: Runs all 11 deterministic Quality Gates simultaneously (`quality`, `traceability`, `governance`, `testing`, `gherkin`, `licenses`, `pdac`, `schemas`, `duplicates`, `friction`, `security`).
 - **`report`**: Concurrently generates interactive HTML dashboard (`reports/dashboard.html`) and Markdown quality report (`reports/QUALITY_REPORT.md`).
 
-### 2. Complete Tools (20 Tools) and Resources (5 Resources)
-- **SDD Lifecycle**: `sdd_init`, `sdd_new`, `sdd_deposit`, `sdd_integrate`.
-- **Individual Quality Gates**: `verify_quality`, `verify_traceability`, `verify_governance`, `verify_licenses`, `verify_schemas`, `verify_duplicates`, `verify_security`, `verify_testing`, `verify_pdac`.
-- **Reports & KPIs**: `report_markdown`, `report_dashboard`, `kpi_pr`, `git_detect_author`.
+### 2. Complete Tools (23 Tools) and Resources (5 Resources)
+- **SDD Lifecycle**: `sdd_init`, `sdd_new`, `sdd_deposit`, `sdd_integrate`, `get_active_handoff`.
+- **Individual Quality Gates**: `verify_quality`, `verify_traceability`, `verify_governance`, `verify_licenses`, `verify_schemas`, `verify_duplicates`, `verify_friction`, `verify_security`, `verify_testing`, `verify_pdac`.
+- **Reports & KPIs**: `report_markdown`, `report_dashboard`, `kpi_pr`, `kpi_release`, `git_detect_author`.
 - **Canonical Resources (`aisdlc://`)**: `aisdlc://policies/quality`, `aisdlc://policies/licenses`, `aisdlc://changes/active`, `aisdlc://changes/completed`, `aisdlc://status/summary`.
 
 ### 3. IDE and MCP Client Configuration
