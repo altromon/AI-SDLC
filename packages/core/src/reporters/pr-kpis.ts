@@ -63,14 +63,13 @@ function accumulateRecord(target: AuthorKpiSummary, record: CommitKpiRecord): vo
 }
 
 /**
- * Aggregates all commit KPIs in the revision range of a Pull Request.
+ * Aggregates a collection of commit KPI records into a unified PR KPI aggregation.
  */
-export function aggregatePrKpis(
-  baseRef: string,
-  headRef: string = 'HEAD',
-  options: { cwd?: string } = {}
+export function aggregateCommitKpiRecords(
+  records: CommitKpiRecord[],
+  baseRef: string = 'main',
+  headRef: string = 'HEAD'
 ): PrKpiAggregation {
-  const records = extractCommitKpisFromRange(baseRef, headRef, options);
   const humanSummary = createEmptySummary();
   const byModel: Record<string, AuthorKpiSummary> = {};
 
@@ -100,6 +99,9 @@ export function aggregatePrKpis(
     }
   }
 
+  const totalTokens = totalPrompt + totalCompletion;
+  const estimatedCostUsd = calculateEstimatedCost(totalPrompt, totalCompletion);
+
   return {
     baseRef,
     headRef,
@@ -109,13 +111,25 @@ export function aggregatePrKpis(
     totalActiveTimeSeconds: totalActiveTime,
     totalPromptTokens: totalPrompt,
     totalCompletionTokens: totalCompletion,
-    totalTokens: totalPrompt + totalCompletion,
-    estimatedCostUsd: calculateEstimatedCost(totalPrompt, totalCompletion),
+    totalTokens,
+    estimatedCostUsd,
     humanSummary,
     byModel,
     isBugPr,
     commitRecords: records,
   };
+}
+
+/**
+ * Aggregates all commit KPIs in the revision range of a Pull Request.
+ */
+export function aggregatePrKpis(
+  baseRef: string,
+  headRef: string = 'HEAD',
+  options: { cwd?: string } = {}
+): PrKpiAggregation {
+  const records = extractCommitKpisFromRange(baseRef, headRef, options);
+  return aggregateCommitKpiRecords(records, baseRef, headRef);
 }
 
 function formatMinutes(seconds: number): string {

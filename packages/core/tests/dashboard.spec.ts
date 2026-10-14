@@ -121,6 +121,46 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(history[0].defectDensity).toBe(0.43);
   });
 
+  it('should discover historical KPIs in subdirectories when root reports/releases is absent or empty', () => {
+    const subProjDir = path.join(tempDir, 'subprojects', 'app1', 'reports', 'releases');
+    fs.mkdirSync(subProjDir, { recursive: true });
+
+    const mockReport = {
+      releaseBranch: 'release/v2.0.0',
+      baseBranch: 'main',
+      generatedAt: '2026-10-01T12:00:00Z',
+      totalCommits: 8,
+      totalLinesAdded: 1200,
+      totalLinesDeleted: 100,
+      totalKloc: 1.3,
+      totalBugs: 0,
+      globalDefectDensity: 0,
+      totalTimeSeconds: 3600,
+      totalTokens: 80000,
+      totalCostUsd: 1.5,
+      reworkTimeSeconds: 0,
+      reworkTokens: 0,
+      reworkCostUsd: 0,
+      reworkTimePercent: 0,
+      reworkTokensPercent: 0,
+      reworkCostPercent: 0,
+      authorStats: [],
+      bugList: [],
+    };
+
+    fs.writeFileSync(
+      path.join(subProjDir, 'release_v2.0.0.kpis.json'),
+      JSON.stringify(mockReport, null, 2),
+      'utf-8'
+    );
+
+    const subDirRoot = path.join(tempDir, 'subprojects');
+    const history = collectHistoricalKpis(subDirRoot);
+    expect(history.length).toBe(1);
+    expect(history[0].id).toBe('release/v2.0.0');
+    expect(history[0].kloc).toBe(1.3);
+  });
+
   it('should generate a complete, standalone, self-contained HTML dashboard', () => {
     const outputPath = path.join(tempDir, 'reports', 'test-dashboard.html');
     const result = generateDashboardReport({
@@ -150,6 +190,12 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(htmlContent).toContain('hideTooltip');
     expect(htmlContent).toContain('1000');
     expect(htmlContent).toContain('Code Coverage (Lines)');
+
+    // Verify branch filter and totalizer telemetry elements
+    expect(htmlContent).toContain('id="telemetry-branch-select"');
+    expect(htmlContent).toContain('Totalizador (Todas las ramas)');
+    expect(htmlContent).toContain('filterTelemetryByBranch');
+    expect(htmlContent).toContain('var telemetryData =');
 
     // Verify it is larger than 100KB due to bundled Cytoscape library
     expect(htmlContent.length).toBeGreaterThan(100000);

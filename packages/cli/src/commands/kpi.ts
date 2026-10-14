@@ -80,6 +80,23 @@ function printKpiReleaseError(err: unknown): void {
   console.error(pc.red(`\n✖ [ERROR] Failed to calculate Release KPIs: ${msg}\n`));
 }
 
+function executeKpiReleaseReport(
+  release: string,
+  baseBranch: string,
+  rootDir: string,
+  outputDir?: string
+): void {
+  const report = aggregateReleaseKpis(release, baseBranch, { cwd: rootDir });
+  const { markdownPath, jsonPath } = writeReleaseKpiReport(report, {
+    outputDir,
+    rootDir,
+  });
+  if (report.totalCommits === 0) {
+    console.warn(pc.yellow(`\n⚠ [WARNING] No commits found between '${baseBranch}' and '${release}'.`));
+  }
+  printReleaseKpiSummary(report, markdownPath, jsonPath);
+}
+
 export function runKpiRelease(options: KpiReleaseCliOptions): boolean {
   if (!options.release) {
     console.error(pc.red('\n✖ [ERROR] Release branch must be specified (--release <branch>).\n'));
@@ -91,15 +108,12 @@ export function runKpiRelease(options: KpiReleaseCliOptions): boolean {
 
   try {
     console.log(pc.cyan(`\n📊 [AI-SDLC Release KPI] Consolidating metrics for '${pc.bold(options.release)}'...`));
-    const report = aggregateReleaseKpis(options.release, baseBranch, { cwd: rootDir });
-
     if (options.json) {
+      const report = aggregateReleaseKpis(options.release, baseBranch, { cwd: rootDir });
       console.log(JSON.stringify(report, null, 2));
       return true;
     }
-
-    const { markdownPath, jsonPath } = writeReleaseKpiReport(report, { outputDir: options.output });
-    printReleaseKpiSummary(report, markdownPath, jsonPath);
+    executeKpiReleaseReport(options.release, baseBranch, rootDir, options.output);
     return true;
   } catch (err: unknown) {
     printKpiReleaseError(err);

@@ -4,7 +4,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { CommitKpiRecord, extractCommitKpisFromRange } from '../git/trailers.js';
+import { CommitKpiRecord, extractCommitKpisFromRange, resolveGitRef } from '../git/trailers.js';
 
 export interface ModelDefectStats {
   authorOrModel: string;
@@ -170,7 +170,10 @@ export function aggregateReleaseKpis(
   baseBranch: string = 'main',
   options: { cwd?: string } = {}
 ): ReleaseKpiReport {
-  const records = extractCommitKpisFromRange(baseBranch, releaseBranch, options);
+  const cwd = options.cwd || process.cwd();
+  const resolvedRelease = resolveGitRef(cwd, releaseBranch);
+  const resolvedBase = resolveGitRef(cwd, baseBranch);
+  const records = extractCommitKpisFromRange(resolvedBase, resolvedRelease, options);
   const statsMap: Record<string, ModelDefectStats> = {};
   const bugList: BugRecordSummary[] = [];
   const totals: CommitTotals = { linesAdded: 0, linesDeleted: 0, time: 0, tokens: 0, reworkTime: 0, reworkTokens: 0 };
@@ -188,8 +191,8 @@ export function aggregateReleaseKpis(
   const ratios = computeReworkRatios(totals.time, totals.tokens, totalCostUsd, totals.reworkTime, totals.reworkTokens, reworkCostUsd);
 
   return {
-    releaseBranch,
-    baseBranch,
+    releaseBranch: resolvedRelease,
+    baseBranch: resolvedBase,
     generatedAt: new Date().toISOString(),
     totalCommits: records.length,
     totalLinesAdded: totals.linesAdded,
@@ -270,9 +273,11 @@ export function formatReleaseKpiMarkdown(report: ReleaseKpiReport): string {
  */
 export function writeReleaseKpiReport(
   report: ReleaseKpiReport,
-  options: { outputDir?: string } = {}
+  options: { outputDir?: string; rootDir?: string } = {}
 ): { markdownPath: string; jsonPath: string } {
-  const root = options.outputDir || path.join(process.cwd(), 'reports', 'releases');
+  const root =
+    options.outputDir ||
+    (options.rootDir ? path.join(options.rootDir, 'reports', 'releases') : path.join(process.cwd(), 'reports', 'releases'));
   if (!fs.existsSync(root)) {
     fs.mkdirSync(root, { recursive: true });
   }

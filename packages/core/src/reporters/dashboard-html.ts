@@ -31,6 +31,8 @@ export interface DashboardMetricsData {
   history: DashboardHistoricalKpi[];
   activePrKpi: PrKpiAggregation | null;
   activeBranch: string;
+  branchTelemetries?: Record<string, PrKpiAggregation>;
+  totalTelemetry?: PrKpiAggregation | null;
 }
 
 const GRAPH_LEGEND_HTML = `
@@ -386,13 +388,40 @@ export function renderManualsTab(manuals: ManualsVerificationResult): string {
   ].join('\n');
 }
 
-function renderTelemetryCardsHtml(kpi: PrKpiAggregation): string {
+function renderBranchOption(b: string, activeBranch: string): string {
+  const isAct = b === activeBranch ? ' (Rama activa)' : '';
+  return `  <option value="${escapeHtml(b)}">${escapeHtml(b)}${isAct}</option>`;
+}
+
+function renderTelemetrySelect(options: string): string {
+  return [
+    `  <div style="display: flex; align-items: center; gap: 0.6rem;">`,
+    `    <label for="telemetry-branch-select" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Filtrar por Rama:</label>`,
+    `    <select id="telemetry-branch-select" onchange="filterTelemetryByBranch(this.value)" class="form-select" style="background: var(--panel-bg, #1e293b); color: var(--text-main, #f8fafc); border: 1px solid var(--border-color, #475569); border-radius: 6px; padding: 0.4rem 0.8rem; font-size: 0.85rem; cursor: pointer; outline: none; font-weight: 500;">`,
+    options,
+    `    </select>`,
+    `  </div>`,
+  ].join('\n');
+}
+
+function renderTelemetryFilterBarHtml(branches: string[], activeBranch: string): string {
+  const options = [
+    `  <option value="__total__" selected>🌟 Totalizador (Todas las ramas)</option>`,
+    ...branches.map((b) => renderBranchOption(b, activeBranch)),
+  ].join('\n');
+  const selectHtml = renderTelemetrySelect(options);
+  const badgeHtml = `  <div id="telemetry-badge-container"><span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 4px;">Vista: Totalizador Global</span></div>`;
+
+  return `<div class="telemetry-filter-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">\n${selectHtml}\n${badgeHtml}\n</div>`;
+}
+
+function renderTelemetryCardsHtml(kpi: PrKpiAggregation, displayLabel: string = 'Totalizador'): string {
   return [
     `<div class="grid-cards">`,
-    `  <div class="metric-card"><span class="title">Commits in Active Branch</span><span class="value">${kpi.totalCommits}</span><span class="subtitle">+${kpi.linesAdded} / -${kpi.linesDeleted} lines</span></div>`,
-    `  <div class="metric-card"><span class="title">Active Development Time</span><span class="value">${Math.round(kpi.totalActiveTimeSeconds / 60)}m</span><span class="subtitle">${kpi.totalActiveTimeSeconds}s accumulated</span></div>`,
-    `  <div class="metric-card"><span class="title">Consumed Tokens</span><span class="value">${kpi.totalTokens.toLocaleString('en-US')}</span><span class="subtitle">In: ${kpi.totalPromptTokens.toLocaleString()} | Out: ${kpi.totalCompletionTokens.toLocaleString()}</span></div>`,
-    `  <div class="metric-card"><span class="title">Estimated Compute Cost</span><span class="value">$${kpi.estimatedCostUsd.toFixed(2)}</span><span class="subtitle">Weighted USD</span></div>`,
+    `  <div class="metric-card"><span class="title">Commits (<span id="card-branch-label">${escapeHtml(displayLabel)}</span>)</span><span class="value" id="card-commits">${kpi.totalCommits}</span><span class="subtitle" id="card-lines">+${kpi.linesAdded} / -${kpi.linesDeleted} lines</span></div>`,
+    `  <div class="metric-card"><span class="title">Active Development Time</span><span class="value" id="card-time">${Math.round(kpi.totalActiveTimeSeconds / 60)}m</span><span class="subtitle" id="card-time-seconds">${kpi.totalActiveTimeSeconds}s accumulated</span></div>`,
+    `  <div class="metric-card"><span class="title">Consumed Tokens</span><span class="value" id="card-tokens">${kpi.totalTokens.toLocaleString('en-US')}</span><span class="subtitle" id="card-tokens-detail">In: ${kpi.totalPromptTokens.toLocaleString()} | Out: ${kpi.totalCompletionTokens.toLocaleString()}</span></div>`,
+    `  <div class="metric-card"><span class="title">Estimated Compute Cost</span><span class="value" id="card-cost">$${kpi.estimatedCostUsd.toFixed(2)}</span><span class="subtitle">Weighted USD</span></div>`,
     `</div>`,
   ].join('\n');
 }
@@ -425,35 +454,47 @@ function renderHumanTelemetryRow(human: AuthorKpiSummary): string {
   ].join('');
 }
 
-function renderTotalBranchRow(kpi: PrKpiAggregation): string {
+function renderTotalBranchRow(kpi: PrKpiAggregation, isTotal: boolean = false): string {
   const mins = Math.round(kpi.totalActiveTimeSeconds / 60);
   const tokens = kpi.totalTokens.toLocaleString('en-US');
   const cost = kpi.estimatedCostUsd.toFixed(2);
+  const label = isTotal ? 'TOTAL REPOSITORIO' : 'TOTAL RAMA';
   return [
     `<tr style="font-weight: bold; background: rgba(255,255,255,0.05);">`,
-    `  <td>TOTAL BRANCH</td><td>—</td><td>${kpi.totalCommits}</td><td>+${kpi.linesAdded} / -${kpi.linesDeleted}</td>`,
+    `  <td>${label}</td><td>—</td><td>${kpi.totalCommits}</td><td>+${kpi.linesAdded} / -${kpi.linesDeleted}</td>`,
     `  <td>${mins}m</td><td>${tokens}</td><td>$${cost} USD</td>`,
     `</tr>`,
   ].join('');
 }
 
-function renderActiveTelemetrySection(kpi: PrKpiAggregation, branch: string): string {
-  const cardsHtml = renderTelemetryCardsHtml(kpi);
+function renderTelemetryTable(kpi: PrKpiAggregation, displayLabel: string): string {
   const humanRow = renderHumanTelemetryRow(kpi.humanSummary);
   const modelRows = Object.entries(kpi.byModel).map(([m, s]: [string, AuthorKpiSummary]) => renderModelRow(m, s)).join('\n');
-  const totalRow = renderTotalBranchRow(kpi);
+  const totalRow = renderTotalBranchRow(kpi, displayLabel === 'Totalizador');
+  const titleLabel = displayLabel === 'Totalizador' ? 'Totalizador (Todas las ramas)' : displayLabel;
 
   return [
-    cardsHtml,
     `<div class="chart-container">`,
-    `  <h3>Telemetry Breakdown by Author and Model (${branch || 'HEAD'})</h3>`,
-    `  <table class="data-table"><thead><tr><th>Entity / Model</th><th>Type</th><th>Commits</th><th>Lines (+/-)</th><th>Active Time</th><th>Consumed Tokens</th><th>Estimated Cost ($ USD)</th></tr></thead><tbody>`,
+    `  <h3>Telemetry Breakdown by Author and Model (<span id="table-branch-label">${escapeHtml(titleLabel)}</span>)</h3>`,
+    `  <table class="data-table"><thead><tr><th>Entity / Model</th><th>Type</th><th>Commits</th><th>Lines (+/-)</th><th>Active Time</th><th>Consumed Tokens</th><th>Estimated Cost ($ USD)</th></tr></thead><tbody id="telemetry-table-tbody">`,
     humanRow,
     modelRows,
     totalRow,
     `  </tbody></table>`,
     `</div>`,
   ].join('\n');
+}
+
+function renderActiveTelemetrySection(
+  kpi: PrKpiAggregation,
+  displayLabel: string,
+  branches: string[],
+  activeBranch: string
+): string {
+  const filterBarHtml = renderTelemetryFilterBarHtml(branches, activeBranch);
+  const cardsHtml = renderTelemetryCardsHtml(kpi, displayLabel);
+  const tableHtml = renderTelemetryTable(kpi, displayLabel);
+  return `${filterBarHtml}\n${cardsHtml}\n${tableHtml}`;
 }
 
 function renderReleaseHistoryRow(h: DashboardHistoricalKpi): string {
@@ -465,12 +506,29 @@ function renderReleaseHistoryRow(h: DashboardHistoricalKpi): string {
   ].join('');
 }
 
+function renderHistoricalKpisTable(history: DashboardHistoricalKpi[]): string {
+  if (history.length === 0) {
+    return `<p style="color: var(--text-muted); font-size: 0.85rem;">No consolidated release reports recorded yet in <code>reports/releases/*.kpis.json</code>.</p>`;
+  }
+  const rows = history.map(renderReleaseHistoryRow).join('\n');
+  return `<table class="data-table"><thead><tr><th>Release</th><th>Date</th><th>KLoC</th><th>Commits</th><th>Confirmed Bugs</th><th>DIR (Bugs/KLoC)</th><th>Rework (%)</th><th>Cost ($ USD)</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function resolveBranchFilterKeys(metricsData: DashboardMetricsData): string[] {
+  const keys = Object.keys(metricsData.branchTelemetries || {});
+  if (metricsData.activeBranch && metricsData.activeBranch !== 'HEAD' && !keys.includes(metricsData.activeBranch)) {
+    keys.unshift(metricsData.activeBranch);
+  }
+  return keys;
+}
+
 function renderKpisTabHtml(metricsData: DashboardMetricsData): string {
-  const telemetryHtml = metricsData.activePrKpi ? renderActiveTelemetrySection(metricsData.activePrKpi, metricsData.activeBranch) : '';
-  const historyRows = metricsData.history.map(renderReleaseHistoryRow).join('\n');
-  const historyContent = metricsData.history.length > 0
-    ? `<table class="data-table"><thead><tr><th>Release</th><th>Date</th><th>KLoC</th><th>Commits</th><th>Confirmed Bugs</th><th>DIR (Bugs/KLoC)</th><th>Rework (%)</th><th>Cost ($ USD)</th></tr></thead><tbody>${historyRows}</tbody></table>`
-    : `<p style="color: var(--text-muted); font-size: 0.85rem;">No consolidated release reports recorded yet in <code>reports/releases/*.kpis.json</code>.</p>`;
+  const displayKpi = metricsData.totalTelemetry || metricsData.activePrKpi;
+  const branchKeys = resolveBranchFilterKeys(metricsData);
+  const telemetryHtml = displayKpi
+    ? renderActiveTelemetrySection(displayKpi, 'Totalizador', branchKeys, metricsData.activeBranch)
+    : '<p style="color: var(--text-muted); font-size: 0.85rem;">No telemetry recorded yet in this workspace.</p>';
+  const historyContent = renderHistoricalKpisTable(metricsData.history);
 
   return [
     `    <div id="tab-kpis" class="tab-panel">`,
@@ -494,18 +552,31 @@ function renderTaskSidebarHtml(): string {
   ].join('\n');
 }
 
+function buildTelemetryMap(metricsData: DashboardMetricsData): Record<string, PrKpiAggregation> {
+  const map: Record<string, PrKpiAggregation> = {};
+  const total = metricsData.totalTelemetry || metricsData.activePrKpi;
+  if (total) map['__total__'] = total;
+  Object.assign(map, metricsData.branchTelemetries || {});
+  if (metricsData.activePrKpi && metricsData.activeBranch && !map[metricsData.activeBranch]) {
+    map[metricsData.activeBranch] = metricsData.activePrKpi;
+  }
+  return map;
+}
+
 function renderDashboardScripts(graphData: GraphElementsResult, metricsData: DashboardMetricsData): string {
-  const cytoscapeScript = getCytoscapeScript();
   const elementsJson = safeJsonForScript(graphData.elements);
   const govTasksJson = safeJsonForScript(metricsData.gov.tasks || []);
   const allManuals = [...metricsData.manuals.userManuals, ...metricsData.manuals.productionManuals];
   const manualsJson = safeJsonForScript(allManuals);
+  const telemetryJson = safeJsonForScript(buildTelemetryMap(metricsData));
+
   return [
-    `  <script>${cytoscapeScript}</script>`,
+    `  <script>${getCytoscapeScript()}</script>`,
     `  <script>`,
     `    var elements = ${elementsJson};`,
     `    var govTasks = ${govTasksJson};`,
     `    var manualsData = ${manualsJson};`,
+    `    var telemetryData = ${telemetryJson};`,
     DASHBOARD_CLIENT_SCRIPT,
     `  </script>`,
   ].join('\n');
