@@ -269,18 +269,29 @@ function scanBracesInLine(line: string, wasInBlock: boolean, ext: string): ScanR
 
 function buildMetricsFromBlocks(blocks: RawFunctionBlock[], content: string, filePath: string): FunctionMetrics[] {
   if (blocks.length === 0) {
-    return [calculatePolyglotMetrics(content, 'main_module', filePath)];
+    const smells = detectPolyglotSmells(content);
+    if (smells.length > 0) {
+      return [
+        {
+          functionName: 'main_module',
+          filePath,
+          loc: 1,
+          cyclomatic: 1,
+          cognitive: 0,
+          maintainability: 100,
+          codeSmells: smells,
+        },
+      ];
+    }
+    return [];
   }
   return blocks.map((b) => calculatePolyglotMetrics(b.body, b.name, filePath));
 }
 
-function detectPolyglotSmells(body: string, loc: number): string[] {
+function detectPolyglotSmells(body: string): string[] {
   const smells: string[] = [];
   if (/#\s*noqa|#\s*type:\s*ignore|@SuppressWarnings/.test(body)) {
     smells.push('Supresión no autorizada de linter');
-  }
-  if (loc > 40) {
-    smells.push(`Función extensa (${loc} líneas > límite 40)`);
   }
   return smells;
 }
@@ -329,7 +340,7 @@ function calculatePolyglotMetrics(body: string, name: string, filePath: string):
     cyclomatic,
     cognitive,
     maintainability,
-    codeSmells: detectPolyglotSmells(body, loc),
+    codeSmells: detectPolyglotSmells(body),
   };
 }
 

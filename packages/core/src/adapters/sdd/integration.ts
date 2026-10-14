@@ -25,58 +25,56 @@ interface TaskParsed {
   status?: string;
 }
 
-export function parseTasksFromContent(content: string): TaskParsed[] {
+function parseFrontmatterTasks(frontmatter: Record<string, unknown> | null): TaskParsed[] {
+  if (!frontmatter || !Array.isArray(frontmatter.tasks)) return [];
   const tasks: TaskParsed[] = [];
-  const { frontmatter } = parseFrontmatter(content);
-
-  if (frontmatter && Array.isArray(frontmatter.tasks)) {
-    for (const t of frontmatter.tasks as any[]) {
-      if (t && typeof t === 'object' && t.id) {
-        tasks.push({
-          id: String(t.id),
-          title: t.title ? String(t.title) : undefined,
-          status: t.status ? String(t.status).toUpperCase() : undefined,
-        });
-      }
+  for (const t of frontmatter.tasks as Record<string, unknown>[]) {
+    if (t && typeof t === 'object' && t.id) {
+      tasks.push({
+        id: String(t.id),
+        title: t.title ? String(t.title) : undefined,
+        status: t.status ? String(t.status).toUpperCase() : undefined,
+      });
     }
   }
-
-  // Also match markdown task checkboxes if no frontmatter tasks found
-  if (tasks.length === 0) {
-    const lines = content.split('\n');
-    let index = 1;
-    for (const line of lines) {
-      const trimmed = line.trim();
-      const match = trimmed.match(/^-\s+\[([ xX])\]\s+(?:`([^`]+)`\s*:?\s*)?(.*)$/);
-      if (match) {
-        const isDone = match[1].toLowerCase() === 'x';
-        const taskId = match[2] || `TSK-${String(index).padStart(3, '0')}`;
-        tasks.push({
-          id: taskId,
-          title: match[3],
-          status: isDone ? 'COMPLETED' : 'PENDING',
-        });
-        index++;
-      }
-    }
-  }
-
   return tasks;
+}
+
+function parseMarkdownCheckboxTasks(content: string): TaskParsed[] {
+  const tasks: TaskParsed[] = [];
+  const lines = content.split('\n');
+  let index = 1;
+  for (const line of lines) {
+    const match = line.trim().match(/^-\s+\[([ xX])\]\s+(?:`([^`]+)`\s*:?\s*)?(.*)$/);
+    if (match) {
+      const isDone = match[1].toLowerCase() === 'x';
+      const taskId = match[2] || `TSK-${String(index).padStart(3, '0')}`;
+      tasks.push({
+        id: taskId,
+        title: match[3],
+        status: isDone ? 'COMPLETED' : 'PENDING',
+      });
+      index++;
+    }
+  }
+  return tasks;
+}
+
+export function parseTasksFromContent(content: string): TaskParsed[] {
+  const { frontmatter } = parseFrontmatter(content);
+  const tasks = parseFrontmatterTasks(frontmatter);
+  return tasks.length > 0 ? tasks : parseMarkdownCheckboxTasks(content);
 }
 
 export function appendRevisionHistoryRow(
   body: string,
   entry: { version: string; date: string; author: string; description: string; reference: string }
 ): string {
-  // Check if reference already recorded in table
-  if (body.includes(entry.reference)) {
-    return body;
-  }
+  if (body.includes(entry.reference)) return body;
 
   const tableHeaderMatch = body.match(
     /(\|\s*Versi[oó]n\s*\|\s*Fecha\s*\|\s*Autor[^\n]*\r?\n\|[\s\-:|]+\r?\n)/i
   );
-
   const newRow = `| **${entry.version}** | ${entry.date} | ${entry.author} | ${entry.description} | ${entry.reference} |\n`;
 
   if (tableHeaderMatch && tableHeaderMatch.index !== undefined) {
@@ -84,14 +82,11 @@ export function appendRevisionHistoryRow(
     return body.substring(0, insertPos) + newRow + body.substring(insertPos);
   }
 
-  // If table header not found, append section at the end
   const newSection = `\n\n## Historial de Revisiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n${newRow}`;
   return body + newSection;
 }
 
-
 // --- Canonical Artifact Materialization ---
-
 
 interface SpecCatalogNewItem {
   id: string;
@@ -111,59 +106,70 @@ export interface SpecCatalogScope {
   affectedItems: SpecCatalogAffectedItem[];
 }
 
-/**
- * Parses a spec.md using the canonical template format to extract:
- * - Section 1.1: existing catalog items that are MODIFIED or DEPRECATED
- * - Section 1.2: new catalog items to be physically materialized
- *
- * Returns empty arrays when the spec uses the simplified format (no 1.1 / 1.2 headings).
- */
-export function parseSpecCatalogScope(specContent: string): SpecCatalogScope {
-  const newItems: SpecCatalogNewItem[] = [];
-  const affectedItems: SpecCatalogAffectedItem[] = [];
-
-  // Locate section 1.1 and 1.2 blocks by heading
-  const section11Match = specContent.match(/###\s+1\.1\s+Affected Existing Catalog Items[^\n]*\n([\s\S]*?)(?=\n###\s+1\.2|\n---|\n##\s|$)/i);
-  const section12Match = specContent.match(/###\s+1\.2\s+New Catalog Items Introduced[^\n]*\n([\s\S]*?)(?=\n---|\n##\s|\n###\s+[^1]|$)/i);
-
-  // Parse section 1.1 — table rows: | Category | `ID` | `ACTION` | Description |
-  if (section11Match) {
-    const tableRows = section11Match[1].split('\n').filter(l => l.trim().startsWith('|'));
-    for (const row of tableRows) {
-      // Skip header and separator rows
-      if (/^\|\s*:?-+:?\s*\|/.test(row) || /Catalog Category/.test(row)) continue;
-      const cols = row.split('|').map(c => c.trim()).filter(Boolean);
-      if (cols.length < 3) continue;
-      const rawId = cols[1].replace(/`/g, '').trim();
-      const rawAction = cols[2].replace(/`/g, '').trim().toUpperCase();
-      if (!rawId || !rawAction) continue;
-      if (rawAction === 'MODIFIED' || rawAction === 'DEPRECATED') {
-        affectedItems.push({ id: rawId, action: rawAction as 'MODIFIED' | 'DEPRECATED', category: cols[0] });
-      }
+function parseAffectedCatalogItems(block?: string): SpecCatalogAffectedItem[] {
+  if (!block) return [];
+  const items: SpecCatalogAffectedItem[] = [];
+  const rows = block.split('\n').filter((l) => l.trim().startsWith('|'));
+  for (const row of rows) {
+    if (/^\|\s*:?-+:?\s*\|/.test(row) || /Catalog Category/.test(row)) continue;
+    const cols = row.split('|').map((c) => c.trim()).filter(Boolean);
+    if (cols.length < 3) continue;
+    const rawId = cols[1].replace(/`/g, '').trim();
+    const rawAction = cols[2].replace(/`/g, '').trim().toUpperCase();
+    if (rawId && (rawAction === 'MODIFIED' || rawAction === 'DEPRECATED')) {
+      items.push({ id: rawId, action: rawAction as 'MODIFIED' | 'DEPRECATED', category: cols[0] });
     }
   }
-
-  // Parse section 1.2 — table rows: | Category | `ID` | `target/dir/` | Scope |
-  if (section12Match) {
-    const tableRows = section12Match[1].split('\n').filter(l => l.trim().startsWith('|'));
-    for (const row of tableRows) {
-      if (/^\|\s*:?-+:?\s*\|/.test(row) || /Catalog Category/.test(row)) continue;
-      const cols = row.split('|').map(c => c.trim()).filter(Boolean);
-      if (cols.length < 3) continue;
-      const rawId = cols[1].replace(/`/g, '').trim();
-      const rawDir = cols[2].replace(/`/g, '').trim();
-      if (!rawId || !rawDir) continue;
-      newItems.push({ id: rawId, targetDir: rawDir, category: cols[0], scope: cols[3] || '' });
-    }
-  }
-
-  return { newItems, affectedItems };
+  return items;
 }
 
-/**
- * Writes a new canonical artifact file with valid frontmatter and empty revision table.
- * Only runs if the target file does not already exist (idempotent).
- */
+function parseNewCatalogItems(block?: string): SpecCatalogNewItem[] {
+  if (!block) return [];
+  const items: SpecCatalogNewItem[] = [];
+  const rows = block.split('\n').filter((l) => l.trim().startsWith('|'));
+  for (const row of rows) {
+    if (/^\|\s*:?-+:?\s*\|/.test(row) || /Catalog Category/.test(row)) continue;
+    const cols = row.split('|').map((c) => c.trim()).filter(Boolean);
+    if (cols.length < 3) continue;
+    const rawId = cols[1].replace(/`/g, '').trim();
+    const rawDir = cols[2].replace(/`/g, '').trim();
+    if (rawId && rawDir) {
+      items.push({ id: rawId, targetDir: rawDir, category: cols[0], scope: cols[3] || '' });
+    }
+  }
+  return items;
+}
+
+export function parseSpecCatalogScope(specContent: string): SpecCatalogScope {
+  const s11 = specContent.match(/###\s+1\.1\s+Affected Existing Catalog Items[^\n]*\n([\s\S]*?)(?=\n###\s+1\.2|\n---|\n##\s|$)/i);
+  const s12 = specContent.match(/###\s+1\.2\s+New Catalog Items Introduced[^\n]*\n([\s\S]*?)(?=\n---|\n##\s|\n###\s+[^1]|$)/i);
+
+  return {
+    affectedItems: parseAffectedCatalogItems(s11 ? s11[1] : undefined),
+    newItems: parseNewCatalogItems(s12 ? s12[1] : undefined),
+  };
+}
+
+const CANONICAL_TYPE_MAP: Record<string, string> = {
+  'product/requirements/': 'requirement',
+  'product/use-cases/': 'use-case',
+  'product/actors/': 'actor',
+  'product/business-rules/': 'business-rule',
+  'product/journeys/': 'journey',
+  'security/requirements/': 'security-requirement',
+  'architecture/': 'component',
+};
+
+function buildCanonicalInitialContent(item: SpecCatalogNewItem, changeId: string, author: string, date: string): string {
+  const normTarget = item.targetDir.endsWith('/') ? item.targetDir : `${item.targetDir}/`;
+  const artifactType = CANONICAL_TYPE_MAP[normTarget] || 'artifact';
+  const frontmatter = `id: ${item.id}\ntype: ${artifactType}\nstatus: draft\nversion: "1.0.0"\n`;
+  const title = item.scope || item.id;
+  const revisionRow = `| **1.0.0** | ${date} | ${author} | Creación inicial desde ${changeId} | ${changeId} |\n`;
+  const body = `# ${item.id}: ${title}\n\n## Historial de Revisiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n${revisionRow}`;
+  return `---\n${frontmatter}---\n${body}`;
+}
+
 function materializeCanonicalArtifact(
   rootDir: string,
   item: SpecCatalogNewItem,
@@ -175,39 +181,360 @@ function materializeCanonicalArtifact(
   if (fs.existsSync(targetPath)) return targetPath;
 
   fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-
-  const typeMap: Record<string, string> = {
-    'product/requirements/': 'requirement',
-    'product/use-cases/': 'use-case',
-    'product/actors/': 'actor',
-    'product/business-rules/': 'business-rule',
-    'product/journeys/': 'journey',
-    'security/requirements/': 'security-requirement',
-    'architecture/': 'component',
-  };
-  const artifactType = typeMap[item.targetDir] || 'artifact';
-  const frontmatter = `id: ${item.id}\ntype: ${artifactType}\nstatus: draft\nversion: "1.0.0"\n`;
-  const title = item.scope || item.id;
-  const revisionRow = `| **1.0.0** | ${date} | ${author} | Creación inicial desde ${changeId} | ${changeId} |\n`;
-  const body = `# ${item.id}: ${title}\n\n## Historial de Revisiones\n\n| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |\n| :--- | :--- | :--- | :--- | :--- |\n${revisionRow}`;
-
-  fs.writeFileSync(targetPath, `---\n${frontmatter}---\n${body}`, 'utf-8');
+  const initialContent = buildCanonicalInitialContent(item, changeId, author, date);
+  fs.writeFileSync(targetPath, initialContent, 'utf-8');
   return targetPath;
 }
 
 export function findChangeWorkspaceDir(rootDir: string, changeId: string): string | null {
-  const candidateDirs = [
-    path.join(rootDir, 'specs', 'changes', 'active', changeId),
-    path.join(rootDir, 'specs', changeId),
-    path.join(rootDir, 'openspec', 'changes', changeId),
-    path.join(rootDir, 'specs', 'changes', 'completed', changeId),
-  ];
+  const activeDir = path.join(rootDir, 'specs', 'changes', 'active', changeId);
+  if (fs.existsSync(activeDir)) return activeDir;
 
-  for (const dir of candidateDirs) {
-    if (fs.existsSync(dir)) return dir;
-  }
+  const completedDir = path.join(rootDir, 'specs', 'changes', 'completed', changeId);
+  if (fs.existsSync(completedDir)) return completedDir;
+
+  const openspecActive = path.join(rootDir, 'openspec', 'changes', changeId);
+  if (fs.existsSync(openspecActive)) return openspecActive;
 
   return null;
+}
+
+function checkTasksExecution(changeDir: string, changeId: string) {
+  const tasksFile = path.join(changeDir, 'tasks.md');
+  const allTasks: TaskParsed[] = [];
+  if (fs.existsSync(tasksFile)) {
+    allTasks.push(...parseTasksFromContent(fs.readFileSync(tasksFile, 'utf-8')));
+  }
+  const completedTasks = allTasks.filter((t) => t.status === 'COMPLETED').map((t) => t.id);
+  const pendingTasks = allTasks.filter((t) => t.status !== 'COMPLETED').map((t) => t.id);
+
+  if (pendingTasks.length > 0) {
+    return {
+      ok: false,
+      completedTasks,
+      pendingTasks,
+      error: `No se puede integrar el cambio '${changeId}' porque existen ${pendingTasks.length} tareas pendientes o bloqueadas (${pendingTasks.join(', ')}). Todas las tareas deben estar en COMPLETED.`,
+    };
+  }
+  return { ok: true, completedTasks, pendingTasks, error: null };
+}
+
+function resolveChangeHandoff(changeDir: string, changeId: string): ProductHandoff | null {
+  const sidecar = loadProductHandoffSidecar(changeDir);
+  if (sidecar) return sidecar;
+
+  const proposalFile = path.join(changeDir, 'proposal.md');
+  if (!fs.existsSync(proposalFile)) return null;
+
+  const propContent = fs.readFileSync(proposalFile, 'utf-8');
+  const { frontmatter } = parseFrontmatter(propContent);
+  const citations = Array.isArray(frontmatter.citations) ? (frontmatter.citations as NonNullable<ProductHandoff['citations']>) : [];
+  const reqs = citations
+    .map((c) => c.id || '')
+    .filter((id: string) => id.startsWith('FR-') || id.startsWith('QR-') || id.startsWith('CON-') || id.startsWith('SEC-REQ-'));
+
+  return {
+    id: `HOF-${changeId.toUpperCase()}`,
+    type: 'handoff',
+    changeId,
+    subgraph: { requirements: reqs },
+    citations,
+  };
+}
+
+function materializeNewCatalogArtifacts(changeDir: string, rootDir: string, changeId: string, author: string, date: string, errors: string[]) {
+  const created: string[] = [];
+  const specFile = path.join(changeDir, 'spec.md');
+  if (!fs.existsSync(specFile)) return created;
+
+  const specContent = fs.readFileSync(specFile, 'utf-8');
+  const { newItems } = parseSpecCatalogScope(specContent);
+  for (const item of newItems) {
+    try {
+      materializeCanonicalArtifact(rootDir, item, changeId, author, date);
+      created.push(item.id);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      errors.push(`Error materializando artefacto canónico '${item.id}': ${msg}`);
+    }
+  }
+  return created;
+}
+
+type CanonicalMap = Map<string, { file: string; frontmatter: Record<string, unknown>; body: string }>;
+
+function loadCanonicalArtifacts(rootDir: string): CanonicalMap {
+  const allMdFiles = walkMdFiles(rootDir);
+  const canonicalArtifacts: CanonicalMap = new Map();
+  for (const file of allMdFiles) {
+    const relFile = path.relative(rootDir, file).replace(/\\/g, '/');
+    if (relFile.includes('specs/changes/') || relFile.includes('templates/')) continue;
+    try {
+      const content = fs.readFileSync(file, 'utf-8');
+      const { frontmatter, body } = parseFrontmatter(content);
+      if (frontmatter.id) canonicalArtifacts.set(String(frontmatter.id), { file, frontmatter, body });
+    } catch {}
+  }
+  return canonicalArtifacts;
+}
+
+function writeUpdatedArtifact(file: string, frontmatter: Record<string, unknown>, body: string): void {
+  const yamlHeader = `---\n${yaml.dump(frontmatter, { indent: 2, lineWidth: -1 }).trim()}\n---\n`;
+  fs.writeFileSync(file, yamlHeader + body, 'utf-8');
+}
+
+function updateSingleCanonicalRequirement(
+  canonical: { file: string; frontmatter: Record<string, unknown>; body: string },
+  completedTasks: string[],
+  changeId: string,
+  date: string,
+  author: string
+): boolean {
+  const fm = canonical.frontmatter;
+  const isPending = fm.status !== 'active';
+  if (isPending) fm.status = 'active';
+
+  const taskDesc = completedTasks.length > 0 ? `Implementación verificada (${completedTasks.join(', ')})` : `Integración de especificación`;
+  const updatedBody = appendRevisionHistoryRow(canonical.body, {
+    version: String(fm.version || '1.0.0'),
+    date,
+    author,
+    description: taskDesc,
+    reference: changeId,
+  });
+
+  if (updatedBody !== canonical.body || isPending) {
+    writeUpdatedArtifact(canonical.file, fm, updatedBody);
+    return true;
+  }
+  return false;
+}
+
+function tryUpdateCanonicalRequirement(
+  canonical: { file: string; frontmatter: Record<string, unknown>; body: string },
+  reqId: string,
+  completedTasks: string[],
+  changeId: string,
+  date: string,
+  author: string,
+  errors: string[]
+): boolean {
+  try {
+    return updateSingleCanonicalRequirement(canonical, completedTasks, changeId, date, author);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    errors.push(`Error actualizando artefacto canónico '${reqId}': ${msg}`);
+    return false;
+  }
+}
+
+function updateRequirementsArtifacts(
+  targetReqs: string[],
+  createdArtifacts: string[],
+  canonicalArtifacts: CanonicalMap,
+  completedTasks: string[],
+  changeId: string,
+  date: string,
+  author: string,
+  errors: string[]
+): string[] {
+  const updated: string[] = [];
+  for (const reqId of targetReqs) {
+    if (createdArtifacts.includes(reqId)) continue;
+    const canonical = canonicalArtifacts.get(reqId);
+    if (canonical && tryUpdateCanonicalRequirement(canonical, reqId, completedTasks, changeId, date, author, errors)) {
+      updated.push(reqId);
+    }
+  }
+  return updated;
+}
+
+function isArchitectureComponentId(id?: string): boolean {
+  if (!id) return false;
+  return id.startsWith('CMP-') || id.startsWith('SEC-ENC-') || id.startsWith('ADR-');
+}
+
+function collectCitedComponents(citations?: ProductHandoff['citations']): string[] {
+  if (!citations) return [];
+  const cited: string[] = [];
+  for (const c of citations) {
+    const citeId = c.targetId || c.id;
+    if (isArchitectureComponentId(citeId)) cited.push(citeId!);
+  }
+  return cited;
+}
+
+function collectSatisfyingComponents(canonicalArtifacts: CanonicalMap, targetReqs: string[], cited: string[]): void {
+  for (const [artId, art] of canonicalArtifacts.entries()) {
+    if (!artId.startsWith('CMP-') || !art.frontmatter) continue;
+    const satisfies = Array.isArray(art.frontmatter['satisfies-requirements'])
+      ? (art.frontmatter['satisfies-requirements'] as string[])
+      : [];
+    if (targetReqs.some((r) => satisfies.includes(r)) && !cited.includes(artId)) {
+      cited.push(artId);
+    }
+  }
+}
+
+function collectArchitectureComponents(handoff: ProductHandoff, canonicalArtifacts: CanonicalMap, targetReqs: string[]): string[] {
+  const cited = collectCitedComponents(handoff.citations);
+  collectSatisfyingComponents(canonicalArtifacts, targetReqs, cited);
+  return cited;
+}
+
+function mergeSatisfiesRequirements(fm: Record<string, unknown>, targetReqs: string[]): boolean {
+  const existing = Array.isArray(fm['satisfies-requirements']) ? [...fm['satisfies-requirements']] : [];
+  let modified = false;
+  for (const req of targetReqs) {
+    if (!existing.includes(req)) {
+      existing.push(req);
+      modified = true;
+    }
+  }
+  fm['satisfies-requirements'] = existing;
+  return modified;
+}
+
+function updateSingleArchitectureComponent(
+  canonical: { file: string; frontmatter: Record<string, unknown>; body: string },
+  cmpId: string,
+  targetReqs: string[],
+  changeId: string,
+  date: string,
+  author: string
+): boolean {
+  const fm = canonical.frontmatter;
+  const modified = cmpId.startsWith('CMP-') ? mergeSatisfiesRequirements(fm, targetReqs) : false;
+  const updatedBody = appendRevisionHistoryRow(canonical.body, {
+    version: String(fm.version || '1.0.0'),
+    date,
+    author,
+    description: `Integración de incremento de entrega ${changeId}`,
+    reference: changeId,
+  });
+  if (updatedBody !== canonical.body || modified) {
+    writeUpdatedArtifact(canonical.file, fm, updatedBody);
+    return true;
+  }
+  return false;
+}
+
+function updateArchitectureComponents(
+  citedComponents: string[],
+  canonicalArtifacts: CanonicalMap,
+  targetReqs: string[],
+  changeId: string,
+  date: string,
+  author: string,
+  errors: string[]
+): string[] {
+  const updated: string[] = [];
+  for (const cmpId of citedComponents) {
+    const canonical = canonicalArtifacts.get(cmpId);
+    if (!canonical) continue;
+    try {
+      if (updateSingleArchitectureComponent(canonical, cmpId, targetReqs, changeId, date, author)) {
+        updated.push(cmpId);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      errors.push(`Error actualizando componente de arquitectura '${cmpId}': ${msg}`);
+    }
+  }
+  return updated;
+}
+
+function moveToCompletedFolder(changeDir: string, changeId: string, rootDir: string): string {
+  const completedParent = path.join(rootDir, 'specs', 'changes', 'completed');
+  if (!fs.existsSync(completedParent)) fs.mkdirSync(completedParent, { recursive: true });
+  const destDir = path.join(completedParent, changeId);
+  if (fs.existsSync(destDir)) fs.rmSync(destDir, { recursive: true, force: true });
+  fs.renameSync(changeDir, destDir);
+
+  const destProposal = path.join(destDir, 'proposal.md');
+  if (fs.existsSync(destProposal)) {
+    const { frontmatter, body } = parseFrontmatter(fs.readFileSync(destProposal, 'utf-8'));
+    frontmatter.status = 'applied';
+    writeUpdatedArtifact(destProposal, frontmatter, body);
+  }
+  return destDir;
+}
+
+function archiveChangeWorkspace(
+  changeDir: string,
+  changeId: string,
+  rootDir: string,
+  autoArchive: boolean,
+  completedAll: boolean
+): { archived: boolean; archivedPath?: string } {
+  const isActiveFolder = changeDir.includes('specs' + path.sep + 'changes' + path.sep + 'active');
+  if (completedAll && autoArchive && isActiveFolder) {
+    const destDir = moveToCompletedFolder(changeDir, changeId, rootDir);
+    return { archived: true, archivedPath: destDir };
+  }
+
+  const proposalFile = path.join(changeDir, 'proposal.md');
+  if (fs.existsSync(proposalFile)) {
+    const { frontmatter, body } = parseFrontmatter(fs.readFileSync(proposalFile, 'utf-8'));
+    if (completedAll) frontmatter.status = 'completed';
+    writeUpdatedArtifact(proposalFile, frontmatter, body);
+  }
+  return { archived: false };
+}
+
+function buildEmptyIntegrationResult(changeId: string, error: string, pendingTasks: string[] = []): SddIntegrationResult {
+  return {
+    success: false,
+    changeId,
+    completedTasks: [],
+    pendingTasks,
+    integratedRequirements: [],
+    updatedProductArtifacts: [],
+    updatedArchitectureArtifacts: [],
+    archived: false,
+    errors: [error],
+  };
+}
+
+function validateChangeWorkspace(rootDir: string, changeId: string) {
+  const changeDir = findChangeWorkspaceDir(rootDir, changeId);
+  if (!changeDir) {
+    return { error: `No se encontró el espacio de trabajo para el cambio '${changeId}'.` };
+  }
+  const tasksRes = checkTasksExecution(changeDir, changeId);
+  if (!tasksRes.ok) {
+    return { error: tasksRes.error!, pendingTasks: tasksRes.pendingTasks };
+  }
+  const handoff = resolveChangeHandoff(changeDir, changeId);
+  if (!handoff || !handoff.subgraph) {
+    return { error: `El cambio '${changeId}' no posee un sidecar 'handoff.yaml' ni citaciones válidas en proposal.md.` };
+  }
+  return { changeDir, tasksRes, handoff };
+}
+
+function buildIntegrationSuccessPayload(
+  changeId: string,
+  tasksRes: { completedTasks: string[]; pendingTasks: string[] },
+  targetReqs: string[],
+  updatedProduct: string[],
+  updatedArch: string[],
+  createdArtifacts: string[],
+  archiveRes: { archived: boolean; archivedPath?: string },
+  errors: string[]
+): SddIntegrationResult {
+  return {
+    success: errors.length === 0,
+    changeId,
+    completedTasks: tasksRes.completedTasks,
+    pendingTasks: tasksRes.pendingTasks,
+    integratedRequirements: targetReqs,
+    updatedProductArtifacts: updatedProduct,
+    updatedArchitectureArtifacts: updatedArch,
+    createdCanonicalArtifacts: createdArtifacts,
+    archived: archiveRes.archived,
+    archivedPath: archiveRes.archivedPath,
+    errors,
+  };
 }
 
 export function integrateSddChange(options: SddIntegrationOptions): SddIntegrationResult {
@@ -215,304 +542,86 @@ export function integrateSddChange(options: SddIntegrationOptions): SddIntegrati
   const changeId = options.changeId;
   const author = options.author || 'AI-SDLC Integration Engine';
   const date = options.date || new Date().toISOString().split('T')[0];
-  const autoArchive = options.autoArchive !== false;
 
+  const validation = validateChangeWorkspace(rootDir, changeId);
+  if (validation.error) return buildEmptyIntegrationResult(changeId, validation.error, validation.pendingTasks);
+
+  const { changeDir, tasksRes, handoff } = validation;
   const errors: string[] = [];
-  const updatedProductArtifacts: string[] = [];
-  const updatedArchitectureArtifacts: string[] = [];
+  const targetReqs = [...(handoff!.subgraph!.requirements || []), ...(handoff!.subgraph!.securityRequirements || [])];
+  const createdArtifacts = materializeNewCatalogArtifacts(changeDir!, rootDir, changeId, author, date, errors);
+  const canonicalArtifacts = loadCanonicalArtifacts(rootDir);
 
-  // 1. Locate change workspace
-  const changeDir = findChangeWorkspaceDir(rootDir, changeId);
-  if (!changeDir) {
-    return {
-      success: false,
-      changeId,
-      completedTasks: [],
-      pendingTasks: [],
-      integratedRequirements: [],
-      updatedProductArtifacts: [],
-      updatedArchitectureArtifacts: [],
-      archived: false,
-      errors: [`No se encontró el espacio de trabajo para el cambio '${changeId}'.`],
-    };
-  }
+  const updatedProduct = updateRequirementsArtifacts(targetReqs, createdArtifacts, canonicalArtifacts, tasksRes!.completedTasks, changeId, date, author, errors);
+  const citedComponents = collectArchitectureComponents(handoff!, canonicalArtifacts, targetReqs);
+  const updatedArch = updateArchitectureComponents(citedComponents, canonicalArtifacts, targetReqs, changeId, date, author, errors);
 
-  // 2. Parse tasks.md to identify implemented vs pending tasks
-  const tasksFile = path.join(changeDir, 'tasks.md');
-  const allTasks: TaskParsed[] = [];
-  if (fs.existsSync(tasksFile)) {
-    const tasksContent = fs.readFileSync(tasksFile, 'utf-8');
-    allTasks.push(...parseTasksFromContent(tasksContent));
-  }
+  const completedAll = tasksRes!.completedTasks.length > 0 && tasksRes!.pendingTasks.length === 0;
+  const archiveRes = archiveChangeWorkspace(changeDir!, changeId, rootDir, options.autoArchive !== false, completedAll);
 
-  const completedTasks = allTasks.filter((t) => t.status === 'COMPLETED').map((t) => t.id);
-  const pendingTasks = allTasks.filter((t) => t.status !== 'COMPLETED').map((t) => t.id);
+  return buildIntegrationSuccessPayload(changeId, tasksRes!, targetReqs, updatedProduct, updatedArch, createdArtifacts, archiveRes, errors);
+}
 
-  // Bloquear integración si existen tareas pendientes o no completadas
-  if (pendingTasks.length > 0) {
-    return {
-      success: false,
-      changeId,
-      completedTasks,
-      pendingTasks,
-      integratedRequirements: [],
-      updatedProductArtifacts: [],
-      updatedArchitectureArtifacts: [],
-      archived: false,
-      errors: [
-        `No se puede integrar el cambio '${changeId}' porque existen ${pendingTasks.length} tareas pendientes o bloqueadas (${pendingTasks.join(
-          ', '
-        )}). Todas las tareas deben estar en estado COMPLETED antes de consolidar en la especificación canónica.`,
-      ],
-    };
-  }
+function auditChangeRequirements(targetReqs: string[], canonicalMap: CanonicalMap): { integrated: string[]; missing: string[]; gaps: string[] } {
+  const integrated: string[] = [];
+  const missing: string[] = [];
+  const gaps: string[] = [];
 
-  // 3. Load sidecar HOF-* or fallback to proposal citations
-  let handoff: ProductHandoff | null = loadProductHandoffSidecar(changeDir);
-
-  if (!handoff) {
-    // Attempt to extract from proposal.md
-    const proposalFile = path.join(changeDir, 'proposal.md');
-    if (fs.existsSync(proposalFile)) {
-      const propContent = fs.readFileSync(proposalFile, 'utf-8');
-      const { frontmatter } = parseFrontmatter(propContent);
-      const citations = Array.isArray(frontmatter.citations) ? (frontmatter.citations as any[]) : [];
-      const reqs = citations.map((c) => c.id).filter((id: string) => id.startsWith('FR-') || id.startsWith('QR-') || id.startsWith('CON-') || id.startsWith('SEC-REQ-'));
-      handoff = {
-        id: `HOF-${changeId.toUpperCase()}`,
-        type: 'handoff',
-        changeId,
-        subgraph: {
-          requirements: reqs,
-        },
-        citations,
-      };
-    }
-  }
-
-  if (!handoff || !handoff.subgraph) {
-    return {
-      success: false,
-      changeId,
-      completedTasks,
-      pendingTasks,
-      integratedRequirements: [],
-      updatedProductArtifacts: [],
-      updatedArchitectureArtifacts: [],
-      archived: false,
-      errors: [`El cambio '${changeId}' no posee un sidecar 'handoff.yaml' ni citaciones válidas en proposal.md.`],
-    };
-  }
-
-  // 4. Determine which requirements are implemented
-  // "integra todo lo implementado": integrate all requirements declared in the handoff subgraph
-  const targetReqs = [
-    ...(handoff.subgraph.requirements || []),
-    ...(handoff.subgraph.securityRequirements || []),
-  ];
-
-  // 4.5 Materialize new canonical artifacts declared in spec.md section 1.2
-  const createdCanonicalArtifacts: string[] = [];
-  const specFile = path.join(changeDir, 'spec.md');
-  if (fs.existsSync(specFile)) {
-    const specContent = fs.readFileSync(specFile, 'utf-8');
-    const { newItems } = parseSpecCatalogScope(specContent);
-    for (const item of newItems) {
-      try {
-        materializeCanonicalArtifact(rootDir, item, changeId, author, date);
-        createdCanonicalArtifacts.push(item.id);
-      } catch (err: any) {
-        errors.push(`Error materializando artefacto canónico '${item.id}': ${err.message}`);
-      }
-    }
-  }
-
-  // 5. Scan all markdown files to find canonical target files
-  const allMdFiles = walkMdFiles(rootDir);
-  const canonicalArtifacts = new Map<string, { file: string; frontmatter: any; body: string }>();
-
-  for (const file of allMdFiles) {
-    const relFile = path.relative(rootDir, file).replace(/\\/g, '/');
-    // Skip change folders and templates
-    if (relFile.includes('specs/changes/') || relFile.includes('templates/')) continue;
-
-    try {
-      const content = fs.readFileSync(file, 'utf-8');
-      const { frontmatter, body } = parseFrontmatter(content);
-      if (frontmatter.id) {
-        canonicalArtifacts.set(String(frontmatter.id), { file, frontmatter, body });
-      }
-    } catch {
-      // Ignore
-    }
-  }
-
-  // 6. Integrate Product & Requirements Artifacts
   for (const reqId of targetReqs) {
-    if (createdCanonicalArtifacts.includes(reqId)) continue; // newly materialized — leave as draft
-    const canonical = canonicalArtifacts.get(reqId);
-    if (canonical) {
-      try {
-        const fm = canonical.frontmatter;
-        let modified = false;
-
-        if (fm.status !== 'active') {
-          fm.status = 'active';
-          modified = true;
-        }
-
-        const taskDesc =
-          completedTasks.length > 0
-            ? `Implementación verificada (${completedTasks.join(', ')})`
-            : `Integración de especificación`;
-
-        const updatedBody = appendRevisionHistoryRow(canonical.body, {
-          version: String(fm.version || '1.0.0'),
-          date,
-          author,
-          description: taskDesc,
-          reference: changeId,
-        });
-
-        if (updatedBody !== canonical.body || modified) {
-          const yamlHeader = `---\n${yaml.dump(fm, { indent: 2, lineWidth: -1 }).trim()}\n---\n`;
-          fs.writeFileSync(canonical.file, yamlHeader + updatedBody, 'utf-8');
-          updatedProductArtifacts.push(reqId);
-        }
-      } catch (err: any) {
-        errors.push(`Error actualizando artefacto canónico '${reqId}': ${err.message}`);
+    const canonical = canonicalMap.get(reqId);
+    if (!canonical) {
+      missing.push(reqId);
+      gaps.push(`El requerimiento '${reqId}' no existe en la especificación canónica.`);
+    } else {
+      if (canonical.frontmatter.status !== 'active') {
+        gaps.push(`El requerimiento '${reqId}' no tiene status: active en la especificación canónica.`);
       }
+      integrated.push(reqId);
     }
   }
+  return { integrated, missing, gaps };
+}
 
-  // 7. Integrate Architecture Components & Views (arc42 / NAF v4)
-  // Identify cited architecture components in handoff or proposal
-  const citedComponents: string[] = [];
-  if (handoff.citations) {
-    for (const c of handoff.citations) {
-      const citeId = (c as any).targetId || (c as any).id;
-      if (
-        citeId &&
-        (citeId.startsWith('CMP-') ||
-          citeId.startsWith('SEC-ENC-') ||
-          citeId.startsWith('ADR-'))
-      ) {
-        citedComponents.push(citeId);
-      }
-    }
-  }
+function resolveAuditStatus(integratedCount: number, targetCount: number, gapsCount: number): 'FULLY_INTEGRATED' | 'PARTIALLY_INTEGRATED' | 'UNINTEGRATED' {
+  if (integratedCount === targetCount && gapsCount === 0) return 'FULLY_INTEGRATED';
+  if (integratedCount > 0) return 'PARTIALLY_INTEGRATED';
+  return 'UNINTEGRATED';
+}
 
-  // If no components cited directly in citations, search canonical components that implement target requirements
-  for (const [artId, art] of canonicalArtifacts.entries()) {
-    if (artId.startsWith('CMP-') && art.frontmatter) {
-      const satisfies = Array.isArray(art.frontmatter['satisfies-requirements'])
-        ? (art.frontmatter['satisfies-requirements'] as string[])
-        : [];
-      if (targetReqs.some((r) => satisfies.includes(r))) {
-        if (!citedComponents.includes(artId)) citedComponents.push(artId);
-      }
-    }
-  }
+function auditChangeEntry(changeDir: string, changeName: string, canonicalMap: CanonicalMap): SddIntegrationAudit | null {
+  const handoff = loadProductHandoffSidecar(changeDir);
+  if (!handoff) return null;
 
-  for (const cmpId of citedComponents) {
-    const canonical = canonicalArtifacts.get(cmpId);
-    if (canonical) {
-      try {
-        const fm = canonical.frontmatter;
-        let modified = false;
+  const tasksFile = path.join(changeDir, 'tasks.md');
+  const tasks = fs.existsSync(tasksFile) ? parseTasksFromContent(fs.readFileSync(tasksFile, 'utf-8')) : [];
+  const completed = tasks.filter((t) => t.status === 'COMPLETED');
+  const targetReqs = handoff.subgraph?.requirements || [];
 
-        // Ensure satisfies-requirements includes target requirements
-        if (cmpId.startsWith('CMP-')) {
-          const existingSatisfies = Array.isArray(fm['satisfies-requirements'])
-            ? [...fm['satisfies-requirements']]
-            : [];
-          for (const req of targetReqs) {
-            if (!existingSatisfies.includes(req)) {
-              existingSatisfies.push(req);
-              modified = true;
-            }
-          }
-          fm['satisfies-requirements'] = existingSatisfies;
-        }
-
-        const updatedBody = appendRevisionHistoryRow(canonical.body, {
-          version: String(fm.version || '1.0.0'),
-          date,
-          author,
-          description: `Integración de incremento de entrega ${changeId}`,
-          reference: changeId,
-        });
-
-        if (updatedBody !== canonical.body || modified) {
-          const yamlHeader = `---\n${yaml.dump(fm, { indent: 2, lineWidth: -1 }).trim()}\n---\n`;
-          fs.writeFileSync(canonical.file, yamlHeader + updatedBody, 'utf-8');
-          updatedArchitectureArtifacts.push(cmpId);
-        }
-      } catch (err: any) {
-        errors.push(`Error actualizando componente de arquitectura '${cmpId}': ${err.message}`);
-      }
-    }
-  }
-
-  // 8. Archiving / Promotion of Change Workspace
-  let archived = false;
-  let archivedPath: string | undefined;
-
-  const isActiveFolder = changeDir.includes('specs' + path.sep + 'changes' + path.sep + 'active');
-  const allTasksCompleted = allTasks.length > 0 && pendingTasks.length === 0;
-
-  if (allTasksCompleted && autoArchive && isActiveFolder) {
-    const completedParent = path.join(rootDir, 'specs', 'changes', 'completed');
-    if (!fs.existsSync(completedParent)) {
-      fs.mkdirSync(completedParent, { recursive: true });
-    }
-
-    const destDir = path.join(completedParent, changeId);
-    if (fs.existsSync(destDir)) {
-      fs.rmSync(destDir, { recursive: true, force: true });
-    }
-
-    // Move folder
-    fs.renameSync(changeDir, destDir);
-    archived = true;
-    archivedPath = destDir;
-
-    // Update proposal.md status to applied
-    const destProposal = path.join(destDir, 'proposal.md');
-    if (fs.existsSync(destProposal)) {
-      const content = fs.readFileSync(destProposal, 'utf-8');
-      const { frontmatter, body } = parseFrontmatter(content);
-      frontmatter.status = 'applied';
-      const newContent = `---\n${yaml.dump(frontmatter, { indent: 2, lineWidth: -1 }).trim()}\n---\n` + body;
-      fs.writeFileSync(destProposal, newContent, 'utf-8');
-    }
-  } else {
-    // Update proposal status or add integration note
-    const proposalFile = path.join(changeDir, 'proposal.md');
-    if (fs.existsSync(proposalFile)) {
-      const content = fs.readFileSync(proposalFile, 'utf-8');
-      const { frontmatter, body } = parseFrontmatter(content);
-      if (allTasksCompleted) {
-        frontmatter.status = 'completed';
-      }
-      const newContent = `---\n${yaml.dump(frontmatter, { indent: 2, lineWidth: -1 }).trim()}\n---\n` + body;
-      fs.writeFileSync(proposalFile, newContent, 'utf-8');
-    }
-  }
+  const { integrated, missing, gaps } = auditChangeRequirements(targetReqs, canonicalMap);
+  const status = resolveAuditStatus(integrated.length, targetReqs.length, gaps.length);
 
   return {
-    success: errors.length === 0,
-    changeId,
-    completedTasks,
-    pendingTasks,
-    integratedRequirements: targetReqs,
-    updatedProductArtifacts,
-    updatedArchitectureArtifacts,
-    createdCanonicalArtifacts,
-    archived,
-    archivedPath,
-    errors,
+    changeId: changeName,
+    status,
+    completedTasksCount: completed.length,
+    totalTasksCount: tasks.length,
+    integratedRequirements: integrated,
+    missingRequirements: missing,
+    gaps,
   };
+}
+
+function collectParentDirAudits(parent: string, canonicalMap: CanonicalMap, audits: SddIntegrationAudit[], errors: string[]): void {
+  if (!fs.existsSync(parent)) return;
+  const entries = fs.readdirSync(parent, { withFileTypes: true });
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    const audit = auditChangeEntry(path.join(parent, e.name), e.name, canonicalMap);
+    if (audit) {
+      if (audit.gaps.length > 0) errors.push(`[${e.name}] Desalineación: ${audit.gaps.join('; ')}`);
+      audits.push(audit);
+    }
+  }
 }
 
 export function verifySddIntegration(options: { rootDir?: string } = {}): {
@@ -524,88 +633,17 @@ export function verifySddIntegration(options: { rootDir?: string } = {}): {
   const audits: SddIntegrationAudit[] = [];
   const errors: string[] = [];
 
-  // Look for changes in specs/changes/active and specs/changes/completed
   const searchDirs = [
     path.join(rootDir, 'specs', 'changes', 'completed'),
     path.join(rootDir, 'specs', 'changes', 'active'),
   ];
-
-  // Scan all canonical requirements
-  const allMdFiles = walkMdFiles(rootDir);
-  const canonicalMap = new Map<string, any>();
-  for (const file of allMdFiles) {
-    const rel = path.relative(rootDir, file).replace(/\\/g, '/');
-    if (rel.includes('specs/changes/') || rel.includes('templates/')) continue;
-    try {
-      const { frontmatter, body } = parseFrontmatter(fs.readFileSync(file, 'utf-8'));
-      if (frontmatter.id) {
-        canonicalMap.set(String(frontmatter.id), { file, frontmatter, body });
-      }
-    } catch {}
-  }
+  const canonicalMap = loadCanonicalArtifacts(rootDir);
 
   for (const parent of searchDirs) {
-    if (!fs.existsSync(parent)) continue;
-    const entries = fs.readdirSync(parent, { withFileTypes: true });
-    for (const e of entries) {
-      if (!e.isDirectory()) continue;
-      const changeDir = path.join(parent, e.name);
-      const handoff = loadProductHandoffSidecar(changeDir);
-      if (!handoff) continue;
-
-      const tasksFile = path.join(changeDir, 'tasks.md');
-      const tasks: TaskParsed[] = fs.existsSync(tasksFile)
-        ? parseTasksFromContent(fs.readFileSync(tasksFile, 'utf-8'))
-        : [];
-
-      const completed = tasks.filter((t) => t.status === 'COMPLETED');
-      const targetReqs = handoff.subgraph?.requirements || [];
-      const integrated: string[] = [];
-      const missing: string[] = [];
-      const gaps: string[] = [];
-
-      for (const reqId of targetReqs) {
-        const canonical = canonicalMap.get(reqId);
-        if (!canonical) {
-          missing.push(reqId);
-          gaps.push(`El requerimiento '${reqId}' no existe en la especificación canónica.`);
-        } else {
-          // Check if canonical reflects active status
-          if (canonical.frontmatter.status !== 'active') {
-            gaps.push(`El requerimiento '${reqId}' no tiene status: active en la especificación canónica.`);
-          }
-          integrated.push(reqId);
-        }
-      }
-
-      let status: 'FULLY_INTEGRATED' | 'PARTIALLY_INTEGRATED' | 'UNINTEGRATED' = 'UNINTEGRATED';
-      if (integrated.length === targetReqs.length && gaps.length === 0) {
-        status = 'FULLY_INTEGRATED';
-      } else if (integrated.length > 0) {
-        status = 'PARTIALLY_INTEGRATED';
-      }
-
-      if (gaps.length > 0) {
-        errors.push(`[${e.name}] Desalineación: ${gaps.join('; ')}`);
-      }
-
-      audits.push({
-        changeId: e.name,
-        status,
-        completedTasksCount: completed.length,
-        totalTasksCount: tasks.length,
-        integratedRequirements: integrated,
-        missingRequirements: missing,
-        gaps,
-      });
-    }
+    collectParentDirAudits(parent, canonicalMap, audits, errors);
   }
 
-  return {
-    success: errors.length === 0,
-    audits,
-    errors,
-  };
+  return { success: errors.length === 0, audits, errors };
 }
 
 function matchesFolderOrPrefix(folder: string, candidate: string): boolean {
@@ -617,41 +655,82 @@ function matchesFolderOrPrefix(folder: string, candidate: string): boolean {
   return Boolean(fPrefix && cPrefix && fPrefix[1] === cPrefix[1]);
 }
 
+function matchByChangedFiles(activeFolders: string[], files?: string[]) {
+  if (!files || files.length === 0) return null;
+  for (const file of files) {
+    const match = file.replace(/\\/g, '/').match(/specs\/changes\/active\/([^/]+)/);
+    if (match && activeFolders.includes(match[1])) {
+      return { changeId: match[1], source: 'files' as const, reason: `Coincidencia por archivo modificado '${file}'.` };
+    }
+  }
+  return null;
+}
+
+function matchByText(activeFolders: string[], text: string | undefined, source: 'branch' | 'title' | 'body', reasonPrefix: string) {
+  if (!text) return null;
+  const found = activeFolders.find((f) => matchesFolderOrPrefix(f, text));
+  if (found) return { changeId: found, source, reason: `${reasonPrefix} '${text}'.` };
+  return null;
+}
+
 function resolveMatchFromMetadata(
   activeFolders: string[],
   options: ChangeDetectionOptions
 ): { changeId?: string; source?: ChangeDetectionResult['source']; reason?: string } {
-  const hasSpecificFilter = Boolean(
-    options.headRef ||
-    (options.changedFiles && options.changedFiles.length > 0) ||
-    options.prTitle ||
-    options.prBody
-  );
+  const branchMatch = matchByText(activeFolders, options.headRef, 'branch', 'Coincidencia por rama origen');
+  if (branchMatch) return branchMatch;
 
-  if (options.headRef) {
-    const found = activeFolders.find((f) => matchesFolderOrPrefix(f, options.headRef!));
-    if (found) return { changeId: found, source: 'branch', reason: `Coincidencia por rama origen '${options.headRef}'.` };
-  }
-  if (options.changedFiles && options.changedFiles.length > 0) {
-    for (const file of options.changedFiles) {
-      const match = file.replace(/\\/g, '/').match(/specs\/changes\/active\/([^/]+)/);
-      if (match && activeFolders.includes(match[1])) {
-        return { changeId: match[1], source: 'files', reason: `Coincidencia por archivo modificado '${file}'.` };
-      }
-    }
-  }
-  if (options.prTitle) {
-    const found = activeFolders.find((f) => matchesFolderOrPrefix(f, options.prTitle!));
-    if (found) return { changeId: found, source: 'title', reason: `Coincidencia por título del PR '${options.prTitle}'.` };
-  }
-  if (options.prBody) {
-    const found = activeFolders.find((f) => matchesFolderOrPrefix(f, options.prBody!));
-    if (found) return { changeId: found, source: 'body', reason: `Coincidencia por mención en cuerpo del PR.` };
-  }
-  if (!hasSpecificFilter && activeFolders.length === 1) {
+  const fileMatch = matchByChangedFiles(activeFolders, options.changedFiles);
+  if (fileMatch) return fileMatch;
+
+  const titleMatch = matchByText(activeFolders, options.prTitle, 'title', 'Coincidencia por título del PR');
+  if (titleMatch) return titleMatch;
+
+  const bodyMatch = matchByText(activeFolders, options.prBody, 'body', 'Coincidencia por mención en cuerpo del PR');
+  if (bodyMatch) return bodyMatch;
+
+  const hasFilter = Boolean(options.headRef || options.changedFiles?.length || options.prTitle || options.prBody);
+  if (!hasFilter && activeFolders.length === 1) {
     return { changeId: activeFolders[0], source: 'single_active_completed', reason: `Único cambio activo disponible '${activeFolders[0]}'.` };
   }
   return {};
+}
+
+function validateActiveDirectory(activeParent: string): { ok: boolean; folders: string[]; error?: string } {
+  if (!fs.existsSync(activeParent)) {
+    return { ok: false, folders: [], error: `No existe el directorio de cambios activos en '${activeParent}'.` };
+  }
+  const entries = fs.readdirSync(activeParent, { withFileTypes: true });
+  const activeFolders = entries.filter((e) => e.isDirectory()).map((e) => e.name);
+  if (activeFolders.length === 0) {
+    return { ok: false, folders: [], error: 'No se encontraron carpetas de cambios activos en specs/changes/active/.' };
+  }
+  return { ok: true, folders: activeFolders };
+}
+
+function buildUnmatchedActiveResult(folders: string[], options: ChangeDetectionOptions): ChangeDetectionResult {
+  const headRefStr = options.headRef || 'n/a';
+  const prTitleStr = options.prTitle || 'n/a';
+  const folderList = folders.join(', ');
+  return {
+    detected: false,
+    reasons: [`No fue posible correlacionar unívocamente ningún cambio activo (${folderList}) a partir de la metadata proporcionada (rama: ${headRefStr}, título: ${prTitleStr}).`],
+    allTasksCompleted: false,
+    completedTasksCount: 0,
+    totalTasksCount: 0,
+  };
+}
+
+function evaluateTasksProgress(changeId: string, tasks: TaskParsed[]): { completed: TaskParsed[]; allCompleted: boolean; error?: string } {
+  const completed = tasks.filter((t) => t.status === 'COMPLETED');
+  const allCompleted = tasks.length > 0 && completed.length === tasks.length;
+  if (tasks.length === 0) {
+    return { completed, allCompleted, error: `El cambio '${changeId}' no posee tareas declaradas en tasks.md.` };
+  }
+  if (!allCompleted) {
+    return { completed, allCompleted, error: `El cambio '${changeId}' tiene ${tasks.length - completed.length} tareas pendientes.` };
+  }
+  return { completed, allCompleted };
 }
 
 /**
@@ -663,39 +742,38 @@ export function detectActiveChangeForIntegration(
 ): ChangeDetectionResult {
   const rootDir = options.rootDir || process.cwd();
   const activeParent = path.join(rootDir, 'specs', 'changes', 'active');
-  if (!fs.existsSync(activeParent)) {
-    return { detected: false, reasons: [`No existe el directorio de cambios activos en '${activeParent}'.`] };
-  }
+  const dirCheck = validateActiveDirectory(activeParent);
 
-  const entries = fs.readdirSync(activeParent, { withFileTypes: true });
-  const activeFolders = entries.filter((e) => e.isDirectory()).map((e) => e.name);
-  if (activeFolders.length === 0) {
-    return { detected: false, reasons: ['No se encontraron carpetas de cambios activos en specs/changes/active/.'] };
-  }
-
-  const match = resolveMatchFromMetadata(activeFolders, options);
-  if (!match.changeId) {
+  if (!dirCheck.ok) {
     return {
       detected: false,
-      reasons: [`No se correlacionó ningún cambio activo (${activeFolders.join(', ')}) con los metadatos suministrados.`],
+      reasons: [dirCheck.error!],
+      allTasksCompleted: false,
+      completedTasksCount: 0,
+      totalTasksCount: 0,
     };
+  }
+
+  const match = resolveMatchFromMetadata(dirCheck.folders, options);
+  if (!match.changeId) {
+    return buildUnmatchedActiveResult(dirCheck.folders, options);
   }
 
   const changeDir = path.join(activeParent, match.changeId);
   const tasksFile = path.join(changeDir, 'tasks.md');
   const tasks = fs.existsSync(tasksFile) ? parseTasksFromContent(fs.readFileSync(tasksFile, 'utf-8')) : [];
-  const completed = tasks.filter((t) => t.status === 'COMPLETED');
-  const allCompleted = tasks.length > 0 && completed.length === tasks.length;
+  const progress = evaluateTasksProgress(match.changeId, tasks);
+  const reasons: string[] = match.reason ? [match.reason] : [];
+  if (progress.error) reasons.push(progress.error);
 
   return {
     detected: true,
     changeId: match.changeId,
-    source: match.source,
     changeDir,
-    allTasksCompleted: allCompleted,
-    completedTasksCount: completed.length,
+    source: match.source,
+    allTasksCompleted: progress.allCompleted,
+    completedTasksCount: progress.completed.length,
     totalTasksCount: tasks.length,
-    reasons: match.reason ? [match.reason] : [],
+    reasons,
   };
 }
-

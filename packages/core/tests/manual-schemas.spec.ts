@@ -1,7 +1,9 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 import { describe, expect, it } from 'vitest';
+import { verifyManuals } from '../src/index.js';
 
 const repoRoot = path.resolve(__dirname, '../../..');
 
@@ -171,4 +173,58 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
     expect(content.includes('Hazard Mitigation') || content.includes('Matriz de Mitigación de Peligros')).toBe(true);
     expect(content).toContain('@safety @failsafe');
   });
+
+  it('should compute 100% manuals coverage on SentinelCore example workspace', () => {
+    const sentinelDir = path.join(repoRoot, 'examples/sentinel-core');
+    const res = verifyManuals({ rootDir: sentinelDir, branch: 'release/v1.0.0' });
+
+    expect(res.success).toBe(true);
+    expect(res.status).toBe('PASSED');
+    expect(res.enforcementMode).toBe('STRICT_RELEASE');
+    expect(res.userManuals.length).toBe(1);
+    expect(res.productionManuals.length).toBe(1);
+    expect(res.coverage.userCoveragePct).toBe(100);
+    expect(res.coverage.productionCoveragePct).toBe(100);
+  });
+
+  it('should emit ADVISORY warning in daily dev and BLOCK in release/* or critical profile when manuals are missing', () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-manuals-gate-'));
+    try {
+      const ucDir = path.join(tempDir, 'product', 'use-cases');
+      const cmpDir = path.join(tempDir, 'architecture', 'components');
+      fs.mkdirSync(ucDir, { recursive: true });
+      fs.mkdirSync(cmpDir, { recursive: true });
+
+      fs.writeFileSync(
+        path.join(ucDir, 'UC-TEST-001.md'),
+        '---\nid: UC-TEST-001\ntype: use-case\ntitle: Test Use Case\nstatus: active\n---\n# UC-TEST-001\n',
+        'utf-8'
+      );
+      fs.writeFileSync(
+        path.join(cmpDir, 'CMP-TEST-001.md'),
+        '---\nid: CMP-TEST-001\ntype: component\ntitle: Test Component\nstatus: active\n---\n# CMP-TEST-001\n',
+        'utf-8'
+      );
+
+      const advisoryRes = verifyManuals({ rootDir: tempDir, branch: 'task/CHG-001/TSK-001', profile: 'standard' });
+      expect(advisoryRes.success).toBe(true);
+      expect(advisoryRes.status).toBe('WARNING');
+      expect(advisoryRes.enforcementMode).toBe('ADVISORY');
+      expect(advisoryRes.warnings.length).toBeGreaterThanOrEqual(2);
+
+      const releaseRes = verifyManuals({ rootDir: tempDir, branch: 'release/v1.0.0', profile: 'standard' });
+      expect(releaseRes.success).toBe(false);
+      expect(releaseRes.status).toBe('FAILED');
+      expect(releaseRes.enforcementMode).toBe('STRICT_RELEASE');
+      expect(releaseRes.violations.length).toBeGreaterThanOrEqual(2);
+
+      const criticalRes = verifyManuals({ rootDir: tempDir, branch: 'feat/CHG-001', profile: 'critical' });
+      expect(criticalRes.success).toBe(false);
+      expect(criticalRes.status).toBe('FAILED');
+      expect(criticalRes.enforcementMode).toBe('STRICT_RELEASE');
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
 });
+

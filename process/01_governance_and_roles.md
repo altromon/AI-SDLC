@@ -30,7 +30,7 @@ The AI-SDLC framework organizes humans and AI agents into a clear, balanced gove
 
 ### B. AI Agent Roles (Specialized by Persona)
 1. **Product Analyst Agent (`agent-product-analyst`)**:
-   - Executes exploration skills (`ps:explore`), drafts product artifact candidates (`ACT-*`, `UC-*`, `BR-*`, `FR-*`), and detects ambiguities.
+   - Executes Phase 0 Product Inception (3–5 question discovery interview and `ARCH-INTRO-*` Enterprise & Capability Vision), exploration skills (`ps:explore`), drafts product artifact candidates (`ACT-*`, `UC-*`, `BR-*`, `FR-*`, `QR-*`), and detects ambiguities.
 2. **Threat Modeler and Security Agent (`agent-threat-modeler`)**:
    - Applies STRIDE and OWASP ASVS across use cases (`UC-*`) and technical architecture artifacts (`CMP-*`, Mermaid diagrams, ADRs) in the technical feedback loop from the architect, proposing threat actors (`ACT-THREAT-*`), abuse cases (`ABUSE-*`), and security requirements (`SEC-REQ-*`).
 3. **Systems Architect Agent (`agent-system-architect`)**:

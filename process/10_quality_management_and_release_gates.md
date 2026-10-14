@@ -226,14 +226,18 @@ npx aisdlc check --fix
    - **BDD Extraction**: Detects if ` ```gherkin ` blocks in product or security specifications differ from `.feature` files on disk and automatically synchronizes them.
    - **PDaC Anti-Drift Sync**: Synchronizes SHA-256 cryptographic digests of canonical citations (`citations: - id: ... digest: ...`) if target content exists and is valid.
 2. **Consolidated Quality Gate Execution**:
-   - Deterministically executes all master verifiers:
+   - Deterministically executes all 11 master verifiers:
      - Code quality (CC $\le 10$, MI $\ge 50$, LOC $\le 40$).
      - 360° reverse RTM traceability (zero orphan requirements).
      - Task governance and autonomy modes (`tasks.md`).
      - Test coverage across requirements and tasks.
+     - BDD Gherkin synchronization against specifications.
      - Open source license compliance with `license-policy.yaml`.
      - PDaC cryptographic integrity free of digest drift.
-     - Formal JSON schema compliance (Draft 2020-12).
+     - Formal JSON schema compliance (Draft 2020-12, including `handoff.yaml` sidecars).
+     - Duplicate requirement and title collision detection.
+     - Progressive friction and anti-bypass guardrails.
+     - Shift-left security (secrets and SAST).
 3. **Actionable Console Dashboard**:
    - Outputs a visual summary of gate statuses (`PASSED`, `AUTO-FIXED`, `FAILED`).
    - If non-recoverable blocking errors occur, details root causes and remediation commands with deterministic exit codes (0 on success, 1 on violations).
@@ -322,6 +326,47 @@ The configuration file allows orchestrating language-specific linters and covera
 ### C. The Universal SARIF Standard (Static Analysis Results Interchange Format)
 For enterprise integrations, AI-SDLC adopts the **SARIF (JSON OASIS)** standard. Any analyzer from any language ecosystem (Roslyn, Clang-Tidy, ESLint, Bandit, Flake8) can output diagnostics in SARIF format, seamlessly ingested by the release pipeline.
 
+### D. Automated Code Coverage Ingestion and .NET Integration
+
+AI-SDLC deterministically ingests automated test coverage metrics without proprietary lock-in. The core reporting engines (`readCodeCoverageSummary`, `aisdlc report quality`, `aisdlc report dashboard`) passively scan the following canonical locations:
+- `coverage/lcov.info` or `reports/lcov.info` (LCOV format)
+- `coverage/coverage-summary.json` or `reports/coverage-summary.json` (Istanbul/JSON summary format)
+
+#### 1. The .NET / C# Testing & Coverage Toolchain
+For C#/.NET projects, the canonical stack declared in `quality-policy.yaml` uses **xUnit** / **Reqnroll** with **Coverlet**:
+
+1. **Test Project Configuration**:
+   Every test project (`*.Tests.csproj`) must include the `coverlet.collector` package to enable cross-platform coverage data collection during `dotnet test`:
+   ```xml
+   <ItemGroup>
+     <PackageReference Include="coverlet.collector" Version="6.0.2">
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+     </PackageReference>
+   </ItemGroup>
+   ```
+   > [!WARNING]
+   > If `coverlet.collector` is omitted, running `dotnet test --collect:"XPlat Code Coverage"` will emit a warning (`No se encuentra ningún objeto datacollector con el nombre descriptivo "XPlat Code Coverage"`) and fail to generate coverage data, causing AI-SDLC reports to display `N/A` or `0%` coverage.
+
+2. **Coverage Collection and LCOV Conversion via ReportGenerator**:
+   Coverlet generates raw Cobertura XML (`TestResults/*/coverage.cobertura.xml`). To ingest these metrics into AI-SDLC:
+   ```bash
+   # Run tests collecting Cobertura XML
+   dotnet test --collect:"XPlat Code Coverage"
+
+   # Convert raw Cobertura XML to standard LCOV using ReportGenerator
+   reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coverage" -reporttypes:lcov
+   ```
+   *Alternative (Direct MSBuild)*: When using `coverlet.msbuild`, output can be emitted directly to LCOV format:
+   ```bash
+   dotnet test /p:CollectCoverage=true /p:CoverletOutput="../../coverage/lcov.info" /p:CoverletOutputFormat=lcov
+   ```
+
+3. **Validation Against Release Gate**:
+   Once `coverage/lcov.info` is present:
+   - `aisdlc report quality` evaluates Line Coverage ($\ge 85\%$), Branch Coverage ($\ge 80\%$), and Function Coverage ($\ge 90\%$) against `quality-policy.yaml`.
+   - `aisdlc report dashboard` populates the interactive Code Coverage cards and charts in `reports/dashboard.html`.
+
 ---
 
 ## 8. Commit Telemetry, KPI Aggregation, and Cost of Quality (Rework & DIR)
@@ -373,7 +418,7 @@ These metrics provide engineering leaders with empirical insight into LLM reliab
 
 ## 9. Interactive Web Dashboard and PDaC / RTM Graph Visualizer (Cytoscape.js)
 
-For non-technical stakeholders (Product Owners, CISOs, auditors, and engineering executives), exploring the complete product dependency network (`Actors ➔ Use Cases ➔ Business Rules ➔ Requirements ➔ arc42 Components ➔ BDD Tests`) across static Markdown documents introduces cognitive load.
+For non-technical stakeholders (Product Owners, CISOs, auditors, and engineering executives), exploring the complete product dependency network (`Vision / Goals ARCH-INTRO-* ➔ Actors ➔ Use Cases ➔ Business Rules ➔ Requirements ➔ arc42 Components ➔ BDD Tests`) across static Markdown documents introduces cognitive load.
 
 The CLI command `npx aisdlc report dashboard` compiles the entire PDaC graph, 360° RTM matrix, quality metrics, and historical KPI telemetry into a self-contained HTML artifact (`reports/dashboard.html`):
 
@@ -390,9 +435,9 @@ npx aisdlc report dashboard --output dist/governance.html --title "SentinelCore 
 
 ### Key Dashboard Features:
 1. **Network Visualizer with Cytoscape.js (MIT)**:
-   - Geometric and color-coded semantic layers: Product (cyan diamonds), Requirements (green/red rectangles), Architecture (indigo hexagons), and Testing (emerald ellipses).
+   - Geometric and color-coded semantic layers: Product Upstream (including root `Vision / Goals` `ARCH-INTRO-*` with `identifies`, `envisions`, and `defines-goal` semantic edges, `JRN-*`, `ACT-*`, `UC-*`, `BR-*`), Requirements (`FR-*`, `QR-*`, `SEC-REQ-*`), Architecture Midstream (`CMP-*`, `ADR-*`, `SEC-ENC-*`), and Testing Downstream (`.feature`).
    - Deterministic status coloring: 🟢 Green for compliant nodes; 🔴 Red for orphan requirements or nodes with cryptographic SHA-256 drift (`DRIFT`).
-   - Navigation controls: Zoom, pan, center view, and switchable layouts (hierarchical layered, COSE, concentric, circular).
+   - Navigation controls: Zoom, pan, center view, typology filter (including `Vision / Goals (ARCH-INTRO)`), and switchable layouts (hierarchical layered, COSE, concentric, circular).
    - **Critical Path Highlighting**: Clicking any node illuminates its upstream and downstream dependencies while dimming unrelated elements.
 2. **Interactive 360° Traceability Matrix**:
    - Real-time search and filterable table with bidirectional navigation focusing and centering selected nodes in the graph.

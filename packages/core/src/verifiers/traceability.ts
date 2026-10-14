@@ -13,6 +13,7 @@ import { scanAllProductHandoffs } from '../adapters/sdd/index.js';
 import {
   ArtifactFrontmatter,
   ProductHandoff,
+  ProductHandoffSubgraph,
   TraceabilityOptions,
   TraceabilityResult,
   TraceabilityRow,
@@ -64,9 +65,8 @@ export function extractFeatureTags(featureContent: string): string[] {
   return Array.from(new Set(tags));
 }
 
-export function generateTraceabilityReportMarkdown(rows: TraceabilityRow[], errors: number): string {
-  const isOk = errors === 0;
-  const reportLines: string[] = [
+function buildTraceabilityHeader(isOk: boolean, errors: number): string[] {
+  return [
     '# 360° Requirements Traceability Matrix (RTM)',
     '',
     `*Verification Date: ${new Date().toISOString()}*`,
@@ -77,31 +77,38 @@ export function generateTraceabilityReportMarkdown(rows: TraceabilityRow[], erro
     '| Requirement ID | PDaC Handoff | Title | Product (Upstream) | Architecture (Midstream) | Testing (Downstream) | Global Status |',
     '| :--- | :--- | :--- | :--- | :--- | :--- | :---: |',
   ];
+}
 
+function buildTraceabilityCriteria(): string[] {
+  return [
+    '',
+    '## 2. Deterministic Validation Criteria',
+    '- **Product (Upstream)**: Requirement is issued in a formal PDaC Handoff (`HOF-*`) and derives from a Use Case (`UC-*`), Business Rule (`BR-*`), or Abuse Case (`ABUSE-*`).',
+    '- **Architecture (Midstream)**: Requirement is assigned to at least one Component (`CMP-*`), Security Enclave (`SEC-ENC-*`), Decision (`ADR-*`), or arc42/NAF v4 Execution View.',
+    '- **Testing (Downstream)**: Requirement has executable scenarios in BDD/Gherkin (`.feature`) test suites with matching tags or verified automated test cases.',
+  ];
+}
+
+function isRowCompliant(r: TraceabilityRow): boolean {
+  const isProd = r.productStatus === 'COMPLIANT' || r.productStatus === 'CONFORME';
+  const isArch = r.archStatus === 'COMPLIANT' || r.archStatus === 'CONFORME';
+  const isTest = r.testStatus === 'COMPLIANT' || r.testStatus === 'CONFORME';
+  return isProd && isArch && isTest;
+}
+
+function formatTraceabilityRow(r: TraceabilityRow): string {
+  const ok = isRowCompliant(r);
+  const statusIcon = ok ? '✅ COMPLIANT' : '❌ ORPHAN';
+  return `| **\`${r.id}\`** | \`${r.hofId || 'N/A'}\` | ${r.title} | \`${r.productTraces}\` | \`${r.archTraces}\` | \`${r.testTraces}\` | ${statusIcon} |`;
+}
+
+export function generateTraceabilityReportMarkdown(rows: TraceabilityRow[], errors: number): string {
+  const lines = buildTraceabilityHeader(errors === 0, errors);
   for (const r of rows) {
-    const ok = (r.productStatus === 'COMPLIANT' || r.productStatus === 'CONFORME') &&
-      (r.archStatus === 'COMPLIANT' || r.archStatus === 'CONFORME') &&
-      (r.testStatus === 'COMPLIANT' || r.testStatus === 'CONFORME');
-    reportLines.push(
-      `| **\`${r.id}\`** | \`${r.hofId || 'N/A'}\` | ${r.title} | \`${r.productTraces}\` | \`${r.archTraces}\` | \`${r.testTraces}\` | ${
-        ok ? '✅ COMPLIANT' : '❌ ORPHAN'
-      } |`
-    );
+    lines.push(formatTraceabilityRow(r));
   }
-
-  reportLines.push('');
-  reportLines.push('## 2. Deterministic Validation Criteria');
-  reportLines.push(
-    '- **Product (Upstream)**: Requirement is issued in a formal PDaC Handoff (`HOF-*`) and derives from a Use Case (`UC-*`), Business Rule (`BR-*`), or Abuse Case (`ABUSE-*`).'
-  );
-  reportLines.push(
-    '- **Architecture (Midstream)**: Requirement is assigned to at least one Component (`CMP-*`), Security Enclave (`SEC-ENC-*`), Decision (`ADR-*`), or arc42/NAF v4 Execution View.'
-  );
-  reportLines.push(
-    '- **Testing (Downstream)**: Requirement has executable scenarios in BDD/Gherkin (`.feature`) test suites with matching tags or verified automated test cases.'
-  );
-
-  return reportLines.join('\n');
+  lines.push(...buildTraceabilityCriteria());
+  return lines.join('\n');
 }
 
 const SKIPPED_DIR_NAMES = new Set([
@@ -220,90 +227,113 @@ function scanCodeTestFiles(
   }
 }
 
-export function verifyTraceability(options: TraceabilityOptions = {}): TraceabilityResult {
-  const rootDir = options.rootDir || process.cwd();
-  const allMdFiles = walkMdFiles(rootDir);
+interface ArchitectureView {
+  file: string;
+  id?: string;
+  type?: string;
+  content: string;
+}
 
-  // 1. Index all markdown artifacts
+function parseComponentFromFrontmatter(frontmatter: ArtifactFrontmatter): ComponentEntry {
+  const satisfies: string[] = [];
+  if (Array.isArray(frontmatter['satisfies-requirements'])) {
+    satisfies.push(...(frontmatter['satisfies-requirements'] as string[]));
+  }
+  if (Array.isArray(frontmatter['satisfies'])) {
+    satisfies.push(...(frontmatter['satisfies'] as string[]));
+  }
+  return {
+    id: String(frontmatter.id),
+    level: typeof frontmatter.level === 'number' ? frontmatter.level : undefined,
+    parentComponent:
+      typeof frontmatter['parent-component'] === 'string' ? frontmatter['parent-component'] : undefined,
+    boundedContext:
+      typeof frontmatter['bounded-context'] === 'string' ? frontmatter['bounded-context'] : undefined,
+    implementationType:
+      typeof frontmatter['implementation-type'] === 'string' ? frontmatter['implementation-type'] : undefined,
+    satisfies,
+  };
+}
+
+function isArchitectureViewFile(relFile: string, frontmatter: ArtifactFrontmatter): boolean {
+  const isArchIntro =
+    frontmatter.type === 'architecture-introduction' ||
+    (frontmatter.id !== undefined && String(frontmatter.id).trim().startsWith('ARCH-INTRO-'));
+  if (isArchIntro) return false;
+
+  return (
+    relFile.includes('architecture/') ||
+    relFile.includes('06_runtime_view') ||
+    relFile.includes('08_security_concept') ||
+    relFile.includes('09_decisions')
+  );
+}
+
+interface IndexedArtifacts {
+  artifactMap: Map<string, ArtifactEntry>;
+  componentsList: ComponentEntry[];
+  architectureViews: ArchitectureView[];
+}
+
+function processSingleMdFile(
+  file: string,
+  rootDir: string,
+  artifactMap: Map<string, ArtifactEntry>,
+  componentsList: ComponentEntry[],
+  architectureViews: ArchitectureView[]
+): void {
+  try {
+    const content = fs.readFileSync(file, 'utf-8');
+    const { frontmatter, body } = parseFrontmatter(content);
+    const relFile = path.relative(rootDir, file).replace(/\\/g, '/');
+
+    if (frontmatter.id) {
+      artifactMap.set(frontmatter.id, {
+        file: relFile,
+        type: typeof frontmatter.type === 'string' ? frontmatter.type : undefined,
+        title: typeof frontmatter.title === 'string' ? frontmatter.title : undefined,
+        frontmatter,
+        rawBody: body,
+      });
+
+      if (frontmatter.type === 'component' || String(frontmatter.id).startsWith('CMP-')) {
+        componentsList.push(parseComponentFromFrontmatter(frontmatter));
+      }
+    }
+
+    if (isArchitectureViewFile(relFile, frontmatter)) {
+      architectureViews.push({
+        file: relFile,
+        id: frontmatter.id ? String(frontmatter.id).trim() : undefined,
+        type: typeof frontmatter.type === 'string' ? frontmatter.type.trim() : undefined,
+        content,
+      });
+    }
+  } catch {
+    // Ignore unparseable files
+  }
+}
+
+function indexAllArtifacts(allMdFiles: string[], rootDir: string): IndexedArtifacts {
   const artifactMap = new Map<string, ArtifactEntry>();
   const componentsList: ComponentEntry[] = [];
-  const architectureViews: { file: string; id?: string; type?: string; content: string }[] = [];
+  const architectureViews: ArchitectureView[] = [];
 
   for (const file of allMdFiles) {
-    try {
-      const content = fs.readFileSync(file, 'utf-8');
-      const { frontmatter, body } = parseFrontmatter(content);
-      const relFile = path.relative(rootDir, file).replace(/\\/g, '/');
-
-      if (frontmatter.id) {
-        artifactMap.set(frontmatter.id, {
-          file: relFile,
-          type: typeof frontmatter.type === 'string' ? frontmatter.type : undefined,
-          title: typeof frontmatter.title === 'string' ? frontmatter.title : undefined,
-          frontmatter,
-          rawBody: body,
-        });
-
-        if (frontmatter.type === 'component' || String(frontmatter.id).startsWith('CMP-')) {
-          const satisfies: string[] = [];
-          if (Array.isArray(frontmatter['satisfies-requirements'])) {
-            satisfies.push(...(frontmatter['satisfies-requirements'] as string[]));
-          }
-          if (Array.isArray(frontmatter['satisfies'])) {
-            satisfies.push(...(frontmatter['satisfies'] as string[]));
-          }
-          componentsList.push({
-            id: String(frontmatter.id),
-            level: typeof frontmatter.level === 'number' ? frontmatter.level : undefined,
-            parentComponent:
-              typeof frontmatter['parent-component'] === 'string'
-                ? frontmatter['parent-component']
-                : undefined,
-            boundedContext:
-              typeof frontmatter['bounded-context'] === 'string'
-                ? frontmatter['bounded-context']
-                : undefined,
-            implementationType:
-              typeof frontmatter['implementation-type'] === 'string'
-                ? frontmatter['implementation-type']
-                : undefined,
-            satisfies,
-          });
-        }
-      }
-
-      // Collect arc42 / NAF v4 midstream architecture views (excluding Phase 0 ARCH-INTRO-* upstream vision)
-      const isArchIntro =
-        frontmatter.type === 'architecture-introduction' ||
-        (frontmatter.id !== undefined && String(frontmatter.id).trim().startsWith('ARCH-INTRO-'));
-      if (
-        !isArchIntro &&
-        (relFile.includes('architecture/') ||
-          relFile.includes('06_runtime_view') ||
-          relFile.includes('08_security_concept') ||
-          relFile.includes('09_decisions'))
-      ) {
-        architectureViews.push({
-          file: relFile,
-          id: frontmatter.id ? String(frontmatter.id).trim() : undefined,
-          type: typeof frontmatter.type === 'string' ? frontmatter.type.trim() : undefined,
-          content,
-        });
-      }
-    } catch {
-      // Ignore unparseable files
-    }
+    processSingleMdFile(file, rootDir, artifactMap, componentsList, architectureViews);
   }
 
-  // 2. Scan PDaC Handoffs (HOF-*)
+  return { artifactMap, componentsList, architectureViews };
+}
+
+function buildHandoffList(rootDir: string, artifactMap: Map<string, ArtifactEntry>): ProductHandoff[] {
   const handoffsMap = scanAllProductHandoffs(rootDir);
   const handoffList: ProductHandoff[] = Array.from(handoffsMap.values()).map((v) => v.handoff);
 
-  // Also collect any handoffs declared in artifactMap (e.g. from markdown files with id: HOF-*)
   for (const [id, entry] of artifactMap.entries()) {
     if (id.startsWith('HOF-') && !handoffsMap.has(id)) {
       const fm = entry.frontmatter;
-      const subgraph = (fm.subgraph as any) || {
+      const subgraph = (fm.subgraph as ProductHandoffSubgraph | undefined) || {
         requirements: Array.isArray(fm.requirements) ? (fm.requirements as string[]) : [],
       };
       handoffList.push({
@@ -315,8 +345,10 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
       });
     }
   }
+  return handoffList;
+}
 
-  // Index requirement to handoff
+function indexRequirementsToHandoff(handoffList: ProductHandoff[]): Map<string, ProductHandoff> {
   const reqToHandoffMap = new Map<string, ProductHandoff>();
   for (const hof of handoffList) {
     if (hof.subgraph && Array.isArray(hof.subgraph.requirements)) {
@@ -330,182 +362,290 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
       }
     }
   }
+  return reqToHandoffMap;
+}
 
-  // 3. Scan Downstream Tests (BDD / Gherkin .feature & Code-level tests)
-  const featureTagMap = new Map<string, string[]>(); // reqId -> featureFiles[]
-  const codeTestMap = new Map<string, string[]>(); // reqId -> testFiles[]
+const TARGET_REQ_PREFIXES = ['FR-', 'QR-', 'SEC-REQ-', 'CON-'];
+
+function isRequirementToVerify(data: ArtifactEntry, id: string): boolean {
+  if (data.file.includes('templates/') || data.file.includes('.template.') || data.file.includes('process/')) {
+    return false;
+  }
+  if (data.type === 'requirement' || data.type === 'security-requirement') {
+    return true;
+  }
+  return TARGET_REQ_PREFIXES.some((prefix) => id.startsWith(prefix));
+}
+
+function collectRequirementsToVerify(artifactMap: Map<string, ArtifactEntry>): ArtifactEntry[] {
+  const list: ArtifactEntry[] = [];
+  for (const [id, data] of artifactMap.entries()) {
+    if (isRequirementToVerify(data, id)) {
+      list.push(data);
+    }
+  }
+  return list;
+}
+
+function buildTestMaps(
+  rootDir: string,
+  artifactMap: Map<string, ArtifactEntry>
+): { featureTagMap: Map<string, string[]>; codeTestMap: Map<string, string[]> } {
+  const featureTagMap = new Map<string, string[]>();
+  const codeTestMap = new Map<string, string[]>();
 
   const targetReqIds: string[] = [];
   for (const [artId] of artifactMap.entries()) {
-    if (
-      artId.startsWith('FR-') ||
-      artId.startsWith('QR-') ||
-      artId.startsWith('SEC-REQ-') ||
-      artId.startsWith('CON-')
-    ) {
+    if (TARGET_REQ_PREFIXES.some((p) => artId.startsWith(p))) {
       targetReqIds.push(artId);
     }
   }
 
   scanFeatureFiles(rootDir, rootDir, featureTagMap);
   scanCodeTestFiles(rootDir, rootDir, targetReqIds, codeTestMap);
+  return { featureTagMap, codeTestMap };
+}
 
-  // 4. Identify all requirements to verify (excluding templates and process docs)
-  const requirements: ArtifactEntry[] = [];
-  for (const [id, data] of artifactMap.entries()) {
-    if (data.file.includes('templates/') || data.file.includes('.template.') || data.file.includes('process/')) {
-      continue;
-    }
+function extractArrayOrSingle(val: unknown): string[] {
+  if (Array.isArray(val)) return val as string[];
+  if (typeof val === 'string') return [val];
+  return [];
+}
 
-    if (
-      data.type === 'requirement' ||
-      data.type === 'security-requirement' ||
-      id.startsWith('FR-') ||
-      id.startsWith('QR-') ||
-      id.startsWith('CON-') ||
-      id.startsWith('SEC-REQ-')
-    ) {
-      requirements.push(data);
+function collectHandoffSubgraphTraces(subgraph: ProductHandoffSubgraph | undefined): string[] {
+  if (!subgraph) return [];
+  const traces: string[] = [];
+  if (subgraph.useCases) traces.push(...subgraph.useCases);
+  if (subgraph.businessRules) traces.push(...subgraph.businessRules);
+  if (subgraph.abuseCases) traces.push(...subgraph.abuseCases);
+  return traces;
+}
+
+function collectArchIntroTraces(reqId: string, artifactMap: Map<string, ArtifactEntry>): string[] {
+  const traces: string[] = [];
+  for (const [artId, artEntry] of artifactMap.entries()) {
+    if (artEntry.type === 'architecture-introduction' || artId.startsWith('ARCH-INTRO-')) {
+      const citedGoals = artEntry.frontmatter['cites-quality-goals'];
+      if (Array.isArray(citedGoals) && citedGoals.includes(reqId)) {
+        traces.push(artId);
+      }
     }
   }
+  return traces;
+}
 
+function resolveProductTraces(
+  fm: ArtifactFrontmatter,
+  reqId: string,
+  associatedHandoff: ProductHandoff | undefined,
+  artifactMap: Map<string, ArtifactEntry>
+): { traces: string[]; isConforme: boolean } {
+  const traces: string[] = [
+    ...extractArrayOrSingle(fm['derives-from']),
+    ...extractArrayOrSingle(fm['mitigates-abuse-case']),
+    ...collectHandoffSubgraphTraces(associatedHandoff?.subgraph),
+    ...collectArchIntroTraces(reqId, artifactMap),
+  ];
+
+  const validTraces = Array.from(new Set(traces.filter((id) => artifactMap.has(id))));
+  const isConforme =
+    validTraces.length > 0 ||
+    (associatedHandoff !== undefined && (associatedHandoff.subgraph?.requirements?.includes(reqId) ?? false));
+
+  return { traces: validTraces, isConforme };
+}
+
+function isEntityWithId(view: ArchitectureView): boolean {
+  if (
+    view.type === 'component' ||
+    view.type === 'adr' ||
+    view.type === 'architecture-decision-record' ||
+    view.type === 'security-enclave'
+  ) {
+    return true;
+  }
+  return Boolean(
+    view.id && (view.id.startsWith('CMP-') || view.id.startsWith('ADR-') || view.id.startsWith('SEC-ENC-'))
+  );
+}
+
+function collectComponentTraces(reqId: string, componentsList: ComponentEntry[]): string[] {
+  const traces: string[] = [];
+  for (const cmp of componentsList) {
+    if (cmp.satisfies.includes(reqId)) {
+      traces.push(cmp.id);
+      if (cmp.parentComponent) {
+        traces.push(cmp.parentComponent);
+      }
+    }
+  }
+  return traces;
+}
+
+function collectArchitectureViewTraces(reqId: string, architectureViews: ArchitectureView[]): string[] {
+  const traces: string[] = [];
+  for (const view of architectureViews) {
+    if (view.content.includes(reqId)) {
+      const viewIdentifier = isEntityWithId(view) && view.id ? view.id : path.basename(view.file);
+      traces.push(viewIdentifier);
+    }
+  }
+  return traces;
+}
+
+function resolveArchitectureTraces(
+  fm: ArtifactFrontmatter,
+  reqId: string,
+  componentsList: ComponentEntry[],
+  architectureViews: ArchitectureView[]
+): { traces: string[]; isConforme: boolean } {
+  const archTraces: string[] = [
+    ...collectComponentTraces(reqId, componentsList),
+    ...collectArchitectureViewTraces(reqId, architectureViews),
+  ];
+
+  if (typeof fm['enforced-in-enclave'] === 'string') {
+    archTraces.push(fm['enforced-in-enclave']);
+  }
+
+  const uniqueTraces = Array.from(new Set(archTraces));
+  return { traces: uniqueTraces, isConforme: uniqueTraces.length > 0 };
+}
+
+function resolveTestTraces(
+  reqId: string,
+  associatedHandoff: ProductHandoff | undefined,
+  featureTagMap: Map<string, string[]>,
+  codeTestMap: Map<string, string[]>
+): { traces: string[]; isConforme: boolean } {
+  const testTraces: string[] = [
+    ...(featureTagMap.get(reqId) || []),
+    ...(associatedHandoff ? featureTagMap.get(associatedHandoff.id) || [] : []),
+    ...(codeTestMap.get(reqId) || []),
+  ];
+
+  const uniqueTraces = Array.from(new Set(testTraces));
+  return { traces: uniqueTraces, isConforme: uniqueTraces.length > 0 };
+}
+
+function formatTraceString(traces: string[], fallback = 'NONE'): string {
+  return traces.join(', ') || fallback;
+}
+
+function resolveComplianceStatus(isConforme: boolean): 'COMPLIANT' | 'ORPHAN' {
+  return isConforme ? 'COMPLIANT' : 'ORPHAN';
+}
+
+function assembleTraceabilityRow(
+  req: ArtifactEntry,
+  reqId: string,
+  associatedHandoff: ProductHandoff | undefined,
+  prod: { traces: string[]; isConforme: boolean },
+  arch: { traces: string[]; isConforme: boolean },
+  test: { traces: string[]; isConforme: boolean }
+): TraceabilityRow {
+  const fm = req.frontmatter;
+  const defaultProdTrace = associatedHandoff ? associatedHandoff.id : 'NONE';
+  return {
+    id: reqId,
+    title: (fm.title as string) || 'Untitled',
+    type: req.type,
+    hofId: associatedHandoff?.id,
+    productTraces: formatTraceString(prod.traces, defaultProdTrace),
+    productStatus: resolveComplianceStatus(prod.isConforme),
+    archTraces: formatTraceString(arch.traces),
+    archStatus: resolveComplianceStatus(arch.isConforme),
+    testTraces: formatTraceString(test.traces),
+    testStatus: resolveComplianceStatus(test.isConforme),
+    content: req.rawBody ? req.rawBody.trim() : undefined,
+    filePath: req.file,
+  };
+}
+
+function evaluateTraceabilityRow(
+  req: ArtifactEntry,
+  associatedHandoff: ProductHandoff | undefined,
+  artifactMap: Map<string, ArtifactEntry>,
+  componentsList: ComponentEntry[],
+  architectureViews: ArchitectureView[],
+  featureTagMap: Map<string, string[]>,
+  codeTestMap: Map<string, string[]>
+): { row: TraceabilityRow; isError: boolean } {
+  const reqId = req.frontmatter.id || '';
+  const prod = resolveProductTraces(req.frontmatter, reqId, associatedHandoff, artifactMap);
+  const arch = resolveArchitectureTraces(req.frontmatter, reqId, componentsList, architectureViews);
+  const test = resolveTestTraces(reqId, associatedHandoff, featureTagMap, codeTestMap);
+
+  const isError = !prod.isConforme || !arch.isConforme || !test.isConforme;
+  const row = assembleTraceabilityRow(req, reqId, associatedHandoff, prod, arch, test);
+  return { row, isError };
+}
+
+interface TraceabilityEvaluation {
+  matrixRows: TraceabilityRow[];
+  orphans: TraceabilityRow[];
+  errorCount: number;
+}
+
+interface TraceabilityContext {
+  reqToHandoffMap: Map<string, ProductHandoff>;
+  artifactMap: Map<string, ArtifactEntry>;
+  componentsList: ComponentEntry[];
+  architectureViews: ArchitectureView[];
+  featureTagMap: Map<string, string[]>;
+  codeTestMap: Map<string, string[]>;
+}
+
+function evaluateAllRequirements(
+  requirements: ArtifactEntry[],
+  ctx: TraceabilityContext
+): TraceabilityEvaluation {
   let errorCount = 0;
   const matrixRows: TraceabilityRow[] = [];
   const orphans: TraceabilityRow[] = [];
 
   for (const req of requirements) {
-    const fm = req.frontmatter;
-    const reqId = fm.id || '';
-    const associatedHandoff = reqToHandoffMap.get(reqId);
-
-    // --- A. UPSTREAM: PRODUCT TRACEABILITY (PDaC Handoff & Subgraph) ---
-    const productTraces: string[] = [];
-
-    // From frontmatter
-    if (Array.isArray(fm['derives-from'])) {
-      productTraces.push(...(fm['derives-from'] as string[]));
-    } else if (typeof fm['derives-from'] === 'string') {
-      productTraces.push(fm['derives-from']);
-    }
-
-    if (Array.isArray(fm['mitigates-abuse-case'])) {
-      productTraces.push(...(fm['mitigates-abuse-case'] as string[]));
-    } else if (typeof fm['mitigates-abuse-case'] === 'string') {
-      productTraces.push(fm['mitigates-abuse-case']);
-    }
-
-    // From PDaC Handoff subgraph
-    if (associatedHandoff) {
-      if (associatedHandoff.subgraph?.useCases) {
-        productTraces.push(...associatedHandoff.subgraph.useCases);
-      }
-      if (associatedHandoff.subgraph?.businessRules) {
-        productTraces.push(...associatedHandoff.subgraph.businessRules);
-      }
-      if (associatedHandoff.subgraph?.abuseCases) {
-        productTraces.push(...associatedHandoff.subgraph.abuseCases);
-      }
-    }
-
-    // From ARCH-INTRO-* (NAF v4 Enterprise & Capability Vision citing quality goals)
-    for (const [artId, artEntry] of artifactMap.entries()) {
-      if (artEntry.type === 'architecture-introduction' || artId.startsWith('ARCH-INTRO-')) {
-        const citedGoals = artEntry.frontmatter['cites-quality-goals'];
-        if (Array.isArray(citedGoals) && citedGoals.includes(reqId)) {
-          productTraces.push(artId);
-        }
-      }
-    }
-
-    // Keep unique valid traces that exist in the artifact base
-    const validProductTraces = Array.from(
-      new Set(productTraces.filter((id) => artifactMap.has(id)))
+    const associatedHandoff = ctx.reqToHandoffMap.get(req.frontmatter.id || '');
+    const { row, isError } = evaluateTraceabilityRow(
+      req,
+      associatedHandoff,
+      ctx.artifactMap,
+      ctx.componentsList,
+      ctx.architectureViews,
+      ctx.featureTagMap,
+      ctx.codeTestMap
     );
 
-    const isProductConforme =
-      validProductTraces.length > 0 || (associatedHandoff !== undefined && (associatedHandoff.subgraph?.requirements?.includes(reqId) ?? false));
-
-    const productStatus: 'COMPLIANT' | 'ORPHAN' = isProductConforme ? 'COMPLIANT' : 'ORPHAN';
-    if (!isProductConforme) errorCount++;
-
-    // --- B. MIDSTREAM: ARCHITECTURE TRACEABILITY (arc42 / NAF v4 - Reverse Lookup) ---
-    const archTraces: string[] = [];
-
-    // Component reverse mapping (components declaring satisfies-requirements / satisfies)
-    for (const cmp of componentsList) {
-      if (cmp.satisfies.includes(reqId)) {
-        if (!archTraces.includes(cmp.id)) archTraces.push(cmp.id);
-        if (cmp.parentComponent && !archTraces.includes(cmp.parentComponent)) {
-          archTraces.push(cmp.parentComponent);
-        }
-      }
-    }
-
-    if (typeof fm['enforced-in-enclave'] === 'string') {
-      archTraces.push(fm['enforced-in-enclave']);
-    }
-
-    // Check arc42 / NAF v4 views for direct citations
-    for (const view of architectureViews) {
-      if (view.content.includes(reqId)) {
-        const isEntityWithId =
-          view.type === 'component' ||
-          view.type === 'adr' ||
-          view.type === 'architecture-decision-record' ||
-          view.type === 'security-enclave' ||
-          (view.id !== undefined &&
-            (view.id.startsWith('CMP-') || view.id.startsWith('ADR-') || view.id.startsWith('SEC-ENC-')));
-        const viewIdentifier = isEntityWithId && view.id ? view.id : path.basename(view.file);
-        if (!archTraces.includes(viewIdentifier)) archTraces.push(viewIdentifier);
-      }
-    }
-
-    const uniqueArchTraces = Array.from(new Set(archTraces));
-    const archStatus: 'COMPLIANT' | 'ORPHAN' = uniqueArchTraces.length > 0 ? 'COMPLIANT' : 'ORPHAN';
-    if (uniqueArchTraces.length === 0) errorCount++;
-
-    // --- C. DOWNSTREAM: TEST TRACEABILITY (BDD / Gherkin & Code Tests - Reverse Lookup) ---
-    const testTraces: string[] = [];
-
-    // Tagged .feature files (reverse lookup)
-    const matchingFeatures = featureTagMap.get(reqId) || [];
-    testTraces.push(...matchingFeatures);
-
-    if (associatedHandoff) {
-      const handoffFeatures = featureTagMap.get(associatedHandoff.id) || [];
-      testTraces.push(...handoffFeatures);
-    }
-
-    // Code-based test files (reverse lookup)
-    const matchingCodeTests = codeTestMap.get(reqId) || [];
-    testTraces.push(...matchingCodeTests);
-
-    const uniqueTestTraces = Array.from(new Set(testTraces));
-    const testStatus: 'COMPLIANT' | 'ORPHAN' = uniqueTestTraces.length > 0 ? 'COMPLIANT' : 'ORPHAN';
-    if (uniqueTestTraces.length === 0) errorCount++;
-
-    const row: TraceabilityRow = {
-      id: reqId,
-      title: (fm.title as string) || 'Untitled',
-      type: req.type,
-      hofId: associatedHandoff?.id,
-      productTraces: validProductTraces.join(', ') || (associatedHandoff ? associatedHandoff.id : 'NONE'),
-      productStatus,
-      archTraces: uniqueArchTraces.join(', ') || 'NONE',
-      archStatus,
-      testTraces: uniqueTestTraces.join(', ') || 'NONE',
-      testStatus,
-      content: req.rawBody ? req.rawBody.trim() : undefined,
-      filePath: req.file,
-    };
-
-    matrixRows.push(row);
-    if (productStatus === 'ORPHAN' || archStatus === 'ORPHAN' || testStatus === 'ORPHAN') {
+    if (isError) {
+      errorCount++;
       orphans.push(row);
     }
+    matrixRows.push(row);
   }
 
-  const reportMarkdown = generateTraceabilityReportMarkdown(matrixRows, errorCount);
+  return { matrixRows, orphans, errorCount };
+}
+
+export function verifyTraceability(options: TraceabilityOptions = {}): TraceabilityResult {
+  const rootDir = options.rootDir || process.cwd();
+  const allMdFiles = walkMdFiles(rootDir);
+
+  const { artifactMap, componentsList, architectureViews } = indexAllArtifacts(allMdFiles, rootDir);
+  const handoffList = buildHandoffList(rootDir, artifactMap);
+  const reqToHandoffMap = indexRequirementsToHandoff(handoffList);
+  const { featureTagMap, codeTestMap } = buildTestMaps(rootDir, artifactMap);
+  const requirements = collectRequirementsToVerify(artifactMap);
+
+  const ctx: TraceabilityContext = {
+    reqToHandoffMap,
+    artifactMap,
+    componentsList,
+    architectureViews,
+    featureTagMap,
+    codeTestMap,
+  };
+
+  const { matrixRows, orphans, errorCount } = evaluateAllRequirements(requirements, ctx);
 
   return {
     success: errorCount === 0,
@@ -513,6 +653,6 @@ export function verifyTraceability(options: TraceabilityOptions = {}): Traceabil
     orphans,
     orphanCount: orphans.length,
     totalRequirements: requirements.length,
-    reportMarkdown,
+    reportMarkdown: generateTraceabilityReportMarkdown(matrixRows, errorCount),
   };
 }

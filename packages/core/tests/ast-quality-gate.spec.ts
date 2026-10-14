@@ -1,8 +1,12 @@
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import {
   extractFunctions,
   extractFunctionsTypeScriptAst,
   extractFunctionsPolyglot,
+  verifyQualityGate,
 } from '../src/index.js';
 
 describe('AST Static Analysis Engine (Issue #32)', () => {
@@ -324,6 +328,53 @@ def analyze_telemetry(data, threshold=100):
       }
       const elapsed = Date.now() - start;
       expect(elapsed).toBeLessThan(1000); // 20 files in < 1 second
+    });
+  });
+
+  describe('Monorepo & Scope Discovery (Issue #106)', () => {
+    it('should scan monorepo packages (packages/*/src) and exclude examples directory', () => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-quality-monorepo-'));
+      try {
+        // 1. Root source
+        const rootSrc = path.join(tmpDir, 'src');
+        fs.mkdirSync(rootSrc, { recursive: true });
+        fs.writeFileSync(path.join(rootSrc, 'index.ts'), 'export function rootFn() { return 1; }\n');
+
+        // 2. Monorepo packages/pkg-a/src
+        const pkgASrc = path.join(tmpDir, 'packages', 'pkg-a', 'src');
+        fs.mkdirSync(pkgASrc, { recursive: true });
+        fs.writeFileSync(path.join(pkgASrc, 'service.ts'), 'export function serviceFn() { return 2; }\n');
+
+        // 3. Examples directory (must be ignored)
+        const examplesDir = path.join(tmpDir, 'examples', 'demo', 'src');
+        fs.mkdirSync(examplesDir, { recursive: true });
+        fs.writeFileSync(path.join(examplesDir, 'demo.ts'), 'export function demoFn() { return 3; }\n');
+
+        const result = verifyQualityGate({
+          rootDir: tmpDir,
+          policy: {
+            max_cyclomatic: 10,
+            max_cognitive: 15,
+            min_maintainability: 50.0,
+            max_function_lines: 40,
+            min_line_coverage: 85.0,
+            min_branch_coverage: 80.0,
+            min_function_coverage: 90.0,
+            enforce_mode: 'STRICT',
+            target_directories: ['src', 'lib'],
+            supported_extensions: ['.ts'],
+            exclude_patterns: ['examples', 'node_modules', 'dist'],
+          },
+        });
+
+        expect(result.totalFiles).toBe(2); // root index.ts + pkg-a service.ts (examples excluded)
+        const fileNames = result.results.map((r) => r.relPath.replace(/\\/g, '/'));
+        expect(fileNames).toContain('src/index.ts');
+        expect(fileNames).toContain('packages/pkg-a/src/service.ts');
+        expect(fileNames.some((f) => f.includes('examples'))).toBe(false);
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
     });
   });
 });

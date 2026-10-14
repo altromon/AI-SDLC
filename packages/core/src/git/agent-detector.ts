@@ -84,17 +84,7 @@ function resolveModelFromBotString(str: string): string {
   return 'agent-developer';
 }
 
-/**
- * Universally detects whether the current author is an AI Agent or a Human,
- * regardless of IDE (VSCode, Cursor, Windsurf, Claude Code, CLI, JetBrains).
- */
-export function detectAuthorIdentity(
-  options: { cwd?: string; env?: NodeJS.ProcessEnv } = {}
-): AuthorIdentity {
-  const env = options.env || process.env;
-  const cwd = options.cwd || process.cwd();
-
-  // 1. Explicit Override via Environment Variable
+function detectFromEnvOverride(env: NodeJS.ProcessEnv): AuthorIdentity | null {
   const explicitEnv = env.AI_SDLC_AUTHOR_TYPE || env.AUTHOR_TYPE;
   if (explicitEnv === 'human' || explicitEnv === 'agent') {
     const model = explicitEnv === 'agent' ? (env.AI_MODEL || 'agent-developer') : 'n/a';
@@ -108,8 +98,10 @@ export function detectAuthorIdentity(
       activeTimeSeconds: 0,
     };
   }
+  return null;
+}
 
-  // 2. Explicit Git Config (git config ai-sdlc.author-type [human|agent])
+function detectFromGitConfig(cwd: string): AuthorIdentity | null {
   const gitConfigType = getGitConfigValue('ai-sdlc.author-type', cwd);
   if (gitConfigType === 'human' || gitConfigType === 'agent') {
     const gitConfigModel = getGitConfigValue('ai-sdlc.model', cwd) || (gitConfigType === 'agent' ? 'agent-developer' : 'n/a');
@@ -123,8 +115,10 @@ export function detectAuthorIdentity(
       activeTimeSeconds: 0,
     };
   }
+  return null;
+}
 
-  // 3. Local Session Telemetry File (.ai-sdlc/session-telemetry.json)
+function detectFromTelemetry(cwd: string, env: NodeJS.ProcessEnv): AuthorIdentity | null {
   const telemetry = readSessionTelemetry(cwd);
   if (telemetry) {
     const model = telemetry.model || env.AI_MODEL || 'agent-developer';
@@ -138,25 +132,36 @@ export function detectAuthorIdentity(
       activeTimeSeconds: telemetry.activeTimeSeconds || 0,
     };
   }
+  return null;
+}
 
-  // 4. IDE & Toolchain Environment Variables
+function parseEnvInt(val?: string): number {
+  return val ? (parseInt(val, 10) || 0) : 0;
+}
+
+function isEnvActive(val?: string): boolean {
+  return Boolean(val && val !== '0' && val !== 'false');
+}
+
+function detectFromAgentEnv(env: NodeJS.ProcessEnv): AuthorIdentity | null {
   for (const mapping of AGENT_ENV_MAPPINGS) {
     const envVal = env[mapping.envKey];
-    if (envVal && envVal !== '0' && envVal !== 'false') {
-      const model = env.AI_MODEL || (mapping.envKey === 'AIDER_MODEL' ? envVal : mapping.defaultModel);
-      return {
-        authorType: 'agent',
-        model,
-        source: `env-${mapping.source}`,
-        confidence: 'HIGH',
-        promptTokens: parseInt(env.PROMPT_TOKENS || '0', 10) || 0,
-        completionTokens: parseInt(env.COMPLETION_TOKENS || '0', 10) || 0,
-        activeTimeSeconds: parseInt(env.ACTIVE_TIME_SECONDS || env.ACTIVE_TIME_SEC || '0', 10) || 0,
-      };
-    }
+    if (!isEnvActive(envVal)) continue;
+    const model = env.AI_MODEL || (mapping.envKey === 'AIDER_MODEL' ? envVal! : mapping.defaultModel);
+    return {
+      authorType: 'agent',
+      model,
+      source: `env-${mapping.source}`,
+      confidence: 'HIGH',
+      promptTokens: parseEnvInt(env.PROMPT_TOKENS),
+      completionTokens: parseEnvInt(env.COMPLETION_TOKENS),
+      activeTimeSeconds: parseEnvInt(env.ACTIVE_TIME_SECONDS || env.ACTIVE_TIME_SEC),
+    };
   }
+  return null;
+}
 
-  // 5. Git Author / Committer Signature Inspection
+function detectFromSignature(env: NodeJS.ProcessEnv, cwd: string): AuthorIdentity | null {
   const authorName = env.GIT_AUTHOR_NAME || getGitConfigValue('user.name', cwd) || '';
   const authorEmail = env.GIT_AUTHOR_EMAIL || getGitConfigValue('user.email', cwd) || '';
 
@@ -172,15 +177,32 @@ export function detectAuthorIdentity(
       activeTimeSeconds: 0,
     };
   }
+  return null;
+}
 
-  // 6. Default Fallback: Human Developer
-  return {
-    authorType: 'human',
-    model: 'n/a',
-    source: 'default-human',
-    confidence: 'HIGH',
-    promptTokens: 0,
-    completionTokens: 0,
-    activeTimeSeconds: 0,
-  };
+/**
+ * Universally detects whether the current author is an AI Agent or a Human,
+ * regardless of IDE (VSCode, Cursor, Windsurf, Claude Code, CLI, JetBrains).
+ */
+export function detectAuthorIdentity(
+  options: { cwd?: string; env?: NodeJS.ProcessEnv } = {}
+): AuthorIdentity {
+  const env = options.env || process.env;
+  const cwd = options.cwd || process.cwd();
+
+  return (
+    detectFromEnvOverride(env) ||
+    detectFromGitConfig(cwd) ||
+    detectFromTelemetry(cwd, env) ||
+    detectFromAgentEnv(env) ||
+    detectFromSignature(env, cwd) || {
+      authorType: 'human',
+      model: 'n/a',
+      source: 'default-human',
+      confidence: 'HIGH',
+      promptTokens: 0,
+      completionTokens: 0,
+      activeTimeSeconds: 0,
+    }
+  );
 }

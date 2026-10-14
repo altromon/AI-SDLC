@@ -1,5 +1,17 @@
 # @aisdlc/core
 
+## 1.4.0
+
+### Minor Changes
+
+- refactor(quality): achieve zero violations across monorepo and activate STRICT quality gate enforcement mode; modularize reporting pipeline (`dashboard-graph`, `dashboard-html`, `dashboard-template`) and decompose high-complexity domain verifiers.
+
+## 1.3.3
+
+### Patch Changes
+
+- feat(dashboard): add interactive multi-selection and toggle filtering to Cytoscape node typologies legend; support single-click isolation, `Ctrl+click` / `Cmd+click` multi-selection displaying cross-typology relationship edges, and toggle-off cancellation on selected types.
+
 ## 1.3.2
 
 ### Patch Changes

@@ -175,6 +175,13 @@ export function runSemgrepCli(rootDir: string): SastViolation[] {
   return violations;
 }
 
+function isSastExcluded(relPath: string, excludes: string[]): boolean {
+  for (const exc of excludes) {
+    if (relPath.includes(exc) || relPath.startsWith(exc)) return true;
+  }
+  return false;
+}
+
 export function walkSourceFiles(
   dir: string,
   rootDir: string,
@@ -189,14 +196,7 @@ export function walkSourceFiles(
       const fullPath = path.join(dir, entry.name);
       const relPath = path.relative(rootDir, fullPath).replace(/\\/g, '/');
 
-      let isExcluded = false;
-      for (const exc of excludes) {
-        if (relPath.includes(exc) || relPath.startsWith(exc)) {
-          isExcluded = true;
-          break;
-        }
-      }
-      if (isExcluded) continue;
+      if (isSastExcluded(relPath, excludes)) continue;
 
       if (entry.isDirectory()) {
         files.push(...walkSourceFiles(fullPath, rootDir, excludes));
@@ -214,6 +214,26 @@ export function walkSourceFiles(
   return files;
 }
 
+function isLineExemptFromSast(line: string): boolean {
+  return (
+    line.includes('ai-sdlc:allow-sast') ||
+    line.includes('ai-sdlc:allow-prompt-injection') ||
+    line.includes('nosec')
+  );
+}
+
+function checkRuleMatch(
+  rule: SastRule,
+  line: string,
+  ext: string,
+  minSeverity: SastSeverity
+): boolean {
+  if (rule.fileExtensions && !rule.fileExtensions.includes(ext)) return false;
+  if (minSeverity === 'CRITICAL' && rule.severity !== 'CRITICAL') return false;
+  rule.pattern.lastIndex = 0;
+  return rule.pattern.test(line);
+}
+
 export function scanFileForSast(
   filePath: string,
   rootDir: string,
@@ -229,20 +249,10 @@ export function scanFileForSast(
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (
-        line.includes('ai-sdlc:allow-sast') ||
-        line.includes('ai-sdlc:allow-prompt-injection') ||
-        line.includes('nosec')
-      )
-        continue;
+      if (isLineExemptFromSast(line)) continue;
 
       for (const rule of SAST_RULES) {
-        if (rule.fileExtensions && !rule.fileExtensions.includes(ext)) continue;
-
-        if (minSeverity === 'CRITICAL' && rule.severity !== 'CRITICAL') continue;
-
-        rule.pattern.lastIndex = 0;
-        if (rule.pattern.test(line)) {
+        if (checkRuleMatch(rule, line, ext, minSeverity)) {
           violations.push({
             filePath,
             relPath,
@@ -263,29 +273,36 @@ export function scanFileForSast(
   return violations;
 }
 
+function collectSastFiles(rootDir: string, targetDirs: string[]): string[] {
+  const files: string[] = [];
+  for (const tDir of targetDirs) {
+    const fullDir = path.join(rootDir, tDir);
+    if (fs.existsSync(fullDir)) {
+      files.push(...walkSourceFiles(fullDir, rootDir));
+    }
+  }
+  return files;
+}
+
+function shouldRunSemgrep(options: SastVerifierOptions): boolean {
+  if (options.semgrep !== undefined) return options.semgrep;
+  return isSemgrepInstalled();
+}
+
 export function verifySast(options: SastVerifierOptions = {}): SastVerifierResult {
   const rootDir = options.rootDir || process.cwd();
   const minSeverity = options.minSeverity || 'HIGH';
   const targetDirs = options.targetDirectories || ['src', 'packages', 'prompts'];
-
-  const filesToScan: string[] = [];
-  for (const tDir of targetDirs) {
-    const fullDir = path.join(rootDir, tDir);
-    if (fs.existsSync(fullDir)) {
-      filesToScan.push(...walkSourceFiles(fullDir, rootDir));
-    }
-  }
+  const filesToScan = collectSastFiles(rootDir, targetDirs);
 
   const violations: SastViolation[] = [];
   for (const file of filesToScan) {
     violations.push(...scanFileForSast(file, rootDir, minSeverity));
   }
 
-  // Delegate to Semgrep if requested or available
-  if (options.semgrep || (options.semgrep === undefined && isSemgrepInstalled())) {
+  if (shouldRunSemgrep(options)) {
     try {
-      const semgrepFindings = runSemgrepCli(rootDir);
-      violations.push(...semgrepFindings);
+      violations.push(...runSemgrepCli(rootDir));
     } catch {
       // Semgrep failure fallback
     }
@@ -302,44 +319,49 @@ export function verifySast(options: SastVerifierOptions = {}): SastVerifierResul
   return result;
 }
 
-export function generateSastReportMarkdown(result: SastVerifierResult): string {
-  const isOk = result.success;
-  const lines: string[] = [
+function formatSastViolationRow(v: SastViolation): string {
+  const badge = v.severity === 'CRITICAL' ? '🛑 CRITICAL' : '⚠️ HIGH';
+  return `| **${badge}** | \`${v.ruleId}\` | \`${v.type}\` | \`${v.relPath}:${v.lineNumber}\` | \`${v.snippet.replace(/\|/g, '\\|')}\` | ${v.message} |`;
+}
+
+function buildSastHeader(isOk: boolean, violationsCount: number, totalFilesScanned: number): string[] {
+  const verdict = isOk
+    ? '✅ COMPLIANT (No vulnerable patterns detected)'
+    : `❌ BLOCKED (${violationsCount} vulnerabilities detected)`;
+  return [
     `# 🛡️ Shift-Left SAST Audit (Static Application Security Testing)`,
     ``,
     `> **Evaluation Date:** ${new Date().toISOString()}`,
-    `> **Verdict:** ${isOk ? '✅ COMPLIANT (No vulnerable patterns detected)' : `❌ BLOCKED (${result.violationsCount} vulnerabilities detected)`}`,
-    `> **Audited Code Files:** ${result.totalFilesScanned} | **SAST Violations:** ${result.violationsCount}`,
+    `> **Verdict:** ${verdict}`,
+    `> **Audited Code Files:** ${totalFilesScanned} | **SAST Violations:** ${violationsCount}`,
     ``,
     `---`,
   ];
+}
 
-  if (result.violations.length === 0) {
-    lines.push(
-      ``,
-      `## Compliance Summary`,
-      ``,
-      `No SQL injection, arbitrary dynamic command execution (eval/exec), SSRF, path traversal, or prompt injection (OWASP LLM01) patterns detected in analyzed code modules.`,
-      `Code generated by humans and agents complies with OWASP Top 10 and OWASP Top 10 for LLMs secure coding standards.`
-    );
-  } else {
-    lines.push(
-      ``,
-      `## Detected Security Findings Detail`,
-      ``,
-      `| Severity | Rule | Type | File:Line | Snippet | Details |`,
-      `| :---: | :--- | :--- | :--- | :--- | :--- |`
-    );
+const SAST_CLEAN_SUMMARY = `## Compliance Summary
 
-    for (const v of result.violations) {
-      const badge = v.severity === 'CRITICAL' ? '🛑 CRITICAL' : '⚠️ HIGH';
-      lines.push(
-        `| **${badge}** | \`${v.ruleId}\` | \`${v.type}\` | \`${v.relPath}:${v.lineNumber}\` | \`${v.snippet.replace(/\|/g, '\\|')}\` | ${v.message} |`
-      );
-    }
-  }
+No SQL injection, arbitrary dynamic command execution (eval/exec), SSRF, path traversal, or prompt injection (OWASP LLM01) patterns detected in analyzed code modules.
+Code generated by humans and agents complies with OWASP Top 10 and OWASP Top 10 for LLMs secure coding standards.`;
 
-  return lines.join('\n');
+function buildSastFindingsSection(violations: SastViolation[]): string[] {
+  const rows = violations.map(formatSastViolationRow);
+  return [
+    ``,
+    `## Detected Security Findings Detail`,
+    ``,
+    `| Severity | Rule | Type | File:Line | Snippet | Details |`,
+    `| :---: | :--- | :--- | :--- | :--- | :--- |`,
+    ...rows,
+  ];
+}
+
+export function generateSastReportMarkdown(result: SastVerifierResult): string {
+  const header = buildSastHeader(result.success, result.violationsCount, result.totalFilesScanned);
+  const body = result.violations.length === 0
+    ? [``, SAST_CLEAN_SUMMARY]
+    : buildSastFindingsSection(result.violations);
+  return [...header, ...body].join('\n');
 }
 
 export const PROMPT_INJECTION_SIGNATURES: readonly {
@@ -380,11 +402,7 @@ export const PROMPT_INJECTION_SIGNATURES: readonly {
   },
 ];
 
-export function detectPromptInjection(content: string): PromptInjectionFinding[] {
-  const findings: PromptInjectionFinding[] = [];
-  if (!content) return findings;
-
-  const lines = content.split(/\r?\n/);
+function scanLinesForPromptInjection(lines: string[], findings: PromptInjectionFinding[]): void {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (line.includes('ai-sdlc:allow-prompt-injection') || line.includes('nosec')) continue;
@@ -403,25 +421,33 @@ export function detectPromptInjection(content: string): PromptInjectionFinding[]
       }
     }
   }
+}
 
-  // Multiline checks
+function checkMultilinePromptInjection(content: string, findings: PromptInjectionFinding[]): void {
   for (const sig of PROMPT_INJECTION_SIGNATURES) {
-    if (sig.ruleId === 'PROMPT-INJ-ROLE-SPOOFING') {
-      sig.regex.lastIndex = 0;
-      if (sig.regex.test(content)) {
-        const alreadyFound = findings.some((f) => f.ruleId === sig.ruleId);
-        if (!alreadyFound) {
-          findings.push({
-            ruleId: sig.ruleId,
-            severity: sig.severity,
-            pattern: sig.regex.source,
-            snippet: content.slice(0, 100).trim(),
-            message: sig.message,
-          });
-        }
+    if (sig.ruleId !== 'PROMPT-INJ-ROLE-SPOOFING') continue;
+    sig.regex.lastIndex = 0;
+    if (sig.regex.test(content)) {
+      const alreadyFound = findings.some((f) => f.ruleId === sig.ruleId);
+      if (!alreadyFound) {
+        findings.push({
+          ruleId: sig.ruleId,
+          severity: sig.severity,
+          pattern: sig.regex.source,
+          snippet: content.slice(0, 100).trim(),
+          message: sig.message,
+        });
       }
     }
   }
+}
+
+export function detectPromptInjection(content: string): PromptInjectionFinding[] {
+  const findings: PromptInjectionFinding[] = [];
+  if (!content) return findings;
+
+  scanLinesForPromptInjection(content.split(/\r?\n/), findings);
+  checkMultilinePromptInjection(content, findings);
 
   return findings;
 }

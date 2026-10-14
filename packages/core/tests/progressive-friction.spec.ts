@@ -188,4 +188,24 @@ profile: patch
     expect(resTask.tier).toBe(4);
     expect(resTask.parentId).toBe('patch-002-typo');
   });
+
+  it('should auto-detect active patch change when changeId is omitted', () => {
+    const activePatchDir = path.join(tmpDir, 'specs', 'changes', 'active', 'patch-099-auto');
+    fs.mkdirSync(activePatchDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(activePatchDir, 'spec.md'),
+      '---\nid: SPEC-PATCH-099\ntype: delivery-spec\nchange-id: PATCH-099\nprofile: patch\n---\n',
+      'utf-8'
+    );
+
+    const res = verifyProgressiveFriction({
+      rootDir: tmpDir,
+      diffFiles: ['schemas/product/actor.schema.json'],
+    });
+    expect(res.profile).toBe('patch');
+    expect(res.success).toBe(false);
+    expect(res.bypassedRules.length).toBe(1);
+
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
 });

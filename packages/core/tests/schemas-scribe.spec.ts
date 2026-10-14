@@ -640,4 +640,19 @@ unknown-extra-property: "disallowed"
     expect(res.valid).toBe(true);
     expect(computeCanonicalSha256(content)).toBeDefined();
   });
+
+  it('should validate handoff.yaml sidecar files directly in verifyArtifactsSchemas', () => {
+    const handoffPath = path.join(
+      repoRoot,
+      'specs',
+      'changes',
+      'active',
+      'chg-027-normalize-ide-rulesets',
+      'handoff.yaml'
+    );
+    const res = verifyArtifactsSchemas({ rootDir: repoRoot, targetPath: handoffPath });
+    expect(res.success).toBe(true);
+    expect(res.totalEvaluated).toBe(1);
+    expect(res.validCount).toBe(1);
+  });
 });

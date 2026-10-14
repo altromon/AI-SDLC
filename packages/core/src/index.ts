@@ -17,6 +17,7 @@ export * from './verifiers/sca/sbom.js';
 export * from './verifiers/pdac-graph.js';
 export * from './verifiers/schemas.js';
 export * from './verifiers/progressive-friction.js';
+export * from './verifiers/manuals.js';
 export * from './verifiers/duplicates.js';
 export * from './verifiers/secrets.js';
 export * from './verifiers/sast.js';

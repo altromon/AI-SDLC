@@ -24,6 +24,24 @@ function openInBrowser(filePath: string): void {
 }
 
 
+function printDashboardMetrics(result: ReturnType<typeof generateDashboardReport>, rootDir: string): void {
+  console.log(`  Compiled nodes:        ${pc.bold(String(result.totalNodes))}`);
+  console.log(`  Connections (edges):   ${pc.bold(String(result.totalEdges))}`);
+  console.log(`  Compliant nodes:       ${pc.green(String(result.conformingCount))}`);
+  console.log(`  Nodes with issues:     ${result.issueCount > 0 ? pc.red(String(result.issueCount)) : pc.green('0')}`);
+  console.log(`  Global traceability:   ${pc.green(String(result.metrics.traceabilityRatio) + '%')}`);
+  console.log(`  Maintainability:       ${pc.bold(String(result.metrics.avgMaintainability) + ' / 100')}`);
+  console.log(`  Gate verdict:          ${result.metrics.qualityVerdict === 'PASS' ? pc.green('PASS') : pc.red('FAIL')}`);
+
+  const relPath = path.relative(rootDir, result.outputPath);
+  console.log(pc.green(`\n✔ Self-contained HTML dashboard successfully generated at: ${pc.bold(relPath)}\n`));
+}
+
+function printDashboardError(err: unknown): void {
+  const msg = err instanceof Error ? err.message : String(err);
+  console.error(pc.red(`\n✖ [ERROR] Failed to generate web dashboard: ${msg}\n`));
+}
+
 export function runReportDashboard(options: {
   root?: string;
   output?: string;
@@ -40,16 +58,7 @@ export function runReportDashboard(options: {
       title: options.title,
     });
 
-    console.log(`  Compiled nodes:        ${pc.bold(String(result.totalNodes))}`);
-    console.log(`  Connections (edges):   ${pc.bold(String(result.totalEdges))}`);
-    console.log(`  Compliant nodes:       ${pc.green(String(result.conformingCount))}`);
-    console.log(`  Nodes with issues:     ${result.issueCount > 0 ? pc.red(String(result.issueCount)) : pc.green('0')}`);
-    console.log(`  Global traceability:   ${pc.green(String(result.metrics.traceabilityRatio) + '%')}`);
-    console.log(`  Maintainability:       ${pc.bold(String(result.metrics.avgMaintainability) + ' / 100')}`);
-    console.log(`  Gate verdict:          ${result.metrics.qualityVerdict === 'PASS' ? pc.green('PASS') : pc.red('FAIL')}`);
-
-    const relPath = path.relative(rootDir, result.outputPath);
-    console.log(pc.green(`\n✔ Self-contained HTML dashboard successfully generated at: ${pc.bold(relPath)}\n`));
+    printDashboardMetrics(result, rootDir);
 
     if (options.open) {
       openInBrowser(result.outputPath);
@@ -57,10 +66,27 @@ export function runReportDashboard(options: {
 
     return true;
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error(pc.red(`\n✖ [ERROR] Failed to generate web dashboard: ${msg}\n`));
+    printDashboardError(err);
     return false;
   }
+}
+
+function printQualityReportMetrics(result: ReturnType<typeof generateQualityReport>, rootDir: string): void {
+  console.log(`  Analyzed files:             ${pc.bold(String(result.totalFiles))}`);
+  console.log(`  Evaluated functions:        ${pc.bold(String(result.totalFunctions))}`);
+  console.log(`  Average maintainability:    ${pc.green(String(result.avgMaintainability) + ' / 100')}`);
+  console.log(`  Average complexity (CC):    ${pc.bold(String(result.avgCyclomatic))}`);
+  console.log(
+    `  Code coverage (L/B/F):      ${
+      result.coverage
+        ? pc.bold(`${result.coverage.linesPct}% / ${result.coverage.branchesPct}% / ${result.coverage.functionsPct}%`)
+        : pc.dim('N/A (Run test:coverage)')
+    }`
+  );
+  console.log(`  Release Gate verdict:       ${result.verdict === 'PASS' ? pc.green('PASS') : pc.red('FAIL')}`);
+
+  const reportRelPath = path.relative(rootDir, path.join(rootDir, 'reports', 'QUALITY_REPORT.md'));
+  console.log(pc.green(`\n✔ Report successfully generated at: ${pc.bold(reportRelPath)}\n`));
 }
 
 export function runReportQuality(options: {
@@ -84,22 +110,7 @@ export function runReportQuality(options: {
   };
 
   const result = generateQualityReport({ rootDir, policyPath: options.policy, thresholds });
-
-  console.log(`  Analyzed files:             ${pc.bold(String(result.totalFiles))}`);
-  console.log(`  Evaluated functions:        ${pc.bold(String(result.totalFunctions))}`);
-  console.log(`  Average maintainability:    ${pc.green(String(result.avgMaintainability) + ' / 100')}`);
-  console.log(`  Average complexity (CC):    ${pc.bold(String(result.avgCyclomatic))}`);
-  console.log(
-    `  Code coverage (L/B/F):      ${
-      result.coverage
-        ? pc.bold(`${result.coverage.linesPct}% / ${result.coverage.branchesPct}% / ${result.coverage.functionsPct}%`)
-        : pc.dim('N/A (Run test:coverage)')
-    }`
-  );
-  console.log(`  Release Gate verdict:       ${result.verdict === 'PASS' ? pc.green('PASS') : pc.red('FAIL')}`);
-
-  const reportRelPath = path.relative(rootDir, path.join(rootDir, 'reports', 'QUALITY_REPORT.md'));
-  console.log(pc.green(`\n✔ Report successfully generated at: ${pc.bold(reportRelPath)}\n`));
+  printQualityReportMetrics(result, rootDir);
 
   return result.verdict === 'PASS';
 }

@@ -24,23 +24,28 @@ export function isToolAvailable(toolName: string): boolean {
   }
 }
 
-export function normalizeSpdxLicense(raw: any): string {
+function normalizeArrayLicense(raw: unknown[]): string {
+  const parts = raw.map((item) => normalizeSpdxLicense(item)).filter((id) => id !== 'UNKNOWN');
+  if (parts.length === 0) return 'UNKNOWN';
+  if (parts.length === 1) return parts[0];
+  return `(${parts.join(' OR ')})`;
+}
+
+function normalizeObjectLicense(raw: Record<string, unknown>): string {
+  if (typeof raw.type === 'string') return raw.type.trim();
+  if (typeof raw.name === 'string') return raw.name.trim();
+  if (typeof raw.license === 'string') return raw.license.trim();
+  return 'UNKNOWN';
+}
+
+export function normalizeSpdxLicense(raw: unknown): string {
   if (!raw) return 'UNKNOWN';
   if (typeof raw === 'string') {
     const trimmed = raw.trim();
     return trimmed.length > 0 ? trimmed : 'UNKNOWN';
   }
-  if (Array.isArray(raw)) {
-    const parts = raw.map((item) => normalizeSpdxLicense(item)).filter((id) => id !== 'UNKNOWN');
-    if (parts.length === 0) return 'UNKNOWN';
-    if (parts.length === 1) return parts[0];
-    return `(${parts.join(' OR ')})`;
-  }
-  if (typeof raw === 'object') {
-    if (raw.type && typeof raw.type === 'string') return raw.type.trim();
-    if (raw.name && typeof raw.name === 'string') return raw.name.trim();
-    if (raw.license && typeof raw.license === 'string') return raw.license.trim();
-  }
+  if (Array.isArray(raw)) return normalizeArrayLicense(raw);
+  if (typeof raw === 'object') return normalizeObjectLicense(raw as Record<string, unknown>);
   return 'UNKNOWN';
 }
 
@@ -65,33 +70,23 @@ export function findLicenseFile(pkgDir: string): string | undefined {
   return undefined;
 }
 
+const LICENSE_FILE_PATTERNS: readonly [predicate: (text: string) => boolean, spdx: string][] = [
+  [(t) => t.includes('Apache License') && t.includes('Version 2.0'), 'Apache-2.0'],
+  [(t) => t.includes('MIT License') || t.includes('Permission is hereby granted, free of charge'), 'MIT'],
+  [(t) => t.includes('Blue Oak Model License 1.0.0'), 'BlueOak-1.0.0'],
+  [(t) => t.includes('Python Software Foundation License') || t.includes('PSF LICENSE AGREEMENT'), 'Python-2.0'],
+  [(t) => t.includes('Redistribution and use in source and binary forms') && t.includes('Neither the name'), 'BSD-3-Clause'],
+  [(t) => t.includes('ISC License'), 'ISC'],
+  [(t) => t.includes('Microsoft Public License') || t.includes('MS-PL'), 'MS-PL'],
+  [(t) => t.includes('Microsoft Reciprocal License') || t.includes('MS-RL'), 'MS-RL'],
+];
+
 export function resolveLicenseFromFile(licenseFilePath?: string): string | undefined {
   if (!licenseFilePath || !fs.existsSync(licenseFilePath)) return undefined;
   try {
     const text = fs.readFileSync(licenseFilePath, 'utf-8');
-    if (text.includes('Apache License') && text.includes('Version 2.0')) {
-      return 'Apache-2.0';
-    }
-    if (text.includes('MIT License') || text.includes('Permission is hereby granted, free of charge')) {
-      return 'MIT';
-    }
-    if (text.includes('Blue Oak Model License 1.0.0')) {
-      return 'BlueOak-1.0.0';
-    }
-    if (text.includes('Python Software Foundation License') || text.includes('PSF LICENSE AGREEMENT')) {
-      return 'Python-2.0';
-    }
-    if (text.includes('Redistribution and use in source and binary forms') && text.includes('Neither the name')) {
-      return 'BSD-3-Clause';
-    }
-    if (text.includes('ISC License')) {
-      return 'ISC';
-    }
-    if (text.includes('Microsoft Public License') || text.includes('MS-PL')) {
-      return 'MS-PL';
-    }
-    if (text.includes('Microsoft Reciprocal License') || text.includes('MS-RL')) {
-      return 'MS-RL';
+    for (const [matches, spdx] of LICENSE_FILE_PATTERNS) {
+      if (matches(text)) return spdx;
     }
   } catch {
     // Ignore read error
@@ -99,10 +94,22 @@ export function resolveLicenseFromFile(licenseFilePath?: string): string | undef
   return undefined;
 }
 
-export function readPackageJson(filePath: string): any | null {
+export interface PackageJsonInfo {
+  name?: string;
+  version?: string;
+  license?: unknown;
+  licenses?: unknown;
+  repository?: string | { url?: string };
+  author?: string | { name?: string };
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  [key: string]: unknown;
+}
+
+export function readPackageJson(filePath: string): PackageJsonInfo | null {
   if (!fs.existsSync(filePath)) return null;
   try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as PackageJsonInfo;
   } catch {
     return null;
   }
@@ -123,22 +130,24 @@ export function extractDirectDepNames(rootDir: string, productionOnly?: boolean)
   return names;
 }
 
+function resolveSpdxForPackage(pkg: PackageJsonInfo, licFile?: string): string {
+  let spdx = normalizeSpdxLicense(pkg.license || pkg.licenses);
+  if (spdx === 'UNKNOWN' || spdx.toUpperCase().includes('SEE LICENSE')) {
+    const inferred = resolveLicenseFromFile(licFile);
+    if (inferred) spdx = inferred;
+  }
+  return spdx;
+}
+
 export function processPackageDir(pkgDir: string, directNames: Set<string>, seen: Map<string, ScannedDependency>): void {
-  const pkgJsonPath = path.join(pkgDir, 'package.json');
-  const pkg = readPackageJson(pkgJsonPath);
-  if (!pkg || !pkg.name || !pkg.version) return;
+  const pkg = readPackageJson(path.join(pkgDir, 'package.json'));
+  if (!pkg?.name || !pkg.version) return;
 
   const key = `${pkg.name}@${pkg.version}`;
   if (seen.has(key)) return;
 
   const licFile = findLicenseFile(pkgDir);
-  let spdx = normalizeSpdxLicense(pkg.license || pkg.licenses);
-
-  if (spdx === 'UNKNOWN' || spdx.toUpperCase().includes('SEE LICENSE')) {
-    const inferred = resolveLicenseFromFile(licFile);
-    if (inferred) spdx = inferred;
-  }
-
+  const spdx = resolveSpdxForPackage(pkg, licFile);
   const repoUrl = typeof pkg.repository === 'string' ? pkg.repository : pkg.repository?.url;
   const authorStr = typeof pkg.author === 'string' ? pkg.author : pkg.author?.name;
 
@@ -155,19 +164,22 @@ export function processPackageDir(pkgDir: string, directNames: Set<string>, seen
   });
 }
 
+function scanScopeSubdirectory(scopeDir: string, directNames: Set<string>, seen: Map<string, ScannedDependency>): void {
+  const scopedEntries = fs.readdirSync(scopeDir, { withFileTypes: true });
+  for (const scoped of scopedEntries) {
+    if (scoped.isDirectory()) {
+      processPackageDir(path.join(scopeDir, scoped.name), directNames, seen);
+    }
+  }
+}
+
 export function scanSubdirectories(baseDir: string, directNames: Set<string>, seen: Map<string, ScannedDependency>): void {
   if (!fs.existsSync(baseDir)) return;
   const entries = fs.readdirSync(baseDir, { withFileTypes: true });
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
     if (entry.name.startsWith('@')) {
-      const scopeDir = path.join(baseDir, entry.name);
-      const scopedEntries = fs.readdirSync(scopeDir, { withFileTypes: true });
-      for (const scoped of scopedEntries) {
-        if (scoped.isDirectory()) {
-          processPackageDir(path.join(scopeDir, scoped.name), directNames, seen);
-        }
-      }
+      scanScopeSubdirectory(path.join(baseDir, entry.name), directNames, seen);
     } else if (entry.name !== '.bin' && entry.name !== '.pnpm') {
       processPackageDir(path.join(baseDir, entry.name), directNames, seen);
     }
@@ -205,6 +217,22 @@ export function scanWithNativeFs(rootDir: string, options: ScanOptions = {}): Sc
   return allDeps.sort((a, b) => a.name.localeCompare(b.name));
 }
 
+function parseTrivyOutput(stdout: string): ScannedDependency[] {
+  const data = JSON.parse(stdout);
+  const deps: ScannedDependency[] = [];
+  for (const r of data.Results || []) {
+    for (const p of r.Packages || []) {
+      deps.push({
+        name: p.Name,
+        version: p.Version || 'unknown',
+        spdxLicense: normalizeSpdxLicense(p.Licenses?.[0] || 'UNKNOWN'),
+        purl: p.Identifier?.PURL || `pkg:npm/${p.Name}@${p.Version || 'unknown'}`,
+      });
+    }
+  }
+  return deps;
+}
+
 export function scanWithTrivy(rootDir: string): { dependencies: ScannedDependency[]; executed: boolean } {
   if (!isToolAvailable('trivy')) {
     return { dependencies: [], executed: false };
@@ -218,26 +246,26 @@ export function scanWithTrivy(rootDir: string): { dependencies: ScannedDependenc
     if (res.status !== 0 || !res.stdout) {
       return { dependencies: [], executed: false };
     }
-    const data = JSON.parse(res.stdout);
-    const deps: ScannedDependency[] = [];
-    if (Array.isArray(data.Results)) {
-      for (const r of data.Results) {
-        if (Array.isArray(r.Packages)) {
-          for (const p of r.Packages) {
-            deps.push({
-              name: p.Name,
-              version: p.Version || 'unknown',
-              spdxLicense: normalizeSpdxLicense(p.Licenses?.[0] || 'UNKNOWN'),
-              purl: p.Identifier?.PURL || `pkg:npm/${p.Name}@${p.Version || 'unknown'}`,
-            });
-          }
-        }
-      }
-    }
-    return { dependencies: deps, executed: true };
+    return { dependencies: parseTrivyOutput(res.stdout), executed: true };
   } catch {
     return { dependencies: [], executed: false };
   }
+}
+
+function parseSyftOutput(stdout: string): ScannedDependency[] {
+  const data = JSON.parse(stdout);
+  const deps: ScannedDependency[] = [];
+  for (const a of data.artifacts || []) {
+    const lic = a.licenses?.[0]?.value || 'UNKNOWN';
+    deps.push({
+      name: a.name,
+      version: a.version || 'unknown',
+      spdxLicense: normalizeSpdxLicense(lic),
+      purl: a.purl || `pkg:npm/${a.name}@${a.version || 'unknown'}`,
+      author: a.metadata?.author,
+    });
+  }
+  return deps;
 }
 
 export function scanWithSyft(rootDir: string): { dependencies: ScannedDependency[]; executed: boolean } {
@@ -252,21 +280,7 @@ export function scanWithSyft(rootDir: string): { dependencies: ScannedDependency
     if (res.status !== 0 || !res.stdout) {
       return { dependencies: [], executed: false };
     }
-    const data = JSON.parse(res.stdout);
-    const deps: ScannedDependency[] = [];
-    if (Array.isArray(data.artifacts)) {
-      for (const a of data.artifacts) {
-        const lic = a.licenses?.[0]?.value || 'UNKNOWN';
-        deps.push({
-          name: a.name,
-          version: a.version || 'unknown',
-          spdxLicense: normalizeSpdxLicense(lic),
-          purl: a.purl || `pkg:npm/${a.name}@${a.version || 'unknown'}`,
-          author: a.metadata?.author,
-        });
-      }
-    }
-    return { dependencies: deps, executed: true };
+    return { dependencies: parseSyftOutput(res.stdout), executed: true };
   } catch {
     return { dependencies: [], executed: false };
   }

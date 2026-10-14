@@ -42,6 +42,10 @@ export const DEFAULT_EXCLUDES: readonly string[] = [
   'reports',
   'dist',
   '.changeset',
+  'examples',
+  'scratch',
+  'templates',
+  'fixtures',
 ];
 
 const TS_JS_EXTENSIONS: readonly string[] = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
@@ -56,7 +60,7 @@ export function createDefaultQualityPolicy(): QualityPolicy {
     min_branch_coverage: 80.0,
     min_function_coverage: 90.0,
     enforce_mode: 'STRICT',
-    target_directories: ['src', 'lib', 'examples', 'tests'],
+    target_directories: ['src', 'lib'],
     supported_extensions: [...DEFAULT_EXTENSIONS],
     exclude_patterns: [...DEFAULT_EXCLUDES],
   };
@@ -188,26 +192,33 @@ export function calculateMetrics(fnBody: string, fnName: string, filePath: strin
   };
 }
 
+function isExcludedFile(file: string, normalized: string, excludePatterns: readonly string[]): boolean {
+  return excludePatterns.some(
+    (pattern) =>
+      file === pattern ||
+      normalized.includes('/' + pattern + '/') ||
+      normalized.endsWith('/' + pattern) ||
+      normalized.includes(pattern)
+  );
+}
+
 export function walkDir(
   dir: string,
   extensions: readonly string[] = DEFAULT_EXTENSIONS,
   excludePatterns: readonly string[] = DEFAULT_EXCLUDES
 ): string[] {
-  let results: string[] = [];
-  if (!fs.existsSync(dir)) return results;
-  const list = fs.readdirSync(dir);
-  for (const file of list) {
+  if (!fs.existsSync(dir)) return [];
+  const results: string[] = [];
+  for (const file of fs.readdirSync(dir)) {
     const fullPath = path.join(dir, file);
+    const normalized = fullPath.replace(/\\/g, '/');
+    if (isExcludedFile(file, normalized, excludePatterns)) continue;
+
     const stat = fs.statSync(fullPath);
-    if (stat && stat.isDirectory()) {
-      if (!excludePatterns.some((pattern) => file === pattern || fullPath.includes(pattern))) {
-        results = results.concat(walkDir(fullPath, extensions, excludePatterns));
-      }
-    } else {
-      const ext = path.extname(file).toLowerCase();
-      if (extensions.includes(ext)) {
-        results.push(fullPath);
-      }
+    if (stat.isDirectory()) {
+      results.push(...walkDir(fullPath, extensions, excludePatterns));
+    } else if (extensions.includes(path.extname(file).toLowerCase())) {
+      results.push(fullPath);
     }
   }
   return results;
@@ -226,15 +237,80 @@ function resolvePolicy(rootDir: string, options: QualityGateOptions): QualityPol
   return parseQualityPolicy('', options.thresholds);
 }
 
-function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
-  const files: string[] = [];
-  for (const targetDir of policy.target_directories) {
-    const fullDir = path.join(rootDir, targetDir);
-    if (fs.existsSync(fullDir)) {
-      files.push(...walkDir(fullDir, policy.supported_extensions, policy.exclude_patterns));
+function isPathExcluded(targetPath: string, rootDir: string, excludePatterns: readonly string[]): boolean {
+  const rel = path.relative(rootDir, targetPath).replace(/\\/g, '/');
+  const base = path.basename(targetPath);
+  return excludePatterns.some(
+    (pat) =>
+      base === pat ||
+      rel === pat ||
+      rel.startsWith(pat + '/') ||
+      rel.includes('/' + pat + '/') ||
+      rel.endsWith('/' + pat) ||
+      rel.includes(pat)
+  );
+}
+
+function scanContainerSubdir(
+  containerDir: string,
+  subdirName: string,
+  targetDir: string,
+  rootDir: string,
+  policy: QualityPolicy,
+  files: Set<string>
+): void {
+  if (policy.exclude_patterns.includes(subdirName)) return;
+  const subTarget = path.join(containerDir, subdirName, targetDir);
+  if (!fs.existsSync(subTarget) || !fs.statSync(subTarget).isDirectory()) return;
+  if (isPathExcluded(subTarget, rootDir, policy.exclude_patterns)) return;
+  for (const f of walkDir(subTarget, policy.supported_extensions, policy.exclude_patterns)) {
+    files.add(f);
+  }
+}
+
+function scanMonorepoContainer(
+  rootDir: string,
+  container: string,
+  targetDir: string,
+  policy: QualityPolicy,
+  files: Set<string>
+): void {
+  const containerDir = path.join(rootDir, container);
+  if (!fs.existsSync(containerDir) || !fs.statSync(containerDir).isDirectory()) return;
+  if (isPathExcluded(containerDir, rootDir, policy.exclude_patterns)) return;
+
+  try {
+    for (const subdir of fs.readdirSync(containerDir, { withFileTypes: true })) {
+      if (subdir.isDirectory()) {
+        scanContainerSubdir(containerDir, subdir.name, targetDir, rootDir, policy, files);
+      }
+    }
+  } catch {
+    // ignore directory read errors
+  }
+}
+
+function scanDirectTarget(rootDir: string, targetDir: string, policy: QualityPolicy, files: Set<string>): void {
+  const fullDir = path.join(rootDir, targetDir);
+  if (fs.existsSync(fullDir) && !isPathExcluded(fullDir, rootDir, policy.exclude_patterns)) {
+    for (const f of walkDir(fullDir, policy.supported_extensions, policy.exclude_patterns)) {
+      files.add(f);
     }
   }
-  return files;
+}
+
+function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
+  const files = new Set<string>();
+  const monorepoContainers = ['packages', 'apps', 'libs', 'modules', 'services'];
+
+  for (const targetDir of policy.target_directories) {
+    scanDirectTarget(rootDir, targetDir, policy, files);
+    for (const container of monorepoContainers) {
+      scanMonorepoContainer(rootDir, container, targetDir, policy, files);
+    }
+  }
+
+  return Array.from(files);
 }
 
 function evaluateViolations(fn: FunctionMetrics, policy: QualityPolicy): string[] {

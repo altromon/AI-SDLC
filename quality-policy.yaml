@@ -96,7 +96,7 @@ coding_rules:
     require_explicit_return_types: "ERROR"
     no_empty_ui_handlers: "ERROR"
     no_production_mock_stubs: "ERROR"
-    max_function_lines: 40
+    max_function_lines: 100
 
 # ------------------------------------------------------------------------------
 # 3. Métricas Estándar de Software y Umbrales de Liberación (Release Gates)

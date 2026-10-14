@@ -15,6 +15,28 @@ export interface GherkinExtractCliOptions {
   format?: string;
 }
 
+function printGherkinResult(result: ReturnType<typeof extractGherkinFeatures>): void {
+  console.log(`  Generated .feature files:    ${pc.bold(String(result.features.length))}`);
+  console.log(`  Total scenarios:             ${pc.bold(String(result.totalScenarios))}`);
+
+  for (const f of result.features) {
+    console.log(`    ${pc.green('✔')} ${pc.bold(f.featureName)} ➔ ${f.outputFile} (${f.scenarioCount} scenarios)`);
+  }
+
+  console.log(pc.green('\n✔ BDD synchronization completed successfully.\n'));
+}
+
+function emitGherkinJson(result: ReturnType<typeof extractGherkinFeatures>): void {
+  const payload = {
+    command: 'gherkin:extract',
+    success: result.success,
+    exitCode: result.success ? 0 : 1,
+    totalScenarios: result.totalScenarios,
+    features: result.features,
+  };
+  console.log(JSON.stringify(payload, null, 2));
+}
+
 export function runGherkinExtract(options: GherkinExtractCliOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
   const useJson = isJsonOutput(options);
@@ -31,25 +53,11 @@ export function runGherkinExtract(options: GherkinExtractCliOptions = {}): boole
   });
 
   if (!isSilent) {
-    console.log(`  Generated .feature files:    ${pc.bold(String(result.features.length))}`);
-    console.log(`  Total scenarios:             ${pc.bold(String(result.totalScenarios))}`);
-
-    for (const f of result.features) {
-      console.log(`    ${pc.green('✔')} ${pc.bold(f.featureName)} ➔ ${f.outputFile} (${f.scenarioCount} scenarios)`);
-    }
-
-    console.log(pc.green('\n✔ BDD synchronization completed successfully.\n'));
+    printGherkinResult(result);
   }
 
   if (useJson) {
-    const payload = {
-      command: 'gherkin:extract',
-      success: result.success,
-      exitCode: result.success ? 0 : 1,
-      totalScenarios: result.totalScenarios,
-      features: result.features,
-    };
-    console.log(JSON.stringify(payload, null, 2));
+    emitGherkinJson(result);
   }
 
   return result.success;

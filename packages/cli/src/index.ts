@@ -23,6 +23,7 @@ import {
   runVerifyAll,
   runVerifyDuplicates,
   runVerifyFriction,
+  runVerifyGherkin,
   runVerifyGovernance,
   runVerifyLicenses,
   runVerifyPdac,
@@ -40,7 +41,7 @@ const program = new Command();
 program
   .name('aisdlc')
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
-  .version('1.3.2');
+  .version('1.4.0');
 
 // --- check command (unified pre-flight with auto-fix) ---
 program
@@ -149,6 +150,17 @@ verifyCommand
   .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
     const passed = runVerifyTesting({ root: opts.root, json: opts.json, format: opts.format });
+    process.exit(passed ? 0 : 1);
+  });
+
+verifyCommand
+  .command('gherkin')
+  .description('Verify BDD synchronization between Markdown Gherkin blocks and .feature files')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
+  .action((opts) => {
+    const passed = runVerifyGherkin({ root: opts.root, json: opts.json, format: opts.format });
     process.exit(passed ? 0 : 1);
   });
 

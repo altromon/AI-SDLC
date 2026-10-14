@@ -46,6 +46,10 @@ const GENERIC_BDD_TAGS = new Set([
   'integration',
 ]);
 
+const REQ_PREFIXES = ['FR-', 'QR-', 'CON-', 'SEC-REQ-', 'SAF-REQ-'];
+const REQ_TYPES = new Set(['requirement', 'security-requirement', 'safety-requirement']);
+const REQ_CATEGORIES = new Set(['functional', 'quality', 'constraint', 'security', 'safety']);
+
 export interface ScannedRequirement {
   id: string;
   file: string;
@@ -101,70 +105,227 @@ export function extractNormativeText(body: string): string {
 
 export function isRequirementArtifact(frontmatter: ArtifactFrontmatter): boolean {
   const id = String(frontmatter.id || '');
-  const type = String(frontmatter.type || '').toLowerCase();
-  const category = String((frontmatter as Record<string, unknown>).category || '').toLowerCase();
+  if (REQ_PREFIXES.some((p) => id.startsWith(p))) return true;
 
-  return (
-    id.startsWith('FR-') ||
-    id.startsWith('QR-') ||
-    id.startsWith('CON-') ||
-    id.startsWith('SEC-REQ-') ||
-    id.startsWith('SAF-REQ-') ||
-    type === 'requirement' ||
-    type === 'security-requirement' ||
-    type === 'safety-requirement' ||
-    category === 'functional' ||
-    category === 'quality' ||
-    category === 'constraint' ||
-    category === 'security' ||
-    category === 'safety'
-  );
+  const type = String(frontmatter.type || '').toLowerCase();
+  if (REQ_TYPES.has(type)) return true;
+
+  const category = String((frontmatter as Record<string, unknown>).category || '').toLowerCase();
+  return REQ_CATEGORIES.has(category);
+}
+
+function extractFrontmatterDerives(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.map(String);
+  return raw ? [String(raw)] : [];
+}
+
+function extractCucumberTags(raw: unknown): string[] {
+  if (Array.isArray(raw)) {
+    return raw.map((t) => String(t).replace(/^@/, '').toLowerCase().trim());
+  }
+  return [];
+}
+
+function extractParsedFrontmatter(content: string): { fm: ArtifactFrontmatter; matchLen: number } | null {
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return null;
+  try {
+    const parsed = yaml.load(match[1]);
+    if (parsed && typeof parsed === 'object') {
+      const fm = parsed as ArtifactFrontmatter;
+      if (fm.id && isRequirementArtifact(fm)) {
+        return { fm, matchLen: match[0].length };
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function buildRequirementObject(
+  content: string,
+  fm: ArtifactFrontmatter,
+  body: string,
+  filePath: string,
+  relFile: string
+): ScannedRequirement {
+  return {
+    id: String(fm.id).trim(),
+    file: filePath,
+    relFile,
+    title: String(fm.title || '').trim(),
+    version: String(fm.version || '1.0.0').trim(),
+    type: fm.type ? String(fm.type) : undefined,
+    category: fm.category ? String(fm.category) : undefined,
+    derivesFrom: extractFrontmatterDerives(fm['derives-from']),
+    cucumberTags: extractCucumberTags(fm['cucumber-tags']),
+    canonicalHash: computeSha256(content),
+    normalizedNormativeText: extractNormativeText(body),
+  };
 }
 
 export function parseRequirementFile(filePath: string, rootDir: string): ScannedRequirement | null {
   try {
     const content = fs.readFileSync(filePath, 'utf-8');
-    const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-    if (!match) return null;
-
-    const parsed = yaml.load(match[1]);
-    if (!parsed || typeof parsed !== 'object') return null;
-
-    const frontmatter = parsed as ArtifactFrontmatter;
-    if (!frontmatter.id || !isRequirementArtifact(frontmatter)) {
-      return null;
-    }
-
-    const body = content.substring(match[0].length);
+    const extracted = extractParsedFrontmatter(content);
+    if (!extracted) return null;
+    const body = content.substring(extracted.matchLen);
     const relFile = path.relative(rootDir, filePath).replace(/\\/g, '/');
-
-    const derivesRaw = frontmatter['derives-from'];
-    const derivesFrom: string[] = Array.isArray(derivesRaw)
-      ? derivesRaw.map(String)
-      : derivesRaw
-        ? [String(derivesRaw)]
-        : [];
-
-    const tagsRaw = frontmatter['cucumber-tags'];
-    const cucumberTags: string[] = Array.isArray(tagsRaw)
-      ? tagsRaw.map((t) => String(t).replace(/^@/, '').toLowerCase().trim())
-      : [];
-
-    return {
-      id: String(frontmatter.id).trim(),
-      file: filePath,
-      relFile,
-      title: String(frontmatter.title || '').trim(),
-      version: String(frontmatter.version || '1.0.0').trim(),
-      type: frontmatter.type ? String(frontmatter.type) : undefined,
-      category: frontmatter.category ? String(frontmatter.category) : undefined,
-      derivesFrom,
-      cucumberTags,
-      canonicalHash: computeSha256(content),
-      normalizedNormativeText: extractNormativeText(body),
-    };
+    return buildRequirementObject(content, extracted.fm, body, filePath, relFile);
   } catch {
     return null;
+  }
+}
+
+function isIgnoredScanPath(relFile: string): boolean {
+  return (
+    relFile.includes('node_modules/') ||
+    relFile.includes('dist/') ||
+    relFile.includes('.template.') ||
+    relFile.startsWith('templates/') ||
+    relFile.startsWith('process/') ||
+    relFile.startsWith('reports/') ||
+    relFile.startsWith('.changeset/')
+  );
+}
+
+function collectRequirements(rootDir: string): ScannedRequirement[] {
+  const reqs: ScannedRequirement[] = [];
+  for (const file of walkMdFiles(rootDir)) {
+    const relFile = path.relative(rootDir, file).replace(/\\/g, '/');
+    if (isIgnoredScanPath(relFile)) continue;
+    const req = parseRequirementFile(file, rootDir);
+    if (req) reqs.push(req);
+  }
+  return reqs;
+}
+
+function checkIdCollisions(requirements: ScannedRequirement[], issues: DuplicateIssue[]): void {
+  const idMap = new Map<string, ScannedRequirement>();
+  for (const req of requirements) {
+    const existing = idMap.get(req.id);
+    if (existing && existing.relFile !== req.relFile) {
+      issues.push({
+        type: 'ID_COLLISION',
+        severity: 'ERROR',
+        id: req.id,
+        file: req.relFile,
+        conflictingId: existing.id,
+        conflictingFile: existing.relFile,
+        message: `Identificador duplicado '${req.id}' presente en dos archivos distintos: '${req.relFile}' y '${existing.relFile}'.`,
+      });
+    } else {
+      idMap.set(req.id, req);
+    }
+  }
+}
+
+function checkExactContentCollision(a: ScannedRequirement, b: ScannedRequirement, issues: DuplicateIssue[]): boolean {
+  const isHashEqual = a.canonicalHash === b.canonicalHash && a.canonicalHash.length > 0;
+  const isNormEqual = a.normalizedNormativeText.length > 20 && a.normalizedNormativeText === b.normalizedNormativeText;
+
+  if (isHashEqual || isNormEqual) {
+    issues.push({
+      type: 'EXACT_CONTENT',
+      severity: 'ERROR',
+      id: a.id,
+      file: a.relFile,
+      conflictingId: b.id,
+      conflictingFile: b.relFile,
+      message: `Cuerpo normativo idéntico (copia-pega) detectado entre '${a.id}' (${a.relFile}) y '${b.id}' (${b.relFile}).`,
+    });
+    return true;
+  }
+  return false;
+}
+
+function checkTitleSimilarity(
+  a: ScannedRequirement,
+  b: ScannedRequirement,
+  tokensA: Set<string>,
+  threshold: number,
+  issues: DuplicateIssue[]
+): void {
+  const tokensB = tokenizeTitle(b.title);
+  const similarity = calculateJaccardSimilarity(tokensA, tokensB);
+  if (similarity >= threshold && tokensA.size > 0 && tokensB.size > 0) {
+    issues.push({
+      type: 'TITLE_SIMILARITY',
+      severity: 'ERROR',
+      id: a.id,
+      file: a.relFile,
+      conflictingId: b.id,
+      conflictingFile: b.relFile,
+      similarityScore: Math.round(similarity * 100) / 100,
+      message: `Titles with high lexical redundancy (${Math.round(similarity * 100)}% similarity) between '${a.id}' ("${a.title}") and '${b.id}' ("${b.title}").`,
+    });
+  }
+}
+
+function checkBddTagCollision(a: ScannedRequirement, b: ScannedRequirement, issues: DuplicateIssue[]): void {
+  const tagsA = new Set(a.cucumberTags.filter((t) => !GENERIC_BDD_TAGS.has(t) && t !== a.id.toLowerCase()));
+  const tagsB = new Set(b.cucumberTags.filter((t) => !GENERIC_BDD_TAGS.has(t) && t !== b.id.toLowerCase()));
+
+  if (tagsA.size > 0 && tagsB.size > 0 && tagsA.size === tagsB.size) {
+    const allMatch = Array.from(tagsA).every((t) => tagsB.has(t));
+    if (allMatch) {
+      issues.push({
+        type: 'BDD_TAG_COLLISION',
+        severity: 'ERROR',
+        id: a.id,
+        file: a.relFile,
+        conflictingId: b.id,
+        conflictingFile: b.relFile,
+        message: `BDD test tag collision: '${a.id}' and '${b.id}' claim the same specific tags: @${Array.from(tagsA).join(' @')}.`,
+      });
+    }
+  }
+}
+
+function checkSharedBusinessRules(a: ScannedRequirement, b: ScannedRequirement, issues: DuplicateIssue[]): void {
+  const brA = a.derivesFrom.filter((r) => r.startsWith('BR-'));
+  const brB = new Set(b.derivesFrom.filter((r) => r.startsWith('BR-')));
+  for (const br of brA) {
+    if (brB.has(br)) {
+      issues.push({
+        type: 'SHARED_BUSINESS_RULE',
+        severity: 'WARNING',
+        id: a.id,
+        file: a.relFile,
+        conflictingId: b.id,
+        conflictingFile: b.relFile,
+        message: `Potential logic overlap: both '${a.id}' and '${b.id}' govern the same atomic business rule '${br}'.`,
+      });
+    }
+  }
+}
+
+function compareRequirementPair(
+  a: ScannedRequirement,
+  b: ScannedRequirement,
+  tokensA: Set<string>,
+  threshold: number,
+  issues: DuplicateIssue[]
+): void {
+  if (a.id === b.id) return;
+  if (checkExactContentCollision(a, b, issues)) return;
+  checkTitleSimilarity(a, b, tokensA, threshold, issues);
+  checkBddTagCollision(a, b, issues);
+  checkSharedBusinessRules(a, b, issues);
+}
+
+function checkCrossComparisons(
+  requirements: ScannedRequirement[],
+  threshold: number,
+  issues: DuplicateIssue[]
+): void {
+  for (let i = 0; i < requirements.length; i++) {
+    const a = requirements[i];
+    const tokensA = tokenizeTitle(a.title);
+    for (let j = i + 1; j < requirements.length; j++) {
+      compareRequirementPair(a, requirements[j], tokensA, threshold, issues);
+    }
   }
 }
 
@@ -174,147 +335,11 @@ export function verifyArtifactDuplicates(
   const rootDir = options.rootDir || process.cwd();
   const threshold = options.titleSimilarityThreshold ?? 0.85;
 
-  const allMdFiles = walkMdFiles(rootDir);
-  const requirements: ScannedRequirement[] = [];
-
-  for (const file of allMdFiles) {
-    const relFile = path.relative(rootDir, file).replace(/\\/g, '/');
-
-    // Skip templates, node_modules, dist, and process documentation
-    if (
-      relFile.includes('node_modules/') ||
-      relFile.includes('dist/') ||
-      relFile.includes('.template.') ||
-      relFile.startsWith('templates/') ||
-      relFile.startsWith('process/') ||
-      relFile.startsWith('reports/') ||
-      relFile.startsWith('.changeset/')
-    ) {
-      continue;
-    }
-
-    const req = parseRequirementFile(file, rootDir);
-    if (req) {
-      requirements.push(req);
-    }
-  }
-
+  const requirements = collectRequirements(rootDir);
   const issues: DuplicateIssue[] = [];
 
-  // 1. Check ID collisions across different files
-  const idMap = new Map<string, ScannedRequirement>();
-  for (const req of requirements) {
-    const existing = idMap.get(req.id);
-    if (existing) {
-      if (existing.relFile !== req.relFile) {
-        issues.push({
-          type: 'ID_COLLISION',
-          severity: 'ERROR',
-          id: req.id,
-          file: req.relFile,
-          conflictingId: existing.id,
-          conflictingFile: existing.relFile,
-          message: `Identificador duplicado '${req.id}' presente en dos archivos distintos: '${req.relFile}' y '${existing.relFile}'.`,
-        });
-      }
-    } else {
-      idMap.set(req.id, req);
-    }
-  }
-
-  // 2. Cross-comparisons between different requirements
-  for (let i = 0; i < requirements.length; i++) {
-    const a = requirements[i];
-    const tokensA = tokenizeTitle(a.title);
-
-    for (let j = i + 1; j < requirements.length; j++) {
-      const b = requirements[j];
-
-      // If they have the same ID, it was already reported as ID_COLLISION
-      if (a.id === b.id) continue;
-
-      // Check Exact Content / SHA-256 / identical normative text
-      if (
-        (a.canonicalHash === b.canonicalHash && a.canonicalHash.length > 0) ||
-        (a.normalizedNormativeText.length > 20 &&
-          a.normalizedNormativeText === b.normalizedNormativeText)
-      ) {
-        issues.push({
-          type: 'EXACT_CONTENT',
-          severity: 'ERROR',
-          id: a.id,
-          file: a.relFile,
-          conflictingId: b.id,
-          conflictingFile: b.relFile,
-          message: `Cuerpo normativo idéntico (copia-pega) detectado entre '${a.id}' (${a.relFile}) y '${b.id}' (${b.relFile}).`,
-        });
-        continue;
-      }
-
-      // Check Title Lexical Similarity
-      const tokensB = tokenizeTitle(b.title);
-      const similarity = calculateJaccardSimilarity(tokensA, tokensB);
-
-      if (similarity >= threshold && tokensA.size > 0 && tokensB.size > 0) {
-        issues.push({
-          type: 'TITLE_SIMILARITY',
-          severity: 'ERROR',
-          id: a.id,
-          file: a.relFile,
-          conflictingId: b.id,
-          conflictingFile: b.relFile,
-          similarityScore: Math.round(similarity * 100) / 100,
-          message: `Titles with high lexical redundancy (${Math.round(similarity * 100)}% similarity) between '${a.id}' ("${a.title}") and '${b.id}' ("${b.title}").`,
-        });
-      }
-
-      // Check BDD tag collision (excluding generic and self tags)
-      const specificTagsA = new Set(
-        a.cucumberTags.filter((t) => !GENERIC_BDD_TAGS.has(t) && t !== a.id.toLowerCase())
-      );
-      const specificTagsB = new Set(
-        b.cucumberTags.filter((t) => !GENERIC_BDD_TAGS.has(t) && t !== b.id.toLowerCase())
-      );
-
-      if (specificTagsA.size > 0 && specificTagsB.size > 0 && specificTagsA.size === specificTagsB.size) {
-        let allMatch = true;
-        for (const tag of specificTagsA) {
-          if (!specificTagsB.has(tag)) {
-            allMatch = false;
-            break;
-          }
-        }
-        if (allMatch) {
-          issues.push({
-            type: 'BDD_TAG_COLLISION',
-            severity: 'ERROR',
-            id: a.id,
-            file: a.relFile,
-            conflictingId: b.id,
-            conflictingFile: b.relFile,
-            message: `BDD test tag collision: '${a.id}' and '${b.id}' claim the same specific tags: @${Array.from(specificTagsA).join(' @')}.`,
-          });
-        }
-      }
-
-      // Check Shared Business Rule (WARNING only)
-      const brA = a.derivesFrom.filter((r) => r.startsWith('BR-'));
-      const brB = new Set(b.derivesFrom.filter((r) => r.startsWith('BR-')));
-      for (const br of brA) {
-        if (brB.has(br)) {
-          issues.push({
-            type: 'SHARED_BUSINESS_RULE',
-            severity: 'WARNING',
-            id: a.id,
-            file: a.relFile,
-            conflictingId: b.id,
-            conflictingFile: b.relFile,
-            message: `Potential logic overlap: both '${a.id}' and '${b.id}' govern the same atomic business rule '${br}'.`,
-          });
-        }
-      }
-    }
-  }
+  checkIdCollisions(requirements, issues);
+  checkCrossComparisons(requirements, threshold, issues);
 
   const errorCount = issues.filter((i) => i.severity === 'ERROR').length;
   const warningCount = issues.filter((i) => i.severity === 'WARNING').length;
@@ -331,9 +356,9 @@ export function verifyArtifactDuplicates(
   return result;
 }
 
-export function generateDuplicatesReportMarkdown(result: DuplicateVerifierResult): string {
+function buildDuplicatesHeader(result: DuplicateVerifierResult): string[] {
   const isOk = result.success;
-  const lines: string[] = [
+  return [
     `# 🛡️ Duplicate Requirements and Redundancy Audit (Shift-Left Pre-Flight)`,
     ``,
     `> **Evaluation Date:** ${new Date().toISOString()}`,
@@ -342,6 +367,16 @@ export function generateDuplicatesReportMarkdown(result: DuplicateVerifierResult
     ``,
     `---`,
   ];
+}
+
+function formatIssueRow(issue: DuplicateIssue): string {
+  const badge = issue.severity === 'ERROR' ? '🛑 ERROR' : '⚠️ WARNING';
+  const conflict = issue.conflictingId ? `\`${issue.conflictingId}\` (\`${issue.conflictingFile}\`)` : 'N/A';
+  return `| **${badge}** | \`${issue.type}\` | **\`${issue.id}\`** (\`${issue.file}\`) | ${conflict} | ${issue.message} |`;
+}
+
+export function generateDuplicatesReportMarkdown(result: DuplicateVerifierResult): string {
+  const lines = buildDuplicatesHeader(result);
 
   if (result.issues.length === 0) {
     lines.push(
@@ -359,14 +394,8 @@ export function generateDuplicatesReportMarkdown(result: DuplicateVerifierResult
       `| Severity | Collision Type | Requirement A | Requirement B | Message |`,
       `| :---: | :--- | :--- | :--- | :--- |`
     );
-
     for (const issue of result.issues) {
-      const badge = issue.severity === 'ERROR' ? '🛑 ERROR' : '⚠️ WARNING';
-      lines.push(
-        `| **${badge}** | \`${issue.type}\` | **\`${issue.id}\`** (\`${issue.file}\`) | ${
-          issue.conflictingId ? `\`${issue.conflictingId}\` (\`${issue.conflictingFile}\`)` : 'N/A'
-        } | ${issue.message} |`
-      );
+      lines.push(formatIssueRow(issue));
     }
   }
 

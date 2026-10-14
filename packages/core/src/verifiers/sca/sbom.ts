@@ -89,46 +89,44 @@ export function generateCycloneDxSbom(
   };
 }
 
+function tryAtomicWrite(filePath: string, content: string): boolean {
+  const tempPath = `${filePath}.${process.pid}.${Math.random().toString(36).substring(2)}.tmp`;
+  try {
+    fs.writeFileSync(tempPath, content, 'utf-8');
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.rmSync(filePath, { force: true });
+      }
+      fs.renameSync(tempPath, filePath);
+    } catch {
+      fs.copyFileSync(tempPath, filePath);
+      fs.unlinkSync(tempPath);
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function safeWriteFileSync(filePath: string, content: string): void {
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  let attempts = 10;
-  while (attempts > 0) {
-    try {
-      const tempPath = `${filePath}.${process.pid}.${Math.random().toString(36).substring(2)}.tmp`;
-      fs.writeFileSync(tempPath, content, 'utf-8');
-      try {
-        if (fs.existsSync(filePath)) {
-          fs.rmSync(filePath, { force: true });
-        }
-        fs.renameSync(tempPath, filePath);
-      } catch {
-        try {
-          fs.copyFileSync(tempPath, filePath);
-          fs.unlinkSync(tempPath);
-        } catch {
-          // ignore fallback error
-        }
-      }
-      return;
-    } catch {
-      attempts--;
-      if (attempts === 0) {
-        try {
-          fs.writeFileSync(filePath, content, 'utf-8');
-        } catch {
-          // Ignore transient lock error if another worker already wrote the report
-        }
-        return;
-      }
-      const delay = Math.floor(Math.random() * 50) + 50;
-      const start = Date.now();
-      while (Date.now() - start < delay) {
-        // wait
-      }
+
+  for (let attempt = 0; attempt < 10; attempt++) {
+    if (tryAtomicWrite(filePath, content)) return;
+    const delay = Math.floor(Math.random() * 50) + 50;
+    const start = Date.now();
+    while (Date.now() - start < delay) {
+      // wait
     }
+  }
+
+  try {
+    fs.writeFileSync(filePath, content, 'utf-8');
+  } catch {
+    // Ignore transient lock error if another worker already wrote the report
   }
 }
 
@@ -136,16 +134,13 @@ export function writeCycloneDxSbom(sbom: CycloneDxBom, outputPath: string): void
   safeWriteFileSync(outputPath, JSON.stringify(sbom, null, 2));
 }
 
-export function generateThirdPartyNotices(
-  dependencies: ScannedDependency[],
-  projectName = 'AI-SDLC'
-): string {
-  const lines = [
+function buildThirdPartyHeader(projectName: string, count: number): string[] {
+  return [
     `# 📜 Third-Party Software Notices and Information`,
     ``,
     `> **Proyecto:** ${projectName}`,
     `> **Fecha:** ${new Date().toISOString().split('T')[0]}`,
-    `> **Total Componentes:** ${dependencies.length}`,
+    `> **Total Componentes:** ${count}`,
     ``,
     `Este documento contiene los avisos de copyright y términos de licencia aplicables a los componentes de terceros utilizados en este proyecto.`,
     ``,
@@ -156,38 +151,54 @@ export function generateThirdPartyNotices(
     `| Paquete | Versión | Licencia SPDX |`,
     `| :--- | :--- | :---: |`,
   ];
+}
 
-  for (const dep of dependencies) {
-    lines.push(`| **\`${dep.name}\`** | \`${dep.version}\` | \`${dep.spdxLicense}\` |`);
+function readLicenseTextPreview(licenseFile?: string): string | null {
+  if (!licenseFile || !fs.existsSync(licenseFile)) return null;
+  try {
+    const text = fs.readFileSync(licenseFile, 'utf-8').trim();
+    return text.slice(0, 1000) + (text.length > 1000 ? '\n... (texto truncado)' : '');
+  } catch {
+    return null;
   }
+}
 
-  lines.push('');
-  lines.push('---');
-  lines.push('');
-  lines.push('## Textos de Licencia y Atribuciones');
-  lines.push('');
+function buildDepAttribution(dep: ScannedDependency): string[] {
+  const lines: string[] = [
+    `### ${dep.name}@${dep.version}`,
+    `- **Licencia:** \`${dep.spdxLicense}\``,
+  ];
+  if (dep.author) lines.push(`- **Autor:** ${dep.author}`);
+  if (dep.repository) lines.push(`- **Repositorio:** ${dep.repository}`);
 
-  for (const dep of dependencies) {
-    lines.push(`### ${dep.name}@${dep.version}`);
-    lines.push(`- **Licencia:** \`${dep.spdxLicense}\``);
-    if (dep.author) lines.push(`- **Autor:** ${dep.author}`);
-    if (dep.repository) lines.push(`- **Repositorio:** ${dep.repository}`);
-
-    if (dep.licenseFile && fs.existsSync(dep.licenseFile)) {
-      try {
-        const text = fs.readFileSync(dep.licenseFile, 'utf-8').trim();
-        lines.push('');
-        lines.push('```');
-        lines.push(text.slice(0, 1000) + (text.length > 1000 ? '\n... (texto truncado)' : ''));
-        lines.push('```');
-      } catch {
-        // Ignore read error
-      }
-    }
-    lines.push('');
+  const licensePreview = readLicenseTextPreview(dep.licenseFile);
+  if (licensePreview) {
+    lines.push('', '```', licensePreview, '```');
   }
+  lines.push('');
+  return lines;
+}
 
-  return lines.join('\n');
+export function generateThirdPartyNotices(
+  dependencies: ScannedDependency[],
+  projectName = 'AI-SDLC'
+): string {
+  const header = buildThirdPartyHeader(projectName, dependencies.length);
+  const rows = dependencies.map(
+    (dep) => `| **\`${dep.name}\`** | \`${dep.version}\` | \`${dep.spdxLicense}\` |`
+  );
+  const attributions = dependencies.flatMap(buildDepAttribution);
+
+  return [
+    ...header,
+    ...rows,
+    '',
+    '---',
+    '',
+    '## Textos de Licencia y Atribuciones',
+    '',
+    ...attributions,
+  ].join('\n');
 }
 
 export function writeThirdPartyNotices(content: string, outputPath: string): void {

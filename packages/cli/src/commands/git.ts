@@ -11,6 +11,15 @@ import {
   detectAuthorIdentity,
 } from '@aisdlc/core';
 
+function printInvalidBranchError(error?: string): void {
+  console.error(pc.red(`\n✖ [NAMING ERROR] ${error || 'Invalid pattern'}`));
+  console.error(pc.yellow('\nAllowed patterns:'));
+  console.error('  Tier 1: main');
+  console.error('  Tier 2: release/vX.Y.Z');
+  console.error('  Tier 3: feat/<FEAT-ID>-<slug>  or  bug/<BUG-ID>-<slug>');
+  console.error('  Tier 4: task/<PARENT-ID>/<TSK-ID>-<slug>\n');
+}
+
 export function runGitValidate(branchName: string): boolean {
   if (!branchName) {
     console.error(pc.red('\n[ERROR] Branch name to validate must be specified.\n'));
@@ -24,15 +33,9 @@ export function runGitValidate(branchName: string): boolean {
     console.log(`  - Base Origin:   ${result.parentRequirement}`);
     console.log(`  - Target Merge:  ${result.targetMerge}\n`);
     return true;
-  } else {
-    console.error(pc.red(`\n✖ [NAMING ERROR] ${result.error}`));
-    console.error(pc.yellow('\nAllowed patterns:'));
-    console.error('  Tier 1: main');
-    console.error('  Tier 2: release/vX.Y.Z');
-    console.error('  Tier 3: feat/<FEAT-ID>-<slug>  or  bug/<BUG-ID>-<slug>');
-    console.error('  Tier 4: task/<PARENT-ID>/<TSK-ID>-<slug>\n');
-    return false;
   }
+  printInvalidBranchError(result.error);
+  return false;
 }
 
 export function runGitPlan(options: { version?: string; feature?: string; tasks?: string }): boolean {
@@ -44,6 +47,35 @@ export function runGitPlan(options: { version?: string; feature?: string; tasks?
   const plan = generateBranchHierarchyPlan(version, feature, tasks);
   console.log(pc.cyan('\n' + plan.planText));
   return true;
+}
+
+function printCheckoutFailure(result: ReturnType<typeof checkoutTaskBranch>): void {
+  console.error(pc.red(`\n✖ [ERROR] ${result.error}`));
+  if (result.availableTasks && result.availableTasks.length > 0) {
+    console.log(pc.yellow('\nAvailable tasks in active changes:'));
+    for (const t of result.availableTasks) {
+      console.log(`  - [${pc.cyan(t.changeId)}] ${pc.bold(t.id)}${t.title ? `: ${t.title}` : ''}`);
+    }
+  }
+  console.log();
+}
+
+function printCheckoutSuccess(result: ReturnType<typeof checkoutTaskBranch>): void {
+  console.log(`  - Detected change:   ${pc.bold(result.changeId || 'N/A')}`);
+  console.log(`  - Release Branch:    ${pc.green(result.releaseBranch || '')} (Tier 2)`);
+  console.log(`  - Feature Branch:    ${pc.green(result.featureBranch || '')} (Tier 3)`);
+  console.log(`  - Task Branch:       ${pc.green(result.taskBranch || '')} (Tier 4)`);
+
+  if (result.createdBranches && result.createdBranches.length > 0) {
+    console.log(pc.green(`\n✔ Cascading branches created:`));
+    for (const b of result.createdBranches) {
+      console.log(`  ├── ${pc.bold(b)}`);
+    }
+  }
+
+  const switched = result.switchedBranch || result.taskBranch || '';
+  console.log(pc.green(`\n✔ [CHECKOUT] Successfully switched to working branch:`));
+  console.log(`  👉 ${pc.bold(pc.cyan(switched))}\n`);
 }
 
 export function runGitCheckout(taskId: string, options: { root?: string; silent?: boolean } = {}): boolean {
@@ -62,35 +94,11 @@ export function runGitCheckout(taskId: string, options: { root?: string; silent?
   const result = checkoutTaskBranch(taskId, { rootDir });
 
   if (!result.success) {
-    if (!options.silent) {
-      console.error(pc.red(`\n✖ [ERROR] ${result.error}`));
-      if (result.availableTasks && result.availableTasks.length > 0) {
-        console.log(pc.yellow('\nAvailable tasks in active changes:'));
-        for (const t of result.availableTasks) {
-          console.log(`  - [${pc.cyan(t.changeId)}] ${pc.bold(t.id)}${t.title ? `: ${t.title}` : ''}`);
-        }
-      }
-      console.log();
-    }
+    if (!options.silent) printCheckoutFailure(result);
     return false;
   }
 
-  if (!options.silent) {
-    console.log(`  - Detected change:   ${pc.bold(result.changeId || 'N/A')}`);
-    console.log(`  - Release Branch:    ${pc.green(result.releaseBranch || '')} (Tier 2)`);
-    console.log(`  - Feature Branch:    ${pc.green(result.featureBranch || '')} (Tier 3)`);
-    console.log(`  - Task Branch:       ${pc.green(result.taskBranch || '')} (Tier 4)`);
-
-    if (result.createdBranches && result.createdBranches.length > 0) {
-      console.log(pc.green(`\n✔ Cascading branches created:`));
-      for (const b of result.createdBranches) {
-        console.log(`  ├── ${pc.bold(b)}`);
-      }
-    }
-
-    console.log(pc.green(`\n✔ [CHECKOUT] Successfully switched to working branch:`));
-    console.log(`  👉 ${pc.bold(pc.cyan(result.switchedBranch || result.taskBranch || ''))}\n`);
-  }
+  if (!options.silent) printCheckoutSuccess(result);
   return true;
 }
 

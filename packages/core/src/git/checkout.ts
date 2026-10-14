@@ -36,6 +36,85 @@ export interface TaskLocateResult {
   error?: string;
 }
 
+function resolveVersionFromProposal(changeDir: string): string {
+  const proposalFile = path.join(changeDir, 'proposal.md');
+  if (!fs.existsSync(proposalFile)) return '1.0.0';
+  const propContent = fs.readFileSync(proposalFile, 'utf-8');
+  const propFm = propContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!propFm) return '1.0.0';
+  const parsedProp = yaml.load(propFm[1]) as Record<string, unknown>;
+  return parsedProp?.version ? String(parsedProp.version) : '1.0.0';
+}
+
+function resolveChangeVersion(fm: RawTasksFrontmatter, changeDir: string): string {
+  if (fm.version) return String(fm.version);
+  if (fm['target-release'] || fm.release) return String(fm['target-release'] || fm.release);
+  return resolveVersionFromProposal(changeDir);
+}
+
+function isTaskMatchingId(currentId: string, cleanTaskId: string): boolean {
+  const targetLower = cleanTaskId.toLowerCase();
+  const currentLower = currentId.toLowerCase();
+  return (
+    currentLower === targetLower ||
+    currentLower.startsWith(`${targetLower}-`) ||
+    targetLower.startsWith(`${currentLower}-`)
+  );
+}
+
+function parseTasksFrontmatter(tasksFile: string): RawTasksFrontmatter | null {
+  if (!fs.existsSync(tasksFile)) return null;
+  try {
+    const content = fs.readFileSync(tasksFile, 'utf-8');
+    const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!fmMatch) return null;
+    const fm = yaml.load(fmMatch[1]) as RawTasksFrontmatter;
+    return fm && Array.isArray(fm.tasks) ? fm : null;
+  } catch {
+    return null;
+  }
+}
+
+function resolveRawChangeId(fm: RawTasksFrontmatter, entryName: string): string {
+  return String(fm['change-id'] || fm.changeId || entryName.replace(/^(chg|CHG)-/i, 'CHG-').toUpperCase());
+}
+
+function buildTaskMatch(currentId: string, currentTitle: string, rawChangeId: string, changeDir: string, versionStr: string): ActiveTaskMatch {
+  return {
+    taskId: currentId,
+    taskTitle: currentTitle,
+    changeId: rawChangeId,
+    changeDir,
+    version: versionStr,
+  };
+}
+
+function inspectChangeTasks(
+  changeDir: string,
+  entryName: string,
+  cleanTaskId: string,
+  availableTasks: Array<{ id: string; title: string; changeId: string }>
+): ActiveTaskMatch | undefined {
+  const fm = parseTasksFrontmatter(path.join(changeDir, 'tasks.md'));
+  if (!fm || !fm.tasks) return undefined;
+
+  const rawChangeId = resolveRawChangeId(fm, entryName);
+  const versionStr = resolveChangeVersion(fm, changeDir);
+
+  let match: ActiveTaskMatch | undefined;
+  for (const t of fm.tasks) {
+    if (!t?.id) continue;
+    const currentId = String(t.id).trim();
+    const currentTitle = String(t.title || '').trim();
+    availableTasks.push({ id: currentId, title: currentTitle, changeId: rawChangeId });
+
+    if (!match && isTaskMatchingId(currentId, cleanTaskId)) {
+      match = buildTaskMatch(currentId, currentTitle, rawChangeId, changeDir, versionStr);
+    }
+  }
+  return match;
+}
+
 /**
  * Locate which active SDD change (CHG-*) a task belongs to by inspecting
  * specs/changes/active/<change-dir>/tasks.md.
@@ -46,104 +125,29 @@ export function locateTaskInActiveChanges(
 ): TaskLocateResult {
   const cleanTaskId = (taskId || '').trim();
   if (!cleanTaskId) {
-    return {
-      found: false,
-      error: 'Debe especificar un identificador de tarea válido (ej. TSK-001).',
-    };
+    return { found: false, error: 'Debe especificar un identificador de tarea válido (ej. TSK-001).' };
   }
 
   const activeChangesDir = path.join(rootDir, 'specs', 'changes', 'active');
   if (!fs.existsSync(activeChangesDir)) {
-    return {
-      found: false,
-      error: `No se encontró el directorio de cambios activos en '${activeChangesDir}'.`,
-    };
+    return { found: false, error: `No se encontró el directorio de cambios activos en '${activeChangesDir}'.` };
   }
 
   const availableTasks: Array<{ id: string; title: string; changeId: string }> = [];
   const candidateDirs = fs.readdirSync(activeChangesDir, { withFileTypes: true });
 
   let matchedTask: ActiveTaskMatch | undefined;
-
   for (const entry of candidateDirs) {
     if (!entry.isDirectory()) continue;
     const changeDir = path.join(activeChangesDir, entry.name);
-    const tasksFile = path.join(changeDir, 'tasks.md');
-
-    if (!fs.existsSync(tasksFile)) continue;
-
-    try {
-      const content = fs.readFileSync(tasksFile, 'utf-8');
-      const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-      if (!fmMatch) continue;
-
-      const fm = yaml.load(fmMatch[1]) as RawTasksFrontmatter;
-      if (!fm || !Array.isArray(fm.tasks)) continue;
-
-      const rawChangeId =
-        fm['change-id'] ||
-        fm.changeId ||
-        entry.name.replace(/^(chg|CHG)-/i, 'CHG-').toUpperCase();
-
-      // Resolve version from tasks.md frontmatter, or fallback to proposal.md / package.json
-      let versionStr = '1.0.0';
-      if (fm.version) {
-        versionStr = String(fm.version);
-      } else if (fm['target-release'] || fm.release) {
-        versionStr = String(fm['target-release'] || fm.release);
-      } else {
-        const proposalFile = path.join(changeDir, 'proposal.md');
-        if (fs.existsSync(proposalFile)) {
-          const propContent = fs.readFileSync(proposalFile, 'utf-8');
-          const propFm = propContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-          if (propFm) {
-            const parsedProp = yaml.load(propFm[1]) as Record<string, unknown>;
-            if (parsedProp?.version) versionStr = String(parsedProp.version);
-          }
-        }
-      }
-
-      for (const t of fm.tasks) {
-        if (!t || !t.id) continue;
-        const currentId = String(t.id).trim();
-        const currentTitle = String(t.title || '').trim();
-
-        availableTasks.push({
-          id: currentId,
-          title: currentTitle,
-          changeId: String(rawChangeId),
-        });
-
-        const targetLower = cleanTaskId.toLowerCase();
-        const currentLower = currentId.toLowerCase();
-
-        // Exact match or prefix match (e.g. TSK-001 matches TSK-001-dto or vice versa)
-        const isMatch =
-          currentLower === targetLower ||
-          currentLower.startsWith(`${targetLower}-`) ||
-          targetLower.startsWith(`${currentLower}-`);
-
-        if (isMatch && !matchedTask) {
-          matchedTask = {
-            taskId: currentId,
-            taskTitle: currentTitle,
-            changeId: String(rawChangeId),
-            changeDir,
-            version: versionStr,
-          };
-        }
-      }
-    } catch {
-      // Ignore unparseable change files
+    const m = inspectChangeTasks(changeDir, entry.name, cleanTaskId, availableTasks);
+    if (m && !matchedTask) {
+      matchedTask = m;
     }
   }
 
   if (matchedTask) {
-    return {
-      found: true,
-      match: matchedTask,
-      availableTasks,
-    };
+    return { found: true, match: matchedTask, availableTasks };
   }
 
   return {
@@ -151,6 +155,58 @@ export function locateTaskInActiveChanges(
     availableTasks,
     error: `No se encontró la tarea '${cleanTaskId}' en ningún cambio activo bajo 'specs/changes/active/'.`,
   };
+}
+
+function getGitBranchList(rootDir: string): string[] {
+  try {
+    const out = execFileSync('git', ['branch', '-a'], {
+      cwd: rootDir,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'ignore'],
+    });
+    return out.split('\n').map((l) => l.trim().replace(/^[*+]\s+/, '').replace(/^remotes\/origin\//, ''));
+  } catch {
+    return [];
+  }
+}
+
+function detectExistingReleaseBranch(branches: string[], cleanVersion: string): string {
+  const candidate = `release/v${cleanVersion}`;
+  const existing = branches.find((b) => b.startsWith('release/v') && classifyBranch(b).valid);
+  return existing || candidate;
+}
+
+function detectExistingFeatureBranch(branches: string[], dirName: string, changeId: string, changeSlug: string): string {
+  const existing = branches.find(
+    (b) =>
+      b.startsWith('feat/') &&
+      (b.toLowerCase().includes(dirName.toLowerCase()) || b.toLowerCase().includes(changeId.toLowerCase())) &&
+      classifyBranch(b).valid
+  );
+  if (existing) return existing;
+  const normalizedName = slugify(changeSlug).replace(/^(chg|bug|feat)-(\d+)/i, (_, p, n) => `${p.toUpperCase()}-${n}`);
+  return `feat/${normalizedName}`;
+}
+
+function buildDefaultTaskSuffix(taskId: string, taskTitle?: string): string {
+  let taskSuffix = taskId.toLowerCase();
+  const hasSlug = taskSuffix.includes('-') && taskSuffix.split('-').length > 2;
+  if (!hasSlug && taskTitle) {
+    const titleSlug = slugify(taskTitle).split('-').slice(0, 4).join('-');
+    if (titleSlug) {
+      taskSuffix = `${taskSuffix}-${titleSlug}`;
+    }
+  }
+  return taskSuffix;
+}
+
+function detectExistingTaskBranch(branches: string[], parentId: string, taskId: string, taskTitle?: string): string {
+  const prefix = `task/${parentId}/`;
+  const existing = branches.find(
+    (b) => b.startsWith(prefix) && b.toLowerCase().includes(taskId.toLowerCase()) && classifyBranch(b).valid
+  );
+  if (existing) return existing;
+  return `task/${parentId}/${buildDefaultTaskSuffix(taskId, taskTitle)}`;
 }
 
 /**
@@ -169,118 +225,54 @@ export function resolveBranchHierarchy(
   featureBranch: string;
   taskBranch: string;
 } {
-  // Tier 1: Base branch
   const baseBranch = 'main';
-
-  // Tier 2: Release branch
-  // Check if an existing release branch exists locally or remotely
-  let existingReleaseBranch: string | undefined;
-  try {
-    const branchesOutput = execFileSync('git', ['branch', '-a'], {
-      cwd: rootDir,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'ignore'],
-    });
-    const releaseMatches = branchesOutput.match(/(?:remotes\/origin\/)?(release\/v[0-9]+\.[0-9]+\.[0-9]+[^\s]*)/g);
-    if (releaseMatches && releaseMatches.length > 0) {
-      existingReleaseBranch = releaseMatches[0].replace(/^remotes\/origin\//, '');
-    }
-  } catch {
-    // Git command failure fallback
-  }
-
+  const branches = getGitBranchList(rootDir);
   const cleanVersion = (match.version || '1.0.0').replace(/^v/, '');
-  const candidateReleaseBranch = `release/v${cleanVersion}`;
-  const releaseBranch =
-    existingReleaseBranch && classifyBranch(existingReleaseBranch).valid
-      ? existingReleaseBranch
-      : candidateReleaseBranch;
+  const releaseBranch = detectExistingReleaseBranch(branches, cleanVersion);
 
-  // Tier 3: Feature branch
-  // Normalize change ID into feat/<CHG-XXX-slug>
   const dirName = path.basename(match.changeDir);
   const changeSlug = dirName.replace(/^(chg|CHG)-/i, (m) => m.toUpperCase());
+  const featureBranch = detectExistingFeatureBranch(branches, dirName, match.changeId, changeSlug);
 
-  // Check if a branch for this change already exists in git
-  let existingFeatureBranch: string | undefined;
-  try {
-    const branchesOutput = execFileSync('git', ['branch', '-a'], {
-      cwd: rootDir,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'ignore'],
-    });
-    const lines = branchesOutput.split('\n');
-    for (const line of lines) {
-      const cleanLine = line.trim().replace(/^[*+]\s+/, '').replace(/^remotes\/origin\//, '');
-      if (
-        cleanLine.startsWith('feat/') &&
-        (cleanLine.toLowerCase().includes(dirName.toLowerCase()) ||
-          cleanLine.toLowerCase().includes(match.changeId.toLowerCase()))
-      ) {
-        existingFeatureBranch = cleanLine;
-        break;
-      }
-    }
-  } catch {
-    // Git command failure fallback
-  }
-
-  let featureBranch: string;
-  if (existingFeatureBranch && classifyBranch(existingFeatureBranch).valid) {
-    featureBranch = existingFeatureBranch;
-  } else {
-    // Construct standardized feature branch
-    const normalizedName = slugify(changeSlug).replace(/^(chg|bug|feat)-(\d+)/i, (_, p, n) => `${p.toUpperCase()}-${n}`);
-    featureBranch = `feat/${normalizedName}`;
-  }
-
-  // Tier 4: Task branch: task/<PARENT-ID>/<TSK-ID>-<slug>
   const parentIdMatch = featureBranch.replace(/^(feat|feature)\//i, '').match(/^[a-zA-Z0-9]+-[a-zA-Z0-9]+/);
   const parentId = parentIdMatch ? parentIdMatch[0] : match.changeId.split('-').slice(0, 2).join('-');
+  const taskBranch = detectExistingTaskBranch(branches, parentId, match.taskId, match.taskTitle);
 
-  let existingTaskBranch: string | undefined;
+  return { baseBranch, releaseBranch, featureBranch, taskBranch };
+}
+
+function branchExistsLocally(branch: string, rootDir: string): boolean {
   try {
-    const branchesOutput = execFileSync('git', ['branch', '-a'], {
+    execFileSync('git', ['show-ref', '--verify', '--quiet', `refs/heads/${branch}`], {
       cwd: rootDir,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'ignore'],
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
-    const lines = branchesOutput.split('\n');
-    for (const line of lines) {
-      const cleanLine = line.trim().replace(/^[*+]\s+/, '').replace(/^remotes\/origin\//, '');
-      if (
-        cleanLine.startsWith(`task/${parentId}/`) &&
-        cleanLine.toLowerCase().includes(match.taskId.toLowerCase())
-      ) {
-        existingTaskBranch = cleanLine;
-        break;
-      }
-    }
+    return true;
   } catch {
-    // Git command failure fallback
+    return false;
   }
+}
 
-  let taskBranch: string;
-  if (existingTaskBranch && classifyBranch(existingTaskBranch).valid) {
-    taskBranch = existingTaskBranch;
+function branchExistsRemotely(branch: string, rootDir: string): boolean {
+  try {
+    execFileSync('git', ['show-ref', '--verify', '--quiet', `refs/remotes/origin/${branch}`], {
+      cwd: rootDir,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function ensureBranchInCascade(branch: string, parentBranch: string, rootDir: string): boolean {
+  if (branchExistsLocally(branch, rootDir)) return false;
+  if (branchExistsRemotely(branch, rootDir)) {
+    execFileSync('git', ['branch', '--track', branch, `origin/${branch}`], { cwd: rootDir, stdio: ['pipe', 'pipe', 'pipe'] });
   } else {
-    let taskSuffix = match.taskId.toLowerCase();
-    const hasSlug = taskSuffix.includes('-') && taskSuffix.split('-').length > 2;
-    if (!hasSlug && match.taskTitle) {
-      const titleSlug = slugify(match.taskTitle).split('-').slice(0, 4).join('-');
-      if (titleSlug) {
-        taskSuffix = `${taskSuffix}-${titleSlug}`;
-      }
-    }
-    taskBranch = `task/${parentId}/${taskSuffix}`;
+    execFileSync('git', ['branch', branch, parentBranch], { cwd: rootDir, stdio: ['pipe', 'pipe', 'pipe'] });
   }
-
-  return {
-    baseBranch,
-    releaseBranch,
-    featureBranch,
-    taskBranch,
-  };
+  return true;
 }
 
 /**
@@ -292,7 +284,6 @@ export function checkoutTaskBranch(
   options: GitCheckoutTaskOptions = {}
 ): GitCheckoutTaskResult {
   const rootDir = options.rootDir || process.cwd();
-
   const locateRes = locateTaskInActiveChanges(taskId, rootDir);
   if (!locateRes.found || !locateRes.match) {
     return {
@@ -306,68 +297,14 @@ export function checkoutTaskBranch(
 
   const match = locateRes.match;
   const { baseBranch, releaseBranch, featureBranch, taskBranch } = resolveBranchHierarchy(match, rootDir);
-
   const createdBranches: string[] = [];
 
-  const runGit = (args: string[]) => {
-    return execFileSync('git', args, {
-      cwd: rootDir,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-  };
-
-  const branchExistsLocally = (branch: string): boolean => {
-    try {
-      runGit(['show-ref', '--verify', '--quiet', `refs/heads/${branch}`]);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const branchExistsRemotely = (branch: string): boolean => {
-    try {
-      runGit(['show-ref', '--verify', '--quiet', `refs/remotes/origin/${branch}`]);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   try {
-    // 1. Ensure Tier 2 (release) branch exists
-    if (!branchExistsLocally(releaseBranch)) {
-      if (branchExistsRemotely(releaseBranch)) {
-        runGit(['branch', '--track', releaseBranch, `origin/${releaseBranch}`]);
-      } else {
-        runGit(['branch', releaseBranch, baseBranch]);
-      }
-      createdBranches.push(releaseBranch);
-    }
+    if (ensureBranchInCascade(releaseBranch, baseBranch, rootDir)) createdBranches.push(releaseBranch);
+    if (ensureBranchInCascade(featureBranch, releaseBranch, rootDir)) createdBranches.push(featureBranch);
+    if (ensureBranchInCascade(taskBranch, featureBranch, rootDir)) createdBranches.push(taskBranch);
 
-    // 2. Ensure Tier 3 (feature) branch exists
-    if (!branchExistsLocally(featureBranch)) {
-      if (branchExistsRemotely(featureBranch)) {
-        runGit(['branch', '--track', featureBranch, `origin/${featureBranch}`]);
-      } else {
-        runGit(['branch', featureBranch, releaseBranch]);
-      }
-      createdBranches.push(featureBranch);
-    }
-
-    // 3. Ensure Tier 4 (task) branch exists
-    if (!branchExistsLocally(taskBranch)) {
-      if (branchExistsRemotely(taskBranch)) {
-        runGit(['branch', '--track', taskBranch, `origin/${taskBranch}`]);
-      } else {
-        runGit(['branch', taskBranch, featureBranch]);
-      }
-      createdBranches.push(taskBranch);
-    }
-
-    // 4. Perform checkout to Tier 4 task branch
-    runGit(['checkout', taskBranch]);
+    execFileSync('git', ['checkout', taskBranch], { cwd: rootDir, stdio: ['pipe', 'pipe', 'pipe'] });
 
     return {
       success: true,

@@ -46,6 +46,10 @@ describe('Standalone Unknown Project End-to-End Suite', () => {
     const activeSpecsDest = path.join(tempProjectDir, 'specs', 'changes', 'active', 'chg-001-telemetry-ingestion');
     fs.mkdirSync(path.dirname(activeSpecsDest), { recursive: true });
     fs.cpSync(path.join(examplesDir, 'specs', 'changes', 'completed', 'chg-001-telemetry-ingestion'), activeSpecsDest, { recursive: true });
+
+    // 5. Regenerate .feature files from the standalone's own Markdown: the copied banners embed
+    //    the 'examples/...' origin path, which no longer exists in a standalone project.
+    runGherkinExtract({ root: tempProjectDir, silent: true });
   });
 
   afterAll(() => {

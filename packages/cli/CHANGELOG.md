@@ -1,5 +1,23 @@
 # @aisdlc/cli
 
+## 1.4.0
+
+### Minor Changes
+
+- refactor(quality): activate STRICT release gate mode, refactor CLI command runners with CC <= 10 and MI >= 50, and bump dependency to @aisdlc/core@1.4.0
+- Updated dependencies
+  - @aisdlc/core@1.4.0
+  - @aisdlc/mcp@1.4.0
+
+## 1.3.3
+
+### Patch Changes
+
+- feat(dashboard): support interactive multi-selection and typology toggle filtering in `aisdlc report dashboard`
+- Updated dependencies
+  - @aisdlc/core@1.3.3
+  - @aisdlc/mcp@1.3.3
+
 ## 1.3.2
 
 ### Patch Changes
