@@ -1,5 +1,12 @@
 # @aisdlc/core
 
+## 1.4.1
+
+### Patch Changes
+
+- feat(dashboard): add interactive telemetry branch selector with default consolidated Totalizer (`Totalizador`) view that aggregates telemetry across all branches.
+- fix(kpi): resolve Git reference prefixes flexibly across git trailer utilities (`resolveGitRef`), ensure release KPI reports are written relative to target `rootDir`, and discover KPI reports recursively across subdirectories.
+
 ## 1.4.0
 
 ### Minor Changes

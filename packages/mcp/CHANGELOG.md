@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 1.4.1
+
+### Patch Changes
+
+- fix(mcp): ensure `kpi_release` MCP tool forwards `rootDir` option correctly to report writers, and render branch-filtered telemetry in `report_dashboard`.
+- Updated dependencies
+  - @aisdlc/core@1.4.1
+
 ## 1.4.0
 
 ### Minor Changes

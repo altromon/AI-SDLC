@@ -594,7 +594,10 @@ function registerKpiReleaseTool(server: McpServer, baseRoot: string): void {
       const report = aggregateReleaseKpis(params.release, params.base || 'main', { cwd: root });
       let filesWritten: { markdownPath: string; jsonPath: string } | undefined;
       if (params.writeReports || params.outputDir) {
-        filesWritten = writeReleaseKpiReport(report, { outputDir: params.outputDir });
+        filesWritten = writeReleaseKpiReport(report, {
+          outputDir: params.outputDir,
+          rootDir: root,
+        });
       }
       return formatResponse({ ...report, filesWritten });
     } catch (err: unknown) {

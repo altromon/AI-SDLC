@@ -1,5 +1,15 @@
 # @aisdlc/cli
 
+## 1.4.1
+
+### Patch Changes
+
+- feat(dashboard): support interactive branch telemetry selector and default totalizer in `aisdlc report dashboard`.
+- fix(cli): ensure `aisdlc kpi release` writes reports to target project `--root` directory and properly handle options typing in governance verification.
+- Updated dependencies
+  - @aisdlc/core@1.4.1
+  - @aisdlc/mcp@1.4.1
+
 ## 1.4.0
 
 ### Minor Changes

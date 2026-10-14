@@ -1138,6 +1138,86 @@ export const DASHBOARD_CLIENT_SCRIPT = `
       if (backdrop) backdrop.style.display = 'block';
     }
 
+    function filterTelemetryByBranch(branchKey) {
+      if (typeof telemetryData === 'undefined' || !telemetryData) return;
+      var data = telemetryData[branchKey] || null;
+      if (!data) return;
+
+      var isTotal = branchKey === '__total__';
+      var label = isTotal ? 'Totalizador' : branchKey;
+      var badgeText = isTotal ? 'Vista: Totalizador Global' : ('Rama: ' + branchKey);
+
+      var cardBranchLabel = document.getElementById('card-branch-label');
+      if (cardBranchLabel) cardBranchLabel.textContent = label;
+
+      var tableBranchLabel = document.getElementById('table-branch-label');
+      if (tableBranchLabel) tableBranchLabel.textContent = isTotal ? 'Totalizador (Todas las ramas)' : branchKey;
+
+      var badgeElem = document.getElementById('telemetry-badge-container');
+      if (badgeElem) {
+        badgeElem.innerHTML = '<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 4px;">' + badgeText + '</span>';
+      }
+
+      var elCommits = document.getElementById('card-commits');
+      if (elCommits) elCommits.textContent = data.totalCommits;
+      var elLines = document.getElementById('card-lines');
+      if (elLines) elLines.textContent = '+' + data.linesAdded + ' / -' + data.linesDeleted + ' lines';
+
+      var elTime = document.getElementById('card-time');
+      if (elTime) elTime.textContent = Math.round(data.totalActiveTimeSeconds / 60) + 'm';
+      var elTimeSec = document.getElementById('card-time-seconds');
+      if (elTimeSec) elTimeSec.textContent = data.totalActiveTimeSeconds + 's accumulated';
+
+      var elTokens = document.getElementById('card-tokens');
+      if (elTokens) elTokens.textContent = Number(data.totalTokens).toLocaleString('en-US');
+      var elTokensDetail = document.getElementById('card-tokens-detail');
+      if (elTokensDetail) elTokensDetail.textContent = 'In: ' + Number(data.totalPromptTokens).toLocaleString('en-US') + ' | Out: ' + Number(data.totalCompletionTokens).toLocaleString('en-US');
+
+      var elCost = document.getElementById('card-cost');
+      if (elCost) elCost.textContent = '$' + Number(data.estimatedCostUsd).toFixed(2);
+
+      var tbody = document.getElementById('telemetry-table-tbody');
+      if (tbody) {
+        var html = '';
+        if (data.humanSummary && data.humanSummary.commits > 0) {
+          html += '<tr>' +
+            '<td><strong>Human (Developer)</strong></td>' +
+            '<td><span class="badge" style="background:#334155;">HUMAN</span></td>' +
+            '<td>' + data.humanSummary.commits + '</td>' +
+            '<td>+' + data.humanSummary.linesAdded + ' / -' + data.humanSummary.linesDeleted + '</td>' +
+            '<td>' + Math.round(data.humanSummary.activeTimeSeconds / 60) + 'm</td>' +
+            '<td>0</td><td>—</td>' +
+            '</tr>';
+        }
+        if (data.byModel) {
+          var models = Object.keys(data.byModel);
+          for (var i = 0; i < models.length; i++) {
+            var m = models[i];
+            var summary = data.byModel[m];
+            var safeModel = String(m).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            html += '<tr>' +
+              '<td><strong><code>' + safeModel + '</code></strong></td>' +
+              '<td><span class="badge badge-green">AGENT</span></td>' +
+              '<td>' + summary.commits + '</td>' +
+              '<td>+' + summary.linesAdded + ' / -' + summary.linesDeleted + '</td>' +
+              '<td>' + Math.round(summary.activeTimeSeconds / 60) + 'm</td>' +
+              '<td>' + (summary.promptTokens + summary.completionTokens).toLocaleString('en-US') + '</td>' +
+              '<td>$' + Number(summary.estimatedCostUsd).toFixed(2) + '</td>' +
+              '</tr>';
+          }
+        }
+        html += '<tr style="font-weight: bold; background: rgba(255,255,255,0.05);">' +
+          '<td>' + (isTotal ? 'TOTAL REPOSITORIO' : 'TOTAL RAMA') + '</td><td>—</td>' +
+          '<td>' + data.totalCommits + '</td>' +
+          '<td>+' + data.linesAdded + ' / -' + data.linesDeleted + '</td>' +
+          '<td>' + Math.round(data.totalActiveTimeSeconds / 60) + 'm</td>' +
+          '<td>' + Number(data.totalTokens).toLocaleString('en-US') + '</td>' +
+          '<td>$' + Number(data.estimatedCostUsd).toFixed(2) + ' USD</td>' +
+          '</tr>';
+        tbody.innerHTML = html;
+      }
+    }
+
     function closeTaskSidebar() {
       var sidebar = document.getElementById('task-sidebar');
       var backdrop = document.getElementById('task-backdrop');

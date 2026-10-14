@@ -180,6 +180,36 @@ export function inferMissingTrailers(
     : inferHumanTrailers(trailers, linesAdded, linesDeleted);
 }
 
+/**
+ * Resolves a git reference (branch or commit), checking common branch prefixes if not directly found.
+ */
+export function resolveGitRef(cwd: string, ref: string): string {
+  if (!ref || ref === 'HEAD') return ref;
+  const candidates = [
+    ref,
+    `feat/${ref}`,
+    `release/${ref}`,
+    `bug/${ref}`,
+    `task/${ref}`,
+    `origin/${ref}`,
+    `origin/feat/${ref}`,
+    `origin/release/${ref}`,
+    `origin/bug/${ref}`,
+  ];
+  for (const cand of candidates) {
+    try {
+      execFileSync('git', ['rev-parse', '--verify', '--quiet', cand], {
+        cwd,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      return cand;
+    } catch {
+      // try next candidate
+    }
+  }
+  return ref;
+}
+
 function fetchGitLogOutput(cwd: string, baseRef: string, headRef: string, format: string): string {
   const rangeArg = baseRef ? `${baseRef}..${headRef}` : headRef;
   try {
@@ -234,8 +264,10 @@ export function extractCommitKpisFromRange(
   options: { cwd?: string } = {}
 ): CommitKpiRecord[] {
   const cwd = options.cwd || process.cwd();
+  const resolvedBase = resolveGitRef(cwd, baseRef);
+  const resolvedHead = resolveGitRef(cwd, headRef);
   const format = '---AI_SDLC_COMMIT---%n%H%x1f%an%x1f%ae%x1f%aI%x1f%s%n%B%n---AI_SDLC_BODY_END---';
-  const rawOutput = fetchGitLogOutput(cwd, baseRef, headRef, format);
+  const rawOutput = fetchGitLogOutput(cwd, resolvedBase, resolvedHead, format);
   if (!rawOutput) return [];
 
   const chunks = parseRawLogChunks(rawOutput);

@@ -248,6 +248,8 @@ function printGovernanceConsole(result: ReturnType<typeof verifyTasksGovernance>
   console.log(result.success ? pc.green('\n✔ Tasks Governance COMPLIANT\n') : pc.red('\n✖ Tasks Governance BLOCKED\n'));
 }
 
+export interface GovernanceVerifyOptions extends VerifyBaseOptions {}
+
 export function runVerifyGovernance(options: GovernanceVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
   const useJson = isJsonOutput(options);
