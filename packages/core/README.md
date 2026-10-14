@@ -53,6 +53,7 @@ import {
   verifySecrets,
   scaffoldSddChange,
   generateDashboardReport,
+  readCodeCoverageSummary,
 } from '@aisdlc/core';
 
 // 1. Run the deterministic Quality Gate on the codebase
@@ -72,6 +73,12 @@ const secretResult = verifySecrets({
   rootDir: process.cwd(),
 });
 console.log(`Secret violations found: ${secretResult.violations.length}`);
+
+// 4. Ingest automated test coverage (LCOV from Coverlet/ReportGenerator, Vitest, etc.)
+const coverage = readCodeCoverageSummary(process.cwd());
+if (coverage) {
+  console.log(`Line coverage: ${coverage.linesPct}%, Branch: ${coverage.branchesPct}%`);
+}
 ```
 
 ## AI-SDLC architecture
@@ -151,6 +158,7 @@ This separation allows the core functionality to be reused by different interfac
 | --- | --- | --- |
 | **Interactive Offline Dashboard** | Generates a 100% self-contained offline HTML dashboard with Cytoscape.js interactive graph for visualizing the full PDaC and RTM network. | `generateDashboardReport`, `buildGraphElements`, `renderDashboardHtml` |
 | **Formal Code Quality Reporting** | Compiles granular polyglot code quality analysis into structured Markdown reports (`reports/QUALITY_REPORT.md`). | `generateQualityReport`, `writeQualityReport`, `calculateRating` |
+| **Code Coverage Ingestion** | Passively ingests test coverage summaries from standard formats (`coverage/lcov.info`, `coverage/coverage-summary.json`) across polyglot stacks (.NET via Coverlet & ReportGenerator, Node.js, Python). | `readCodeCoverageSummary` |
 | **Pull Request KPIs & Telemetry** | Calculates human vs. AI agent contribution ratios, review cycle duration, and token usage, formatting them for PR templates. | `aggregatePrKpis`, `formatPrKpiMarkdown`, `injectKpisIntoPrBody` |
 | **Release KPIs & Defect Injection Rate** | Computes release-level engineering metrics, Defect Injection Rate (DIR) per author/model, rework costs, and defect density. | `aggregateReleaseKpis`, `formatReleaseKpiMarkdown`, `writeReleaseKpiReport` |
 

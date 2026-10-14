@@ -466,6 +466,7 @@ Verify code meets quality thresholds in `quality-policy.yaml`:
 - **Cognitive Complexity**: $\le 15$ per function.
 - **Maintainability Index (SEI MI)**: $\ge 50.0$ (Target: $>65.0$).
 - **Maximum Function Length**: $\le 40$ lines.
+- **Automated Test Coverage**: Line $\ge 85\%$, Branch $\ge 80\%$, Function $\ge 90\%$.
 
 1. **Run Pre-Flight with Auto-Fix**:
    ```bash
@@ -479,12 +480,33 @@ Verify code meets quality thresholds in `quality-policy.yaml`:
    # or: npx aisdlc verify quality
    ```
 
-3. **Generate Formal Quality Report**:
+3. **Generate Formal Quality Report & Dashboard**:
    ```bash
    pnpm run report:quality
    # or: npx aisdlc report quality
    ```
    *Output*: Generates `reports/QUALITY_REPORT.md` analyzing TypeScript, JavaScript, Python, Go, Java, C#, Rust, C/C++.
+
+4. **Automated Code Coverage Ingestion (.NET / C#)**:
+   AI-SDLC passively ingests test coverage from standard `coverage/lcov.info` or `coverage/coverage-summary.json` (also supported under `reports/`).
+
+   For .NET / C# projects:
+   - Ensure `coverlet.collector` is installed in test projects (`*.Tests.csproj`):
+     ```xml
+     <PackageReference Include="coverlet.collector" Version="6.*">
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+     </PackageReference>
+     ```
+   - Execute tests with data collection and convert to LCOV format using **ReportGenerator**:
+     ```bash
+     # 1. Run tests collecting raw Cobertura XML
+     dotnet test --collect:"XPlat Code Coverage"
+
+     # 2. Convert to LCOV using ReportGenerator tool
+     reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coverage" -reporttypes:lcov
+     ```
+   - Re-run `npx aisdlc report quality` or `npx aisdlc report dashboard` to populate coverage cards and tables.
 
 ---
 

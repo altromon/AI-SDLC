@@ -122,6 +122,34 @@ The `aisdlc` CLI provides comprehensive commands across 6 functional categories 
 | --- | --- | --- |
 | `aisdlc gherkin extract` | Extracts ````gherkin```` blocks from Markdown specifications and synchronizes them to `.feature` files under `tests/features/`. | `-p, --path <path>`, `-a, --all`, `--json`, `-F, --format <format>` |
 
+### Automated Code Coverage Ingestion (.NET / Polyglot)
+
+`aisdlc report quality` and `aisdlc report dashboard` passively ingest test coverage from standard locations:
+- `coverage/lcov.info` or `reports/lcov.info` (LCOV format)
+- `coverage/coverage-summary.json` or `reports/coverage-summary.json` (Istanbul/JSON summary format)
+
+#### Setting up .NET / C# projects:
+1. Ensure `coverlet.collector` is installed in your test project (`*.Tests.csproj`):
+   ```xml
+   <PackageReference Include="coverlet.collector" Version="6.*">
+     <PrivateAssets>all</PrivateAssets>
+     <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+   </PackageReference>
+   ```
+2. Collect coverage and convert Cobertura XML to LCOV format via **ReportGenerator**:
+   ```bash
+   # Run tests collecting coverage
+   dotnet test --collect:"XPlat Code Coverage"
+
+   # Convert to LCOV for AI-SDLC ingestion
+   reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coverage" -reporttypes:lcov
+   ```
+3. Generate reports:
+   ```bash
+   aisdlc report quality
+   aisdlc report dashboard --open
+   ```
+
 ### Common Workflow Examples
 
 ```bash

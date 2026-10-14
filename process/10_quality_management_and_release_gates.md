@@ -326,6 +326,47 @@ The configuration file allows orchestrating language-specific linters and covera
 ### C. The Universal SARIF Standard (Static Analysis Results Interchange Format)
 For enterprise integrations, AI-SDLC adopts the **SARIF (JSON OASIS)** standard. Any analyzer from any language ecosystem (Roslyn, Clang-Tidy, ESLint, Bandit, Flake8) can output diagnostics in SARIF format, seamlessly ingested by the release pipeline.
 
+### D. Automated Code Coverage Ingestion and .NET Integration
+
+AI-SDLC deterministically ingests automated test coverage metrics without proprietary lock-in. The core reporting engines (`readCodeCoverageSummary`, `aisdlc report quality`, `aisdlc report dashboard`) passively scan the following canonical locations:
+- `coverage/lcov.info` or `reports/lcov.info` (LCOV format)
+- `coverage/coverage-summary.json` or `reports/coverage-summary.json` (Istanbul/JSON summary format)
+
+#### 1. The .NET / C# Testing & Coverage Toolchain
+For C#/.NET projects, the canonical stack declared in `quality-policy.yaml` uses **xUnit** / **Reqnroll** with **Coverlet**:
+
+1. **Test Project Configuration**:
+   Every test project (`*.Tests.csproj`) must include the `coverlet.collector` package to enable cross-platform coverage data collection during `dotnet test`:
+   ```xml
+   <ItemGroup>
+     <PackageReference Include="coverlet.collector" Version="6.0.2">
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+     </PackageReference>
+   </ItemGroup>
+   ```
+   > [!WARNING]
+   > If `coverlet.collector` is omitted, running `dotnet test --collect:"XPlat Code Coverage"` will emit a warning (`No se encuentra ningún objeto datacollector con el nombre descriptivo "XPlat Code Coverage"`) and fail to generate coverage data, causing AI-SDLC reports to display `N/A` or `0%` coverage.
+
+2. **Coverage Collection and LCOV Conversion via ReportGenerator**:
+   Coverlet generates raw Cobertura XML (`TestResults/*/coverage.cobertura.xml`). To ingest these metrics into AI-SDLC:
+   ```bash
+   # Run tests collecting Cobertura XML
+   dotnet test --collect:"XPlat Code Coverage"
+
+   # Convert raw Cobertura XML to standard LCOV using ReportGenerator
+   reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coverage" -reporttypes:lcov
+   ```
+   *Alternative (Direct MSBuild)*: When using `coverlet.msbuild`, output can be emitted directly to LCOV format:
+   ```bash
+   dotnet test /p:CollectCoverage=true /p:CoverletOutput="../../coverage/lcov.info" /p:CoverletOutputFormat=lcov
+   ```
+
+3. **Validation Against Release Gate**:
+   Once `coverage/lcov.info` is present:
+   - `aisdlc report quality` evaluates Line Coverage ($\ge 85\%$), Branch Coverage ($\ge 80\%$), and Function Coverage ($\ge 90\%$) against `quality-policy.yaml`.
+   - `aisdlc report dashboard` populates the interactive Code Coverage cards and charts in `reports/dashboard.html`.
+
 ---
 
 ## 8. Commit Telemetry, KPI Aggregation, and Cost of Quality (Rework & DIR)

@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-10-13 08:23:03 UTC` | *Módulos Integrados:* `13`  
+> *Fecha de Compilación:* `2026-10-14 10:27:50 UTC` | *Módulos Integrados:* `13`  
 
 ---
 
@@ -235,6 +235,7 @@
     - [A. Framework Neutrality Levels](#cap-10-quality-management-and-release-gates-a-framework-neutrality-levels)
     - [B. Ecosystem Mapping in `quality-policy.yaml`](#cap-10-quality-management-and-release-gates-b-ecosystem-mapping-in-quality-policyyaml)
     - [C. The Universal SARIF Standard (Static Analysis Results Interchange Format)](#cap-10-quality-management-and-release-gates-c-the-universal-sarif-standard-static-analysis-results-interchange-format)
+    - [D. Automated Code Coverage Ingestion and .NET Integration](#cap-10-quality-management-and-release-gates-d-automated-code-coverage-ingestion-and-net-integration)
   - [8. Commit Telemetry, KPI Aggregation, and Cost of Quality (Rework & DIR)](#cap-10-quality-management-and-release-gates-8-commit-telemetry-kpi-aggregation-and-cost-of-quality-rework-dir)
     - [A. Standardized Git Trailers](#cap-10-quality-management-and-release-gates-a-standardized-git-trailers)
     - [B. Observability and Rework Metrics](#cap-10-quality-management-and-release-gates-b-observability-and-rework-metrics)
@@ -761,6 +762,7 @@ Verify code meets quality thresholds in `quality-policy.yaml`:
 - **Cognitive Complexity**: $\le 15$ per function.
 - **Maintainability Index (SEI MI)**: $\ge 50.0$ (Target: $>65.0$).
 - **Maximum Function Length**: $\le 40$ lines.
+- **Automated Test Coverage**: Line $\ge 85\%$, Branch $\ge 80\%$, Function $\ge 90\%$.
 
 1. **Run Pre-Flight with Auto-Fix**:
    ```bash
@@ -774,12 +776,33 @@ Verify code meets quality thresholds in `quality-policy.yaml`:
    # or: npx aisdlc verify quality
    ```
 
-3. **Generate Formal Quality Report**:
+3. **Generate Formal Quality Report & Dashboard**:
    ```bash
    pnpm run report:quality
    # or: npx aisdlc report quality
    ```
    *Output*: Generates `reports/QUALITY_REPORT.md` analyzing TypeScript, JavaScript, Python, Go, Java, C#, Rust, C/C++.
+
+4. **Automated Code Coverage Ingestion (.NET / C#)**:
+   AI-SDLC passively ingests test coverage from standard `coverage/lcov.info` or `coverage/coverage-summary.json` (also supported under `reports/`).
+
+   For .NET / C# projects:
+   - Ensure `coverlet.collector` is installed in test projects (`*.Tests.csproj`):
+     ```xml
+     <PackageReference Include="coverlet.collector" Version="6.*">
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+     </PackageReference>
+     ```
+   - Execute tests with data collection and convert to LCOV format using **ReportGenerator**:
+     ```bash
+     # 1. Run tests collecting raw Cobertura XML
+     dotnet test --collect:"XPlat Code Coverage"
+
+     # 2. Convert to LCOV using ReportGenerator tool
+     reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coverage" -reporttypes:lcov
+     ```
+   - Re-run `npx aisdlc report quality` or `npx aisdlc report dashboard` to populate coverage cards and tables.
 
 ---
 
@@ -3966,6 +3989,49 @@ The configuration file allows orchestrating language-specific linters and covera
 
 ### C. The Universal SARIF Standard (Static Analysis Results Interchange Format)
 For enterprise integrations, AI-SDLC adopts the **SARIF (JSON OASIS)** standard. Any analyzer from any language ecosystem (Roslyn, Clang-Tidy, ESLint, Bandit, Flake8) can output diagnostics in SARIF format, seamlessly ingested by the release pipeline.
+
+<a id="cap-10-quality-management-and-release-gates-d-automated-code-coverage-ingestion-and-net-integration"></a>
+
+### D. Automated Code Coverage Ingestion and .NET Integration
+
+AI-SDLC deterministically ingests automated test coverage metrics without proprietary lock-in. The core reporting engines (`readCodeCoverageSummary`, `aisdlc report quality`, `aisdlc report dashboard`) passively scan the following canonical locations:
+- `coverage/lcov.info` or `reports/lcov.info` (LCOV format)
+- `coverage/coverage-summary.json` or `reports/coverage-summary.json` (Istanbul/JSON summary format)
+
+#### 1. The .NET / C# Testing & Coverage Toolchain
+For C#/.NET projects, the canonical stack declared in `quality-policy.yaml` uses **xUnit** / **Reqnroll** with **Coverlet**:
+
+1. **Test Project Configuration**:
+   Every test project (`*.Tests.csproj`) must include the `coverlet.collector` package to enable cross-platform coverage data collection during `dotnet test`:
+   ```xml
+   <ItemGroup>
+     <PackageReference Include="coverlet.collector" Version="6.0.2">
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+     </PackageReference>
+   </ItemGroup>
+   ```
+   > [!WARNING]
+   > If `coverlet.collector` is omitted, running `dotnet test --collect:"XPlat Code Coverage"` will emit a warning (`No se encuentra ningún objeto datacollector con el nombre descriptivo "XPlat Code Coverage"`) and fail to generate coverage data, causing AI-SDLC reports to display `N/A` or `0%` coverage.
+
+2. **Coverage Collection and LCOV Conversion via ReportGenerator**:
+   Coverlet generates raw Cobertura XML (`TestResults/*/coverage.cobertura.xml`). To ingest these metrics into AI-SDLC:
+   ```bash
+   # Run tests collecting Cobertura XML
+   dotnet test --collect:"XPlat Code Coverage"
+
+   # Convert raw Cobertura XML to standard LCOV using ReportGenerator
+   reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coverage" -reporttypes:lcov
+   ```
+   *Alternative (Direct MSBuild)*: When using `coverlet.msbuild`, output can be emitted directly to LCOV format:
+   ```bash
+   dotnet test /p:CollectCoverage=true /p:CoverletOutput="../../coverage/lcov.info" /p:CoverletOutputFormat=lcov
+   ```
+
+3. **Validation Against Release Gate**:
+   Once `coverage/lcov.info` is present:
+   - `aisdlc report quality` evaluates Line Coverage ($\ge 85\%$), Branch Coverage ($\ge 80\%$), and Function Coverage ($\ge 90\%$) against `quality-policy.yaml`.
+   - `aisdlc report dashboard` populates the interactive Code Coverage cards and charts in `reports/dashboard.html`.
 
 ---
 
