@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 1.4.0
+
+### Minor Changes
+
+- refactor(quality): achieve zero violations across monorepo and activate STRICT quality gate enforcement mode; modularize reporting pipeline (`dashboard-graph`, `dashboard-html`, `dashboard-template`) and decompose high-complexity domain verifiers.
+
 ## 1.3.3
 
 ### Patch Changes

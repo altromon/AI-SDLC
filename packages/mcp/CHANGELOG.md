@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 1.4.0
+
+### Minor Changes
+
+- refactor(quality): achieve compliance with STRICT quality gates and update core dependency to @aisdlc/core@1.4.0
+- Updated dependencies
+  - @aisdlc/core@1.4.0
+
 ## 1.3.3
 
 ### Patch Changes
