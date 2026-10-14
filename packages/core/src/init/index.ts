@@ -41,8 +41,6 @@ scope:
   target_directories:
     - "src"
     - "lib"
-    - "examples"
-    - "tests"
   supported_extensions:
     - ".ts"
     - ".js"
@@ -64,6 +62,9 @@ scope:
     - "reports"
     - "dist"
     - ".changeset"
+    - "examples"
+    - "scratch"
+    - "templates"
 
 thresholds:
   cyclomatic_complexity:
@@ -638,6 +639,25 @@ function appendCopilotFiles(dirs: string[], files: { relPath: string; content: s
   }
 }
 
+function isTargetIncluded(targets: Set<string>, name: string): boolean {
+  return targets.has('all') || targets.has(name);
+}
+
+function appendMcpFiles(targets: Set<string>, dirs: string[], files: { relPath: string; content: string }[]) {
+  const hasMcp = isTargetIncluded(targets, 'mcp');
+  if (hasMcp || targets.has('cursor')) {
+    dirs.push('.cursor');
+    files.push({ relPath: '.cursor/mcp.json', content: STARTER_CURSOR_MCP });
+  }
+  if (hasMcp || targets.has('antigravity')) {
+    files.push({ relPath: 'antigravity.mcp.json', content: STARTER_ANTIGRAVITY_MCP });
+  }
+  if (hasMcp) {
+    dirs.push('.vscode');
+    files.push({ relPath: '.vscode/mcp.json', content: STARTER_VSCODE_MCP });
+  }
+}
+
 export function collectAgentFiles(targets: Set<string>): {
   dirs: string[];
   files: { relPath: string; content: string }[];
@@ -645,30 +665,12 @@ export function collectAgentFiles(targets: Set<string>): {
   const dirs: string[] = [];
   const files: { relPath: string; content: string }[] = [];
 
-  const includeAll = targets.has('all');
-  const includeCursor = includeAll || targets.has('cursor');
-  const includeClaude = includeAll || targets.has('claude');
-  const includeAntigravity = includeAll || targets.has('antigravity');
-  const includeCopilot = includeAll || targets.has('copilot');
-  const includeMcp = includeAll || targets.has('mcp');
+  if (isTargetIncluded(targets, 'antigravity')) appendAntigravityFiles(dirs, files);
+  if (isTargetIncluded(targets, 'cursor')) appendCursorFiles(dirs, files);
+  if (isTargetIncluded(targets, 'claude')) appendClaudeFiles(dirs, files);
+  if (isTargetIncluded(targets, 'copilot')) appendCopilotFiles(dirs, files);
 
-  if (includeAntigravity) appendAntigravityFiles(dirs, files);
-  if (includeCursor) appendCursorFiles(dirs, files);
-  if (includeClaude) appendClaudeFiles(dirs, files);
-  if (includeCopilot) appendCopilotFiles(dirs, files);
-
-  if (includeMcp || includeCursor) {
-    dirs.push('.cursor');
-    files.push({ relPath: '.cursor/mcp.json', content: STARTER_CURSOR_MCP });
-  }
-  if (includeMcp || includeAntigravity) {
-    files.push({ relPath: 'antigravity.mcp.json', content: STARTER_ANTIGRAVITY_MCP });
-  }
-  if (includeMcp) {
-    dirs.push('.vscode');
-    files.push({ relPath: '.vscode/mcp.json', content: STARTER_VSCODE_MCP });
-  }
-
+  appendMcpFiles(targets, dirs, files);
   return { dirs, files };
 }
 
@@ -696,45 +698,33 @@ function writeProjectFiles(
   return filesCreated;
 }
 
-export function initProject(options: InitProjectOptions = {}): InitProjectResult {
-  const baseDir = options.rootDir || process.cwd();
-  const destDir = path.resolve(baseDir, options.targetDir || '.');
-
-  let ciProvider: SupportedCiProvider | undefined;
-  if (options.ci) {
-    const normalized = options.ci.trim().toLowerCase();
-    if (!VALID_CI_PROVIDERS.includes(normalized as SupportedCiProvider)) {
-      return {
-        success: false,
-        targetDir: destDir,
-        directoriesCreated: [],
-        filesCreated: [],
-        agentsConfigured: [],
-        gitHookInstalled: false,
-        error: `Unrecognized CI provider: '${options.ci}'. Valid options: ${VALID_CI_PROVIDERS.join(', ')}.`,
-      };
-    }
-    ciProvider = normalized as SupportedCiProvider;
+function validateCiProvider(ci?: string): { valid: boolean; provider?: SupportedCiProvider; error?: string } {
+  if (!ci) return { valid: true };
+  const normalized = ci.trim().toLowerCase();
+  if (!VALID_CI_PROVIDERS.includes(normalized as SupportedCiProvider)) {
+    return {
+      valid: false,
+      error: `Unrecognized CI provider: '${ci}'. Valid options: ${VALID_CI_PROVIDERS.join(', ')}.`,
+    };
   }
+  return { valid: true, provider: normalized as SupportedCiProvider };
+}
 
-  let archGranularity: ArchitectureGranularity = 'minimal';
-  if (options.architecture !== undefined && options.architecture !== null) {
-    const rawArch = String(options.architecture).trim().toLowerCase();
-    if (!VALID_ARCHITECTURE_GRANULARITIES.includes(rawArch as ArchitectureGranularity)) {
-      return {
-        success: false,
-        targetDir: destDir,
-        directoriesCreated: [],
-        filesCreated: [],
-        agentsConfigured: [],
-        gitHookInstalled: false,
-        error: `Unrecognized architecture granularity level: '${options.architecture}'. Valid options: ${VALID_ARCHITECTURE_GRANULARITIES.join(', ')}.`,
-      };
-    }
-    archGranularity = rawArch as ArchitectureGranularity;
+function validateArchitectureGranularity(arch?: unknown): { valid: boolean; granularity: ArchitectureGranularity; error?: string } {
+  if (arch === undefined || arch === null) return { valid: true, granularity: 'minimal' };
+  const rawArch = String(arch).trim().toLowerCase();
+  if (!VALID_ARCHITECTURE_GRANULARITIES.includes(rawArch as ArchitectureGranularity)) {
+    return {
+      valid: false,
+      granularity: 'minimal',
+      error: `Unrecognized architecture granularity level: '${arch}'. Valid options: ${VALID_ARCHITECTURE_GRANULARITIES.join(', ')}.`,
+    };
   }
+  return { valid: true, granularity: rawArch as ArchitectureGranularity };
+}
 
-  const directories = [
+function getBaseDirectories(ciProvider?: SupportedCiProvider): string[] {
+  const dirs = [
     'process',
     'schemas/product',
     'schemas/security',
@@ -756,29 +746,38 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
     'reports',
     'tests/features',
   ];
+  if (ciProvider === 'github') dirs.push('.github/workflows');
+  return dirs;
+}
 
+function getCiWorkflowFiles(ciProvider?: SupportedCiProvider): { relPath: string; content: string }[] {
+  if (ciProvider === 'gitlab') return [{ relPath: '.gitlab-ci.yml', content: STARTER_GITLAB_CI }];
+  if (ciProvider === 'azure') return [{ relPath: 'azure-pipelines.yml', content: STARTER_AZURE_PIPELINES }];
+  if (ciProvider === 'bitbucket') return [{ relPath: 'bitbucket-pipelines.yml', content: STARTER_BITBUCKET_PIPELINES }];
   if (ciProvider === 'github') {
-    directories.push('.github/workflows');
+    return [
+      { relPath: '.github/workflows/ci.yml', content: STARTER_GITHUB_CI },
+      { relPath: '.github/workflows/sdd-integrate-on-merge.yml', content: STARTER_GITHUB_SDD_INTEGRATE },
+    ];
   }
+  return [];
+}
 
-  const agentTargets = resolveAgentTargets(options.agents);
-  const { dirs: agentDirs, files: agentFiles } = collectAgentFiles(agentTargets);
-  for (const d of agentDirs) {
-    if (!directories.includes(d)) {
-      directories.push(d);
-    }
-  }
-
-  const directoriesCreated: string[] = [];
+function createDirectoriesOnDisk(destDir: string, directories: string[], dryRun?: boolean): string[] {
+  const created: string[] = [];
   for (const d of directories) {
-    const fullDir = path.join(destDir, d);
-    if (!options.dryRun) {
-      fs.mkdirSync(fullDir, { recursive: true });
-    }
-    directoriesCreated.push(d);
+    if (!dryRun) fs.mkdirSync(path.join(destDir, d), { recursive: true });
+    created.push(d);
   }
+  return created;
+}
 
-  const filesToWrite: { relPath: string; content: string }[] = [
+function collectStarterFiles(
+  ciProvider?: SupportedCiProvider,
+  agentFiles: { relPath: string; content: string }[] = [],
+  archGranularity: ArchitectureGranularity = 'minimal'
+): { relPath: string; content: string }[] {
+  return [
     { relPath: 'quality-policy.yaml', content: STARTER_QUALITY_POLICY },
     { relPath: 'license-policy.yaml', content: STARTER_LICENSE_POLICY },
     { relPath: 'templates/sdd/tasks.template.md', content: STARTER_TASK_TEMPLATE },
@@ -787,47 +786,57 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
     { relPath: 'templates/ci/.gitlab-ci.yml', content: STARTER_GITLAB_CI },
     { relPath: 'templates/ci/azure-pipelines.yml', content: STARTER_AZURE_PIPELINES },
     { relPath: 'templates/ci/bitbucket-pipelines.yml', content: STARTER_BITBUCKET_PIPELINES },
+    ...getCiWorkflowFiles(ciProvider),
+    ...agentFiles,
+    ...getArchitectureTemplates(archGranularity).map((t) => ({
+      relPath: path.join('templates', 'architecture', t.filename).replace(/\\/g, '/'),
+      content: t.content,
+    })),
   ];
+}
 
-  if (ciProvider === 'gitlab') {
-    filesToWrite.push({ relPath: '.gitlab-ci.yml', content: STARTER_GITLAB_CI });
-  } else if (ciProvider === 'azure') {
-    filesToWrite.push({ relPath: 'azure-pipelines.yml', content: STARTER_AZURE_PIPELINES });
-  } else if (ciProvider === 'bitbucket') {
-    filesToWrite.push({ relPath: 'bitbucket-pipelines.yml', content: STARTER_BITBUCKET_PIPELINES });
-  } else if (ciProvider === 'github') {
-    filesToWrite.push(
-      { relPath: '.github/workflows/ci.yml', content: STARTER_GITHUB_CI },
-      { relPath: '.github/workflows/sdd-integrate-on-merge.yml', content: STARTER_GITHUB_SDD_INTEGRATE }
-    );
+function tryInstallGitHook(destDir: string, dryRun?: boolean): boolean {
+  if (!dryRun && fs.existsSync(path.join(destDir, '.git'))) {
+    return installGitHooks(destDir).success;
   }
+  return false;
+}
 
-  filesToWrite.push(...agentFiles);
+function formatAgentsConfigured(targets: Set<string>): string[] {
+  const configured = Array.from(targets).filter((t) => t !== 'all');
+  if (targets.has('all')) configured.unshift('all');
+  return configured;
+}
 
-  const archTemplates = getArchitectureTemplates(archGranularity);
-  for (const tpl of archTemplates) {
-    filesToWrite.push({
-      relPath: path.join('templates', 'architecture', tpl.filename).replace(/\\/g, '/'),
-      content: tpl.content,
-    });
+function buildInitError(targetDir: string, error?: string): InitProjectResult {
+  return {
+    success: false,
+    targetDir,
+    directoriesCreated: [],
+    filesCreated: [],
+    agentsConfigured: [],
+    gitHookInstalled: false,
+    error,
+  };
+}
+
+function mergeDirectories(base: string[], extra: string[]): string[] {
+  const result = [...base];
+  for (const d of extra) {
+    if (!result.includes(d)) result.push(d);
   }
+  return result;
+}
 
-  const filesCreated = writeProjectFiles(destDir, filesToWrite, options.dryRun);
-
-  let gitHookInstalled = false;
-  if (!options.dryRun) {
-    const gitDir = path.join(destDir, '.git');
-    if (fs.existsSync(gitDir)) {
-      const hookRes = installGitHooks(destDir);
-      gitHookInstalled = hookRes.success;
-    }
-  }
-
-  const agentsConfigured = Array.from(agentTargets).filter((t) => t !== 'all');
-  if (agentTargets.has('all')) {
-    agentsConfigured.unshift('all');
-  }
-
+function buildInitSuccessResult(
+  destDir: string,
+  directoriesCreated: string[],
+  filesCreated: string[],
+  ciProvider: SupportedCiProvider | undefined,
+  agentsConfigured: string[],
+  architectureGranularity: ArchitectureGranularity,
+  gitHookInstalled: boolean
+): InitProjectResult {
   return {
     success: true,
     targetDir: destDir,
@@ -835,7 +844,36 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
     filesCreated,
     ciProvider,
     agentsConfigured,
-    architectureGranularity: archGranularity,
+    architectureGranularity,
     gitHookInstalled,
   };
+}
+
+export function initProject(options: InitProjectOptions = {}): InitProjectResult {
+  const baseDir = options.rootDir || process.cwd();
+  const destDir = path.resolve(baseDir, options.targetDir || '.');
+
+  const ciRes = validateCiProvider(options.ci);
+  if (!ciRes.valid) return buildInitError(destDir, ciRes.error);
+
+  const archRes = validateArchitectureGranularity(options.architecture);
+  if (!archRes.valid) return buildInitError(destDir, archRes.error);
+
+  const agentTargets = resolveAgentTargets(options.agents);
+  const { dirs: agentDirs, files: agentFiles } = collectAgentFiles(agentTargets);
+  const directories = mergeDirectories(getBaseDirectories(ciRes.provider), agentDirs);
+
+  const directoriesCreated = createDirectoriesOnDisk(destDir, directories, options.dryRun);
+  const starterFiles = collectStarterFiles(ciRes.provider, agentFiles, archRes.granularity);
+  const filesCreated = writeProjectFiles(destDir, starterFiles, options.dryRun);
+
+  return buildInitSuccessResult(
+    destDir,
+    directoriesCreated,
+    filesCreated,
+    ciRes.provider,
+    formatAgentsConfigured(agentTargets),
+    archRes.granularity,
+    tryInstallGitHook(destDir, options.dryRun)
+  );
 }

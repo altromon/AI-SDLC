@@ -36,6 +36,25 @@ const TRAILER_REGEXES = {
   activeTimeSeconds: /^\s*Active-Time-Seconds:\s*([0-9]+)/im,
 };
 
+function parseTrailerInt(match: RegExpMatchArray | null): number {
+  if (!match) return 0;
+  const val = parseInt(match[1], 10);
+  return isNaN(val) ? 0 : val;
+}
+
+function resolveAuthorType(
+  authorTypeMatch: RegExpMatchArray | null,
+  aiModelMatch: RegExpMatchArray | null
+): 'human' | 'agent' {
+  if (authorTypeMatch) {
+    return authorTypeMatch[1].toLowerCase() as 'human' | 'agent';
+  }
+  if (aiModelMatch && aiModelMatch[1].trim() !== 'n/a') {
+    return 'agent';
+  }
+  return 'human';
+}
+
 /**
  * Parses structured AI-SDLC git trailers from a commit message.
  */
@@ -45,30 +64,19 @@ export function parseCommitTrailers(rawMessage: string): CommitTrailers {
   const parentRefMatch = text.match(TRAILER_REGEXES.parentRef);
   const authorTypeMatch = text.match(TRAILER_REGEXES.authorType);
   const aiModelMatch = text.match(TRAILER_REGEXES.aiModel);
-  const promptTokensMatch = text.match(TRAILER_REGEXES.promptTokens);
-  const completionTokensMatch = text.match(TRAILER_REGEXES.completionTokens);
-  const activeTimeMatch = text.match(TRAILER_REGEXES.activeTimeSeconds);
 
-  let authorType: 'human' | 'agent' = 'human';
-  if (authorTypeMatch) {
-    authorType = authorTypeMatch[1].toLowerCase() as 'human' | 'agent';
-  } else if (aiModelMatch && aiModelMatch[1].trim() !== 'n/a') {
-    authorType = 'agent';
-  }
-
-  const aiModel = aiModelMatch ? aiModelMatch[1].trim() : undefined;
-  const promptTokens = promptTokensMatch ? parseInt(promptTokensMatch[1], 10) : 0;
-  const completionTokens = completionTokensMatch ? parseInt(completionTokensMatch[1], 10) : 0;
-  const activeTimeSeconds = activeTimeMatch ? parseInt(activeTimeMatch[1], 10) : 0;
+  const authorType = resolveAuthorType(authorTypeMatch, aiModelMatch);
+  const rawModel = aiModelMatch ? aiModelMatch[1].trim() : undefined;
+  const aiModel = rawModel && rawModel !== 'n/a' ? rawModel : undefined;
 
   return {
     taskId: taskIdMatch ? taskIdMatch[1].trim() : undefined,
     parentRef: parentRefMatch ? parentRefMatch[1].trim() : undefined,
     authorType,
-    aiModel: aiModel && aiModel !== 'n/a' ? aiModel : undefined,
-    promptTokens: isNaN(promptTokens) ? 0 : promptTokens,
-    completionTokens: isNaN(completionTokens) ? 0 : completionTokens,
-    activeTimeSeconds: isNaN(activeTimeSeconds) ? 0 : activeTimeSeconds,
+    aiModel,
+    promptTokens: parseTrailerInt(text.match(TRAILER_REGEXES.promptTokens)),
+    completionTokens: parseTrailerInt(text.match(TRAILER_REGEXES.completionTokens)),
+    activeTimeSeconds: parseTrailerInt(text.match(TRAILER_REGEXES.activeTimeSeconds)),
   };
 }
 
@@ -135,6 +143,29 @@ function evaluateIsBugFix(subject: string, parentRef?: string): boolean {
   return /^(fix|bug)(\([^)]+\))?:/i.test(subject.trim());
 }
 
+function inferAgentTrailers(trailers: CommitTrailers, linesAdded: number, linesDeleted: number): CommitTrailers {
+  const res: CommitTrailers = { ...trailers };
+  const linesChanged = linesAdded + linesDeleted;
+
+  if (res.promptTokens === 0 && res.completionTokens === 0) {
+    res.completionTokens = linesChanged > 0 ? Math.max(linesAdded * 10, 50) : 0;
+    res.promptTokens = linesChanged > 0 ? Math.max(2500 + linesChanged * 25, 3000) : 1000;
+  }
+  if (res.activeTimeSeconds === 0) {
+    res.activeTimeSeconds = linesChanged > 0 ? Math.round(30 + linesChanged * 0.5) : 30;
+  }
+  return res;
+}
+
+function inferHumanTrailers(trailers: CommitTrailers, linesAdded: number, linesDeleted: number): CommitTrailers {
+  const res: CommitTrailers = { ...trailers };
+  const linesChanged = linesAdded + linesDeleted;
+  if (res.activeTimeSeconds === 0) {
+    res.activeTimeSeconds = linesChanged > 0 ? Math.round(180 + linesChanged * 2) : 120;
+  }
+  return res;
+}
+
 /**
  * Infers or estimates missing KPI metrics (tokens and active development time)
  * when not explicitly declared in commit trailers.
@@ -144,32 +175,54 @@ export function inferMissingTrailers(
   linesAdded: number,
   linesDeleted: number
 ): CommitTrailers {
-  const result: CommitTrailers = { ...trailers };
-  const linesChanged = linesAdded + linesDeleted;
+  return trailers.authorType === 'agent'
+    ? inferAgentTrailers(trailers, linesAdded, linesDeleted)
+    : inferHumanTrailers(trailers, linesAdded, linesDeleted);
+}
 
-  if (result.authorType === 'agent') {
-    // If prompt and completion tokens are 0, estimate based on lines changed
-    if (result.promptTokens === 0 && result.completionTokens === 0) {
-      if (linesChanged > 0) {
-        result.completionTokens = Math.max(linesAdded * 10, 50);
-        result.promptTokens = Math.max(2500 + linesChanged * 25, 3000);
-      } else {
-        result.completionTokens = 0;
-        result.promptTokens = 1000;
+function fetchGitLogOutput(cwd: string, baseRef: string, headRef: string, format: string): string {
+  const rangeArg = baseRef ? `${baseRef}..${headRef}` : headRef;
+  try {
+    return execFileSync('git', ['log', rangeArg, `--format=${format}`, '--numstat'], {
+      cwd,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+  } catch {
+    if (baseRef && !baseRef.includes('/')) {
+      try {
+        return execFileSync('git', ['log', `origin/${baseRef}..${headRef}`, `--format=${format}`, `--numstat`], {
+          cwd,
+          encoding: 'utf-8',
+          stdio: ['pipe', 'pipe', 'pipe'],
+        });
+      } catch {
+        return '';
       }
     }
-    // If active time is 0, estimate based on lines changed
-    if (result.activeTimeSeconds === 0) {
-      result.activeTimeSeconds = linesChanged > 0 ? Math.round(30 + linesChanged * 0.5) : 30;
-    }
-  } else {
-    // Human developer: tokens are always 0, estimate active development time
-    if (result.activeTimeSeconds === 0) {
-      result.activeTimeSeconds = linesChanged > 0 ? Math.round(180 + linesChanged * 2) : 120;
-    }
+    return '';
   }
+}
 
-  return result;
+function buildCommitKpiRecord(chunk: ParsedCommitChunk): CommitKpiRecord | null {
+  const fields = chunk.header.split('\x1f');
+  if (fields.length < 5) return null;
+
+  const rawTrailers = parseCommitTrailers(chunk.body);
+  const { added, deleted } = sumNumstatLines(chunk.numstatLines);
+  const trailers = inferMissingTrailers(rawTrailers, added, deleted);
+
+  return {
+    sha: fields[0],
+    authorName: fields[1],
+    authorEmail: fields[2],
+    date: fields[3],
+    subject: fields[4],
+    trailers,
+    linesAdded: added,
+    linesDeleted: deleted,
+    isBugFix: evaluateIsBugFix(fields[4], trailers.parentRef),
+  };
 }
 
 /**
@@ -182,59 +235,14 @@ export function extractCommitKpisFromRange(
 ): CommitKpiRecord[] {
   const cwd = options.cwd || process.cwd();
   const format = '---AI_SDLC_COMMIT---%n%H%x1f%an%x1f%ae%x1f%aI%x1f%s%n%B%n---AI_SDLC_BODY_END---';
-  let rawOutput = '';
-  const rangeArg = baseRef ? `${baseRef}..${headRef}` : headRef;
-  try {
-    rawOutput = execFileSync(
-      'git',
-      ['log', rangeArg, `--format=${format}`, '--numstat'],
-      { cwd, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
-    );
-  } catch {
-    if (baseRef && !baseRef.includes('/')) {
-      try {
-        rawOutput = execFileSync(
-          'git',
-          ['log', `origin/${baseRef}..${headRef}`, `--format=${format}`, `--numstat`],
-          { cwd, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
-        );
-      } catch {
-        return [];
-      }
-    } else {
-      return [];
-    }
-  }
+  const rawOutput = fetchGitLogOutput(cwd, baseRef, headRef, format);
+  if (!rawOutput) return [];
 
   const chunks = parseRawLogChunks(rawOutput);
   const records: CommitKpiRecord[] = [];
-
   for (const chunk of chunks) {
-    const fields = chunk.header.split('\x1f');
-    if (fields.length < 5) continue;
-    const sha = fields[0];
-    const authorName = fields[1];
-    const authorEmail = fields[2];
-    const date = fields[3];
-    const subject = fields[4];
-
-    const rawTrailers = parseCommitTrailers(chunk.body);
-    const { added, deleted } = sumNumstatLines(chunk.numstatLines);
-    const trailers = inferMissingTrailers(rawTrailers, added, deleted);
-    const isBugFix = evaluateIsBugFix(subject, trailers.parentRef);
-
-    records.push({
-      sha,
-      authorName,
-      authorEmail,
-      date,
-      subject,
-      trailers,
-      linesAdded: added,
-      linesDeleted: deleted,
-      isBugFix,
-    });
+    const rec = buildCommitKpiRecord(chunk);
+    if (rec) records.push(rec);
   }
-
   return records;
 }

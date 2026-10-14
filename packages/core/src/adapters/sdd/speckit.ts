@@ -11,6 +11,110 @@ import { ChangeProfile, ProductHandoff, SddValidationResult, SddWorkspaceInfo } 
 import { extractGherkinBlock } from '../../verifiers/gherkin.js';
 import { SddAdapter } from './types.js';
 
+function parseChangeProfile(specFile: string): ChangeProfile {
+  if (!fs.existsSync(specFile)) return 'standard';
+  try {
+    const rawSpec = fs.readFileSync(specFile, 'utf-8').replace(/^\uFEFF/, '');
+    const match = rawSpec.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (match) {
+      const parsedFm = yaml.load(match[1]) as Record<string, unknown> | null;
+      if (parsedFm?.profile && ['patch', 'standard', 'critical'].includes(String(parsedFm.profile))) {
+        return parsedFm.profile as ChangeProfile;
+      }
+    }
+  } catch {}
+  return 'standard';
+}
+
+function checkSpecGherkinFormat(parsedFm: Record<string, unknown>, rawSpec: string, changeWorkspaceDir: string, errors: string[]): void {
+  const format = parsedFm['acceptance-format'];
+  if (format && format !== 'gherkin') {
+    errors.push(`El archivo 'spec.md' declara acceptance-format '${format}', pero el estándar obligatorio es 'gherkin'.`);
+  }
+  if (format === 'gherkin' && extractGherkinBlock(rawSpec).length === 0) {
+    errors.push(`El archivo 'spec.md' en ${changeWorkspaceDir} declara 'acceptance-format: gherkin' pero no incluye ningún bloque de especificación ejecutable (\`\`\`gherkin ... \`\`\`).`);
+  }
+}
+
+function validateSpecFileContent(specFile: string, changeWorkspaceDir: string, errors: string[]): void {
+  if (!fs.existsSync(specFile)) {
+    errors.push(`Falta el archivo de especificación obligatorio 'spec.md' en ${changeWorkspaceDir}.`);
+    return;
+  }
+  try {
+    const rawSpec = fs.readFileSync(specFile, 'utf-8').replace(/^\uFEFF/, '');
+    const match = rawSpec.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (match) {
+      const parsedFm = yaml.load(match[1]) as Record<string, unknown> | null;
+      if (parsedFm) checkSpecGherkinFormat(parsedFm, rawSpec, changeWorkspaceDir, errors);
+    }
+  } catch {}
+}
+
+function validateHandoffSidecar(handoff: ProductHandoff | null, changeWorkspaceDir: string, errors: string[]): string | undefined {
+  if (!handoff) {
+    errors.push(
+      `Falta el archivo de acompañamiento (sidecar) 'handoff.yaml' con identificador 'HOF-*' en ${changeWorkspaceDir}.`
+    );
+    return undefined;
+  }
+  if (!handoff.subgraph || !Array.isArray(handoff.subgraph.requirements)) {
+    errors.push(`El sidecar '${handoff.id}' no define un subgrafo de requerimientos válido.`);
+  }
+  return path.join(changeWorkspaceDir, 'handoff.yaml');
+}
+
+function validateSpecKitStructure(
+  profile: ChangeProfile,
+  changeWorkspaceDir: string,
+  adapter: SpecKitAdapter,
+  errors: string[],
+  warnings: string[]
+): { handoff: ProductHandoff | null; sidecarFile?: string } {
+  const planFile = path.join(changeWorkspaceDir, 'plan.md');
+  const tasksFile = path.join(changeWorkspaceDir, 'tasks.md');
+
+  if (profile === 'patch') {
+    const handoff = adapter.loadSidecar(changeWorkspaceDir);
+    return { handoff, sidecarFile: handoff ? path.join(changeWorkspaceDir, 'handoff.yaml') : undefined };
+  }
+
+  if (!fs.existsSync(tasksFile)) {
+    errors.push(`Falta el archivo de tareas obligatorio 'tasks.md' en ${changeWorkspaceDir}.`);
+  }
+  if (!fs.existsSync(planFile)) {
+    warnings.push(`Se recomienda incluir 'plan.md' en el espacio de trabajo Spec Kit.`);
+  }
+
+  const handoff = adapter.loadSidecar(changeWorkspaceDir);
+  const sidecarFile = validateHandoffSidecar(handoff, changeWorkspaceDir, errors);
+  return { handoff, sidecarFile };
+}
+
+function buildSpecKitWorkspaceInfo(
+  changeWorkspaceDir: string,
+  profile: ChangeProfile,
+  handoff: ProductHandoff | null,
+  sidecarFile?: string
+): SddWorkspaceInfo {
+  const changeId = path.basename(changeWorkspaceDir);
+  const specFile = path.join(changeWorkspaceDir, 'spec.md');
+  const planFile = path.join(changeWorkspaceDir, 'plan.md');
+  const tasksFile = path.join(changeWorkspaceDir, 'tasks.md');
+
+  return {
+    framework: 'speckit',
+    changeId,
+    changeDir: changeWorkspaceDir,
+    profile,
+    specFile: fs.existsSync(specFile) ? specFile : undefined,
+    designFile: fs.existsSync(planFile) ? planFile : undefined,
+    tasksFile: fs.existsSync(tasksFile) ? tasksFile : undefined,
+    sidecarFile,
+    handoff: handoff || undefined,
+  };
+}
+
 export class SpecKitAdapter implements SddAdapter {
   readonly framework = 'speckit' as const;
 
@@ -92,7 +196,7 @@ export class SpecKitAdapter implements SddAdapter {
       if (fs.existsSync(fullPath)) {
         try {
           const raw = fs.readFileSync(fullPath, 'utf-8').replace(/^\uFEFF/, '');
-          const parsed = file.endsWith('.json') ? JSON.parse(raw) : (yaml.load(raw) as any);
+          const parsed = file.endsWith('.json') ? JSON.parse(raw) : (yaml.load(raw) as Record<string, unknown>);
           if (parsed && typeof parsed === 'object' && parsed.id && String(parsed.id).startsWith('HOF-')) {
             return parsed as ProductHandoff;
           }
@@ -106,9 +210,6 @@ export class SpecKitAdapter implements SddAdapter {
   }
 
   validateWorkspace(changeWorkspaceDir: string): SddValidationResult {
-    const errors: string[] = [];
-    const warnings: string[] = [];
-
     if (!fs.existsSync(changeWorkspaceDir)) {
       return {
         valid: false,
@@ -117,95 +218,14 @@ export class SpecKitAdapter implements SddAdapter {
       };
     }
 
-    const changeId = path.basename(changeWorkspaceDir);
-
+    const errors: string[] = [];
+    const warnings: string[] = [];
     const specFile = path.join(changeWorkspaceDir, 'spec.md');
-    const planFile = path.join(changeWorkspaceDir, 'plan.md');
-    const tasksFile = path.join(changeWorkspaceDir, 'tasks.md');
+    const profile = parseChangeProfile(specFile);
 
-    let profile: ChangeProfile = 'standard';
-    if (fs.existsSync(specFile)) {
-      try {
-        const rawSpec = fs.readFileSync(specFile, 'utf-8').replace(/^\uFEFF/, '');
-        const match = rawSpec.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-        if (match) {
-          const parsedFm = yaml.load(match[1]) as any;
-          if (parsedFm && parsedFm.profile && ['patch', 'standard', 'critical'].includes(parsedFm.profile)) {
-            profile = parsedFm.profile as ChangeProfile;
-          }
-        }
-      } catch {
-        // ignore parse error
-      }
-    }
-
-    if (!fs.existsSync(specFile)) {
-      errors.push(`Falta el archivo de especificación obligatorio 'spec.md' en ${changeWorkspaceDir}.`);
-    } else {
-      try {
-        const rawSpec = fs.readFileSync(specFile, 'utf-8').replace(/^\uFEFF/, '');
-        const match = rawSpec.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-        if (match) {
-          const parsedFm = yaml.load(match[1]) as any;
-          if (parsedFm && parsedFm['acceptance-format'] && parsedFm['acceptance-format'] !== 'gherkin') {
-            errors.push(
-              `El archivo 'spec.md' declara acceptance-format '${parsedFm['acceptance-format']}', pero el estándar obligatorio es 'gherkin'.`
-            );
-          }
-          if (parsedFm && parsedFm['acceptance-format'] === 'gherkin') {
-            const blocks = extractGherkinBlock(rawSpec);
-            if (blocks.length === 0) {
-              errors.push(
-                `El archivo 'spec.md' en ${changeWorkspaceDir} declara 'acceptance-format: gherkin' pero no incluye ningún bloque de especificación ejecutable (\`\`\`gherkin ... \`\`\`).`
-              );
-            }
-          }
-        }
-      } catch {
-        // ignore parse error
-      }
-    }
-
-    let sidecarFile: string | undefined;
-    let handoff: ProductHandoff | null = null;
-
-    if (profile === 'patch') {
-      handoff = this.loadSidecar(changeWorkspaceDir);
-      if (handoff) {
-        sidecarFile = path.join(changeWorkspaceDir, 'handoff.yaml');
-      }
-    } else {
-      if (!fs.existsSync(tasksFile)) {
-        errors.push(`Falta el archivo de tareas obligatorio 'tasks.md' en ${changeWorkspaceDir}.`);
-      }
-      if (!fs.existsSync(planFile)) {
-        warnings.push(`Se recomienda incluir 'plan.md' en el espacio de trabajo Spec Kit.`);
-      }
-
-      handoff = this.loadSidecar(changeWorkspaceDir);
-      if (!handoff) {
-        errors.push(
-          `Falta el archivo de acompañamiento (sidecar) 'handoff.yaml' con identificador 'HOF-*' en ${changeWorkspaceDir}.`
-        );
-      } else {
-        if (!handoff.subgraph || !Array.isArray(handoff.subgraph.requirements)) {
-          errors.push(`El sidecar '${handoff.id}' no define un subgrafo de requerimientos válido.`);
-        }
-        sidecarFile = path.join(changeWorkspaceDir, 'handoff.yaml');
-      }
-    }
-
-    const workspace: SddWorkspaceInfo = {
-      framework: this.framework,
-      changeId,
-      changeDir: changeWorkspaceDir,
-      profile,
-      specFile: fs.existsSync(specFile) ? specFile : undefined,
-      designFile: fs.existsSync(planFile) ? planFile : undefined,
-      tasksFile: fs.existsSync(tasksFile) ? tasksFile : undefined,
-      sidecarFile,
-      handoff: handoff || undefined,
-    };
+    validateSpecFileContent(specFile, changeWorkspaceDir, errors);
+    const { handoff, sidecarFile } = validateSpecKitStructure(profile, changeWorkspaceDir, this, errors, warnings);
+    const workspace = buildSpecKitWorkspaceInfo(changeWorkspaceDir, profile, handoff, sidecarFile);
 
     return {
       valid: errors.length === 0,

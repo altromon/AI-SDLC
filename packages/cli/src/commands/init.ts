@@ -13,62 +13,150 @@ export interface InitCliOptions {
   format?: string;
 }
 
+function parseArchitectureChoice(answer: string): string {
+  const trimmed = answer.trim().toLowerCase();
+  if (!trimmed || trimmed === '1' || trimmed === 'minimal') return 'minimal';
+  if (trimmed === '2' || trimmed === 'full' || trimmed === 'complete') return 'full';
+  if (trimmed === '3' || trimmed === 'none') return 'none';
+  return trimmed;
+}
+
+const ARCH_MENU = [
+  pc.bold(pc.cyan('\n🏛️  [AI-SDLC] Architecture Granularity Level:')),
+  '  1) ' + pc.green('Minimal / Baseline') + ' (ARCH-INTRO-* Vision, CMP-* Decisions) ' + pc.yellow('[Recommended]'),
+  '  2) ' + pc.cyan('Full / arc42 + NAF v4') + ' (12 complete architecture sections)',
+  '  3) ' + pc.gray('None') + ' (No architecture templates)',
+].join('\n');
+
 export async function promptForArchitecture(): Promise<string> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  console.log(pc.bold(pc.cyan('\n🏛️  [AI-SDLC] Architecture Granularity Level:')));
-  console.log('  1) ' + pc.green('Minimal / Baseline') + ' (ARCH-INTRO-* Vision, CMP-* Components, and ADR-* Decisions) ' + pc.yellow('[Recommended for microservices and CLI]'));
-  console.log('  2) ' + pc.cyan('Full / arc42 + NAF v4') + ' (12 complete architecture sections)');
-  console.log('  3) ' + pc.gray('None') + ' (No architecture templates)');
-
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  console.log(ARCH_MENU);
   try {
-    const answer = await rl.question(
-      pc.bold('\nWhich architecture granularity level do you wish to configure? [1-3] (default 1): ')
-    );
-    const trimmed = answer.trim().toLowerCase();
-    if (!trimmed || trimmed === '1' || trimmed === 'minimal') return 'minimal';
-    if (trimmed === '2' || trimmed === 'full' || trimmed === 'complete') return 'full';
-    if (trimmed === '3' || trimmed === 'none') return 'none';
-    return trimmed;
+    const answer = await rl.question(pc.bold('\nWhich architecture granularity level do you wish to configure? [1-3] (default 1): '));
+    return parseArchitectureChoice(answer);
   } finally {
     rl.close();
   }
 }
 
+const AGENTS_MENU = [
+  pc.bold(pc.cyan('\n🤖 [AI-SDLC] Project AI Agents Configuration:')),
+  '  1) ' + pc.green('All') + ' (Cursor, Claude Code, Antigravity, Copilot, MCP) ' + pc.yellow('[Recommended]'),
+  '  2) Cursor (.cursor/rules and .cursor/mcp.json)',
+  '  3) Claude Code (CLAUDE.md)',
+  '  4) Google Antigravity / Gemini CLI (.agent/rules and antigravity.mcp.json)',
+  '  5) GitHub Copilot (.github/copilot-instructions.md)',
+  '  6) MCP connectors only (.cursor/mcp.json, antigravity.mcp.json, .vscode/mcp.json)',
+  '  7) None (only core policies and base templates)',
+].join('\n');
+
+function parseAgentsChoice(answer: string): string {
+  const map: Record<string, string> = {
+    '1': 'all', '2': 'cursor', '3': 'claude', '4': 'antigravity',
+    '5': 'copilot', '6': 'mcp', '7': 'none',
+  };
+  const trimmed = answer.trim();
+  return !trimmed ? 'all' : map[trimmed] || trimmed;
+}
+
 export async function promptForAgents(): Promise<string> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  console.log(pc.bold(pc.cyan('\n🤖 [AI-SDLC] Project AI Agents Configuration:')));
-  console.log('  1) ' + pc.green('All') + ' (Cursor, Claude Code, Antigravity, Copilot, MCP) ' + pc.yellow('[Recommended]'));
-  console.log('  2) Cursor (.cursor/rules and .cursor/mcp.json)');
-  console.log('  3) Claude Code (CLAUDE.md)');
-  console.log('  4) Google Antigravity / Gemini CLI (.agent/rules and antigravity.mcp.json)');
-  console.log('  5) GitHub Copilot (.github/copilot-instructions.md)');
-  console.log('  6) MCP connectors only (.cursor/mcp.json, antigravity.mcp.json, .vscode/mcp.json)');
-  console.log('  7) None (only core policies and base templates)');
-
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  console.log(AGENTS_MENU);
   try {
-    const answer = await rl.question(
-      pc.bold('\nWhich agents do you wish to deploy? [1-7 or comma-separated list] (default 1): ')
-    );
-    const trimmed = answer.trim();
-    if (!trimmed || trimmed === '1') return 'all';
-    if (trimmed === '2') return 'cursor';
-    if (trimmed === '3') return 'claude';
-    if (trimmed === '4') return 'antigravity';
-    if (trimmed === '5') return 'copilot';
-    if (trimmed === '6') return 'mcp';
-    if (trimmed === '7') return 'none';
-    return trimmed;
+    const answer = await rl.question(pc.bold('\nWhich agents do you wish to deploy? [1-7 or comma-separated list] (default 1): '));
+    return parseAgentsChoice(answer);
   } finally {
     rl.close();
   }
+}
+
+type InitProjectResult = ReturnType<typeof initProject>;
+
+function emitInitJson(result: InitProjectResult, isSuccess: boolean, dryRun: boolean): void {
+  const payload = {
+    command: 'init',
+    success: isSuccess,
+    exitCode: isSuccess ? 0 : 1,
+    targetDir: result.targetDir,
+    directoriesCreated: result.directoriesCreated,
+    filesCreated: result.filesCreated,
+    ciProvider: result.ciProvider,
+    agentsConfigured: result.agentsConfigured,
+    architectureGranularity: result.architectureGranularity,
+    gitHookInstalled: result.gitHookInstalled,
+    dryRun,
+    ...(isSuccess ? {} : { error: result.error || 'Error initializing project.' }),
+  };
+  console.log(JSON.stringify(payload, null, 2));
+}
+
+function formatGranularityLabel(granularity?: string): string {
+  if (granularity === 'full' || granularity === 'complete') return 'Full (arc42 + NAF v4, 12 sections)';
+  if (granularity === 'minimal') return 'Minimal / Baseline (ARCH-INTRO-*, CMP-* and ADR-*)';
+  return 'None';
+}
+
+function printGitHookStatus(dryRun: boolean, installed?: boolean): void {
+  if (dryRun) {
+    console.log(`  ${pc.blue('DRY-RUN')} Install Git Hook: .git/hooks/prepare-commit-msg`);
+  } else if (installed) {
+    console.log(`  ${pc.green('✔')} Git Hook installed: ${pc.bold('prepare-commit-msg')}`);
+  } else {
+    console.log(`  ${pc.yellow('ℹ')} Git repository not detected at target.`);
+    console.log(`    ${pc.gray("Run 'git init' and then 'aisdlc git hook install' to activate commit hooks.")}`);
+  }
+}
+
+function printCreatedItems(items: string[], type: 'directory' | 'file', dryRun: boolean): void {
+  const isDir = type === 'directory';
+  for (const item of items) {
+    const prefix = dryRun ? pc.blue('DRY-RUN') + ` ${isDir ? 'Create directory:' : 'Create file:'}` : pc.green('✔') + ` ${isDir ? 'Directory created:' : 'File generated:'}`;
+    console.log(`  ${prefix} ${item}`);
+  }
+}
+
+function printInitSuccess(result: InitProjectResult, dryRun: boolean): void {
+  console.log(pc.bold(pc.cyan(`\n🚀 [AI-SDLC] Initializing governance structure in: ${result.targetDir}\n`)));
+  printCreatedItems(result.directoriesCreated, 'directory', dryRun);
+  printCreatedItems(result.filesCreated, 'file', dryRun);
+
+  if (result.ciProvider) {
+    console.log(pc.cyan(`\n  ✔ CI/CD configuration generated for provider: ${pc.bold(result.ciProvider)}`));
+  }
+  if (result.agentsConfigured && result.agentsConfigured.length > 0) {
+    console.log(pc.cyan(`\n  ✔ Configured AI agents: ${pc.bold(result.agentsConfigured.join(', '))}`));
+  }
+  if (result.architectureGranularity) {
+    console.log(pc.cyan(`\n  ✔ Architecture granularity: ${pc.bold(formatGranularityLabel(result.architectureGranularity))}`));
+  }
+
+  printGitHookStatus(dryRun, result.gitHookInstalled);
+  console.log(pc.green('\n✔ Repository configured with AI-SDLC policies and templates.\n'));
+}
+
+function handleInitResult(
+  result: InitProjectResult,
+  ctx: { isSilent: boolean; useJson: boolean; dryRun: boolean }
+): boolean {
+  if (!result.success) {
+    if (!ctx.isSilent) {
+      console.error(pc.red(`\n✖ [ERROR] ${result.error || 'Error initializing project.'}\n`));
+    }
+    if (ctx.useJson) {
+      emitInitJson(result, false, ctx.dryRun);
+    }
+    return false;
+  }
+
+  if (!ctx.isSilent) {
+    printInitSuccess(result, ctx.dryRun);
+  }
+
+  if (ctx.useJson) {
+    emitInitJson(result, true, ctx.dryRun);
+  }
+
+  return true;
 }
 
 export function runInit(
@@ -77,6 +165,7 @@ export function runInit(
 ): boolean {
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
+  const dryRun = Boolean(options.dryRun);
 
   const result = initProject({
     rootDir: process.cwd(),
@@ -84,98 +173,9 @@ export function runInit(
     ci: options.ci,
     agents: options.agents === 'none' ? false : options.agents,
     architecture: options.architecture,
-    dryRun: options.dryRun,
+    dryRun,
   });
 
-  if (!result.success) {
-    if (!isSilent) {
-      console.error(pc.red(`\n✖ [ERROR] ${result.error || 'Error initializing project.'}\n`));
-    }
-    if (useJson) {
-      const payload = {
-        command: 'init',
-        success: false,
-        exitCode: 1,
-        targetDir: result.targetDir,
-        directoriesCreated: result.directoriesCreated,
-        filesCreated: result.filesCreated,
-        ciProvider: result.ciProvider,
-        agentsConfigured: result.agentsConfigured,
-        gitHookInstalled: result.gitHookInstalled,
-        dryRun: Boolean(options.dryRun),
-        error: result.error || 'Error initializing project.',
-      };
-      console.log(JSON.stringify(payload, null, 2));
-    }
-    return false;
-  }
-
-  if (!isSilent) {
-    console.log(pc.bold(pc.cyan(`\n🚀 [AI-SDLC] Initializing governance structure in: ${result.targetDir}\n`)));
-
-    for (const d of result.directoriesCreated) {
-      if (options.dryRun) {
-        console.log(`  ${pc.blue('DRY-RUN')} Create directory: ${d}`);
-      } else {
-        console.log(`  ${pc.green('✔')} Directory created: ${d}`);
-      }
-    }
-
-    for (const f of result.filesCreated) {
-      if (options.dryRun) {
-        console.log(`  ${pc.blue('DRY-RUN')} Create file: ${f}`);
-      } else {
-        console.log(`  ${pc.green('✔')} File generated: ${f}`);
-      }
-    }
-
-    if (result.ciProvider) {
-      console.log(pc.cyan(`\n  ✔ CI/CD configuration generated for provider: ${pc.bold(result.ciProvider)}`));
-    }
-
-    if (result.agentsConfigured && result.agentsConfigured.length > 0) {
-      console.log(pc.cyan(`\n  ✔ Configured AI agents: ${pc.bold(result.agentsConfigured.join(', '))}`));
-    }
-
-    if (result.architectureGranularity) {
-      const label =
-        result.architectureGranularity === 'full' || result.architectureGranularity === 'complete'
-          ? 'Full (arc42 + NAF v4, 12 sections)'
-          : result.architectureGranularity === 'minimal'
-          ? 'Minimal / Baseline (ARCH-INTRO-*, CMP-* and ADR-*)'
-          : 'None';
-      console.log(pc.cyan(`\n  ✔ Architecture granularity: ${pc.bold(label)}`));
-    }
-
-    if (options.dryRun) {
-      console.log(`  ${pc.blue('DRY-RUN')} Install Git Hook: .git/hooks/prepare-commit-msg`);
-    } else if (result.gitHookInstalled) {
-      console.log(`  ${pc.green('✔')} Git Hook installed: ${pc.bold('prepare-commit-msg')}`);
-    } else {
-      console.log(`  ${pc.yellow('ℹ')} Git repository not detected at target.`);
-      console.log(`    ${pc.gray("Run 'git init' and then 'aisdlc git hook install' to activate commit hooks.")}`);
-    }
-
-    console.log(pc.green('\n✔ Repository configured with AI-SDLC policies and templates.\n'));
-  }
-
-  if (useJson) {
-    const payload = {
-      command: 'init',
-      success: true,
-      exitCode: 0,
-      targetDir: result.targetDir,
-      directoriesCreated: result.directoriesCreated,
-      filesCreated: result.filesCreated,
-      ciProvider: result.ciProvider,
-      agentsConfigured: result.agentsConfigured,
-      architectureGranularity: result.architectureGranularity,
-      gitHookInstalled: result.gitHookInstalled,
-      dryRun: Boolean(options.dryRun),
-    };
-    console.log(JSON.stringify(payload, null, 2));
-  }
-
-  return true;
+  return handleInitResult(result, { isSilent, useJson, dryRun });
 }
 

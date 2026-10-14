@@ -1,8 +1,8 @@
 # 📊 Formal Quality and Release Gate Report (AI-SDLC)
 
-> **Generation Date:** 2026-10-13T10:44:09.163Z
+> **Generation Date:** 2026-10-14T08:10:52.540Z
 > **Release Gate Verdict:** 🟢 APPROVED (RELEASE READY)
-> **Global Rating:** **`B`** (MI Index: 71.8/100, Average CC: 1.5)
+> **Global Rating:** **`C`** (MI Index: 59.9/100, Average CC: 3.9)
 
 ---
 
@@ -10,12 +10,12 @@
 
 | Key Metric | Measured Value | Policy Threshold | Compliance |
 | :--- | :---: | :---: | :---: |
-| **Analyzed Files** | `1` | N/A | ℹ️ |
-| **Evaluated Functions** | `2` | N/A | ℹ️ |
-| **Lines of Code (LOC)** | `12` | N/A | ℹ️ |
-| **Cyclomatic Complexity (Average)** | `1.5` | $\le 10$ | ✅ COMPLIANT |
-| **Cognitive Complexity (Average)** | `0.5` | $\le 15$ | ✅ COMPLIANT |
-| **Maintainability Index (SEI MI)** | `71.8 / 100` | $\ge 50$ | ✅ COMPLIANT |
+| **Analyzed Files** | `57` | N/A | ℹ️ |
+| **Evaluated Functions** | `870` | N/A | ℹ️ |
+| **Lines of Code (LOC)** | `12063` | N/A | ℹ️ |
+| **Cyclomatic Complexity (Average)** | `3.9` | $\le 10$ | ✅ COMPLIANT |
+| **Cognitive Complexity (Average)** | `2.6` | $\le 15$ | ✅ COMPLIANT |
+| **Maintainability Index (SEI MI)** | `59.9 / 100` | $\ge 50$ | ✅ COMPLIANT |
 | **Line Coverage** | `71.3%` | $\ge 85\%$ | ⚠️ BELOW THRESHOLD |
 | **Branch Coverage** | `69.57%` | $\ge 80\%$ | ⚠️ BELOW THRESHOLD |
 | **Function Coverage** | `88.39%` | $\ge 90\%$ | ⚠️ BELOW THRESHOLD |
@@ -27,7 +27,7 @@
 
 | Language | Functions | Total LOC | Average MI | Average CC | Rating |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **TypeScript** | `2` | `12` | `71.8` | `1.5` | `B` |
+| **TypeScript** | `870` | `12063` | `59.9` | `3.9` | `C` |
 
 ---
 
@@ -35,4 +35,4 @@
 - **McCabe Cyclomatic Complexity (CC)**: Number of linearly independent paths.
 - **Maintainability Index (SEI MI)**: Normalized formula [0 - 100] combining Halstead Volume, CC, and LOC.
 - **Automated Test Coverage**: Passively ingested from `coverage/coverage-summary.json` or `lcov.info` when present.
-- **Clean Code Guardrails**: Prohibition of implicit `any` typing, function length limits ($le 40$ lines), and zero unjustified suppressions.
+- **Clean Code Guardrails**: Prohibition of implicit `any` typing, function length limits ($\le 40$ lines), and zero unjustified suppressions.

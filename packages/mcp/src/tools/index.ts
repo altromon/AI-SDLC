@@ -33,6 +33,7 @@ import {
   verifyTestingCoverage,
   verifyTraceability,
   writeReleaseKpiReport,
+  type SastSeverity,
 } from '@aisdlc/core';
 
 export interface RegisterToolsOptions {
@@ -55,358 +56,311 @@ function formatResponse(data: unknown, isError = false) {
   };
 }
 
-export function registerAllTools(server: McpServer, options: RegisterToolsOptions = {}): void {
-  const baseRoot = options.rootDir || process.cwd();
+function formatCatchError(err: unknown) {
+  const message = err instanceof Error ? err.message : String(err);
+  return formatResponse({ success: false, error: message }, true);
+}
 
-  // ============================================================================
-  // 1. SUMMARY TOOLS (Consolidated Entrypoints)
-  // ============================================================================
+function runCoreGates(root: string) {
+  const qg = verifyQualityGate({ rootDir: root });
+  const sec = verifySecrets({ rootDir: root });
+  const sast = verifySast({ rootDir: root });
+  const lc = verifyLicenses({ rootDir: root });
+  const tr = verifyTraceability({ rootDir: root });
+  const gv = verifyTasksGovernance({ rootDir: root });
 
-  // Tool: new (Initialize new project or configure existing repo)
-  server.tool(
-    'new',
-    'Initializes a new project or configures AI-SDLC governance and structure in an existing repository (policies, templates, hooks, and optional CI).',
-    {
-      targetDir: z
-        .string()
-        .optional()
-        .describe("Target directory to initialize AI-SDLC structure (defaults to '.')"),
-      ci: z
-        .enum(['github', 'gitlab', 'azure', 'bitbucket'])
-        .optional()
-        .describe('CI/CD provider to generate workflows and pipelines for'),
-      dryRun: z
-        .boolean()
-        .optional()
-        .describe('If true, simulates creation without writing files to disk'),
-      agents: z
-        .string()
-        .optional()
-        .describe('AI agent environments to configure (e.g. "all", "cursor", "claude", "antigravity", "copilot", "mcp")'),
-      architecture: z
-        .enum(['minimal', 'full', 'complete', 'none'])
-        .optional()
-        .describe('Architecture template granularity level ("minimal" for CMP and ADR, "full" for 12 arc42/NAF sections, "none" to skip)'),
-    },
-    async (params) => {
-      try {
-        const result = initProject({
-          rootDir: baseRoot,
-          targetDir: params.targetDir,
-          ci: params.ci,
-          agents: params.agents,
-          architecture: params.architecture,
-          dryRun: params.dryRun,
-        });
-        return formatResponse(result, !result.success);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
+  return [
+    { name: 'quality', success: qg.success, summary: `${qg.passCount}/${qg.totalFunctions} compliant functions` },
+    { name: 'traceability', success: tr.success, summary: `${tr.orphanCount} orphan requirements` },
+    { name: 'governance', success: gv.success, summary: `${gv.totalTasks} audited tasks` },
+    { name: 'licenses', success: lc.success, summary: `${lc.totalEvaluated} analyzed dependencies` },
+    { name: 'security', success: sec.success && sast.success, summary: `${sec.findingsCount} secrets, ${sast.violationsCount} SAST` },
+  ];
+}
+
+function runExtendedGates(root: string) {
+  const tc = verifyTestingCoverage({ rootDir: root });
+  const gh = checkGherkinInSync({ rootDir: root });
+  const pd = verifyPdacGraph({ rootDir: root });
+  const sc = verifyArtifactsSchemas({ rootDir: root });
+  const dp = verifyArtifactDuplicates({ rootDir: root });
+  const fr = verifyProgressiveFriction({ rootDir: root });
+
+  return [
+    { name: 'testing', success: tc.success, summary: `${tc.passedRequirements}/${tc.totalRequirements} covered requirements` },
+    { name: 'gherkin', success: gh.inSync, summary: `${gh.totalFeatures} synchronized features` },
+    { name: 'pdac', success: pd.success, summary: `${pd.totalNodes} aligned nodes` },
+    { name: 'schemas', success: sc.success, summary: `${sc.validCount}/${sc.totalEvaluated} valid artifacts` },
+    { name: 'duplicates', success: dp.success, summary: `${dp.errorCount} errors, ${dp.warningCount} warnings` },
+    { name: 'friction', success: fr.success, summary: `profile: ${fr.profile}, ${fr.bypassedRules.length} violations` },
+  ];
+}
+
+function runFullGates(root: string) {
+  return [...runCoreGates(root), ...runExtendedGates(root)];
+}
+
+function runLiteGates(root: string) {
+  const qg = verifyQualityGate({ rootDir: root });
+  const sec = verifySecrets({ rootDir: root });
+  const sast = verifySast({ rootDir: root });
+  const lc = verifyLicenses({ rootDir: root });
+
+  return [
+    { name: 'quality', success: qg.success, summary: `${qg.passCount}/${qg.totalFunctions} compliant functions` },
+    { name: 'licenses', success: lc.success, summary: `${lc.totalEvaluated} analyzed dependencies` },
+    { name: 'security', success: sec.success && sast.success, summary: `${sec.findingsCount} secrets, ${sast.violationsCount} SAST` },
+  ];
+}
+
+function runVerifyAllGates(root: string, isLite: boolean) {
+  const gates = isLite ? runLiteGates(root) : runFullGates(root);
+  const allPassed = gates.every((g) => g.success);
+  const secGate = gates.find((g) => g.name === 'security');
+  const okSecurity = secGate ? secGate.success : true;
+
+  return {
+    success: allPassed,
+    profile: isLite ? 'lite' : 'full',
+    exitCode: allPassed ? 0 : (!okSecurity ? 4 : 1),
+    totalGates: gates.length,
+    passedGates: gates.filter((g) => g.success).length,
+    failedGates: gates.filter((g) => !g.success).length,
+    gates,
+  };
+}
+
+const NEW_TOOL_SCHEMA = {
+  targetDir: z.string().optional(),
+  ci: z.enum(['github', 'gitlab', 'azure', 'bitbucket']).optional(),
+  dryRun: z.boolean().optional(),
+  agents: z.string().optional(),
+  architecture: z.enum(['minimal', 'full', 'complete', 'none']).optional(),
+};
+
+function registerNewTool(server: McpServer, baseRoot: string): void {
+  server.tool('new', 'Initializes a new project or configures AI-SDLC governance.', NEW_TOOL_SCHEMA, async (params) => {
+    try {
+      const result = initProject({
+        rootDir: baseRoot,
+        targetDir: params.targetDir,
+        ci: params.ci,
+        agents: params.agents,
+        architecture: params.architecture,
+        dryRun: params.dryRun,
+      });
+      return formatResponse(result, !result.success);
+    } catch (err: unknown) {
+      return formatCatchError(err);
     }
-  );
+  });
+}
 
-  // Tool: verify (Consolidated execution of all Quality Gates)
+function registerVerifyTool(server: McpServer, baseRoot: string): void {
   server.tool(
     'verify',
-    'Executes deterministic AI-SDLC Quality Gates (all 11 gates in "full" profile, or essential gates [quality, security, licenses] in "lite" profile) in a consolidated run and returns overall repository health.',
-    {
-      root: z.string().optional().describe('Project root directory (optional)'),
-      profile: z
-        .enum(['full', 'lite'])
-        .optional()
-        .describe('Quality Gate evaluation profile: "full" (default, executes all 11 gates) or "lite" (essential gates: quality, security, and licenses for personal/solo projects)'),
-    },
+    'Executes deterministic AI-SDLC Quality Gates.',
+    { root: z.string().optional(), profile: z.enum(['full', 'lite']).optional() },
     async (params) => {
       try {
         const root = resolveRoot(params.root, baseRoot);
-        const isLite = params.profile === 'lite';
-
-        const qg = verifyQualityGate({ rootDir: root });
-        const sec = verifySecrets({ rootDir: root });
-        const sast = verifySast({ rootDir: root });
-        const lc = verifyLicenses({ rootDir: root });
-
-        const tr = !isLite ? verifyTraceability({ rootDir: root }) : undefined;
-        const gv = !isLite ? verifyTasksGovernance({ rootDir: root }) : undefined;
-        const tc = !isLite ? verifyTestingCoverage({ rootDir: root }) : undefined;
-        const gh = !isLite ? checkGherkinInSync({ rootDir: root }) : undefined;
-        const pd = !isLite ? verifyPdacGraph({ rootDir: root }) : undefined;
-        const sc = !isLite ? verifyArtifactsSchemas({ rootDir: root }) : undefined;
-        const dp = !isLite ? verifyArtifactDuplicates({ rootDir: root }) : undefined;
-        const fr = !isLite ? verifyProgressiveFriction({ rootDir: root }) : undefined;
-
-        const gates = [
-          { name: 'quality', success: qg.success, summary: `${qg.passCount}/${qg.totalFunctions} compliant functions` },
-          ...(tr ? [{ name: 'traceability', success: tr.success, summary: `${tr.orphanCount} orphan requirements` }] : []),
-          ...(gv ? [{ name: 'governance', success: gv.success, summary: `${gv.totalTasks} audited tasks` }] : []),
-          ...(tc ? [{ name: 'testing', success: tc.success, summary: `${tc.passedRequirements}/${tc.totalRequirements} covered requirements` }] : []),
-          ...(gh ? [{ name: 'gherkin', success: gh.inSync, summary: `${gh.totalFeatures} synchronized features` }] : []),
-          { name: 'licenses', success: lc.success, summary: `${lc.totalEvaluated} analyzed dependencies` },
-          ...(pd ? [{ name: 'pdac', success: pd.success, summary: `${pd.totalNodes} aligned nodes` }] : []),
-          ...(sc ? [{ name: 'schemas', success: sc.success, summary: `${sc.validCount}/${sc.totalEvaluated} valid artifacts` }] : []),
-          ...(dp ? [{ name: 'duplicates', success: dp.success, summary: `${dp.errorCount} errors, ${dp.warningCount} warnings` }] : []),
-          ...(fr ? [{ name: 'friction', success: fr.success, summary: `profile: ${fr.profile}, ${fr.bypassedRules.length} violations` }] : []),
-          { name: 'security', success: sec.success && sast.success, summary: `${sec.findingsCount} secrets, ${sast.violationsCount} SAST` },
-        ];
-
-        const allPassed = gates.every((g) => g.success);
-        return formatResponse({
-          success: allPassed,
-          profile: isLite ? 'lite' : 'full',
-          exitCode: allPassed ? 0 : (!sec.success ? 4 : 1),
-          totalGates: gates.length,
-          passedGates: gates.filter((g) => g.success).length,
-          failedGates: gates.filter((g) => !g.success).length,
-          gates,
-        });
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+        return formatResponse(runVerifyAllGates(root, params.profile === 'lite'));
+      } catch (err: unknown) {
+        return formatCatchError(err);
       }
     }
   );
+}
 
-  // Tool: report (Generate all reports combined)
-  server.tool(
-    'report',
-    'Generates all AI-SDLC reports combined: interactive web dashboard with PDaC graph (HTML) and formal code quality report (Markdown).',
-    {
-      root: z.string().optional().describe('Project root directory'),
-      dashboardOutput: z
-        .string()
-        .optional()
-        .describe("Output path for HTML dashboard (defaults to 'reports/dashboard.html')"),
-      qualityPolicy: z.string().optional().describe('Path to quality-policy.yaml'),
+const REPORT_TOOL_SCHEMA = {
+  root: z.string().optional(),
+  dashboardOutput: z.string().optional(),
+  qualityPolicy: z.string().optional(),
+};
+
+function registerReportTool(server: McpServer, baseRoot: string): void {
+  server.tool('report', 'Generates all AI-SDLC reports combined.', REPORT_TOOL_SCHEMA, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const dashRes = generateDashboardReport({ rootDir: root, outputPath: params.dashboardOutput });
+      const qualRes = generateQualityReport({ rootDir: root, policyPath: params.qualityPolicy });
+      return formatResponse({
+        success: true,
+        dashboard: { outputPath: dashRes.outputPath, totalNodes: dashRes.totalNodes, totalEdges: dashRes.totalEdges },
+        qualityReport: {
+          totalFiles: qualRes.totalFiles,
+          totalFunctions: qualRes.totalFunctions,
+          avgMaintainability: qualRes.avgMaintainability,
+          avgCyclomatic: qualRes.avgCyclomatic,
+          verdict: qualRes.verdict,
+        },
+      });
+    } catch (err: unknown) {
+      return formatCatchError(err);
+    }
+  });
+}
+
+const SDD_CHANGE_NEW_SCHEMA = {
+  name: z.string(),
+  id: z.string().optional(),
+  profile: z.enum(['patch', 'standard', 'critical']).optional(),
+  framework: z.enum(['openspec', 'speckit']).optional(),
+  author: z.string().optional(),
+  from: z.array(z.string()).optional(),
+  root: z.string().optional(),
+};
+
+function registerSddChangeNewTool(server: McpServer, baseRoot: string): void {
+  server.tool('sdd_change_new', 'Creates deterministic scaffolding for a new SDD change.', SDD_CHANGE_NEW_SCHEMA, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const result = scaffoldSddChange({
+        rootDir: root,
+        name: params.name,
+        changeId: params.id,
+        profile: params.profile,
+        framework: params.framework,
+        author: params.author,
+        from: params.from,
+      });
+      return formatResponse(result, !result.success);
+    } catch (err: unknown) {
+      return formatCatchError(err);
+    }
+  });
+}
+
+function registerSddCheckFixTool(server: McpServer, baseRoot: string): void {
+  server.tool('sdd_check_fix', 'Synchronizes Gherkin features and PDaC digests.', { root: z.string().optional() }, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const gherkinRes = extractGherkinFeatures({ rootDir: root });
+      const pdacRes = syncPdacDigests({ rootDir: root });
+      const gherkinSync = checkGherkinInSync({ rootDir: root });
+      const pdacVerify = verifyPdacGraph({ rootDir: root });
+      return formatResponse({
+        success: gherkinSync.inSync && pdacVerify.success,
+        extractedFeaturesCount: gherkinRes.features.length,
+        totalScenarios: gherkinRes.totalScenarios,
+        syncedDigestsCount: pdacRes.syncedCount,
+        updatedFiles: pdacRes.updatedFiles,
+        gherkinInSync: gherkinSync.inSync,
+        pdacInSync: pdacVerify.success,
+      });
+    } catch (err: unknown) {
+      return formatCatchError(err);
+    }
+  });
+}
+
+const SDD_DEPOSIT_SCHEMA = {
+  change: z.string(),
+  title: z.string().optional(),
+  framework: z.enum(['openspec', 'speckit']).optional(),
+  requirements: z.array(z.string()).optional(),
+  useCases: z.array(z.string()).optional(),
+  root: z.string().optional(),
+};
+
+function buildDepositHandoff(change: string, title?: string, reqs?: string[], ucs?: string[]): ProductHandoff {
+  return {
+    id: `HOF-${change.toUpperCase()}`,
+    type: 'handoff',
+    title: title || `PDaC Handoff for ${change}`,
+    changeId: change,
+    version: '1.0.0',
+    createdAt: new Date().toISOString(),
+    subgraph: {
+      requirements: reqs || ['FR-001'],
+      useCases: ucs || ['UC-001'],
     },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const dashRes = generateDashboardReport({
-          rootDir: root,
-          outputPath: params.dashboardOutput,
-        });
-        const qualRes = generateQualityReport({
-          rootDir: root,
-          policyPath: params.qualityPolicy,
-        });
+  };
+}
 
-        return formatResponse({
-          success: true,
-          dashboard: {
-            outputPath: dashRes.outputPath,
-            totalNodes: dashRes.totalNodes,
-            totalEdges: dashRes.totalEdges,
-          },
-          qualityReport: {
-            totalFiles: qualRes.totalFiles,
-            totalFunctions: qualRes.totalFunctions,
-            avgMaintainability: qualRes.avgMaintainability,
-            avgCyclomatic: qualRes.avgCyclomatic,
-            verdict: qualRes.verdict,
-          },
-        });
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
+function registerSddDepositTool(server: McpServer, baseRoot: string): void {
+  server.tool('sdd_deposit', 'Deposits or regenerates handoff.yaml sidecar.', SDD_DEPOSIT_SCHEMA, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const handoff = buildDepositHandoff(params.change, params.title, params.requirements, params.useCases);
+      const depositedPath = depositProductHandoffSidecar({
+        rootDir: root,
+        changeId: params.change,
+        framework: params.framework || 'openspec',
+        handoff,
+      });
+      return formatResponse({ success: true, depositedPath, handoffId: handoff.id, changeId: params.change });
+    } catch (err: unknown) {
+      return formatCatchError(err);
     }
-  );
+  });
+}
 
-  // ============================================================================
-  // 2. SDD TOOLS (Scaffolding, Sync, Integration)
-  // ============================================================================
+const SDD_INTEGRATE_SCHEMA = {
+  change: z.string().optional(),
+  auto: z.boolean().optional(),
+  author: z.string().optional(),
+  root: z.string().optional(),
+};
 
-  // Tool: sdd_change_new
-  server.tool(
-    'sdd_change_new',
-    'Creates the full deterministic scaffolding for a new SDD change (proposal, spec, design, tasks, handoff.yaml).',
-    {
-      name: z.string().describe('Descriptive name of the SDD increment or feature'),
-      id: z.string().optional().describe('Explicit change identifier (e.g. chg-002-my-change)'),
-      profile: z.enum(['patch', 'standard', 'critical']).optional().describe('Risk profile of the change'),
-      framework: z.enum(['openspec', 'speckit']).optional().describe('Adopted SDD framework'),
-      author: z.string().optional().describe('Author or development agent name'),
-      from: z.array(z.string()).optional().describe('Existing requirement IDs to cite'),
-      root: z.string().optional().describe('Project root directory'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const result = scaffoldSddChange({
-          rootDir: root,
-          name: params.name,
-          changeId: params.id,
-          profile: params.profile,
-          framework: params.framework,
-          author: params.author,
-          from: params.from,
-        });
-        return formatResponse(result, !result.success);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
+function registerSddIntegrateTool(server: McpServer, baseRoot: string): void {
+  server.tool('sdd_integrate', 'Integrates and promotes a completed SDD change.', SDD_INTEGRATE_SCHEMA, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const result = integrateSddChange({ rootDir: root, changeId: params.change || '', author: params.author, autoArchive: true });
+      return formatResponse(result, !result.success);
+    } catch (err: unknown) {
+      return formatCatchError(err);
     }
-  );
+  });
+}
 
-  // Tool: sdd_check_fix
-  server.tool(
-    'sdd_check_fix',
-    'Deterministically synchronizes Gherkin scenarios to .feature files and updates PDaC SHA-256 digests without touching source code.',
-    {
-      root: z.string().optional().describe('Project root directory'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const gherkinRes = extractGherkinFeatures({ rootDir: root });
-        const pdacRes = syncPdacDigests({ rootDir: root });
-        const gherkinSync = checkGherkinInSync({ rootDir: root });
-        const pdacVerify = verifyPdacGraph({ rootDir: root });
-
-        return formatResponse({
-          success: gherkinSync.inSync && pdacVerify.success,
-          extractedFeaturesCount: gherkinRes.features.length,
-          totalScenarios: gherkinRes.totalScenarios,
-          syncedDigestsCount: pdacRes.syncedCount,
-          updatedFiles: pdacRes.updatedFiles,
-          gherkinInSync: gherkinSync.inSync,
-          pdacInSync: pdacVerify.success,
-        });
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
+function readActiveHandoffFiles(targetDir: string) {
+  const files = ['handoff.yaml', 'proposal.md', 'spec.md', 'design.md', 'tasks.md'];
+  const contents: Record<string, string> = {};
+  for (const file of files) {
+    const filePath = path.join(targetDir, file);
+    if (fs.existsSync(filePath)) {
+      contents[file] = fs.readFileSync(filePath, 'utf-8');
     }
-  );
+  }
+  return contents;
+}
 
-  // Tool: sdd_deposit
-  server.tool(
-    'sdd_deposit',
-    'Deposits or regenerates the canonical handoff.yaml (HOF-*) sidecar in an active SDD change.',
-    {
-      change: z.string().describe('Active change identifier (e.g. chg-001-telemetry)'),
-      title: z.string().optional().describe('Formal title of the PDaC handoff'),
-      framework: z.enum(['openspec', 'speckit']).optional().describe('SDD framework'),
-      requirements: z.array(z.string()).optional().describe('List of functional requirement IDs'),
-      useCases: z.array(z.string()).optional().describe('List of use case IDs'),
-      root: z.string().optional().describe('Project root directory'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const handoff: ProductHandoff = {
-          id: `HOF-${params.change.toUpperCase()}`,
-          type: 'handoff',
-          title: params.title || `PDaC Handoff for ${params.change}`,
-          changeId: params.change,
-          version: '1.0.0',
-          createdAt: new Date().toISOString(),
-          subgraph: {
-            requirements: params.requirements || ['FR-001'],
-            useCases: params.useCases || ['UC-001'],
-          },
-        };
+function resolveTargetChangeDir(root: string, change: string) {
+  const activeDir = path.join(root, 'specs', 'changes', 'active', change);
+  const completedDir = path.join(root, 'specs', 'changes', 'completed', change);
+  if (fs.existsSync(activeDir)) return { dir: activeDir, isCompleted: false };
+  if (fs.existsSync(completedDir)) return { dir: completedDir, isCompleted: true };
+  return null;
+}
 
-        const depositedPath = depositProductHandoffSidecar({
-          rootDir: root,
-          changeId: params.change,
-          framework: params.framework || 'openspec',
-          handoff,
-        });
-
-        return formatResponse({
-          success: true,
-          depositedPath,
-          handoffId: handoff.id,
-          changeId: params.change,
-        });
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+function registerGetActiveHandoffTool(server: McpServer, baseRoot: string): void {
+  server.tool('get_active_handoff', 'Queries active change subgraph.', { change: z.string(), root: z.string().optional() }, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const resolved = resolveTargetChangeDir(root, params.change);
+      if (!resolved) {
+        return formatResponse({ success: false, error: `SDD change '${params.change}' not found.` }, true);
       }
+      return formatResponse({
+        success: true,
+        changeId: params.change,
+        directory: resolved.dir,
+        isCompleted: resolved.isCompleted,
+        files: readActiveHandoffFiles(resolved.dir),
+      });
+    } catch (err: unknown) {
+      return formatCatchError(err);
     }
-  );
+  });
+}
 
-  // Tool: sdd_integrate
-  server.tool(
-    'sdd_integrate',
-    'Integrates and promotes a completed SDD change to the canonical baseline and archives its directory to completed/.',
-    {
-      change: z.string().optional().describe('Identifier of the change to integrate'),
-      auto: z.boolean().optional().describe('Automatically detect the active completed change'),
-      author: z.string().optional().describe('Integration author'),
-      root: z.string().optional().describe('Project root directory'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const result = integrateSddChange({
-          rootDir: root,
-          changeId: params.change || '',
-          author: params.author,
-          autoArchive: true,
-        });
-        return formatResponse(result, !result.success);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
-    }
-  );
-
-  // Tool: get_active_handoff
-  server.tool(
-    'get_active_handoff',
-    'Queries in-memory PDaC subgraph and contents of an active change for surgical context injection into the agent.',
-    {
-      change: z.string().describe('Active SDD change identifier (e.g. chg-028-native-mcp-server)'),
-      root: z.string().optional().describe('Project root directory'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const activeDir = path.join(root, 'specs', 'changes', 'active', params.change);
-        const completedDir = path.join(root, 'specs', 'changes', 'completed', params.change);
-        const targetDir = fs.existsSync(activeDir) ? activeDir : completedDir;
-
-        if (!fs.existsSync(targetDir)) {
-          return formatResponse(
-            { success: false, error: `SDD change '${params.change}' not found.` },
-            true
-          );
-        }
-
-        const files = ['handoff.yaml', 'proposal.md', 'spec.md', 'design.md', 'tasks.md'];
-        const contents: Record<string, string> = {};
-        for (const file of files) {
-          const filePath = path.join(targetDir, file);
-          if (fs.existsSync(filePath)) {
-            contents[file] = fs.readFileSync(filePath, 'utf-8');
-          }
-        }
-
-        return formatResponse({
-          success: true,
-          changeId: params.change,
-          directory: targetDir,
-          isCompleted: !fs.existsSync(activeDir),
-          files: contents,
-        });
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
-    }
-  );
-
-  // ============================================================================
-  // 3. GRANULAR VERIFICATION TOOLS
-  // ============================================================================
-
-  // Tool: verify_quality
+function registerVerifyQualityTool(server: McpServer, baseRoot: string): void {
   server.tool(
     'verify_quality',
-    'Evaluates cyclomatic complexity, cognitive complexity, maintainability index, and function length against quality-policy.yaml.',
-    {
-      root: z.string().optional().describe('Project root directory'),
-      maxCyclomatic: z.number().optional().describe('Maximum CC threshold (defaults to policy)'),
-      maxCognitive: z.number().optional().describe('Maximum cognitive complexity threshold'),
-      minMaintainability: z.number().optional().describe('Minimum maintainability index (MI) threshold'),
-    },
+    'Evaluates cyclomatic complexity, cognitive complexity, MI, and function length.',
+    { root: z.string().optional(), maxCyclomatic: z.number().optional(), maxCognitive: z.number().optional(), minMaintainability: z.number().optional() },
     async (params) => {
       try {
         const root = resolveRoot(params.root, baseRoot);
@@ -419,196 +373,141 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
           },
         });
         return formatResponse(result, !result.success);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+      } catch (err: unknown) {
+        return formatCatchError(err);
       }
     }
   );
+}
 
-  // Tool: verify_schemas
-  server.tool(
-    'verify_schemas',
-    'Validates specification Markdown artifacts against canonical JSON Schemas (Draft 2020-12).',
-    {
-      root: z.string().optional().describe('Project root directory'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const result = verifyArtifactsSchemas({ rootDir: root });
-        return formatResponse(result, !result.success);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
+function registerVerifySchemasTool(server: McpServer, baseRoot: string): void {
+  server.tool('verify_schemas', 'Validates specification Markdown artifacts against canonical JSON Schemas.', { root: z.string().optional() }, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const result = verifyArtifactsSchemas({ rootDir: root });
+      return formatResponse(result, !result.success);
+    } catch (err: unknown) {
+      return formatCatchError(err);
     }
-  );
+  });
+}
 
-  // Tool: verify_security
-  server.tool(
-    'verify_security',
-    'Executes deterministic secret scanning (Gitleaks) and SAST static analysis (command injection, SQLi, SSRF).',
-    {
-      root: z.string().optional().describe('Project root directory'),
-      minSeverity: z.enum(['CRITICAL', 'HIGH', 'MEDIUM']).optional().describe('Minimum SAST severity threshold'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const secRes = verifySecrets({ rootDir: root });
-        const sastRes = verifySast({ rootDir: root, minSeverity: params.minSeverity as any });
-        const success = secRes.success && sastRes.success;
+const VERIFY_SECURITY_SCHEMA = {
+  root: z.string().optional(),
+  minSeverity: z.enum(['CRITICAL', 'HIGH', 'MEDIUM']).optional(),
+};
 
-        return formatResponse(
-          {
-            success,
-            exitCode: success ? 0 : (!secRes.success ? 4 : 1),
-            secrets: {
-              success: secRes.success,
-              findingsCount: secRes.findingsCount,
-              findings: secRes.findings,
-            },
-            sast: {
-              success: sastRes.success,
-              violationsCount: sastRes.violationsCount,
-              violations: sastRes.violations,
-            },
-          },
-          !success
-        );
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
+function executeSecurityVerification(root: string, minSeverity?: SastSeverity) {
+  const secRes = verifySecrets({ rootDir: root });
+  const sastRes = verifySast({ rootDir: root, minSeverity });
+  const success = secRes.success && sastRes.success;
+  return {
+    success,
+    exitCode: success ? 0 : (!secRes.success ? 4 : 1),
+    secrets: { success: secRes.success, findingsCount: secRes.findingsCount, findings: secRes.findings },
+    sast: { success: sastRes.success, violationsCount: sastRes.violationsCount, violations: sastRes.violations },
+  };
+}
+
+function registerVerifySecurityTool(server: McpServer, baseRoot: string): void {
+  server.tool('verify_security', 'Deterministic secret scanning and SAST.', VERIFY_SECURITY_SCHEMA, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const res = executeSecurityVerification(root, params.minSeverity as SastSeverity);
+      return formatResponse(res, !res.success);
+    } catch (err: unknown) {
+      return formatCatchError(err);
     }
-  );
+  });
+}
 
-  // Tool: verify_traceability
-  server.tool(
-    'verify_traceability',
-    'Audits the 360° inverted traceability matrix (Upstream PDaC, Midstream arc42, Downstream BDD/tests).',
-    {
-      root: z.string().optional().describe('Project root directory'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const result = verifyTraceability({ rootDir: root });
-        return formatResponse(result, !result.success);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
+function registerVerifyTraceabilityTool(server: McpServer, baseRoot: string): void {
+  server.tool('verify_traceability', 'Audits the 360° inverted traceability matrix.', { root: z.string().optional() }, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const result = verifyTraceability({ rootDir: root });
+      return formatResponse(result, !result.success);
+    } catch (err: unknown) {
+      return formatCatchError(err);
     }
-  );
+  });
+}
 
-  // Tool: verify_governance
-  server.tool(
-    'verify_governance',
-    'Audits task governance compliance and human autonomy classification modes (AUTONOMOUS, HUMAN_REVIEW_PLAN, etc.).',
-    {
-      root: z.string().optional().describe('Project root directory'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const result = verifyTasksGovernance({ rootDir: root });
-        return formatResponse(result, !result.success);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
+function registerVerifyGovernanceTool(server: McpServer, baseRoot: string): void {
+  server.tool('verify_governance', 'Audits task governance compliance.', { root: z.string().optional() }, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const result = verifyTasksGovernance({ rootDir: root });
+      return formatResponse(result, !result.success);
+    } catch (err: unknown) {
+      return formatCatchError(err);
     }
-  );
+  });
+}
 
-  // Tool: verify_testing
-  server.tool(
-    'verify_testing',
-    'Audits that 100% of requirements and tasks have verifiable tests on disk.',
-    {
-      root: z.string().optional().describe('Project root directory'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const result = verifyTestingCoverage({ rootDir: root });
-        return formatResponse(result, !result.success);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
+function registerVerifyTestingTool(server: McpServer, baseRoot: string): void {
+  server.tool('verify_testing', 'Audits test coverage in requirements and tasks.', { root: z.string().optional() }, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const result = verifyTestingCoverage({ rootDir: root });
+      return formatResponse(result, !result.success);
+    } catch (err: unknown) {
+      return formatCatchError(err);
     }
-  );
+  });
+}
 
-  // Tool: verify_licenses
+function registerVerifyLicensesTool(server: McpServer, baseRoot: string): void {
   server.tool(
     'verify_licenses',
-    'Audits Open Source license compliance against license-policy.yaml.',
-    {
-      root: z.string().optional().describe('Project root directory'),
-      policy: z.string().optional().describe('Path to license-policy.yaml'),
-      depth: z.enum(['direct', 'transitive']).optional().describe('Scanning depth'),
-    },
+    'Audits Open Source license compliance.',
+    { root: z.string().optional(), policy: z.string().optional(), depth: z.enum(['direct', 'transitive']).optional() },
     async (params) => {
       try {
         const root = resolveRoot(params.root, baseRoot);
-        const result = verifyLicenses({
-          rootDir: root,
-          policyPath: params.policy,
-          depth: params.depth || 'transitive',
-        });
+        const result = verifyLicenses({ rootDir: root, policyPath: params.policy, depth: params.depth || 'transitive' });
         return formatResponse(result, !result.success);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+      } catch (err: unknown) {
+        return formatCatchError(err);
       }
     }
   );
+}
 
-  // Tool: verify_duplicates
-  server.tool(
-    'verify_duplicates',
-    'Audits identifier collisions, redundant normative statements, and specification overlaps.',
-    {
-      root: z.string().optional().describe('Project root directory'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const result = verifyArtifactDuplicates({ rootDir: root });
-        return formatResponse(result, !result.success);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
+function registerVerifyDuplicatesTool(server: McpServer, baseRoot: string): void {
+  server.tool('verify_duplicates', 'Audits identifier collisions and specification overlaps.', { root: z.string().optional() }, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const result = verifyArtifactDuplicates({ rootDir: root });
+      return formatResponse(result, !result.success);
+    } catch (err: unknown) {
+      return formatCatchError(err);
     }
-  );
+  });
+}
 
-  // Tool: verify_friction
+function registerVerifyFrictionTool(server: McpServer, baseRoot: string): void {
   server.tool(
     'verify_friction',
-    'Evaluates progressive friction rules and anti-bypass guardrails (prevents patch-profile changes from modifying protected security, schema, or architecture paths).',
-    {
-      change: z.string().optional().describe('Active SDD change identifier or spec path (optional)'),
-      diffFiles: z.array(z.string()).optional().describe('Optional list of modified file paths to audit against guardrails'),
-      root: z.string().optional().describe('Project root directory'),
-    },
+    'Evaluates progressive friction rules and anti-bypass guardrails.',
+    { change: z.string().optional(), diffFiles: z.array(z.string()).optional(), root: z.string().optional() },
     async (params) => {
       try {
         const root = resolveRoot(params.root, baseRoot);
-        const result = verifyProgressiveFriction({
-          rootDir: root,
-          changeId: params.change,
-          diffFiles: params.diffFiles,
-        });
+        const result = verifyProgressiveFriction({ rootDir: root, changeId: params.change, diffFiles: params.diffFiles });
         return formatResponse(result, !result.success);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+      } catch (err: unknown) {
+        return formatCatchError(err);
       }
     }
   );
+}
 
-  // Tool: verify_pdac
+function registerVerifyPdacTool(server: McpServer, baseRoot: string): void {
   server.tool(
     'verify_pdac',
-    'Audits the product graph (Product Definition as Code) and deterministically verifies the absence of cryptographic drift (SHA-256 digests) in citations.',
-    {
-      root: z.string().optional().describe('Project root directory'),
-      autoSync: z.boolean().optional().describe('If true, automatically synchronizes and recalculates stale digests on disk'),
-    },
+    'Audits product graph and cryptographic drift.',
+    { root: z.string().optional(), autoSync: z.boolean().optional() },
     async (params) => {
       try {
         const root = resolveRoot(params.root, baseRoot);
@@ -618,49 +517,35 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
         }
         const result = verifyPdacGraph({ rootDir: root });
         return formatResponse(result, !result.success);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+      } catch (err: unknown) {
+        return formatCatchError(err);
       }
     }
   );
+}
 
-  // ============================================================================
-  // 4. REPORTING AND TELEMETRY TOOLS (Reports & Telemetry)
-  // ============================================================================
-
-  // Tool: report_dashboard
+function registerReportDashboardTool(server: McpServer, baseRoot: string): void {
   server.tool(
     'report_dashboard',
-    'Generates the interactive web dashboard and Cytoscape.js graph of the RTM / PDaC matrix at reports/dashboard.html.',
-    {
-      output: z.string().optional().describe('Path to the output HTML file'),
-      title: z.string().optional().describe('Title of the web dashboard'),
-      root: z.string().optional().describe('Project root directory'),
-    },
+    'Generates interactive web dashboard and Cytoscape.js graph.',
+    { output: z.string().optional(), title: z.string().optional(), root: z.string().optional() },
     async (params) => {
       try {
         const root = resolveRoot(params.root, baseRoot);
-        const result = generateDashboardReport({
-          rootDir: root,
-          outputPath: params.output,
-          title: params.title,
-        });
+        const result = generateDashboardReport({ rootDir: root, outputPath: params.output, title: params.title });
         return formatResponse(result);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+      } catch (err: unknown) {
+        return formatCatchError(err);
       }
     }
   );
+}
 
-  // Tool: report_quality
+function registerReportQualityTool(server: McpServer, baseRoot: string): void {
   server.tool(
     'report_quality',
-    'Generates the formal polyglot code quality report at reports/QUALITY_REPORT.md.',
-    {
-      policy: z.string().optional().describe('Path to quality-policy.yaml'),
-      mode: z.enum(['STRICT', 'PERMISSIVE']).optional().describe('Enforcement compliance mode'),
-      root: z.string().optional().describe('Project root directory'),
-    },
+    'Generates formal polyglot code quality report at reports/QUALITY_REPORT.md.',
+    { policy: z.string().optional(), mode: z.enum(['STRICT', 'PERMISSIVE']).optional(), root: z.string().optional() },
     async (params) => {
       try {
         const root = resolveRoot(params.root, baseRoot);
@@ -670,76 +555,89 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
           thresholds: params.mode ? { enforce_mode: params.mode } : undefined,
         });
         return formatResponse(result);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+      } catch (err: unknown) {
+        return formatCatchError(err);
       }
     }
   );
+}
 
-  // Tool: kpi_pr
+function registerKpiPrTool(server: McpServer, baseRoot: string): void {
   server.tool(
     'kpi_pr',
-    'Calculates commit KPI aggregation and telemetry (human vs. AI agents) for a Pull Request.',
-    {
-      base: z.string().optional().describe('Base branch for comparison (defaults to main)'),
-      head: z.string().optional().describe('Head branch or commit (defaults to HEAD)'),
-      root: z.string().optional().describe('Project root directory'),
-    },
+    'Calculates commit KPI aggregation and telemetry for a PR.',
+    { base: z.string().optional(), head: z.string().optional(), root: z.string().optional() },
     async (params) => {
       try {
         const root = resolveRoot(params.root, baseRoot);
         const result = aggregatePrKpis(params.base || 'main', params.head || 'HEAD', { cwd: root });
         return formatResponse(result);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+      } catch (err: unknown) {
+        return formatCatchError(err);
       }
     }
   );
+}
 
-  // Tool: kpi_release
-  server.tool(
-    'kpi_release',
-    'Calculates consolidated Release KPIs (Defect Injection Rate, rework ratio, KLoC volume, time, and token costs between human and AI models).',
-    {
-      release: z.string().describe('Name of the release branch to audit (e.g. release/v1.0.0)'),
-      base: z.string().optional().describe('Base branch for comparison (defaults to main)'),
-      outputDir: z.string().optional().describe('Optional directory where Markdown and JSON reports will be generated'),
-      writeReports: z.boolean().optional().describe('If true, writes report files to disk'),
-      root: z.string().optional().describe('Project root directory'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const report = aggregateReleaseKpis(params.release, params.base || 'main', { cwd: root });
-        let filesWritten: { markdownPath: string; jsonPath: string } | undefined;
-        if (params.writeReports || params.outputDir) {
-          filesWritten = writeReleaseKpiReport(report, { outputDir: params.outputDir });
-        }
-        return formatResponse({
-          ...report,
-          filesWritten,
-        });
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
-      }
-    }
-  );
+const KPI_RELEASE_SCHEMA = {
+  release: z.string(),
+  base: z.string().optional(),
+  outputDir: z.string().optional(),
+  writeReports: z.boolean().optional(),
+  root: z.string().optional(),
+};
 
-  // Tool: git_detect_author
-  server.tool(
-    'git_detect_author',
-    'Universally and IDE-independently detects whether the current author is human or an AI agent.',
-    {
-      root: z.string().optional().describe('Project root directory'),
-    },
-    async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        const result = detectAuthorIdentity({ cwd: root });
-        return formatResponse(result);
-      } catch (err: any) {
-        return formatResponse({ success: false, error: err?.message || String(err) }, true);
+function registerKpiReleaseTool(server: McpServer, baseRoot: string): void {
+  server.tool('kpi_release', 'Calculates consolidated Release KPIs.', KPI_RELEASE_SCHEMA, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const report = aggregateReleaseKpis(params.release, params.base || 'main', { cwd: root });
+      let filesWritten: { markdownPath: string; jsonPath: string } | undefined;
+      if (params.writeReports || params.outputDir) {
+        filesWritten = writeReleaseKpiReport(report, { outputDir: params.outputDir });
       }
+      return formatResponse({ ...report, filesWritten });
+    } catch (err: unknown) {
+      return formatCatchError(err);
     }
-  );
+  });
+}
+
+function registerGitDetectAuthorTool(server: McpServer, baseRoot: string): void {
+  server.tool('git_detect_author', 'Detects whether current author is human or AI agent.', { root: z.string().optional() }, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const result = detectAuthorIdentity({ cwd: root });
+      return formatResponse(result);
+    } catch (err: unknown) {
+      return formatCatchError(err);
+    }
+  });
+}
+
+export function registerAllTools(server: McpServer, options: RegisterToolsOptions = {}): void {
+  const baseRoot = options.rootDir || process.cwd();
+  registerNewTool(server, baseRoot);
+  registerVerifyTool(server, baseRoot);
+  registerReportTool(server, baseRoot);
+  registerSddChangeNewTool(server, baseRoot);
+  registerSddCheckFixTool(server, baseRoot);
+  registerSddDepositTool(server, baseRoot);
+  registerSddIntegrateTool(server, baseRoot);
+  registerGetActiveHandoffTool(server, baseRoot);
+  registerVerifyQualityTool(server, baseRoot);
+  registerVerifySchemasTool(server, baseRoot);
+  registerVerifySecurityTool(server, baseRoot);
+  registerVerifyTraceabilityTool(server, baseRoot);
+  registerVerifyGovernanceTool(server, baseRoot);
+  registerVerifyTestingTool(server, baseRoot);
+  registerVerifyLicensesTool(server, baseRoot);
+  registerVerifyDuplicatesTool(server, baseRoot);
+  registerVerifyFrictionTool(server, baseRoot);
+  registerVerifyPdacTool(server, baseRoot);
+  registerReportDashboardTool(server, baseRoot);
+  registerReportQualityTool(server, baseRoot);
+  registerKpiPrTool(server, baseRoot);
+  registerKpiReleaseTool(server, baseRoot);
+  registerGitDetectAuthorTool(server, baseRoot);
 }

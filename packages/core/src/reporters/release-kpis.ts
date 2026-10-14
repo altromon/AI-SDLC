@@ -81,6 +81,87 @@ function createEmptyModelStats(key: string, isAgent: boolean): ModelDefectStats 
   };
 }
 
+interface CommitTotals {
+  linesAdded: number;
+  linesDeleted: number;
+  time: number;
+  tokens: number;
+  reworkTime: number;
+  reworkTokens: number;
+}
+
+function updateAuthorStat(stat: ModelDefectStats, record: CommitKpiRecord, tokens: number): void {
+  stat.commits += 1;
+  stat.linesAdded += record.linesAdded;
+  stat.linesDeleted += record.linesDeleted;
+  stat.totalTimeSeconds += record.trailers.activeTimeSeconds;
+  stat.totalTokens += tokens;
+}
+
+function recordBugFix(
+  record: CommitKpiRecord,
+  key: string,
+  tokens: number,
+  stat: ModelDefectStats,
+  bugList: BugRecordSummary[],
+  totals: CommitTotals
+): void {
+  stat.bugsInjected += 1;
+  totals.reworkTime += record.trailers.activeTimeSeconds;
+  totals.reworkTokens += tokens;
+  bugList.push({
+    sha: record.sha.slice(0, 8),
+    subject: record.subject,
+    author: key,
+    parentRef: record.trailers.parentRef,
+    timeSeconds: record.trailers.activeTimeSeconds,
+    tokens,
+  });
+}
+
+function processSingleCommit(
+  record: CommitKpiRecord,
+  statsMap: Record<string, ModelDefectStats>,
+  bugList: BugRecordSummary[],
+  totals: CommitTotals
+): void {
+  const { key, isAgent } = resolveAuthorKey(record);
+  if (!statsMap[key]) {
+    statsMap[key] = createEmptyModelStats(key, isAgent);
+  }
+  const stat = statsMap[key];
+  const tokens = record.trailers.promptTokens + record.trailers.completionTokens;
+  updateAuthorStat(stat, record, tokens);
+
+  totals.linesAdded += record.linesAdded;
+  totals.linesDeleted += record.linesDeleted;
+  totals.time += record.trailers.activeTimeSeconds;
+  totals.tokens += tokens;
+
+  if (record.isBugFix) {
+    recordBugFix(record, key, tokens, stat, bugList, totals);
+  }
+}
+
+function finalizeAuthorStats(statsMap: Record<string, ModelDefectStats>): ModelDefectStats[] {
+  return Object.values(statsMap).map((stat) => {
+    stat.klocProduced = Math.round(((stat.linesAdded + stat.linesDeleted) / 1000) * 100) / 100;
+    stat.defectInjectionRate = stat.klocProduced > 0
+      ? Math.round((stat.bugsInjected / stat.klocProduced) * 100) / 100
+      : stat.bugsInjected;
+    stat.estimatedCostUsd = calculateCost(stat.totalTokens * 0.8, stat.totalTokens * 0.2);
+    return stat;
+  });
+}
+
+function computeReworkRatios(totalTime: number, totalTokens: number, totalCost: number, reworkTime: number, reworkTokens: number, reworkCost: number) {
+  return {
+    timePercent: totalTime > 0 ? Math.round((reworkTime / totalTime) * 10000) / 100 : 0,
+    tokensPercent: totalTokens > 0 ? Math.round((reworkTokens / totalTokens) * 10000) / 100 : 0,
+    costPercent: totalCost > 0 ? Math.round((reworkCost / totalCost) * 10000) / 100 : 0,
+  };
+}
+
 /**
  * Aggregates all commits in a release branch relative to base (e.g. main..release/vX.Y.Z).
  */
@@ -92,85 +173,39 @@ export function aggregateReleaseKpis(
   const records = extractCommitKpisFromRange(baseBranch, releaseBranch, options);
   const statsMap: Record<string, ModelDefectStats> = {};
   const bugList: BugRecordSummary[] = [];
-
-  let totalLinesAdded = 0;
-  let totalLinesDeleted = 0;
-  let totalTime = 0;
-  let totalTokens = 0;
-  let reworkTime = 0;
-  let reworkTokens = 0;
+  const totals: CommitTotals = { linesAdded: 0, linesDeleted: 0, time: 0, tokens: 0, reworkTime: 0, reworkTokens: 0 };
 
   for (const record of records) {
-    const { key, isAgent } = resolveAuthorKey(record);
-    if (!statsMap[key]) {
-      statsMap[key] = createEmptyModelStats(key, isAgent);
-    }
-    const stat = statsMap[key];
-    stat.commits += 1;
-    stat.linesAdded += record.linesAdded;
-    stat.linesDeleted += record.linesDeleted;
-    stat.totalTimeSeconds += record.trailers.activeTimeSeconds;
-    const tokens = record.trailers.promptTokens + record.trailers.completionTokens;
-    stat.totalTokens += tokens;
-
-    totalLinesAdded += record.linesAdded;
-    totalLinesDeleted += record.linesDeleted;
-    totalTime += record.trailers.activeTimeSeconds;
-    totalTokens += tokens;
-
-    if (record.isBugFix) {
-      stat.bugsInjected += 1;
-      reworkTime += record.trailers.activeTimeSeconds;
-      reworkTokens += tokens;
-      bugList.push({
-        sha: record.sha.slice(0, 8),
-        subject: record.subject,
-        author: key,
-        parentRef: record.trailers.parentRef,
-        timeSeconds: record.trailers.activeTimeSeconds,
-        tokens,
-      });
-    }
+    processSingleCommit(record, statsMap, bugList, totals);
   }
 
-  const authorStats = Object.values(statsMap).map((stat) => {
-    stat.klocProduced = Math.round(((stat.linesAdded + stat.linesDeleted) / 1000) * 100) / 100;
-    stat.defectInjectionRate = stat.klocProduced > 0
-      ? Math.round((stat.bugsInjected / stat.klocProduced) * 100) / 100
-      : stat.bugsInjected;
-    stat.estimatedCostUsd = calculateCost(stat.totalTokens * 0.8, stat.totalTokens * 0.2);
-    return stat;
-  });
-
-  const totalKloc = Math.round(((totalLinesAdded + totalLinesDeleted) / 1000) * 100) / 100;
+  const authorStats = finalizeAuthorStats(statsMap);
+  const totalKloc = Math.round(((totals.linesAdded + totals.linesDeleted) / 1000) * 100) / 100;
   const totalBugs = bugList.length;
   const globalDefectDensity = totalKloc > 0 ? Math.round((totalBugs / totalKloc) * 100) / 100 : totalBugs;
-  const totalCostUsd = calculateCost(totalTokens * 0.8, totalTokens * 0.2);
-  const reworkCostUsd = calculateCost(reworkTokens * 0.8, reworkTokens * 0.2);
-
-  const reworkTimePercent = totalTime > 0 ? Math.round((reworkTime / totalTime) * 10000) / 100 : 0;
-  const reworkTokensPercent = totalTokens > 0 ? Math.round((reworkTokens / totalTokens) * 10000) / 100 : 0;
-  const reworkCostPercent = totalCostUsd > 0 ? Math.round((reworkCostUsd / totalCostUsd) * 10000) / 100 : 0;
+  const totalCostUsd = calculateCost(totals.tokens * 0.8, totals.tokens * 0.2);
+  const reworkCostUsd = calculateCost(totals.reworkTokens * 0.8, totals.reworkTokens * 0.2);
+  const ratios = computeReworkRatios(totals.time, totals.tokens, totalCostUsd, totals.reworkTime, totals.reworkTokens, reworkCostUsd);
 
   return {
     releaseBranch,
     baseBranch,
     generatedAt: new Date().toISOString(),
     totalCommits: records.length,
-    totalLinesAdded,
-    totalLinesDeleted,
+    totalLinesAdded: totals.linesAdded,
+    totalLinesDeleted: totals.linesDeleted,
     totalKloc,
     totalBugs,
     globalDefectDensity,
-    totalTimeSeconds: totalTime,
-    totalTokens,
+    totalTimeSeconds: totals.time,
+    totalTokens: totals.tokens,
     totalCostUsd,
-    reworkTimeSeconds: reworkTime,
-    reworkTokens,
+    reworkTimeSeconds: totals.reworkTime,
+    reworkTokens: totals.reworkTokens,
     reworkCostUsd,
-    reworkTimePercent,
-    reworkTokensPercent,
-    reworkCostPercent,
+    reworkTimePercent: ratios.timePercent,
+    reworkTokensPercent: ratios.tokensPercent,
+    reworkCostPercent: ratios.costPercent,
     authorStats,
     bugList,
   };

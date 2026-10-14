@@ -60,6 +60,36 @@ function resolveManualType(id: string, rawType: string): 'user-manual' | 'produc
   return null;
 }
 
+function extractFmString(fm: Record<string, unknown>, key: string, fallback: string): string {
+  const v = fm[key];
+  return typeof v === 'string' ? v.trim() : fallback;
+}
+
+function extractManualMetadata(
+  fm: Record<string, unknown>,
+  id: string,
+  manualType: 'user-manual' | 'production-manual',
+  relPath: string,
+  body: string
+): ManualDocumentItem {
+  return {
+    id,
+    type: manualType,
+    title: extractFmString(fm, 'title', id),
+    status: extractFmString(fm, 'status', 'draft'),
+    version: extractFmString(fm, 'version', '1.0.0'),
+    appliesToVersion: extractFmString(fm, 'applies-to-version', 'v1.0.0'),
+    filePath: relPath,
+    targetAudience: toStringArray(fm['target-audience']),
+    allowedRoles: toStringArray(fm['allowed-roles']),
+    journeysCovered: toStringArray(fm['journeys-covered']),
+    useCasesCovered: toStringArray(fm['use-cases-covered']),
+    componentsCovered: toStringArray(fm['components-covered']),
+    enclavesInvolved: toStringArray(fm['enclaves-involved']),
+    body,
+  };
+}
+
 function buildManualItem(rootDir: string, filePath: string): ManualDocumentItem | null {
   try {
     const raw = fs.readFileSync(filePath, 'utf-8');
@@ -68,23 +98,8 @@ function buildManualItem(rootDir: string, filePath: string): ManualDocumentItem 
     const rawType = typeof fm.type === 'string' ? fm.type.trim() : '';
     const manualType = resolveManualType(id, rawType);
     if (!id || !manualType) return null;
-
-    return {
-      id,
-      type: manualType,
-      title: typeof fm.title === 'string' ? fm.title.trim() : id,
-      status: typeof fm.status === 'string' ? fm.status.trim() : 'draft',
-      version: typeof fm.version === 'string' ? fm.version.trim() : '1.0.0',
-      appliesToVersion: typeof fm['applies-to-version'] === 'string' ? fm['applies-to-version'].trim() : 'v1.0.0',
-      filePath: path.relative(rootDir, filePath).replace(/\\/g, '/'),
-      targetAudience: toStringArray(fm['target-audience']),
-      allowedRoles: toStringArray(fm['allowed-roles']),
-      journeysCovered: toStringArray(fm['journeys-covered']),
-      useCasesCovered: toStringArray(fm['use-cases-covered']),
-      componentsCovered: toStringArray(fm['components-covered']),
-      enclavesInvolved: toStringArray(fm['enclaves-involved']),
-      body,
-    };
+    const relPath = path.relative(rootDir, filePath).replace(/\\/g, '/');
+    return extractManualMetadata(fm, id, manualType, relPath, body);
   } catch {
     return null;
   }
@@ -121,19 +136,23 @@ function classifyBaselineId(id: string, type: string, buckets: BaselineBuckets):
   }
 }
 
+function processBaselineFile(file: string, rootDir: string, buckets: BaselineBuckets): void {
+  const rel = path.relative(rootDir, file).replace(/\\/g, '/');
+  if (rel.includes('/changes/') || rel.startsWith('changes/')) return;
+  try {
+    const { fm } = parseMdFrontmatter(fs.readFileSync(file, 'utf-8'));
+    const id = typeof fm.id === 'string' ? fm.id.trim() : '';
+    const status = typeof fm.status === 'string' ? fm.status.trim().toLowerCase() : 'active';
+    if (!id || status === 'retired' || status === 'deprecated') return;
+    classifyBaselineId(id, typeof fm.type === 'string' ? fm.type.trim() : '', buckets);
+  } catch {
+    // Ignore unreadable markdown files
+  }
+}
+
 function scanDirectoryForBaseline(rootDir: string, dirPath: string, buckets: BaselineBuckets): void {
   for (const file of walkMdFiles(dirPath)) {
-    const rel = path.relative(rootDir, file).replace(/\\/g, '/');
-    if (rel.includes('/changes/') || rel.startsWith('changes/')) continue;
-    try {
-      const { fm } = parseMdFrontmatter(fs.readFileSync(file, 'utf-8'));
-      const id = typeof fm.id === 'string' ? fm.id.trim() : '';
-      const status = typeof fm.status === 'string' ? fm.status.trim().toLowerCase() : 'active';
-      if (!id || status === 'retired' || status === 'deprecated') continue;
-      classifyBaselineId(id, typeof fm.type === 'string' ? fm.type.trim() : '', buckets);
-    } catch {
-      // Ignore unreadable markdown files
-    }
+    processBaselineFile(file, rootDir, buckets);
   }
 }
 
@@ -160,42 +179,55 @@ function calcRatioPct(covered: number, total: number, hasManual: boolean): numbe
   return Math.round((covered / total) * 100);
 }
 
+function computeTargetCoverage(allSet: Set<string>, coveredList: string[]) {
+  const coveredSet = new Set(coveredList);
+  const uncovered = Array.from(allSet).filter((id) => !coveredSet.has(id));
+  const covered = allSet.size - uncovered.length;
+  return { total: allSet.size, covered, uncovered };
+}
+
+type CoverageTarget = ReturnType<typeof computeTargetCoverage>;
+
+function assembleCoverageSummary(
+  jrn: CoverageTarget,
+  uc: CoverageTarget,
+  cmp: CoverageTarget,
+  enc: CoverageTarget,
+  userCoveragePct: number,
+  productionCoveragePct: number
+): ManualsCoverageSummary {
+  return {
+    totalJourneys: jrn.total,
+    coveredJourneys: jrn.covered,
+    uncoveredJourneys: jrn.uncovered,
+    totalUseCases: uc.total,
+    coveredUseCases: uc.covered,
+    uncoveredUseCases: uc.uncovered,
+    userCoveragePct,
+    totalComponents: cmp.total,
+    coveredComponents: cmp.covered,
+    uncoveredComponents: cmp.uncovered,
+    totalEnclaves: enc.total,
+    coveredEnclaves: enc.covered,
+    uncoveredEnclaves: enc.uncovered,
+    productionCoveragePct,
+  };
+}
+
 function computeManualsCoverage(
   userManuals: ManualDocumentItem[],
   prodManuals: ManualDocumentItem[],
   buckets: BaselineBuckets
 ): ManualsCoverageSummary {
-  const coveredJrnSet = new Set(userManuals.flatMap((m) => m.journeysCovered));
-  const coveredUcSet = new Set(userManuals.flatMap((m) => m.useCasesCovered));
-  const coveredCmpSet = new Set(prodManuals.flatMap((m) => m.componentsCovered));
-  const coveredEncSet = new Set(prodManuals.flatMap((m) => m.enclavesInvolved));
+  const jrn = computeTargetCoverage(buckets.journeys, userManuals.flatMap((m) => m.journeysCovered));
+  const uc = computeTargetCoverage(buckets.useCases, userManuals.flatMap((m) => m.useCasesCovered));
+  const cmp = computeTargetCoverage(buckets.components, prodManuals.flatMap((m) => m.componentsCovered));
+  const enc = computeTargetCoverage(buckets.enclaves, prodManuals.flatMap((m) => m.enclavesInvolved));
 
-  const uncoveredJourneys = Array.from(buckets.journeys).filter((id) => !coveredJrnSet.has(id));
-  const uncoveredUseCases = Array.from(buckets.useCases).filter((id) => !coveredUcSet.has(id));
-  const uncoveredComponents = Array.from(buckets.components).filter((id) => !coveredCmpSet.has(id));
-  const uncoveredEnclaves = Array.from(buckets.enclaves).filter((id) => !coveredEncSet.has(id));
+  const userCoveragePct = calcRatioPct(jrn.covered + uc.covered, jrn.total + uc.total, userManuals.length > 0);
+  const productionCoveragePct = calcRatioPct(cmp.covered + enc.covered, cmp.total + enc.total, prodManuals.length > 0);
 
-  const userTotal = buckets.journeys.size + buckets.useCases.size;
-  const userCovered = (buckets.journeys.size - uncoveredJourneys.length) + (buckets.useCases.size - uncoveredUseCases.length);
-  const prodTotal = buckets.components.size + buckets.enclaves.size;
-  const prodCovered = (buckets.components.size - uncoveredComponents.length) + (buckets.enclaves.size - uncoveredEnclaves.length);
-
-  return {
-    totalJourneys: buckets.journeys.size,
-    coveredJourneys: buckets.journeys.size - uncoveredJourneys.length,
-    uncoveredJourneys,
-    totalUseCases: buckets.useCases.size,
-    coveredUseCases: buckets.useCases.size - uncoveredUseCases.length,
-    uncoveredUseCases,
-    userCoveragePct: calcRatioPct(userCovered, userTotal, userManuals.length > 0),
-    totalComponents: buckets.components.size,
-    coveredComponents: buckets.components.size - uncoveredComponents.length,
-    uncoveredComponents,
-    totalEnclaves: buckets.enclaves.size,
-    coveredEnclaves: buckets.enclaves.size - uncoveredEnclaves.length,
-    uncoveredEnclaves,
-    productionCoveragePct: calcRatioPct(prodCovered, prodTotal, prodManuals.length > 0),
-  };
+  return assembleCoverageSummary(jrn, uc, cmp, enc, userCoveragePct, productionCoveragePct);
 }
 
 function detectCurrentGitBranch(rootDir: string): string {
@@ -227,49 +259,60 @@ function resolveActiveChangeProfile(rootDir: string): ChangeProfile {
   }
 }
 
-function buildFindingsList(
-  userManuals: ManualDocumentItem[],
-  prodManuals: ManualDocumentItem[],
-  cov: ManualsCoverageSummary
-): string[] {
+function buildMissingManualFindings(userCount: number, prodCount: number, cov: ManualsCoverageSummary): string[] {
   const findings: string[] = [];
-  if (userManuals.length === 0 && (cov.totalJourneys > 0 || cov.totalUseCases > 0)) {
+  if (userCount === 0 && (cov.totalJourneys > 0 || cov.totalUseCases > 0)) {
     findings.push('Missing User Manual (MAN-USER-*) in manuals/ covering active Journeys and Use Cases.');
   }
-  if (prodManuals.length === 0 && (cov.totalComponents > 0 || cov.totalEnclaves > 0)) {
+  if (prodCount === 0 && (cov.totalComponents > 0 || cov.totalEnclaves > 0)) {
     findings.push('Missing Production Manual (MAN-PROD-*) in manuals/ covering active Architecture Components and Enclaves.');
   }
-  if (userManuals.length > 0 && cov.uncoveredJourneys.length > 0) {
+  return findings;
+}
+
+function buildUncoveredTargetFindings(userCount: number, prodCount: number, cov: ManualsCoverageSummary): string[] {
+  const findings: string[] = [];
+  if (userCount > 0 && cov.uncoveredJourneys.length > 0) {
     findings.push(`Uncovered Journeys in MAN-USER-*: ${cov.uncoveredJourneys.join(', ')}`);
   }
-  if (userManuals.length > 0 && cov.uncoveredUseCases.length > 0) {
+  if (userCount > 0 && cov.uncoveredUseCases.length > 0) {
     findings.push(`Uncovered Use Cases in MAN-USER-*: ${cov.uncoveredUseCases.join(', ')}`);
   }
-  if (prodManuals.length > 0 && cov.uncoveredComponents.length > 0) {
+  if (prodCount > 0 && cov.uncoveredComponents.length > 0) {
     findings.push(`Uncovered Components in MAN-PROD-*: ${cov.uncoveredComponents.join(', ')}`);
   }
-  if (prodManuals.length > 0 && cov.uncoveredEnclaves.length > 0) {
+  if (prodCount > 0 && cov.uncoveredEnclaves.length > 0) {
     findings.push(`Uncovered Security Enclaves in MAN-PROD-*: ${cov.uncoveredEnclaves.join(', ')}`);
   }
   return findings;
 }
 
-export function verifyManuals(options: ManualsVerificationOptions = {}): ManualsVerificationResult {
-  const rootDir = options.rootDir || process.cwd();
-  const branch = options.branch || detectCurrentGitBranch(rootDir);
-  const profile = options.profile || resolveActiveChangeProfile(rootDir);
-  const isStrict = Boolean(options.strict || /^release\//i.test(branch) || profile === 'critical');
+function buildFindingsList(
+  userManuals: ManualDocumentItem[],
+  prodManuals: ManualDocumentItem[],
+  cov: ManualsCoverageSummary
+): string[] {
+  return [
+    ...buildMissingManualFindings(userManuals.length, prodManuals.length, cov),
+    ...buildUncoveredTargetFindings(userManuals.length, prodManuals.length, cov),
+  ];
+}
 
-  const allManuals = scanManualsInWorkspace(rootDir);
-  const userManuals = allManuals.filter((m) => m.type === 'user-manual');
-  const productionManuals = allManuals.filter((m) => m.type === 'production-manual');
-  const buckets = collectBaselineTargets(rootDir);
-  const coverage = computeManualsCoverage(userManuals, productionManuals, buckets);
-  const findings = buildFindingsList(userManuals, productionManuals, coverage);
+function isStrictEnforcement(options: ManualsVerificationOptions, branch: string, profile: ChangeProfile): boolean {
+  if (options.strict !== undefined) return Boolean(options.strict);
+  return /^release\//i.test(branch) || profile === 'critical';
+}
 
-  const hasIssues = findings.length > 0;
-  const status: 'PASSED' | 'WARNING' | 'FAILED' = !hasIssues ? 'PASSED' : isStrict ? 'FAILED' : 'WARNING';
-
+function assembleManualsResult(
+  isStrict: boolean,
+  branch: string,
+  profile: ChangeProfile,
+  userManuals: ManualDocumentItem[],
+  productionManuals: ManualDocumentItem[],
+  coverage: ManualsCoverageSummary,
+  findings: string[]
+): ManualsVerificationResult {
+  const status: 'PASSED' | 'WARNING' | 'FAILED' = findings.length === 0 ? 'PASSED' : isStrict ? 'FAILED' : 'WARNING';
   return {
     success: status !== 'FAILED',
     status,
@@ -282,4 +325,20 @@ export function verifyManuals(options: ManualsVerificationOptions = {}): Manuals
     warnings: isStrict ? [] : findings,
     violations: isStrict ? findings : [],
   };
+}
+
+export function verifyManuals(options: ManualsVerificationOptions = {}): ManualsVerificationResult {
+  const rootDir = options.rootDir || process.cwd();
+  const branch = options.branch || detectCurrentGitBranch(rootDir);
+  const profile = options.profile || resolveActiveChangeProfile(rootDir);
+  const isStrict = isStrictEnforcement(options, branch, profile);
+
+  const allManuals = scanManualsInWorkspace(rootDir);
+  const userManuals = allManuals.filter((m) => m.type === 'user-manual');
+  const productionManuals = allManuals.filter((m) => m.type === 'production-manual');
+  const buckets = collectBaselineTargets(rootDir);
+  const coverage = computeManualsCoverage(userManuals, productionManuals, buckets);
+  const findings = buildFindingsList(userManuals, productionManuals, coverage);
+
+  return assembleManualsResult(isStrict, branch, profile, userManuals, productionManuals, coverage, findings);
 }

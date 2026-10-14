@@ -28,6 +28,22 @@ export interface KpiReleaseCliOptions {
   root?: string;
 }
 
+function applyKpiPrOutput(options: KpiPrCliOptions, markdown: string): boolean {
+  if (options.updateFile) {
+    if (!fs.existsSync(options.updateFile)) {
+      console.error(pc.red(`\n✖ [ERROR] Target file '${options.updateFile}' does not exist.\n`));
+      return false;
+    }
+    const original = fs.readFileSync(options.updateFile, 'utf-8');
+    const updated = injectKpisIntoPrBody(original, markdown);
+    fs.writeFileSync(options.updateFile, updated, 'utf-8');
+    console.log(pc.green(`✔ [UPDATED] KPI summary injected into '${options.updateFile}'.`));
+  } else {
+    console.log('\n' + markdown + '\n');
+  }
+  return true;
+}
+
 export function runKpiPr(options: KpiPrCliOptions): boolean {
   const baseRef = options.base || 'main';
   const headRef = options.head || 'HEAD';
@@ -42,26 +58,26 @@ export function runKpiPr(options: KpiPrCliOptions): boolean {
     }
 
     const markdown = formatPrKpiMarkdown(kpi);
-
-    if (options.updateFile) {
-      if (!fs.existsSync(options.updateFile)) {
-        console.error(pc.red(`\n✖ [ERROR] Target file '${options.updateFile}' does not exist.\n`));
-        return false;
-      }
-      const original = fs.readFileSync(options.updateFile, 'utf-8');
-      const updated = injectKpisIntoPrBody(original, markdown);
-      fs.writeFileSync(options.updateFile, updated, 'utf-8');
-      console.log(pc.green(`✔ [UPDATED] KPI summary injected into '${options.updateFile}'.`));
-    } else {
-      console.log('\n' + markdown + '\n');
-    }
-
-    return true;
+    return applyKpiPrOutput(options, markdown);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error(pc.red(`\n✖ [ERROR] Failed to calculate PR KPIs: ${msg}\n`));
     return false;
   }
+}
+
+function printReleaseKpiSummary(report: ReturnType<typeof aggregateReleaseKpis>, markdownPath: string, jsonPath: string): void {
+  console.log(pc.green(`✔ [COMPLIANT] Consolidated report successfully generated:`));
+  console.log(`  - Markdown: ${pc.bold(markdownPath)}`);
+  console.log(`  - JSON:     ${pc.bold(jsonPath)}`);
+  console.log(`  - KLoC:     ${report.totalKloc} (${report.totalCommits} commits)`);
+  console.log(`  - Bugs:     ${report.totalBugs} (Density: ${report.globalDefectDensity} bugs/KLoC)`);
+  console.log(`  - Rework:   ${report.reworkTimePercent}% time | ${report.reworkTokensPercent}% tokens\n`);
+}
+
+function printKpiReleaseError(err: unknown): void {
+  const msg = err instanceof Error ? err.message : String(err);
+  console.error(pc.red(`\n✖ [ERROR] Failed to calculate Release KPIs: ${msg}\n`));
 }
 
 export function runKpiRelease(options: KpiReleaseCliOptions): boolean {
@@ -83,17 +99,10 @@ export function runKpiRelease(options: KpiReleaseCliOptions): boolean {
     }
 
     const { markdownPath, jsonPath } = writeReleaseKpiReport(report, { outputDir: options.output });
-    console.log(pc.green(`✔ [COMPLIANT] Consolidated report successfully generated:`));
-    console.log(`  - Markdown: ${pc.bold(markdownPath)}`);
-    console.log(`  - JSON:     ${pc.bold(jsonPath)}`);
-    console.log(`  - KLoC:     ${report.totalKloc} (${report.totalCommits} commits)`);
-    console.log(`  - Bugs:     ${report.totalBugs} (Density: ${report.globalDefectDensity} bugs/KLoC)`);
-    console.log(`  - Rework:   ${report.reworkTimePercent}% time | ${report.reworkTokensPercent}% tokens\n`);
-
+    printReleaseKpiSummary(report, markdownPath, jsonPath);
     return true;
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error(pc.red(`\n✖ [ERROR] Failed to calculate Release KPIs: ${msg}\n`));
+    printKpiReleaseError(err);
     return false;
   }
 }

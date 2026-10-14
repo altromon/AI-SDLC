@@ -188,70 +188,77 @@ export interface DiffLineItem {
   content: string;
 }
 
-export function getGitDiffLines(rootDir: string, baseBranch?: string): DiffLineItem[] {
-  const lines: DiffLineItem[] = [];
+function tryGitDiff(rootDir: string, args: string[]): string | null {
   try {
-    const targetBase = baseBranch || 'origin/main';
-    let diffOutput = '';
-
-    // Check if targetBase exists
-    try {
-      diffOutput = execFileSync('git', ['diff', '-U0', `${targetBase}...HEAD`], {
-        cwd: rootDir,
-        encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'ignore'],
-      });
-    } catch {
-      // Fallback to diff against HEAD or working tree
-      try {
-        diffOutput = execFileSync('git', ['diff', '-U0', 'HEAD'], {
-          cwd: rootDir,
-          encoding: 'utf-8',
-          stdio: ['pipe', 'pipe', 'ignore'],
-        });
-      } catch {
-        diffOutput = '';
-      }
-    }
-
-    if (!diffOutput) {
-      // Check unstaged changes as fallback
-      diffOutput = execFileSync('git', ['diff', '-U0'], {
-        cwd: rootDir,
-        encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'ignore'],
-      });
-    }
-
-    let currentFile = '';
-    let currentLine = 1;
-
-    for (const rawLine of diffOutput.split('\n')) {
-      if (rawLine.startsWith('+++ b/')) {
-        currentFile = rawLine.substring(6).trim();
-      } else if (rawLine.startsWith('@@ ')) {
-        // Parse hunk header: @@ -1,1 +15,3 @@
-        const match = rawLine.match(/@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
-        if (match) {
-          currentLine = parseInt(match[1], 10);
-        }
-      } else if (rawLine.startsWith('+') && !rawLine.startsWith('+++')) {
-        const content = rawLine.substring(1);
-        if (currentFile) {
-          lines.push({
-            file: currentFile,
-            lineNumber: currentLine,
-            content,
-          });
-        }
-        currentLine++;
-      }
-    }
+    return execFileSync('git', args, {
+      cwd: rootDir,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'ignore'],
+    });
   } catch {
-    // Git diff failure fallback
+    return null;
   }
+}
 
+function getGitDiffOutput(rootDir: string, baseBranch?: string): string {
+  const targetBase = baseBranch || 'origin/main';
+  return (
+    tryGitDiff(rootDir, ['diff', '-U0', `${targetBase}...HEAD`]) ??
+    tryGitDiff(rootDir, ['diff', '-U0', 'HEAD']) ??
+    tryGitDiff(rootDir, ['diff', '-U0']) ??
+    ''
+  );
+}
+
+function parseHunkHeaderLine(rawLine: string): number | null {
+  const match = rawLine.match(/@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+function appendDiffLine(
+  lines: DiffLineItem[],
+  file: string,
+  lineNumber: number,
+  rawContent: string
+): void {
+  if (file) {
+    lines.push({ file, lineNumber, content: rawContent });
+  }
+}
+
+function parseDiffOutput(diffOutput: string): DiffLineItem[] {
+  const lines: DiffLineItem[] = [];
+  let currentFile = '';
+  let currentLine = 1;
+
+  for (const rawLine of diffOutput.split('\n')) {
+    if (rawLine.startsWith('+++ b/')) {
+      currentFile = rawLine.substring(6).trim();
+      continue;
+    }
+    if (rawLine.startsWith('@@ ')) {
+      const hunkLine = parseHunkHeaderLine(rawLine);
+      if (hunkLine !== null) currentLine = hunkLine;
+      continue;
+    }
+    if (rawLine.startsWith('+') && !rawLine.startsWith('+++')) {
+      appendDiffLine(lines, currentFile, currentLine, rawLine.substring(1));
+      currentLine++;
+    }
+  }
   return lines;
+}
+
+export function getGitDiffLines(rootDir: string, baseBranch?: string): DiffLineItem[] {
+  try {
+    return parseDiffOutput(getGitDiffOutput(rootDir, baseBranch));
+  } catch {
+    return [];
+  }
+}
+
+function isPathExcluded(relPath: string, patterns: string[]): boolean {
+  return patterns.some((pat) => relPath.includes(pat) || relPath.startsWith(pat));
 }
 
 export function walkProjectFiles(
@@ -268,15 +275,7 @@ export function walkProjectFiles(
       const fullPath = path.join(dir, entry.name);
       const relPath = path.relative(rootDir, fullPath).replace(/\\/g, '/');
 
-      let isExcluded = false;
-      for (const pat of excludedPatterns) {
-        if (relPath.includes(pat) || relPath.startsWith(pat)) {
-          isExcluded = true;
-          break;
-        }
-      }
-
-      if (isExcluded) continue;
+      if (isPathExcluded(relPath, excludedPatterns)) continue;
 
       if (entry.isDirectory()) {
         results.push(...walkProjectFiles(fullPath, rootDir, excludedPatterns));
@@ -301,8 +300,49 @@ export function isGitleaksInstalled(): boolean {
   }
 }
 
+interface GitleaksRawItem {
+  File?: string;
+  file?: string;
+  StartLine?: number;
+  line?: number;
+  RuleID?: string;
+  ruleID?: string;
+  Secret?: string;
+  secret?: string;
+  Match?: string;
+  Entropy?: number;
+  entropy?: number;
+  Description?: string;
+}
+
+function pickFirstString(...vals: (string | undefined)[]): string {
+  for (const v of vals) {
+    if (v) return v;
+  }
+  return '';
+}
+
+function parseGitleaksItem(item: GitleaksRawItem, rootDir: string): SecretViolation {
+  const rawFile = pickFirstString(item.File, item.file);
+  const filePath = path.resolve(rootDir, rawFile);
+  const relPath = path.relative(rootDir, filePath).replace(/\\/g, '/');
+  const ruleId = pickFirstString(item.RuleID, item.ruleID) || 'GITLEAKS-MATCH';
+  const rawSecret = pickFirstString(item.Secret, item.secret, item.Match);
+  const line = item.StartLine ?? item.line ?? 1;
+
+  return {
+    filePath,
+    relPath,
+    lineNumber: line,
+    type: 'GITLEAKS_FINDING',
+    ruleId,
+    maskedMatch: maskSecret(rawSecret),
+    entropy: item.Entropy ?? item.entropy,
+    message: `Gitleaks detectó credencial [${ruleId}]: ${item.Description || ''}`,
+  };
+}
+
 export function runGitleaksCli(rootDir: string): SecretViolation[] {
-  const violations: SecretViolation[] = [];
   try {
     const output = execFileSync(
       'gitleaks',
@@ -313,30 +353,75 @@ export function runGitleaksCli(rootDir: string): SecretViolation[] {
         stdio: ['pipe', 'pipe', 'ignore'],
       }
     );
-
-    if (output) {
-      const parsed = JSON.parse(output);
-      if (Array.isArray(parsed)) {
-        for (const item of parsed) {
-          const filePath = path.resolve(rootDir, item.File || item.file);
-          const relPath = path.relative(rootDir, filePath).replace(/\\/g, '/');
-          violations.push({
-            filePath,
-            relPath,
-            lineNumber: item.StartLine || item.line || 1,
-            type: 'GITLEAKS_FINDING',
-            ruleId: item.RuleID || item.ruleID || 'GITLEAKS-MATCH',
-            maskedMatch: maskSecret(item.Secret || item.secret || item.Match || ''),
-            entropy: item.Entropy || item.entropy,
-            message: `Gitleaks detectó credencial [${item.RuleID || 'SECRET'}]: ${item.Description || ''}`,
-          });
-        }
-      }
-    }
+    if (!output) return [];
+    const parsed = JSON.parse(output);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item: GitleaksRawItem) => parseGitleaksItem(item, rootDir));
   } catch {
-    // If gitleaks exits with code > 0 it typically means secrets were found or syntax error
+    return [];
+  }
+}
+
+function buildSecretViolation(
+  rule: SecretRule,
+  rawMatch: string,
+  entropy: number,
+  filePath: string,
+  relPath: string,
+  lineNumber: number
+): SecretViolation {
+  return {
+    filePath,
+    relPath,
+    lineNumber,
+    type: rule.type,
+    ruleId: rule.id,
+    maskedMatch: maskSecret(rawMatch),
+    entropy,
+    message: `${rule.description} (Entropía: ${entropy})`,
+  };
+}
+
+function checkRuleOnLine(
+  rule: SecretRule,
+  line: string,
+  lineNumber: number,
+  filePath: string,
+  relPath: string,
+  entropyThreshold: number
+): SecretViolation[] {
+  const violations: SecretViolation[] = [];
+  rule.regex.lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = rule.regex.exec(line)) !== null) {
+    const rawMatch = rule.captureIndex ? match[rule.captureIndex] : match[0];
+    if (!rawMatch || rawMatch.length < 8) continue;
+    if (isPlaceholderOrIgnored(rawMatch, line)) continue;
+
+    const entropy = calculateShannonEntropy(rawMatch);
+    if (rule.minEntropy && entropy < (entropyThreshold || rule.minEntropy)) {
+      continue;
+    }
+
+    violations.push(buildSecretViolation(rule, rawMatch, entropy, filePath, relPath, lineNumber));
   }
   return violations;
+}
+
+function scanLineForSecrets(
+  line: string,
+  lineNumber: number,
+  filePath: string,
+  relPath: string,
+  entropyThreshold: number
+): SecretViolation[] {
+  if (!line || line.trim().length === 0) return [];
+  const lineViolations: SecretViolation[] = [];
+  for (const rule of SECRET_RULES) {
+    lineViolations.push(...checkRuleOnLine(rule, line, lineNumber, filePath, relPath, entropyThreshold));
+  }
+  return lineViolations;
 }
 
 export function scanContentForSecrets(
@@ -350,39 +435,93 @@ export function scanContentForSecrets(
   const relPath = path.relative(rootDir, filePath).replace(/\\/g, '/');
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (!line || line.trim().length === 0) continue;
-
-    for (const rule of SECRET_RULES) {
-      rule.regex.lastIndex = 0;
-      let match: RegExpExecArray | null;
-
-      while ((match = rule.regex.exec(line)) !== null) {
-        const rawMatch = rule.captureIndex ? match[rule.captureIndex] : match[0];
-        if (!rawMatch || rawMatch.length < 8) continue;
-
-        if (isPlaceholderOrIgnored(rawMatch, line)) continue;
-
-        const entropy = calculateShannonEntropy(rawMatch);
-        if (rule.minEntropy && entropy < (entropyThreshold || rule.minEntropy)) {
-          continue;
-        }
-
-        violations.push({
-          filePath,
-          relPath,
-          lineNumber: i + 1,
-          type: rule.type,
-          ruleId: rule.id,
-          maskedMatch: maskSecret(rawMatch),
-          entropy,
-          message: `${rule.description} (Entropía: ${entropy})`,
-        });
-      }
-    }
+    violations.push(...scanLineForSecrets(lines[i], i + 1, filePath, relPath, entropyThreshold));
   }
 
   return violations;
+}
+
+function groupDiffLinesByFile(diffLines: DiffLineItem[]): Map<string, DiffLineItem[]> {
+  const fileGroups = new Map<string, DiffLineItem[]>();
+  for (const item of diffLines) {
+    const list = fileGroups.get(item.file) || [];
+    list.push(item);
+    fileGroups.set(item.file, list);
+  }
+  return fileGroups;
+}
+
+function scanDiffItems(
+  diffLines: DiffLineItem[],
+  rootDir: string,
+  excludePatterns: string[],
+  entropyThreshold: number
+): { findings: SecretViolation[]; filesScannedCount: number } {
+  const fileGroups = groupDiffLinesByFile(diffLines);
+  const findings: SecretViolation[] = [];
+
+  for (const [relFile, items] of fileGroups) {
+    if (isPathExcluded(relFile, excludePatterns)) continue;
+    const absPath = path.resolve(rootDir, relFile);
+    for (const item of items) {
+      const lineViolations = scanLineForSecrets(item.content, item.lineNumber, absPath, relFile, entropyThreshold);
+      for (const v of lineViolations) {
+        findings.push({ ...v, message: `[DIFF] ${v.message}` });
+      }
+    }
+  }
+  return { findings, filesScannedCount: fileGroups.size };
+}
+
+function scanAllProjectFiles(
+  rootDir: string,
+  excludePatterns: string[],
+  entropyThreshold: number
+): { findings: SecretViolation[]; filesScannedCount: number } {
+  const allFiles = walkProjectFiles(rootDir, rootDir, excludePatterns);
+  const findings: SecretViolation[] = [];
+  for (const file of allFiles) {
+    try {
+      const content = fs.readFileSync(file, 'utf-8');
+      findings.push(...scanContentForSecrets(content, file, rootDir, entropyThreshold));
+    } catch {
+      // Skip unreadable files
+    }
+  }
+  return { findings, filesScannedCount: allFiles.length };
+}
+
+function appendNonDuplicateFindings(target: SecretViolation[], incoming: SecretViolation[]): void {
+  for (const item of incoming) {
+    const exists = target.some(
+      (f) => f.relPath === item.relPath && Math.abs(f.lineNumber - item.lineNumber) <= 1
+    );
+    if (!exists) {
+      target.push(item);
+    }
+  }
+}
+
+function mergeGitleaksFindings(
+  findings: SecretViolation[],
+  rootDir: string,
+  gitleaksEnabled: boolean | undefined
+): { findings: SecretViolation[]; scannedWithGitleaks: boolean } {
+  const shouldRun = gitleaksEnabled || (gitleaksEnabled === undefined && isGitleaksInstalled());
+  if (!shouldRun) {
+    return { findings, scannedWithGitleaks: false };
+  }
+  try {
+    const gitleaksFindings = runGitleaksCli(rootDir);
+    if (gitleaksFindings.length === 0) {
+      return { findings, scannedWithGitleaks: false };
+    }
+    const merged = [...findings];
+    appendNonDuplicateFindings(merged, gitleaksFindings);
+    return { findings: merged, scannedWithGitleaks: true };
+  } catch {
+    return { findings, scannedWithGitleaks: false };
+  }
 }
 
 export function verifySecrets(options: SecretVerifierOptions = {}): SecretVerifierResult {
@@ -390,116 +529,27 @@ export function verifySecrets(options: SecretVerifierOptions = {}): SecretVerifi
   const entropyThreshold = options.entropyThreshold ?? 4.3;
   const excludePatterns = options.excludePatterns || DEFAULT_EXCLUDED_PATTERNS;
 
-  const findings: SecretViolation[] = [];
-  let totalFilesScanned = 0;
-  let scannedWithGitleaks = false;
+  const { findings, filesScannedCount } = options.diff
+    ? scanDiffItems(getGitDiffLines(rootDir, options.baseBranch), rootDir, excludePatterns, entropyThreshold)
+    : scanAllProjectFiles(rootDir, excludePatterns, entropyThreshold);
 
-  // 1. If diff mode is requested, scan git diff lines
-  if (options.diff) {
-    const diffLines = getGitDiffLines(rootDir, options.baseBranch);
-    const fileGroups = new Map<string, DiffLineItem[]>();
-
-    for (const item of diffLines) {
-      const list = fileGroups.get(item.file) || [];
-      list.push(item);
-      fileGroups.set(item.file, list);
-    }
-
-    totalFilesScanned = fileGroups.size;
-
-    for (const [relFile, items] of fileGroups) {
-      let isExcluded = false;
-      for (const pat of excludePatterns) {
-        if (relFile.includes(pat) || relFile.startsWith(pat)) {
-          isExcluded = true;
-          break;
-        }
-      }
-      if (isExcluded) continue;
-
-      for (const item of items) {
-        const line = item.content;
-        for (const rule of SECRET_RULES) {
-          rule.regex.lastIndex = 0;
-          let match: RegExpExecArray | null;
-
-          while ((match = rule.regex.exec(line)) !== null) {
-            const rawMatch = rule.captureIndex ? match[rule.captureIndex] : match[0];
-            if (!rawMatch || rawMatch.length < 8) continue;
-
-            if (isPlaceholderOrIgnored(rawMatch, line)) continue;
-
-            const entropy = calculateShannonEntropy(rawMatch);
-            if (rule.minEntropy && entropy < (entropyThreshold || rule.minEntropy)) {
-              continue;
-            }
-
-            findings.push({
-              filePath: path.resolve(rootDir, item.file),
-              relPath: item.file,
-              lineNumber: item.lineNumber,
-              type: rule.type,
-              ruleId: rule.id,
-              maskedMatch: maskSecret(rawMatch),
-              entropy,
-              message: `[DIFF] ${rule.description} (Entropía: ${entropy})`,
-            });
-          }
-        }
-      }
-    }
-  } else {
-    // 2. Full project scan
-    const allFiles = walkProjectFiles(rootDir, rootDir, excludePatterns);
-    totalFilesScanned = allFiles.length;
-
-    for (const file of allFiles) {
-      try {
-        const content = fs.readFileSync(file, 'utf-8');
-        const fileViolations = scanContentForSecrets(content, file, rootDir, entropyThreshold);
-        findings.push(...fileViolations);
-      } catch {
-        // Skip unreadable files
-      }
-    }
-  }
-
-  // 3. Delegate to Gitleaks CLI if requested or available
-  if (options.gitleaks || (options.gitleaks === undefined && isGitleaksInstalled())) {
-    try {
-      const gitleaksFindings = runGitleaksCli(rootDir);
-      if (gitleaksFindings.length > 0) {
-        scannedWithGitleaks = true;
-        // Merge without duplicating same file and line
-        for (const gf of gitleaksFindings) {
-          const exists = findings.some(
-            (f) => f.relPath === gf.relPath && Math.abs(f.lineNumber - gf.lineNumber) <= 1
-          );
-          if (!exists) {
-            findings.push(gf);
-          }
-        }
-      }
-    } catch {
-      // Gitleaks failure fallback
-    }
-  }
+  const merged = mergeGitleaksFindings(findings, rootDir, options.gitleaks);
 
   const result: SecretVerifierResult = {
-    success: findings.length === 0,
-    totalFilesScanned,
-    findingsCount: findings.length,
-    findings,
-    scannedWithGitleaks,
+    success: merged.findings.length === 0,
+    totalFilesScanned: filesScannedCount,
+    findingsCount: merged.findings.length,
+    findings: merged.findings,
+    scannedWithGitleaks: merged.scannedWithGitleaks,
   };
 
   result.reportMarkdown = generateSecretsReportMarkdown(result);
   return result;
 }
 
-export function generateSecretsReportMarkdown(result: SecretVerifierResult): string {
+function buildReportHeader(result: SecretVerifierResult): string[] {
   const isOk = result.success;
-  const lines: string[] = [
+  return [
     `# 🔐 Deterministic Secrets and Credentials Audit (Gitleaks Gate)`,
     ``,
     `> **Evaluation Date:** ${new Date().toISOString()}`,
@@ -509,6 +559,39 @@ export function generateSecretsReportMarkdown(result: SecretVerifierResult): str
     ``,
     `---`,
   ];
+}
+
+function buildReportRemediationProtocol(): string[] {
+  return [
+    ``,
+    `## 🚨 Mandatory Remediation Protocol (Exit Code 4)`,
+    ``,
+    `1. **Immediate Revocation**: Any credential or token detected above must be considered compromised and immediately revoked at the respective provider.`,
+    `2. **Rotation and Secure Storage**: Migrate credentials to protected environment variables or secrets management vaults (Vault, AWS Secrets Manager, GitHub Secrets).`,
+    `3. **Git History Purge**: If the secret was committed, purge it from Git history with \`git filter-repo\` or BFG before merging.`,
+    `4. **False Positives**: For legitimate test fixtures or non-secret strings, add \`// ai-sdlc:allow-secret\` on the offending line or add the path to \`.secretsignore\`.`,
+  ];
+}
+
+function buildFindingsTable(findings: SecretViolation[]): string[] {
+  const rows: string[] = [
+    ``,
+    `## Detected Secret Leaks Detail`,
+    ``,
+    `| Severity | Rule | Type | File:Line | Token (Masked) | Details |`,
+    `| :---: | :--- | :--- | :--- | :--- | :--- |`,
+  ];
+  for (const f of findings) {
+    rows.push(
+      `| 🛑 **CRITICAL** | \`${f.ruleId}\` | \`${f.type}\` | \`${f.relPath}:${f.lineNumber}\` | \`${f.maskedMatch}\` | ${f.message} |`
+    );
+  }
+  rows.push(...buildReportRemediationProtocol());
+  return rows;
+}
+
+export function generateSecretsReportMarkdown(result: SecretVerifierResult): string {
+  const lines = buildReportHeader(result);
 
   if (result.findings.length === 0) {
     lines.push(
@@ -519,29 +602,7 @@ export function generateSecretsReportMarkdown(result: SecretVerifierResult): str
       `Credentials security Quality Gate is APPROVED (EXIT 0).`
     );
   } else {
-    lines.push(
-      ``,
-      `## Detected Secret Leaks Detail`,
-      ``,
-      `| Severity | Rule | Type | File:Line | Token (Masked) | Details |`,
-      `| :---: | :--- | :--- | :--- | :--- | :--- |`
-    );
-
-    for (const f of result.findings) {
-      lines.push(
-        `| 🛑 **CRITICAL** | \`${f.ruleId}\` | \`${f.type}\` | \`${f.relPath}:${f.lineNumber}\` | \`${f.maskedMatch}\` | ${f.message} |`
-      );
-    }
-
-    lines.push(
-      ``,
-      `## 🚨 Mandatory Remediation Protocol (Exit Code 4)`,
-      ``,
-      `1. **Immediate Revocation**: Any credential or token detected above must be considered compromised and immediately revoked at the respective provider.`,
-      `2. **Rotation and Secure Storage**: Migrate credentials to protected environment variables or secrets management vaults (Vault, AWS Secrets Manager, GitHub Secrets).`,
-      `3. **Git History Purge**: If the secret was committed, purge it from Git history with \`git filter-repo\` or BFG before merging.`,
-      `4. **False Positives**: For legitimate test fixtures or non-secret strings, add \`// ai-sdlc:allow-secret\` on the offending line or add the path to \`.secretsignore\`.`
-    );
+    lines.push(...buildFindingsTable(result.findings));
   }
 
   return lines.join('\n');

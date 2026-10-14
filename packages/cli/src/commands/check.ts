@@ -215,6 +215,19 @@ export function auditSecretsGate(rootDir: string): PreflightGateSummary {
   };
 }
 
+function formatSecurityErrors(secRes: ReturnType<typeof verifySecrets>, sastRes: ReturnType<typeof verifySast>): string {
+  const errors: string[] = [];
+  if (!secRes.success) {
+    const f = secRes.findings[0];
+    errors.push(`${secRes.findingsCount} secret(s) (e.g. ${f.ruleId} in ${f.relPath}:${f.lineNumber})`);
+  }
+  if (!sastRes.success) {
+    const v = sastRes.violations[0];
+    errors.push(`${sastRes.violationsCount} SAST violation(s) (e.g. ${v.ruleId} in ${v.relPath}:${v.lineNumber})`);
+  }
+  return errors.join('; ');
+}
+
 export function auditSecurityGate(rootDir: string): PreflightGateSummary {
   const secRes = verifySecrets({ rootDir });
   const sastRes = verifySast({ rootDir });
@@ -227,20 +240,10 @@ export function auditSecurityGate(rootDir: string): PreflightGateSummary {
     };
   }
 
-  const errors: string[] = [];
-  if (!secRes.success) {
-    const f = secRes.findings[0];
-    errors.push(`${secRes.findingsCount} secret(s) (e.g. ${f.ruleId} in ${f.relPath}:${f.lineNumber})`);
-  }
-  if (!sastRes.success) {
-    const v = sastRes.violations[0];
-    errors.push(`${sastRes.violationsCount} SAST violation(s) (e.g. ${v.ruleId} in ${v.relPath}:${v.lineNumber})`);
-  }
-
   return {
     name: 'Shift-Left Security (Gitleaks Secrets & SAST)',
     status: 'FAILED',
-    message: errors.join('; '),
+    message: formatSecurityErrors(secRes, sastRes),
     remediation: "Run 'aisdlc verify security' and resolve credentials or vulnerable patterns.",
   };
 }
@@ -281,12 +284,24 @@ export function auditFrictionGate(rootDir: string): PreflightGateSummary {
   };
 }
 
-export function renderDashboard(
-  gates: PreflightGateSummary[],
-  autoFixExecuted: boolean,
-  gherkinCount: number,
-  digestsCount: number
-): void {
+function renderGateBadge(status: string): string {
+  if (status === 'PASSED') return pc.green('✔ PASSED    ');
+  if (status === 'FIXED') return pc.cyan('🔧 AUTO-FIX ');
+  return pc.red('✖ FAILED    ');
+}
+
+function renderRemediations(failedGates: PreflightGateSummary[]): void {
+  console.log(pc.bold(pc.red('\n------------------------------------------------------------------------------')));
+  console.log(pc.bold(pc.red('  REQUIRED ACTIONS TO RESOLVE BLOCKING ERRORS:')));
+  console.log(pc.bold(pc.red('------------------------------------------------------------------------------')));
+  failedGates.forEach((g, idx) => {
+    console.log(`  ${pc.bold(String(idx + 1))}. ${pc.yellow(g.name)}:`);
+    console.log(`     👉 ${pc.bold(g.remediation || 'Review affected files.')}`);
+  });
+  console.log(pc.bold(pc.red('\n⛔ VERDICT: PRE-FLIGHT BLOCKED (EXIT 1)\n')));
+}
+
+function printDashboardHeader(autoFixExecuted: boolean, gherkinCount: number, digestsCount: number): void {
   console.log(pc.bold(pc.cyan('\n==============================================================================')));
   console.log(pc.bold(pc.cyan('             AI-SDLC: CONSOLIDATED PRE-FLIGHT DASHBOARD (aisdlc check)        ')));
   console.log(pc.bold(pc.cyan('==============================================================================\n')));
@@ -296,52 +311,41 @@ export function renderDashboard(
     console.log(`    - Gherkin scenarios synchronized: ${pc.bold(String(gherkinCount))}`);
     console.log(`    - SHA-256 digests synchronized:    ${pc.bold(String(digestsCount))}\n`);
   }
+}
 
-  for (const gate of gates) {
-    const badge =
-      gate.status === 'PASSED'
-        ? pc.green('✔ PASSED    ')
-        : gate.status === 'FIXED'
-          ? pc.cyan('🔧 AUTO-FIX ')
-          : pc.red('✖ FAILED    ');
-
-    console.log(`  [${badge}] ${pc.bold(gate.name)}`);
-    console.log(`               ${pc.dim(gate.message)}`);
-  }
-
-  const failedGates = gates.filter((g) => g.status === 'FAILED');
-  if (failedGates.length > 0) {
-    console.log(pc.bold(pc.red('\n------------------------------------------------------------------------------')));
-    console.log(pc.bold(pc.red('  REQUIRED ACTIONS TO RESOLVE BLOCKING ERRORS:')));
-    console.log(pc.bold(pc.red('------------------------------------------------------------------------------')));
-    failedGates.forEach((g, idx) => {
-      console.log(`  ${pc.bold(String(idx + 1))}. ${pc.yellow(g.name)}:`);
-      console.log(`     👉 ${pc.bold(g.remediation || 'Review affected files.')}`);
-    });
-    console.log(pc.bold(pc.red('\n⛔ VERDICT: PRE-FLIGHT BLOCKED (EXIT 1)\n')));
-  } else {
+function printDashboardFooter(isPassed: boolean): void {
+  if (isPassed) {
     console.log(pc.bold(pc.green('\n==============================================================================')));
     console.log(pc.bold(pc.green('✨ VERDICT: PRE-FLIGHT PASSED (EXIT 0) - Repository ready for Pull Request')));
     console.log(pc.bold(pc.green('==============================================================================\n')));
   }
 }
 
-export function executePreflightCheck(options: CheckCommandOptions = {}): PreflightCheckResult {
-  const rootDir = options.root || process.cwd();
-  const useJson = isJsonOutput(options);
-  const isSilent = Boolean(options.silent || useJson);
-  let gherkinCount = 0;
-  let digestsCount = 0;
+export function renderDashboard(
+  gates: PreflightGateSummary[],
+  autoFixExecuted: boolean,
+  gherkinCount: number,
+  digestsCount: number
+): void {
+  printDashboardHeader(autoFixExecuted, gherkinCount, digestsCount);
 
-  if (options.fix) {
-    const fixResult = runAutoFix(rootDir, isSilent);
-    gherkinCount = fixResult.gherkinCount;
-    digestsCount = fixResult.digestsCount;
+  for (const gate of gates) {
+    console.log(`  [${renderGateBadge(gate.status)}] ${pc.bold(gate.name)}`);
+    console.log(`               ${pc.dim(gate.message)}`);
   }
 
-  const gates: PreflightGateSummary[] = [
-    auditGherkinGate(rootDir, options.fix === true && gherkinCount > 0),
-    auditPdacGate(rootDir, options.fix === true && digestsCount > 0),
+  const failedGates = gates.filter((g) => g.status === 'FAILED');
+  if (failedGates.length > 0) {
+    renderRemediations(failedGates);
+  } else {
+    printDashboardFooter(true);
+  }
+}
+
+function collectPreflightGates(rootDir: string, fix: boolean, gherkinCount: number, digestsCount: number): PreflightGateSummary[] {
+  return [
+    auditGherkinGate(rootDir, fix && gherkinCount > 0),
+    auditPdacGate(rootDir, fix && digestsCount > 0),
     auditQualityGate(rootDir),
     auditTraceabilityGate(rootDir),
     auditGovernanceGate(rootDir),
@@ -352,7 +356,34 @@ export function executePreflightCheck(options: CheckCommandOptions = {}): Prefli
     auditFrictionGate(rootDir),
     auditSecurityGate(rootDir),
   ];
+}
 
+function emitCheckJson(result: PreflightCheckResult): void {
+  const payload = {
+    command: 'check',
+    success: result.success,
+    exitCode: result.success ? 0 : 1,
+    autoFixExecuted: result.autoFixExecuted,
+    gherkinSynced: result.gherkinSynced,
+    digestsSynced: result.digestsSynced,
+    gates: result.gates,
+  };
+  console.log(JSON.stringify(payload, null, 2));
+}
+
+function applyAutoFix(rootDir: string, isSilent: boolean, fix?: boolean): { gherkinCount: number; digestsCount: number } {
+  if (!fix) return { gherkinCount: 0, digestsCount: 0 };
+  const res = runAutoFix(rootDir, isSilent);
+  return { gherkinCount: res.gherkinCount, digestsCount: res.digestsCount };
+}
+
+export function executePreflightCheck(options: CheckCommandOptions = {}): PreflightCheckResult {
+  const rootDir = options.root || process.cwd();
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
+  const { gherkinCount, digestsCount } = applyAutoFix(rootDir, isSilent, options.fix);
+
+  const gates = collectPreflightGates(rootDir, Boolean(options.fix), gherkinCount, digestsCount);
   const success = gates.every((g) => g.status === 'PASSED' || g.status === 'FIXED');
 
   if (!isSilent) {
@@ -368,16 +399,7 @@ export function executePreflightCheck(options: CheckCommandOptions = {}): Prefli
   };
 
   if (useJson) {
-    const payload = {
-      command: 'check',
-      success: result.success,
-      exitCode: result.success ? 0 : 1,
-      autoFixExecuted: result.autoFixExecuted,
-      gherkinSynced: result.gherkinSynced,
-      digestsSynced: result.digestsSynced,
-      gates: result.gates,
-    };
-    console.log(JSON.stringify(payload, null, 2));
+    emitCheckJson(result);
   }
 
   return result;

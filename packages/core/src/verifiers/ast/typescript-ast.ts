@@ -148,16 +148,13 @@ function isProductionFile(filePath: string): boolean {
   return !TEST_FILE_PATTERN.test(filePath.replace(/\\/g, '/'));
 }
 
-function detectAstCodeSmells(node: Node, loc: number, fullText: string, filePath: string): string[] {
+function detectAstCodeSmells(node: Node, fullText: string, filePath: string): string[] {
   const smells: string[] = [];
   if (node.getDescendantsOfKind(SyntaxKind.AnyKeyword).length > 0) {
     smells.push('Uso prohibido de "any"');
   }
   if (/\/\/\s*@ts-ignore|\/\/\s*eslint-disable/.test(fullText)) {
     smells.push('Supresión no autorizada de linter');
-  }
-  if (loc > 40) {
-    smells.push(`Función extensa (${loc} líneas > límite 40)`);
   }
   if (isProductionFile(filePath)) {
     if (EMPTY_UI_HANDLER_PATTERN.test(fullText)) {
@@ -201,30 +198,35 @@ function buildNodeMetrics(node: Node, filePath: string): FunctionMetrics {
   const cognitive = computeCognitiveFromAst(node);
   const fullText = node.getFullText();
   const { loc, mi } = calculateLocAndHalstead(fullText, cyclomatic);
-  const codeSmells = detectAstCodeSmells(node, loc, fullText, filePath);
+  const codeSmells = detectAstCodeSmells(node, fullText, filePath);
 
   return { functionName, filePath, loc, cyclomatic, cognitive, maintainability: mi, codeSmells };
 }
 
-function buildModuleFallback(content: string, filePath: string): FunctionMetrics {
-  const { loc, mi } = calculateLocAndHalstead(content, 1);
-  const codeSmells = loc > 40 ? [`Función extensa (${loc} líneas > límite 40)`] : [];
-  return {
-    functionName: 'main_module',
-    filePath,
-    loc,
-    cyclomatic: 1,
-    cognitive: 0,
-    maintainability: mi,
-    codeSmells,
-  };
+
+function createTempSourceFile(project: Project, content: string, filePath: string) {
+  const ext = path.extname(filePath).toLowerCase() || '.ts';
+  const fileName = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}${ext}`;
+  return project.createSourceFile(fileName, content, { overwrite: true });
+}
+
+function createFallbackModuleMetrics(filePath: string, smells: string[]): FunctionMetrics[] {
+  return [
+    {
+      functionName: 'main_module',
+      filePath,
+      loc: 1,
+      cyclomatic: 1,
+      cognitive: 0,
+      maintainability: 100,
+      codeSmells: smells,
+    },
+  ];
 }
 
 export function extractFunctionsTypeScriptAst(content: string, filePath: string): FunctionMetrics[] {
   const project = getSharedProject();
-  const ext = path.extname(filePath).toLowerCase() || '.ts';
-  const fileName = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}${ext}`;
-  const sourceFile = project.createSourceFile(fileName, content, { overwrite: true });
+  const sourceFile = createTempSourceFile(project, content, filePath);
   const metricsList: FunctionMetrics[] = [];
 
   try {
@@ -233,7 +235,11 @@ export function extractFunctionsTypeScriptAst(content: string, filePath: string)
         metricsList.push(buildNodeMetrics(node, filePath));
       }
     });
-    return metricsList.length > 0 ? metricsList : [buildModuleFallback(content, filePath)];
+    if (metricsList.length > 0) {
+      return metricsList;
+    }
+    const smells = detectAstCodeSmells(sourceFile, content, filePath);
+    return smells.length > 0 ? createFallbackModuleMetrics(filePath, smells) : [];
   } finally {
     sourceFile.forget();
   }

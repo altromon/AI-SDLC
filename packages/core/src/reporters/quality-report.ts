@@ -5,7 +5,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import {
+  AnalysisResult,
   CodeCoverageSummary,
+  QualityGateResult,
   QualityPolicy,
   QualityReportOptions,
   QualityReportResult,
@@ -61,25 +63,29 @@ function parseJsonSummaryFile(filePath: string, relSource: string): CodeCoverage
   }
 }
 
+function updateLcovCounts(line: string, counts: Record<string, number>): void {
+  const idx = line.indexOf(':');
+  if (idx === -1) return;
+  const key = line.slice(0, idx);
+  if (counts[key] !== undefined) {
+    counts[key] += parseInt(line.slice(idx + 1), 10) || 0;
+  }
+}
+
 function parseLcovFile(filePath: string, relSource: string): CodeCoverageSummary | null {
   try {
     const lines = fs.readFileSync(filePath, 'utf-8').split(/\r?\n/);
-    let lf = 0, lh = 0, brf = 0, brh = 0, fnf = 0, fnh = 0;
+    const counts: Record<string, number> = { LF: 0, LH: 0, BRF: 0, BRH: 0, FNF: 0, FNH: 0 };
     for (const line of lines) {
-      if (line.startsWith('LF:')) lf += parseInt(line.slice(3), 10) || 0;
-      else if (line.startsWith('LH:')) lh += parseInt(line.slice(3), 10) || 0;
-      else if (line.startsWith('BRF:')) brf += parseInt(line.slice(4), 10) || 0;
-      else if (line.startsWith('BRH:')) brh += parseInt(line.slice(4), 10) || 0;
-      else if (line.startsWith('FNF:')) fnf += parseInt(line.slice(4), 10) || 0;
-      else if (line.startsWith('FNH:')) fnh += parseInt(line.slice(4), 10) || 0;
+      updateLcovCounts(line, counts);
     }
-    if (lf === 0 && fnf === 0 && brf === 0) return null;
+    if (counts.LF === 0 && counts.FNF === 0 && counts.BRF === 0) return null;
     const pct = (hit: number, found: number): number =>
       found > 0 ? Math.round((hit / found) * 1000) / 10 : 100;
     return {
-      linesPct: pct(lh, lf),
-      branchesPct: pct(brh, brf),
-      functionsPct: pct(fnh, fnf),
+      linesPct: pct(counts.LH, counts.LF),
+      branchesPct: pct(counts.BRH, counts.BRF),
+      functionsPct: pct(counts.FNH, counts.FNF),
       source: relSource,
     };
   } catch {
@@ -123,6 +129,175 @@ function buildCoverageRows(coverage: CodeCoverageSummary | null, policy: Quality
   ];
 }
 
+interface LangStat {
+  fns: number;
+  loc: number;
+  miSum: number;
+  ccSum: number;
+}
+
+interface AccumulatedMetrics {
+  totalMi: number;
+  totalCc: number;
+  totalCognitive: number;
+  totalLoc: number;
+  langMap: Map<string, LangStat>;
+  violationsList: string[];
+}
+
+function updateLangStats(langMap: Map<string, LangStat>, fn: AnalysisResult): void {
+  const lang = detectLanguage(fn.filePath);
+  const existing = langMap.get(lang) || { fns: 0, loc: 0, miSum: 0, ccSum: 0 };
+  existing.fns++;
+  existing.loc += fn.loc;
+  existing.miSum += fn.maintainability;
+  existing.ccSum += fn.cyclomatic;
+  langMap.set(lang, existing);
+}
+
+function processFunctionMetric(fn: AnalysisResult, accumulated: AccumulatedMetrics): void {
+  accumulated.totalMi += fn.maintainability;
+  accumulated.totalCc += fn.cyclomatic;
+  accumulated.totalCognitive += fn.cognitive;
+  accumulated.totalLoc += fn.loc;
+  updateLangStats(accumulated.langMap, fn);
+  if (fn.violations.length > 0) {
+    accumulated.violationsList.push(`- **\`${fn.relPath}\`** [\`${fn.functionName}\`]: ${fn.violations.join(', ')}`);
+  }
+}
+
+function accumulateMetrics(results: AnalysisResult[]): AccumulatedMetrics {
+  const accumulated: AccumulatedMetrics = {
+    totalMi: 0,
+    totalCc: 0,
+    totalCognitive: 0,
+    totalLoc: 0,
+    langMap: new Map(),
+    violationsList: [],
+  };
+  for (const fn of results) {
+    processFunctionMetric(fn, accumulated);
+  }
+  return accumulated;
+}
+
+function renderPolyglotRows(langMap: Map<string, LangStat>): string[] {
+  const rows: string[] = [];
+  for (const [lang, stats] of langMap.entries()) {
+    const langMi = Math.round((stats.miSum / stats.fns) * 10) / 10;
+    const langCc = Math.round((stats.ccSum / stats.fns) * 10) / 10;
+    const rating = calculateRating(langMi, langCc);
+    rows.push(`| **${lang}** | \`${stats.fns}\` | \`${stats.loc}\` | \`${langMi}\` | \`${langCc}\` | \`${rating}\` |`);
+  }
+  return rows;
+}
+
+const EVALUATION_STANDARDS_MD = [
+  '---',
+  '',
+  '## 4. Evaluation Criteria and Standards',
+  '- **McCabe Cyclomatic Complexity (CC)**: Number of linearly independent paths.',
+  '- **Maintainability Index (SEI MI)**: Normalized formula [0 - 100] combining Halstead Volume, CC, and LOC.',
+  '- **Automated Test Coverage**: Passively ingested from `coverage/coverage-summary.json` or `lcov.info` when present.',
+  '- **Clean Code Guardrails**: Prohibition of implicit `any` typing, function length limits ($\\le 40$ lines), and zero unjustified suppressions.',
+].join('\n');
+
+interface QualityAverages {
+  avgMaintainability: number;
+  avgCyclomatic: number;
+  avgCognitive: number;
+  globalRating: 'A' | 'B' | 'C' | 'D' | 'F';
+}
+
+function computeQualityAverages(totalFunctions: number, acc: AccumulatedMetrics): QualityAverages {
+  const avgMaintainability = totalFunctions > 0 ? Math.round((acc.totalMi / totalFunctions) * 10) / 10 : 100;
+  const avgCyclomatic = totalFunctions > 0 ? Math.round((acc.totalCc / totalFunctions) * 10) / 10 : 1;
+  const avgCognitive = totalFunctions > 0 ? Math.round((acc.totalCognitive / totalFunctions) * 10) / 10 : 0;
+  const globalRating = calculateRating(avgMaintainability, avgCyclomatic);
+  return { avgMaintainability, avgCyclomatic, avgCognitive, globalRating };
+}
+
+function buildReportHeader(verdict: string, rating: string, mi: number, cc: number): string[] {
+  const status = verdict === 'PASS' ? '🟢 APPROVED (RELEASE READY)' : '🔴 BLOCKED (VIOLATIONS DETECTED)';
+  return [
+    `# 📊 Formal Quality and Release Gate Report (AI-SDLC)`,
+    '',
+    `> **Generation Date:** ${new Date().toISOString()}`,
+    `> **Release Gate Verdict:** ${status}`,
+    `> **Global Rating:** **\`${rating}\`** (MI Index: ${mi}/100, Average CC: ${cc})`,
+  ];
+}
+
+function buildMetricStatus(averages: QualityAverages, policy: QualityPolicy, failCount: number) {
+  return {
+    ccStatus: averages.avgCyclomatic <= policy.max_cyclomatic ? '✅ COMPLIANT' : '❌ EXCEEDED',
+    cogStatus: averages.avgCognitive <= policy.max_cognitive ? '✅ COMPLIANT' : '❌ EXCEEDED',
+    miStatus: averages.avgMaintainability >= policy.min_maintainability ? '✅ COMPLIANT' : '❌ INSUFFICIENT',
+    violStatus: failCount === 0 ? '✅ 0 VIOLATIONS' : '❌ BLOCKED',
+  };
+}
+
+function buildCountRows(totalFiles: number, totalFunctions: number, totalLoc: number): string[] {
+  return [
+    `| **Analyzed Files** | \`${totalFiles}\` | N/A | ℹ️ |`,
+    `| **Evaluated Functions** | \`${totalFunctions}\` | N/A | ℹ️ |`,
+    `| **Lines of Code (LOC)** | \`${totalLoc}\` | N/A | ℹ️ |`,
+  ];
+}
+
+function buildExecutiveTable(
+  gateResult: QualityGateResult,
+  totalLoc: number,
+  averages: QualityAverages,
+  coverage: CodeCoverageSummary | null
+): string[] {
+  const { policy, totalFiles, totalFunctions, failCount } = gateResult;
+  const status = buildMetricStatus(averages, policy, failCount);
+
+  return [
+    '## 1. Executive Metric Summary',
+    '',
+    '| Key Metric | Measured Value | Policy Threshold | Compliance |',
+    '| :--- | :---: | :---: | :---: |',
+    ...buildCountRows(totalFiles, totalFunctions, totalLoc),
+    `| **Cyclomatic Complexity (Average)** | \`${averages.avgCyclomatic}\` | $\\le ${policy.max_cyclomatic}$ | ${status.ccStatus} |`,
+    `| **Cognitive Complexity (Average)** | \`${averages.avgCognitive}\` | $\\le ${policy.max_cognitive}$ | ${status.cogStatus} |`,
+    `| **Maintainability Index (SEI MI)** | \`${averages.avgMaintainability} / 100\` | $\\ge ${policy.min_maintainability}$ | ${status.miStatus} |`,
+    ...buildCoverageRows(coverage, policy),
+    `| **Functions in Violation** | \`${failCount}\` | $0$ (Mode ${policy.enforce_mode}) | ${status.violStatus} |`,
+  ];
+}
+
+function renderQualityReportMarkdown(
+  gateResult: QualityGateResult,
+  coverage: CodeCoverageSummary | null,
+  accumulated: AccumulatedMetrics,
+  averages: QualityAverages
+): string {
+  const verdict = gateResult.success ? 'PASS' : 'FAIL';
+  const header = buildReportHeader(verdict, averages.globalRating, averages.avgMaintainability, averages.avgCyclomatic);
+  const table = buildExecutiveTable(gateResult, accumulated.totalLoc, averages, coverage);
+  const polyglot = [
+    '## 2. Polyglot Breakdown by Language Ecosystem',
+    '',
+    '| Language | Functions | Total LOC | Average MI | Average CC | Rating |',
+    '| :--- | :---: | :---: | :---: | :---: | :---: |',
+    ...renderPolyglotRows(accumulated.langMap),
+  ];
+
+  const violationsSection = accumulated.violationsList.length > 0
+    ? ['', '---', '', '## 3. Quality Gate Violations Log', '', ...accumulated.violationsList]
+    : [];
+
+  return [...header, '', '---', '', ...table, '', '---', '', ...polyglot, ...violationsSection, '', EVALUATION_STANDARDS_MD].join('\n');
+}
+
+function writeQualityReportFile(rootDir: string, markdown: string): void {
+  const reportsDir = path.join(rootDir, 'reports');
+  fs.mkdirSync(reportsDir, { recursive: true });
+  fs.writeFileSync(path.join(reportsDir, 'QUALITY_REPORT.md'), markdown, 'utf-8');
+}
+
 export function generateQualityReport(options: QualityReportOptions = {}): QualityReportResult {
   const rootDir = options.rootDir || process.cwd();
   const gateResult = verifyQualityGate({
@@ -131,114 +306,18 @@ export function generateQualityReport(options: QualityReportOptions = {}): Quali
     thresholds: options.thresholds,
   });
   const coverage = readCodeCoverageSummary(rootDir);
-
-  const totalFiles = gateResult.totalFiles;
-  const totalFunctions = gateResult.totalFunctions;
-
-  let totalMi = 0;
-  let totalCc = 0;
-  let totalCognitive = 0;
-  let totalLoc = 0;
-
-  const langMap = new Map<string, { fns: number; loc: number; miSum: number; ccSum: number }>();
-  const violationsList: string[] = [];
-
-  for (const fn of gateResult.results) {
-    totalMi += fn.maintainability;
-    totalCc += fn.cyclomatic;
-    totalCognitive += fn.cognitive;
-    totalLoc += fn.loc;
-
-    const lang = detectLanguage(fn.filePath);
-    const existing = langMap.get(lang) || { fns: 0, loc: 0, miSum: 0, ccSum: 0 };
-    existing.fns++;
-    existing.loc += fn.loc;
-    existing.miSum += fn.maintainability;
-    existing.ccSum += fn.cyclomatic;
-    langMap.set(lang, existing);
-
-    if (fn.violations.length > 0) {
-      violationsList.push(`- **\`${fn.relPath}\`** [\`${fn.functionName}\`]: ${fn.violations.join(', ')}`);
-    }
-  }
-
-  const avgMaintainability = totalFunctions > 0 ? Math.round((totalMi / totalFunctions) * 10) / 10 : 100;
-  const avgCyclomatic = totalFunctions > 0 ? Math.round((totalCc / totalFunctions) * 10) / 10 : 1;
-  const avgCognitive = totalFunctions > 0 ? Math.round((totalCognitive / totalFunctions) * 10) / 10 : 0;
-  const globalRating = calculateRating(avgMaintainability, avgCyclomatic);
-  const verdict = gateResult.success ? 'PASS' : 'FAIL';
-
-  const lines: string[] = [
-    `# 📊 Formal Quality and Release Gate Report (AI-SDLC)`,
-    ``,
-    `> **Generation Date:** ${new Date().toISOString()}`,
-    `> **Release Gate Verdict:** ${verdict === 'PASS' ? '🟢 APPROVED (RELEASE READY)' : '🔴 BLOCKED (VIOLATIONS DETECTED)'}`,
-    `> **Global Rating:** **\`${globalRating}\`** (MI Index: ${avgMaintainability}/100, Average CC: ${avgCyclomatic})`,
-    ``,
-    `---`,
-    ``,
-    `## 1. Executive Metric Summary`,
-    ``,
-    `| Key Metric | Measured Value | Policy Threshold | Compliance |`,
-    `| :--- | :---: | :---: | :---: |`,
-    `| **Analyzed Files** | \`${totalFiles}\` | N/A | ℹ️ |`,
-    `| **Evaluated Functions** | \`${totalFunctions}\` | N/A | ℹ️ |`,
-    `| **Lines of Code (LOC)** | \`${totalLoc}\` | N/A | ℹ️ |`,
-    `| **Cyclomatic Complexity (Average)** | \`${avgCyclomatic}\` | $\\le ${gateResult.policy.max_cyclomatic}$ | ${avgCyclomatic <= gateResult.policy.max_cyclomatic ? '✅ COMPLIANT' : '❌ EXCEEDED'} |`,
-    `| **Cognitive Complexity (Average)** | \`${avgCognitive}\` | $\\le ${gateResult.policy.max_cognitive}$ | ${avgCognitive <= gateResult.policy.max_cognitive ? '✅ COMPLIANT' : '❌ EXCEEDED'} |`,
-    `| **Maintainability Index (SEI MI)** | \`${avgMaintainability} / 100\` | $\\ge ${gateResult.policy.min_maintainability}$ | ${avgMaintainability >= gateResult.policy.min_maintainability ? '✅ COMPLIANT' : '❌ INSUFFICIENT'} |`,
-    ...buildCoverageRows(coverage, gateResult.policy),
-    `| **Functions in Violation** | \`${gateResult.failCount}\` | $0$ (Mode ${gateResult.policy.enforce_mode}) | ${gateResult.failCount === 0 ? '✅ 0 VIOLATIONS' : '❌ BLOCKED'} |`,
-    ``,
-    `---`,
-    ``,
-    `## 2. Polyglot Breakdown by Language Ecosystem`,
-    ``,
-    `| Language | Functions | Total LOC | Average MI | Average CC | Rating |`,
-    `| :--- | :---: | :---: | :---: | :---: | :---: |`,
-  ];
-
-  for (const [lang, stats] of langMap.entries()) {
-    const langMi = Math.round((stats.miSum / stats.fns) * 10) / 10;
-    const langCc = Math.round((stats.ccSum / stats.fns) * 10) / 10;
-    const rating = calculateRating(langMi, langCc);
-    lines.push(
-      `| **${lang}** | \`${stats.fns}\` | \`${stats.loc}\` | \`${langMi}\` | \`${langCc}\` | \`${rating}\` |`
-    );
-  }
-
-  if (violationsList.length > 0) {
-    lines.push('');
-    lines.push('---');
-    lines.push('');
-    lines.push('## 3. Quality Gate Violations Log');
-    lines.push('');
-    lines.push(...violationsList);
-  }
-
-  lines.push('');
-  lines.push('---');
-  lines.push('');
-  lines.push('## 4. Evaluation Criteria and Standards');
-  lines.push('- **McCabe Cyclomatic Complexity (CC)**: Number of linearly independent paths.');
-  lines.push('- **Maintainability Index (SEI MI)**: Normalized formula [0 - 100] combining Halstead Volume, CC, and LOC.');
-  lines.push('- **Automated Test Coverage**: Passively ingested from `coverage/coverage-summary.json` or `lcov.info` when present.');
-  lines.push('- **Clean Code Guardrails**: Prohibition of implicit `any` typing, function length limits ($\le 40$ lines), and zero unjustified suppressions.');
-
-  const markdown = lines.join('\n');
-
-  // Optionally write to reports/QUALITY_REPORT.md
-  const reportsDir = path.join(rootDir, 'reports');
-  fs.mkdirSync(reportsDir, { recursive: true });
-  fs.writeFileSync(path.join(reportsDir, 'QUALITY_REPORT.md'), markdown, 'utf-8');
+  const accumulated = accumulateMetrics(gateResult.results);
+  const averages = computeQualityAverages(gateResult.totalFunctions, accumulated);
+  const markdown = renderQualityReportMarkdown(gateResult, coverage, accumulated, averages);
+  writeQualityReportFile(rootDir, markdown);
 
   return {
     markdown,
-    totalFiles,
-    totalFunctions,
-    avgMaintainability,
-    avgCyclomatic,
-    verdict,
+    totalFiles: gateResult.totalFiles,
+    totalFunctions: gateResult.totalFunctions,
+    avgMaintainability: averages.avgMaintainability,
+    avgCyclomatic: averages.avgCyclomatic,
+    verdict: gateResult.success ? 'PASS' : 'FAIL',
     coverage,
   };
 }

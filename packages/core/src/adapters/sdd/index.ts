@@ -45,16 +45,33 @@ export function loadProductHandoffSidecar(changeDir: string): ProductHandoff | n
   return speckit.loadSidecar(changeDir);
 }
 
+function isIgnoredEntry(name: string): boolean {
+  return name === 'changes' || name === 'active' || name === 'node_modules';
+}
+
+function scanParentDirectoryHandoffs(
+  parentDir: string,
+  handoffsMap: Map<string, { handoff: ProductHandoff; changeDir: string }>
+): void {
+  if (!fs.existsSync(parentDir)) return;
+  const entries = fs.readdirSync(parentDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory() || isIgnoredEntry(entry.name)) continue;
+
+    const changeDir = path.join(parentDir, entry.name);
+    if (handooffsHasDir(handoffsMap, changeDir)) continue;
+
+    const handoff = loadProductHandoffSidecar(changeDir);
+    if (handoff?.id) {
+      handoffsMap.set(changeDir, { handoff, changeDir });
+    }
+  }
+}
+
 export function scanAllProductHandoffs(
   rootDir: string
 ): Map<string, { handoff: ProductHandoff; changeDir: string }> {
   const handoffsMap = new Map<string, { handoff: ProductHandoff; changeDir: string }>();
-
-  // Look across potential SDD change locations:
-  // 1. specs/changes/active/*
-  // 2. specs/changes/completed/*
-  // 3. specs/*
-  // 4. openspec/changes/*
   const candidateParentDirs = [
     path.join(rootDir, 'specs', 'changes', 'active'),
     path.join(rootDir, 'specs', 'changes', 'completed'),
@@ -63,27 +80,13 @@ export function scanAllProductHandoffs(
   ];
 
   for (const parentDir of candidateParentDirs) {
-    if (!fs.existsSync(parentDir)) continue;
-    const entries = fs.readdirSync(parentDir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-      // Skip non-change directories
-      if (entry.name === 'changes' || entry.name === 'active' || entry.name === 'node_modules') continue;
-
-      const changeDir = path.join(parentDir, entry.name);
-      if (handooffsHasDir(handoffsMap, changeDir)) continue;
-
-      const handoff = loadProductHandoffSidecar(changeDir);
-      if (handoff && handoff.id) {
-        handoffsMap.set(changeDir, { handoff, changeDir });
-      }
-    }
+    scanParentDirectoryHandoffs(parentDir, handoffsMap);
   }
 
   return handoffsMap;
 }
 
-function handooffsHasDir(map: Map<string, any>, dir: string): boolean {
+function handooffsHasDir(map: Map<string, unknown>, dir: string): boolean {
   const norm = path.resolve(dir);
   for (const key of map.keys()) {
     if (path.resolve(key) === norm) return true;
