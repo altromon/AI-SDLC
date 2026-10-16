@@ -12,6 +12,8 @@ import yaml from 'js-yaml';
 import { scanAllProductHandoffs } from '../adapters/sdd/index.js';
 import {
   ArtifactFrontmatter,
+  ContractTraceAudit,
+  DesignContractDeclaration,
   ProductHandoff,
   ProductHandoffSubgraph,
   TraceabilityOptions,
@@ -626,33 +628,168 @@ function evaluateAllRequirements(
   return { matrixRows, orphans, errorCount };
 }
 
-export function verifyTraceability(options: TraceabilityOptions = {}): TraceabilityResult {
-  const rootDir = options.rootDir || process.cwd();
-  const allMdFiles = walkMdFiles(rootDir);
+const SOURCE_CODE_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.py', '.go', '.java', '.cs', '.rs'];
 
+function isProductionSourceFile(name: string): boolean {
+  if (isCodeTestFile(name) || name.endsWith('.d.ts')) return false;
+  return SOURCE_CODE_EXTS.some((ext) => name.endsWith(ext));
+}
+
+function collectCodeAndTestCorpora(
+  dir: string,
+  prodChunks: string[] = [],
+  testChunks: string[] = []
+): { prodCorpus: string; testCorpus: string } {
+  if (!fs.existsSync(dir)) return { prodCorpus: '', testCorpus: '' };
+  try {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const fullPath = path.join(dir, e.name);
+      if (e.isDirectory() && !shouldSkipDir(e.name)) {
+        collectCodeAndTestCorpora(fullPath, prodChunks, testChunks);
+      } else if (isCodeTestFile(e.name) || e.name.endsWith('.feature')) {
+        testChunks.push(fs.readFileSync(fullPath, 'utf-8'));
+      } else if (isProductionSourceFile(e.name)) {
+        prodChunks.push(fs.readFileSync(fullPath, 'utf-8'));
+      }
+    }
+  } catch {
+    // Ignore read errors
+  }
+  return { prodCorpus: prodChunks.join('\n'), testCorpus: testChunks.join('\n') };
+}
+
+interface ExpandedContractEntry {
+  designId: string;
+  component?: string;
+  interfaceName?: string;
+  method: string;
+}
+
+function parseStringContractEntry(
+  designId: string,
+  defaultComp: string | undefined,
+  raw: string
+): ExpandedContractEntry | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const parts = trimmed.split('.');
+  const method = parts.pop()!;
+  const interfaceName = parts.length > 0 ? parts.join('.') : undefined;
+  return { designId, component: defaultComp, interfaceName, method };
+}
+
+function parseObjectContractEntries(
+  designId: string,
+  defaultComp: string | undefined,
+  item: DesignContractDeclaration
+): ExpandedContractEntry[] {
+  if (!Array.isArray(item.methods)) return [];
+  const component = item.component || defaultComp;
+  return item.methods
+    .filter((m): m is string => typeof m === 'string' && Boolean(m.trim()))
+    .map((m) => ({ designId, component, interfaceName: item.interface, method: m.trim() }));
+}
+
+function expandContractDeclarations(
+  designId: string,
+  defaultComp: string | undefined,
+  rawContracts: Array<DesignContractDeclaration | string>
+): ExpandedContractEntry[] {
+  const expanded: ExpandedContractEntry[] = [];
+  for (const item of rawContracts) {
+    if (typeof item === 'string') {
+      const parsed = parseStringContractEntry(designId, defaultComp, item);
+      if (parsed) expanded.push(parsed);
+    } else if (item && typeof item === 'object') {
+      expanded.push(...parseObjectContractEntries(designId, defaultComp, item));
+    }
+  }
+  return expanded;
+}
+
+function evaluateSingleContractMethod(
+  entry: ExpandedContractEntry,
+  prodCorpus: string,
+  testCorpus: string
+): ContractTraceAudit {
+  const symbol = entry.method.includes('.') ? entry.method.split('.').pop()! : entry.method;
+  const implementedInCode = prodCorpus.includes(symbol);
+  const testedInSuite = testCorpus.includes(symbol);
+  const status: ContractTraceAudit['status'] = !implementedInCode
+    ? 'MISSING_IMPLEMENTATION'
+    : !testedInSuite
+      ? 'MISSING_UNIT_TEST'
+      : 'COMPLIANT';
+
+  return {
+    designId: entry.designId,
+    component: entry.component,
+    interfaceName: entry.interfaceName,
+    method: entry.method,
+    implementedInCode,
+    testedInSuite,
+    status,
+  };
+}
+
+function auditDesignContracts(
+  rootDir: string,
+  artifactMap: Map<string, ArtifactEntry>
+): { contractAudits: ContractTraceAudit[]; missingContractsCount: number } {
+  const pending: ExpandedContractEntry[] = [];
+  for (const [id, entry] of artifactMap.entries()) {
+    if (entry.file.includes('templates/') || entry.file.includes('.template.')) continue;
+    const rawContracts = entry.frontmatter.contracts;
+    if (!Array.isArray(rawContracts) || rawContracts.length === 0) continue;
+    const defaultComp = typeof entry.frontmatter['architecture-component'] === 'string'
+      ? entry.frontmatter['architecture-component']
+      : undefined;
+    pending.push(...expandContractDeclarations(id, defaultComp, rawContracts));
+  }
+
+  if (pending.length === 0) {
+    return { contractAudits: [], missingContractsCount: 0 };
+  }
+
+  const { prodCorpus, testCorpus } = collectCodeAndTestCorpora(rootDir);
+  const contractAudits = pending.map((p) => evaluateSingleContractMethod(p, prodCorpus, testCorpus));
+  const missingContractsCount = contractAudits.filter((c) => c.status !== 'COMPLIANT').length;
+  return { contractAudits, missingContractsCount };
+}
+
+function buildTraceabilityContext(rootDir: string, allMdFiles: string[]): {
+  ctx: TraceabilityContext;
+  requirements: ArtifactEntry[];
+} {
   const { artifactMap, componentsList, architectureViews } = indexAllArtifacts(allMdFiles, rootDir);
   const handoffList = buildHandoffList(rootDir, artifactMap);
   const reqToHandoffMap = indexRequirementsToHandoff(handoffList);
   const { featureTagMap, codeTestMap } = buildTestMaps(rootDir, artifactMap);
   const requirements = collectRequirementsToVerify(artifactMap);
 
-  const ctx: TraceabilityContext = {
-    reqToHandoffMap,
-    artifactMap,
-    componentsList,
-    architectureViews,
-    featureTagMap,
-    codeTestMap,
+  return {
+    ctx: { reqToHandoffMap, artifactMap, componentsList, architectureViews, featureTagMap, codeTestMap },
+    requirements,
   };
+}
 
+export function verifyTraceability(options: TraceabilityOptions = {}): TraceabilityResult {
+  const rootDir = options.rootDir || process.cwd();
+  const allMdFiles = walkMdFiles(rootDir);
+  const { ctx, requirements } = buildTraceabilityContext(rootDir, allMdFiles);
   const { matrixRows, orphans, errorCount } = evaluateAllRequirements(requirements, ctx);
+  const { contractAudits, missingContractsCount } = auditDesignContracts(rootDir, ctx.artifactMap);
+  const totalIssues = errorCount + missingContractsCount;
 
   return {
-    success: errorCount === 0,
+    success: totalIssues === 0,
     rows: matrixRows,
     orphans,
     orphanCount: orphans.length,
     totalRequirements: requirements.length,
-    reportMarkdown: generateTraceabilityReportMarkdown(matrixRows, errorCount),
+    contractAudits,
+    missingContractsCount,
+    reportMarkdown: generateTraceabilityReportMarkdown(matrixRows, totalIssues),
   };
 }
+

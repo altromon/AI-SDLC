@@ -59,6 +59,42 @@
       "type": "string",
       "pattern": "^BC-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
+    "alternative-flows": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "description": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "description": "Declared alternative flows that must be covered by tests."
+    },
+    "exception-flows": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "description": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "description": "Declared exception flows that must be covered by tests."
+    },
     "supersedes": {
       "type": ["string", "null"],
       "pattern": "^UC-[A-Z0-9]+(-[A-Z0-9]+)*$"

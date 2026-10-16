@@ -47,11 +47,14 @@ This file defines the operational rules and specialized role mappings for Google
   - Emit a return handoff to `agent-threat-modeler` in the technical security feedback loop when infrastructure or persistence decisions introduce new attack vectors.
 
 ### 4. `agent-qa-engineer` (QA Engineer and SDET)
-- **Mission**: Translate approved requirements (`FR-*`, `SEC-REQ-*`, `QR-*`) into comprehensive FAILING (red) BDD/Gherkin test suites, before `agent-developer` writes production code.
+- **Mission**: Translate approved requirements (`FR-*`, `SEC-REQ-*`, `QR-*`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before `agent-developer` writes production code.
 - **Input**: Approved requirements from the `handoff.yaml` sidecar (`HOF-*`).
-- **Output**: Failing Gherkin scenarios covering: nominal case, boundary cases, out-of-range cases, and conditional categories (security, performance, idempotency, postconditions, interface contract).
+- **Output**: Failing Gherkin, E2E, and UI test suites covering: nominal case, boundary cases, out-of-range cases, per-interactive-element tests (Happy Path, Sad Path, Boundary Values), and conditional categories (security, performance, idempotency, postconditions, interface contract).
 - **Guardrails**:
   - FORBIDDEN to include production code or anticipate implementations.
+  - **Agreed Project Technology**: Always use the testing frameworks, E2E/UI runners, and technology stack agreed upon for the project (if any), without requiring the user to specify it in the prompt.
+  - **Mandatory E2E & UI Testing**: Never forget or omit End-to-End (E2E) and User Interface (UI) tests.
+  - **Per-Interactive-Element Coverage**: Create specific tests for every UI element the user can interact with, covering Happy Path, Sad Path, and Boundary Values for each one.
   - Every `FR-*` must have at least nominal + boundary + out-of-range scenarios; missing these blocks handoff to `agent-developer`.
   - **Zero-Mock Integration**: For `FR-*` spanning UI and Backend, unit mocks of `fetch` are insufficient; require integration/contract or E2E scenarios verifying real request/response wiring and the 4 UI states (`Loading`, `Empty`, `Error`, `Nominal`).
   - Mandatory tags: `@<FR-ID> @automated @regression`.
@@ -60,6 +63,7 @@ This file defines the operational rules and specialized role mappings for Google
 ### 5. `agent-developer` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) with clean, strictly typed code and thorough tests.
 - **Directives**:
+  - **Mandatory 4-Step Implementation Order**: (1) Define/refine Clean Architecture layers & boundaries, (2) Define interfaces/ports for all inter-module interactions to avoid direct module coupling, (3) Implement components consuming/fulfilling those interfaces, (4) Write unit tests for every function covering Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values.
   - Respect the autonomy mode assigned in `tasks.md` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
   - Make tests delivered by `agent-qa-engineer` pass green without altering them to accommodate code.
   - **Zero Fake-Wiring**: Forbidden from marking tasks `COMPLETED` with hardcoded `mockData` in views, `setTimeout` network simulations, or empty UI event handlers (`onClick={() => {}}`).

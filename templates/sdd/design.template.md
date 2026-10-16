@@ -9,6 +9,12 @@ handoff: "HOF-CHG-NAME-001"
 architecture-component: "CMP-NAME-001"
 enclave: "SEC-ENC-DMZ"
 status: draft
+contracts:
+  - component: "CMP-NAME-001"
+    interface: "FeatureService"
+    methods:
+      - "executeAction"
+      - "validateInput"
 citations:
   - id: "UC-ACTION-001"
     digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"

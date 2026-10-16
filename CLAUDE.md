@@ -58,12 +58,12 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 - **Guardrails**: Declare `satisfies-requirements` on every `CMP-*` and trigger the technical security feedback loop toward `agent-threat-modeler` when infrastructure decisions introduce new attack vectors.
 
 ### 4. `agent-qa-engineer` (QA Engineer and SDET)
-- **Mission**: Translate approved requirements (`FR-*`, `SEC-REQ-*`, `QR-*`) into comprehensive FAILING (red) BDD/Gherkin test suites, before `agent-developer` writes production code.
-- **Guardrails**: FORBIDDEN to include production code. Mandatory tags: `@<FR-ID> @automated @regression`.
+- **Mission**: Translate approved requirements (`FR-*`, `SEC-REQ-*`, `QR-*`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before `agent-developer` writes production code.
+- **Guardrails**: Always use the agreed project technology/testing stack (if any). Never omit End-to-End (E2E) and UI tests. Create specific tests for every interactive UI element covering Happy Path, Sad Path, and Boundary Values. FORBIDDEN to include production code. Mandatory tags: `@<FR-ID> @automated @regression`.
 
 ### 5. `agent-developer` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) with clean, strictly typed code and thorough tests.
-- **Directives**: Respect the autonomy mode. Make tests delivered by `agent-qa-engineer` pass green. Run `pnpm run check:fix` and `pnpm run verify:all`.
+- **Directives**: Execute the mandatory 4-step order: (1) Clean Architecture definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by `agent-qa-engineer` pass green. Run `pnpm run check:fix` and `pnpm run verify:all`.
 
 ### 6. `agent-security-auditor` (Adversarial Code Auditor)
 - **Mission**: Examine Pull Requests for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws as part of the Pre-Merge Audit Triad.

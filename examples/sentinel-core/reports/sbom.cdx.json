@@ -2,13 +2,13 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:2fb63d8b-28ec-4557-b571-5ad7b8bb755d",
+  "serialNumber": "urn:uuid:6ce0cfab-b6d6-4c26-a494-90faa3d1961b",
   "metadata": {
-    "timestamp": "2026-09-23T19:29:01.269Z",
+    "timestamp": "2026-10-16T15:16:02.678Z",
     "tools": [
       {
         "vendor": "AI-SDLC",
-        "name": "@ai-sdlc/core",
+        "name": "@aisdlc/core",
         "version": "1.0.0"
       }
     ],

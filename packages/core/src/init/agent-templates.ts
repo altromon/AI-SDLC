@@ -82,18 +82,25 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
     id: 'agent-qa-engineer',
     title: 'QA Engineer and SDET',
     description:
-      'Translate approved requirements (FR-*, SEC-REQ-*, QR-*) into comprehensive FAILING (red) BDD/Gherkin and unit test suites before production code is written.',
+      'Translate approved requirements (FR-*, SEC-REQ-*, QR-*) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites before production code is written.',
     globs: 'tests/**, specs/changes/**/spec.md',
     body: `## Role & Mission
 - **Role**: QA Engineer and SDET (Software Development Engineer in Test) Agent (\`agent-qa-engineer\`).
-- **Mission**: Translate approved requirements (\`FR-*\`, \`SEC-REQ-*\`, \`QR-*\`) into comprehensive FAILING (red) BDD/Gherkin test suites before \`agent-developer\` writes a single line of production code.
+- **Mission**: Translate approved requirements (\`FR-*\`, \`SEC-REQ-*\`, \`QR-*\`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites before \`agent-developer\` writes a single line of production code.
 
 ## Operational Directives & Guardrails
 - Read exclusively requirements cited in the \`handoff.yaml\` sidecar (\`HOF-*\`) and their referenced artifacts.
-- For each \`FR-*\` requirement, generate the three mandatory test categories:
-  1. **Nominal Case** (\`Scenario\`): happy path with valid inputs within expected boundaries.
-  2. **Boundary Cases** (\`Scenario Outline\` + \`Examples\` table): values at the extremes of the accepted range.
-  3. **Out-of-Range / Invalid Cases** (\`Scenario Outline\` + \`Examples\` table): null, empty, wrong types, values exceeding bounds.
+- **Agreed Project Technology**: Always use the testing frameworks, E2E/UI runners, and technology stack agreed upon for the project (as defined in \`ADR-*\`, \`design.md\`, \`package.json\`, or project configuration) if present, without requiring the user to specify it in the prompt.
+- **Mandatory End-to-End (E2E) & User Interface (UI) Testing**: Never forget or omit End-to-End (E2E) and User Interface (UI) tests. Automatically include E2E and UI test suites alongside BDD/integration tests whenever requirements involve user-facing flows or interfaces, so the user never has to remind you in the prompt.
+- **Per-Interactive-Element Exhaustive Testing**: Create specific tests for **every** UI element with which the user can interact (buttons, inputs, selects, forms, modals, links, toggles, tabs, etc.), explicitly evaluating for each element:
+  1. **Happy Path**: nominal user interaction with valid inputs producing the expected UI state/response.
+  2. **Sad Path**: error handling, invalid interactions, validation rejections, disabled/blocked states, and failure recovery.
+  3. **Boundary Values**: minimum/maximum lengths, numeric extremes, empty/whitespace inputs, edge selections, and rapid/repeated interactions.
+- For each \`FR-*\` requirement, generate the three mandatory test categories tagged with \`@nominal\`, \`@boundary\`, and \`@invalid\`:
+  1. **Nominal Case** (\`@nominal\` \`Scenario\`): happy path with valid inputs within expected boundaries.
+  2. **Boundary Cases** (\`@boundary\` \`Scenario Outline\` + \`Examples\` table): values at the extremes of the accepted range.
+  3. **Out-of-Range / Invalid Cases** (\`@invalid\` \`Scenario Outline\` + \`Examples\` table): null, empty, wrong types, values exceeding bounds.
+- **Use Case Variant Coverage**: Inspect every \`UC-*\` in \`handoff.yaml\` and generate BDD scenarios covering 100% of its \`alternative-flows\` and \`exception-flows\`.
 - Apply conditional categories when applicable: Security (\`@security @mitigation\`), Performance (\`@performance\`), Idempotency (\`@idempotence\`), Postconditions, and Interface Contracts.
 - **Zero-Mock Integration Rule**: When an \`FR-*\` spans UI and Backend, unit tests mocking \`fetch\`/HTTP in isolation are insufficient; include integration/contract or E2E test scenarios verifying real request/response wiring and UI state transitions (\`Loading\`, \`Empty\`, \`Error\`, \`Nominal\`).
 - Tag all scenarios with \`@<FR-ID> @automated @regression\`.
@@ -111,9 +118,21 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
 - **Role**: High-Precision Software Developer / Coder Agent (\`agent-developer\`).
 - **Mission**: Implement atomic tasks from SDD specifications (\`tasks.md\`) delivering clean, strictly typed, and tested code.
 
+## Mandatory 4-Step Implementation Order
+Execute every implementation task following this strict sequential order:
+1. **Clean Architecture Definition / Redefinition**: Define or refine the module/layer architecture adhering to Clean Architecture patterns (Domain/Entities, Application/Use Cases, Interface Adapters, Frameworks/Drivers), strictly enforcing the Dependency Rule (dependencies point inward toward the domain).
+2. **Inter-Module Interfaces First**: Define explicit interfaces/ports (contracts, DTOs, types) for all interactions across module boundaries before writing concrete logic, avoiding direct coupling between modules.
+3. **Component Implementation**: Implement the concrete components, use cases, and adapters that implement and consume the defined interfaces.
+4. **Exhaustive Per-Function Unit Testing**: Write unit tests for every function in \`tests/unit/\`, always verifying:
+   - **Happy Path**: nominal execution with valid inputs.
+   - **Sad Path**: controlled error paths, rejections, and business exceptions.
+   - **Boundary Values**: minimum, maximum, exact limits, and off-by-one edges.
+   - **Unexpected, Null & Empty Values**: \`null\`, \`undefined\`, empty strings/arrays/objects, and malformed inputs.
+
 ## Operational Directives & Guardrails
 - Respect the autonomy mode assigned to each task in \`tasks.md\` (\`AUTONOMOUS\`, \`HUMAN_REVIEW_PLAN\`, \`AMBIGUOUS\`, \`HIGH_RISK_MANUAL\`).
-- Apply Test-Driven Development (TDD): make failing tests delivered by \`agent-qa-engineer\` pass green without altering tests to accommodate buggy code.
+- **100% Design & Handoff Scope Coverage in Tasks**: Ensure every task in \`tasks.md\` declares \`implements-components\` (\`CMP-*\`), \`satisfies-requirements\` (\`FR-*\`, \`SEC-REQ-*\`), and \`implements-contracts\` so 100% of \`design.md\` and \`handoff.yaml\` is mapped and implemented.
+- Apply Test-Driven Development (TDD): make failing tests delivered by \`agent-qa-engineer\` pass green without altering tests to accommodate buggy code, and write direct unit tests in \`tests/unit/\` for every exported function and contract method declared in \`design.md\` or implemented in \`src/\`.
 - Cite implemented \`FR-*\` or \`SEC-REQ-*\` IDs in test header comments to maintain 360° reverse traceability.
 - **Zero Fake-Wiring Guardrail**: Strictly forbidden from marking a task \`COMPLETED\` with hardcoded \`mockData\` arrays in production views, \`setTimeout\` simulating network calls, or empty UI event handlers (\`onClick={() => {}}\`, \`onSubmit={() => {}}\`). Frontend components must wire directly to the shared contract and real Backend endpoints.
 - **Mandatory 4 UI States Matrix**: Every data-driven UI component or screen must explicitly implement all 4 usability states: \`Loading\` (spinner/skeleton + disabled submit), \`Empty\` (clear message + CTA), \`Error\` (visible error recovery banner, never silent failure), and \`Nominal/Success\` (accessible semantic DOM + keyboard navigation).
@@ -275,11 +294,14 @@ This file defines the operational rules and specialized role mappings for Google
   - Emit a return handoff to \`agent-threat-modeler\` in the technical security feedback loop when infrastructure or persistence decisions introduce new attack vectors.
 
 ### 4. \`agent-qa-engineer\` (QA Engineer and SDET)
-- **Mission**: Translate approved requirements (\`FR-*\`, \`SEC-REQ-*\`, \`QR-*\`) into comprehensive FAILING (red) BDD/Gherkin test suites, before \`agent-developer\` writes production code.
+- **Mission**: Translate approved requirements (\`FR-*\`, \`SEC-REQ-*\`, \`QR-*\`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before \`agent-developer\` writes production code.
 - **Input**: Approved requirements from the \`handoff.yaml\` sidecar (\`HOF-*\`).
-- **Output**: Failing Gherkin scenarios covering: nominal case, boundary cases, out-of-range cases, and conditional categories (security, performance, idempotency, postconditions, interface contract).
+- **Output**: Failing Gherkin, E2E, and UI test suites covering: nominal case, boundary cases, out-of-range cases, per-interactive-element tests (Happy Path, Sad Path, Boundary Values), and conditional categories (security, performance, idempotency, postconditions, interface contract).
 - **Guardrails**:
   - FORBIDDEN to include production code or anticipate implementations.
+  - **Agreed Project Technology**: Always use the testing frameworks, E2E/UI runners, and technology stack agreed upon for the project (if any), without requiring the user to specify it in the prompt.
+  - **Mandatory E2E & UI Testing**: Never forget or omit End-to-End (E2E) and User Interface (UI) tests.
+  - **Per-Interactive-Element Coverage**: Create specific tests for every UI element the user can interact with, covering Happy Path, Sad Path, and Boundary Values for each one.
   - Every \`FR-*\` must have at least nominal + boundary + out-of-range scenarios; missing these blocks handoff to \`agent-developer\`.
   - Mandatory tags: \`@<FR-ID> @automated @regression\`.
   - Run \`pnpm run verify:testing\` before emitting handoff.
@@ -287,6 +309,7 @@ This file defines the operational rules and specialized role mappings for Google
 ### 5. \`agent-developer\` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (\`tasks.md\`) with clean, strictly typed code and thorough tests.
 - **Directives**:
+  - **Mandatory 4-Step Implementation Order**: (1) Define/refine Clean Architecture layers & boundaries, (2) Define interfaces/ports for all inter-module interactions to avoid direct module coupling, (3) Implement components consuming/fulfilling those interfaces, (4) Write unit tests for every function covering Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values.
   - Respect the autonomy mode assigned in \`tasks.md\` (\`AUTONOMOUS\`, \`HUMAN_REVIEW_PLAN\`, \`AMBIGUOUS\`, \`HIGH_RISK_MANUAL\`).
   - Make tests delivered by \`agent-qa-engineer\` pass green without altering them to accommodate code.
   - Respect \`quality-policy.yaml\` thresholds: CC $\\le 10$, Cognitive $\\le 15$, MI $\\ge 50$, LOC $\\le 40$.
@@ -386,7 +409,7 @@ Before finalizing changes or proposing commits:
 | \`agent-product-analyst\` | Phase 0 NAF v4 Enterprise & Capability Vision (\`ARCH-INTRO-*\`, 3–5 question interview) + ProductShape artifacts (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`); status starts \`draft\`. |
 | \`agent-threat-modeler\` | STRIDE/OWASP threat triad (\`ACT-THREAT-*\`, \`ABUSE-*\`, \`SEC-REQ-*\`). |
 | \`agent-system-architect\` | Modular arc42 + NAF v4 architecture (\`CMP-*\`, Mermaid diagrams, \`ADR-*\`). |
-| \`agent-qa-engineer\` | FAILING BDD/Gherkin suites before \`agent-developer\` writes code. |
+| \`agent-qa-engineer\` | FAILING BDD/Gherkin, E2E, and UI suites (using agreed project tech; Happy Path, Sad Path & Boundary Values per interactive UI element) before \`agent-developer\` writes code. |
 | \`agent-developer\` | Atomic tasks from \`tasks.md\`; respects autonomy mode; runs \`pnpm run check:fix\` + \`pnpm run verify:all\`. |
 | \`agent-security-auditor\` | Adversarial PR security audit, SAST, secrets, and CVSS v3.1 evaluation. |
 | \`agent-compliance-checker\` | SPDX license compliance audit against \`license-policy.yaml\`. |
@@ -455,7 +478,8 @@ Canonical Reference: [\`process/09_agent_protocols.md\`](process/09_agent_protoc
 - **Function Length**: $\\le 40$ lines (warning if $> 30$).
 - If a function exceeds these limits, decompose logic into cohesive helper functions before completing the task.
 
-## 2. TDD Methodology and Unit Testing
+## 2. TDD Methodology, Clean Architecture & Unit Testing
+- **Mandatory 4-Step Implementation Order**: (1) Define/refine Clean Architecture layers & boundaries, (2) Define interfaces/ports for all inter-module interactions to avoid direct module coupling, (3) Implement components consuming/fulfilling those interfaces, (4) Write unit tests for every function covering Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values.
 - Apply Test-Driven Development: generate unit tests before or alongside component logic.
 - Tag tests linked to requirements with header comments citing the ID (\`FR-*\` or \`SEC-REQ-*\`) to enable reverse traceability.
 - Suppressing types (\`any\`), linter rules (\`eslint-disable\`), or unit tests to force pipeline passage is prohibited.
@@ -529,12 +553,12 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 - **Guardrails**: Declare \`satisfies-requirements\` on every \`CMP-*\` and trigger the technical security feedback loop toward \`agent-threat-modeler\` when infrastructure decisions introduce new attack vectors.
 
 ### 4. \`agent-qa-engineer\` (QA Engineer and SDET)
-- **Mission**: Translate approved requirements (\`FR-*\`, \`SEC-REQ-*\`, \`QR-*\`) into comprehensive FAILING (red) BDD/Gherkin test suites, before \`agent-developer\` writes production code.
-- **Guardrails**: FORBIDDEN to include production code. Mandatory tags: \`@<FR-ID> @automated @regression\`.
+- **Mission**: Translate approved requirements (\`FR-*\`, \`SEC-REQ-*\`, \`QR-*\`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before \`agent-developer\` writes production code.
+- **Guardrails**: Always use the agreed project technology/testing stack (if any). Never omit End-to-End (E2E) and UI tests. Create specific tests for every interactive UI element covering Happy Path, Sad Path, and Boundary Values. FORBIDDEN to include production code. Mandatory tags: \`@<FR-ID> @automated @regression\`.
 
 ### 5. \`agent-developer\` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (\`tasks.md\`) with clean, strictly typed code and thorough tests.
-- **Directives**: Respect the autonomy mode. Make tests delivered by \`agent-qa-engineer\` pass green. Run \`pnpm run check:fix\` and \`pnpm run verify:all\`.
+- **Directives**: Execute the mandatory 4-step order: (1) Clean Architecture definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by \`agent-qa-engineer\` pass green. Run \`pnpm run check:fix\` and \`pnpm run verify:all\`.
 
 ### 6. \`agent-security-auditor\` (Adversarial Code Auditor)
 - **Mission**: Examine Pull Requests for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws as part of the Pre-Merge Audit Triad.
@@ -680,7 +704,7 @@ Non-Negotiable Quality Thresholds (\`quality-policy.yaml\`):
 | \`agent-product-analyst\` | Phase 0 NAF v4 Enterprise & Capability Vision (\`ARCH-INTRO-*\`, 3–5 question interview) + ProductShape artifacts (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`); \`status\` starts \`draft\`. |
 | \`agent-threat-modeler\` | STRIDE/OWASP threat triad (\`ACT-THREAT-*\`, \`ABUSE-*\`, \`SEC-REQ-*\`). |
 | \`agent-system-architect\` | Modular arc42 + NAF v4 architecture (\`CMP-*\`, Mermaid diagrams, \`ADR-*\`). |
-| \`agent-qa-engineer\` | FAILING BDD/Gherkin suites before \`agent-developer\` writes production code. |
+| \`agent-qa-engineer\` | FAILING BDD/Gherkin, E2E, and UI suites (using agreed project tech; Happy Path, Sad Path & Boundary Values per interactive UI element) before \`agent-developer\` writes production code. |
 | \`agent-developer\` | Atomic tasks from \`tasks.md\`; autonomy mode must be respected; runs \`pnpm run check:fix\` + \`pnpm run verify:all\`. |
 | \`agent-security-auditor\` | Adversarial PR security audit, SAST, secrets, and CVSS v3.1 evaluation. |
 | \`agent-compliance-checker\` | SPDX license compliance audit against \`license-policy.yaml\`. |

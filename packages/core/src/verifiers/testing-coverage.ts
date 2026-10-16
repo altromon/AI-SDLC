@@ -6,12 +6,15 @@ import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
 import {
+  BddVariantCoverage,
   RequirementAuditItem,
   TaskAuditItem,
   TestingCoverageOptions,
   TestingCoverageResult,
+  UseCaseFlowAuditItem,
 } from '../types/index.js';
 import { walkMdFiles } from '../utils/fs.js';
+import { extractGherkinBlock } from './gherkin.js';
 
 interface ParsedTaskItem {
   id: string;
@@ -30,6 +33,9 @@ interface GenericFrontmatter {
   'verified-by-tests'?: string[];
   'verifiable-by'?: string;
   'acceptance-format'?: string;
+  'enforce-bdd-variants'?: boolean;
+  'alternative-flows'?: unknown[];
+  'exception-flows'?: unknown[];
   tasks?: ParsedTaskItem[];
   [key: string]: unknown;
 }
@@ -234,6 +240,79 @@ export function scanAllTestArtifacts(rootDir: string): Map<string, string[]> {
   return reqToTestsMap;
 }
 
+const NOMINAL_KEYWORDS = /\b(nominal|happy|valid|exitoso|normal|standard|flujo principal)\b/i;
+const BOUNDARY_KEYWORDS = /\b(boundary|limit|edge|min|max|l[ií]mite|borde|extremo|rango)\b/i;
+const INVALID_KEYWORDS =
+  /\b(invalid|out[- ]of[- ]range|error|null|empty|reject|fail|unauthorized|exception|inv[aá]lido|fuera de rango|rechaz|excepci[oó]n|fallo)\b/i;
+
+interface ScenarioChunk {
+  tags: string;
+  header: string;
+  isOutline: boolean;
+}
+
+function extractScenariosForReq(gherkinText: string, reqId: string): ScenarioChunk[] {
+  const lines = gherkinText.split(/\r?\n/);
+  const featureApplies = gherkinText.includes(`@${reqId}`);
+  if (!featureApplies) return [];
+
+  const chunks: ScenarioChunk[] = [];
+  let pendingTags = '';
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (line.startsWith('@')) {
+      pendingTags += ' ' + line;
+    } else if (/^(Scenario|Escenario|Scenario Outline|Esquema del escenario):/i.test(line)) {
+      const isOutline = /^(Scenario Outline|Esquema del escenario):/i.test(line);
+      chunks.push({ tags: pendingTags.toLowerCase(), header: line, isOutline });
+      pendingTags = '';
+    }
+  }
+  return chunks;
+}
+
+const INVALID_TAG_RE = /@(invalid|error|out-of-range)\b/i;
+
+function isInvalidScenario(chunk: ScenarioChunk, combined: string): boolean {
+  return INVALID_TAG_RE.test(chunk.tags) || INVALID_KEYWORDS.test(combined);
+}
+
+function isBoundaryScenario(chunk: ScenarioChunk, combined: string, isInvalid: boolean): boolean {
+  if (chunk.tags.includes('@boundary') || BOUNDARY_KEYWORDS.test(combined)) return true;
+  return chunk.isOutline && !isInvalid;
+}
+
+function classifyScenarioChunk(chunk: ScenarioChunk, cov: BddVariantCoverage): void {
+  const combined = `${chunk.tags} ${chunk.header}`;
+  const isInvalid = isInvalidScenario(chunk, combined);
+  const isBoundary = isBoundaryScenario(chunk, combined, isInvalid);
+  const isNominal = chunk.tags.includes('@nominal') || NOMINAL_KEYWORDS.test(combined) || (!isInvalid && !isBoundary);
+
+  if (isNominal) cov.nominal = true;
+  if (isBoundary) cov.boundary = true;
+  if (isInvalid) cov.invalid = true;
+}
+
+export function analyzeBddVariantsForRequirement(reqId: string, gherkinSources: string[]): BddVariantCoverage {
+  const cov: BddVariantCoverage = { nominal: false, boundary: false, invalid: false, totalScenarios: 0 };
+  for (const src of gherkinSources) {
+    const chunks = extractScenariosForReq(src, reqId);
+    cov.totalScenarios += chunks.length;
+    for (const chunk of chunks) {
+      classifyScenarioChunk(chunk, cov);
+    }
+  }
+  return cov;
+}
+
+function computeMissingVariants(cov: BddVariantCoverage): string[] {
+  const missing: string[] = [];
+  if (!cov.nominal) missing.push('nominal');
+  if (!cov.boundary) missing.push('boundary');
+  if (!cov.invalid) missing.push('invalid');
+  return missing;
+}
+
 const REQ_PREFIXES = ['FR-', 'QR-', 'CON-', 'SEC-REQ-'];
 
 function isRequirementArtifact(frontmatter: GenericFrontmatter, id: string): boolean {
@@ -250,29 +329,126 @@ function resolveRequirementMethod(declaredMethod: unknown, matchingTests: string
   return matchingTests.some((t) => t.endsWith('.feature')) ? 'BDD_CUCUMBER' : 'TEST_EXECUTION';
 }
 
+function shouldEnforceVariantsForReq(
+  id: string,
+  frontmatter: GenericFrontmatter,
+  options: TestingCoverageOptions
+): boolean {
+  if (!id.startsWith('FR-')) return false;
+  return Boolean(options.enforceBddVariants || frontmatter['enforce-bdd-variants'] === true);
+}
+
+function evaluateReqVerification(
+  id: string,
+  isTemplate: boolean,
+  hasTests: boolean,
+  missingVariants: string[],
+  frontmatter: GenericFrontmatter,
+  options: TestingCoverageOptions
+): boolean {
+  if (isTemplate) return true;
+  const enforceVariants = shouldEnforceVariantsForReq(id, frontmatter, options);
+  const variantsOk = !enforceVariants || missingVariants.length === 0;
+  return hasTests && variantsOk;
+}
+
+function formatTestRefs(matchingTests: string[], relPath: string, totalScenarios: number): string {
+  if (matchingTests.length > 0) return matchingTests.join(', ');
+  return totalScenarios > 0 ? `${relPath} (gherkin)` : 'NINGUNA DETECTADA';
+}
+
+function buildRequirementAuditItem(
+  frontmatter: GenericFrontmatter,
+  id: string,
+  relPath: string,
+  isTemplate: boolean,
+  matchingTests: string[],
+  bddVariants: BddVariantCoverage,
+  missingVariants: string[],
+  isVerified: boolean
+): RequirementAuditItem {
+  const status = isVerified ? 'VERIFICADO_CON_PRUEBA' : 'FALLO_SIN_PRUEBA';
+  return {
+    id: id || 'SIN-ID',
+    title: frontmatter.title || 'Sin título',
+    file: relPath,
+    isTemplate,
+    method: resolveRequirementMethod(frontmatter['verifiable-by'], matchingTests),
+    testRefs: formatTestRefs(matchingTests, relPath, bddVariants.totalScenarios),
+    existingCount: matchingTests.length || bddVariants.totalScenarios,
+    bddVariants,
+    missingVariants,
+    status,
+  };
+}
+
 function auditRequirement(
   frontmatter: GenericFrontmatter,
   id: string,
   relPath: string,
   isTemplate: boolean,
-  reqToTestsMap: Map<string, string[]>
+  reqToTestsMap: Map<string, string[]>,
+  gherkinSources: string[],
+  options: TestingCoverageOptions
 ): { item: RequirementAuditItem; isError: boolean } {
   const matchingTests = reqToTestsMap.get(id) || [];
-  const isVerified = isTemplate || matchingTests.length > 0;
-  const method = resolveRequirementMethod(frontmatter['verifiable-by'], matchingTests);
+  const bddVariants = analyzeBddVariantsForRequirement(id, gherkinSources);
+  const missingVariants = id.startsWith('FR-') ? computeMissingVariants(bddVariants) : [];
+  const hasTests = matchingTests.length > 0 || bddVariants.totalScenarios > 0;
+  const isVerified = evaluateReqVerification(id, isTemplate, hasTests, missingVariants, frontmatter, options);
+  const item = buildRequirementAuditItem(
+    frontmatter, id, relPath, isTemplate, matchingTests, bddVariants, missingVariants, isVerified
+  );
+  return { item, isError: !isVerified };
+}
+
+function parseSingleFlowEntry(entry: unknown): string {
+  if (typeof entry === 'string') return entry.trim();
+  if (entry && typeof entry === 'object') {
+    const rec = entry as Record<string, unknown>;
+    return String(rec.id || rec.name || '').trim();
+  }
+  return '';
+}
+
+function extractDeclaredUseCaseFlows(frontmatter: GenericFrontmatter): string[] {
+  const flows: string[] = [];
+  const rawLists = [frontmatter['alternative-flows'], frontmatter['exception-flows']];
+  for (const list of rawLists) {
+    if (!Array.isArray(list)) continue;
+    for (const entry of list) {
+      const flowId = parseSingleFlowEntry(entry);
+      if (flowId) flows.push(flowId);
+    }
+  }
+  return flows;
+}
+
+function auditUseCaseFlowItem(
+  id: string,
+  relPath: string,
+  declaredFlows: string[],
+  combinedTestsText: string
+): UseCaseFlowAuditItem {
+  const coveredFlows: string[] = [];
+  const missingFlows: string[] = [];
+  const lowerCorpus = combinedTestsText.toLowerCase();
+
+  for (const flow of declaredFlows) {
+    if (lowerCorpus.includes(flow.toLowerCase())) {
+      coveredFlows.push(flow);
+    } else {
+      missingFlows.push(flow);
+    }
+  }
 
   return {
-    item: {
-      id: id || 'SIN-ID',
-      title: frontmatter.title || 'Sin título',
-      file: relPath,
-      isTemplate,
-      method,
-      testRefs: matchingTests.join(', ') || 'NINGUNA DETECTADA',
-      existingCount: matchingTests.length,
-      status: isVerified ? 'VERIFICADO_CON_PRUEBA' : 'FALLO_SIN_PRUEBA',
-    },
-    isError: !isVerified,
+    id,
+    file: relPath,
+    declaredFlows,
+    coveredFlows,
+    missingFlows,
+    status: missingFlows.length === 0 ? 'VERIFICADO_CON_PRUEBA' : 'FALLO_SIN_PRUEBA',
   };
 }
 
@@ -322,14 +498,40 @@ function auditTasks(
   return { items, errorCount };
 }
 
+function collectTestCorpus(rootDir: string, allMdFiles: string[]): { gherkinSources: string[]; combinedTests: string } {
+  const gherkinSources: string[] = [];
+  const testContents: string[] = [];
+  for (const tf of collectTestFiles(rootDir)) {
+    try {
+      const content = fs.readFileSync(tf, 'utf-8');
+      testContents.push(content);
+      if (tf.endsWith('.feature')) gherkinSources.push(content);
+    } catch {
+      // Ignore read errors
+    }
+  }
+  for (const md of allMdFiles) {
+    try {
+      const blocks = extractGherkinBlock(fs.readFileSync(md, 'utf-8'));
+      gherkinSources.push(...blocks);
+      testContents.push(...blocks);
+    } catch {
+      // Ignore read errors
+    }
+  }
+  return { gherkinSources, combinedTests: testContents.join('\n') };
+}
+
 function assembleCoverageResult(
   reqAudit: RequirementAuditItem[],
   taskAudit: TaskAuditItem[],
+  useCaseFlows: UseCaseFlowAuditItem[],
   reqErrors: number,
-  taskErrors: number
+  taskErrors: number,
+  ucErrors: number
 ): TestingCoverageResult {
   return {
-    success: reqErrors === 0 && taskErrors === 0,
+    success: reqErrors === 0 && taskErrors === 0 && ucErrors === 0,
     totalRequirements: reqAudit.length,
     passedRequirements: reqAudit.length - reqErrors,
     failedRequirements: reqErrors,
@@ -338,41 +540,88 @@ function assembleCoverageResult(
     failedTasks: taskErrors,
     requirements: reqAudit,
     tasks: taskAudit,
+    useCaseFlows,
+    failedUseCaseFlows: ucErrors,
     reportMarkdown: generateTestingCoverageReportMarkdown(reqAudit, taskAudit, reqErrors, taskErrors),
   };
+}
+
+interface CoverageScanState {
+  reqAudit: RequirementAuditItem[];
+  taskAudit: TaskAuditItem[];
+  useCaseFlows: UseCaseFlowAuditItem[];
+  reqErrors: number;
+  taskErrors: number;
+  ucErrors: number;
+}
+
+function recordUseCaseAuditIfPresent(
+  frontmatter: GenericFrontmatter,
+  id: string,
+  relPath: string,
+  isTemplate: boolean,
+  combinedTests: string,
+  state: CoverageScanState
+): void {
+  if (isTemplate || !(frontmatter.type === 'use-case' || id.startsWith('UC-'))) return;
+  const declaredFlows = extractDeclaredUseCaseFlows(frontmatter);
+  if (declaredFlows.length === 0) return;
+  const flowAudit = auditUseCaseFlowItem(id, relPath, declaredFlows, combinedTests);
+  state.useCaseFlows.push(flowAudit);
+  if (flowAudit.status === 'FALLO_SIN_PRUEBA') state.ucErrors++;
+}
+
+function processMdFileForCoverage(
+  file: string,
+  rootDir: string,
+  reqToTestsMap: Map<string, string[]>,
+  corpus: { gherkinSources: string[]; combinedTests: string },
+  options: TestingCoverageOptions,
+  state: CoverageScanState
+): void {
+  const { frontmatter } = parseGenericDoc(fs.readFileSync(file, 'utf-8'));
+  const relPath = path.relative(rootDir, file).replace(/\\/g, '/');
+  const isTemplate = relPath.includes('templates/');
+  const id = frontmatter.id || '';
+
+  if (isRequirementArtifact(frontmatter, id)) {
+    const audited = auditRequirement(frontmatter, id, relPath, isTemplate, reqToTestsMap, corpus.gherkinSources, options);
+    state.reqAudit.push(audited.item);
+    if (audited.isError) state.reqErrors++;
+  }
+
+  recordUseCaseAuditIfPresent(frontmatter, id, relPath, isTemplate, corpus.combinedTests, state);
+
+  const auditedTasks = auditTasks(frontmatter.tasks, relPath, isTemplate);
+  state.taskAudit.push(...auditedTasks.items);
+  state.taskErrors += auditedTasks.errorCount;
 }
 
 export function verifyTestingCoverage(options: TestingCoverageOptions = {}): TestingCoverageResult {
   const rootDir = options.rootDir || process.cwd();
   const allMdFiles = walkMdFiles(rootDir);
   const reqToTestsMap = scanAllTestArtifacts(rootDir);
+  const corpus = collectTestCorpus(rootDir, allMdFiles);
 
-  const reqAudit: RequirementAuditItem[] = [];
-  const taskAudit: TaskAuditItem[] = [];
-  let reqErrors = 0;
-  let taskErrors = 0;
+  const state: CoverageScanState = {
+    reqAudit: [],
+    taskAudit: [],
+    useCaseFlows: [],
+    reqErrors: 0,
+    taskErrors: 0,
+    ucErrors: 0,
+  };
 
   for (const file of allMdFiles) {
     try {
-      const content = fs.readFileSync(file, 'utf-8');
-      const { frontmatter } = parseGenericDoc(content);
-      const relPath = path.relative(rootDir, file).replace(/\\/g, '/');
-      const isTemplate = relPath.includes('templates/');
-      const id = frontmatter.id || '';
-
-      if (isRequirementArtifact(frontmatter, id)) {
-        const auditedReq = auditRequirement(frontmatter, id, relPath, isTemplate, reqToTestsMap);
-        reqAudit.push(auditedReq.item);
-        if (auditedReq.isError) reqErrors++;
-      }
-
-      const auditedTasks = auditTasks(frontmatter.tasks, relPath, isTemplate);
-      taskAudit.push(...auditedTasks.items);
-      taskErrors += auditedTasks.errorCount;
+      processMdFileForCoverage(file, rootDir, reqToTestsMap, corpus, options, state);
     } catch {
       // Ignore unparseable files
     }
   }
 
-  return assembleCoverageResult(reqAudit, taskAudit, reqErrors, taskErrors);
+  return assembleCoverageResult(
+    state.reqAudit, state.taskAudit, state.useCaseFlows, state.reqErrors, state.taskErrors, state.ucErrors
+  );
 }
+

@@ -46,6 +46,13 @@ export interface QualityGateOptions {
   policyPath?: string;
   policy?: QualityPolicy;
   thresholds?: QualityThresholds;
+  requireCoverageReport?: boolean;
+  requireFunctionUnitTests?: boolean;
+}
+
+export interface UntestedFunctionItem {
+  file: string;
+  functionName: string;
 }
 
 export interface QualityGateResult {
@@ -57,10 +64,28 @@ export interface QualityGateResult {
   violationsCount: number;
   results: AnalysisResult[];
   policy: QualityPolicy;
+  coverageViolations?: string[];
+  untestedFunctions?: UntestedFunctionItem[];
   reportMarkdown?: string;
 }
 
 // --- Traceability Types ---
+export interface DesignContractDeclaration {
+  component?: string;
+  interface?: string;
+  methods: string[];
+}
+
+export interface ContractTraceAudit {
+  designId: string;
+  component?: string;
+  interfaceName?: string;
+  method: string;
+  implementedInCode: boolean;
+  testedInSuite: boolean;
+  status: 'COMPLIANT' | 'MISSING_IMPLEMENTATION' | 'MISSING_UNIT_TEST';
+}
+
 export interface ArtifactFrontmatter {
   id?: string;
   type?: string;
@@ -74,6 +99,7 @@ export interface ArtifactFrontmatter {
   'mitigates-abuse-case'?: string | string[];
   'enforced-in-enclave'?: string;
   'cucumber-tags'?: string[];
+  contracts?: Array<DesignContractDeclaration | string>;
   [key: string]: unknown;
 }
 
@@ -98,6 +124,7 @@ export interface TraceabilityOptions {
   examplesDir?: string;
   testsDir?: string;
   strictHandoff?: boolean;
+  enforceContracts?: boolean;
 }
 
 export interface TraceabilityResult {
@@ -106,6 +133,8 @@ export interface TraceabilityResult {
   orphans: TraceabilityRow[];
   orphanCount: number;
   totalRequirements: number;
+  contractAudits?: ContractTraceAudit[];
+  missingContractsCount?: number;
   reportMarkdown: string;
 }
 
@@ -291,6 +320,9 @@ export interface TaskItem {
   assignedTo?: string;
   status?: string;
   blockingReason?: string;
+  implementsComponents?: string[];
+  satisfiesRequirements?: string[];
+  implementsContracts?: string[];
   verification: TaskVerification;
 }
 
@@ -305,6 +337,8 @@ export interface TaskSummary {
 export interface GovernanceOptions {
   rootDir?: string;
   specsDir?: string;
+  enforceDesignCoverage?: boolean;
+  maxUseCasesPerChange?: number;
 }
 
 export interface GovernanceResult {
@@ -316,10 +350,27 @@ export interface GovernanceResult {
   modeCounts: Record<string, number>;
   tasks: TaskSummary[];
   violations: string[];
+  unassignedDesignScope?: string[];
   reportMarkdown: string;
 }
 
 // --- Testing Coverage Types ---
+export interface BddVariantCoverage {
+  nominal: boolean;
+  boundary: boolean;
+  invalid: boolean;
+  totalScenarios: number;
+}
+
+export interface UseCaseFlowAuditItem {
+  id: string;
+  file: string;
+  declaredFlows: string[];
+  coveredFlows: string[];
+  missingFlows: string[];
+  status: 'VERIFICADO_CON_PRUEBA' | 'FALLO_SIN_PRUEBA';
+}
+
 export interface RequirementAuditItem {
   id: string;
   title: string;
@@ -328,6 +379,8 @@ export interface RequirementAuditItem {
   method: string;
   testRefs: string;
   existingCount: number;
+  bddVariants?: BddVariantCoverage;
+  missingVariants?: string[];
   status: 'VERIFICADO_CON_PRUEBA' | 'FALLO_SIN_PRUEBA';
 }
 
@@ -342,6 +395,8 @@ export interface TaskAuditItem {
 
 export interface TestingCoverageOptions {
   rootDir?: string;
+  enforceBddVariants?: boolean;
+  enforceUseCaseFlows?: boolean;
 }
 
 export interface TestingCoverageResult {
@@ -354,6 +409,8 @@ export interface TestingCoverageResult {
   failedTasks: number;
   requirements: RequirementAuditItem[];
   tasks: TaskAuditItem[];
+  useCaseFlows?: UseCaseFlowAuditItem[];
+  failedUseCaseFlows?: number;
   reportMarkdown: string;
 }
 

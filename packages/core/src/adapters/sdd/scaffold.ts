@@ -207,16 +207,39 @@ El sistema DEBE implementar y soportar la capacidad de {{NAME}}.
 ## 2. Criterios de Aceptación en Formato Gherkin (Cucumber)
 
 \`\`\`gherkin
-@{{REQ_ID}} @automated
+@{{REQ_ID}} @automated @regression
 Feature: {{NAME}}
   As a user or client system
   I want to execute the capability for {{NAME}}
   So that the expected outcome and value are achieved
 
+  @nominal
   Scenario: Nominal successful flow
     Given the system is in an operational state
     When the operation for "{{NAME}}" is executed
     Then the operation completes successfully
+
+  @boundary
+  Scenario Outline: Boundary limits validation
+    Given the system receives boundary input "<boundary_input>"
+    When the operation for "{{NAME}}" is evaluated at range limits
+    Then the system responds with expected boundary status "<expected_status>"
+
+    Examples:
+      | boundary_input | expected_status |
+      | min_bound      | 200             |
+      | max_bound      | 200             |
+
+  @invalid
+  Scenario Outline: Out-of-range and invalid payload rejection
+    Given the system receives invalid or out-of-range input "<invalid_input>"
+    When the operation for "{{NAME}}" is invoked
+    Then the system rejects the request with error "<error_code>"
+
+    Examples:
+      | invalid_input | error_code       |
+      | empty_payload | ERR_INVALID_ARGS |
+      | overflow_val  | ERR_OUT_OF_RANGE |
 \`\`\`
 
 ---
@@ -236,12 +259,33 @@ Definición de artefacto citado en {{CANONICAL_ID}}.
 ## 2. Criterios de Aceptación en Formato Gherkin (Cucumber)
 
 \`\`\`gherkin
-@{{ID}} @automated
+@{{ID}} @automated @regression
 Feature: {{NAME}}
+  @nominal
   Scenario: Expected behavior verification
     Given the system is initialized for "{{NAME}}"
     When the request associated with {{ID}} is processed
     Then the response satisfies acceptance criteria
+
+  @boundary
+  Scenario Outline: Boundary limits verification
+    Given boundary input "<input>" for {{ID}}
+    When the request is processed
+    Then the response status is "<status>"
+
+    Examples:
+      | input | status |
+      | min   | 200    |
+
+  @invalid
+  Scenario Outline: Invalid input rejection
+    Given invalid input "<input>" for {{ID}}
+    When the request is processed
+    Then the request is rejected with "<error>"
+
+    Examples:
+      | input | error            |
+      | null  | ERR_INVALID_ARGS |
 \`\`\`
 `;
 
@@ -256,10 +300,33 @@ Feature: {{NAME}}
   I want to process the operation for {{NAME}}
   So that delivery criteria are satisfied
 
+  @nominal
   Scenario: Nominal successful flow
     Given the system is in a nominal operational state
     When the operation for "{{NAME}}" is processed
     Then the operation completes successfully satisfying acceptance criteria
+
+  @boundary
+  Scenario Outline: Boundary conditions verification
+    Given the system is configured with boundary value "<value>"
+    When the operation for "{{NAME}}" is processed
+    Then the boundary result matches "<expected>"
+
+    Examples:
+      | value | expected |
+      | min   | accepted |
+      | max   | accepted |
+
+  @invalid
+  Scenario Outline: Out-of-range and invalid input handling
+    Given an invalid or malformed payload "<payload>"
+    When the operation for "{{NAME}}" is attempted
+    Then the system rejects the operation with "<error>"
+
+    Examples:
+      | payload  | error            |
+      | null     | ERR_INVALID_DATA |
+      | overflow | ERR_OUT_OF_RANGE |
 \`\`\`
 
 ---
@@ -368,6 +435,7 @@ derives-from:
   - {{UC_ID}}
 verifiable-by: cucumber-bdd
 acceptance-format: gherkin
+enforce-bdd-variants: true
 cucumber-tags:
   - "@{{REQ_ID}}"
   - "@automated"
@@ -386,6 +454,7 @@ schema-version: "1.0"
 category: functional
 verifiable-by: cucumber-bdd
 acceptance-format: gherkin
+enforce-bdd-variants: true
 cucumber-tags:
   - "@{{ID}}"
   - "@automated"
@@ -742,6 +811,7 @@ handoff: "HOF-${canonicalId}"
 architecture-component: "CMP-CORE"
 enclave: "SEC-ENC-DMZ"
 status: draft
+contracts: []
 ${citationsSection}---
 `;
   const body = DESIGN_BODY.replaceAll('{{CANONICAL_ID}}', canonicalId).replaceAll('{{NAME}}', name).replaceAll('{{AUTHOR}}', author).replaceAll('{{DATE}}', dateStr);
@@ -749,7 +819,12 @@ ${citationsSection}---
   return designPath;
 }
 
-function buildTasksFrontmatter(canonicalId: string, name: string) {
+function buildTasksFrontmatter(canonicalId: string, name: string, reqIds: string[]) {
+  const tasks = DEFAULT_TASKS_ARRAY.map((t) => ({
+    ...t,
+    'implements-components': ['CMP-CORE'],
+    ...(reqIds.length > 0 ? { 'satisfies-requirements': reqIds } : {}),
+  }));
   return {
     id: `TSK-PLAN-${canonicalId}`,
     type: 'task-plan',
@@ -759,15 +834,22 @@ function buildTasksFrontmatter(canonicalId: string, name: string) {
     'schema-version': '1.0',
     status: 'draft',
     'governance-summary': GOVERNANCE_SUMMARY_DEFAULT,
-    tasks: DEFAULT_TASKS_ARRAY,
+    tasks,
     supersedes: null,
     'superseded-by': null,
   };
 }
 
-function renderTasksFile(changeDir: string, canonicalId: string, name: string, author: string, dateStr: string): { tasksPath: string; tasksFm: Record<string, unknown> } {
+function renderTasksFile(
+  changeDir: string,
+  canonicalId: string,
+  name: string,
+  author: string,
+  dateStr: string,
+  reqIds: string[]
+): { tasksPath: string; tasksFm: Record<string, unknown> } {
   const tasksPath = path.join(changeDir, 'tasks.md');
-  const tasksFm = buildTasksFrontmatter(canonicalId, name);
+  const tasksFm = buildTasksFrontmatter(canonicalId, name, reqIds);
   const header = `---\n${yaml.dump(tasksFm, { indent: 2, lineWidth: -1 }).trim()}\n---\n`;
   const body = TASKS_BODY.replaceAll('{{CANONICAL_ID}}', canonicalId).replaceAll('{{NAME}}', name).replaceAll('{{AUTHOR}}', author).replaceAll('{{DATE}}', dateStr);
   fs.writeFileSync(tasksPath, `${header}\n${body}`, 'utf-8');
@@ -852,14 +934,16 @@ function renderAndCollectArtifactFiles(
   author: string,
   dateStr: string,
   profile: ChangeProfile,
-  citationsBlock: string,
+  citations: CitationsCollection,
   createdFiles: string[]
 ): { specFmObj: Record<string, unknown>; tasksFm: Record<string, unknown> } {
+  const citationsBlock = renderCitationsYamlBlock(citations.citedArtifacts);
+  const reqIds = [...citations.subRequirements, ...citations.subSecReqs];
   createdFiles.push(renderProposalFile(changeDir, canonicalId, name, author, citationsBlock));
   const { specPath, specFmObj } = renderSpecFile(changeDir, canonicalId, name, profile);
   createdFiles.push(specPath);
   createdFiles.push(renderDesignFile(changeDir, canonicalId, name, author, dateStr, citationsBlock));
-  const { tasksPath, tasksFm } = renderTasksFile(changeDir, canonicalId, name, author, dateStr);
+  const { tasksPath, tasksFm } = renderTasksFile(changeDir, canonicalId, name, author, dateStr, reqIds);
   createdFiles.push(tasksPath);
   return { specFmObj, tasksFm };
 }
@@ -903,9 +987,7 @@ function executeStandardScaffolding(
 ): SddChangeScaffoldResult {
   const createdFiles: string[] = [];
   const citations = collectChangeCitations(rootDir, name, padNum, canonicalId, author, dateStr, inputFromIds, artifactMap, createdFiles);
-  const citationsBlock = renderCitationsYamlBlock(citations.citedArtifacts);
-
-  const { specFmObj, tasksFm } = renderAndCollectArtifactFiles(changeDir, canonicalId, name, author, dateStr, profile, citationsBlock, createdFiles);
+  const { specFmObj, tasksFm } = renderAndCollectArtifactFiles(changeDir, canonicalId, name, author, dateStr, profile, citations, createdFiles);
   const { depositedPath, handoff } = renderHandoffSidecar(rootDir, slug, canonicalId, name, framework, citations);
   createdFiles.push(depositedPath);
 

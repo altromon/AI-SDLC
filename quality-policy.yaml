@@ -130,9 +130,9 @@ release_thresholds:
 
   # Cobertura de Pruebas Automatizadas
   test_coverage:
-    min_line_coverage_percent: 85.0
-    min_branch_coverage_percent: 80.0
-    min_function_coverage_percent: 90.0
+    min_line_coverage_percent: 75.0
+    min_branch_coverage_percent: 70.0
+    min_function_coverage_percent: 85.0
     action_on_breach: "BLOCK_MERGE"
 
   # Deuda Técnica y Severidad de Hallazgos

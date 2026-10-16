@@ -74,7 +74,7 @@ Non-Negotiable Quality Thresholds (`quality-policy.yaml`):
 | `agent-product-analyst` | Product inception (`ARCH-INTRO-*`) & ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); `status` starts `draft`. |
 | `agent-threat-modeler` | STRIDE/OWASP threat triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`). |
 | `agent-system-architect` | Modular arc42 + NAF v4 architecture (`CMP-*`, Mermaid diagrams, `ADR-*`). |
-| `agent-qa-engineer` | FAILING BDD/Gherkin suites before `agent-developer` writes production code. |
+| `agent-qa-engineer` | FAILING BDD/Gherkin, E2E, and UI suites (using agreed project tech; Happy Path, Sad Path & Boundary Values per interactive UI element) before `agent-developer` writes production code. |
 | `agent-developer` | Atomic tasks from `tasks.md`; autonomy mode must be respected; runs `pnpm run check:fix` + `pnpm run verify:all`. |
 | `agent-security-auditor` | Adversarial PR security audit, SAST, secrets, and CVSS v3.1 evaluation. |
 | `agent-compliance-checker` | SPDX license compliance audit against `license-policy.yaml`. |
