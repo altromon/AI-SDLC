@@ -56,7 +56,7 @@ export interface QualityVerifyOptions extends VerifyBaseOptions {
   enforceMode?: 'STRICT' | 'PERMISSIVE' | string;
 }
 
-function buildQualityViolations(results: ReturnType<typeof verifyQualityGate>['results']) {
+function buildFunctionMetricViolations(results: ReturnType<typeof verifyQualityGate>['results']) {
   return results
     .filter((r) => r.status === 'FAIL')
     .flatMap((r) =>
@@ -65,18 +65,25 @@ function buildQualityViolations(results: ReturnType<typeof verifyQualityGate>['r
         function: r.functionName,
         metric: 'quality',
         message: v,
-        metrics: {
-          loc: r.loc,
-          cyclomatic: r.cyclomatic,
-          cognitive: r.cognitive,
-          maintainability: r.maintainability,
-        },
+        metrics: { loc: r.loc, cyclomatic: r.cyclomatic, cognitive: r.cognitive, maintainability: r.maintainability },
       }))
     );
 }
 
+function buildQualityViolations(result: ReturnType<typeof verifyQualityGate>) {
+  const fnViolations = buildFunctionMetricViolations(result.results);
+  const untested = (result.untestedFunctions || []).map((u) => ({
+    file: u.relPath,
+    function: u.functionName,
+    metric: 'unit-test',
+    message: `Function [${u.functionName}] at line ${u.line} lacks direct unit test`,
+  }));
+  const cov = (result.coverageViolations || []).map((message) => ({ metric: 'coverage', message }));
+  return [...fnViolations, ...untested, ...cov];
+}
+
 function emitQualityJson(result: ReturnType<typeof verifyQualityGate>): void {
-  const violations = buildQualityViolations(result.results);
+  const violations = buildQualityViolations(result);
   const payload: VerifyJsonPayload = {
     gate: 'quality',
     success: result.success,
@@ -86,6 +93,8 @@ function emitQualityJson(result: ReturnType<typeof verifyQualityGate>): void {
       totalFunctions: result.totalFunctions,
       passCount: result.passCount,
       failCount: result.failCount,
+      untestedFunctionsCount: result.untestedFunctions?.length || 0,
+      coverageViolationsCount: result.coverageViolations?.length || 0,
     },
     violations,
   };
@@ -105,6 +114,19 @@ function printQualityFailingDetails(failing: ReturnType<typeof verifyQualityGate
   }
 }
 
+function printQualityTestAndCoverageGaps(result: ReturnType<typeof verifyQualityGate>): void {
+  const untested = result.untestedFunctions || [];
+  if (untested.length > 0) {
+    console.log(pc.red('\n  Functions lacking unit tests:'));
+    for (const u of untested.slice(0, 15)) {
+      console.log(`    ${pc.red('✖')} ${pc.bold(u.relPath)}:${u.line} [${u.functionName}]`);
+    }
+  }
+  for (const cv of result.coverageViolations || []) {
+    console.log(`    ${pc.red('✖')} ${cv}`);
+  }
+}
+
 function printQualityConsole(result: ReturnType<typeof verifyQualityGate>): void {
   const isPermissive = result.policy.enforce_mode === 'PERMISSIVE';
   console.log(
@@ -118,6 +140,7 @@ function printQualityConsole(result: ReturnType<typeof verifyQualityGate>): void
   if (result.failCount > 0) {
     printQualityFailingDetails(result.results.filter((r) => r.status === 'FAIL'), isPermissive);
   }
+  printQualityTestAndCoverageGaps(result);
 
   const tag = isPermissive && result.failCount > 0 ? ' (PERMISSIVE mode)' : '';
   console.log(result.success ? pc.green(`\n✔ Release Gate PASSED${tag}\n`) : pc.red('\n✖ Release Gate BLOCKED\n'));
@@ -156,6 +179,26 @@ export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
 
 export interface TraceabilityVerifyOptions extends VerifyBaseOptions {}
 
+function buildTraceabilityViolations(result: ReturnType<typeof verifyTraceability>) {
+  const orphanViolations = result.orphans.map((o) => ({
+    id: o.id,
+    title: o.title,
+    productStatus: o.productStatus,
+    archStatus: o.archStatus,
+    testStatus: o.testStatus,
+    message: `Orphan requirement [${o.id}]`,
+  }));
+  const contractViolations = (result.contractAudits || [])
+    .filter((c) => c.status !== 'COMPLIANT')
+    .map((c) => ({
+      id: c.designId,
+      method: c.method,
+      status: c.status,
+      message: `Design contract [${c.designId}] method '${c.method}': ${c.status}`,
+    }));
+  return [...orphanViolations, ...contractViolations];
+}
+
 function emitTraceabilityJson(result: ReturnType<typeof verifyTraceability>): void {
   const payload: VerifyJsonPayload = {
     gate: 'traceability',
@@ -165,17 +208,20 @@ function emitTraceabilityJson(result: ReturnType<typeof verifyTraceability>): vo
       totalRequirements: result.totalRequirements,
       conformingCount: result.totalRequirements - result.orphanCount,
       orphanCount: result.orphanCount,
+      missingContractsCount: result.missingContractsCount || 0,
     },
-    violations: result.orphans.map((o) => ({
-      id: o.id,
-      title: o.title,
-      productStatus: o.productStatus,
-      archStatus: o.archStatus,
-      testStatus: o.testStatus,
-      message: `Orphan requirement [${o.id}]`,
-    })),
+    violations: buildTraceabilityViolations(result),
   };
   console.log(JSON.stringify(payload, null, 2));
+}
+
+function printMissingContractAudits(result: ReturnType<typeof verifyTraceability>): void {
+  const failingContracts = (result.contractAudits || []).filter((c) => c.status !== 'COMPLIANT');
+  if (failingContracts.length === 0) return;
+  console.log(pc.red('\n  Unfulfilled design contracts (design.md -> src/ & tests/):'));
+  for (const c of failingContracts) {
+    console.log(`    ${pc.red('✖')} [${c.designId}] ${c.interfaceName ? `${c.interfaceName}.` : ''}${c.method}: ${c.status}`);
+  }
 }
 
 function printTraceabilityConsole(result: ReturnType<typeof verifyTraceability>): void {
@@ -189,6 +235,7 @@ function printTraceabilityConsole(result: ReturnType<typeof verifyTraceability>)
       console.log(`    ${pc.red('✖')} [${o.id}] Product: ${o.productStatus}, Architecture: ${o.archStatus}, Testing: ${o.testStatus}`);
     }
   }
+  printMissingContractAudits(result);
   console.log(result.success ? pc.green('\n✔ 360° Traceability COMPLIANT (100%)\n') : pc.red('\n✖ Traceability BLOCKED\n'));
 }
 
@@ -272,18 +319,28 @@ export function runVerifyGovernance(options: GovernanceVerifyOptions = {}): bool
 
 export interface TestingVerifyOptions extends VerifyBaseOptions {}
 
-function buildTestingViolations(result: ReturnType<typeof verifyTestingCoverage>) {
-  const reqViolations = result.requirements
+function formatReqTestingViolationMsg(r: ReturnType<typeof verifyTestingCoverage>['requirements'][number]): string {
+  if (r.missingVariants && r.missingVariants.length > 0) {
+    return `Requirement [${r.id}] missing BDD variant categories: ${r.missingVariants.join(', ')}`;
+  }
+  return `Requirement without verifiable test [${r.id}]`;
+}
+
+function mapReqViolations(requirements: ReturnType<typeof verifyTestingCoverage>['requirements']) {
+  return requirements
     .filter((r) => r.status !== 'VERIFICADO_CON_PRUEBA')
     .map((r) => ({
       type: 'REQUIREMENT',
       id: r.id,
       title: r.title,
       file: r.file,
-      message: `Requirement without verifiable test [${r.id}]`,
+      missingVariants: r.missingVariants,
+      message: formatReqTestingViolationMsg(r),
     }));
+}
 
-  const taskViolations = result.tasks
+function mapTaskViolations(tasks: ReturnType<typeof verifyTestingCoverage>['tasks']) {
+  return tasks
     .filter((t) => t.status !== 'VERIFICADO_CON_PRUEBA')
     .map((t) => ({
       type: 'TASK',
@@ -292,8 +349,20 @@ function buildTestingViolations(result: ReturnType<typeof verifyTestingCoverage>
       file: t.file,
       message: `Task without test verification [${t.id}]`,
     }));
+}
 
-  return [...reqViolations, ...taskViolations];
+function buildTestingViolations(result: ReturnType<typeof verifyTestingCoverage>) {
+  const flowViolations = (result.useCaseFlows || [])
+    .filter((u) => u.status !== 'VERIFICADO_CON_PRUEBA')
+    .map((u) => ({
+      type: 'USE_CASE_FLOW',
+      id: u.id,
+      file: u.file,
+      missingFlows: u.missingFlows,
+      message: `Use Case [${u.id}] missing tests for flows: ${u.missingFlows.join(', ')}`,
+    }));
+
+  return [...mapReqViolations(result.requirements), ...mapTaskViolations(result.tasks), ...flowViolations];
 }
 
 function emitTestingJson(result: ReturnType<typeof verifyTestingCoverage>): void {
@@ -308,24 +377,33 @@ function emitTestingJson(result: ReturnType<typeof verifyTestingCoverage>): void
       totalTasks: result.totalTasks,
       passedTasks: result.passedTasks,
       failedTasks: result.failedTasks,
+      failedUseCaseFlows: result.failedUseCaseFlows || 0,
     },
     violations: buildTestingViolations(result),
   };
   console.log(JSON.stringify(payload, null, 2));
 }
 
+function printTestingFailures(result: ReturnType<typeof verifyTestingCoverage>): void {
+  for (const r of result.requirements.filter((req) => req.status !== 'VERIFICADO_CON_PRUEBA')) {
+    const varHint = r.missingVariants?.length ? ` [Missing BDD variants: ${r.missingVariants.join(', ')}]` : '';
+    console.log(`    ${pc.red('✖')} [Requirement: ${r.id}] ${r.title} (${r.file})${varHint}`);
+  }
+  for (const t of result.tasks.filter((tsk) => tsk.status !== 'VERIFICADO_CON_PRUEBA')) {
+    console.log(`    ${pc.red('✖')} [Task: ${t.id}] ${t.title} (${t.file})`);
+  }
+  for (const u of (result.useCaseFlows || []).filter((uc) => uc.status !== 'VERIFICADO_CON_PRUEBA')) {
+    console.log(`    ${pc.red('✖')} [Use Case Flows: ${u.id}] Missing tests for: ${u.missingFlows.join(', ')} (${u.file})`);
+  }
+}
+
 function printTestingConsole(result: ReturnType<typeof verifyTestingCoverage>): void {
   console.log(`  Verified requirements:  ${pc.green(`${result.passedRequirements}/${result.totalRequirements}`)}`);
   console.log(`  Verified tasks:         ${pc.green(`${result.passedTasks}/${result.totalTasks}`)}`);
 
-  if (result.failedRequirements > 0 || result.failedTasks > 0) {
+  if (result.failedRequirements > 0 || result.failedTasks > 0 || (result.failedUseCaseFlows || 0) > 0) {
     console.log(pc.red('\n  Items lacking executable tests:'));
-    for (const r of result.requirements.filter((r) => r.status !== 'VERIFICADO_CON_PRUEBA')) {
-      console.log(`    ${pc.red('✖')} [Requirement: ${r.id}] ${r.title} (${r.file})`);
-    }
-    for (const t of result.tasks.filter((t) => t.status !== 'VERIFICADO_CON_PRUEBA')) {
-      console.log(`    ${pc.red('✖')} [Task: ${t.id}] ${t.title} (${t.file})`);
-    }
+    printTestingFailures(result);
   }
   console.log(result.success ? pc.green('\n✔ Test Coverage COMPLIANT (100%)\n') : pc.red('\n✖ Test Coverage INSUFFICIENT\n'));
 }

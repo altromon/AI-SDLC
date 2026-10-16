@@ -17,6 +17,10 @@ tasks:
     complexity: "LOW"
     risk-level: "LOW"
     autonomy-mode: "AUTONOMOUS"
+    implements-components:
+      - "CMP-NAME-001"
+    satisfies-requirements:
+      - "FR-001"
     verification:
       method: "quality-gate"
       command-or-criteria: "npx tsc --noEmit && node packages/cli/bin/aisdlc.js verify quality"
@@ -28,6 +32,10 @@ tasks:
     complexity: "MEDIUM"
     risk-level: "MEDIUM"
     autonomy-mode: "HUMAN_REVIEW_PLAN"
+    implements-components:
+      - "CMP-NAME-001"
+    satisfies-requirements:
+      - "FR-001"
     verification:
       method: "automated-unit-test"
       command-or-criteria: "npm test -- tests/unit/feature_core.spec.ts"

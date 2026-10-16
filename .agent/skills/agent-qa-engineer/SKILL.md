@@ -14,10 +14,11 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
 
 ## Operational Directives & Guardrails
 - Read exclusively requirements cited in the `handoff.yaml` sidecar (`HOF-*`) and their referenced artifacts.
-- For each `FR-*` requirement, generate the three mandatory test categories:
-  1. **Nominal Case** (`Scenario`): happy path with valid inputs within expected boundaries.
-  2. **Boundary Cases** (`Scenario Outline` + `Examples` table): values at the extremes of the accepted range.
-  3. **Out-of-Range / Invalid Cases** (`Scenario Outline` + `Examples` table): null, empty, wrong types, values exceeding bounds.
+- For each `FR-*` requirement, generate the three mandatory test categories tagged with `@nominal`, `@boundary`, and `@invalid`:
+  1. **Nominal Case** (`@nominal` `Scenario`): happy path with valid inputs within expected boundaries.
+  2. **Boundary Cases** (`@boundary` `Scenario Outline` + `Examples` table): values at the extremes of the accepted range.
+  3. **Out-of-Range / Invalid Cases** (`@invalid` `Scenario Outline` + `Examples` table): null, empty, wrong types, values exceeding bounds.
+- **Use Case Variant Coverage**: Inspect every `UC-*` in `handoff.yaml` and generate BDD scenarios covering 100% of its `alternative-flows` and `exception-flows`.
 - Apply conditional categories when applicable: Security (`@security @mitigation`), Performance (`@performance`), Idempotency (`@idempotence`), Postconditions, and Interface Contracts.
 - **Zero-Mock Integration Rule**: When an `FR-*` spans UI and Backend, unit tests mocking `fetch`/HTTP in isolation are insufficient; include integration/contract or E2E test scenarios verifying real request/response wiring and UI state transitions (`Loading`, `Empty`, `Error`, `Nominal`).
 - Tag all scenarios with `@<FR-ID> @automated @regression`.

@@ -60,6 +60,10 @@
       },
       "description": "Cucumber tags for filtering and executing BDD tests."
     },
+    "enforce-bdd-variants": {
+      "type": "boolean",
+      "description": "When true, enforces all 3 BDD scenario categories (@nominal, @boundary, @invalid)."
+    },
     "supersedes": {
       "type": ["string", "null"],
       "pattern": "^(FR|QR|CON)-[A-Z0-9]+(-[A-Z0-9]+)*$"

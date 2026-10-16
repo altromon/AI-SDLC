@@ -106,6 +106,30 @@
           },
           "blocking-reason": {
             "type": "string"
+          },
+          "implements-components": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$"
+            },
+            "description": "Architecture components (CMP-*) implemented by this atomic task."
+          },
+          "satisfies-requirements": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^(FR|QR|CON|SEC-REQ|SAF-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*$"
+            },
+            "description": "Requirements satisfied by this atomic task."
+          },
+          "implements-contracts": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Explicit interface or method contracts from design.md implemented by this task."
           }
         },
         "additionalProperties": false

@@ -13,6 +13,7 @@ import {
   TaskSummary,
   VALID_AUTONOMY_MODES,
 } from '../types/index.js';
+import { loadProductHandoffSidecar } from '../adapters/sdd/index.js';
 
 interface TasksFrontmatter {
   tasks: TaskItem[];
@@ -29,6 +30,13 @@ function parseTaskVerification(rawVerification: unknown): TaskItem['verification
   return verification;
 }
 
+function parseOptionalStringList(val: unknown): string[] | undefined {
+  if (Array.isArray(val)) {
+    return val.map(String).filter(Boolean);
+  }
+  return undefined;
+}
+
 function mapRawTaskItem(t: Record<string, unknown>): TaskItem {
   return {
     id: typeof t['id'] === 'string' ? t['id'] : String(t['id'] ?? ''),
@@ -39,6 +47,9 @@ function mapRawTaskItem(t: Record<string, unknown>): TaskItem {
     assignedTo: typeof t['assigned-to'] === 'string' ? t['assigned-to'] : undefined,
     status: typeof t['status'] === 'string' ? t['status'] : undefined,
     blockingReason: typeof t['blocking-reason'] === 'string' ? t['blocking-reason'] : undefined,
+    implementsComponents: parseOptionalStringList(t['implements-components']),
+    satisfiesRequirements: parseOptionalStringList(t['satisfies-requirements']),
+    implementsContracts: parseOptionalStringList(t['implements-contracts']),
     verification: parseTaskVerification(t['verification']),
   };
 }
@@ -241,13 +252,86 @@ function parseTasksFromFile(file: string): TaskItem[] {
   }
 }
 
+function extractDesignExpectedScope(changeDir: string): string[] {
+  const designFile = path.join(changeDir, 'design.md');
+  if (!fs.existsSync(designFile)) return [];
+  const expected: string[] = [];
+  try {
+    const { frontmatter } = parseTasksDoc(fs.readFileSync(designFile, 'utf-8'));
+    if (typeof frontmatter['architecture-component'] === 'string') {
+      expected.push(frontmatter['architecture-component']);
+    }
+    if (Array.isArray(frontmatter['architecture-components'])) {
+      expected.push(...frontmatter['architecture-components'].map(String));
+    }
+  } catch {
+    // Ignore read errors
+  }
+  return expected;
+}
+
+function extractHandoffExpectedScope(changeDir: string, maxUc?: number, violations?: string[]): string[] {
+  const handoff = loadProductHandoffSidecar(changeDir);
+  if (!handoff?.subgraph) return [];
+  const ucList = handoff.subgraph.useCases || [];
+  if (maxUc !== undefined && ucList.length > maxUc && violations) {
+    violations.push(
+      `[${handoff.changeId}] Greenfield monolith detected: change bundles ${ucList.length} use cases (max ${maxUc}). Decompose into incremental SDD changes per Use Case.`
+    );
+  }
+  const reqs = handoff.subgraph.requirements || [];
+  const secReqs = handoff.subgraph.securityRequirements || [];
+  return [...reqs, ...secReqs];
+}
+
+function collectTaskCoveredScope(tasks: TaskItem[]): Set<string> {
+  const covered = new Set<string>();
+  for (const t of tasks) {
+    for (const c of t.implementsComponents || []) covered.add(c);
+    for (const r of t.satisfiesRequirements || []) covered.add(r);
+    for (const m of t.implementsContracts || []) covered.add(m);
+  }
+  return covered;
+}
+
+function hasExplicitScopeBindings(tasks: TaskItem[]): boolean {
+  return tasks.some(
+    (t) =>
+      (t.implementsComponents && t.implementsComponents.length > 0) ||
+      (t.satisfiesRequirements && t.satisfiesRequirements.length > 0) ||
+      (t.implementsContracts && t.implementsContracts.length > 0)
+  );
+}
+
+function auditDesignScopeForFile(
+  file: string,
+  tasks: TaskItem[],
+  options: GovernanceOptions,
+  unassignedList: string[],
+  violationsList: string[]
+): void {
+  const changeDir = path.dirname(file);
+  const expectedItems = [
+    ...extractDesignExpectedScope(changeDir),
+    ...extractHandoffExpectedScope(changeDir, options.maxUseCasesPerChange, violationsList),
+  ];
+  const shouldEnforce = Boolean(options.enforceDesignCoverage || hasExplicitScopeBindings(tasks));
+  if (!shouldEnforce || expectedItems.length === 0) return;
+
+  const covered = collectTaskCoveredScope(tasks);
+  for (const item of new Set(expectedItems)) {
+    if (!covered.has(item)) {
+      unassignedList.push(item);
+      violationsList.push(`[${path.basename(changeDir)}] Unassigned design/handoff scope in tasks.md: missing task coverage for ${item}`);
+    }
+  }
+}
+
 function processTasksFile(
   file: string,
   rootDir: string,
-  modeCounts: Record<string, number>,
-  riskCounts: Record<string, number>,
-  taskSummaries: TaskSummary[],
-  violationsList: string[]
+  options: GovernanceOptions,
+  acc: GovernanceAccumulator
 ): { tasksCount: number; unverifiedDelta: number } {
   const tasks = parseTasksFromFile(file);
   const relPath = path.relative(rootDir, file).replace(/\\/g, '/');
@@ -255,12 +339,13 @@ function processTasksFile(
 
   for (const t of tasks) {
     const { summary, violation, unverified } = evaluateTaskItem(t, relPath);
-    if (violation) violationsList.push(violation);
+    if (violation) acc.violationsList.push(violation);
     if (unverified) unverifiedDelta++;
-    updateGovernanceCounts(t, modeCounts, riskCounts);
-    taskSummaries.push(summary);
+    updateGovernanceCounts(t, acc.modeCounts, acc.riskCounts);
+    acc.taskSummaries.push(summary);
   }
 
+  auditDesignScopeForFile(file, tasks, options, acc.unassignedDesignScope, acc.violationsList);
   return { tasksCount: tasks.length, unverifiedDelta };
 }
 
@@ -282,24 +367,17 @@ function createInitialRiskCounts(): Record<string, number> {
   };
 }
 
-function assembleGovernanceResult(
-  totalTasks: number,
-  unverifiedCount: number,
-  riskCounts: Record<string, number>,
-  modeCounts: Record<string, number>,
-  taskSummaries: TaskSummary[],
-  violationsList: string[],
-  reportMarkdown: string
-): GovernanceResult {
+function assembleGovernanceResult(acc: GovernanceAccumulator, reportMarkdown: string): GovernanceResult {
   return {
-    success: violationsList.length === 0,
-    totalTasks,
-    verifiedCount: totalTasks - unverifiedCount,
-    unverifiedCount,
-    riskCounts,
-    modeCounts,
-    tasks: taskSummaries,
-    violations: violationsList,
+    success: acc.violationsList.length === 0,
+    totalTasks: acc.totalTasks,
+    verifiedCount: acc.totalTasks - acc.unverifiedCount,
+    unverifiedCount: acc.unverifiedCount,
+    riskCounts: acc.riskCounts,
+    modeCounts: acc.modeCounts,
+    tasks: acc.taskSummaries,
+    violations: acc.violationsList,
+    unassignedDesignScope: acc.unassignedDesignScope,
     reportMarkdown,
   };
 }
@@ -309,21 +387,23 @@ interface GovernanceAccumulator {
   unverifiedCount: number;
   taskSummaries: TaskSummary[];
   violationsList: string[];
+  unassignedDesignScope: string[];
   modeCounts: Record<string, number>;
   riskCounts: Record<string, number>;
 }
 
-function collectAllTasksData(taskFiles: string[], rootDir: string): GovernanceAccumulator {
+function collectAllTasksData(taskFiles: string[], rootDir: string, options: GovernanceOptions): GovernanceAccumulator {
   const acc: GovernanceAccumulator = {
     totalTasks: 0,
     unverifiedCount: 0,
     taskSummaries: [],
     violationsList: [],
+    unassignedDesignScope: [],
     modeCounts: createInitialModeCounts(),
     riskCounts: createInitialRiskCounts(),
   };
   for (const file of taskFiles) {
-    const delta = processTasksFile(file, rootDir, acc.modeCounts, acc.riskCounts, acc.taskSummaries, acc.violationsList);
+    const delta = processTasksFile(file, rootDir, options, acc);
     acc.totalTasks += delta.tasksCount;
     acc.unverifiedCount += delta.unverifiedDelta;
   }
@@ -333,7 +413,7 @@ function collectAllTasksData(taskFiles: string[], rootDir: string): GovernanceAc
 export function verifyTasksGovernance(options: GovernanceOptions = {}): GovernanceResult {
   const rootDir = options.rootDir || process.cwd();
   const searchDir = options.specsDir || rootDir;
-  const data = collectAllTasksData(walkTaskFiles(searchDir), rootDir);
+  const data = collectAllTasksData(walkTaskFiles(searchDir), rootDir, options);
 
   const reportMarkdown = generateGovernanceReportMarkdown(
     data.taskSummaries,
@@ -342,13 +422,6 @@ export function verifyTasksGovernance(options: GovernanceOptions = {}): Governan
     data.totalTasks
   );
 
-  return assembleGovernanceResult(
-    data.totalTasks,
-    data.unverifiedCount,
-    data.riskCounts,
-    data.modeCounts,
-    data.taskSummaries,
-    data.violationsList,
-    reportMarkdown
-  );
+  return assembleGovernanceResult(data, reportMarkdown);
 }
+

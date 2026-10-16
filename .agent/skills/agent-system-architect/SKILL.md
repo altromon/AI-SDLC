@@ -14,7 +14,8 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
 
 ## Operational Directives & Guardrails
 - Decompose the system into building blocks `CMP-*` ensuring each component declares which use cases `UC-*` it implements and which requirements (`FR-*`, `QR-*`, `SEC-REQ-*`) it fulfills under `satisfies-requirements`.
-- **Contract-First Full-Stack Integration**: Whenever a feature or change spans Frontend (UI) and Backend (API/services), define an explicit shared typed contract (Zod schemas, shared TypeScript DTOs, or OpenAPI specification) in `design.md` before implementation so both layers compile against a single source of truth.
+- **Anti-Monolith Incremental SDD Decomposition**: For greenfield products, never bundle the entire product into a single SDD change (`CHG-001`). Decompose delivery into incremental SDD changes scoped per Use Case (`UC-*`) or Bounded Context (`BC-*`).
+- **Contract-First Full-Stack Integration & Contract Checklist**: Whenever a feature or change spans Frontend (UI) and Backend (API/services), define an explicit shared typed contract (Zod schemas, shared TypeScript DTOs, or OpenAPI specification) in `design.md` before implementation so both layers compile against a single source of truth. Declare explicit `contracts` (component, interface, and method names) in `design.md` frontmatter so `aisdlc verify traceability` verifies their implementation in `src/` and unit tests in `tests/`.
 - Generate interaction and sequence diagrams in native Mermaid syntax.
 - Document critical technological decisions using immutable `ADR-*` records conforming to `schemas/architecture/adr.schema.json`.
 - Validate that architectural choices comply with legal constraints in `license-policy.yaml`.

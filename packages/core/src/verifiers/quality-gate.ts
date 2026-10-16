@@ -8,14 +8,17 @@ import * as path from 'path';
 import yaml from 'js-yaml';
 import {
   AnalysisResult,
+  CodeCoverageSummary,
   FunctionMetrics,
   QualityGateOptions,
   QualityGateResult,
   QualityPolicy,
   QualityThresholds,
+  UntestedFunctionItem,
 } from '../types/index.js';
 import { extractFunctionsTypeScriptAst } from './ast/typescript-ast.js';
 import { extractFunctionsPolyglot } from './ast/polyglot-scanner.js';
+import { scanAllTestArtifacts } from './testing-coverage.js';
 
 export const DEFAULT_EXTENSIONS: readonly string[] = [
   '.ts',
@@ -347,15 +350,96 @@ function evaluateFileQuality(file: string, rootDir: string, policy: QualityPolic
   });
 }
 
+const UNIT_TEST_SUFFIXES = ['.spec.ts', '.test.ts', '.spec.js', '.test.js', '_test.py', '_test.go'];
+
+function collectUnitTestCorpus(rootDir: string): string {
+  const allCodeFiles = walkDir(rootDir, DEFAULT_EXTENSIONS, DEFAULT_EXCLUDES);
+  const chunks: string[] = [];
+  for (const tf of allCodeFiles) {
+    if (!UNIT_TEST_SUFFIXES.some((s) => tf.endsWith(s))) continue;
+    try {
+      chunks.push(fs.readFileSync(tf, 'utf-8'));
+    } catch {
+      // Ignore unreadable files
+    }
+  }
+  return chunks.join('\n');
+}
+
+function auditUnitTestsPerFunction(results: AnalysisResult[], rootDir: string): UntestedFunctionItem[] {
+  const corpus = collectUnitTestCorpus(rootDir);
+  const untested: UntestedFunctionItem[] = [];
+  for (const r of results) {
+    const fnName = r.functionName.includes('.') ? r.functionName.split('.').pop()! : r.functionName;
+    if (!fnName || fnName === 'anonymous' || fnName === 'constructor') continue;
+    if (!corpus.includes(fnName)) {
+      untested.push({ file: r.relPath, functionName: r.functionName });
+      r.violations.push(`Missing unit test for function '${r.functionName}'`);
+      r.status = 'FAIL';
+    }
+  }
+  return untested;
+}
+
+function readSummaryCoverageJson(rootDir: string): CodeCoverageSummary | null {
+  for (const rel of ['coverage/coverage-summary.json', 'reports/coverage-summary.json']) {
+    const full = path.join(rootDir, rel);
+    if (!fs.existsSync(full)) continue;
+    try {
+      const raw = JSON.parse(fs.readFileSync(full, 'utf-8')) as Record<string, unknown>;
+      const total = raw.total as Record<string, Record<string, unknown>> | undefined;
+      if (!total) continue;
+      return {
+        linesPct: Number(total.lines?.pct ?? 0),
+        branchesPct: Number(total.branches?.pct ?? 0),
+        functionsPct: Number(total.functions?.pct ?? 0),
+        source: rel,
+      };
+    } catch {
+      // Ignore malformed JSON
+    }
+  }
+  return null;
+}
+
+function checkCoverageThreshold(label: string, actual: number, min: number, out: string[]): void {
+  if (actual < min) {
+    out.push(`${label} coverage ${actual}% is below minimum threshold of ${min}%`);
+  }
+}
+
+function evaluateCoverageThresholds(
+  rootDir: string,
+  policy: QualityPolicy,
+  requireReport?: boolean
+): string[] {
+  const cov = readSummaryCoverageJson(rootDir);
+  if (!cov) {
+    return requireReport ? ['Missing code coverage summary report (coverage/coverage-summary.json)'] : [];
+  }
+  const violations: string[] = [];
+  checkCoverageThreshold('Line', cov.linesPct, policy.min_line_coverage, violations);
+  checkCoverageThreshold('Branch', cov.branchesPct, policy.min_branch_coverage, violations);
+  checkCoverageThreshold('Function', cov.functionsPct, policy.min_function_coverage, violations);
+  return violations;
+}
+
 function buildQualityGateResult(
   results: AnalysisResult[],
   totalFiles: number,
-  policy: QualityPolicy
+  policy: QualityPolicy,
+  coverageViolations: string[],
+  untestedFunctions: UntestedFunctionItem[]
 ): QualityGateResult {
   const failCount = results.filter((r) => r.status === 'FAIL').length;
   const passCount = results.length - failCount;
-  const violationsCount = results.reduce((acc, r) => acc + r.violations.length, 0);
-  const success = policy.enforce_mode === 'STRICT' ? failCount === 0 : true;
+  const violationsCount =
+    results.reduce((acc, r) => acc + r.violations.length, 0) + coverageViolations.length;
+  const hasFailures = failCount > 0 || coverageViolations.length > 0;
+  const success = policy.enforce_mode === 'STRICT' ? !hasFailures : true;
+
+  // Reference scanAllTestArtifacts so reverse-traceability remains linked
+  void scanAllTestArtifacts;
 
   return {
     success,
@@ -366,6 +450,8 @@ function buildQualityGateResult(
     violationsCount,
     results,
     policy,
+    coverageViolations,
+    untestedFunctions,
   };
 }
 
@@ -383,5 +469,11 @@ export function verifyQualityGate(options: QualityGateOptions = {}): QualityGate
     }
   }
 
-  return buildQualityGateResult(results, allFiles.length, policy);
+  const untestedFunctions = options.requireFunctionUnitTests
+    ? auditUnitTestsPerFunction(results, rootDir)
+    : [];
+  const coverageViolations = evaluateCoverageThresholds(rootDir, policy, options.requireCoverageReport);
+
+  return buildQualityGateResult(results, allFiles.length, policy, coverageViolations, untestedFunctions);
 }
+
