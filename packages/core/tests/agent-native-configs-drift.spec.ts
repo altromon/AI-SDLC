@@ -239,6 +239,53 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     const reviewerSkill = fs.readFileSync(path.join(rootDir, '.agent/skills/agent-code-reviewer/SKILL.md'), 'utf-8');
     expect(reviewerSkill).toMatch(/Fake-Wiring/i);
   });
+
+  it('verifies agent-developer enforces the mandatory 4-step Clean Architecture & exhaustive unit testing order across protocols and agent configs', () => {
+    const filesToCheck = [
+      canonicalProtocolPath,
+      path.join(rootDir, '.agent/skills/agent-developer/SKILL.md'),
+      path.join(rootDir, '.agent/agents/agent-developer.md'),
+      path.join(rootDir, '.claude/agents/agent-developer.md'),
+      path.join(rootDir, '.cursor/rules/agent-developer.mdc'),
+      path.join(rootDir, '.github/agents/agent-developer.agent.md'),
+      configFiles.antigravity,
+      configFiles.claude,
+      configFiles.cursorQuality,
+    ];
+
+    for (const filePath of filesToCheck) {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      expect(content, `${filePath} must enforce Clean Architecture step`).toMatch(/Clean Architecture/i);
+      expect(content, `${filePath} must enforce inter-module interfaces step`).toMatch(/interfaces/i);
+      expect(content, `${filePath} must enforce Happy Path testing`).toMatch(/Happy Path/i);
+      expect(content, `${filePath} must enforce Sad Path testing`).toMatch(/Sad Path/i);
+      expect(content, `${filePath} must enforce Boundary Values testing`).toMatch(/Boundary Values/i);
+      expect(content, `${filePath} must enforce Null and Empty values testing`).toMatch(/Null.*Empty/is);
+    }
+  });
+
+  it('verifies agent-qa-engineer enforces E2E/UI testing, agreed project technology, and per-interactive-element Happy Path, Sad Path, and Boundary Values coverage (#130)', () => {
+    const qaFiles = [
+      canonicalProtocolPath,
+      path.join(rootDir, '.agent/skills/agent-qa-engineer/SKILL.md'),
+      path.join(rootDir, '.agent/agents/agent-qa-engineer.md'),
+      path.join(rootDir, '.claude/agents/agent-qa-engineer.md'),
+      path.join(rootDir, '.cursor/rules/agent-qa-engineer.mdc'),
+      path.join(rootDir, '.github/agents/agent-qa-engineer.agent.md'),
+      configFiles.antigravity,
+      configFiles.claude,
+    ];
+
+    for (const filePath of qaFiles) {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      expect(content, `${filePath} must enforce E2E and UI tests`).toMatch(/End-to-End.*E2E|E2E.*UI/is);
+      expect(content, `${filePath} must enforce agreed project technology`).toMatch(/agreed.*project.*technology|agreed.*technology|project.*technology/i);
+      expect(content, `${filePath} must enforce per-interactive-element testing`).toMatch(/interactive.*element|element.*interact/i);
+      expect(content, `${filePath} must enforce Happy Path per interactive element`).toMatch(/Happy Path/i);
+      expect(content, `${filePath} must enforce Sad Path per interactive element`).toMatch(/Sad Path/i);
+      expect(content, `${filePath} must enforce Boundary Values per interactive element`).toMatch(/Boundary Values/i);
+    }
+  });
 });
 
 

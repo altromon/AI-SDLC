@@ -73,10 +73,10 @@ function buildFunctionMetricViolations(results: ReturnType<typeof verifyQualityG
 function buildQualityViolations(result: ReturnType<typeof verifyQualityGate>) {
   const fnViolations = buildFunctionMetricViolations(result.results);
   const untested = (result.untestedFunctions || []).map((u) => ({
-    file: u.relPath,
+    file: u.file,
     function: u.functionName,
     metric: 'unit-test',
-    message: `Function [${u.functionName}] at line ${u.line} lacks direct unit test`,
+    message: `Function [${u.functionName}] lacks direct unit test`,
   }));
   const cov = (result.coverageViolations || []).map((message) => ({ metric: 'coverage', message }));
   return [...fnViolations, ...untested, ...cov];
@@ -119,7 +119,7 @@ function printQualityTestAndCoverageGaps(result: ReturnType<typeof verifyQuality
   if (untested.length > 0) {
     console.log(pc.red('\n  Functions lacking unit tests:'));
     for (const u of untested.slice(0, 15)) {
-      console.log(`    ${pc.red('✖')} ${pc.bold(u.relPath)}:${u.line} [${u.functionName}]`);
+      console.log(`    ${pc.red('✖')} ${pc.bold(u.file)} [${u.functionName}]`);
     }
   }
   for (const cv of result.coverageViolations || []) {

@@ -759,7 +759,7 @@ function auditDesignContracts(
 
 function buildTraceabilityContext(rootDir: string, allMdFiles: string[]): {
   ctx: TraceabilityContext;
-  requirements: Array<{ id: string; entry: ArtifactEntry }>;
+  requirements: ArtifactEntry[];
 } {
   const { artifactMap, componentsList, architectureViews } = indexAllArtifacts(allMdFiles, rootDir);
   const handoffList = buildHandoffList(rootDir, artifactMap);

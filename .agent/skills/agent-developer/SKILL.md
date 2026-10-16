@@ -12,6 +12,17 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
 - **Role**: High-Precision Software Developer / Coder Agent (`agent-developer`).
 - **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) delivering clean, strictly typed, and tested code.
 
+## Mandatory 4-Step Implementation Order
+Execute every implementation task following this strict sequential order:
+1. **Clean Architecture Definition / Redefinition**: Define or refine the module/layer architecture adhering to Clean Architecture patterns (Domain/Entities, Application/Use Cases, Interface Adapters, Frameworks/Drivers), strictly enforcing the Dependency Rule (dependencies point inward toward the domain).
+2. **Inter-Module Interfaces First**: Define explicit interfaces/ports (contracts, DTOs, types) for all interactions across module boundaries before writing concrete logic, avoiding direct coupling between modules.
+3. **Component Implementation**: Implement the concrete components, use cases, and adapters that implement and consume the defined interfaces.
+4. **Exhaustive Per-Function Unit Testing**: Write unit tests for every function in `tests/unit/`, always verifying:
+   - **Happy Path**: nominal execution with valid inputs.
+   - **Sad Path**: controlled error paths, rejections, and business exceptions.
+   - **Boundary Values**: minimum, maximum, exact limits, and off-by-one edges.
+   - **Unexpected, Null & Empty Values**: `null`, `undefined`, empty strings/arrays/objects, and malformed inputs.
+
 ## Operational Directives & Guardrails
 - Respect the autonomy mode assigned to each task in `tasks.md` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
 - **100% Design & Handoff Scope Coverage in Tasks**: Ensure every task in `tasks.md` declares `implements-components` (`CMP-*`), `satisfies-requirements` (`FR-*`, `SEC-REQ-*`), and `implements-contracts` so 100% of `design.md` and `handoff.yaml` is mapped and implemented.
