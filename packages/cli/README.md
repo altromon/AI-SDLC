@@ -64,9 +64,22 @@ The `aisdlc` CLI provides comprehensive commands across 6 functional categories 
 
 | Command | Description | Key Options |
 | --- | --- | --- |
-| `aisdlc init [directory]` | Bootstraps a repository with AI-SDLC folders, JSON schemas, policy files (`quality-policy.yaml`, `license-policy.yaml`), CI/CD templates, and AI agent rules. `--arch minimal` (default) scaffolds 3 architecture templates: Phase 0 Vision & Goals (`ARCH-INTRO-*`), components (`CMP-*`), and ADRs (`ADR-*`); `full` scaffolds all arc42 sections. | `-d, --dry-run`, `--ci <github\|gitlab\|azure\|bitbucket>`, `--agents <all\|cursor\|claude\|antigravity\|copilot\|mcp>`, `--arch <minimal\|full\|none>`, `--json` |
+| `aisdlc init [directory]` | Bootstraps a repository with AI-SDLC folders, all 29 canonical JSON schemas (Draft 2020-12), 32 base starter templates (Product, Security, Safety, Manuals, Compliance, SDD, CI), Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`), and AI agent configs. Unconditionally generates universal MCP configurations (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Non-destructively injects standard npm scripts into consumer `package.json`. In interactive TTY mode, prompts for CI/CD provider, architecture level, and AI agent targets. | `-d, --dry-run`, `--ci <github\|gitlab\|azure\|bitbucket\|none>`, `--agents <all\|cursor\|claude\|antigravity\|copilot\|mcp\|none>`, `--arch <minimal\|full\|none>`, `--json`, `-F, --format <format>` |
 | `aisdlc check` | Unified pre-flight gate: runs Quality Gate checks with optional auto-repair (syncs Gherkin to `.feature` and recalculates PDaC SHA-256 digests). | `--fix`, `-r, --root <path>`, `--json`, `-F, --format <format>` |
 | `aisdlc mcp` | Starts the native Model Context Protocol (MCP) server over `stdio` exposing 23 deterministic tools and 5 context resources. | `-r, --root <path>` |
+
+#### Repository Bootstrapping (`aisdlc init`)
+
+Running `aisdlc init` (or `npx @aisdlc/cli init`) delivers a turnkey governance environment:
+1. **Interactive Guided Prompts (TTY mode)**:
+   - **CI/CD Provider**: GitHub Actions (default / recommended), GitLab CI, Azure DevOps Pipelines, Bitbucket Pipelines, or None.
+   - **Architecture Granularity**: Minimal / Baseline (default: `ARCH-INTRO-*`, `CMP-*`, `ADR-*`), Full (all 12 arc42 sections), or None.
+   - **AI Agents**: All (Cursor, Claude Code, Antigravity, Copilot, MCP - recommended) or granular environments.
+2. **Universal MCP Integration**: Regardless of CI provider or agent selection, automatically scaffolds `.cursor/mcp.json`, `antigravity.mcp.json`, and `.vscode/mcp.json` preconfigured for `@aisdlc/mcp`.
+3. **Canonical Starter Templates**: Deploys 32 templates into `templates/` (product, security, safety, manuals, compliance, SDD, and CI/CD reference templates).
+4. **JSON Schemas (Draft 2020-12)**: Scaffolds all 29 schemas under `schemas/` and provides automatic in-memory fallback during verification if disk files are deleted.
+5. **Pull Request Templates**: Deposits `.github/PULL_REQUEST_TEMPLATE.md` with non-negotiable Plan Execution Matrix (`[X]` vs `[O]`), Weak Points hotspots, and automated KPI tables.
+6. **Automatic Script Injection**: Non-destructively registers standard shortcuts in consumer `package.json` (`check`, `check:fix`, `verify:quality`, `verify:all`, `change:new`).
 
 ### 2. Spec-Driven Development (SDD) & Change Management
 

@@ -75,10 +75,30 @@ describe('Core initProject: Full Scaffolding, Templates, Schemas & CI Suite', ()
     expect(fs.existsSync(path.join(tempDir, 'compliance', 'license-manifest.yaml'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'process', 'README.md'))).toBe(true);
 
+    // Universal MCP files
+    expect(fs.existsSync(path.join(tempDir, 'antigravity.mcp.json'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.vscode', 'mcp.json'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.cursor', 'mcp.json'))).toBe(true);
+
     // All 29 Schemas
     for (const s of STARTER_SCHEMAS) {
       expect(fs.existsSync(path.join(tempDir, s.relPath))).toBe(true);
     }
+  });
+
+  it('installs MCP configuration files always regardless of ci provider or agents choice', () => {
+    const gitlabDir = path.join(tempDir, 'gitlab-no-agents');
+    fs.mkdirSync(gitlabDir, { recursive: true });
+    const result = initProject({ targetDir: gitlabDir, ci: 'gitlab', agents: 'none' });
+    expect(result.success).toBe(true);
+
+    expect(fs.existsSync(path.join(gitlabDir, '.gitlab-ci.yml'))).toBe(true);
+    expect(fs.existsSync(path.join(gitlabDir, 'antigravity.mcp.json'))).toBe(true);
+    expect(fs.existsSync(path.join(gitlabDir, '.vscode', 'mcp.json'))).toBe(true);
+    expect(fs.existsSync(path.join(gitlabDir, '.cursor', 'mcp.json'))).toBe(true);
+    // Agent-specific rules should NOT be present when agents: 'none'
+    expect(fs.existsSync(path.join(gitlabDir, 'CLAUDE.md'))).toBe(false);
+    expect(fs.existsSync(path.join(gitlabDir, '.agent', 'rules', 'ai-sdlc.md'))).toBe(false);
   });
 
   it('scaffolds GitHub CI workflows including PR KPI aggregator when ci is "github"', () => {

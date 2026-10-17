@@ -42,6 +42,7 @@ describe('@aisdlc/cli Command Suite', () => {
     expect(runInit('test-scaffold', { dryRun: true, ci: 'azure' })).toBe(true);
     expect(runInit('test-scaffold', { dryRun: true, ci: 'bitbucket' })).toBe(true);
     expect(runInit('test-scaffold', { dryRun: true, ci: 'github' })).toBe(true);
+    expect(runInit('test-scaffold', { dryRun: true, ci: 'none' })).toBe(true);
     expect(runInit('test-scaffold', { dryRun: true, ci: 'invalid-provider' })).toBe(false);
   });
 
@@ -81,16 +82,21 @@ describe('@aisdlc/cli Command Suite', () => {
       expect(fs.existsSync(path.join(gitlabTarget, 'templates', 'ci', '.gitlab-ci.yml'))).toBe(true);
       expect(fs.existsSync(path.join(gitlabTarget, 'templates', 'ci', 'azure-pipelines.yml'))).toBe(true);
       expect(fs.existsSync(path.join(gitlabTarget, 'templates', 'ci', 'bitbucket-pipelines.yml'))).toBe(true);
+      expect(fs.existsSync(path.join(gitlabTarget, 'antigravity.mcp.json'))).toBe(true);
+      expect(fs.existsSync(path.join(gitlabTarget, '.vscode', 'mcp.json'))).toBe(true);
+      expect(fs.existsSync(path.join(gitlabTarget, '.cursor', 'mcp.json'))).toBe(true);
 
       // Test Azure DevOps scaffolding
       const azureTarget = path.join(tempInitDir, 'azure-proj');
       expect(runInit(azureTarget, { ci: 'azure' })).toBe(true);
       expect(fs.existsSync(path.join(azureTarget, 'azure-pipelines.yml'))).toBe(true);
+      expect(fs.existsSync(path.join(azureTarget, 'antigravity.mcp.json'))).toBe(true);
 
       // Test Bitbucket Pipelines scaffolding
       const bitbucketTarget = path.join(tempInitDir, 'bitbucket-proj');
       expect(runInit(bitbucketTarget, { ci: 'bitbucket' })).toBe(true);
       expect(fs.existsSync(path.join(bitbucketTarget, 'bitbucket-pipelines.yml'))).toBe(true);
+      expect(fs.existsSync(path.join(bitbucketTarget, 'antigravity.mcp.json'))).toBe(true);
 
       // Test GitHub Actions scaffolding
       const githubTarget = path.join(tempInitDir, 'github-proj');
@@ -101,6 +107,9 @@ describe('@aisdlc/cli Command Suite', () => {
       expect(fs.existsSync(path.join(githubTarget, '.github', 'workflows', 'deploy-dashboard.yml'))).toBe(true);
       expect(fs.existsSync(path.join(githubTarget, '.github', 'PULL_REQUEST_TEMPLATE.md'))).toBe(true);
       expect(fs.existsSync(path.join(githubTarget, 'templates', 'sdd', 'pull-request.template.md'))).toBe(true);
+      expect(fs.existsSync(path.join(githubTarget, 'antigravity.mcp.json'))).toBe(true);
+      expect(fs.existsSync(path.join(githubTarget, '.vscode', 'mcp.json'))).toBe(true);
+      expect(fs.existsSync(path.join(githubTarget, '.cursor', 'mcp.json'))).toBe(true);
     } finally {
       fs.rmSync(tempInitDir, { recursive: true, force: true });
     }

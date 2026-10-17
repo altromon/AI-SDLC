@@ -760,19 +760,13 @@ function isTargetIncluded(targets: Set<string>, name: string): boolean {
   return targets.has('all') || targets.has(name);
 }
 
-function appendMcpFiles(targets: Set<string>, dirs: string[], files: { relPath: string; content: string }[]) {
-  const hasMcp = isTargetIncluded(targets, 'mcp');
-  if (hasMcp || targets.has('cursor')) {
-    dirs.push('.cursor');
-    files.push({ relPath: '.cursor/mcp.json', content: STARTER_CURSOR_MCP });
-  }
-  if (hasMcp || targets.has('antigravity')) {
-    files.push({ relPath: 'antigravity.mcp.json', content: STARTER_ANTIGRAVITY_MCP });
-  }
-  if (hasMcp) {
-    dirs.push('.vscode');
-    files.push({ relPath: '.vscode/mcp.json', content: STARTER_VSCODE_MCP });
-  }
+function appendMcpFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
+  dirs.push('.cursor', '.vscode');
+  files.push(
+    { relPath: '.cursor/mcp.json', content: STARTER_CURSOR_MCP },
+    { relPath: 'antigravity.mcp.json', content: STARTER_ANTIGRAVITY_MCP },
+    { relPath: '.vscode/mcp.json', content: STARTER_VSCODE_MCP }
+  );
 }
 
 export function collectAgentFiles(targets: Set<string>): {
@@ -787,7 +781,7 @@ export function collectAgentFiles(targets: Set<string>): {
   if (isTargetIncluded(targets, 'claude')) appendClaudeFiles(dirs, files);
   if (isTargetIncluded(targets, 'copilot')) appendCopilotFiles(dirs, files);
 
-  appendMcpFiles(targets, dirs, files);
+  appendMcpFiles(dirs, files);
   return { dirs, files };
 }
 
@@ -818,6 +812,7 @@ function writeProjectFiles(
 function validateCiProvider(ci?: string): { valid: boolean; provider?: SupportedCiProvider; error?: string } {
   if (!ci) return { valid: true };
   const normalized = ci.trim().toLowerCase();
+  if (normalized === 'none') return { valid: true };
   if (!VALID_CI_PROVIDERS.includes(normalized as SupportedCiProvider)) {
     return {
       valid: false,
@@ -867,7 +862,7 @@ const BASE_DIRECTORIES: readonly string[] = [
 ];
 
 function getBaseDirectories(ciProvider?: SupportedCiProvider): string[] {
-  const dirs = [...BASE_DIRECTORIES];
+  const dirs = [...BASE_DIRECTORIES, '.cursor', '.vscode'];
   if (ciProvider === 'github' || !ciProvider) {
     dirs.push('.github', '.github/workflows');
   }
