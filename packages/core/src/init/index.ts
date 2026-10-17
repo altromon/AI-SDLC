@@ -218,12 +218,6 @@ stages:
 
 default:
   image: node:20
-  cache:
-    key:
-      files:
-        - pnpm-lock.yaml
-    paths:
-      - .pnpm-store
 
 variables:
   PNPM_HOME: "$CI_PROJECT_DIR/.pnpm"
@@ -375,13 +369,9 @@ export const STARTER_BITBUCKET_PIPELINES = `# ==================================
 image: node:20
 
 definitions:
-  caches:
-    pnpm: $BITBUCKET_CLONE_DIR/.pnpm-store
   steps:
     - step: &build-and-verify
         name: Quality Gates & Verification
-        caches:
-          - pnpm
         script:
           - corepack enable
           - corepack prepare pnpm@10 --activate
@@ -395,8 +385,6 @@ definitions:
 
     - step: &sdd-integrate
         name: SDD Canonical Integration
-        caches:
-          - pnpm
         script:
           - corepack enable
           - corepack prepare pnpm@10 --activate
@@ -456,7 +444,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: \${{ matrix.node-version }}
-          cache: 'pnpm'
 
       - name: Install Dependencies
         run: |
@@ -503,7 +490,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
 
       - name: Install Dependencies
         run: |
@@ -626,7 +612,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
 
       - name: Install Dependencies
         run: |
