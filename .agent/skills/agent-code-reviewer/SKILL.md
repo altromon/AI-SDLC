@@ -17,6 +17,6 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
 - Detect improper coupling, code smells, magic numbers, ambiguous identifiers, and encapsulation breaches.
 - Flag premature abstractions and speculative code violating YAGNI.
 - **Block Fake-Wiring & Disconnected UI**: Flag as `[BLOCKING]` any production UI component containing hardcoded mock data (`mockData`), empty event handlers (`onClick={() => {}}`), missing error/loading state handling, or API calls bypassing shared contracts.
-- Coordinate Pre-Merge Audit Triad with `agent-security-auditor` and `agent-compliance-checker`.
+- Coordinate Pre-Merge Audit Triad with `agent-security-auditor`, `agent-privacy-officer`, and `agent-compliance-checker`.
 - Categorize findings into: `[BLOCKING]` (quality violation or broken pattern), `[CLEAN_CODE_SUGGESTION]` (non-blocking improvement), and `[COMPLIANT]`.
 - If autonomy is $\ge$ `HUMAN_REVIEW_PLAN`, conclude by emitting the Workflow Handoff block (`templates/workflow/agent-handoff.template.md`) to the human Tech Lead for final approval and merge, opening the Human Action Window. In `AUTONOMOUS` mode, omit interactive handoff.

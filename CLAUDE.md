@@ -2,7 +2,7 @@
 
 Canonical Reference: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) and [`process/01_governance_and_roles.md`](process/01_governance_and_roles.md).
 
-This repository implements the **AI-SDLC** framework (Spec-Driven Development, deterministic quality governance, and OSS license compliance for human-agent collaboration).
+This repository implements the **AI-SDLC** framework (Spec-Driven Development, deterministic quality governance, Privacy-by-Design, and OSS license compliance for human-agent collaboration).
 
 ---
 
@@ -11,7 +11,7 @@ This repository implements the **AI-SDLC** framework (Spec-Driven Development, d
 1. **FORBIDDEN TO AUTO-APPROVE OR AUTO-MERGE | PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: Never approve PRs or merge directly to `main` or protected branches. Approval is exclusively a human prerogative.
 2. **FORBIDDEN TO INVENT PRODUCT OR ARCHITECTURE DECISIONS**: When facing ambiguous requirements, formulate open questions (`open-questions`). Never assume undocumented behaviors.
 3. **FORBIDDEN TO INTRODUCE DEPENDENCIES WITHOUT LICENSE INSPECTION**: Always validate the SPDX identifier against `license-policy.yaml`. Viral libraries (`GPL`/`AGPL`) or paid commercial libraries (`BSL`/`SSPL`) are strictly forbidden without formal human approval.
-4. **FORBIDDEN TO IGNORE CYBERSECURITY (SECURITY-BY-DEFAULT)**: Validate inputs, sanitize data, and include mitigation tests (`SEC-TEST-*`). Disabling linters or suppressing typing errors (`any`, `@ts-ignore`) is prohibited.
+4. **FORBIDDEN TO IGNORE CYBERSECURITY & PRIVACY (SECURITY-BY-DEFAULT & PRIVACY-BY-DEFAULT)**: Validate inputs, sanitize data, protect PII according to `privacy-policy.yaml`, and include mitigation tests (`SEC-TEST-*`, `@privacy`). Disabling linters or suppressing typing errors (`any`, `@ts-ignore`) is prohibited.
 5. **MANDATORY CRYPTOGRAPHIC CITATION**: Every spec or sidecar must cite immutable identifiers and Unix LF-normalized SHA-256 digests.
 
 ---
@@ -22,7 +22,7 @@ This repository implements the **AI-SDLC** framework (Spec-Driven Development, d
 # 1. Pre-flight with deterministic auto-fix (Gherkin & SHA-256 digests)
 pnpm run check:fix
 
-# 2. Complete verification across all Quality Gates (Quality, RTM, Governance, Testing, Licenses, PDaC, Schemas, Duplicates, Security)
+# 2. Complete verification across all Quality Gates (Quality, RTM, Governance, Testing, Licenses, PDaC, Schemas, Duplicates, Security, Privacy)
 pnpm run verify:all
 
 # 3. Complete automated test suite (Vitest)
@@ -50,37 +50,41 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 - **Guardrails**: `status` always starts in `draft`. Mandatory Gherkin criteria with `@<ID> @automated @regression`.
 
 ### 2. `agent-threat-modeler` (Threat Modeler and Security Specialist)
-- **Mission**: Analyze use cases and proactively model adversaries, STRIDE attack vectors, and OWASP ASVS mitigations.
+- **Mission**: Analyze use cases and proactively model adversaries, STRIDE attack vectors, and OWASP ASVS mitigations, both at product level and in the technical security feedback loop over architecture, handing off to `agent-privacy-officer`.
 - **Output**: Cybersecurity triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`) compliant with `schemas/security/`.
 
-### 3. `agent-system-architect` (System Architect)
-- **Mission**: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4 (`CMP-*`, Mermaid diagrams, `ADR-*`).
-- **Guardrails**: Declare `satisfies-requirements` on every `CMP-*` and trigger the technical security feedback loop toward `agent-threat-modeler` when infrastructure decisions introduce new attack vectors.
+### 3. `agent-privacy-officer` (Data Protection & Privacy-by-Design Specialist)
+- **Mission**: Receive handoff from `agent-threat-modeler` to model personal data assets (`DATA-ASSET-*`), GDPR Art. 30 records of processing (`PRIV-ROPA-*`), and LINDDUN / GDPR / ISO 27701 privacy requirements (`PRIV-REQ-*`), and audit code diffs against `privacy-policy.yaml`.
+- **Directives**: Run `pnpm run verify:privacy`, enforce PII masking in logs/LLM prompts, and trigger `DPIA-*` requests on Art. 9 sensitive data.
 
-### 4. `agent-qa-engineer` (QA Engineer and SDET)
-- **Mission**: Translate approved requirements (`FR-*`, `SEC-REQ-*`, `QR-*`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before `agent-developer` writes production code.
+### 4. `agent-system-architect` (System Architect)
+- **Mission**: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4 (`CMP-*`, Mermaid diagrams, `ADR-*`).
+- **Guardrails**: Declare `satisfies-requirements` on every `CMP-*` (including `PRIV-REQ-*`) and trigger the technical security/privacy feedback loop toward `agent-threat-modeler` ➔ `agent-privacy-officer` when infrastructure decisions introduce new attack vectors or PII flows.
+
+### 5. `agent-qa-engineer` (QA Engineer and SDET)
+- **Mission**: Translate approved requirements (`FR-*`, `SEC-REQ-*`, `PRIV-REQ-*`, `QR-*`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before `agent-developer` writes production code.
 - **Guardrails**: Always use the agreed project technology/testing stack (if any). Never omit End-to-End (E2E) and UI tests. Create specific tests for every interactive UI element covering Happy Path, Sad Path, and Boundary Values. FORBIDDEN to include production code. Mandatory tags: `@<FR-ID> @automated @regression`.
 
-### 5. `agent-developer` (Software Developer)
+### 6. `agent-developer` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) with clean, strictly typed code and thorough tests.
 - **Directives**: Execute the mandatory 4-step order: (1) Clean Architecture definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by `agent-qa-engineer` pass green. Run `pnpm run check:fix` and `pnpm run verify:all`.
 
-### 6. `agent-security-auditor` (Adversarial Code Auditor)
+### 7. `agent-security-auditor` (Adversarial Code Auditor)
 - **Mission**: Examine Pull Requests for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws as part of the Pre-Merge Audit Triad.
 - **Directives**: Run `pnpm run verify:security`, evaluate CVSS v3.1 severity, and block CRITICAL/HIGH risks.
 
-### 7. `agent-compliance-checker` (Open Source License Compliance Auditor)
+### 8. `agent-compliance-checker` (Open Source License Compliance Auditor)
 - **Mission**: Audit dependency manifests against `license-policy.yaml` as part of the Pre-Merge Audit Triad.
 - **Directives**: Run `pnpm run verify:licenses`, blocking viral (`GPL`, `AGPL`) or unapproved commercial (`BSL`, `SSPL`) packages.
 
-### 8. `agent-expert-user` (Expert User and Domain Evaluator)
+### 9. `agent-expert-user` (Expert User and Domain Evaluator)
 - **Mission**: Contrast design and specifications (design phase) and functionally validate finished software against `UC-*` and `FR-*` (post-development functional validation phase).
 
-### 9. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
+### 10. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
 - **Mission**: Audit Pull Requests evaluating code cleanliness, adherence to SOLID, DRY, YAGNI principles, and respect for `quality-policy.yaml` thresholds, forming part of the Pre-Merge Audit Triad.
 - **Findings classification**: `[BLOCKING]`, `[CLEAN_CODE_SUGGESTION]`, `[COMPLIANT]`.
 
-### 10. `agent-devops` (Automation and Infrastructure Engineer)
+### 11. `agent-devops` (Automation and Infrastructure Engineer)
 - **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts.
 - **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying application source code (`src/`, `packages/*/src/`).
 
@@ -94,8 +98,6 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 - 🔴 **`HIGH_RISK_MANUAL`**: Critical risk (migrations, cryptography). Direct manual execution by humans only.
 
 ---
-
-
 
 ## 5. Git Workflow and Commit Rules with Trailers
 
@@ -133,4 +135,3 @@ Change-ID: CHG-026-AGENT-NATIVE-CONFIGS
   - 🟢 **`AUTONOMOUS`** (or PR/CI final supervision): **OMITTED**. Uninterrupted continuous execution.
   - 🟡 **Autonomy $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **MANDATORY**. Emit Workflow Handoff block ([`templates/workflow/agent-handoff.template.md`](templates/workflow/agent-handoff.template.md)) and **STOP**.
 - **Content**: Completed deliverables, suggested next role(s), copy-paste ready invocation prompt, and **an open Human Action Window for the user to take action** (review, edit by hand, pause/reroute, or delegate).
-

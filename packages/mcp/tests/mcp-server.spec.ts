@@ -57,8 +57,9 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       expect(toolNames).toContain('git_detect_author');
       expect(toolNames).toContain('verify_friction');
       expect(toolNames).toContain('verify_pdac');
+      expect(toolNames).toContain('verify_privacy');
 
-      expect(response.tools.length).toBeGreaterThanOrEqual(21);
+      expect(response.tools.length).toBeGreaterThanOrEqual(22);
     });
 
     it('should register all canonical read-only context resources', async () => {
@@ -67,6 +68,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
 
       expect(uris).toContain('aisdlc://policies/quality');
       expect(uris).toContain('aisdlc://policies/licenses');
+      expect(uris).toContain('aisdlc://policies/privacy');
       expect(uris).toContain('aisdlc://changes/active');
       expect(uris).toContain('aisdlc://changes/completed');
       expect(uris).toContain('aisdlc://status/summary');
@@ -137,8 +139,8 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       }
       expect(content.success).toBe(true);
       expect(content.profile).toBe('full');
-      expect(content.totalGates).toBe(11);
-      expect(content.passedGates).toBe(11);
+      expect(content.totalGates).toBe(12);
+      expect(content.passedGates).toBe(12);
       expect(content.failedGates).toBe(0);
     });
 

@@ -25,6 +25,7 @@ import {
   verifyArtifactsSchemas,
   verifyLicenses,
   verifyPdacGraph,
+  verifyPrivacy,
   verifyProgressiveFriction,
   verifyQualityGate,
   verifySast,
@@ -85,6 +86,7 @@ function runExtendedGates(root: string) {
   const sc = verifyArtifactsSchemas({ rootDir: root });
   const dp = verifyArtifactDuplicates({ rootDir: root });
   const fr = verifyProgressiveFriction({ rootDir: root });
+  const pv = verifyPrivacy({ rootDir: root });
 
   return [
     { name: 'testing', success: tc.success, summary: `${tc.passedRequirements}/${tc.totalRequirements} covered requirements` },
@@ -93,6 +95,7 @@ function runExtendedGates(root: string) {
     { name: 'schemas', success: sc.success, summary: `${sc.validCount}/${sc.totalEvaluated} valid artifacts` },
     { name: 'duplicates', success: dp.success, summary: `${dp.errorCount} errors, ${dp.warningCount} warnings` },
     { name: 'friction', success: fr.success, summary: `profile: ${fr.profile}, ${fr.bypassedRules.length} violations` },
+    { name: 'privacy', success: pv.success, summary: `${pv.dataAssetsCount} assets, ${pv.ropaRecordsCount} ROPA, ${pv.violationsCount} violations` },
   ];
 }
 
@@ -113,16 +116,23 @@ function runLiteGates(root: string) {
   ];
 }
 
+function resolveCompositeExitCode(allPassed: boolean, gates: Array<{ name: string; success: boolean }>): number {
+  if (allPassed) return 0;
+  const secGate = gates.find((g) => g.name === 'security');
+  if (secGate && !secGate.success) return 4;
+  const privGate = gates.find((g) => g.name === 'privacy');
+  if (privGate && !privGate.success) return 5;
+  return 1;
+}
+
 function runVerifyAllGates(root: string, isLite: boolean) {
   const gates = isLite ? runLiteGates(root) : runFullGates(root);
   const allPassed = gates.every((g) => g.success);
-  const secGate = gates.find((g) => g.name === 'security');
-  const okSecurity = secGate ? secGate.success : true;
 
   return {
     success: allPassed,
     profile: isLite ? 'lite' : 'full',
-    exitCode: allPassed ? 0 : (!okSecurity ? 4 : 1),
+    exitCode: resolveCompositeExitCode(allPassed, gates),
     totalGates: gates.length,
     passedGates: gates.filter((g) => g.success).length,
     failedGates: gates.filter((g) => !g.success).length,
@@ -524,6 +534,32 @@ function registerVerifyPdacTool(server: McpServer, baseRoot: string): void {
   );
 }
 
+const VERIFY_PRIVACY_SCHEMA = {
+  root: z.string().optional(),
+  policyPath: z.string().optional(),
+  generateRopa: z.boolean().optional(),
+  ropaOutputPath: z.string().optional(),
+  reportOutputPath: z.string().optional(),
+};
+
+function registerVerifyPrivacyTool(server: McpServer, baseRoot: string): void {
+  server.tool('verify_privacy', 'Audits Data Protection & Privacy-by-Design (GDPR ROPA, PII-SAST, retention/erasure).', VERIFY_PRIVACY_SCHEMA, async (params) => {
+    try {
+      const root = resolveRoot(params.root, baseRoot);
+      const result = verifyPrivacy({
+        rootDir: root,
+        policyPath: params.policyPath,
+        generateRopa: params.generateRopa,
+        ropaOutputPath: params.ropaOutputPath,
+        reportOutputPath: params.reportOutputPath,
+      });
+      return formatResponse(result, !result.success);
+    } catch (err: unknown) {
+      return formatCatchError(err);
+    }
+  });
+}
+
 function registerReportDashboardTool(server: McpServer, baseRoot: string): void {
   server.tool(
     'report_dashboard',
@@ -618,8 +654,7 @@ function registerGitDetectAuthorTool(server: McpServer, baseRoot: string): void 
   });
 }
 
-export function registerAllTools(server: McpServer, options: RegisterToolsOptions = {}): void {
-  const baseRoot = options.rootDir || process.cwd();
+function registerLifecycleAndSddTools(server: McpServer, baseRoot: string): void {
   registerNewTool(server, baseRoot);
   registerVerifyTool(server, baseRoot);
   registerReportTool(server, baseRoot);
@@ -628,6 +663,9 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   registerSddDepositTool(server, baseRoot);
   registerSddIntegrateTool(server, baseRoot);
   registerGetActiveHandoffTool(server, baseRoot);
+}
+
+function registerVerificationTools(server: McpServer, baseRoot: string): void {
   registerVerifyQualityTool(server, baseRoot);
   registerVerifySchemasTool(server, baseRoot);
   registerVerifySecurityTool(server, baseRoot);
@@ -638,9 +676,20 @@ export function registerAllTools(server: McpServer, options: RegisterToolsOption
   registerVerifyDuplicatesTool(server, baseRoot);
   registerVerifyFrictionTool(server, baseRoot);
   registerVerifyPdacTool(server, baseRoot);
+  registerVerifyPrivacyTool(server, baseRoot);
+}
+
+function registerReportingAndKpiTools(server: McpServer, baseRoot: string): void {
   registerReportDashboardTool(server, baseRoot);
   registerReportQualityTool(server, baseRoot);
   registerKpiPrTool(server, baseRoot);
   registerKpiReleaseTool(server, baseRoot);
   registerGitDetectAuthorTool(server, baseRoot);
+}
+
+export function registerAllTools(server: McpServer, options: RegisterToolsOptions = {}): void {
+  const baseRoot = options.rootDir || process.cwd();
+  registerLifecycleAndSddTools(server, baseRoot);
+  registerVerificationTools(server, baseRoot);
+  registerReportingAndKpiTools(server, baseRoot);
 }

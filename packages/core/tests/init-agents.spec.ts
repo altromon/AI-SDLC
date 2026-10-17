@@ -45,8 +45,8 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
     expect(fs.existsSync(path.join(tempDir, '.cursor/rules/ai-sdlc-core.mdc'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, '.github/copilot-instructions.md'))).toBe(true);
 
-    // Individual specialized agent files should be present for all 10 roles
-    expect(SPECIALIZED_AGENT_TEMPLATES).toHaveLength(10);
+    // Individual specialized agent files should be present for all 11 roles
+    expect(SPECIALIZED_AGENT_TEMPLATES).toHaveLength(11);
     for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
       expect(fs.existsSync(path.join(tempDir, `.agent/agents/${agent.id}.md`))).toBe(true);
       expect(fs.existsSync(path.join(tempDir, `.agent/skills/${agent.id}/SKILL.md`))).toBe(true);

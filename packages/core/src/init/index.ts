@@ -131,6 +131,53 @@ categories:
       - "BSL-1.1"
 `;
 
+export const STARTER_PRIVACY_POLICY = `# ==============================================================================
+# AI-SDLC: Data Protection & Privacy-by-Design Governance Policy (PDaC)
+# ==============================================================================
+version: "1.0"
+project: "Standard AI-SDLC Project"
+regulatory_frameworks:
+  - "GDPR"
+  - "LOPDGDD"
+  - "ISO-27701"
+default_pii_action: "DENY_UNCLASSIFIED"
+
+classification_levels:
+  PUBLIC:
+    encryption_at_rest: false
+    encryption_in_transit: true
+    allow_in_logs: true
+    allow_in_llm_prompts: true
+  INTERNAL:
+    encryption_at_rest: true
+    encryption_in_transit: true
+    allow_in_logs: true
+    allow_in_llm_prompts: true
+  CONFIDENTIAL_PII:
+    encryption_at_rest: true
+    encryption_in_transit: true
+    allow_in_logs: false
+    masking_in_logs: "HASH_OR_REDACT"
+    allow_in_llm_prompts: false
+    require_retention_policy: true
+    require_erasure_mechanism: true
+  RESTRICTED_SENSITIVE_PII:
+    encryption_at_rest: true
+    field_level_encryption: true
+    encryption_in_transit: true
+    allow_in_logs: false
+    allow_in_llm_prompts: false
+    require_dpia_approval: true
+    require_explicit_consent_or_art9_basis: true
+
+cross_border_transfers:
+  allowed_regions:
+    - "EU"
+    - "EEA"
+  require_scc_for_external: true
+  approved_subprocessors: []
+`;
+
 export const STARTER_TASK_TEMPLATE = `---
 tasks:
   - id: "TSK-001-setup"
@@ -186,8 +233,8 @@ export const STARTER_WORKFLOW_HANDOFF_TEMPLATE = `# Workflow Handoff Template
 
 ### 🔄 Workflow Handoff
 
-- **Completed Phase / Activity**: \`[Current phase, e.g. Product Definition / Threat Modeling / Architecture / SDD Implementation]\`
-- **Acting Role**: \`[agent-product-analyst | agent-threat-modeler | agent-system-architect | agent-developer | agent-expert-user | agent-security-auditor | agent-compliance-checker]\`
+- **Completed Phase / Activity**: \`[Current phase, e.g. Product Definition / Threat Modeling / Privacy Modeling / Architecture / SDD Implementation]\`
+- **Acting Role**: \`[agent-product-analyst | agent-threat-modeler | agent-privacy-officer | agent-system-architect | agent-developer | agent-expert-user | agent-security-auditor | agent-compliance-checker]\`
 - **Task Autonomy Mode**: \`[HUMAN_REVIEW_PLAN | AMBIGUOUS | HIGH_RISK_MANUAL]\`
 - **Produced Deliverables**:
   - [x] \`[Path or ID of generated artifact, e.g. specs/product/uc-mission.md]\`
@@ -831,6 +878,7 @@ const BASE_DIRECTORIES: readonly string[] = [
   'compliance',
   'schemas/product',
   'schemas/security',
+  'schemas/privacy',
   'schemas/compliance',
   'schemas/architecture',
   'schemas/safety',
@@ -840,6 +888,7 @@ const BASE_DIRECTORIES: readonly string[] = [
   'schemas/ide',
   'templates/product',
   'templates/security',
+  'templates/privacy',
   'templates/compliance',
   'templates/architecture',
   'templates/safety',
@@ -892,6 +941,7 @@ function collectStarterFiles(
   const files: { relPath: string; content: string }[] = [
     { relPath: 'quality-policy.yaml', content: STARTER_QUALITY_POLICY },
     { relPath: 'license-policy.yaml', content: STARTER_LICENSE_POLICY },
+    { relPath: 'privacy-policy.yaml', content: STARTER_PRIVACY_POLICY },
     ...STARTER_BASE_TEMPLATES,
     ...STARTER_SCHEMAS.map((s) => ({ relPath: s.relPath, content: s.content })),
     ...getCiWorkflowFiles(ciProvider),
@@ -916,6 +966,7 @@ const STANDARD_AISDLC_SCRIPTS: Record<string, string> = {
   check: 'aisdlc check',
   'check:fix': 'aisdlc check --fix',
   'verify:quality': 'aisdlc verify quality',
+  'verify:privacy': 'aisdlc verify privacy',
   'verify:all': 'aisdlc verify all',
   'change:new': 'aisdlc change new',
 };

@@ -1,9 +1,9 @@
 {
   "servers": {
     "ai-sdlc": {
-      "command": "node",
+      "command": "npx",
       "args": [
-        "./packages/mcp/dist/cli.js"
+        "@aisdlc/mcp"
       ]
     }
   }

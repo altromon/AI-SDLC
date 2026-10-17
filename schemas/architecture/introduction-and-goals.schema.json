@@ -63,7 +63,7 @@
       "minItems": 1,
       "items": {
         "type": "string",
-        "pattern": "^(QR|SEC-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*$"
+        "pattern": "^(QR|SEC-REQ|PRIV-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*$"
       }
     },
     "cites-use-cases": {

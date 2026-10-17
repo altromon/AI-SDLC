@@ -58,6 +58,9 @@ interface CitationsCollection {
   subUseCases: string[];
   subSecReqs: string[];
   subRules: string[];
+  subPrivReqs: string[];
+  subDataAssets: string[];
+  subRopa: string[];
   productArtifactCreated?: string;
 }
 
@@ -612,11 +615,29 @@ function createGreenfieldRequirement(
   return { reqId, ucId, reqFilePath, digest };
 }
 
+function resolveMissingDraftDestination(rootDir: string, id: string): { dir: string; type: string } {
+  if (id.startsWith('PRIV-REQ-')) {
+    return { dir: path.join(rootDir, 'specs', 'privacy', 'requirements'), type: 'privacy-requirement' };
+  }
+  if (id.startsWith('DATA-ASSET-')) {
+    return { dir: path.join(rootDir, 'specs', 'privacy', 'assets'), type: 'data-asset' };
+  }
+  if (id.startsWith('PRIV-ROPA-')) {
+    return { dir: path.join(rootDir, 'specs', 'privacy', 'ropa'), type: 'privacy-ropa' };
+  }
+  if (id.startsWith('UC-')) {
+    return { dir: path.join(rootDir, 'specs', 'product'), type: 'use-case' };
+  }
+  if (id.startsWith('SEC-REQ-') || id.startsWith('SAF-REQ-')) {
+    return { dir: path.join(rootDir, 'specs', 'product'), type: 'security-requirement' };
+  }
+  return { dir: path.join(rootDir, 'specs', 'product'), type: 'requirement' };
+}
+
 function createMissingDraftRequirement(rootDir: string, name: string, id: string, canonicalId: string, createdFiles: string[]): { reqFilePath: string; digest: string } {
-  const productDir = path.join(rootDir, 'specs', 'product');
-  if (!fs.existsSync(productDir)) fs.mkdirSync(productDir, { recursive: true });
-  const reqFilePath = path.join(productDir, `${id}.md`);
-  const reqType = id.startsWith('UC-') ? 'use-case' : id.startsWith('SEC-REQ-') ? 'security-requirement' : 'requirement';
+  const { dir, type: reqType } = resolveMissingDraftDestination(rootDir, id);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const reqFilePath = path.join(dir, `${id}.md`);
   const header = MISSING_DRAFT_HEADER.replaceAll('{{ID}}', id).replaceAll('{{TYPE}}', reqType).replaceAll('{{NAME}}', name);
   const body = MISSING_DRAFT_BODY.replaceAll('{{ID}}', id).replaceAll('{{NAME}}', name).replaceAll('{{CANONICAL_ID}}', canonicalId);
   const reqContent = `${header}\n${body}`;
@@ -648,19 +669,36 @@ function appendUnique(list: string[], item: string): void {
   if (!list.includes(item)) list.push(item);
 }
 
-function classifyExistingCitation(
-  id: string,
-  existing: ArtifactInfo,
-  artifactMap: Map<string, ArtifactInfo>,
-  col: CitationsCollection
-): void {
+function recordCitedArtifact(existing: ArtifactInfo, col: CitationsCollection): void {
   col.citedArtifacts.push({
     id: existing.id,
     digest: `sha256:${existing.digest}`,
     title: existing.title,
     comment: `Citación de ${existing.frontmatter.type || 'artefacto'} (${existing.title || existing.id})`,
   });
+}
 
+function classifyPrivacyCitation(id: string, col: CitationsCollection): boolean {
+  if (id.startsWith('PRIV-REQ-')) {
+    appendUnique(col.subPrivReqs, id);
+    return true;
+  }
+  if (id.startsWith('DATA-ASSET-')) {
+    appendUnique(col.subDataAssets, id);
+    return true;
+  }
+  if (id.startsWith('PRIV-ROPA-')) {
+    appendUnique(col.subRopa, id);
+    return true;
+  }
+  return false;
+}
+
+function classifyProductCitation(
+  id: string,
+  artifactMap: Map<string, ArtifactInfo>,
+  col: CitationsCollection
+): void {
   if (/^(FR|QR|CON)-/.test(id)) {
     appendUnique(col.subRequirements, id);
   } else if (id.startsWith('UC-')) {
@@ -673,9 +711,24 @@ function classifyExistingCitation(
   }
 }
 
+function classifyExistingCitation(
+  id: string,
+  existing: ArtifactInfo,
+  artifactMap: Map<string, ArtifactInfo>,
+  col: CitationsCollection
+): void {
+  recordCitedArtifact(existing, col);
+  if (!classifyPrivacyCitation(id, col)) {
+    classifyProductCitation(id, artifactMap, col);
+  }
+}
+
 function routeMissingCitationId(id: string, col: CitationsCollection): void {
   if (id.startsWith('UC-')) col.subUseCases.push(id);
   else if (id.startsWith('SEC-REQ-')) col.subSecReqs.push(id);
+  else if (id.startsWith('PRIV-REQ-')) col.subPrivReqs.push(id);
+  else if (id.startsWith('DATA-ASSET-')) col.subDataAssets.push(id);
+  else if (id.startsWith('PRIV-ROPA-')) col.subRopa.push(id);
   else col.subRequirements.push(id);
 }
 
@@ -725,6 +778,25 @@ function collectGreenfieldCitations(
   }
 }
 
+function initEmptyCitations(): CitationsCollection {
+  return {
+    citedArtifacts: [],
+    subRequirements: [],
+    subUseCases: [],
+    subSecReqs: [],
+    subRules: [],
+    subPrivReqs: [],
+    subDataAssets: [],
+    subRopa: [],
+  };
+}
+
+function ensureFallbackRequirement(col: CitationsCollection, padNum: string, name: string): void {
+  if (col.subRequirements.length === 0) {
+    col.subRequirements.push(`FR-${padNum}-${slugify(name).toUpperCase()}-001`);
+  }
+}
+
 function collectChangeCitations(
   rootDir: string,
   name: string,
@@ -736,15 +808,13 @@ function collectChangeCitations(
   artifactMap: Map<string, ArtifactInfo>,
   createdFiles: string[]
 ): CitationsCollection {
-  const col: CitationsCollection = { citedArtifacts: [], subRequirements: [], subUseCases: [], subSecReqs: [], subRules: [] };
+  const col = initEmptyCitations();
   if (inputFromIds.length === 0) {
     collectGreenfieldCitations(rootDir, name, padNum, canonicalId, author, dateStr, createdFiles, col);
   } else {
     collectExplicitCitations(inputFromIds, name, canonicalId, artifactMap, col, rootDir, createdFiles);
   }
-  if (col.subRequirements.length === 0) {
-    col.subRequirements.push(`FR-${padNum}-${slugify(name).toUpperCase()}-001`);
-  }
+  ensureFallbackRequirement(col, padNum, name);
   return col;
 }
 
@@ -861,6 +931,9 @@ function buildHandoffSubgraph(citations: CitationsCollection): ProductHandoff['s
   if (citations.subUseCases.length > 0) subgraph.useCases = citations.subUseCases;
   if (citations.subSecReqs.length > 0) subgraph.securityRequirements = citations.subSecReqs;
   if (citations.subRules.length > 0) subgraph.businessRules = citations.subRules;
+  if (citations.subPrivReqs.length > 0) subgraph.privacyRequirements = citations.subPrivReqs;
+  if (citations.subDataAssets.length > 0) subgraph.dataAssets = citations.subDataAssets;
+  if (citations.subRopa.length > 0) subgraph.privacyRopa = citations.subRopa;
   return subgraph;
 }
 
@@ -938,7 +1011,7 @@ function renderAndCollectArtifactFiles(
   createdFiles: string[]
 ): { specFmObj: Record<string, unknown>; tasksFm: Record<string, unknown> } {
   const citationsBlock = renderCitationsYamlBlock(citations.citedArtifacts);
-  const reqIds = [...citations.subRequirements, ...citations.subSecReqs];
+  const reqIds = [...citations.subRequirements, ...citations.subSecReqs, ...citations.subPrivReqs];
   createdFiles.push(renderProposalFile(changeDir, canonicalId, name, author, citationsBlock));
   const { specPath, specFmObj } = renderSpecFile(changeDir, canonicalId, name, profile);
   createdFiles.push(specPath);

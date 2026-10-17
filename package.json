@@ -1,6 +1,6 @@
 {
   "name": "ai-sdlc-monorepo",
-  "version": "1.6.0",
+  "version": "2.0.0",
   "description": "Deterministic, spec-driven development and governance framework for AI-assisted engineering",
   "license": "MIT",
   "private": true,
@@ -30,6 +30,7 @@
     "verify:security": "tsx packages/cli/src/index.ts verify security",
     "verify:secrets": "tsx packages/cli/src/index.ts verify secrets",
     "verify:sast": "tsx packages/cli/src/index.ts verify sast",
+    "verify:privacy": "tsx packages/cli/src/index.ts verify privacy",
     "verify:all": "tsx packages/cli/src/index.ts verify all",
     "check": "tsx packages/cli/src/index.ts check",
     "check:fix": "tsx packages/cli/src/index.ts check --fix",

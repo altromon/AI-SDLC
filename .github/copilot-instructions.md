@@ -17,8 +17,8 @@ You operate as an assistant agent in the **AI-SDLC** repository. You are not a s
    - If a requirement is ambiguous or incomplete, formulate open questions (`open-questions`) to the human user. Guessing undocumented intentions is forbidden.
 3. **FORBIDDEN TO INTRODUCE DEPENDENCIES WITHOUT LICENSE INSPECTION**:
    - Before suggesting or adding dependencies to manifests (`package.json`, etc.), validate their SPDX identifier against `license-policy.yaml`. Adding viral (`GPL`, `AGPL`) or commercial paid (`BSL`, `SSPL`) licenses without human authorization is prohibited.
-4. **FORBIDDEN TO IGNORE CYBERSECURITY (SECURITY-BY-DEFAULT)**:
-   - All code must enforce least privilege, sanitize external inputs, and include mitigation tests (`SEC-TEST-*`). Suppressing types (`any`), linters, or tests to force a green pipeline is prohibited.
+4. **FORBIDDEN TO IGNORE CYBERSECURITY & PRIVACY (SECURITY-BY-DEFAULT & PRIVACY-BY-DEFAULT)**:
+   - All code must enforce least privilege, sanitize external inputs, protect PII according to `privacy-policy.yaml`, and include mitigation tests (`SEC-TEST-*`, `@privacy`). Suppressing types (`any`), linters, or tests to force a green pipeline is prohibited.
 5. **MANDATORY CRYPTOGRAPHIC CITATION**:
    - Every specification, design, or sidecar must reference canonical identifiers and their Unix LF-normalized SHA-256 digests.
 
@@ -63,7 +63,7 @@ Non-Negotiable Quality Thresholds (`quality-policy.yaml`):
 - **Conditional Activation**:
   * 🟢 **`AUTONOMOUS` Mode** (or PR/CI final supervision): **OMITTED**. Do not interrupt unattended execution.
   * 🟡 **Autonomy $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **MANDATORY**. Emit Workflow Handoff block compliant with [`templates/workflow/agent-handoff.template.md`](../templates/workflow/agent-handoff.template.md) and **STOP**.
-- **Components**: Declare completed deliverables, recommend next roles (`agent-threat-modeler`, `agent-system-architect`, `agent-developer`, `agent-security-auditor`), provide suggested invocation prompt, and **keep the Human Action Window open at all times for the user to take action** (review, edit by hand, pause/reroute, or delegate).
+- **Components**: Declare completed deliverables, recommend next roles (`agent-threat-modeler`, `agent-privacy-officer`, `agent-system-architect`, `agent-developer`, `agent-security-auditor`), provide suggested invocation prompt, and **keep the Human Action Window open at all times for the user to take action** (review, edit by hand, pause/reroute, or delegate).
 
 ---
 
@@ -71,8 +71,9 @@ Non-Negotiable Quality Thresholds (`quality-policy.yaml`):
 
 | Role | Mission (summary) |
 | :--- | :--- |
-| `agent-product-analyst` | Product inception (`ARCH-INTRO-*`) & ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); `status` starts `draft`. |
-| `agent-threat-modeler` | STRIDE/OWASP threat triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`). |
+| `agent-product-analyst` | Phase 0 NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`, 3–5 question interview) + ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); `status` starts `draft`. |
+| `agent-threat-modeler` | STRIDE/OWASP threat triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`); hands off to `agent-privacy-officer`. |
+| `agent-privacy-officer` | LINDDUN & GDPR/LOPDGDD privacy triad (`DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*`) + Pre-Merge `verify:privacy`. |
 | `agent-system-architect` | Modular arc42 + NAF v4 architecture (`CMP-*`, Mermaid diagrams, `ADR-*`). |
 | `agent-qa-engineer` | FAILING BDD/Gherkin, E2E, and UI suites (using agreed project tech; Happy Path, Sad Path & Boundary Values per interactive UI element) before `agent-developer` writes production code. |
 | `agent-developer` | Atomic tasks from `tasks.md`; autonomy mode must be respected; runs `pnpm run check:fix` + `pnpm run verify:all`. |
@@ -88,4 +89,3 @@ Non-Negotiable Quality Thresholds (`quality-policy.yaml`):
 To consult full protocols, specialized prompts, and interface contracts:
 - [`process/09_agent_protocols.md`](../process/09_agent_protocols.md)
 - [`process/01_governance_and_roles.md`](../process/01_governance_and_roles.md)
-

@@ -189,7 +189,7 @@ function parseFeatureTags(content: string, relTest: string, reqToTestsMap: Map<s
   }
 }
 
-const REQ_ID_REGEX = /\b(FR|QR|CON|SEC-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*\b/g;
+const REQ_ID_REGEX = /\b(FR|QR|CON|SEC-REQ|PRIV-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*\b/g;
 
 function parseCodeTestIds(content: string, relTest: string, reqToTestsMap: Map<string, string[]>): void {
   const idMatches = content.match(REQ_ID_REGEX);
@@ -313,10 +313,14 @@ function computeMissingVariants(cov: BddVariantCoverage): string[] {
   return missing;
 }
 
-const REQ_PREFIXES = ['FR-', 'QR-', 'CON-', 'SEC-REQ-'];
+const REQ_PREFIXES = ['FR-', 'QR-', 'CON-', 'SEC-REQ-', 'PRIV-REQ-'];
 
 function isRequirementArtifact(frontmatter: GenericFrontmatter, id: string): boolean {
-  if (frontmatter.type === 'requirement' || frontmatter.type === 'security-requirement') {
+  if (
+    frontmatter.type === 'requirement' ||
+    frontmatter.type === 'security-requirement' ||
+    frontmatter.type === 'privacy-requirement'
+  ) {
     return true;
   }
   return REQ_PREFIXES.some((prefix) => id.startsWith(prefix));

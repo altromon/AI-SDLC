@@ -54,6 +54,18 @@
           "type": "array",
           "items": { "type": "string" }
         },
+        "privacyRequirements": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dataAssets": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "privacyRopa": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
         "actors": {
           "type": "array",
           "items": { "type": "string" }

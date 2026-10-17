@@ -1,0 +1,95 @@
+# ==============================================================================
+# AI-SDLC: Data Protection & Privacy-by-Design Governance Policy
+# ==============================================================================
+# Version: 1.0.0
+# Status: Canonical
+# Purpose: Declarative machine-readable rules for Privacy-by-Design as Code (PDaC),
+#          static PII-SAST scanning, ROPA validation, and AI agent guardrails.
+# ==============================================================================
+
+version: "1.0"
+project: "AI-SDLC Standard Organization"
+regulatory_frameworks:
+  - "GDPR"
+  - "LOPDGDD"
+  - "ISO-27701"
+default_action: "DENY_UNREGISTERED_PII"
+
+# ------------------------------------------------------------------------------
+# 1. Data Classifications & Technical Mandates
+# ------------------------------------------------------------------------------
+classifications:
+  public:
+    action: "ALLOW"
+    encryption_at_rest: false
+    encryption_in_transit: true
+    allow_in_logs: true
+    allow_in_ai_prompts: true
+
+  internal:
+    action: "ALLOW"
+    encryption_at_rest: true
+    encryption_in_transit: true
+    allow_in_logs: true
+    allow_in_ai_prompts: true
+
+  confidential_pii:
+    action: "STRICT_GOVERNANCE"
+    description: "Identifiable personal data (GDPR Art. 6): email, phone, IP, national ID, name."
+    require_ropa_entry: true
+    encryption_at_rest: true
+    encryption_in_transit: true
+    allow_in_logs: false
+    log_masking_strategy: "REDACT_OR_SHA256_SALT"
+    allow_in_ai_prompts: false
+    max_retention_days: 365
+    require_right_to_erasure: true
+
+  special_category_sensitive:
+    action: "DPIA_APPROVAL_REQUIRED"
+    description: "Special categories (GDPR Art. 9): health, biometrics, genetics, political, precise geolocation."
+    exception_requires: "DPO_AND_LEGAL_SIGN_OFF"
+    require_ropa_entry: true
+    require_dpia_artifact: true
+    encryption_at_rest: true
+    encryption_in_transit: true
+    require_field_level_encryption: true
+    allow_in_logs: false
+    allow_in_ai_prompts: false
+
+# ------------------------------------------------------------------------------
+# 2. Cross-Border Transfers & Approved Subprocessors
+# ------------------------------------------------------------------------------
+cross_border_transfers:
+  allowed_regions:
+    - "EU-EEA"
+    - "ADEQUACY_DECISION"
+  require_scc_for_third_countries: true
+  approved_subprocessors: []
+
+# ------------------------------------------------------------------------------
+# 3. AI Agent Guardrails
+# ------------------------------------------------------------------------------
+agent_guardrails:
+  forbid_real_pii_in_tests: true
+  forbid_pii_in_console_or_logger: true
+  require_dto_projection_for_pii: true
+  on_special_category_detected:
+    action: "FLAG_PULL_REQUEST"
+    notification_tag: "NEEDS_DPO_DPIA_APPROVAL"
+    message: >
+      PRIVACY ALERT (DPIA REQUIRED): Processing of Special Category Personal Data
+      (GDPR Art. 9) or high-risk profiling has been detected. An approved Impact
+      Assessment (DPIA-*) signed by the DPO is required before merging to production.
+
+# ------------------------------------------------------------------------------
+# 4. Deterministic CI/CD Gates
+# ------------------------------------------------------------------------------
+ci_gates:
+  fail_on_unregistered_pii: true
+  fail_on_pii_in_logs: true
+  fail_on_missing_retention_policy: true
+  fail_on_unapproved_subprocessor: true
+  generate_ropa_inventory: true
+  output_ropa_file: "reports/ROPA_INVENTORY.md"
+  output_privacy_report: "reports/PRIVACY_SCAN_REPORT.md"

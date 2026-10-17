@@ -347,7 +347,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
     }
   });
 
-  it('should emit consolidated valid JSON for runVerifyAll with all 11 gates mapped', () => {
+  it('should emit consolidated valid JSON for runVerifyAll with all 12 gates mapped', () => {
     let allPassed: boolean = false;
     const output = captureConsoleLog(() => {
       allPassed = runVerifyAll({ json: true });
@@ -360,8 +360,8 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
     expect(parsed.gate).toBe('all');
     expect(parsed.success).toBe(true);
     expect(parsed.exitCode).toBe(0);
-    expect(parsed.summary.totalGates).toBe(11);
-    expect(parsed.summary.passedGates).toBe(11);
+    expect(parsed.summary.totalGates).toBe(12);
+    expect(parsed.summary.passedGates).toBe(12);
     expect(parsed.summary.failedGates).toBe(0);
 
     const expectedGates = [
@@ -376,6 +376,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
       'duplicates',
       'friction',
       'security',
+      'privacy',
     ];
 
     for (const gateName of expectedGates) {
@@ -491,7 +492,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
       expect(output).not.toMatch(ANSI_REGEX);
       const parsed = JSON.parse(output);
       expect(parsed.gate).toBe('all');
-      expect(parsed.summary.totalGates).toBe(11);
+      expect(parsed.summary.totalGates).toBe(12);
       expect(parsed.violations).toEqual([]);
     });
   });
@@ -525,7 +526,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
       expect(parsed.success).toBe(true);
       expect(parsed.exitCode).toBe(0);
       expect(Array.isArray(parsed.gates)).toBe(true);
-      expect(parsed.gates.length).toBe(11);
+      expect(parsed.gates.length).toBe(12);
     });
 
     it('should emit valid JSON for runCheck when AISDLC_FORMAT=json is set', () => {

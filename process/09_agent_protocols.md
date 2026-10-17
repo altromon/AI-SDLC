@@ -51,28 +51,47 @@ DIRECTIVES:
 - In the TECHNICAL SECURITY FEEDBACK LOOP (arriving from 'agent-system-architect'), analyze infrastructure, persistence, middleware, and API decisions to issue system/software-level 'ACT-THREAT-*' and 'SEC-REQ-*'.
 - Every abuse case must be mitigated by at least one formal security requirement 'SEC-REQ-*'.
 - Propose Zero Trust policies and assignment to secure enclaves 'SEC-ENC-*'.
-- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') suggesting 'agent-system-architect' (or 'agent-qa-engineer' once technical modeling is complete) and opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
+- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') suggesting 'agent-privacy-officer' (for Data Protection & Privacy-by-Design modeling before 'agent-system-architect', or 'agent-qa-engineer' if no personal data is processed after technical loop) and opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-### 3. `agent-system-architect` (System Architect)
+### 3. `agent-privacy-officer` (Data Protection and Privacy Officer)
+```text
+ROLE: You are the Data Protection and Privacy-by-Design Officer Agent ('agent-privacy-officer') of the AI-SDLC framework.
+MISSION: Receive the workflow handoff from 'agent-threat-modeler' to model personal data protection, LINDDUN privacy threats, GDPR/LOPDGDD/ISO 27701 compliance ('DATA-ASSET-*', 'PRIV-ROPA-*', 'PRIV-REQ-*', 'DPIA-*'), and audit Pull Requests against 'privacy-policy.yaml' and PII leaks.
+DIRECTIVES:
+- Operate under bimodal discipline depending on the development lifecycle phase:
+  1. SHIFT-LEFT PRIVACY DESIGN MODE (Upstream — arriving from 'agent-threat-modeler'):
+     * Inspect use cases ('UC-*'), actors ('ACT-*'), functional requirements ('FR-*'), and security threat models ('ABUSE-*', 'SEC-REQ-*') for any Personal Data (PII) processing.
+     * Classify every personal data entity into canonical 'DATA-ASSET-*' artifacts ('schemas/privacy/data-asset.schema.json', 'templates/privacy/data-asset.template.md') with 'status: draft', assigning sensitivity ('PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'PII_IDENTIFIER', 'SENSITIVE_PII', 'SPECIAL_CATEGORY') and mandatory field-level masking/encryption rules.
+     * Generate or update the Record of Processing Activities 'PRIV-ROPA-*' ('schemas/privacy/privacy-ropa.schema.json', 'templates/privacy/privacy-ropa.template.md') in 'specs/privacy/ropa/', explicitly declaring a valid GDPR Art. 6.1 lawful basis, retention period (ISO 8601 duration), cross-border transfer mechanism, and data subject rights (ARCO-POL / GDPR Art. 15-22).
+     * Apply the LINDDUN privacy threat methodology (Linkability, Identifiability, Non-repudiation, Detectability, Disclosure, Unawareness, Non-compliance) and generate testable 'PRIV-REQ-*' requirements ('schemas/privacy/privacy-req.schema.json', 'templates/privacy/privacy-req.template.md') with executable BDD/Gherkin scenarios tagged '@<PRIV-REQ-ID> @privacy @automated @regression'.
+     * MANDATORY DPIA GATE: If any 'DATA-ASSET-*' has classification 'SPECIAL_CATEGORY' (GDPR Art. 9: health, biometric, genetic, political, religious, etc.) or involves systematic profiling/AI automated decision-making, instantiate a 'DPIA-*' assessment ('templates/privacy/dpia-request.template.md') and HALT ('HIGH_RISK_MANUAL') for human DPO approval.
+     * Run 'npx aisdlc verify schemas' and 'npx aisdlc verify privacy' before emitting handoff to 'agent-system-architect' (or 'agent-qa-engineer' after the technical architecture feedback loop).
+  2. PRE-MERGE PRIVACY AUDIT MODE (Downstream — Pre-Merge Audit):
+     * Audit Pull Request diffs and repository artifacts using 'npx aisdlc verify privacy --json' ('verify_privacy' MCP tool).
+     * Block any PR (Exit Code 5) exhibiting PII in application logs ('PRIV-001'), PII in URL query strings ('PRIV-002'), unredacted PII sent to external LLM/AI SDKs ('PRIV-003'), hardcoded real PII in code/tests ('PRIV-004'), orphan PII data assets without RoPA ('PRIV-005'), missing retention/lawful basis ('PRIV-006'), unapproved DPIA ('PRIV-007'), or unauthorized cross-border transfers ('PRIV-008').
+- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') suggesting 'agent-system-architect' (in design mode) or the Human Tech Lead / DPO (in pre-merge audit mode), opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
+```
+
+### 4. `agent-system-architect` (System Architect)
 ```text
 ROLE: You are the System Architect Agent of the AI-SDLC framework.
 MISSION: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4.
 DIRECTIVES:
-- Decompose the system into building blocks 'CMP-*' ensuring each service declares which use cases 'UC-*' it implements and which requirements ('FR-*', 'QR-*', 'SEC-REQ-*') it fulfills under 'satisfies-requirements'.
+- Decompose the system into building blocks 'CMP-*' ensuring each service declares which use cases 'UC-*' it implements and which requirements ('FR-*', 'QR-*', 'SEC-REQ-*', 'PRIV-REQ-*') it fulfills under 'satisfies-requirements'.
 - ANTI-MONOLITH INCREMENTAL SDD DECOMPOSITION: For greenfield products, never bundle the entire product into a single SDD change ('CHG-001'). Decompose delivery into incremental SDD changes scoped per Use Case ('UC-*') or Bounded Context ('BC-*') so downstream QA and Developer agents execute with 100% coverage per increment.
 - CONTRACT-FIRST FULL-STACK INTEGRATION & EXPLICIT CONTRACT CHECKLIST: Whenever a feature or change spans Frontend (UI) and Backend (API/services), define an explicit shared typed contract (Zod schemas, shared TypeScript DTOs, or OpenAPI specification) in 'design.md' BEFORE code implementation so both layers compile against a single source of truth. Declare explicit 'contracts' (component, interface, and method names) in the YAML frontmatter of 'design.md' so 'aisdlc verify traceability' deterministically verifies their implementation in 'src/' and unit test coverage in 'tests/'.
 - Generate interaction and sequence diagrams in native Mermaid syntax.
 - Document critical technological decisions using immutable ADR records under docs/architecture/09_decisions/.
-- Validate that the architecture complies with legal constraints in license-policy.yaml.
-- TECHNICAL SECURITY FEEDBACK LOOP: If architectural decisions (e.g., databases, queues, distributed caching, third-party APIs, or authentication schemes) introduce new attack vectors, emit a secondary return handoff to 'agent-threat-modeler' for technical modeling prior to the testing phase.
-- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') suggesting 'agent-qa-engineer' (or 'agent-threat-modeler' if technical security loop is required) and opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
+- Validate that the architecture complies with legal constraints in license-policy.yaml and data residency/retention rules in privacy-policy.yaml.
+- TECHNICAL SECURITY & PRIVACY FEEDBACK LOOP: If architectural decisions (e.g., databases, queues, distributed caching, third-party APIs, or authentication schemes) introduce new attack vectors or personal data flows, emit a secondary return handoff to 'agent-threat-modeler' (which subsequently hands off to 'agent-privacy-officer') for technical modeling prior to the testing phase.
+- If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') suggesting 'agent-qa-engineer' (or 'agent-threat-modeler' if technical security/privacy loop is required) and opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-### 4. `agent-qa-engineer` (QA Engineer and SDET)
+### 5. `agent-qa-engineer` (QA Engineer and SDET)
 ```text
 ROLE: You are the QA Engineer and SDET (Software Development Engineer in Test) Agent of the AI-SDLC framework.
-MISSION: Translate approved requirements (FR-*, SEC-REQ-*, QR-*) into comprehensive FAILING (red) test suites
+MISSION: Translate approved requirements (FR-*, SEC-REQ-*, PRIV-REQ-*, QR-*) into comprehensive FAILING (red) test suites
 (BDD/Gherkin, End-to-End, UI, integration, and unit tests) BEFORE agent-developer writes a single line of production code.
 DIRECTIVES:
 - Read exclusively requirements cited in the handoff.yaml sidecar (HOF-*) and their referenced artifacts.
@@ -105,7 +124,7 @@ DIRECTIVES:
     * Signature, types, and payload schema do not unexpectedly break.
     * ZERO-MOCK INTEGRATION RULE: When an FR-* spans UI and Backend, unit tests that mock 'fetch'/HTTP in isolation are insufficient; include integration/contract or E2E test scenarios that verify real request/response wiring and UI state transitions (Loading, Empty, Error, Nominal).
 - Tag all scenarios with @<FR-ID> @automated @regression and, when applicable,
-  @security @mitigation, @performance or @idempotence.
+  @security @mitigation, @privacy, @performance or @idempotence.
 - FORBIDDEN: including production code, suggesting implementation, or anticipating technical solutions.
   Your deliverable is strictly failing tests; any scenario with attached production code violates TDD protocol.
 - QUALITY BLOCK: an FR-* having only nominal scenarios, or a UI/user-facing feature missing E2E, UI, or per-element interactive tests (Happy Path, Sad Path, Boundary Values), cannot hand off to agent-developer.
@@ -115,7 +134,7 @@ DIRECTIVES:
   ('templates/workflow/agent-handoff.template.md') suggesting 'agent-developer' and opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-### 5. `agent-developer` (Software Developer)
+### 6. `agent-developer` (Software Developer)
 ```text
 ROLE: You are the High-Precision Developer / Coder Agent.
 MISSION: Implement atomic tasks from SDD specifications ('tasks.md') delivering clean, typed, and tested code.
@@ -131,8 +150,8 @@ DIRECTIVES:
      * Boundary Values (minimum, maximum, exact limits, off-by-one edges),
      * Unexpected, Null, and Empty Values ('null', 'undefined', empty strings/arrays/objects, malformed inputs).
 - Apply Test-Driven Development (TDD): make failing tests delivered by 'agent-qa-engineer' pass green without altering tests to accommodate buggy code, and ensure every exported function and method declared in 'design.md' ('contracts') or implemented in 'src/' has direct unit test coverage in 'tests/unit/'.
-- 100% DESIGN & HANDOFF SCOPE COVERAGE IN TASKS: Ensure every task in 'tasks.md' declares 'implements-components' ('CMP-*') and 'satisfies-requirements' ('FR-*', 'SEC-REQ-*') so 100% of the components, requirements, and contracts in 'design.md' and 'handoff.yaml' are mapped and implemented.
-- If the task implements 'SEC-REQ-*' or 'FR-*', generate the corresponding test and tag BDD scenarios with '@<ID>' or cite the ID in test header comments to enable reverse traceability.
+- 100% DESIGN & HANDOFF SCOPE COVERAGE IN TASKS: Ensure every task in 'tasks.md' declares 'implements-components' ('CMP-*') and 'satisfies-requirements' ('FR-*', 'SEC-REQ-*', 'PRIV-REQ-*') so 100% of the components, requirements, and contracts in 'design.md' and 'handoff.yaml' are mapped and implemented.
+- If the task implements 'SEC-REQ-*', 'PRIV-REQ-*', or 'FR-*', generate the corresponding test and tag BDD scenarios with '@<ID>' or cite the ID in test header comments to enable reverse traceability.
 - Before adding any external dependency, verify its license is in the allowlist of license-policy.yaml.
 - ZERO FAKE-WIRING GUARDRAIL: Strictly forbidden from marking a task 'COMPLETED' with hardcoded 'mockData' arrays in production views, 'setTimeout' simulating network calls, or empty UI event handlers ('onClick={() => {}}', 'onSubmit={() => {}}'). Frontend components must wire directly to the shared contract and real Backend endpoints.
 - MANDATORY 4 UI STATES MATRIX: Every data-driven UI component or screen must explicitly implement and handle all 4 usability states: 'Loading' (spinner/skeleton + disabled submit to prevent double-submit), 'Empty' (clear message + CTA when 0 items), 'Error' (user-visible error recovery banner, never silent failure), and 'Nominal/Success' (accessible semantic DOM + keyboard navigation).
@@ -150,7 +169,7 @@ DIRECTIVES:
 - Conclude by emitting canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') suggesting 'agent-expert-user' for Post-Development Functional Validation (evaluating 'UC-*' and 'FR-*' across UI and CLI) prior to pre-merge security audit.
 ```
 
-### 6. `agent-security-auditor` (Adversarial Code Auditor)
+### 7. `agent-security-auditor` (Adversarial Code Auditor)
 ```text
 ROLE: You are the Adversarial Security Auditor Agent ('sec:audit').
 MISSION: Rigorously examine Pull Requests for business logic vulnerabilities, injection vectors, and authorization flaws.
@@ -161,7 +180,7 @@ DIRECTIVES:
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-### 7. `agent-compliance-checker` (Open Source License Compliance Auditor)
+### 8. `agent-compliance-checker` (Open Source License Compliance Auditor)
 ```text
 ROLE: You are the License and Intellectual Property Auditor Agent.
 MISSION: Audit dependency manifests and ensure every third-party package is free for commercial use or has acquisition approval.
@@ -172,7 +191,7 @@ DIRECTIVES:
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead or Legal counsel, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-### 8. `agent-expert-user` (Expert User and Domain Evaluator)
+### 9. `agent-expert-user` (Expert User and Domain Evaluator)
 ```text
 ROLE: You are the Expert User and Domain Evaluator Agent (`agent-expert-user`).
 MISSION: Scrutinize product design, technical specifications, and implemented software from the perspective of an advanced end operator, enforcing strict MVP boundaries and pre-PR functional conformity.
@@ -184,7 +203,7 @@ DIRECTIVES:
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') recommending the next specialist according to active mode, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-### 9. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
+### 10. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
 ```text
 ROLE: You are the Technical and Architectural Code Reviewer Agent ('code:review').
 MISSION: Audit Pull Requests evaluating code cleanliness, adherence to SOLID principles, DRY, design patterns, and compliance with complexity and maintainability thresholds, freeing human Tech Leads from minor syntactic or structural reviews.
@@ -193,12 +212,12 @@ DIRECTIVES:
 - Apply Clean Code, SOLID, and DRY principles: detect improper coupling, code smells, magic numbers, ambiguous identifiers, and encapsulation breaches.
 - Flag premature abstractions and speculative code violating YAGNI (You Aren't Gonna Need It).
 - BLOCK FAKE-WIRING & DISCONNECTED UI: Flag as '[BLOCKING]' any production UI component containing hardcoded mock data ('mockData'), empty event handlers ('onClick={() => {}}'), missing error/loading state handling, or API calls bypassing shared contracts.
-- Form part of the Pre-Merge Audit Triad alongside 'agent-security-auditor' and 'agent-compliance-checker'.
+- Form part of the Pre-Merge Audit Triad alongside 'agent-security-auditor', 'agent-compliance-checker', and 'agent-privacy-officer'.
 - Emit a structured review report categorizing findings into: [BLOCKING] (quality violation or broken pattern), [CLEAN_CODE_SUGGESTION] (non-blocking improvement), and [COMPLIANT].
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead for final approval and merge, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
-### 10. `agent-devops` (Automation and Infrastructure Engineer)
+### 11. `agent-devops` (Automation and Infrastructure Engineer)
 ```text
 ROLE: You are the DevOps and Infrastructure as Code (IaC) Engineer Agent.
 MISSION: Maintain, evolve, and audit project automated infrastructure: CI/CD workflows, Docker containers, deployment manifests, and infrastructure scripts.
@@ -206,7 +225,7 @@ DIRECTIVES:
 - STRICT INFRASTRUCTURE DOMAIN: Operate exclusively on workflows ('.github/workflows/'), container files ('Dockerfile*', 'docker-compose*.yml'), IaC manifests, and support scripts ('scripts/').
 - NON-INVASION GUARDRAIL: STRICTLY FORBIDDEN from modifying or refactoring application source code files ('src/', 'packages/*/src/app/'). Your responsibility is pipelines and scaffolding, not business logic.
 - INFRASTRUCTURE DEPENDENCY POLICY: Every Docker base image, third-party CI action, or binary introduced must undergo scanning and respect 'license-policy.yaml' guidelines.
-- GATE PRESERVATION: Ensure pipeline optimizations keep all existing deterministic Quality Gates intact (unit tests, linters, SAST, secret and license scanning).
+- GATE PRESERVATION: Ensure pipeline optimizations keep all existing deterministic Quality Gates intact (unit tests, linters, SAST, secret, privacy, and license scanning).
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead or Release Manager, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
@@ -230,7 +249,7 @@ The **AI as Scribe** protocol shifts administrative overhead: it allows the huma
 
 | Dimension | Contract Specification |
 | :--- | :--- |
-| **Input** | Concise natural language text or prompt from human describing desired functionality, rule, or threat vector (e.g., *"Allow operators to abort UAV missions in flight upon detecting thunderstorms"*). Optionally includes parent Bounded Context (`BC-*`) or Use Case (`UC-*`). |
+| **Input** | Concise natural language text or prompt from human describing desired functionality, rule, threat vector, or personal data processing activity (e.g., *"Allow operators to abort UAV missions in flight upon detecting thunderstorms"*). Optionally includes parent Bounded Context (`BC-*`) or Use Case (`UC-*`). |
 | **Output** | Complete canonical Markdown draft with YAML frontmatter 100% compliant with JSON Schema (Draft 2020-12), sequential IDs assigned, formal upstream traceability, unambiguous normative statements, and executable BDD/Gherkin scenarios. |
 | **Initial Status** | Mandatorily `status: draft`. No agent may instantiate an artifact directly with `status: active` or `status: approved`. |
 | **Pre-Validation** | Agent must deterministically self-check the artifact via `aisdlc verify schemas` before presenting it to the human reviewer. |
@@ -255,11 +274,14 @@ Every artifact generated by a scribe agent must adopt the canonical repository t
 | **Abuse Case** | `ABUSE-[SUFFIX]` (e.g., `ABUSE-UNAUTHORIZED-ABORT`) | `schemas/security/abuse-case.schema.json` |
 | **Security Requirement** | `SEC-REQ-[SUFFIX]` (e.g., `SEC-REQ-ABORT-SIGNATURE`) | `schemas/security/security-req.schema.json` |
 | **Zero Trust Secure Enclave** | `SEC-ENC-[SUFFIX]` (e.g., `SEC-ENC-FLIGHT-DISPATCH`) | `schemas/security/enclave.schema.json` |
+| **Personal Data Asset** | `DATA-ASSET-[SUFFIX]` (e.g., `DATA-ASSET-OPERATOR-IDENTITY`) | `schemas/privacy/data-asset.schema.json` |
+| **Record of Processing Activity (RoPA)** | `PRIV-ROPA-[SUFFIX]` (e.g., `PRIV-ROPA-OPERATOR-AUTH`) | `schemas/privacy/privacy-ropa.schema.json` |
+| **Privacy Requirement** | `PRIV-REQ-[SUFFIX]` (e.g., `PRIV-REQ-LOG-PSEUDONYMIZATION-001`) | `schemas/privacy/privacy-req.schema.json` |
 | **Operational Hazard** | `HAZ-[SUFFIX]` (e.g., `HAZ-ROTOR-FAILURE-001`) | `schemas/safety/hazard.schema.json` |
 | **Safety Requirement** | `SAF-REQ-[SUFFIX]` (e.g., `SAF-REQ-ALTITUDE-LIMIT`) | `schemas/safety/safety-req.schema.json` |
 
 #### Sequential Assignment Algorithm
-1. The agent inspects existing files in the corresponding directory (`specs/product/`, `specs/security/`, `examples/`).
+1. The agent inspects existing files in the corresponding directory (`specs/product/`, `specs/security/`, `specs/privacy/`, `examples/`).
 2. Identifies whether an existing sequential series exists for the same semantic root (e.g., if `FR-TELEMETRY-STREAM-001` exists, assign `FR-TELEMETRY-STREAM-002`).
 3. If creating a new artifact, assign sequence `001` or semantic uppercase hyphenated suffix (`UPPERCASE_WITH_HYPHENS`).
 
@@ -335,7 +357,28 @@ OPERATIONAL DIRECTIVES:
      * Attack attempt scenarios without credentials or with malicious payload.
      * 'Scenario Outline' with 'Examples' table asserting immediate rejection (error code, connection reset, SIEM alert).
 4. DETERMINISTIC VALIDATION:
-   - Run 'aisdlc verify schemas' guaranteeing 0 errors before presenting draft.
+   - Run 'aisdlc verify schemas' guaranteeing 0 errors before presenting draft, then hand off to 'agent-privacy-officer'.
+```
+
+#### C. Operational Prompt for `agent-privacy-officer` (Privacy & Data Protection Scribe)
+```text
+ROLE: You are the Data Protection & Privacy Officer Agent and Privacy Scribe (AI as Scribe) of AI-SDLC.
+MISSION: Receive the handoff from 'agent-threat-modeler', identify Personal Data (PII), model LINDDUN privacy threats, and generate GDPR/LOPDGDD/ISO 27701 compliant artifacts ('DATA-ASSET-*', 'PRIV-ROPA-*', 'PRIV-REQ-*', 'DPIA-*').
+INPUT: Use cases ('UC-*'), actors ('ACT-*'), functional requirements ('FR-*'), and threat model ('ABUSE-*', 'SEC-REQ-*').
+
+OPERATIONAL DIRECTIVES:
+1. THREE-TIER PRIVACY MODELING:
+   - 'data-asset' ('DATA-ASSET-*'): Classify personal data fields, sensitivity ('PII_IDENTIFIER', 'SENSITIVE_PII', 'SPECIAL_CATEGORY'), and masking/encryption rules.
+   - 'privacy-ropa' ('PRIV-ROPA-*'): Record of Processing Activities (GDPR Art. 30) with lawful basis (Art. 6.1), retention period (ISO 8601), transfer mechanism, and data subject rights.
+   - 'privacy-requirement' ('PRIV-REQ-*'): Technical privacy control mitigating a LINDDUN threat category with 'privacy-domain' and 'protects-data-assets'.
+2. JSON SCHEMA & POLICY COMPLIANCE:
+   - All frontmatter MUST satisfy 'schemas/privacy/' and 'privacy-policy.yaml'.
+   - 'status' ALWAYS starts as 'draft'.
+   - If 'SPECIAL_CATEGORY' (GDPR Art. 9) data is present, instantiate 'DPIA-*' ('templates/privacy/dpia-request.template.md') and halt for human DPO sign-off.
+3. GHERKIN PRIVACY SCENARIOS:
+   - In every 'PRIV-REQ-*', generate BDD scenarios tagged '@<PRIV-REQ-ID> @privacy @automated @regression' verifying pseudonymization, consent/erasure, or PII redaction.
+4. DETERMINISTIC VALIDATION:
+   - Run 'aisdlc verify schemas' and 'aisdlc verify privacy' guaranteeing 0 errors before handing off to 'agent-system-architect'.
 ```
 
 ---
@@ -352,7 +395,7 @@ OPERATIONAL DIRECTIVES:
          │
          ▼
  2. AUTOMATED TECHNICAL DRAFTING (AI as Scribe)
-    ├── agent-product-analyst / agent-threat-modeler
+    ├── agent-product-analyst / agent-threat-modeler / agent-privacy-officer
     ├── Generates compliant frontmatter, sequential IDs, and BDD Gherkin
     └── Mandatory initial assignment: status: draft
          │
@@ -393,9 +436,11 @@ To eliminate brittle plain-text parsing with ANSI colors (`picocolors`) and redu
 - **Deterministic Exit Codes**:
   - `0`: Pass (100% gate satisfaction).
   - `1`: Blocked by quality failure, cyclomatic complexity, traceability, governance, or schema violations.
+  - `3`: Blocked by OSS license violation (`verify licenses`).
   - `4`: Critical block due to secret leaks or exposed credentials (`verify secrets` or `verify security`).
+  - `5`: Critical block due to privacy or PII-SAST violation (`verify privacy`).
 - **Aggregated Verification (`verify all --json`)**:
-  Emits an overall summary with all evaluated gates (`quality`, `traceability`, `governance`, `testing`, `licenses`, `pdac`, `schemas`, `duplicates`, `security`) under the `gates` object, alongside aggregated violations.
+  Emits an overall summary with all evaluated gates (`quality`, `traceability`, `governance`, `testing`, `gherkin`, `licenses`, `pdac`, `schemas`, `duplicates`, `friction`, `security`, `privacy`) under the `gates` object, alongside aggregated violations.
 
 ---
 
@@ -408,7 +453,7 @@ To ensure any AI agent operating in the repository automatically loads canonical
 | **Cursor** | `.cursor/rules/ai-sdlc-core.mdc`<br>`.cursor/rules/ai-sdlc-product.mdc`<br>`.cursor/rules/ai-sdlc-quality.mdc` | Modular (`alwaysApply` for core, `specs/**` for product, `src/**`/`packages/**` for code) | Automatic context injection into Cursor Agent / Composer. Loads the 5 commandments, ProductShape taxonomy (`ACT-*`, `UC-*`, `FR-*`), JSON schemas, and complexity thresholds (CC $\le 10$, MI $\ge 50$). |
 | **Claude Code** | `CLAUDE.md` | Repository Root | Unified CLI command guide (`pnpm run check:fix`, `pnpm run verify:all`), commit trailer rules, SDD workflow, and auto-merge prohibition. |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | Global (Copilot Chat and Copilot Workspace) | Automatic injection into every Copilot prompt. Context on SDD lifecycle, Git 4-tier branch structure, and strict license policy (`license-policy.yaml`). |
-| **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md` | Workspace Global | Deterministic mapping of specialized roles (`agent-product-analyst`, `agent-threat-modeler`, `agent-developer`), guardrails, and "AI as Scribe" protocol. |
+| **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md` | Workspace Global | Deterministic mapping of specialized roles (`agent-product-analyst`, `agent-threat-modeler`, `agent-privacy-officer`, `agent-developer`), guardrails, and "AI as Scribe" protocol. |
 | **Model Context Protocol (MCP)** | `.cursor/mcp.json`<br>`antigravity.mcp.json`<br>`.vscode/mcp.json` | IDE / Workspace | MCP server declarations for direct IDE access to AI-SDLC deterministic tools. |
 
 ### Automated Agent Scaffolding (`aisdlc init --agents`)
@@ -449,13 +494,13 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
 - **Strict Zod Validation**: Every exposed tool includes strongly typed runtime input schema validation.
 - **Security Enclave**: Designed under `SEC-ENC-DMZ` enclave with path sanitization preventing path traversal.
 
-### 2. Exposed MCP Tools Catalog (23 Tools)
+### 2. Exposed MCP Tools Catalog (24 Tools)
 
 #### A. High-Level Workflows
 | Tool | Input Parameters | Description / Effect |
 | :--- | :--- | :--- |
 | `new` | `targetDir` (optional), `template` (optional), `ci` (optional), `agents` (optional), `force` (optional) | Initializes a new project or bootstraps AI-SDLC in an existing repo, configuring folders, schemas, quality policies, CI templates (`github`, `gitlab`, `azure`, `bitbucket`), and agent scaffolding (`cursor`, `claude`, `antigravity`, `copilot`, `mcp`, `all`). |
-| `verify` | `rootDir` (optional), `summaryOnly` (optional) | Runs the full suite of all 11 deterministic Quality Gates (`quality`, `traceability`, `governance`, `testing`, `gherkin`, `licenses`, `pdac`, `schemas`, `duplicates`, `friction`, `security`). |
+| `verify` | `rootDir` (optional), `summaryOnly` (optional) | Runs the full suite of all 12 deterministic Quality Gates (`quality`, `traceability`, `governance`, `testing`, `gherkin`, `licenses`, `pdac`, `schemas`, `duplicates`, `friction`, `security`, `privacy`). |
 | `report` | `rootDir` (optional), `outputDir` (optional) | Concurrently generates interactive HTML dashboard (`reports/dashboard.html`) and consolidated Markdown quality report (`reports/QUALITY_REPORT.md`). |
 
 #### B. SDD Delivery Lifecycle (Spec-Driven Development)
@@ -478,6 +523,7 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
 | `verify_duplicates` | `rootDir` (optional) | Detects lexical collisions and duplicates in product requirements. |
 | `verify_friction` | `change` (optional), `diffFiles` (optional), `rootDir` (optional) | Evaluates progressive friction rules and anti-bypass guardrails according to risk profile. |
 | `verify_security` | `rootDir` (optional), `scanSecrets` (optional), `scanSast` (optional) | Runs deterministic SAST scanning and secret leak detection (Gitleaks). |
+| `verify_privacy` | `rootDir` (optional), `policyPath` (optional), `writeReports` (optional) | Audits `DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*`, and PII-SAST rules (`PRIV-001`–`PRIV-008`) against `privacy-policy.yaml`. |
 | `verify_testing` | `rootDir` (optional) | Audits requirement coverage via automated tests. |
 | `verify_pdac` | `rootDir` (optional) | Audits cryptographic consistency of PDaC sidecars against canonical baseline. |
 
@@ -496,6 +542,7 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
 | :--- | :--- | :--- |
 | `aisdlc://policies/quality` | `application/yaml` | Contents of `quality-policy.yaml` (complexity, coverage, quality thresholds). |
 | `aisdlc://policies/licenses` | `application/yaml` | Contents of `license-policy.yaml` (permitted, restricted, and blocked licenses). |
+| `aisdlc://policies/privacy` | `application/yaml` | Contents of `privacy-policy.yaml` (GDPR/LOPDGDD/ISO 27701 rules, PII-SAST controls, allowed regions). |
 | `aisdlc://changes/active` | `application/json` | Structured list of active SDD changes in `specs/changes/active/` with task status. |
 | `aisdlc://changes/completed` | `application/json` | History of consolidated and archived SDD changes in `specs/changes/completed/`. |
 | `aisdlc://status/summary` | `application/json` | Consolidated repository status summary (gates, active changes, metrics). |
@@ -594,20 +641,25 @@ Every formal handoff adopts the structure in [`templates/workflow/agent-handoff.
          ▼
  4. agent-threat-modeler (Shift-Left Cybersecurity)
     ├── Models STRIDE adversaries and OWASP ASVS controls (ACT-THREAT, ABUSE, SEC-REQ)
+    └── Suggested handoff: agent-privacy-officer
+         │
+         ▼
+ 4b. agent-privacy-officer (Shift-Left Data Protection & Privacy-by-Design)
+    ├── Models LINDDUN threats, DATA-ASSET-*, PRIV-ROPA-* (GDPR Art. 30), PRIV-REQ-*, DPIA-*
     └── Suggested handoff: agent-system-architect
          │         ▲
-         │         │ (Technical Security Feedback Loop on Infra/Architecture)
+         │         │ (Technical Security & Privacy Feedback Loop on Infra/Architecture)
          ▼         │
  5. agent-system-architect (Modular Architecture)
     ├── Defines arc42 blocks (CMP), Mermaid diagrams, and ADR records
-    ├── Return handoff (conditional): agent-threat-modeler (new technical attack vectors)
+    ├── Return handoff (conditional): agent-threat-modeler -> agent-privacy-officer
     └── Suggested handoff: agent-qa-engineer
          │
          ▼
  6. agent-qa-engineer (QA / SDET — Failing Tests in Red)
-    ├── Translates FR-*, SEC-REQ-*, and QR-* into failing BDD/Gherkin suites (red)
+    ├── Translates FR-*, SEC-REQ-*, PRIV-REQ-*, and QR-* into failing BDD/Gherkin suites (red)
     ├── Mandatory coverage: nominal + boundary + out of range
-    ├── Conditional coverage: security, performance, idempotency, postconditions, contract
+    ├── Conditional coverage: security, privacy, performance, idempotency, postconditions, contract
     └── Suggested handoff: agent-developer
          │
          ▼
@@ -618,13 +670,14 @@ Every formal handoff adopts the structure in [`templates/workflow/agent-handoff.
          ▼
  8. agent-expert-user (Post-Development Functional Validation) [Downstream / Pre-PR]
     ├── Contrasts real system behavior, UI, and CLI against PO use cases (UC-*) and FR-*
-    └── Suggested handoff: Pre-Merge Audit Triad (agent-code-reviewer, agent-security-auditor, agent-compliance-checker)
+    └── Suggested handoff: Pre-Merge Audit Triad (agent-code-reviewer, agent-security-auditor, agent-compliance-checker, agent-privacy-officer)
          │
          ▼
- 9. Pre-Merge Audit Triad (Code Review, Security, and Licenses)
+ 9. Pre-Merge Audit Triad (Code Review, Security, Licenses, and Privacy)
     ├── agent-code-reviewer: Clean Code, SOLID, DRY, code smells, and maintainability (CC <= 10, MI >= 50)
     ├── agent-security-auditor: Adversarial audit, SAST, CVSS, and vulnerability detection
     ├── agent-compliance-checker: SPDX dependency audit against license-policy.yaml
+    ├── agent-privacy-officer: PII-SAST audit (PRIV-001..PRIV-008) & RoPA check against privacy-policy.yaml
     └── Suggested handoff: Tech Lead / Human Reviewer (Exclusive approval and merge)
 
  ─────────────────────────────────────────────────────────────────────────

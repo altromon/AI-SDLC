@@ -12,26 +12,28 @@ export interface RegisterResourcesOptions {
   rootDir?: string;
 }
 
-function registerPolicyResources(server: McpServer, rootDir: string): void {
-  server.resource('quality-policy', 'aisdlc://policies/quality', async () => {
-    const policyPath = path.join(rootDir, 'quality-policy.yaml');
+function registerSinglePolicyResource(
+  server: McpServer,
+  rootDir: string,
+  name: string,
+  uri: string,
+  filename: string
+): void {
+  server.resource(name, uri, async () => {
+    const policyPath = path.join(rootDir, filename);
     const text = fs.existsSync(policyPath)
       ? fs.readFileSync(policyPath, 'utf-8')
-      : '# quality-policy.yaml not found at project root';
+      : `# ${filename} not found at project root`;
     return {
-      contents: [{ uri: 'aisdlc://policies/quality', mimeType: 'text/yaml', text }],
+      contents: [{ uri, mimeType: 'text/yaml', text }],
     };
   });
+}
 
-  server.resource('license-policy', 'aisdlc://policies/licenses', async () => {
-    const policyPath = path.join(rootDir, 'license-policy.yaml');
-    const text = fs.existsSync(policyPath)
-      ? fs.readFileSync(policyPath, 'utf-8')
-      : '# license-policy.yaml not found at project root';
-    return {
-      contents: [{ uri: 'aisdlc://policies/licenses', mimeType: 'text/yaml', text }],
-    };
-  });
+function registerPolicyResources(server: McpServer, rootDir: string): void {
+  registerSinglePolicyResource(server, rootDir, 'quality-policy', 'aisdlc://policies/quality', 'quality-policy.yaml');
+  registerSinglePolicyResource(server, rootDir, 'license-policy', 'aisdlc://policies/licenses', 'license-policy.yaml');
+  registerSinglePolicyResource(server, rootDir, 'privacy-policy', 'aisdlc://policies/privacy', 'privacy-policy.yaml');
 }
 
 function getActiveChanges(activeDir: string) {
@@ -94,6 +96,7 @@ function registerStatusResources(server: McpServer, rootDir: string): void {
       totalHandoffs: handoffs.size,
       qualityPolicyExists: fs.existsSync(path.join(rootDir, 'quality-policy.yaml')),
       licensePolicyExists: fs.existsSync(path.join(rootDir, 'license-policy.yaml')),
+      privacyPolicyExists: fs.existsSync(path.join(rootDir, 'privacy-policy.yaml')),
       timestamp: new Date().toISOString(),
     };
 

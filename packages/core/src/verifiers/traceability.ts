@@ -350,30 +350,39 @@ function buildHandoffList(rootDir: string, artifactMap: Map<string, ArtifactEntr
   return handoffList;
 }
 
+function indexSubgraphIds(
+  ids: string[] | undefined,
+  hof: ProductHandoff,
+  map: Map<string, ProductHandoff>
+): void {
+  if (!Array.isArray(ids)) return;
+  for (const reqId of ids) {
+    map.set(reqId, hof);
+  }
+}
+
 function indexRequirementsToHandoff(handoffList: ProductHandoff[]): Map<string, ProductHandoff> {
   const reqToHandoffMap = new Map<string, ProductHandoff>();
   for (const hof of handoffList) {
-    if (hof.subgraph && Array.isArray(hof.subgraph.requirements)) {
-      for (const reqId of hof.subgraph.requirements) {
-        reqToHandoffMap.set(reqId, hof);
-      }
-    }
-    if (hof.subgraph && Array.isArray(hof.subgraph.securityRequirements)) {
-      for (const reqId of hof.subgraph.securityRequirements) {
-        reqToHandoffMap.set(reqId, hof);
-      }
-    }
+    if (!hof.subgraph) continue;
+    indexSubgraphIds(hof.subgraph.requirements, hof, reqToHandoffMap);
+    indexSubgraphIds(hof.subgraph.securityRequirements, hof, reqToHandoffMap);
+    indexSubgraphIds(hof.subgraph.privacyRequirements, hof, reqToHandoffMap);
   }
   return reqToHandoffMap;
 }
 
-const TARGET_REQ_PREFIXES = ['FR-', 'QR-', 'SEC-REQ-', 'CON-'];
+const TARGET_REQ_PREFIXES = ['FR-', 'QR-', 'SEC-REQ-', 'CON-', 'PRIV-REQ-'];
 
 function isRequirementToVerify(data: ArtifactEntry, id: string): boolean {
   if (data.file.includes('templates/') || data.file.includes('.template.') || data.file.includes('process/')) {
     return false;
   }
-  if (data.type === 'requirement' || data.type === 'security-requirement') {
+  if (
+    data.type === 'requirement' ||
+    data.type === 'security-requirement' ||
+    data.type === 'privacy-requirement'
+  ) {
     return true;
   }
   return TARGET_REQ_PREFIXES.some((prefix) => id.startsWith(prefix));
@@ -420,6 +429,8 @@ function collectHandoffSubgraphTraces(subgraph: ProductHandoffSubgraph | undefin
   if (subgraph.useCases) traces.push(...subgraph.useCases);
   if (subgraph.businessRules) traces.push(...subgraph.businessRules);
   if (subgraph.abuseCases) traces.push(...subgraph.abuseCases);
+  if (subgraph.privacyRopa) traces.push(...subgraph.privacyRopa);
+  if (subgraph.dataAssets) traces.push(...subgraph.dataAssets);
   return traces;
 }
 
@@ -445,6 +456,8 @@ function resolveProductTraces(
   const traces: string[] = [
     ...extractArrayOrSingle(fm['derives-from']),
     ...extractArrayOrSingle(fm['mitigates-abuse-case']),
+    ...extractArrayOrSingle(fm['governs-ropa']),
+    ...extractArrayOrSingle(fm['protects-data-assets']),
     ...collectHandoffSubgraphTraces(associatedHandoff?.subgraph),
     ...collectArchIntroTraces(reqId, artifactMap),
   ];

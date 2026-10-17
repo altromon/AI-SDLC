@@ -2,9 +2,9 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:5200fffe-83e0-4227-9a1b-9aec6d26cbb8",
+  "serialNumber": "urn:uuid:099a9906-1735-4b91-bf43-dee5e05721e0",
   "metadata": {
-    "timestamp": "2026-10-17T14:23:30.476Z",
+    "timestamp": "2026-10-17T19:50:30.092Z",
     "tools": [
       {
         "vendor": "AI-SDLC",
@@ -15,7 +15,7 @@
     "component": {
       "type": "application",
       "name": "ai-sdlc-monorepo",
-      "version": "1.6.0"
+      "version": "2.0.0"
     }
   },
   "components": [

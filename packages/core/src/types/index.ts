@@ -97,6 +97,8 @@ export interface ArtifactFrontmatter {
   'satisfies-requirements'?: string[];
   'derives-from'?: string | string[];
   'mitigates-abuse-case'?: string | string[];
+  'governs-ropa'?: string | string[];
+  'protects-data-assets'?: string | string[];
   'enforced-in-enclave'?: string;
   'cucumber-tags'?: string[];
   contracts?: Array<DesignContractDeclaration | string>;
@@ -145,6 +147,9 @@ export interface ProductHandoffSubgraph {
   businessRules?: string[];
   securityRequirements?: string[];
   abuseCases?: string[];
+  privacyRequirements?: string[];
+  dataAssets?: string[];
+  privacyRopa?: string[];
   actors?: string[];
   [key: string]: unknown;
 }
@@ -858,9 +863,12 @@ export type GraphNodeType =
   | 'business-rule'
   | 'abuse-case'
   | 'hazard'
+  | 'data-asset'
+  | 'privacy-ropa'
   | 'requirement'
   | 'security-requirement'
   | 'safety-requirement'
+  | 'privacy-requirement'
   | 'component'
   | 'adr'
   | 'security-enclave'
@@ -994,6 +1002,131 @@ export interface ManualsVerificationResult {
   warnings: string[];
   violations: string[];
 }
+
+// --- Privacy-by-Design as Code (PDaC) & Data Protection Types ---
+export type PrivacyFindingType =
+  | 'PII_IN_LOGS'
+  | 'PII_IN_LLM_PROMPT'
+  | 'HARDCODED_PII_IN_CODE'
+  | 'MISSING_RETENTION_POLICY'
+  | 'UNREGISTERED_ROPA'
+  | 'MISSING_PRIVACY_CONTROL'
+  | 'UNAPPROVED_SUBPROCESSOR'
+  | 'DPIA_APPROVAL_REQUIRED';
+
+export interface PrivacyClassificationRule {
+  action: 'ALLOW' | 'STRICT_GOVERNANCE' | 'DPIA_APPROVAL_REQUIRED' | 'DENY';
+  description?: string;
+  exception_requires?: string;
+  require_ropa_entry?: boolean;
+  require_dpia_artifact?: boolean;
+  encryption_at_rest: boolean;
+  encryption_in_transit: boolean;
+  require_field_level_encryption?: boolean;
+  allow_in_logs: boolean;
+  log_masking_strategy?: string;
+  allow_in_ai_prompts: boolean;
+  max_retention_days?: number;
+  require_right_to_erasure?: boolean;
+}
+
+export interface PrivacyPolicy {
+  version: string;
+  project: string;
+  regulatory_frameworks: string[];
+  default_action: string;
+  classifications: Record<string, PrivacyClassificationRule>;
+  cross_border_transfers?: {
+    allowed_regions?: string[];
+    require_scc_for_third_countries?: boolean;
+    approved_subprocessors?: string[];
+  };
+  agent_guardrails: {
+    forbid_real_pii_in_tests: boolean;
+    forbid_pii_in_console_or_logger: boolean;
+    require_dto_projection_for_pii: boolean;
+    on_special_category_detected?: {
+      action: string;
+      notification_tag: string;
+      message: string;
+    };
+  };
+  ci_gates: {
+    fail_on_unregistered_pii: boolean;
+    fail_on_pii_in_logs: boolean;
+    fail_on_missing_retention_policy: boolean;
+    fail_on_unapproved_subprocessor?: boolean;
+    generate_ropa_inventory: boolean;
+    output_ropa_file: string;
+    output_privacy_report: string;
+  };
+}
+
+export interface DataAssetSummary {
+  id: string;
+  title: string;
+  classification: string;
+  piiCategories: string[];
+  dataSubjects: string[];
+  retentionPeriod: string;
+  erasureMethod: string;
+  filePath: string;
+}
+
+export interface PrivacyRopaSummary {
+  id: string;
+  title: string;
+  lawfulBasis: string;
+  processingPurpose: string;
+  useCases: string[];
+  dataAssets: string[];
+  dataSubjects: string[];
+  retentionTtl: string;
+  crossBorderTransfer: boolean;
+  subprocessors: string[];
+  dpiaRequired: boolean;
+  dpiaReference?: string | null;
+  mitigatedBy: string[];
+  filePath: string;
+}
+
+export interface PrivacyViolation {
+  ruleId: string;
+  type: PrivacyFindingType;
+  severity: SastSeverity;
+  filePath: string;
+  relPath: string;
+  lineNumber?: number;
+  snippet?: string;
+  message: string;
+}
+
+export interface PrivacyVerifierOptions {
+  rootDir?: string;
+  policyPath?: string;
+  targetDirectories?: string[];
+  generateRopa?: boolean;
+  ropaOutputPath?: string;
+  reportOutputPath?: string;
+}
+
+export interface PrivacyVerifierResult {
+  success: boolean;
+  totalFilesScanned: number;
+  dataAssetsCount: number;
+  ropaRecordsCount: number;
+  privacyRequirementsCount: number;
+  violationsCount: number;
+  dpiaRequiredCount: number;
+  dataAssets: DataAssetSummary[];
+  ropaRecords: PrivacyRopaSummary[];
+  violations: PrivacyViolation[];
+  ropaMarkdown: string;
+  reportMarkdown: string;
+  ropaOutputPath?: string;
+  reportOutputPath?: string;
+}
+
 
 
 

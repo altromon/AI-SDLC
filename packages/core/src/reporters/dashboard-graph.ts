@@ -41,7 +41,7 @@ const NON_GRAPH_TYPES = new Set([
   'design', 'delivery-spec', 'spec', 'pre-merge-audit-report',
   'user-design-feedback', 'release-kpis', 'session-telemetry',
   'license-manifest', 'mcp-config', 'user-manual', 'production-manual',
-  'architecture-glossary',
+  'architecture-glossary', 'dpia-request', 'privacy-policy',
 ]);
 
 const PREFIX_MAP: Record<string, { type: string; layer: GraphNodeLayer }> = {
@@ -52,11 +52,14 @@ const PREFIX_MAP: Record<string, { type: string; layer: GraphNodeLayer }> = {
   'UC': { type: 'use-case', layer: 'product' },
   'BR': { type: 'business-rule', layer: 'product' },
   'ABUSE': { type: 'abuse-case', layer: 'product' },
+  'DATA-ASSET': { type: 'data-asset', layer: 'product' },
+  'PRIV-ROPA': { type: 'privacy-ropa', layer: 'product' },
   'HAZ': { type: 'hazard', layer: 'product' },
   'SEC-ENC': { type: 'security-enclave', layer: 'architecture' },
   'CMP': { type: 'component', layer: 'architecture' },
   'ADR': { type: 'adr', layer: 'architecture' },
   'SEC-REQ': { type: 'security-requirement', layer: 'requirement' },
+  'PRIV-REQ': { type: 'privacy-requirement', layer: 'requirement' },
 };
 
 const TYPE_LOOKUP: Record<string, { type: string; layer: GraphNodeLayer }> = {
@@ -69,19 +72,22 @@ const TYPE_LOOKUP: Record<string, { type: string; layer: GraphNodeLayer }> = {
   'business-rule': { type: 'business-rule', layer: 'product' },
   'rule': { type: 'business-rule', layer: 'product' },
   'abuse-case': { type: 'abuse-case', layer: 'product' },
+  'data-asset': { type: 'data-asset', layer: 'product' },
+  'privacy-ropa': { type: 'privacy-ropa', layer: 'product' },
   'hazard': { type: 'hazard', layer: 'product' },
   'security-enclave': { type: 'security-enclave', layer: 'architecture' },
   'component': { type: 'component', layer: 'architecture' },
   'architecture-decision-record': { type: 'adr', layer: 'architecture' },
   'adr': { type: 'adr', layer: 'architecture' },
   'security-requirement': { type: 'security-requirement', layer: 'requirement' },
+  'privacy-requirement': { type: 'privacy-requirement', layer: 'requirement' },
 };
 
 export function classifyArtifactLayerAndType(
   id: string,
   declaredType: string
 ): { type: string; layer: GraphNodeLayer } | null {
-  if (NON_GRAPH_TYPES.has(declaredType) || /^(TERM|HOF|AHOF|CHG|DSG|SPEC|TSK|UDF|AUDIT)-/.test(id)) {
+  if (NON_GRAPH_TYPES.has(declaredType) || /^(TERM|HOF|AHOF|CHG|DSG|SPEC|TSK|UDF|AUDIT|DPIA)-/.test(id)) {
     return null;
   }
   for (const [prefix, mapping] of Object.entries(PREFIX_MAP)) {
@@ -137,7 +143,7 @@ function parseAndCatalogArtifactFile(
 export function scanWorkspaceArtifacts(rootDir: string) {
   const scannedArtifactsMap = new Map<string, ScannedArtifact>();
   const archViewByBasename = new Map<string, ScannedArtifact>();
-  const artifactDirs = ['product', 'architecture', 'specs', 'security'];
+  const artifactDirs = ['product', 'architecture', 'specs', 'security', 'privacy'];
   for (const dirName of artifactDirs) {
     const fullDirPath = path.join(rootDir, dirName);
     if (fs.existsSync(fullDirPath)) {
@@ -155,6 +161,8 @@ function resolveUpstreamType(u: string): string {
   if (u.startsWith('UC-')) return 'use-case';
   if (u.startsWith('BR-')) return 'business-rule';
   if (u.startsWith('ABUSE-')) return 'abuse-case';
+  if (u.startsWith('DATA-ASSET-')) return 'data-asset';
+  if (u.startsWith('PRIV-ROPA-')) return 'privacy-ropa';
   return 'product';
 }
 
@@ -262,7 +270,11 @@ function addTraceTestEdges(
 }
 
 function buildReqNode(r: TraceabilityRow, status: GraphNodeStatus): CytoscapeNodeData {
-  const reqType = r.id.startsWith('SEC-REQ-') ? 'security-requirement' : 'requirement';
+  const reqType = r.id.startsWith('SEC-REQ-')
+    ? 'security-requirement'
+    : r.id.startsWith('PRIV-REQ-')
+      ? 'privacy-requirement'
+      : 'requirement';
   return {
     id: r.id,
     label: r.id,
@@ -366,7 +378,11 @@ function connectIntroRelationships(
   for (const qrId of list) {
     if (typeof qrId === 'string' && qrId.trim()) {
       const q = qrId.trim();
-      const qType = q.startsWith('SEC-REQ-') ? 'security-requirement' : 'requirement';
+      const qType = q.startsWith('SEC-REQ-')
+        ? 'security-requirement'
+        : q.startsWith('PRIV-REQ-')
+          ? 'privacy-requirement'
+          : 'requirement';
       connectTargets(art.id, [q], 'defines-goal', nodeMap, addEdge, qType, 'requirement');
     }
   }
@@ -471,6 +487,38 @@ function connectAbuseCaseRelationships(
   connectAbuseMitigations(fm['mitigated-by'], art.id, nodeMap, addEdge);
 }
 
+function connectDataAssetRelationships(
+  art: ScannedArtifact,
+  nodeMap: Map<string, CytoscapeNodeData>,
+  addEdge: (e: CytoscapeEdgeData) => void
+): void {
+  const fm = art.frontmatter;
+  for (const subj of toList(fm['data-subjects'])) {
+    connectTargets(subj.trim(), [art.id], 'owns-data', nodeMap, addEdge, 'actor', 'product');
+  }
+  const owner = typeof fm['owner-bounded-context'] === 'string' ? fm['owner-bounded-context'].trim() : '';
+  if (owner && owner.startsWith('CMP-')) {
+    connectTargets(art.id, [owner], 'satisfies', nodeMap, addEdge, 'component', 'architecture');
+  }
+}
+
+function connectPrivacyRopaRelationships(
+  art: ScannedArtifact,
+  nodeMap: Map<string, CytoscapeNodeData>,
+  addEdge: (e: CytoscapeEdgeData) => void
+): void {
+  const fm = art.frontmatter;
+  for (const uc of toList(fm['use-cases'])) {
+    connectTargets(uc.trim(), [art.id], 'derives-from', nodeMap, addEdge, 'use-case', 'product');
+  }
+  for (const asset of toList(fm['data-assets'])) {
+    connectTargets(asset.trim(), [art.id], 'governs', nodeMap, addEdge, 'data-asset', 'product');
+  }
+  for (const req of toList(fm['mitigated-by'])) {
+    connectTargets(art.id, [req.trim()], 'mitigated-by', nodeMap, addEdge, 'privacy-requirement', 'requirement');
+  }
+}
+
 function connectRequirementMitigations(
   art: ScannedArtifact,
   nodeMap: Map<string, CytoscapeNodeData>,
@@ -480,6 +528,18 @@ function connectRequirementMitigations(
     const id = ab.trim();
     if (id) {
       connectTargets(id, [art.id], 'mitigated-by', nodeMap, addEdge, 'abuse-case', 'product');
+    }
+  }
+  for (const ropa of toList(art.frontmatter['governs-ropa'])) {
+    const id = ropa.trim();
+    if (id) {
+      connectTargets(id, [art.id], 'mitigated-by', nodeMap, addEdge, 'privacy-ropa', 'product');
+    }
+  }
+  for (const asset of toList(art.frontmatter['protects-data-assets'])) {
+    const id = asset.trim();
+    if (id) {
+      connectTargets(id, [art.id], 'governs', nodeMap, addEdge, 'data-asset', 'product');
     }
   }
 }
@@ -510,8 +570,11 @@ const CONNECTOR_MAP: Record<string, ConnectorFn> = {
   'use-case': connectUseCaseRelationships,
   'business-rule': (art, _map, addEdge) => connectBusinessRuleRelationships(art, addEdge),
   'abuse-case': connectAbuseCaseRelationships,
+  'data-asset': connectDataAssetRelationships,
+  'privacy-ropa': connectPrivacyRopaRelationships,
   'requirement': connectRequirementMitigations,
   'security-requirement': connectRequirementMitigations,
+  'privacy-requirement': connectRequirementMitigations,
   'adr': connectAdrRelationships,
   'security-enclave': connectEnclaveRelationships,
 };

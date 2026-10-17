@@ -69,7 +69,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^(FR|QR|CON|SEC-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*$"
+        "pattern": "^(FR|QR|CON|SEC-REQ|SAF-REQ|PRIV-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*$"
       }
     },
     "hosted-in-enclave": {

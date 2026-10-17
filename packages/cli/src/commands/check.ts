@@ -15,6 +15,7 @@ import {
   verifyArtifactsSchemas,
   verifyLicenses,
   verifyPdacGraph,
+  verifyPrivacy,
   verifyProgressiveFriction,
   verifyQualityGate,
   verifySast,
@@ -284,6 +285,25 @@ export function auditFrictionGate(rootDir: string): PreflightGateSummary {
   };
 }
 
+export function auditPrivacyGate(rootDir: string): PreflightGateSummary {
+  const res = verifyPrivacy({ rootDir });
+  if (res.success) {
+    return {
+      name: 'Data Protection & Privacy-by-Design (GDPR/PII-SAST)',
+      status: 'PASSED',
+      message: `${res.totalFilesScanned} clean files (${res.dataAssetsCount} data assets, ${res.ropaRecordsCount} ROPA records, 0 violations)`,
+    };
+  }
+  const first = res.violations[0];
+  const detail = first ? ` (e.g. ${first.ruleId} in ${first.relPath})` : '';
+  return {
+    name: 'Data Protection & Privacy-by-Design (GDPR/PII-SAST)',
+    status: 'FAILED',
+    message: `${res.violationsCount} privacy violation(s) detected${detail}`,
+    remediation: "Run 'aisdlc verify privacy' and mask PII or register ROPA / retention policies.",
+  };
+}
+
 function renderGateBadge(status: string): string {
   if (status === 'PASSED') return pc.green('✔ PASSED    ');
   if (status === 'FIXED') return pc.cyan('🔧 AUTO-FIX ');
@@ -355,6 +375,7 @@ function collectPreflightGates(rootDir: string, fix: boolean, gherkinCount: numb
     auditDuplicatesGate(rootDir),
     auditFrictionGate(rootDir),
     auditSecurityGate(rootDir),
+    auditPrivacyGate(rootDir),
   ];
 }
 
