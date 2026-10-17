@@ -33,11 +33,11 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm approve-builds --all
 
-      - name: Build Monorepo Packages (@aisdlc/core & @aisdlc/cli)
+      - name: Build Packages
         run: pnpm run build
 
       - name: Run Vitest Unit & Integration Suites
         run: pnpm test
 
-      - name: Dogfooding - Run AI-SDLC Full Verification Suite
-        run: node packages/cli/bin/aisdlc.js verify all
+      - name: AI-SDLC Quality Gate & Full Verification
+        run: npx @aisdlc/cli verify all

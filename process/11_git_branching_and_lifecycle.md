@@ -170,14 +170,19 @@ The AI-SDLC framework is CI/CD provider-agnostic, guaranteeing strict parity for
 1. **Pre-Flight & Quality Gates (PR / MR / Branch)**:
    - Every change proposal runs `npx aisdlc check` and `npx aisdlc verify all`.
    - Deterministic blocking on cyclomatic complexity, orphan traceability, detected secrets, or prohibited licenses.
-2. **Post-Merge Canonical Promotion & Integration (`sdd-integrate-ci.ts`)**:
-   - Upon consolidating a Pull Request or Merge Request into `main` or `release/vX.Y.Z` branches, the runner invokes `npx tsx scripts/sdd-integrate-ci.ts`.
-   - The script detects active SDD changes from provider environment variables, validates all tasks in `tasks.md` are `COMPLETED`, consolidates canonical requirements and components, and archives the change to `specs/changes/completed/`.
+2. **Post-Merge Canonical Promotion & Integration (`sdd integrate --auto`)**:
+   - Upon consolidating a Pull Request or Merge Request into `main` or `release/vX.Y.Z` branches, the runner invokes `npx @aisdlc/cli sdd integrate --auto`.
+   - The command detects active SDD changes from provider environment variables, validates all tasks in `tasks.md` are `COMPLETED`, consolidates canonical requirements and components, and archives the change to `specs/changes/completed/`.
 3. **Quick Scaffolding via CLI**:
    ```bash
-   # Initialize project with specific CI pipeline
-   npx aisdlc init --ci gitlab
-   npx aisdlc init --ci azure
-   npx aisdlc init --ci bitbucket
-   npx aisdlc init --ci github
+   # Interactive guided prompt (GitHub Actions [recommended], GitLab, Azure, Bitbucket, or None):
+   npx aisdlc init
+
+   # Or explicit provider flag:
+   npx aisdlc init --ci github      # Includes CI, SDD auto-integrate, PR KPI aggregator, and Dashboard deployment
+   npx aisdlc init --ci gitlab      # .gitlab-ci.yml
+   npx aisdlc init --ci azure       # azure-pipelines.yml
+   npx aisdlc init --ci bitbucket   # bitbucket-pipelines.yml
+   npx aisdlc init --ci none        # Reference templates in templates/ci/ only
    ```
+   *In addition, `aisdlc init` automatically scaffolds `.github/PULL_REQUEST_TEMPLATE.md` with non-negotiable Plan Execution matrices (`[X]` vs `[O]`) and Weak Points hotspots.*

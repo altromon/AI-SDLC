@@ -14,7 +14,7 @@ import {
   runGitPlan,
   runGitValidate,
 } from './commands/git.js';
-import { promptForAgents, promptForArchitecture, runInit } from './commands/init.js';
+import { promptForAgents, promptForArchitecture, promptForCi, runInit } from './commands/init.js';
 import { runKpiPr, runKpiRelease } from './commands/kpi.js';
 import { runMcpServer } from './commands/mcp.js';
 import { runReportDashboard, runReportQuality } from './commands/report.js';
@@ -41,7 +41,7 @@ const program = new Command();
 program
   .name('aisdlc')
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
-  .version('1.4.1');
+  .version('1.5.1');
 
 // --- check command (unified pre-flight with auto-fix) ---
 program
@@ -622,7 +622,11 @@ program
   .action(async (directory, opts) => {
     let agents = opts.agents;
     let arch = opts.architecture || opts.arch;
+    let ci = opts.ci;
     const isJson = opts.json || opts.format === 'json' || process.env.AISDLC_FORMAT === 'json' || process.env.AISDLC_OUTPUT === 'json';
+    if (ci === undefined && process.stdin.isTTY && !opts.dryRun && !isJson) {
+      ci = await promptForCi();
+    }
     if (arch === undefined && process.stdin.isTTY && !opts.dryRun && !isJson) {
       arch = await promptForArchitecture();
     }
@@ -631,7 +635,7 @@ program
     }
     const passed = runInit(directory, {
       dryRun: opts.dryRun,
-      ci: opts.ci,
+      ci,
       agents,
       architecture: arch,
       json: opts.json,

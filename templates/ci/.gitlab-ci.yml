@@ -38,7 +38,7 @@ quality-gates:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_COMMIT_BRANCH =~ /^release\/.*/'
   script:
-    - node packages/cli/bin/aisdlc.js check
+    - npx @aisdlc/cli check
 
 # ------------------------------------------------------------------------------
 # Stage 2: Unit Test Suite & Full Verification
@@ -51,7 +51,7 @@ test-and-verify:
     - if: '$CI_COMMIT_BRANCH =~ /^release\/.*/'
   script:
     - pnpm test
-    - node packages/cli/bin/aisdlc.js verify all
+    - npx @aisdlc/cli verify all
 
 # ------------------------------------------------------------------------------
 # Stage 3: Post-Merge SDD Canonical Integration
@@ -66,7 +66,7 @@ sdd-canonical-integration:
     GIT_STRATEGY: clone
     GIT_DEPTH: 0
   script:
-    - node packages/cli/bin/aisdlc.js sdd integrate --auto || true
+    - npx @aisdlc/cli sdd integrate --auto || true
     - |
       git config user.name "gitlab-ci-bot"
       git config user.email "gitlab-ci-bot@noreply.gitlab.com"

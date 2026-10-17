@@ -149,6 +149,9 @@ This accelerated flow demonstrates how to create, implement, verify, and integra
 ### 2. Fast 7-Step Workflow with Simplified Commands
 
 ```bash
+# 0. Turnkey Bootstrapping: initialize 29 schemas, 32 starter templates, universal MCP, and CI/CD:
+npx @aisdlc/cli init
+
 # 1. Define canonical product (ProductShape / PDaC) upstream in specs/product/
 #    Create or derive the Use Case or Requirement (e.g., specs/product/UC-STREAM-TELEMETRY.md) using templates/product/
 #    Pre-flight auto-fix syncs Gherkin scenarios to .feature and validates schemas:
@@ -187,7 +190,7 @@ npx aisdlc sdd integrate --auto
 
 | CLI Tool / Command | Equivalent pnpm Command | Lifecycle Phase | Output / Action Performed |
 |---|---|---|---|
-| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository structure, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`), CI/CD pipelines (`--ci <github\|gitlab\|azure\|bitbucket>`), AI agent rules (`--agents <all\|cursor\|claude\|antigravity\|copilot\|mcp\|none>`), and architecture templates (`--arch <minimal\|full\|none>`). Supports `--dry-run`, `--json`, and interactive console wizard |
+| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository with all 29 JSON schemas (Draft 2020-12), 32 canonical starter templates, Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`), and AI agent rules. Unconditionally generates universal MCP configs (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Injects standard npm scripts into consumer `package.json`. Interactive TTY wizard prompts for CI/CD provider (`GitHub Actions` default, `GitLab`, `Azure`, `Bitbucket`, `None`), Architecture granularity, and AI Agents. Supports `--dry-run`, `--json`, and `-F, --format <format>` |
 | `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry Setup** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
 | `npx aisdlc mcp` / `npx @aisdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 23 typed tools (including `new`, `verify`, `report`) and 5 canonical resources |
 | `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | **SDD Scaffolding** | Generates `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` sidecar (`HOF-*`) with SHA-256 digests |
@@ -741,6 +744,9 @@ AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@aisdlc/
 - **Canonical Resources (`aisdlc://`)**: `aisdlc://policies/quality`, `aisdlc://policies/licenses`, `aisdlc://changes/active`, `aisdlc://changes/completed`, `aisdlc://status/summary`.
 
 ### 3. IDE and MCP Client Configuration
+
+> [!TIP]
+> **Automatic Turnkey Scaffolding**: Executing `aisdlc init` (or `npx @aisdlc/cli init`) automatically creates `.cursor/mcp.json`, `antigravity.mcp.json`, and `.vscode/mcp.json` preconfigured with `@aisdlc/mcp` in your project out of the box, regardless of CI or agent options. Manual configuration is only required for standalone desktop clients like Claude Desktop.
 
 #### Cursor (`.cursor/mcp.json`):
 ```json

@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-10-14 10:27:50 UTC` | *Módulos Integrados:* `13`  
+> *Fecha de Compilación:* `2026-10-17 10:35:15 UTC` | *Módulos Integrados:* `13`  
 
 ---
 
@@ -427,6 +427,9 @@ This accelerated flow demonstrates how to create, implement, verify, and integra
 ### 2. Fast 7-Step Workflow with Simplified Commands
 
 ```bash
+# 0. Turnkey Bootstrapping: initialize 29 schemas, 32 starter templates, universal MCP, and CI/CD:
+npx @aisdlc/cli init
+
 # 1. Define canonical product (ProductShape / PDaC) upstream in specs/product/
 #    Create or derive the Use Case or Requirement (e.g., specs/product/UC-STREAM-TELEMETRY.md) using templates/product/
 #    Pre-flight auto-fix syncs Gherkin scenarios to .feature and validates schemas:
@@ -467,7 +470,7 @@ npx aisdlc sdd integrate --auto
 
 | CLI Tool / Command | Equivalent pnpm Command | Lifecycle Phase | Output / Action Performed |
 |---|---|---|---|
-| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository structure, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`), CI/CD pipelines (`--ci <github\|gitlab\|azure\|bitbucket>`), AI agent rules (`--agents <all\|cursor\|claude\|antigravity\|copilot\|mcp\|none>`), and architecture templates (`--arch <minimal\|full\|none>`). Supports `--dry-run`, `--json`, and interactive console wizard |
+| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository with all 29 JSON schemas (Draft 2020-12), 32 canonical starter templates, Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`), and AI agent rules. Unconditionally generates universal MCP configs (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Injects standard npm scripts into consumer `package.json`. Interactive TTY wizard prompts for CI/CD provider (`GitHub Actions` default, `GitLab`, `Azure`, `Bitbucket`, `None`), Architecture granularity, and AI Agents. Supports `--dry-run`, `--json`, and `-F, --format <format>` |
 | `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry Setup** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
 | `npx aisdlc mcp` / `npx @aisdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 23 typed tools (including `new`, `verify`, `report`) and 5 canonical resources |
 | `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | **SDD Scaffolding** | Generates `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` sidecar (`HOF-*`) with SHA-256 digests |
@@ -1077,6 +1080,9 @@ AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@aisdlc/
 <a id="doc-readme-3-ide-and-mcp-client-configuration"></a>
 
 ### 3. IDE and MCP Client Configuration
+
+> [!TIP]
+> **Automatic Turnkey Scaffolding**: Executing `aisdlc init` (or `npx @aisdlc/cli init`) automatically creates `.cursor/mcp.json`, `antigravity.mcp.json`, and `.vscode/mcp.json` preconfigured with `@aisdlc/mcp` in your project out of the box, regardless of CI or agent options. Manual configuration is only required for standalone desktop clients like Claude Desktop.
 
 #### Cursor (`.cursor/mcp.json`):
 ```json
@@ -3006,7 +3012,8 @@ ROLE: You are the System Architect Agent of the AI-SDLC framework.
 MISSION: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4.
 DIRECTIVES:
 - Decompose the system into building blocks 'CMP-*' ensuring each service declares which use cases 'UC-*' it implements and which requirements ('FR-*', 'QR-*', 'SEC-REQ-*') it fulfills under 'satisfies-requirements'.
-- CONTRACT-FIRST FULL-STACK INTEGRATION: Whenever a feature or change spans Frontend (UI) and Backend (API/services), define an explicit shared typed contract (Zod schemas, shared TypeScript DTOs, or OpenAPI specification) in 'design.md' BEFORE code implementation so both layers compile against a single source of truth.
+- ANTI-MONOLITH INCREMENTAL SDD DECOMPOSITION: For greenfield products, never bundle the entire product into a single SDD change ('CHG-001'). Decompose delivery into incremental SDD changes scoped per Use Case ('UC-*') or Bounded Context ('BC-*') so downstream QA and Developer agents execute with 100% coverage per increment.
+- CONTRACT-FIRST FULL-STACK INTEGRATION & EXPLICIT CONTRACT CHECKLIST: Whenever a feature or change spans Frontend (UI) and Backend (API/services), define an explicit shared typed contract (Zod schemas, shared TypeScript DTOs, or OpenAPI specification) in 'design.md' BEFORE code implementation so both layers compile against a single source of truth. Declare explicit 'contracts' (component, interface, and method names) in the YAML frontmatter of 'design.md' so 'aisdlc verify traceability' deterministically verifies their implementation in 'src/' and unit test coverage in 'tests/'.
 - Generate interaction and sequence diagrams in native Mermaid syntax.
 - Document critical technological decisions using immutable ADR records under docs/architecture/09_decisions/.
 - Validate that the architecture complies with legal constraints in license-policy.yaml.
@@ -3020,15 +3027,22 @@ DIRECTIVES:
 ```text
 ROLE: You are the QA Engineer and SDET (Software Development Engineer in Test) Agent of the AI-SDLC framework.
 MISSION: Translate approved requirements (FR-*, SEC-REQ-*, QR-*) into comprehensive FAILING (red) test suites
-applying BDD/Gherkin, BEFORE agent-developer writes a single line of production code.
+(BDD/Gherkin, End-to-End, UI, integration, and unit tests) BEFORE agent-developer writes a single line of production code.
 DIRECTIVES:
 - Read exclusively requirements cited in the handoff.yaml sidecar (HOF-*) and their referenced artifacts.
   Never inspect or anticipate implementation details: your contract is with the requirement, not the code.
-- For each FR-* requirement, generate the three mandatory test categories:
-  1. NOMINAL CASE (Scenario): happy path with valid inputs within expected boundaries.
-  2. BOUNDARY CASES (Scenario Outline + Examples table): values at the extremes of the accepted range
+- PROJECT TECHNOLOGY & TOOLING ALIGNMENT: Always use the testing frameworks, E2E/UI runners, and technology stack agreed upon for the project (as defined in ADR-*, design.md, package.json, or project configuration) if present, rather than introducing arbitrary or mismatched testing tools.
+- MANDATORY END-TO-END (E2E) AND USER INTERFACE (UI) TEST SUITES: Never omit End-to-End (E2E) and User Interface (UI) tests. Whenever requirements involve user-facing flows, screens, or full-stack interactions, generate dedicated E2E and UI test suites alongside BDD/integration tests without requiring the user to ask for them in the prompt.
+- INTERACTIVE UI ELEMENT EXHAUSTIVE COVERAGE: Create specific tests for EVERY interactive element with which the user can interact (buttons, inputs, selects, forms, modals, links, toggles, tabs, etc.), explicitly covering for each element:
+  1. Happy Path (nominal interaction and expected state/navigation result with valid input),
+  2. Sad Path (error handling, invalid interaction, validation rejection, disabled/blocked states, failure recovery),
+  3. Boundary Values (minimum/maximum lengths, numeric limits, empty/whitespace-only inputs, edge selections, rapid/repeated clicks).
+- For each FR-* requirement, generate the three mandatory test categories tagged with '@nominal', '@boundary', and '@invalid':
+  1. NOMINAL CASE (@nominal Scenario): happy path with valid inputs within expected boundaries.
+  2. BOUNDARY CASES (@boundary Scenario Outline + Examples table): values at the extremes of the accepted range
      (minimum, maximum, exact length, domain edge).
-  3. OUT OF RANGE / INVALID CASES (Scenario Outline + Examples table): null, empty, wrong types, values exceeding bounds.
+  3. OUT OF RANGE / INVALID CASES (@invalid Scenario Outline + Examples table): null, empty, wrong types, values exceeding bounds.
+- USE CASE VARIANT COVERAGE: Inspect every 'UC-*' in the handoff subgraph and generate explicit BDD scenarios covering 100% of its 'alternative-flows' and 'exception-flows'.
 - Apply the following conditional categories based on the FR-* context:
   - SECURITY (mandatory if FR-* has associated SEC-REQ-*):
     * Injection: verify inputs with malicious payloads (SQL, prompt injection, XSS) are rejected.
@@ -3048,7 +3062,7 @@ DIRECTIVES:
   @security @mitigation, @performance or @idempotence.
 - FORBIDDEN: including production code, suggesting implementation, or anticipating technical solutions.
   Your deliverable is strictly failing tests; any scenario with attached production code violates TDD protocol.
-- QUALITY BLOCK: an FR-* having only nominal scenarios cannot hand off to agent-developer.
+- QUALITY BLOCK: an FR-* having only nominal scenarios, or a UI/user-facing feature missing E2E, UI, or per-element interactive tests (Happy Path, Sad Path, Boundary Values), cannot hand off to agent-developer.
   Missing boundary or out-of-range scenarios represents an explicit block.
 - Before emitting handoff, run 'npx aisdlc verify testing' to confirm Gherkin scenarios are synchronized and recorded in RTM.
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the canonical Workflow Handoff block
@@ -3063,7 +3077,17 @@ ROLE: You are the High-Precision Developer / Coder Agent.
 MISSION: Implement atomic tasks from SDD specifications ('tasks.md') delivering clean, typed, and tested code.
 DIRECTIVES:
 - Read exclusively documents cited by the spec to keep context clean and eliminate hallucinations.
-- Apply Test-Driven Development (TDD): generate unit tests before or alongside component logic.
+- MANDATORY 4-STEP IMPLEMENTATION ORDER: Execute every implementation task following this strict sequential order:
+  1. CLEAN ARCHITECTURE DEFINITION / REDEFINITION: Define or refine the module/layer structure adhering to Clean Architecture patterns (Entities/Domain, Use Cases/Application, Interface Adapters, and Frameworks/Drivers), enforcing the Dependency Rule (dependencies point strictly inward toward the domain).
+  2. INTER-MODULE INTERFACES FIRST: Define explicit interfaces/ports (contracts, DTOs, types) for all interactions between modules and boundaries BEFORE writing concrete logic, preventing direct coupling between concrete implementations.
+  3. COMPONENT IMPLEMENTATION: Implement the concrete components, use cases, and adapters that fulfill and consume the defined interfaces.
+  4. EXHAUSTIVE PER-FUNCTION UNIT TESTING: Write unit tests for EVERY function in 'tests/unit/', explicitly verifying:
+     * Happy Path (nominal execution with valid inputs),
+     * Sad Path (controlled error handling, rejections, and business exceptions),
+     * Boundary Values (minimum, maximum, exact limits, off-by-one edges),
+     * Unexpected, Null, and Empty Values ('null', 'undefined', empty strings/arrays/objects, malformed inputs).
+- Apply Test-Driven Development (TDD): make failing tests delivered by 'agent-qa-engineer' pass green without altering tests to accommodate buggy code, and ensure every exported function and method declared in 'design.md' ('contracts') or implemented in 'src/' has direct unit test coverage in 'tests/unit/'.
+- 100% DESIGN & HANDOFF SCOPE COVERAGE IN TASKS: Ensure every task in 'tasks.md' declares 'implements-components' ('CMP-*') and 'satisfies-requirements' ('FR-*', 'SEC-REQ-*') so 100% of the components, requirements, and contracts in 'design.md' and 'handoff.yaml' are mapped and implemented.
 - If the task implements 'SEC-REQ-*' or 'FR-*', generate the corresponding test and tag BDD scenarios with '@<ID>' or cite the ID in test header comments to enable reverse traceability.
 - Before adding any external dependency, verify its license is in the allowlist of license-policy.yaml.
 - ZERO FAKE-WIRING GUARDRAIL: Strictly forbidden from marking a task 'COMPLETED' with hardcoded 'mockData' arrays in production views, 'setTimeout' simulating network calls, or empty UI event handlers ('onClick={() => {}}', 'onSubmit={() => {}}'). Frontend components must wire directly to the shared contract and real Backend endpoints.
@@ -3393,6 +3417,7 @@ aisdlc init --agents claude
 
 #### Deployment Rules and No-Clobber Protection:
 - **No-Clobber Invariance**: If a configuration file (`.agent/rules/ai-sdlc.md`, `CLAUDE.md`, `.cursor/rules/*`, etc.) already exists in the target project, the initialization process **never overwrites it**. An informational log is printed to console (`ℹ Skipped (file already exists)`).
+- **Universal MCP Scaffolding Invariance**: Regardless of whether specific agents are configured or if `--agents none` is specified, `aisdlc init` always unconditionally scaffolds `.cursor/mcp.json`, `antigravity.mcp.json`, and `.vscode/mcp.json` preconfigured for `@aisdlc/mcp`, ensuring immediate zero-config connectivity to the AI-SDLC MCP server.
 - **Programmatic MCP Consumption**: The MCP `new` tool accepts the `agents` parameter (`"all"`, `"cursor,claude"`, etc.) enabling automated orchestrators to scaffold projects without manual interaction.
 
 <a id="cap-09-agent-protocols-automated-anti-drift-verification"></a>
@@ -4332,17 +4357,22 @@ The AI-SDLC framework is CI/CD provider-agnostic, guaranteeing strict parity for
 1. **Pre-Flight & Quality Gates (PR / MR / Branch)**:
    - Every change proposal runs `npx aisdlc check` and `npx aisdlc verify all`.
    - Deterministic blocking on cyclomatic complexity, orphan traceability, detected secrets, or prohibited licenses.
-2. **Post-Merge Canonical Promotion & Integration (`sdd-integrate-ci.ts`)**:
-   - Upon consolidating a Pull Request or Merge Request into `main` or `release/vX.Y.Z` branches, the runner invokes `npx tsx scripts/sdd-integrate-ci.ts`.
-   - The script detects active SDD changes from provider environment variables, validates all tasks in `tasks.md` are `COMPLETED`, consolidates canonical requirements and components, and archives the change to `specs/changes/completed/`.
+2. **Post-Merge Canonical Promotion & Integration (`sdd integrate --auto`)**:
+   - Upon consolidating a Pull Request or Merge Request into `main` or `release/vX.Y.Z` branches, the runner invokes `npx @aisdlc/cli sdd integrate --auto`.
+   - The command detects active SDD changes from provider environment variables, validates all tasks in `tasks.md` are `COMPLETED`, consolidates canonical requirements and components, and archives the change to `specs/changes/completed/`.
 3. **Quick Scaffolding via CLI**:
    ```bash
-   # Initialize project with specific CI pipeline
-   npx aisdlc init --ci gitlab
-   npx aisdlc init --ci azure
-   npx aisdlc init --ci bitbucket
-   npx aisdlc init --ci github
+   # Interactive guided prompt (GitHub Actions [recommended], GitLab, Azure, Bitbucket, or None):
+   npx aisdlc init
+
+   # Or explicit provider flag:
+   npx aisdlc init --ci github      # Includes CI, SDD auto-integrate, PR KPI aggregator, and Dashboard deployment
+   npx aisdlc init --ci gitlab      # .gitlab-ci.yml
+   npx aisdlc init --ci azure       # azure-pipelines.yml
+   npx aisdlc init --ci bitbucket   # bitbucket-pipelines.yml
+   npx aisdlc init --ci none        # Reference templates in templates/ci/ only
    ```
+   *In addition, `aisdlc init` automatically scaffolds `.github/PULL_REQUEST_TEMPLATE.md` with non-negotiable Plan Execution matrices (`[X]` vs `[O]`) and Weak Points hotspots.*
 
 ---
 

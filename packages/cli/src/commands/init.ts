@@ -13,6 +13,45 @@ export interface InitCliOptions {
   format?: string;
 }
 
+const CI_MENU = [
+  pc.bold(pc.cyan('\n🚀 [AI-SDLC] CI/CD Pipeline Provider:')),
+  '  1) ' + pc.green('GitHub Actions') + ' (.github/workflows/) ' + pc.yellow('[Recommended]'),
+  '  2) GitLab CI (.gitlab-ci.yml)',
+  '  3) Azure DevOps Pipelines (azure-pipelines.yml)',
+  '  4) Bitbucket Pipelines (bitbucket-pipelines.yml)',
+  '  5) ' + pc.gray('None') + ' (Reference templates in templates/ci/ only)',
+].join('\n');
+
+const CI_CHOICE_MAP: Record<string, string | undefined> = {
+  '1': 'github',
+  '2': 'gitlab',
+  '3': 'azure',
+  '4': 'bitbucket',
+  '5': undefined,
+  github: 'github',
+  gitlab: 'gitlab',
+  azure: 'azure',
+  bitbucket: 'bitbucket',
+  none: undefined,
+};
+
+function parseCiChoice(answer: string): string | undefined {
+  const trimmed = answer.trim().toLowerCase();
+  if (!trimmed) return 'github';
+  return trimmed in CI_CHOICE_MAP ? CI_CHOICE_MAP[trimmed] : trimmed;
+}
+
+export async function promptForCi(): Promise<string | undefined> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  console.log(CI_MENU);
+  try {
+    const answer = await rl.question(pc.bold('\nWhich CI/CD provider do you wish to configure? [1-5] (default 1): '));
+    return parseCiChoice(answer);
+  } finally {
+    rl.close();
+  }
+}
+
 function parseArchitectureChoice(answer: string): string {
   const trimmed = answer.trim().toLowerCase();
   if (!trimmed || trimmed === '1' || trimmed === 'minimal') return 'minimal';

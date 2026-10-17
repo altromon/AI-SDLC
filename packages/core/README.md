@@ -166,7 +166,10 @@ This separation allows the core functionality to be reused by different interfac
 
 | Capability | Description | Primary Exports |
 | --- | --- | --- |
-| **AI-SDLC Project Bootstrapping** | Configures policies (`quality-policy.yaml`, `license-policy.yaml`), schemas, arc42 architecture templates, CI workflows, and AI agent rules. | `initProject`, `resolveAgentTargets`, `collectAgentFiles` |
+| **AI-SDLC Project Bootstrapping** | Configures policies (`quality-policy.yaml`, `license-policy.yaml`), all 29 schemas, 32 starter templates, arc42 architecture templates, CI workflows, and AI agent rules. Injects standard npm scripts into consumer `package.json`. | `initProject`, `resolveAgentTargets`, `collectAgentFiles` |
+| **Canonical Starter Templates & Schemas** | Pre-bundled, typed constants for all 29 Draft 2020-12 JSON schemas and 32 base templates (Product, Security, Safety, Manuals, Compliance, SDD, CI/CD). Provides automatic in-memory fallback during schema validation. | `STARTER_BASE_TEMPLATES`, `STARTER_SCHEMAS`, `STARTER_SCHEMAS_MAP`, `STARTER_QUALITY_POLICY`, `STARTER_LICENSE_POLICY`, `STARTER_PULL_REQUEST_TEMPLATE`, `STARTER_GITHUB_PULL_REQUEST_TEMPLATE` |
+| **Universal MCP Scaffolding** | Pre-bundled Model Context Protocol server configuration files for immediate IDE integration without manual setup. | `STARTER_CURSOR_MCP`, `STARTER_ANTIGRAVITY_MCP`, `STARTER_VSCODE_MCP` |
+| **Multi-Provider CI/CD Pipelines** | Production-ready pipeline definitions using `npx @aisdlc/cli` across GitHub Actions (including automated PR KPI aggregation), GitLab CI, Azure DevOps, and Bitbucket Pipelines. | `STARTER_GITHUB_CI`, `STARTER_GITHUB_SDD_INTEGRATE`, `STARTER_GITHUB_PR_KPI`, `STARTER_GITHUB_DEPLOY_DASHBOARD`, `STARTER_GITLAB_CI`, `STARTER_AZURE_PIPELINES`, `STARTER_BITBUCKET_PIPELINES` |
 
 ## When should I use this package?
 

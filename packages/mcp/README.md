@@ -79,7 +79,18 @@ aisdlc mcp
 
 ### Client Configuration
 
-Add `@aisdlc/mcp` to your IDE or agent configuration (Claude Desktop, Cursor, Google Antigravity, VS Code):
+#### 1. Automatic Turnkey Setup (`aisdlc init`)
+
+When you initialize a repository using `aisdlc init` (or `npx @aisdlc/cli init`), the framework **automatically scaffolds preconfigured MCP files** out of the box for all supported IDEs and agent environments, regardless of CI provider or agent settings:
+- **Google Antigravity / Gemini CLI**: `antigravity.mcp.json`
+- **Visual Studio Code / Copilot**: `.vscode/mcp.json`
+- **Cursor IDE**: `.cursor/mcp.json`
+
+Zero manual JSON configuration is required.
+
+#### 2. Manual Client Configuration
+
+To configure other clients (e.g. Claude Desktop) or add `@aisdlc/mcp` manually:
 
 ```json
 {

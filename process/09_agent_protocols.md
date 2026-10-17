@@ -429,6 +429,7 @@ aisdlc init --agents claude
 
 #### Deployment Rules and No-Clobber Protection:
 - **No-Clobber Invariance**: If a configuration file (`.agent/rules/ai-sdlc.md`, `CLAUDE.md`, `.cursor/rules/*`, etc.) already exists in the target project, the initialization process **never overwrites it**. An informational log is printed to console (`ℹ Skipped (file already exists)`).
+- **Universal MCP Scaffolding Invariance**: Regardless of whether specific agents are configured or if `--agents none` is specified, `aisdlc init` always unconditionally scaffolds `.cursor/mcp.json`, `antigravity.mcp.json`, and `.vscode/mcp.json` preconfigured for `@aisdlc/mcp`, ensuring immediate zero-config connectivity to the AI-SDLC MCP server.
 - **Programmatic MCP Consumption**: The MCP `new` tool accepts the `agents` parameter (`"all"`, `"cursor,claude"`, etc.) enabling automated orchestrators to scaffold projects without manual interaction.
 
 ### Automated Anti-Drift Verification
