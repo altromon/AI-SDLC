@@ -20,9 +20,9 @@ definitions:
           - pnpm install --frozen-lockfile
           - pnpm approve-builds --all
           - pnpm run build
-          - node packages/cli/bin/aisdlc.js check
+          - npx @aisdlc/cli check
           - pnpm test
-          - node packages/cli/bin/aisdlc.js verify all
+          - npx @aisdlc/cli verify all
 
     - step: &sdd-integrate
         name: SDD Canonical Integration
@@ -35,7 +35,7 @@ definitions:
           - pnpm install --frozen-lockfile
           - pnpm approve-builds --all
           - pnpm run build
-          - node packages/cli/bin/aisdlc.js sdd integrate --auto || true
+          - npx @aisdlc/cli sdd integrate --auto || true
           - |
             git config user.name "bitbucket-pipelines[bot]"
             git config user.email "pipelines[bot]@bitbucket.org"

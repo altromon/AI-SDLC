@@ -39,7 +39,7 @@ stages:
             displayName: 'Install dependencies and build monorepo'
 
           - script: |
-              node packages/cli/bin/aisdlc.js check
+              npx @aisdlc/cli check
             displayName: 'Run AI-SDLC pre-flight (check)'
 
           - script: |
@@ -47,7 +47,7 @@ stages:
             displayName: 'Run unit test suite'
 
           - script: |
-              node packages/cli/bin/aisdlc.js verify all
+              npx @aisdlc/cli verify all
             displayName: 'Run Full Release Gate (verify all)'
 
   - stage: CanonicalIntegration
@@ -76,7 +76,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              node packages/cli/bin/aisdlc.js sdd integrate --auto || true
+              npx @aisdlc/cli sdd integrate --auto || true
             name: SddIntegrate
             displayName: 'Detect and integrate SDD increment'
 

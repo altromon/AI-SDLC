@@ -97,6 +97,10 @@ describe('@aisdlc/cli Command Suite', () => {
       expect(runInit(githubTarget, { ci: 'github' })).toBe(true);
       expect(fs.existsSync(path.join(githubTarget, '.github', 'workflows', 'ci.yml'))).toBe(true);
       expect(fs.existsSync(path.join(githubTarget, '.github', 'workflows', 'sdd-integrate-on-merge.yml'))).toBe(true);
+      expect(fs.existsSync(path.join(githubTarget, '.github', 'workflows', 'pr-kpi-summary.yml'))).toBe(true);
+      expect(fs.existsSync(path.join(githubTarget, '.github', 'workflows', 'deploy-dashboard.yml'))).toBe(true);
+      expect(fs.existsSync(path.join(githubTarget, '.github', 'PULL_REQUEST_TEMPLATE.md'))).toBe(true);
+      expect(fs.existsSync(path.join(githubTarget, 'templates', 'sdd', 'pull-request.template.md'))).toBe(true);
     } finally {
       fs.rmSync(tempInitDir, { recursive: true, force: true });
     }

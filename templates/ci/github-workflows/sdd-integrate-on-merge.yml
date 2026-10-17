@@ -62,7 +62,7 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
           MANUAL_CHANGE_ID: ${{ github.event.inputs.change_id }}
         run: |
-          node packages/cli/bin/aisdlc.js sdd integrate --auto || true
+          npx @aisdlc/cli sdd integrate --auto || true
 
       - name: Commit and Push Canonical Baseline Changes
         run: |

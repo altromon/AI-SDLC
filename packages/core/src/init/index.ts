@@ -26,6 +26,12 @@ import {
   VALID_ARCHITECTURE_GRANULARITIES,
   ArchitectureGranularity,
 } from './architecture-templates.js';
+import {
+  STARTER_BASE_TEMPLATES,
+  STARTER_TEMPLATES_SDD_PULL_REQUEST_TEMPLATE_MD,
+  STARTER__GITHUB_PULL_REQUEST_TEMPLATE_MD,
+} from './starter-templates.js';
+import { STARTER_SCHEMAS } from './starter-schemas.js';
 
 export const VALID_CI_PROVIDERS = ['github', 'gitlab', 'azure', 'bitbucket'] as const;
 export type SupportedCiProvider = (typeof VALID_CI_PROVIDERS)[number];
@@ -237,7 +243,7 @@ quality-gates:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_COMMIT_BRANCH =~ /^release\\/.*/'
   script:
-    - node packages/cli/bin/aisdlc.js check
+    - npx @aisdlc/cli check
 
 test-and-verify:
   stage: test
@@ -247,7 +253,7 @@ test-and-verify:
     - if: '$CI_COMMIT_BRANCH =~ /^release\\/.*/'
   script:
     - pnpm test
-    - node packages/cli/bin/aisdlc.js verify all
+    - npx @aisdlc/cli verify all
 
 sdd-canonical-integration:
   stage: integrate
@@ -259,7 +265,7 @@ sdd-canonical-integration:
     GIT_STRATEGY: clone
     GIT_DEPTH: 0
   script:
-    - node packages/cli/bin/aisdlc.js sdd integrate --auto || true
+    - npx @aisdlc/cli sdd integrate --auto || true
     - |
       git config user.name "gitlab-ci-bot"
       git config user.email "gitlab-ci-bot@noreply.gitlab.com"
@@ -310,7 +316,7 @@ stages:
             displayName: 'Instalar dependencias y compilar monorepo'
 
           - script: |
-              node packages/cli/bin/aisdlc.js check
+              npx @aisdlc/cli check
             displayName: 'Ejecutar pre-vuelo AI-SDLC (check)'
 
           - script: |
@@ -318,7 +324,7 @@ stages:
             displayName: 'Ejecutar suite de pruebas unitarias'
 
           - script: |
-              node packages/cli/bin/aisdlc.js verify all
+              npx @aisdlc/cli verify all
             displayName: 'Ejecutar Release Gate Completo (verify all)'
 
   - stage: CanonicalIntegration
@@ -347,7 +353,7 @@ stages:
             displayName: 'Instalar dependencias'
 
           - script: |
-              node packages/cli/bin/aisdlc.js sdd integrate --auto || true
+              npx @aisdlc/cli sdd integrate --auto || true
             name: SddIntegrate
             displayName: 'Detectar e integrar incremento SDD'
 
@@ -383,9 +389,9 @@ definitions:
           - pnpm install --frozen-lockfile
           - pnpm approve-builds --all
           - pnpm run build
-          - node packages/cli/bin/aisdlc.js check
+          - npx @aisdlc/cli check
           - pnpm test
-          - node packages/cli/bin/aisdlc.js verify all
+          - npx @aisdlc/cli verify all
 
     - step: &sdd-integrate
         name: SDD Canonical Integration
@@ -398,7 +404,7 @@ definitions:
           - pnpm install --frozen-lockfile
           - pnpm approve-builds --all
           - pnpm run build
-          - node packages/cli/bin/aisdlc.js sdd integrate --auto || true
+          - npx @aisdlc/cli sdd integrate --auto || true
           - |
             git config user.name "bitbucket-pipelines[bot]"
             git config user.email "pipelines[bot]@bitbucket.org"
@@ -457,14 +463,121 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm approve-builds --all
 
-      - name: Build Monorepo Packages (@aisdlc/core & @aisdlc/cli)
+      - name: Build Packages
         run: pnpm run build
 
       - name: Run Vitest Unit & Integration Suites
         run: pnpm test
 
-      - name: Dogfooding - Run AI-SDLC Full Verification Suite
-        run: node packages/cli/bin/aisdlc.js verify all
+      - name: AI-SDLC Quality Gate & Full Verification
+        run: npx @aisdlc/cli verify all
+`;
+
+export const STARTER_GITHUB_PR_KPI = `name: AI-SDLC PR KPI Aggregator
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  aggregate-kpis:
+    name: Aggregate PR KPIs & Telemetry
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: |
+          pnpm install --frozen-lockfile
+
+      - name: Calculate and Emit PR KPIs
+        id: kpi
+        run: |
+          npx @aisdlc/cli kpi pr --base origin/\${{ github.base_ref }} --head HEAD >> $GITHUB_STEP_SUMMARY
+`;
+
+export const STARTER_GITHUB_DEPLOY_DASHBOARD = `name: Deploy AI-SDLC Dashboard to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy-dashboard:
+    name: Build & Publish Interactive Dashboard
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: \${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate AI-SDLC Interactive Dashboard
+        run: |
+          mkdir -p reports
+          npx --yes @aisdlc/cli report dashboard --output reports/index.html
+          cp reports/index.html reports/dashboard.html
+          touch reports/.nojekyll
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: reports
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Emit Summary to GitHub Actions
+        if: always() && steps.deployment.outcome == 'success'
+        run: |
+          echo "### 🌐 AI-SDLC Interactive Dashboard Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The interactive PDaC / RTM graph, Quality Gate telemetry, and release metrics are live at:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "👉 **[Open Live Dashboard](\${{ steps.deployment.outputs.page_url }})**" >> $GITHUB_STEP_SUMMARY
 `;
 
 export const STARTER_GITHUB_SDD_INTEGRATE = `name: SDD Canonical Integration on Merge
@@ -531,7 +644,7 @@ jobs:
           PR_BODY: \${{ github.event.pull_request.body }}
           MANUAL_CHANGE_ID: \${{ github.event.inputs.change_id }}
         run: |
-          node packages/cli/bin/aisdlc.js sdd integrate --auto || true
+          npx @aisdlc/cli sdd integrate --auto || true
 
       - name: Commit and Push Canonical Baseline Changes
         run: |
@@ -547,6 +660,10 @@ jobs:
           fi
 `;
 
+export * from './starter-schemas.js';
+export * from './starter-templates.js';
+export const STARTER_PULL_REQUEST_TEMPLATE = STARTER_TEMPLATES_SDD_PULL_REQUEST_TEMPLATE_MD;
+export const STARTER_GITHUB_PULL_REQUEST_TEMPLATE = STARTER__GITHUB_PULL_REQUEST_TEMPLATE_MD;
 export * from './agent-templates.js';
 export * from './architecture-templates.js';
 
@@ -723,30 +840,37 @@ function validateArchitectureGranularity(arch?: unknown): { valid: boolean; gran
   return { valid: true, granularity: rawArch as ArchitectureGranularity };
 }
 
+const BASE_DIRECTORIES: readonly string[] = [
+  'process',
+  'compliance',
+  'schemas/product',
+  'schemas/security',
+  'schemas/compliance',
+  'schemas/architecture',
+  'schemas/safety',
+  'schemas/sdd',
+  'schemas/manuals',
+  'schemas/workflow',
+  'schemas/ide',
+  'templates/product',
+  'templates/security',
+  'templates/compliance',
+  'templates/architecture',
+  'templates/safety',
+  'templates/sdd',
+  'templates/manuals',
+  'templates/ci',
+  'templates/workflow',
+  'specs',
+  'reports',
+  'tests/features',
+];
+
 function getBaseDirectories(ciProvider?: SupportedCiProvider): string[] {
-  const dirs = [
-    'process',
-    'schemas/product',
-    'schemas/security',
-    'schemas/compliance',
-    'schemas/architecture',
-    'schemas/safety',
-    'schemas/sdd',
-    'schemas/manuals',
-    'templates/product',
-    'templates/security',
-    'templates/compliance',
-    'templates/architecture',
-    'templates/safety',
-    'templates/sdd',
-    'templates/manuals',
-    'templates/ci',
-    'templates/workflow',
-    'specs',
-    'reports',
-    'tests/features',
-  ];
-  if (ciProvider === 'github') dirs.push('.github/workflows');
+  const dirs = [...BASE_DIRECTORIES];
+  if (ciProvider === 'github' || !ciProvider) {
+    dirs.push('.github', '.github/workflows');
+  }
   return dirs;
 }
 
@@ -758,6 +882,8 @@ function getCiWorkflowFiles(ciProvider?: SupportedCiProvider): { relPath: string
     return [
       { relPath: '.github/workflows/ci.yml', content: STARTER_GITHUB_CI },
       { relPath: '.github/workflows/sdd-integrate-on-merge.yml', content: STARTER_GITHUB_SDD_INTEGRATE },
+      { relPath: '.github/workflows/pr-kpi-summary.yml', content: STARTER_GITHUB_PR_KPI },
+      { relPath: '.github/workflows/deploy-dashboard.yml', content: STARTER_GITHUB_DEPLOY_DASHBOARD },
     ];
   }
   return [];
@@ -777,15 +903,11 @@ function collectStarterFiles(
   agentFiles: { relPath: string; content: string }[] = [],
   archGranularity: ArchitectureGranularity = 'minimal'
 ): { relPath: string; content: string }[] {
-  return [
+  const files: { relPath: string; content: string }[] = [
     { relPath: 'quality-policy.yaml', content: STARTER_QUALITY_POLICY },
     { relPath: 'license-policy.yaml', content: STARTER_LICENSE_POLICY },
-    { relPath: 'templates/sdd/tasks.template.md', content: STARTER_TASK_TEMPLATE },
-    { relPath: 'templates/product/requirement.template.md', content: STARTER_REQUIREMENT_TEMPLATE },
-    { relPath: 'templates/workflow/agent-handoff.template.md', content: STARTER_WORKFLOW_HANDOFF_TEMPLATE },
-    { relPath: 'templates/ci/.gitlab-ci.yml', content: STARTER_GITLAB_CI },
-    { relPath: 'templates/ci/azure-pipelines.yml', content: STARTER_AZURE_PIPELINES },
-    { relPath: 'templates/ci/bitbucket-pipelines.yml', content: STARTER_BITBUCKET_PIPELINES },
+    ...STARTER_BASE_TEMPLATES,
+    ...STARTER_SCHEMAS.map((s) => ({ relPath: s.relPath, content: s.content })),
     ...getCiWorkflowFiles(ciProvider),
     ...agentFiles,
     ...getArchitectureTemplates(archGranularity).map((t) => ({
@@ -793,6 +915,52 @@ function collectStarterFiles(
       content: t.content,
     })),
   ];
+
+  if (ciProvider === 'github' || !ciProvider) {
+    files.push({
+      relPath: '.github/PULL_REQUEST_TEMPLATE.md',
+      content: STARTER_GITHUB_PULL_REQUEST_TEMPLATE,
+    });
+  }
+
+  return files;
+}
+
+const STANDARD_AISDLC_SCRIPTS: Record<string, string> = {
+  check: 'aisdlc check',
+  'check:fix': 'aisdlc check --fix',
+  'verify:quality': 'aisdlc verify quality',
+  'verify:all': 'aisdlc verify all',
+  'change:new': 'aisdlc change new',
+};
+
+function injectMissingScripts(scripts: Record<string, string>): boolean {
+  let modified = false;
+  for (const [key, val] of Object.entries(STANDARD_AISDLC_SCRIPTS)) {
+    if (!scripts[key]) {
+      scripts[key] = val;
+      modified = true;
+    }
+  }
+  return modified;
+}
+
+function updateConsumerPackageJson(destDir: string, dryRun?: boolean): boolean {
+  const pkgPath = path.join(destDir, 'package.json');
+  if (!fs.existsSync(pkgPath)) return false;
+
+  try {
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+    if (!pkg || typeof pkg !== 'object') return false;
+    pkg.scripts = pkg.scripts || {};
+    const modified = injectMissingScripts(pkg.scripts);
+    if (modified && !dryRun) {
+      fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf-8');
+    }
+    return modified;
+  } catch {
+    return false;
+  }
 }
 
 function tryInstallGitHook(destDir: string, dryRun?: boolean): boolean {
@@ -849,31 +1017,45 @@ function buildInitSuccessResult(
   };
 }
 
+function validateInitOptions(options: InitProjectOptions): {
+  valid: boolean;
+  ciProvider?: SupportedCiProvider;
+  archGranularity: ArchitectureGranularity;
+  error?: string;
+} {
+  const ciRes = validateCiProvider(options.ci);
+  if (!ciRes.valid) return { valid: false, archGranularity: 'minimal', error: ciRes.error };
+  const archRes = validateArchitectureGranularity(options.architecture);
+  if (!archRes.valid) return { valid: false, archGranularity: 'minimal', error: archRes.error };
+  return { valid: true, ciProvider: ciRes.provider, archGranularity: archRes.granularity };
+}
+
 export function initProject(options: InitProjectOptions = {}): InitProjectResult {
   const baseDir = options.rootDir || process.cwd();
   const destDir = path.resolve(baseDir, options.targetDir || '.');
 
-  const ciRes = validateCiProvider(options.ci);
-  if (!ciRes.valid) return buildInitError(destDir, ciRes.error);
-
-  const archRes = validateArchitectureGranularity(options.architecture);
-  if (!archRes.valid) return buildInitError(destDir, archRes.error);
+  const validated = validateInitOptions(options);
+  if (!validated.valid) return buildInitError(destDir, validated.error);
 
   const agentTargets = resolveAgentTargets(options.agents);
   const { dirs: agentDirs, files: agentFiles } = collectAgentFiles(agentTargets);
-  const directories = mergeDirectories(getBaseDirectories(ciRes.provider), agentDirs);
+  const directories = mergeDirectories(getBaseDirectories(validated.ciProvider), agentDirs);
 
   const directoriesCreated = createDirectoriesOnDisk(destDir, directories, options.dryRun);
-  const starterFiles = collectStarterFiles(ciRes.provider, agentFiles, archRes.granularity);
+  const starterFiles = collectStarterFiles(validated.ciProvider, agentFiles, validated.archGranularity);
   const filesCreated = writeProjectFiles(destDir, starterFiles, options.dryRun);
+
+  if (updateConsumerPackageJson(destDir, options.dryRun)) {
+    filesCreated.push('package.json');
+  }
 
   return buildInitSuccessResult(
     destDir,
     directoriesCreated,
     filesCreated,
-    ciRes.provider,
+    validated.ciProvider,
     formatAgentsConfigured(agentTargets),
-    archRes.granularity,
+    validated.archGranularity,
     tryInstallGitHook(destDir, options.dryRun)
   );
 }

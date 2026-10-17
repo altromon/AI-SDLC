@@ -14,6 +14,7 @@ import {
   ArtifactValidationResult,
 } from '../types/index.js';
 import { walkMdFiles } from '../utils/fs.js';
+import { STARTER_SCHEMAS_MAP } from '../init/starter-schemas.js';
 
 export const TYPE_TO_SCHEMA_MAP: Record<string, string> = {
   // Product
@@ -384,6 +385,17 @@ function findSchemaFile(relSchemaPath: string, rootDir: string): string | null {
   return null;
 }
 
+function loadJsonSchema(fullPath: string | null, relSchemaPath: string): JsonSchemaRule | null {
+  if (fullPath && fs.existsSync(fullPath)) {
+    try {
+      return JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
+    } catch {
+      // Fallback to embedded schema on read or parse failure
+    }
+  }
+  return STARTER_SCHEMAS_MAP[relSchemaPath] || null;
+}
+
 export function resolveSchemaForArtifact(
   frontmatter: Record<string, unknown>,
   rootDir: string
@@ -395,15 +407,8 @@ export function resolveSchemaForArtifact(
   if (!type || !TYPE_TO_SCHEMA_MAP[type]) return null;
 
   const relSchemaPath = TYPE_TO_SCHEMA_MAP[type];
-  const fullPath = findSchemaFile(relSchemaPath, rootDir);
-  if (!fullPath) return null;
-
-  try {
-    const raw = fs.readFileSync(fullPath, 'utf-8');
-    return { schemaPath: relSchemaPath, schema: JSON.parse(raw) as JsonSchemaRule };
-  } catch {
-    return null;
-  }
+  const schema = loadJsonSchema(findSchemaFile(relSchemaPath, rootDir), relSchemaPath);
+  return schema ? { schemaPath: relSchemaPath, schema } : null;
 }
 
 function loadSchemaFromPathOrType(
@@ -412,15 +417,14 @@ function loadSchemaFromPathOrType(
 ): { schema: JsonSchemaRule | null; schemaId?: string } {
   if (schemaOrType.endsWith('.json')) {
     const fullPath = path.isAbsolute(schemaOrType) ? schemaOrType : findSchemaFile(schemaOrType, rootDir);
-    if (fullPath && fs.existsSync(fullPath)) {
-      return { schema: JSON.parse(fs.readFileSync(fullPath, 'utf-8')), schemaId: schemaOrType };
-    }
-  } else if (TYPE_TO_SCHEMA_MAP[schemaOrType]) {
-    const relPath = TYPE_TO_SCHEMA_MAP[schemaOrType];
-    const fullPath = findSchemaFile(relPath, rootDir);
-    if (fullPath && fs.existsSync(fullPath)) {
-      return { schema: JSON.parse(fs.readFileSync(fullPath, 'utf-8')), schemaId: relPath };
-    }
+    const relNormalized = schemaOrType.replace(/\\/g, '/');
+    const schema = loadJsonSchema(fullPath, relNormalized);
+    return { schema, schemaId: schemaOrType };
+  }
+  const relPath = TYPE_TO_SCHEMA_MAP[schemaOrType];
+  if (relPath) {
+    const schema = loadJsonSchema(findSchemaFile(relPath, rootDir), relPath);
+    return { schema, schemaId: relPath };
   }
   return { schema: null };
 }
