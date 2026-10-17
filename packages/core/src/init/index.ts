@@ -16,7 +16,9 @@ import {
   STARTER_ANTIGRAVITY_MCP,
   STARTER_VSCODE_MCP,
   SPECIALIZED_AGENT_TEMPLATES,
+  LIFECYCLE_SKILL_TEMPLATES,
   renderAntigravityAgentFile,
+  renderAntigravitySkillFile,
   renderClaudeAgentFile,
   renderCopilotAgentFile,
   renderCursorAgentFile,
@@ -710,6 +712,10 @@ function appendAntigravityFiles(dirs: string[], files: { relPath: string; conten
       { relPath: `.agent/agents/${agent.id}.md`, content },
       { relPath: `.agent/skills/${agent.id}/SKILL.md`, content }
     );
+  }
+  for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
+    dirs.push(`.agent/skills/${skill.id}`);
+    files.push({ relPath: `.agent/skills/${skill.id}/SKILL.md`, content: renderAntigravitySkillFile(skill) });
   }
 }
 

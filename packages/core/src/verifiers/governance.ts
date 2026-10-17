@@ -270,11 +270,11 @@ function extractDesignExpectedScope(changeDir: string): string[] {
   return expected;
 }
 
-function extractHandoffExpectedScope(changeDir: string, maxUc?: number, violations?: string[]): string[] {
+function extractHandoffExpectedScope(changeDir: string, maxUc = 1, violations?: string[]): string[] {
   const handoff = loadProductHandoffSidecar(changeDir);
   if (!handoff?.subgraph) return [];
   const ucList = handoff.subgraph.useCases || [];
-  if (maxUc !== undefined && ucList.length > maxUc && violations) {
+  if (ucList.length > maxUc && violations) {
     violations.push(
       `[${handoff.changeId}] Greenfield monolith detected: change bundles ${ucList.length} use cases (max ${maxUc}). Decompose into incremental SDD changes per Use Case.`
     );

@@ -246,6 +246,186 @@ export function renderCursorAgentFile(agent: SpecializedAgentTemplate): string {
   return `---\ndescription: ${agent.id} (${agent.title}) - ${agent.description}\nglobs: ${agent.globs}\nalwaysApply: false\n---\n\n# ${agent.id} (${agent.title})\n\nCanonical Reference: [\`process/09_agent_protocols.md\`](../../process/09_agent_protocols.md) and [\`process/01_governance_and_roles.md\`](../../process/01_governance_and_roles.md).\n\n${agent.body}\n`;
 }
 
+export interface LifecycleSkillTemplate {
+  id: string;
+  title: string;
+  description: string;
+  references: string;
+  body: string;
+}
+
+export const LIFECYCLE_SKILL_TEMPLATES: readonly LifecycleSkillTemplate[] = [
+  {
+    id: 'aisdlc-greenfield',
+    title: 'Greenfield Project Inception & Delivery Playbook',
+    description:
+      'Orchestrate end-to-end AI-SDLC onboarding and Phase 0 Inception for brand-new (Greenfield) projects, from repository initialization (aisdlc init) and NAF v4 Vision (ARCH-INTRO-*) through ProductShape, STRIDE Threat Modeling, arc42 Architecture, and initial SDD increment delivery.',
+    references:
+      '[`process/02_product_definition.md`](../../process/02_product_definition.md), [`process/05_architecture_arc42_nafv4.md`](../../process/05_architecture_arc42_nafv4.md), [`process/06_spec_driven_development.md`](../../process/06_spec_driven_development.md), and [`process/09_agent_protocols.md`](../../process/09_agent_protocols.md).',
+    body: `## Purpose & Trigger
+Use this skill when starting a **brand-new software project from scratch (Greenfield)** or when \`specs/product/\` has no canonical baseline yet. It coordinates the sequential execution of AI-SDLC MCP/CLI tools and specialized role agents so no code is written before product vision, security enclaves, and architecture contracts exist.
+
+## End-to-End Execution Playbook
+
+### Step 1: Repository Turnkey Initialization
+1. If the workspace has not been initialized with AI-SDLC schemas, policies, and templates, run MCP tool \`new\` (or CLI \`npx @aisdlc/cli init\`).
+2. Install the Git telemetry hook via \`npx aisdlc git hook install\` (\`pnpm run git:hook:install\`).
+3. Verify \`quality-policy.yaml\` and \`license-policy.yaml\` are present in the repository root.
+
+### Step 2: Phase 0 Product Inception (\`agent-product-analyst\`)
+1. Delegate to or adopt [\`agent-product-analyst\`](../agent-product-analyst/SKILL.md).
+2. **Discovery Interview (3–5 Questions)**: Before generating artifacts, clarify with the human Product Owner:
+   - Core mission statement and business problem.
+   - Primary actors (\`ACT-*\`) and external systems.
+   - Essential MVP capabilities (\`UC-*\`) vs. future roadmap.
+   - Top 3–5 quality goals (\`QR-*\`) and regulatory/technical constraints (\`CON-*\`).
+3. **Enterprise & Capability Vision**: Create \`specs/architecture/ARCH-INTRO-001.md\` (\`status: draft\`, \`naf-perspective: "Enterprise & Capability"\`) using \`templates/architecture/introduction-and-goals.template.md\`.
+4. **ProductShape Baseline**: Derive initial draft artifacts in \`specs/product/\`:
+   - Actors (\`ACT-*\`), Use Cases (\`UC-*\`), Business Rules (\`BR-*\`), Functional Requirements (\`FR-*\` with mandatory \`@nominal\`, \`@boundary\`, \`@invalid\` Gherkin blocks), and Quality Requirements (\`QR-*\`).
+5. Validate schemas and duplicates via MCP tools \`verify_schemas\` and \`verify_duplicates\` (or \`npx aisdlc check --fix\`).
+6. **Mandatory Upstream UX & MVP Boundary Gate (\`agent-expert-user\`)**: Invoke [\`agent-expert-user\`](../agent-expert-user/SKILL.md) in **Design Mode** to stress-test the proposed workflows, enforce strict MVP boundaries, and separate core MVP \`UC-*\` from future roadmap backlog (\`templates/product/user-design-feedback.template.md\`).
+
+### Step 3: Shift-Left Cybersecurity & Threat Modeling (\`agent-threat-modeler\`)
+1. Delegate to or adopt [\`agent-threat-modeler\`](../agent-threat-modeler/SKILL.md).
+2. Analyze every \`UC-*\` and \`FR-*\` using STRIDE and OWASP ASVS to create in \`specs/security/\`:
+   - Threat Actors (\`ACT-THREAT-*\`)
+   - Abuse Cases (\`ABUSE-*\` targeting \`UC-*\`)
+   - Security Requirements (\`SEC-REQ-*\` with \`@security @mitigation\` negative Gherkin scenarios and \`SEC-ENC-*\` Zero Trust enclave bindings).
+3. Run \`verify_schemas\` (\`npx aisdlc verify schemas --path specs/security\`).
+
+### Step 4: Modular Systems Architecture (\`agent-system-architect\`)
+1. Delegate to or adopt [\`agent-system-architect\`](../agent-system-architect/SKILL.md).
+2. Define building blocks (\`CMP-*\`) and Architectural Decision Records (\`ADR-*\`) in \`specs/architecture/\` using \`templates/architecture/\`, ensuring every \`CMP-*\` cites \`implements-use-cases\` (\`UC-*\`) and \`satisfies-requirements\` (\`FR-*\`, \`QR-*\`, \`SEC-REQ-*\`).
+3. Inspect third-party stack choices against \`license-policy.yaml\` via \`verify_licenses\`.
+4. **Technical Security Feedback Loop**: If new infrastructure, persistence, or auth decisions introduce attack vectors, return to \`agent-threat-modeler\` to add technical \`SEC-REQ-*\` mitigations before coding.
+
+### Step 5: Release Milestone & Topological Wave SDD Plan (\`1 UC-* = 1 CHG-*\`)
+1. **Open Release Milestone (\`Tier 2: release/v1.0.0\`)**: Group the approved MVP Use Cases (\`UC-001\`, \`UC-002\`, ...) under the initial release milestone (\`release/v1.0.0\`) and visualize the branch hierarchy via \`npx aisdlc git plan\`.
+2. **Decompose into Topological Waves (DAG Parallelism)**:
+   - **Wave 0 — Foundational Core (Sequential)**: Identify the foundational \`UC-*\` (core domain entities, shared contracts, auth/config) and deliver it first as \`CHG-001\` via [\`aisdlc-increment\`](../aisdlc-increment/SKILL.md) so downstream agents share locked interfaces.
+   - **Waves 1..N — Orthogonal Capabilities (Parallel Multi-Agent)**: Once Wave 0 contracts are merged into \`release/v1.0.0\`, scaffold independent \`CHG-*\` increments (\`1 UC-* = 1 CHG-*\`) and execute them **in parallel** across isolated branches/worktrees (\`feat/CHG-002\`, \`feat/CHG-003\`, ...) whenever they target distinct components (\`CMP-*\`) or bounded contexts (\`BC-*\`).
+3. **Release Consolidation (\`release/v1.0.0\` ➔ \`main\`)**: Once all MVP \`CHG-*\` increments are integrated (\`sdd_integrate\`), run \`verify\` (\`npx aisdlc verify all\`), generate SBOM (\`npx aisdlc verify licenses --sbom reports/sbom.cdx.json --notices THIRD_PARTY_NOTICES.md\`), compute release KPIs (\`kpi_release\`), and open the Release PR into \`main\` for human Product Owner & Release Manager sign-off.
+
+## Non-Negotiable Guardrails
+- **FORBIDDEN Greenfield Monolith (\`1 UC-* = 1 CHG-*\`)**: Never bundle the entire product or multiple \`UC-*\` into a single SDD change (\`CHG-001\`). Deterministic Gate 3 (\`verify_governance\`) blocks any \`handoff.yaml\` containing $> 1$ Use Case (\`Greenfield monolith detected\`). Parallelism is achieved by running **multiple bounded \`CHG-*\` concurrently** on separate branches/worktrees, never by stuffing multiple \`UC-*\` into one \`CHG-*\`.
+- Never invoke \`sdd_change_new\` or write application code in \`src/\` on a Greenfield project before \`ARCH-INTRO-001\`, \`agent-expert-user\` MVP validation, and at least one \`UC-*\` and \`FR-*\` exist.
+- All newly drafted specifications must start with \`status: draft\`.
+- Respect the Workflow Handoff Protocol (\`templates/workflow/agent-handoff.template.md\`) whenever task autonomy is $\\ge$ \`HUMAN_REVIEW_PLAN\`.`,
+  },
+  {
+    id: 'aisdlc-legacy-onboarding',
+    title: 'Legacy / Brownfield Retro-Inception Playbook',
+    description:
+      'Orchestrate progressive AI-SDLC adoption and Brownfield retro-inception on existing or legacy repositories without breaking production code, reverse-engineering architecture (ARCH-INTRO-*, CMP-*) and establishing baseline quality, security, and license audits before new SDD increments.',
+    references:
+      '[`process/02_product_definition.md`](../../process/02_product_definition.md), [`process/04_open_source_license_compliance.md`](../../process/04_open_source_license_compliance.md), [`process/05_architecture_arc42_nafv4.md`](../../process/05_architecture_arc42_nafv4.md), [`process/10_quality_management_and_release_gates.md`](../../process/10_quality_management_and_release_gates.md), and [`process/09_agent_protocols.md`](../../process/09_agent_protocols.md).',
+    body: `## Purpose & Trigger
+Use this skill when **adopting AI-SDLC in an existing or legacy codebase (Brownfield)** that already has production source code (\`src/\`, \`packages/\`, etc.) but lacks canonical PDaC specifications, arc42 architecture views, or deterministic quality/license gates.
+
+## End-to-End Execution Playbook
+
+### Step 1: Non-Destructive Framework Scaffolding
+1. Run MCP tool \`new\` (or CLI \`npx @aisdlc/cli init\`) on the existing repository.
+   - AI-SDLC enforces strict **no-clobber protection**: existing \`package.json\`, \`CLAUDE.md\`, or CI pipelines are preserved while injecting missing schemas (\`schemas/\`), templates (\`templates/\`), policies (\`quality-policy.yaml\`, \`license-policy.yaml\`), and MCP configs.
+2. Install the Git commit trailer hook via \`npx aisdlc git hook install\`.
+
+### Step 2: Baseline Diagnostic Audit (Read-Only Assessment)
+Before modifying any code or creating SDD changes, run diagnostic verifiers to quantify existing technical, legal, and security debt:
+1. **License & Dependency Audit (\`agent-compliance-checker\`)**: Run MCP tool \`verify_licenses\` (\`npx aisdlc verify licenses\`). Identify any viral (\`GPL\`/\`AGPL\`) or commercial (\`BSL\`/\`SSPL\`) dependencies already present in the lockfile and document exceptions or remediation plans.
+2. **Shift-Left Security Scan (\`agent-security-auditor\`)**: Run MCP tool \`verify_security\` (\`npx aisdlc verify security\`) to detect hardcoded secrets (Gate 11) or OWASP SAST vulnerabilities in legacy files.
+3. **AST Code Quality Baseline (\`agent-code-reviewer\`)**: Run MCP tool \`report_quality\` (\`npx aisdlc report quality\`) to generate \`reports/QUALITY_REPORT.md\` and identify legacy hotspots exceeding Cyclomatic Complexity ($\\le 10$), Cognitive Complexity ($\\le 15$), or Maintainability Index ($\\ge 50$).
+
+### Step 3: Brownfield Retro-Inception (\`agent-system-architect\` & \`agent-product-analyst\`)
+Instead of attempting to document 100% of a legacy monolith upfront, apply **bounded retro-inception** focused on the system boundary and the domain areas under active evolution:
+1. **System Vision & Context (\`ARCH-INTRO-001\`)**: Use [\`agent-product-analyst\`](../agent-product-analyst/SKILL.md) to document the current system's mission, primary actors (\`ACT-*\`), and top quality goals (\`QR-*\`) in \`specs/architecture/ARCH-INTRO-001.md\`.
+2. **As-Is Component Mapping (\`CMP-*\` & \`ADR-*\`)**: Use [\`agent-system-architect\`](../agent-system-architect/SKILL.md) to map existing core modules/services into \`specs/architecture/CMP-*.md\` and capture historical architectural constraints (\`CON-*\`, \`ADR-*\`).
+3. **Core Use Cases Extraction (\`UC-*\`, \`FR-*\`)**: Extract canonical \`UC-*\` and \`FR-*\` artifacts in \`specs/product/\` for the specific bounded context or module that will be modified or extended next, including Gherkin acceptance scenarios reflecting current expected behavior (characterization specs).
+4. **Threat & Trust Boundary Mapping (\`agent-threat-modeler\`)**: Map existing trust zones (\`SEC-ENC-*\`) and active threat vectors (\`ACT-THREAT-*\`, \`ABUSE-*\`, \`SEC-REQ-*\`) on the target module.
+
+### Step 4: Characterization Testing & Synchronization
+1. Run MCP tool \`sdd_check_fix\` (\`npx aisdlc check --fix\`) to extract \`.feature\` files and compute canonical SHA-256 digests.
+2. Run \`verify_schemas\` and \`verify_pdac\` to confirm the reverse-engineered baseline graph is structurally valid and drift-free.
+
+### Step 5: Transition to Governed SDD Increments (Boy Scout / Strangler Rule)
+Once the target domain's baseline artifacts (\`ARCH-INTRO-*\`, \`UC-*\`, \`FR-*\`, \`CMP-*\`) are in place, execute all new features, refactorings, or bugfixes via [\`aisdlc-increment\`](../aisdlc-increment/SKILL.md).
+
+## Non-Negotiable Guardrails
+- **Zero Drive-By Rewrites**: Never mass-refactor untouched legacy modules during onboarding. Apply the Strangler / Boy Scout rule: bring touched functions into compliance with \`quality-policy.yaml\` incrementally via governed SDD tasks (\`TSK-*\`).
+- **Characterization First**: Never alter legacy business logic without first capturing its current behavior in an \`FR-*\` Gherkin specification and a verifiable test suite (\`agent-qa-engineer\`).
+- **Immediate Secret Remediation**: If Step 2 (\`verify_security\`) uncovers leaked credentials (exit code 4), halt feature work and remediate/rotate secrets immediately.`,
+  },
+  {
+    id: 'aisdlc-increment',
+    title: 'Bounded SDD Feature & Bugfix Delivery Playbook',
+    description:
+      'Orchestrate the complete Spec-Driven Development (SDD) lifecycle for bounded feature increments, enhancements, and bugfixes (CHG-* / TSK-*), from upstream requirement derivation and 4-tier Git branching through Red-Green-Refactor TDD, Pre-Merge Audit Triad, all 11 Quality Gates, and canonical baseline integration.',
+    references:
+      '[`process/06_spec_driven_development.md`](../../process/06_spec_driven_development.md), [`process/08_citation_contract_and_drift.md`](../../process/08_citation_contract_and_drift.md), [`process/10_quality_management_and_release_gates.md`](../../process/10_quality_management_and_release_gates.md), [`process/11_git_branching_and_lifecycle.md`](../../process/11_git_branching_and_lifecycle.md), and [`process/09_agent_protocols.md`](../../process/09_agent_protocols.md).',
+    body: `## Purpose & Trigger
+Use this skill for **every evolutionary increment (new feature, enhancement, refactoring, or bugfix)** on a project that already has an AI-SDLC baseline. It enforces strict 360° traceability from upstream ProductShape (\`UC-*\`, \`FR-*\`) through SDD (\`CHG-*\`, \`HOF-*\`, \`TSK-*\`), TDD implementation, the 11 Quality Gates, and baseline promotion.
+
+## End-to-End Execution Playbook
+
+### Step 1: Upstream Product & Security Delta (\`agent-product-analyst\` & \`agent-threat-modeler\`)
+1. Inspect active changes via MCP tool \`get_active_handoff\` and verify whether the target Use Case (\`UC-*\`) or Requirement (\`FR-*\`) already exists in \`specs/product/\`.
+2. If the increment introduces new behavior or modifies business rules:
+   - Use [\`agent-product-analyst\`](../agent-product-analyst/SKILL.md) to create or update the \`UC-*\`, \`BR-*\`, and \`FR-*\` (with \`@nominal\`, \`@boundary\`, \`@invalid\` Gherkin scenarios).
+   - Run MCP tool \`verify_duplicates\` (\`npx aisdlc verify duplicates\`) to block lexical or functional collisions early.
+   - Use [\`agent-threat-modeler\`](../agent-threat-modeler/SKILL.md) to model any new \`ABUSE-*\` and \`SEC-REQ-*\` mitigations.
+3. Run \`sdd_check_fix\` (\`npx aisdlc check --fix\`) to sync Gherkin \`.feature\` files and validate schemas.
+
+### Step 2: SDD Change Scaffolding & Architectural Design (\`agent-system-architect\`)
+1. Scaffold the bounded change package and its cryptographic \`handoff.yaml\` sidecar (\`HOF-*\`) targeting **a single Use Case (\`1 UC-* = 1 CHG-*\`)** using MCP tool \`sdd_change_new\` (or CLI \`npx aisdlc change new "<Title>" --from <UC-ID> --profile <patch|standard|critical>\`).
+2. Use [\`agent-system-architect\`](../agent-system-architect/SKILL.md) to complete \`specs/changes/active/<chg-id>/design.md\` and \`specs/architecture/CMP-*.md\`:
+   - Define **Contract-First** shared interfaces/DTOs/schemas when spanning Frontend and Backend.
+   - Map 100% of \`handoff.yaml\` requirements and components to atomic tasks (\`TSK-*\`) in \`tasks.md\` with explicit \`autonomy-mode\` (\`AUTONOMOUS\`, \`HUMAN_REVIEW_PLAN\`, \`HIGH_RISK_MANUAL\`, \`AMBIGUOUS\`).
+3. Run \`verify_governance\` and \`verify_friction\` to validate task governance, 100% design/handoff scope coverage, and anti-monolith limits (\`maxUseCasesPerChange = 1\`).
+
+### Step 3: 4-Tier Git Branch Navigation & Multi-Agent Parallelism
+1. Navigate to the task branch using \`npx aisdlc git checkout <TSK-ID>\` (\`pnpm run git:checkout <TSK-ID>\`), which cascade-creates:
+   \`main\` ➔ \`release/vX.Y.Z\` ➔ \`feat/CHG-XXX\` ➔ \`task/CHG-XXX/TSK-YYY-<slug>\`.
+2. Validate branch naming compliance via \`npx aisdlc git validate <branch>\`.
+3. **Parallel Agent Execution Rules**:
+   - **Inter-Feature Parallelism (\`feat/CHG-001\` $\\parallel$ \`feat/CHG-002\`)**: Multiple agents may execute different \`CHG-*\` increments concurrently in isolated branches/worktrees (\`specs/changes/active/chg-XXX/\`) when their target \`CMP-*\` / \`UC-*\` have no blocking dependencies.
+   - **Intra-Feature Parallelism (\`task/CHG-X/TSK-002\` $\\parallel$ \`task/CHG-X/TSK-003\`)**: Once \`TSK-001\` (Contract-First shared interfaces/DTOs) is merged into \`feat/CHG-X\`, multiple \`agent-developer\` subagents may implement independent tasks (e.g., Backend adapter vs. Frontend UI) concurrently on their respective \`task/*\` branches.
+
+### Step 4: Red Phase — Failing Test Suites (\`agent-qa-engineer\`)
+1. Delegate to or adopt [\`agent-qa-engineer\`](../agent-qa-engineer/SKILL.md).
+2. Author FAILING (red) BDD/Gherkin step definitions, integration/contract tests, and mandatory E2E/UI tests (evaluating Happy Path, Sad Path, and Boundary Values for every interactive UI element, plus \`UC-*\` alternative/exception flows) in \`tests/\`.
+3. Run \`verify_testing\` (\`npx aisdlc verify testing\`) to confirm requirement test coverage before writing production code.
+
+### Step 5: Green & Refactor Phase — Surgical Implementation (\`agent-developer\`)
+1. Delegate to or adopt [\`agent-developer\`](../agent-developer/SKILL.md).
+2. Execute the **Mandatory 4-Step Implementation Order**:
+   - (1) Clean Architecture boundaries, (2) Inter-module interfaces first, (3) Concrete component implementation (zero fake-wiring; all 4 UI states \`Loading\`, \`Empty\`, \`Error\`, \`Nominal\`), (4) Exhaustive per-function unit tests in \`tests/unit/\` (Happy Path, Sad Path, Boundary, Null/Empty).
+3. Verify any new dependency against \`license-policy.yaml\` via \`verify_licenses\`.
+4. Run \`sdd_check_fix\` (\`npx aisdlc check --fix\`) and \`verify_quality\` (\`npx aisdlc verify quality\`) until Cyclomatic Complexity $\\le 10$, Cognitive $\\le 15$, Maintainability $\\ge 50$, and Function Length $\\le 40$ lines pass with zero violations.
+
+### Step 6: Post-Development Functional Validation & Pre-Merge Audit Triad
+1. **Functional Validation (\`agent-expert-user\`)**: Validate live runtime behavior against \`UC-*\` and \`FR-*\` criteria (including \`0\` browser \`console.error\`/\`pageerror\` on UI changes).
+2. **Pre-Merge Audit Triad**: Execute concurrent review across:
+   - [\`agent-code-reviewer\`](../agent-code-reviewer/SKILL.md) (SOLID, DRY, YAGNI, AST thresholds, zero fake-wiring)
+   - [\`agent-security-auditor\`](../agent-security-auditor/SKILL.md) (\`verify_security\`: Gitleaks secrets + OWASP SAST)
+   - [\`agent-compliance-checker\`](../agent-compliance-checker/SKILL.md) (\`verify_licenses\`: SPDX & SBOM compliance)
+3. **Consolidated Release Gate**: Run MCP tool \`verify\` (\`npx aisdlc verify all\`) and confirm all **11 Quality Gates** pass green.
+
+### Step 7: Human PR Sign-Off, Baseline Integration & Release Closure
+1. **Feature Merge (\`feat/CHG-*\` ➔ \`release/vX.Y.Z\`)**: Present the PR, KPI summary (\`kpi_pr\`), and autogenerated reports (\`reports/QUALITY_REPORT.md\`, \`reports/TRACEABILITY_MATRIX.md\`) to the human Tech Lead for review and approval (never auto-approve or auto-merge).
+2. **Canonical Baseline Promotion**: Once tasks in \`tasks.md\` are marked \`COMPLETED\` and approved, promote the change into the canonical baseline via MCP tool \`sdd_integrate\` (\`npx aisdlc sdd integrate --auto\`), which promotes \`FR-*\` to \`active\`, links \`CMP-*\`, and archives the change under \`specs/changes/completed/\`.
+3. **Release Milestone Closure (\`release/vX.Y.Z\` ➔ \`main\`)**: When all \`CHG-*\` increments planned for \`release/vX.Y.Z\` are integrated:
+   - Run full verification (\`verify\`), generate CycloneDX SBOM & legal notices (\`npx aisdlc verify licenses --sbom reports/sbom.cdx.json --notices THIRD_PARTY_NOTICES.md\`), compute release telemetry (\`kpi_release\` / \`npx aisdlc kpi release --release release/vX.Y.Z\`), and refresh the interactive dashboard (\`report_dashboard\`).
+   - Open the Release PR from \`release/vX.Y.Z\` to \`main\` for final human Product Owner and Release Manager approval and semantic Git tagging (\`vX.Y.Z\`).
+
+## Non-Negotiable Guardrails
+- **Single-Use-Case Scope (\`1 UC-* = 1 CHG-*\`)**: Each SDD change (\`CHG-*\`) must deliver at most 1 Use Case (\`UC-*\`). Bundling multiple \`UC-*\` into one \`handoff.yaml\` is blocked by \`verify_governance\` (\`Greenfield monolith detected\`). Scale throughput via parallel \`CHG-*\` branches/worktrees, not monolithic changes.
+- **100% Design & Handoff Coverage in \`tasks.md\`**: Every \`CMP-*\`, \`FR-*\`, and \`SEC-REQ-*\` declared in \`design.md\` and \`handoff.yaml\` must be explicitly assigned to at least one \`TSK-*\` in \`tasks.md\`.`,
+  },
+];
+
+export function renderAntigravitySkillFile(skill: LifecycleSkillTemplate): string {
+  return `---\nname: ${skill.id}\ndescription: >-\n  ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}\n`;
+}
+
 export const STARTER_ANTIGRAVITY_RULES = `# Google Antigravity & Gemini CLI Rules - AI-SDLC Framework
 
 Canonical Reference: [\`process/09_agent_protocols.md\`](../../process/09_agent_protocols.md) and [\`process/01_governance_and_roles.md\`](../../process/01_governance_and_roles.md).
