@@ -542,6 +542,28 @@ export const DASHBOARD_CLIENT_SCRIPT = `
             }
           },
           {
+            selector: 'node.type-data-asset',
+            style: {
+              'shape': 'barrel',
+              'background-color': '#134e4a',
+              'border-color': '#5eead4',
+              'border-width': 2.5,
+              'width': 68,
+              'height': 42
+            }
+          },
+          {
+            selector: 'node.type-privacy-ropa',
+            style: {
+              'shape': 'round-rectangle',
+              'background-color': '#1e3a8a',
+              'border-color': '#60a5fa',
+              'border-width': 2.5,
+              'width': 72,
+              'height': 40
+            }
+          },
+          {
             selector: 'node.type-security-enclave',
             style: {
               'shape': 'hexagon',
@@ -553,7 +575,7 @@ export const DASHBOARD_CLIENT_SCRIPT = `
             }
           },
           {
-            selector: 'node.type-requirement, node.type-security-requirement',
+            selector: 'node.type-requirement, node.type-security-requirement, node.type-privacy-requirement',
             style: {
               'shape': 'round-rectangle',
               'background-color': '#1e293b',
@@ -586,7 +608,7 @@ export const DASHBOARD_CLIENT_SCRIPT = `
             }
           },
           {
-            selector: 'node.layer-product:not(.type-architecture-introduction):not(.type-journey):not(.type-actor):not(.type-use-case):not(.type-usecase):not(.type-business-rule):not(.type-rule):not(.type-abuse-case):not(.type-threat-actor)',
+            selector: 'node.layer-product:not(.type-architecture-introduction):not(.type-journey):not(.type-actor):not(.type-use-case):not(.type-usecase):not(.type-business-rule):not(.type-rule):not(.type-abuse-case):not(.type-threat-actor):not(.type-data-asset):not(.type-privacy-ropa)',
             style: { 'shape': 'diamond', 'background-color': '#0e7490', 'border-color': '#38bdf8', 'width': 50, 'height': 50 }
           },
           {
@@ -784,7 +806,15 @@ export const DASHBOARD_CLIENT_SCRIPT = `
           typeBadgeColor = '#881337';
           typeTitle = 'ABUSE CASE (ABUSE)';
           typologyKey = 'abuse-case';
-        } else if (typeName === 'requirement' || typeName === 'security-requirement') {
+        } else if (typeName === 'data-asset') {
+          typeBadgeColor = '#134e4a';
+          typeTitle = 'DATA ASSET (DATA-ASSET)';
+          typologyKey = 'data-asset';
+        } else if (typeName === 'privacy-ropa') {
+          typeBadgeColor = '#1e3a8a';
+          typeTitle = 'PRIVACY ROPA (PRIV-ROPA)';
+          typologyKey = 'privacy-ropa';
+        } else if (typeName === 'requirement' || typeName === 'security-requirement' || typeName === 'privacy-requirement') {
           typeBadgeColor = '#1e293b';
           typeTitle = 'REQUIREMENT (' + (data.id.split('-')[0] || 'REQ') + ')';
           typologyKey = 'requirement';
@@ -838,7 +868,9 @@ export const DASHBOARD_CLIENT_SCRIPT = `
       'use-case': '.type-use-case, .type-usecase',
       'business-rule': '.type-business-rule, .type-rule',
       'abuse-case': '.type-abuse-case, .type-threat-actor',
-      'requirement': '.type-requirement, .type-security-requirement, .layer-requirement',
+      'data-asset': '.type-data-asset',
+      'privacy-ropa': '.type-privacy-ropa',
+      'requirement': '.type-requirement, .type-security-requirement, .type-privacy-requirement, .layer-requirement',
       'architecture': '.type-component, .type-adr, .type-security-enclave, .layer-architecture',
       'test': '.type-bdd-feature, .type-code-test, .layer-test'
     };

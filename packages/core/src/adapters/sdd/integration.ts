@@ -157,12 +157,43 @@ const CANONICAL_TYPE_MAP: Record<string, string> = {
   'product/business-rules/': 'business-rule',
   'product/journeys/': 'journey',
   'security/requirements/': 'security-requirement',
+  'privacy/requirements/': 'privacy-requirement',
+  'specs/privacy/requirements/': 'privacy-requirement',
+  'privacy/assets/': 'data-asset',
+  'privacy/data-assets/': 'data-asset',
+  'specs/privacy/assets/': 'data-asset',
+  'specs/privacy/data-assets/': 'data-asset',
+  'privacy/ropa/': 'privacy-ropa',
+  'specs/privacy/ropa/': 'privacy-ropa',
+  'privacy/dpia/': 'dpia-request',
+  'specs/privacy/dpia/': 'dpia-request',
   'architecture/': 'component',
 };
 
+const ID_PREFIX_TYPE_PAIRS: ReadonlyArray< readonly [string, string]> = [
+  ['PRIV-REQ-', 'privacy-requirement'],
+  ['DATA-ASSET-', 'data-asset'],
+  ['PRIV-ROPA-', 'privacy-ropa'],
+  ['DPIA-', 'dpia-request'],
+  ['SEC-REQ-', 'security-requirement'],
+  ['FR-', 'requirement'],
+  ['QR-', 'requirement'],
+  ['CON-', 'requirement'],
+  ['UC-', 'use-case'],
+  ['ACT-', 'actor'],
+  ['BR-', 'business-rule'],
+  ['CMP-', 'component'],
+];
+
+function resolveCanonicalArtifactType(normTarget: string, id: string): string {
+  if (CANONICAL_TYPE_MAP[normTarget]) return CANONICAL_TYPE_MAP[normTarget];
+  const matched = ID_PREFIX_TYPE_PAIRS.find(([prefix]) => id.startsWith(prefix));
+  return matched ? matched[1] : 'artifact';
+}
+
 function buildCanonicalInitialContent(item: SpecCatalogNewItem, changeId: string, author: string, date: string): string {
   const normTarget = item.targetDir.endsWith('/') ? item.targetDir : `${item.targetDir}/`;
-  const artifactType = CANONICAL_TYPE_MAP[normTarget] || 'artifact';
+  const artifactType = resolveCanonicalArtifactType(normTarget, item.id);
   const frontmatter = `id: ${item.id}\ntype: ${artifactType}\nstatus: draft\nversion: "1.0.0"\n`;
   const title = item.scope || item.id;
   const revisionRow = `| **1.0.0** | ${date} | ${author} | Creación inicial desde ${changeId} | ${changeId} |\n`;
@@ -219,6 +250,23 @@ function checkTasksExecution(changeDir: string, changeId: string) {
   return { ok: true, completedTasks, pendingTasks, error: null };
 }
 
+function isProposalRequirementId(id: string): boolean {
+  return id.startsWith('FR-') || id.startsWith('QR-') || id.startsWith('CON-') || id.startsWith('SEC-REQ-');
+}
+
+function buildSubgraphFromProposalIds(ids: string[]): ProductHandoff['subgraph'] {
+  const reqs = ids.filter(isProposalRequirementId);
+  const privReqs = ids.filter((id) => id.startsWith('PRIV-REQ-'));
+  const dataAssets = ids.filter((id) => id.startsWith('DATA-ASSET-'));
+  const ropaEntries = ids.filter((id) => id.startsWith('PRIV-ROPA-'));
+  return {
+    requirements: reqs,
+    ...(privReqs.length > 0 ? { privacyRequirements: privReqs } : {}),
+    ...(dataAssets.length > 0 ? { dataAssets } : {}),
+    ...(ropaEntries.length > 0 ? { ropaEntries } : {}),
+  };
+}
+
 function resolveChangeHandoff(changeDir: string, changeId: string): ProductHandoff | null {
   const sidecar = loadProductHandoffSidecar(changeDir);
   if (sidecar) return sidecar;
@@ -229,15 +277,13 @@ function resolveChangeHandoff(changeDir: string, changeId: string): ProductHando
   const propContent = fs.readFileSync(proposalFile, 'utf-8');
   const { frontmatter } = parseFrontmatter(propContent);
   const citations = Array.isArray(frontmatter.citations) ? (frontmatter.citations as NonNullable<ProductHandoff['citations']>) : [];
-  const reqs = citations
-    .map((c) => c.id || '')
-    .filter((id: string) => id.startsWith('FR-') || id.startsWith('QR-') || id.startsWith('CON-') || id.startsWith('SEC-REQ-'));
+  const ids = citations.map((c) => c.id || '').filter(Boolean);
 
   return {
     id: `HOF-${changeId.toUpperCase()}`,
     type: 'handoff',
     changeId,
-    subgraph: { requirements: reqs },
+    subgraph: buildSubgraphFromProposalIds(ids),
     citations,
   };
 }
@@ -382,10 +428,21 @@ function collectArchitectureComponents(handoff: ProductHandoff, canonicalArtifac
   return cited;
 }
 
+function isSatisfiableRequirementId(id: string): boolean {
+  return (
+    id.startsWith('FR-') ||
+    id.startsWith('QR-') ||
+    id.startsWith('CON-') ||
+    id.startsWith('SEC-REQ-') ||
+    id.startsWith('PRIV-REQ-')
+  );
+}
+
 function mergeSatisfiesRequirements(fm: Record<string, unknown>, targetReqs: string[]): boolean {
   const existing = Array.isArray(fm['satisfies-requirements']) ? [...fm['satisfies-requirements']] : [];
   let modified = false;
   for (const req of targetReqs) {
+    if (!isSatisfiableRequirementId(req)) continue;
     if (!existing.includes(req)) {
       existing.push(req);
       modified = true;
@@ -537,29 +594,100 @@ function buildIntegrationSuccessPayload(
   };
 }
 
+function collectSubgraphPromotableIds(subgraph?: ProductHandoff['subgraph']): string[] {
+  if (!subgraph) return [];
+  const rawSub = subgraph as Record<string, unknown>;
+  const ropaAlias = Array.isArray(rawSub.ropaEntries) ? (rawSub.ropaEntries as string[]) : [];
+  const privacyRopa = Array.isArray(rawSub.privacyRopa) ? (rawSub.privacyRopa as string[]) : [];
+  const combined = [
+    ...(subgraph.requirements || []),
+    ...(subgraph.securityRequirements || []),
+    ...(subgraph.privacyRequirements || []),
+    ...(subgraph.dataAssets || []),
+    ...ropaAlias,
+    ...privacyRopa,
+  ];
+  return Array.from(new Set(combined));
+}
+
+function collectSpecAffectedNonArchIds(changeDir: string): string[] {
+  const specFile = path.join(changeDir, 'spec.md');
+  if (!fs.existsSync(specFile)) return [];
+  const { affectedItems } = parseSpecCatalogScope(fs.readFileSync(specFile, 'utf-8'));
+  return affectedItems
+    .map((item) => item.id)
+    .filter((id) => !isArchitectureComponentId(id));
+}
+
+interface ExecutionContext {
+  rootDir: string;
+  changeId: string;
+  author: string;
+  date: string;
+}
+
+function resolveIntegrationOptions(options: SddIntegrationOptions): ExecutionContext {
+  return {
+    rootDir: options.rootDir || process.cwd(),
+    changeId: options.changeId,
+    author: options.author || 'AI-SDLC Integration Engine',
+    date: options.date || new Date().toISOString().split('T')[0],
+  };
+}
+
+function resolveTargetRequirements(handoff: ProductHandoff, changeDir: string): string[] {
+  return Array.from(
+    new Set([
+      ...collectSubgraphPromotableIds(handoff.subgraph),
+      ...collectSpecAffectedNonArchIds(changeDir),
+    ])
+  );
+}
+
+function applyArtifactUpdates(
+  ctx: ExecutionContext,
+  changeDir: string,
+  handoff: ProductHandoff,
+  completedTasks: string[],
+  errors: string[]
+): {
+  targetReqs: string[];
+  updatedProduct: string[];
+  updatedArch: string[];
+  createdArtifacts: string[];
+} {
+  const targetReqs = resolveTargetRequirements(handoff, changeDir);
+  const createdArtifacts = materializeNewCatalogArtifacts(changeDir, ctx.rootDir, ctx.changeId, ctx.author, ctx.date, errors);
+  const canonicalArtifacts = loadCanonicalArtifacts(ctx.rootDir);
+
+  const updatedProduct = updateRequirementsArtifacts(targetReqs, createdArtifacts, canonicalArtifacts, completedTasks, ctx.changeId, ctx.date, ctx.author, errors);
+  const citedComponents = collectArchitectureComponents(handoff, canonicalArtifacts, targetReqs);
+  const updatedArch = updateArchitectureComponents(citedComponents, canonicalArtifacts, targetReqs, ctx.changeId, ctx.date, ctx.author, errors);
+
+  return { targetReqs, updatedProduct, updatedArch, createdArtifacts };
+}
+
 export function integrateSddChange(options: SddIntegrationOptions): SddIntegrationResult {
-  const rootDir = options.rootDir || process.cwd();
-  const changeId = options.changeId;
-  const author = options.author || 'AI-SDLC Integration Engine';
-  const date = options.date || new Date().toISOString().split('T')[0];
+  const ctx = resolveIntegrationOptions(options);
+  const validation = validateChangeWorkspace(ctx.rootDir, ctx.changeId);
+  if (validation.error) return buildEmptyIntegrationResult(ctx.changeId, validation.error, validation.pendingTasks);
 
-  const validation = validateChangeWorkspace(rootDir, changeId);
-  if (validation.error) return buildEmptyIntegrationResult(changeId, validation.error, validation.pendingTasks);
-
-  const { changeDir, tasksRes, handoff } = validation;
   const errors: string[] = [];
-  const targetReqs = [...(handoff!.subgraph!.requirements || []), ...(handoff!.subgraph!.securityRequirements || [])];
-  const createdArtifacts = materializeNewCatalogArtifacts(changeDir!, rootDir, changeId, author, date, errors);
-  const canonicalArtifacts = loadCanonicalArtifacts(rootDir);
-
-  const updatedProduct = updateRequirementsArtifacts(targetReqs, createdArtifacts, canonicalArtifacts, tasksRes!.completedTasks, changeId, date, author, errors);
-  const citedComponents = collectArchitectureComponents(handoff!, canonicalArtifacts, targetReqs);
-  const updatedArch = updateArchitectureComponents(citedComponents, canonicalArtifacts, targetReqs, changeId, date, author, errors);
-
+  const { changeDir, tasksRes, handoff } = validation;
+  const updates = applyArtifactUpdates(ctx, changeDir!, handoff!, tasksRes!.completedTasks, errors);
   const completedAll = tasksRes!.completedTasks.length > 0 && tasksRes!.pendingTasks.length === 0;
-  const archiveRes = archiveChangeWorkspace(changeDir!, changeId, rootDir, options.autoArchive !== false, completedAll);
+  const archiveRes = archiveChangeWorkspace(changeDir!, ctx.changeId, ctx.rootDir, options.autoArchive !== false, completedAll);
 
-  return buildIntegrationSuccessPayload(changeId, tasksRes!, targetReqs, updatedProduct, updatedArch, createdArtifacts, archiveRes, errors);
+  return buildIntegrationSuccessPayload(
+    ctx.changeId,
+    tasksRes!,
+    updates.targetReqs,
+    updates.updatedProduct,
+    updates.updatedArch,
+    updates.createdArtifacts,
+    archiveRes,
+    errors
+  );
 }
 
 function auditChangeRequirements(targetReqs: string[], canonicalMap: CanonicalMap): { integrated: string[]; missing: string[]; gaps: string[] } {
@@ -595,7 +723,7 @@ function auditChangeEntry(changeDir: string, changeName: string, canonicalMap: C
   const tasksFile = path.join(changeDir, 'tasks.md');
   const tasks = fs.existsSync(tasksFile) ? parseTasksFromContent(fs.readFileSync(tasksFile, 'utf-8')) : [];
   const completed = tasks.filter((t) => t.status === 'COMPLETED');
-  const targetReqs = handoff.subgraph?.requirements || [];
+  const targetReqs = collectSubgraphPromotableIds(handoff.subgraph);
 
   const { integrated, missing, gaps } = auditChangeRequirements(targetReqs, canonicalMap);
   const status = resolveAuditStatus(integrated.length, targetReqs.length, gaps.length);

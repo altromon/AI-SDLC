@@ -31,6 +31,12 @@ export const TYPE_TO_SCHEMA_MAP: Record<string, string> = {
   'security-requirement': 'schemas/security/security-req.schema.json',
   'threat-actor': 'schemas/security/threat-actor.schema.json',
 
+  // Privacy & Data Protection
+  'data-asset': 'schemas/privacy/data-asset.schema.json',
+  'privacy-ropa': 'schemas/privacy/privacy-ropa.schema.json',
+  'privacy-requirement': 'schemas/privacy/privacy-req.schema.json',
+  'privacy-policy': 'schemas/privacy/privacy-policy.schema.json',
+
   // Architecture
   'architecture-introduction': 'schemas/architecture/introduction-and-goals.schema.json',
   'architecture-decision-record': 'schemas/architecture/adr.schema.json',
@@ -80,6 +86,11 @@ const PREFIX_TAXONOMY: Array<[string, string]> = [
   ['ABUSE-', 'abuse-case'],
   ['SEC-ENC-', 'security-enclave'],
   ['SEC-REQ-', 'security-requirement'],
+  ['DATA-ASSET-', 'data-asset'],
+  ['PRIV-ROPA-', 'privacy-ropa'],
+  ['PRIV-REQ-', 'privacy-requirement'],
+  ['PRIV-POL-', 'privacy-policy'],
+  ['POL-PRIV-', 'privacy-policy'],
   ['HAZ-', 'hazard'],
   ['SAF-REQ-', 'safety-requirement'],
   ['SAF-', 'safety-requirement'],

@@ -10,8 +10,8 @@
 
 ### 🔄 Workflow Handoff
 
-- **Completed Phase / Activity**: `[Current phase, e.g. Product Definition / Threat Modeling / Architecture / SDD Implementation]`
-- **Acting Role**: `[agent-product-analyst | agent-threat-modeler | agent-system-architect | agent-developer | agent-expert-user | agent-security-auditor | agent-compliance-checker]`
+- **Completed Phase / Activity**: `[Current phase, e.g. Product Definition / Threat Modeling / Privacy Modeling / Architecture / SDD Implementation]`
+- **Acting Role**: `[agent-product-analyst | agent-threat-modeler | agent-privacy-officer | agent-system-architect | agent-developer | agent-expert-user | agent-security-auditor | agent-compliance-checker]`
 - **Task Autonomy Mode**: `[HUMAN_REVIEW_PLAN | AMBIGUOUS | HIGH_RISK_MANUAL]`
 - **Produced Deliverables**:
   - [x] `[Path or ID of generated artifact, e.g. specs/product/uc-mission.md]`

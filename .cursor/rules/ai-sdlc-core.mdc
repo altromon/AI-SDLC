@@ -13,7 +13,7 @@ Every agent operating in this repository must strictly observe the following gua
 1. **FORBIDDEN TO AUTO-APPROVE OR AUTO-MERGE | PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: Do not approve PRs or execute direct merges to protected branches (`main`, `release/*`). Approval is exclusively reserved for human reviewers.
 2. **FORBIDDEN TO INVENT PRODUCT OR ARCHITECTURE DECISIONS**: When facing ambiguity, formulate open questions (`open-questions`). Never assume undocumented requirements.
 3. **FORBIDDEN TO INTRODUCE DEPENDENCIES WITHOUT LICENSE INSPECTION**: Always verify `license-policy.yaml`. Viral dependencies (GPL/AGPL) or commercial paid dependencies (BSL/SSPL) are strictly forbidden without explicit human approval.
-4. **FORBIDDEN TO IGNORE CYBERSECURITY (SECURITY-BY-DEFAULT)**: Validate inputs, apply least privilege, and accompany every change with security tests (`SEC-TEST-*`). Suppressing linters or tests to force a green pipeline is prohibited.
+4. **FORBIDDEN TO IGNORE CYBERSECURITY & PRIVACY (SECURITY-BY-DEFAULT & PRIVACY-BY-DEFAULT)**: Validate inputs, apply least privilege, protect PII according to `privacy-policy.yaml`, and accompany every change with security and privacy tests (`SEC-TEST-*`, `@privacy`). Suppressing linters or tests to force a green pipeline is prohibited.
 5. **MANDATORY CRYPTOGRAPHIC CITATION**: Link specifications using immutable identifiers and Unix LF-normalized SHA-256 hashes.
 
 ## 2. Pre-Flight Verification Commands
@@ -32,8 +32,9 @@ Before finalizing changes or proposing commits:
 ## 4. Specialized Roles Mapping
 | Role | Mission (summary) |
 | :--- | :--- |
-| `agent-product-analyst` | Product inception (`ARCH-INTRO-*`) & ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); status starts `draft`. |
-| `agent-threat-modeler` | STRIDE/OWASP threat triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`). |
+| `agent-product-analyst` | Phase 0 NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`, 3–5 question interview) + ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); status starts `draft`. |
+| `agent-threat-modeler` | STRIDE/OWASP threat triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`); hands off to `agent-privacy-officer`. |
+| `agent-privacy-officer` | LINDDUN & GDPR/LOPDGDD privacy triad (`DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*`) + Pre-Merge `verify:privacy`. |
 | `agent-system-architect` | Modular arc42 + NAF v4 architecture (`CMP-*`, Mermaid diagrams, `ADR-*`). |
 | `agent-qa-engineer` | FAILING BDD/Gherkin, E2E, and UI suites (using agreed project tech; Happy Path, Sad Path & Boundary Values per interactive UI element) before `agent-developer` writes code. |
 | `agent-developer` | Atomic tasks from `tasks.md`; respects autonomy mode; runs `pnpm run check:fix` + `pnpm run verify:all`. |
@@ -54,4 +55,3 @@ Before finalizing changes or proposing commits:
   * 🟢 **`AUTONOMOUS`** (or PR/CI supervision): **OMITTED**. Do not request or emit interactive handoff.
   * 🟡 **Autonomy $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **MANDATORY**. Emit Workflow Handoff block compliant with [`templates/workflow/agent-handoff.template.md`](templates/workflow/agent-handoff.template.md) and **STOP**.
 - **Content**: Declare completed deliverables, recommend next role(s), provide suggested invocation prompt, and **keep the Human Action Window open for the human user to take action** (review, edit by hand, pause/reroute, or delegate).
-

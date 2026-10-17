@@ -105,14 +105,14 @@ To configure other clients (e.g. Claude Desktop) or add `@aisdlc/mcp` manually:
 
 ## Available MCP Tools
 
-`@aisdlc/mcp` provides 23 deterministic tools divided into 4 functional categories:
+`@aisdlc/mcp` provides 24 deterministic tools divided into 4 functional categories:
 
 ### 1. Workflow & Scaffolding Tools (Consolidated Entrypoints)
 
 | Tool | Description | Parameters |
 | --- | --- | --- |
 | `new` | Initializes a new project or configures AI-SDLC governance and structure in an existing repository (policies, templates, hooks, and optional CI). | `targetDir` *(string)*, `ci` *(enum: github, gitlab, azure, bitbucket)*, `dryRun` *(boolean)*, `agents` *(string)*, `architecture` *(enum: minimal, full, complete, none)* |
-| `verify` | Executes deterministic AI-SDLC Quality Gates (all 11 gates in `full` profile, or essential gates [quality, security, licenses] in `lite` profile) in a consolidated run and returns overall repository health. | `root` *(string)*, `profile` *(enum: full, lite)* |
+| `verify` | Executes deterministic AI-SDLC Quality Gates (all 12 gates in `full` profile, or essential gates [quality, security, licenses] in `lite` profile) in a consolidated run and returns overall repository health. | `root` *(string)*, `profile` *(enum: full, lite)* |
 | `report` | Generates all AI-SDLC reports combined: interactive web dashboard with PDaC graph (HTML) and formal code quality report (Markdown). | `root` *(string)*, `dashboardOutput` *(string)*, `qualityPolicy` *(string)* |
 
 ### 2. Spec-Driven Development (SDD) Tools
@@ -132,6 +132,7 @@ To configure other clients (e.g. Claude Desktop) or add `@aisdlc/mcp` manually:
 | `verify_quality` | Evaluates cyclomatic complexity, cognitive complexity, maintainability index, and function length against `quality-policy.yaml`. | `root` *(string)*, `maxCyclomatic` *(number)*, `maxCognitive` *(number)*, `minMaintainability` *(number)* |
 | `verify_schemas` | Validates specification Markdown artifacts against canonical JSON Schemas (Draft 2020-12). | `root` *(string)* |
 | `verify_security` | Executes deterministic secret scanning (Gitleaks) and SAST static analysis (command injection, SQLi, SSRF). | `root` *(string)*, `minSeverity` *(enum: CRITICAL, HIGH, MEDIUM)* |
+| `verify_privacy` | Audits Personal Data Assets (`DATA-ASSET-*`), GDPR Art. 30 Records (`PRIV-ROPA-*`), Privacy Requirements (`PRIV-REQ-*`), DPIA gates (`DPIA-*`), and static PII-SAST rules (`PRIV-001`–`PRIV-008`) against `privacy-policy.yaml`. | `root` *(string)*, `policyPath` *(string)*, `writeReports` *(boolean)* |
 | `verify_traceability` | Audits the 360° inverted traceability matrix (Upstream PDaC, Midstream arc42, Downstream BDD/tests). | `root` *(string)* |
 | `verify_governance` | Audits task governance compliance and human autonomy classification modes (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc.). | `root` *(string)* |
 | `verify_testing` | Audits that 100% of requirements and tasks have verifiable tests on disk. | `root` *(string)* |
@@ -158,6 +159,7 @@ The MCP server provides read-only context resources accessible via canonical `ai
 | --- | --- | --- |
 | `aisdlc://policies/quality` | `text/yaml` | Content of `quality-policy.yaml` (complexity thresholds, rules, gate limits). |
 | `aisdlc://policies/licenses` | `text/yaml` | Content of `license-policy.yaml` (permitted, restricted, and blocked licenses). |
+| `aisdlc://policies/privacy` | `text/yaml` | Content of `privacy-policy.yaml` (GDPR/LOPDGDD/ISO 27701 rules, PII-SAST controls, allowed regions). |
 | `aisdlc://changes/active` | `application/json` | Structured list of active SDD changes in `specs/changes/active/` with task and handoff status. |
 | `aisdlc://changes/completed` | `application/json` | List of completed and archived SDD changes in `specs/changes/completed/`. |
 | `aisdlc://status/summary` | `application/json` | Consolidated repository status summary (handoffs count, policy file existence, timestamp). |

@@ -281,7 +281,8 @@ function extractHandoffExpectedScope(changeDir: string, maxUc = 1, violations?: 
   }
   const reqs = handoff.subgraph.requirements || [];
   const secReqs = handoff.subgraph.securityRequirements || [];
-  return [...reqs, ...secReqs];
+  const privReqs = handoff.subgraph.privacyRequirements || [];
+  return [...reqs, ...secReqs, ...privReqs];
 }
 
 function collectTaskCoveredScope(tasks: TaskItem[]): Set<string> {

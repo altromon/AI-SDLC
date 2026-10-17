@@ -100,10 +100,11 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     }
   });
 
-  it('verifies all core IDE rules map all 10 specialized roles directly', () => {
+  it('verifies all core IDE rules map all 11 specialized roles directly', () => {
     const expectedRoles = [
       'agent-product-analyst',
       'agent-threat-modeler',
+      'agent-privacy-officer',
       'agent-system-architect',
       'agent-qa-engineer',
       'agent-developer',
@@ -174,10 +175,10 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
 
   it('verifies that canonical protocol documents the technical security feedback loop between architect and threat modeler (#81)', () => {
     const content = fs.readFileSync(canonicalProtocolPath, 'utf-8');
-    expect(content).toMatch(/TECHNICAL SECURITY FEEDBACK LOOP|BUCLE DE RETORNO DE SEGURIDAD TÉCNICA/);
-    expect(content).toMatch(/Technical Security Feedback Loop|Bucle de Retorno: Seguridad T[eé]cnica/i);
+    expect(content).toMatch(/TECHNICAL SECURITY(&| AND| & PRIVACY)? FEEDBACK LOOP|BUCLE DE RETORNO DE SEGURIDAD TÉCNICA/);
+    expect(content).toMatch(/Technical Security(&| and| & Privacy)? Feedback Loop|Bucle de Retorno: Seguridad T[eé]cnica/i);
     const agContent = fs.readFileSync(configFiles.antigravity, 'utf-8');
-    expect(agContent).toMatch(/technical security feedback loop|bucle de retorno de seguridad t[eé]cnica/i);
+    expect(agContent).toMatch(/technical security(&| and| & privacy)? feedback loop|bucle de retorno de seguridad t[eé]cnica/i);
   });
 
   it('verifies that canonical protocol and configurations document the post-development functional validation step (#83)', () => {

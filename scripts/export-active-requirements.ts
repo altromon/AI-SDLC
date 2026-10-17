@@ -198,6 +198,43 @@ export class RequirementLayerRegistry {
       },
     });
 
+    // 2b. Capa de Protección de Datos y Privacidad (Privacy-by-Design)
+    this.registerLayer({
+      id: 'privacy',
+      name: 'Protección de Datos y Privacidad',
+      heading: 'Requerimientos de Protección de Datos y Privacidad (Privacy Requirements)',
+      description: 'Controles técnicos de minimización, seudonimización, retención y derechos ARCO+ que gobiernan el Registro de Actividades de Tratamiento (`PRIV-ROPA-*`) y Activos de Datos (`DATA-ASSET-*`).',
+      methodology: 'Privacy-by-Design as Code (LINDDUN + GDPR / ISO 27701)',
+      canonicalPrefixes: ['`PRIV-REQ-*`'],
+      matches: (fm) => {
+        const id = fm.id || '';
+        const type = (fm.type || '').toLowerCase();
+        return type === 'privacy-requirement' || id.startsWith('PRIV-REQ-');
+      },
+      renderSummaryHeaders: [
+        'ID Requerimiento',
+        'Título',
+        'Principio Privacidad',
+        'Categoría LINDDUN',
+        'Gobierna ROPA',
+        'Estándar / Cumplimiento',
+      ],
+      renderSummaryRow: (art) => {
+        const fm = art.frontmatter;
+        const ropa = Array.isArray(fm['governs-ropa'])
+          ? fm['governs-ropa'].join(', ')
+          : fm['governs-ropa'] || 'N/A';
+        const compl = Array.isArray(fm['compliance-references'])
+          ? fm['compliance-references'].join(', ')
+          : 'N/A';
+        return `| **\`${fm.id}\`** | ${fm.title || 'Sin título'} | \`${fm['privacy-principle'] || 'data-minimization'}\` | \`${fm['linddun-category'] || 'identifiability'}\` | \`${ropa}\` | \`${compl}\` |`;
+      },
+      renderDetail: (art, normative, relPath) => {
+        const fm = art.frontmatter;
+        return `#### [${fm.id}] ${fm.title}\n- **Archivo Canónico:** [\`${relPath}\`](file:///${art.file.replace(/\\/g, '/')})\n- **Principio GDPR:** \`${fm['privacy-principle'] || 'data-minimization'}\` | **LINDDUN:** \`${fm['linddun-category'] || 'identifiability'}\`\n- **Control de Privacidad:**\n  > ${normative.replace(/\n/g, '\n  > ')}\n\n`;
+      },
+    });
+
     // 3. Capa de Seguridad Operacional y Funcional (Safety)
     this.registerLayer({
       id: 'safety',
@@ -395,6 +432,9 @@ export function generateActiveRequirementsDocument(
     'domain-term',
     'bounded-context',
     'abuse-case',
+    'data-asset',
+    'privacy-ropa',
+    'dpia-request',
     'security-enclave',
     'user-manual',
     'production-manual',

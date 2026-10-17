@@ -1,20 +1,20 @@
-# 07. Deterministic Validation: Cybersecurity, Licenses, and CI/CD Quality Gates
+# 07. Deterministic Validation: Cybersecurity, Privacy, Licenses, and CI/CD Quality Gates
 
 ## 1. The Principle of Multilevel Verification
 
 In an AI-agent driven development workflow, code can be produced at high velocity. To safeguard codebase integrity, validation is structured into **two complementary layers**:
 1. **Deterministic Layer (CI/CD Gates)**: Static tools, linters, and algorithmic validators executing without AI intervention, yielding reproducible outcomes (same code, same verdict).
-2. **Semantic and Adversarial Layer (Auditing Agents)**: Specialized AI agents that scrutinize code looking for business logic flaws, evasion vectors, and architectural consistency.
+2. **Semantic and Adversarial Layer (Auditing Agents)**: Specialized AI agents that scrutinize code looking for business logic flaws, evasion vectors, privacy leaks, and architectural consistency.
 
 ---
 
-## 2. The 11 Deterministic CI/CD Gates (Pipeline Gates)
+## 2. The 12 Deterministic CI/CD Gates (Pipeline Gates)
 
-Every Pull Request submitted by a human engineer or an AI agent must pass the following 11 automated gates:
+Every Pull Request submitted by a human engineer or an AI agent must pass the following 12 automated gates:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   DETERMINISTIC CI/CD PIPELINE (11 GATES)              │
+│                   DETERMINISTIC CI/CD PIPELINE (12 GATES)              │
 └────────────────────────────────────────────────────────────────────────┘
 
  [GATE 1: CODE & AST QUALITY RELEASE GATE] (aisdlc verify quality)
@@ -54,11 +54,15 @@ Every Pull Request submitted by a human engineer or an AI agent must pass the fo
  [GATE 11: SHIFT-LEFT SECURITY: SECRETS AND SAST] (aisdlc verify security)
   └─► Zero-tolerance for credentials, API keys, or tokens (Gitleaks Gate) and deterministic
       detection of AI-generated OWASP vulnerabilities (SQLi, exec, eval, SSRF, path traversal).
+
+ [GATE 12: PRIVACY-BY-DESIGN AND PII-SAST AUDIT] (aisdlc verify privacy)
+  └─► Audits DATA-ASSET-*, PRIV-ROPA-*, and PRIV-REQ-* against privacy-policy.yaml, enforces
+      PII-SAST rules (PRIV-001 through PRIV-008), and generates ROPA_INVENTORY.md.
 ```
 
 ---
 
-## 3. Shift-Left Security Detailed Specification
+## 3. Shift-Left Security & Privacy Detailed Specification
 
 ### 3.1 Gate 11: Deterministic Secret Detection (`aisdlc verify secrets`)
 
@@ -90,20 +94,37 @@ To eradicate vulnerable code patterns common in LLM-synthesized code:
 - **Optional Semgrep Connector (`--semgrep`)**: Runs enterprise Semgrep rules across the repository if Semgrep is installed.
 - **Formal Output**: Generates `reports/SAST_REPORT.md` and exits with exit code 1 if vulnerabilities are detected.
 
+### 3.3 Gate 12: Privacy-by-Design & PII-SAST Verification (`aisdlc verify privacy`)
+
+To guarantee continuous compliance with GDPR (EU) 2016/679, LOPDGDD, and ISO/IEC 27701 (`process/04b_data_protection_and_privacy.md`):
+- **Artifact & Policy Governance (`privacy-policy.yaml`)**:
+  - Verifies that every `DATA-ASSET-*` with classification `PII_IDENTIFIER`, `SENSITIVE_PII`, or `SPECIAL_CATEGORY` is covered by an active `PRIV-ROPA-*` record (`PRIV-005`).
+  - Verifies that every `PRIV-ROPA-*` record declares a valid GDPR Art. 6.1 lawful basis and an explicit ISO 8601 or regime-based retention period (`PRIV-006`).
+  - Enforces mandatory DPIA (`DPIA-*`) approval whenever `SPECIAL_CATEGORY` (GDPR Art. 9) data is processed (`PRIV-007`).
+  - Blocks unauthorized cross-border data transfers outside `allowed-regions` unless a transfer mechanism (`SCC`, `ADEQUACY_DECISION`, `BCR`) is declared (`PRIV-008`).
+- **Static PII-SAST Code Analysis**:
+  - `PRIV-001` (*PII in Application Logs*): Detects logging calls (`console.*`, `logger.*`, `pino.*`, `winston.*`) printing raw PII fields (`email`, `dni`, `ssn`, `taxId`, `phone`, `iban`, `creditCard`, `passport`, `biometric`).
+  - `PRIV-002` (*PII in URL Query Parameters*): Detects sensitive PII passed in query strings (`?email=`, `?dni=`, `?ssn=`, `?token=`).
+  - `PRIV-003` (*Unredacted PII Sent to External LLM/AI Prompts*): Detects PII fields interpolated into external LLM/AI SDK payloads without anonymization/pseudonymization.
+  - `PRIV-004` (*Hardcoded Real PII in Source or Fixtures*): Detects real national IDs, IBANs, or non-synthetic personal emails outside RFC 2606 reserved domains (`@example.com`, `@test.local`).
+- **Justified Suppression**: Inline suppression via `// ai-sdlc:allow-privacy` for audited synthetic test cases.
+- **Formal Output**: Generates `reports/ROPA_INVENTORY.md` (Art. 30 GDPR inventory) and `reports/PRIVACY_SCAN_REPORT.md`, exiting with **exit code 5** on violations.
+
 ---
 
-## 4. Adversarial Audit Layer by AI Agents (`sec:audit`)
+## 4. Adversarial Audit Layer by AI Agents (`sec:audit` & `privacy:audit`)
 
-Traditional static tools (SAST) excel at spotting known syntactic patterns (like a simple SQL injection), but struggle with **business logic vulnerabilities**, **horizontal privilege escalations**, or nuanced **prompt injection vectors**.
+Traditional static tools (SAST) excel at spotting known syntactic patterns (like a simple SQL injection), but struggle with **business logic vulnerabilities**, **horizontal privilege escalations**, **unlawful secondary data processing**, or nuanced **prompt injection vectors**.
 
-To fill this gap, the pipeline invokes the **Security Auditor Agent (`agent-security-auditor`)**:
-- **Input**: The Pull Request diff, associated abuse cases (`ABUSE-*`), security requirements (`SEC-REQ-*`), and technical design (`design.md`).
+To fill this gap, the pipeline invokes the **Security Auditor Agent (`agent-security-auditor`)** and **Data Protection & Privacy Officer Agent (`agent-privacy-officer`)**:
+- **Input**: The Pull Request diff, associated abuse cases (`ABUSE-*`), security requirements (`SEC-REQ-*`), privacy requirements (`PRIV-REQ-*`), data assets (`DATA-ASSET-*`), and technical design (`design.md`).
 - **Analysis**:
   - Is there an execution path where an unauthenticated user can invoke this endpoint?
   - Are boundary checks enforced on the backend and not solely on the client?
-  - Are there calls to language models vulnerable to indirect prompt injection?
-  - Do error messages leak stack traces or confidential information?
-- **Output**: A formal report with CVSS v3.1 scoring posted as a Pull Request comment. If critical risks are detected, the agent requests changes before merge.
+  - Are there calls to language models vulnerable to indirect prompt injection or leaking unredacted PII?
+  - Do new database columns or DTO fields introduce undocumented PII (`DATA-ASSET-*`) without a lawful purpose (`PRIV-ROPA-*`)?
+  - Do error messages or logs leak stack traces or confidential personal information?
+- **Output**: Formal audit reports posted on the Pull Request. If critical security or privacy risks are detected, the agents block the merge until remediated.
 
 ---
 
@@ -118,3 +139,4 @@ All process validation tools and scripts must adhere to standard exit codes:
 | **2** | **Citation Drift (Stale)** | A canonical requirement or architecture block changed. Update spec. |
 | **3** | **Legal / License Block** | Disallowed dependency or pending commercial acquisition request. |
 | **4** | **Exposed Secret** | Credential or certificate detected by `verify secrets` in repo or diff. |
+| **5** | **Privacy / Data Protection Block** | PII leak (`PRIV-001`–`PRIV-004`), missing RoPA (`PRIV-005`–`PRIV-006`), unapproved DPIA (`PRIV-007`), or forbidden cross-border transfer (`PRIV-008`). |

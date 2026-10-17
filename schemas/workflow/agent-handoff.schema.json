@@ -48,6 +48,7 @@
       "enum": [
         "agent-product-analyst",
         "agent-threat-modeler",
+        "agent-privacy-officer",
         "agent-system-architect",
         "agent-qa-engineer",
         "agent-developer",
@@ -58,7 +59,8 @@
         "agent-devops",
         "human-dev",
         "tech-lead",
-        "release-manager"
+        "release-manager",
+        "dpo"
       ],
       "description": "Specialized role executing the handoff."
     },

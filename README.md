@@ -1,6 +1,6 @@
 # AI-SDLC: Hybrid Software Development Lifecycle for Humans and AI Agents
 
-> **Next-Generation Software Lifecycle based on Git, "As-Code", ProductShape, NAF v4, arc42, End-to-End Cybersecurity, and Open Source License Governance.**
+> **Next-Generation Software Lifecycle based on Git, "As-Code", ProductShape, NAF v4, arc42, End-to-End Cybersecurity, Data Protection & Privacy-by-Design, and Open Source License Governance.**
 
 ---
 
@@ -9,16 +9,16 @@
 In the age of AI-assisted engineering, the speed of code authoring is no longer the bottleneck. **The critical bottleneck has shifted to the left:**
 - What exactly is the product, and for whom is it being built?
 - What behaviors and business rules govern it?
-- What technical architecture guarantees scalability, security, and interoperability?
-- How do we prevent vulnerabilities and model threats from day zero?
+- What technical architecture guarantees scalability, security, privacy, and interoperability?
+- How do we prevent vulnerabilities, model threats, and protect personal data (PII / GDPR) from day zero?
 - Which third-party dependencies are free for commercial use, and which require acquisition or introduce legal liabilities?
 - How do we feed precise, atomic, and verifiable context to AI agents so they never hallucinate code?
 
-**AI-SDLC** is an operational methodology and framework engineered so that **humans (engineers, architects, product managers, security officers)** and **AI agents (analysts, architects, developers, auditors)** collaborate symmetrically with industrial rigor and zero friction.
+**AI-SDLC** is an operational methodology and framework engineered so that **humans (engineers, architects, product managers, security & privacy officers)** and **AI agents (analysts, threat modelers, privacy officers, architects, developers, auditors)** collaborate symmetrically with industrial rigor and zero friction.
 
 ---
 
-## 🏛️ The 6 Pillars of the Framework
+## 🏛️ The 7 Pillars of the Framework
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -37,31 +37,37 @@ In the age of AI-assisted engineering, the speed of code authoring is no longer 
   ├── Security Requirements (SEC-REQ-*) & Zero Trust Policies (SEC-POL-*)
   └── Security Enclaves and Trust Zones (SEC-ENC-*)
                             │
+                            ▼ (Direct handoff: agent-threat-modeler -> agent-privacy-officer)
+ [3. DATA PROTECTION & PRIVACY BY DESIGN] (LINDDUN / GDPR / ISO 27701)
+  ├── Personal Data Assets (DATA-ASSET-*) & RoPA Art. 30 Records (PRIV-ROPA-*)
+  ├── Privacy Requirements (PRIV-REQ-*) & DPIA Assessments (DPIA-*)
+  └── privacy-policy.yaml & PII-SAST Scanner (PRIV-001 through PRIV-008)
+                            │
                             ▼ (Canonical citation)
- [3. OSS LICENSE GOVERNANCE] (Legal & IP Compliance as Code)
+ [4. OSS LICENSE GOVERNANCE] (Legal & IP Compliance as Code)
   ├── Categorization: Permissive (Free) vs Commercial/Dual (Paid) vs Viral (AGPL)
   ├── license-policy.yaml & Agent Guardrails
   └── SBOM Generation (CycloneDX) and CI/CD Verification
                             │
                             ▼ (Canonical citation)
- [4. QUALITY MANAGEMENT & RELEASE GATES] (Software Quality as Code)
+ [5. QUALITY MANAGEMENT & RELEASE GATES] (Software Quality as Code)
   ├── Coding Rules (Clean Code, Strict Typing, Zero Dead Code, ESLint/Prettier)
   ├── Standard Metrics: Cyclomatic Complexity (<=10), Cognitive (<=15), Maintainability (>=50)
   └── quality-policy.yaml & Deterministic Release Gate Verifier
                             │
                             ▼ (Canonical citation)
- [5. SYSTEMS ARCHITECTURE] (arc42 + NAF v4)
+ [6. SYSTEMS ARCHITECTURE] (arc42 + NAF v4)
   ├── Context & Strategy (arc42 Sec. 1-4 + NAF Operational)
   ├── Building Blocks (arc42 Sec. 5 + NAF Services & Systems CMP-*)
   ├── Runtime & Deployment (arc42 Sec. 6-7 + NAF Behaviour & Resources)
   └── Cross-Cutting Concepts & ADRs (arc42 Sec. 8-9 + NAF Governance)
                             │
                             ▼ (Canonical citation)
- [6. DELIVERY & IMPLEMENTATION] (Spec-Driven Development - SDD)
+ [7. DELIVERY & IMPLEMENTATION] (Spec-Driven Development - SDD)
   ├── Bounded Increments (Changes: Proposal, Spec, Design, Tasks)
   ├── Gherkin Acceptance Criteria & Cucumber BDD Tests
   ├── AI Agent Authoring + Unit & Mitigation Tests
-  └── Deterministic CI/CD Gates: Quality Gate, SAST, SCA, SBOM, Licenses & Human PR
+  └── Deterministic CI/CD Gates: 12 Quality Gates (AST, SAST, PII-SAST, SCA, SBOM, RTM)
 ```
 
 ---
@@ -72,6 +78,7 @@ In the age of AI-assisted engineering, the speed of code authoring is no longer 
 AI-SDLC/
 ├── README.md                                 # This guide
 ├── license-policy.yaml                       # Declarative allowed/blocked license policy
+├── privacy-policy.yaml                       # Declarative GDPR/LOPDGDD/ISO 27701 & PII-SAST policy
 │
 ├── packages/                                 # Monorepo Workspace (pnpm + Changesets)
 │   ├── core/                                 # @aisdlc/core: Domain engine, pure verifiers, and reporters
@@ -79,30 +86,34 @@ AI-SDLC/
 │   └── cli/                                  # @aisdlc/cli: Binary CLI executable (npx aisdlc)
 │
 ├── process/                                  # Normative Process Specification
+│   ├── README.md                             # Process index, 11 agents workflow, and 12 Quality Gates
 │   ├── 00_principles_and_manifesto.md        # Manifesto and core principles
 │   ├── 01_governance_and_roles.md            # Human-Agent RACI matrix and authorization levels
 │   ├── 02_product_definition.md              # ProductShape guide (Actors, Use Cases, Requirements)
 │   ├── 03_security_by_design.md              # Threat modeling, Abuse Cases, and Security Requirements
 │   ├── 04_open_source_license_compliance.md  # License classification, free usage, and commercial acquisition
+│   ├── 04b_data_protection_and_privacy.md    # Privacy-by-Design as Code (LINDDUN, GDPR, DATA-ASSET, PRIV-ROPA, PRIV-REQ)
 │   ├── 05_architecture_arc42_nafv4.md        # arc42 structure augmented with NAF v4 grid
 │   ├── 06_spec_driven_development.md         # SDD delivery lifecycle citing Product and Architecture
-│   ├── 07_security_and_license_validation.md # CI/CD Gates: SAST, Secret Scanning, SBOM, and Licenses
+│   ├── 07_security_and_license_validation.md # CI/CD Gates (12 Gates): SAST, Secrets, Privacy PII-SAST, SBOM, and Licenses
 │   ├── 08_citation_contract_and_drift.md     # Anti-drift cryptographic citation protocol
-│   ├── 09_agent_protocols.md                 # Prompts, skill contracts, and guardrails for LLMs
+│   ├── 09_agent_protocols.md                 # Prompts, skill contracts, and guardrails for LLMs (11 Agents)
 │   ├── 10_quality_management_and_release_gates.md # Coding rules, Cyclomatic Complexity, and Release Gates
 │   └── 11_git_branching_and_lifecycle.md     # 4-tier Git branching model (main, release, feat/bug, task)
 │
-├── schemas/                                  # JSON Schemas (Deterministic Validation)
+├── schemas/                                  # JSON Schemas (33 Deterministic Schemas - Draft 2020-12)
 │   ├── product/                              # Schemas: actor, use-case, requirement, business-rule
-│   ├── security/                             # Schemas: threat-actor, abuse-case, security-req
+│   ├── security/                             # Schemas: threat-actor, abuse-case, security-req, enclave
+│   ├── privacy/                              # Schemas: privacy-policy, data-asset, privacy-ropa, privacy-req
 │   ├── compliance/                           # Schemas: license-policy, dependency-manifest
 │   ├── architecture/                         # Schemas: introduction-and-goals, component, adr
 │   ├── sdd/                                  # Schemas: tasks, handoff
 │   └── manuals/                              # Schemas: user-manual, production-manual
 │
-├── templates/                                # Standard Markdown templates with YAML frontmatter
+├── templates/                                # Standard Markdown templates with YAML frontmatter (37 Templates)
 │   ├── product/                              # ACT, JRN, UC, BR, FR, QR, CON templates
 │   ├── security/                             # THREAT, ABUSE, SEC-REQ, SEC-POL templates
+│   ├── privacy/                              # DATA-ASSET, PRIV-ROPA, PRIV-REQ, DPIA-REQUEST templates
 │   ├── compliance/                           # CON-LIC, ADR-LIC, Commercial Acquisition Request templates
 │   ├── architecture/                         # arc42 templates (01-12) enriched with NAF v4
 │   │   ├── introduction-and-goals.template.md      # Sec. 1 (Enterprise & Capability: ARCH-INTRO-*)
@@ -122,7 +133,7 @@ AI-SDLC/
 │   ├── manuals/                              # MAN-USER (User Manual), MAN-PROD (Production Manual) templates
 │   └── ci/                                   # CI/CD templates (GitLab CI, Azure DevOps, Bitbucket, GitHub Actions)
 │
-├── reports/                                  # Autogenerated formal reports (360° RTM, Quality, Active Reqs)
+├── reports/                                  # Autogenerated formal reports (360° RTM, Quality, RoPA, Active Reqs)
 │
 └── examples/                                 # Realistic Case Study: "SentinelCore" (Critical Telemetry SaaS)
     ├── product/                              # Canonical product model
@@ -149,7 +160,7 @@ This accelerated flow demonstrates how to create, implement, verify, and integra
 ### 2. Fast 7-Step Workflow with Simplified Commands
 
 ```bash
-# 0. Turnkey Bootstrapping: initialize 29 schemas, 32 starter templates, universal MCP, and CI/CD:
+# 0. Turnkey Bootstrapping: initialize 33 schemas, 37 starter templates, universal MCP, and CI/CD:
 npx @aisdlc/cli init
 
 # 1. Define canonical product (ProductShape / PDaC) upstream in specs/product/
@@ -173,7 +184,7 @@ pnpm run git:checkout TSK-001
 pnpm run check:fix
 # or via npx: npx aisdlc check --fix
 
-# 6. Execute consolidated CI/CD suite (all 11 quality and governance gates)
+# 6. Execute consolidated CI/CD suite (all 12 quality and governance gates)
 pnpm run verify:all
 # or via npx: npx aisdlc verify all
 # or with structured JSON output for AI agents / CI pipelines: npx aisdlc verify all --json
@@ -190,21 +201,22 @@ npx aisdlc sdd integrate --auto
 
 | CLI Tool / Command | Equivalent pnpm Command | Lifecycle Phase | Output / Action Performed |
 |---|---|---|---|
-| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository with all 29 JSON schemas (Draft 2020-12), 32 canonical starter templates, Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`), and AI agent rules. Unconditionally generates universal MCP configs (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Injects standard npm scripts into consumer `package.json`. Interactive TTY wizard prompts for CI/CD provider (`GitHub Actions` default, `GitLab`, `Azure`, `Bitbucket`, `None`), Architecture granularity, and AI Agents. Supports `--dry-run`, `--json`, and `-F, --format <format>` |
+| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository with all 33 JSON schemas (Draft 2020-12), 37 canonical starter templates, Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`), and AI agent rules (11 specialized agents). Unconditionally generates universal MCP configs (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Injects standard npm scripts into consumer `package.json`. Interactive TTY wizard prompts for CI/CD provider, Architecture granularity, and AI Agents. Supports `--dry-run`, `--json`, and `-F, --format <format>` |
 | `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry Setup** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
-| `npx aisdlc mcp` / `npx @aisdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 23 typed tools (including `new`, `verify`, `report`) and 5 canonical resources |
+| `npx aisdlc mcp` / `npx @aisdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 24 typed tools (including `new`, `verify`, `verify_privacy`, `report`) and 6 canonical resources |
 | `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | **SDD Scaffolding** | Generates `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` sidecar (`HOF-*`) with SHA-256 digests |
 | `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancy** | Audits lexical collisions and requirement overlaps before coding (`--json`) |
 | `npx aisdlc verify friction [change]` | - | **Progressive Friction** | Validates Anti-Bypass rules and thresholds according to risk profile (`patch`/`standard`/`critical`, `--json`) |
 | `npx aisdlc git plan` | `pnpm run git:plan` | **Git Planning** | Renders visual branch hierarchy tree before starting work |
 | `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Git 4-Tier Branching** | Resolves version and cascade-creates: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
 | `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | **Git Governance** | Validates strict naming rules for any branch according to its Tier (1 to 4) |
-| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Unified Pre-Flight** | Syncs Gherkin to `.feature`, updates PDaC SHA-256 digests, audits security, and checks all 11 Quality Gates |
+| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Unified Pre-Flight** | Syncs Gherkin to `.feature`, updates PDaC SHA-256 digests, audits security & privacy, and checks all 12 Quality Gates |
 | `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Structural Compliance** | Validates Markdown artifacts and `handoff.yaml` sidecars against canonical JSON schemas (Draft 2020-12, `--json`) |
 | `npx aisdlc verify pdac [--json]` | `pnpm run verify:pdac` | **Cryptographic Integrity** | Detects drift in PDaC graph comparing SHA-256 hashes (`--json`) |
 | `npx aisdlc verify quality [--json]` | `pnpm run verify:quality` | **Code Release Gate** | Evaluates Cyclomatic Complexity ($\le 10$), Cognitive ($\le 15$), and Maintainability ($\ge 50$) with `--json` |
 | `npx aisdlc verify gherkin [--json]` | - | **BDD Synchronization** | Verifies `.feature` files match specification Gherkin scenarios with identical hashes (`--json`) |
 | `npx aisdlc verify security [options]` | `pnpm run verify:security` | **Shift-Left Security (Gate 11)** | Unified secret verification (Gitleaks) and deterministic SAST (OWASP Top 10, `--json`, exit code 4 on leaks) |
+| `npx aisdlc verify privacy [options]` | `pnpm run verify:privacy` | **Privacy & PII-SAST (Gate 12)** | Audits `DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*`, and PII-SAST rules (`PRIV-001`–`PRIV-008`) against `privacy-policy.yaml` (`--json`, exit code 5) |
 | `npx aisdlc verify secrets [options]` | `pnpm run verify:secrets` | **Secret Scanning** | Deterministic detection of credentials, API keys, and Shannon entropy with Git diff support, `--json`, and exitCode 4 |
 | `npx aisdlc verify sast [options]` | `pnpm run verify:sast` | **SAST Security** | Deterministic detection of AI-generated vulnerable patterns (SQLi, exec, eval, SSRF, `--json`) |
 | `npx aisdlc verify testing [--json]` | `pnpm run verify:testing` | **Testing Audit** | Verifies 100% test coverage for requirements and tasks with physical disk tests (`--json`) |
@@ -212,7 +224,7 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc verify governance [--json]` | `pnpm run verify:governance` | **Task Governance** | Audits task autonomy modes (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc., supports `--json`) |
 | `npx aisdlc verify licenses [options]` | `pnpm run verify:licenses` | **IP / OSS Governance & SCA** | Dynamic dependency scan, CycloneDX 1.5 SBOM, and legal attribution against `license-policy.yaml` (`--json`) |
 | `npx aisdlc sdd verify` | - | **SDD Compliance** | Audits active changes for specification compliance and valid sidecars |
-| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 11 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
+| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 12 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
 | `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship) for PRs (supports `--json`) |
 | `npx aisdlc sdd integrate [--auto]` | - | **Baseline Promotion** | Promotes requirements to `active`, links architecture, marks proposal `applied`, and archives change |
 | `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Release Summary** | Computes DIR per model/human, defect density, and rework costs (`RELEASE_KPIS_<release>.md`, supports `--json`) |
@@ -233,6 +245,7 @@ This comprehensive walkthrough details how to build a new feature using all phas
 └────────────────────────────────────────────────────────────────────────────────────────┘
   [1. Product & BDD]     ➔ Model UC/FR/BR and sync Gherkin (.feature) via `check:fix`
   [2. Threat Modeling]   ➔ Model ABUSE, SEC-REQ requirements, and Zero Trust enclaves
+  [2b. Privacy & GDPR]   ➔ Model DATA-ASSET, PRIV-ROPA, PRIV-REQ (LINDDUN) via `agent-privacy-officer`
   [3. OSS Licenses]      ➔ Validate dependencies with `verify:licenses` and license-policy.yaml
   [4. SDD Scaffolding]   ➔ Automated scaffolding with `change:new` and HOF-* sidecar
   [5. 4-Tier Branching]  ➔ Cascade branch creation: main ➔ release ➔ feat ➔ task via `git checkout`
@@ -702,10 +715,10 @@ AI-SDLC generates a self-contained interactive web dashboard and dependency grap
 
 ### 1. Key Features
 - **PDaC / RTM Network Visualizer**:
-  - 4 layers: Product (Upstream: root Vision / Goals `ARCH-INTRO-*` with `identifies`, `envisions`, and `defines-goal` edges, plus `JRN-*`, `ACT-*`, `UC-*`, `BR-*`), Requirements (`FR-*`, `QR-*`, `SEC-REQ-*`), Architecture (Midstream: `CMP-*`, `ADR-*`, `SEC-ENC-*`), and BDD Tests (Downstream: `.feature`).
+  - 4 layers: Product (Upstream: root Vision / Goals `ARCH-INTRO-*` with `identifies`, `envisions`, and `defines-goal` edges, plus `JRN-*`, `ACT-*`, `UC-*`, `BR-*`, and Privacy Assets/RoPA `DATA-ASSET-*`, `PRIV-ROPA-*`), Requirements (`FR-*`, `QR-*`, `SEC-REQ-*`, `PRIV-REQ-*`), Architecture (Midstream: `CMP-*`, `ADR-*`, `SEC-ENC-*`), and BDD Tests (Downstream: `.feature`).
   - Deterministic health status: Green (compliant) vs. Red (orphans or SHA-256 drift).
   - **Critical Path Highlighting**: Clicking any node illuminates its full upstream and downstream dependency chain.
-  - Live filters by layer, typology (including `Vision / Goals (ARCH-INTRO)`), and health, auto-focus search, and multiple layout algorithms.
+  - Live filters by layer, typology (including `Vision / Goals (ARCH-INTRO)`, `DATA-ASSET`, `PRIV-ROPA`, `PRIV-REQ`), and health, auto-focus search, and multiple layout algorithms.
 - **360° Traceability Matrix Table**: Interactive table with bidirectional graph navigation.
 - **Quality & Autonomy Governance Metrics**: Executive cards (SEI MI, average CC, Release Gate verdict) and autonomy mode distribution.
 - **Telemetry and Historical KPIs**: Active branch metrics and historical trends tracking KLoC, bugs, DIR, and rework from `reports/releases/*.kpis.json`.
@@ -733,15 +746,15 @@ npx aisdlc report dashboard --output docs/dashboard.html --title "SentinelCore M
 AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@aisdlc/mcp` running over `stdio`. Developers and AI agents can invoke AI-SDLC tools directly within **Cursor, Claude Desktop / Code, Google Antigravity, VS Code, or GitHub Copilot**.
 
 ### 1. High-Level Workflows
-- **`new`**: Initializes a project or adopts AI-SDLC in an existing repo, configuring folders, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`), and CI templates (`github`, `gitlab`, `azure`, `bitbucket`).
-- **`verify`**: Runs all 11 deterministic Quality Gates simultaneously (`quality`, `traceability`, `governance`, `testing`, `gherkin`, `licenses`, `pdac`, `schemas`, `duplicates`, `friction`, `security`).
+- **`new`**: Initializes a project or adopts AI-SDLC in an existing repo, configuring folders, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`), and CI templates (`github`, `gitlab`, `azure`, `bitbucket`).
+- **`verify`**: Runs all 12 deterministic Quality Gates simultaneously (`quality`, `traceability`, `governance`, `testing`, `gherkin`, `licenses`, `pdac`, `schemas`, `duplicates`, `friction`, `security`, `privacy`).
 - **`report`**: Concurrently generates interactive HTML dashboard (`reports/dashboard.html`) and Markdown quality report (`reports/QUALITY_REPORT.md`).
 
-### 2. Complete Tools (23 Tools) and Resources (5 Resources)
+### 2. Complete Tools (24 Tools) and Resources (6 Resources)
 - **SDD Lifecycle**: `sdd_init`, `sdd_new`, `sdd_deposit`, `sdd_integrate`, `get_active_handoff`.
-- **Individual Quality Gates**: `verify_quality`, `verify_traceability`, `verify_governance`, `verify_licenses`, `verify_schemas`, `verify_duplicates`, `verify_friction`, `verify_security`, `verify_testing`, `verify_pdac`.
+- **Individual Quality Gates**: `verify_quality`, `verify_traceability`, `verify_governance`, `verify_licenses`, `verify_schemas`, `verify_duplicates`, `verify_friction`, `verify_security`, `verify_privacy`, `verify_testing`, `verify_pdac`.
 - **Reports & KPIs**: `report_markdown`, `report_dashboard`, `kpi_pr`, `kpi_release`, `git_detect_author`.
-- **Canonical Resources (`aisdlc://`)**: `aisdlc://policies/quality`, `aisdlc://policies/licenses`, `aisdlc://changes/active`, `aisdlc://changes/completed`, `aisdlc://status/summary`.
+- **Canonical Resources (`aisdlc://`)**: `aisdlc://policies/quality`, `aisdlc://policies/licenses`, `aisdlc://policies/privacy`, `aisdlc://changes/active`, `aisdlc://changes/completed`, `aisdlc://status/summary`.
 
 ### 3. IDE and MCP Client Configuration
 
@@ -794,15 +807,15 @@ AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@aisdlc/
    - Establish the Enterprise & Capability Vision (`ARCH-INTRO-*`) using `templates/architecture/introduction-and-goals.template.md` (for new Greenfield products or Brownfield retro-inception).
    - Use `templates/product/` to model Actors (`ACT-*`), Use Cases (`UC-*`), and Business Rules (`BR-*`).
    - Collaborate with analyst agents (`agent-product-analyst` / `ps:explore`) to run a 3–5 question discovery interview, surface gaps, and derive requirements (`FR-*`, `QR-*`).
-2. **Incorporate Shift-Left Cybersecurity**:
-   - Model threat actors (`ACT-THREAT-*`) and abuse cases (`ABUSE-*`).
-   - Define security requirements (`SEC-REQ-*`) and Zero Trust boundaries before technical design.
+2. **Incorporate Shift-Left Cybersecurity & Privacy-by-Design**:
+   - Model threat actors (`ACT-THREAT-*`), abuse cases (`ABUSE-*`), and security requirements (`SEC-REQ-*`) with `agent-threat-modeler`.
+   - Hand off to `agent-privacy-officer` to classify personal data (`DATA-ASSET-*`), maintain GDPR Art. 30 records (`PRIV-ROPA-*`), and derive LINDDUN privacy requirements (`PRIV-REQ-*`) before technical design.
 3. **Model arc42 / NAF v4 Architecture**:
    - Use templates in `templates/architecture/` according to selected granularity (`aisdlc init --arch minimal|full|none`).
    - Standard projects (`minimal`) model product/system vision & goals (`ARCH-INTRO-*`), components (`CMP-*`), and ADRs (`ADR-*`). Critical projects (`full`) cover all 12 arc42 sections.
-   - Each component (`CMP-*`) explicitly cites use cases (`implements-use-cases`) and requirements (`satisfies-requirements`).
-4. **Enforce License Compliance**:
-   - Check `license-policy.yaml`. If commercial libraries are needed, file formal requests (`ADR-LIC-*`).
+   - Each component (`CMP-*`) explicitly cites use cases (`implements-use-cases`), requirements (`satisfies-requirements`), and processed personal data (`processes-data-assets`).
+4. **Enforce License & Data Protection Compliance**:
+   - Check `license-policy.yaml` and `privacy-policy.yaml`. If commercial libraries or Art. 9 Special Category processing are needed, file formal requests (`ADR-LIC-*`, `DPIA-*`).
 5. **Human Review and Approval**:
    - Every proposal is validated by CI linters and schemas. Final approval and merge is strictly a human prerogative.
 
@@ -812,20 +825,21 @@ AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@aisdlc/
 
 ### 1. Non-Negotiable Principles and Guardrails
 1. **Context via Citations**: Never assume behaviors or invent rules. Read canonical cited artifacts (`SPEC-*`).
-2. **Security Guardrails**: All code must satisfy OWASP Secure Coding standards. If a task implements `SEC-REQ-*`, generate the corresponding automated test (`SEC-TEST-*`).
+2. **Security & Privacy Guardrails**: All code must satisfy OWASP Secure Coding standards and `privacy-policy.yaml`. If a task implements `SEC-REQ-*` or `PRIV-REQ-*`, generate the corresponding automated test.
 3. **Pre-Inspection of Dependencies**: Before editing dependency manifests (`package.json`, etc.), verify package SPDX against `license-policy.yaml`. Viral (`GPL`/`AGPL`) or commercial paid licenses without approval are forbidden.
 4. **Architectural Instantiation**: Copy templates from `templates/architecture/` to `docs/architecture/` (or design in `specs/changes/active/.../design.md`). Fill YAML frontmatter and validate via `npx aisdlc verify schemas` and `npx aisdlc verify traceability`.
 5. **Deterministic Validation & Zero Auto-Approval**: Run pre-flight commands (`pnpm run check:fix` and `pnpm run verify:all`). Never attempt to auto-approve or merge a PR: merging is strictly a human prerogative.
 
-### 2. Canonical Specialized Agents (10 Roles)
+### 2. Canonical Specialized Agents (11 Roles)
 
-AI-SDLC defines 10 specialized roles with bounded responsibilities and deterministic gates (see details in [process/09_agent_protocols.md](process/09_agent_protocols.md) and [process/01_governance_and_roles.md](process/01_governance_and_roles.md)):
+AI-SDLC defines 11 specialized roles with bounded responsibilities and deterministic gates (see details in [process/09_agent_protocols.md](process/09_agent_protocols.md) and [process/01_governance_and_roles.md](process/01_governance_and_roles.md)):
 
 | Agent Role | Specialty / Mission | Core Deliverables | Critical Guardrails |
 | :--- | :--- | :--- | :--- |
 | **`agent-product-analyst`** | Product Analyst & PDaC Scribe | `ARCH-INTRO-*` (Phase 0 Vision), `ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*` | `status: draft`, 3–5 question inception interview, mandatory Gherkin, zero assumptions. |
-| **`agent-threat-modeler`** | Threat Modeling & Shift-Left Security | `ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`, `SEC-ENC-*` | STRIDE / ASVS, negative tests, technical security loop. |
-| **`agent-system-architect`** | arc42 / NAF v4 Systems Architect | `CMP-*`, Mermaid diagrams, `ADR-*` records | Cites `implements-use-cases` and `satisfies-requirements`; returns to threat modeler. |
+| **`agent-threat-modeler`** | Threat Modeling & Shift-Left Security | `ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`, `SEC-ENC-*` | STRIDE / ASVS, negative tests, hands off to `agent-privacy-officer`. |
+| **`agent-privacy-officer`** | Data Protection & Privacy Officer (Shift-Left & Pre-Merge) | `DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*`, `DPIA-*` | Receives handoff from `agent-threat-modeler`; LINDDUN + GDPR Art. 30 + PII-SAST (`PRIV-001`–`PRIV-008`). |
+| **`agent-system-architect`** | arc42 / NAF v4 Systems Architect | `CMP-*`, Mermaid diagrams, `ADR-*` records | Cites `implements-use-cases` and `satisfies-requirements`; returns to threat modeler & privacy officer. |
 | **`agent-qa-engineer`** | QA Engineer & SDET | FAILING BDD suites (nominal, boundary, out of range) | **Zero production code**; blocked if boundary scenarios missing. |
 | **`agent-developer`** | Software Developer | Green code (`src/`), unit tests, TDD | Thresholds in `quality-policy.yaml` (CC $\le 10$, MI $\ge 50$); post-dev handoff. |
 | **`agent-expert-user`** | Expert User & Domain Evaluator | MVP feedback (design) / Functional attestation (post-dev) | Bimodal: strict upstream MVP vs downstream UI/CLI functional validation. |
@@ -834,11 +848,12 @@ AI-SDLC defines 10 specialized roles with bounded responsibilities and determini
 | **`agent-code-reviewer`** | Technical & Architecture Reviewer (Pre-Merge) | Clean Code, SOLID, DRY, YAGNI, AST audit | CC $\le 10$, MI $\ge 50$; categorizes `[BLOCKING]` vs `[SUGGESTION]`. |
 | **`agent-devops`** | Automation & Infrastructure Engineer | `.github/workflows/`, Dockerfiles, IaC, scripts | **NON-INVASION**: Strictly forbidden from touching application code in `src/`. |
 
-### 3. Pre-Merge Audit Triad
-Before a PR reaches human Tech Lead review, three agents audit the diff concurrently:
+### 3. Pre-Merge Audit Triad (and Privacy Audit)
+Before a PR reaches human Tech Lead review, specialized auditors inspect the diff concurrently:
 1. **`agent-code-reviewer`**: Audits technical health, design patterns, clean code, and AST complexity metrics.
 2. **`agent-security-auditor`**: Examines attack surface, injection vectors, sanitization, and cryptography.
 3. **`agent-compliance-checker`**: Audits manifests, blocks incompatible licenses, and verifies SBOM.
+4. **`agent-privacy-officer`**: Audits personal data flows, RoPA Art. 30 coverage, and deterministic PII-SAST rules (`PRIV-001`–`PRIV-008`).
 
 ### 4. Automation & Infrastructure: `agent-devops` and Non-Invasion Guardrail
 The `agent-devops` agent maintains CI/CD pipelines, container images, and infrastructure scripts under a **strict non-invasion guardrail**:

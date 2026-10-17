@@ -64,9 +64,9 @@ The `aisdlc` CLI provides comprehensive commands across 6 functional categories 
 
 | Command | Description | Key Options |
 | --- | --- | --- |
-| `aisdlc init [directory]` | Bootstraps a repository with AI-SDLC folders, all 29 canonical JSON schemas (Draft 2020-12), 32 base starter templates (Product, Security, Safety, Manuals, Compliance, SDD, CI), Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`), and AI agent configs. Unconditionally generates universal MCP configurations (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Non-destructively injects standard npm scripts into consumer `package.json`. In interactive TTY mode, prompts for CI/CD provider, architecture level, and AI agent targets. | `-d, --dry-run`, `--ci <github\|gitlab\|azure\|bitbucket\|none>`, `--agents <all\|cursor\|claude\|antigravity\|copilot\|mcp\|none>`, `--arch <minimal\|full\|none>`, `--json`, `-F, --format <format>` |
+| `aisdlc init [directory]` | Bootstraps a repository with AI-SDLC folders, all 33 canonical JSON schemas (Draft 2020-12), 37 base starter templates (Product, Security, Privacy, Safety, Manuals, Compliance, SDD, CI), Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`), and AI agent configs (11 specialized agents). Unconditionally generates universal MCP configurations (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Non-destructively injects standard npm scripts into consumer `package.json`. In interactive TTY mode, prompts for CI/CD provider, architecture level, and AI agent targets. | `-d, --dry-run`, `--ci <github\|gitlab\|azure\|bitbucket\|none>`, `--agents <all\|cursor\|claude\|antigravity\|copilot\|mcp\|none>`, `--arch <minimal\|full\|none>`, `--json`, `-F, --format <format>` |
 | `aisdlc check` | Unified pre-flight gate: runs Quality Gate checks with optional auto-repair (syncs Gherkin to `.feature` and recalculates PDaC SHA-256 digests). | `--fix`, `-r, --root <path>`, `--json`, `-F, --format <format>` |
-| `aisdlc mcp` | Starts the native Model Context Protocol (MCP) server over `stdio` exposing 23 deterministic tools and 5 context resources. | `-r, --root <path>` |
+| `aisdlc mcp` | Starts the native Model Context Protocol (MCP) server over `stdio` exposing 24 deterministic tools and 6 context resources. | `-r, --root <path>` |
 
 #### Repository Bootstrapping (`aisdlc init`)
 
@@ -76,10 +76,10 @@ Running `aisdlc init` (or `npx @aisdlc/cli init`) delivers a turnkey governance 
    - **Architecture Granularity**: Minimal / Baseline (default: `ARCH-INTRO-*`, `CMP-*`, `ADR-*`), Full (all 12 arc42 sections), or None.
    - **AI Agents**: All (Cursor, Claude Code, Antigravity, Copilot, MCP - recommended) or granular environments.
 2. **Universal MCP Integration**: Regardless of CI provider or agent selection, automatically scaffolds `.cursor/mcp.json`, `antigravity.mcp.json`, and `.vscode/mcp.json` preconfigured for `@aisdlc/mcp`.
-3. **Canonical Starter Templates**: Deploys 32 templates into `templates/` (product, security, safety, manuals, compliance, SDD, and CI/CD reference templates).
-4. **JSON Schemas (Draft 2020-12)**: Scaffolds all 29 schemas under `schemas/` and provides automatic in-memory fallback during verification if disk files are deleted.
+3. **Canonical Starter Templates**: Deploys 37 templates into `templates/` (product, security, privacy, safety, manuals, compliance, SDD, and CI/CD reference templates).
+4. **JSON Schemas (Draft 2020-12)**: Scaffolds all 33 schemas under `schemas/` and provides automatic in-memory fallback during verification if disk files are deleted.
 5. **Pull Request Templates**: Deposits `.github/PULL_REQUEST_TEMPLATE.md` with non-negotiable Plan Execution Matrix (`[X]` vs `[O]`), Weak Points hotspots, and automated KPI tables.
-6. **Automatic Script Injection**: Non-destructively registers standard shortcuts in consumer `package.json` (`check`, `check:fix`, `verify:quality`, `verify:all`, `change:new`).
+6. **Automatic Script Injection**: Non-destructively registers standard shortcuts in consumer `package.json` (`check`, `check:fix`, `verify:quality`, `verify:privacy`, `verify:all`, `change:new`).
 
 ### 2. Spec-Driven Development (SDD) & Change Management
 
@@ -95,7 +95,7 @@ Running `aisdlc init` (or `npx @aisdlc/cli init`) delivers a turnkey governance 
 
 | Command | Description | Key Options |
 | --- | --- | --- |
-| `aisdlc verify [all]` | Executes the consolidated CI/CD suite evaluating all 11 quality and governance gates simultaneously. | `-r, --root <path>`, `-p, --policy <path>`, `-C <max-cc>`, `-K <max-cog>`, `-M <min-mi>`, `-L <max-lines>`, `-m <mode>`, `--json` |
+| `aisdlc verify [all]` | Executes the consolidated CI/CD suite evaluating all 12 quality and governance gates simultaneously. | `-r, --root <path>`, `-p, --policy <path>`, `-C <max-cc>`, `-K <max-cog>`, `-M <min-mi>`, `-L <max-lines>`, `-m <mode>`, `--json` |
 | `aisdlc verify quality` | AST-based release gate evaluating Cyclomatic Complexity ($\le 10$), Cognitive ($\le 15$), Maintainability ($\ge 50$), and function length ($\le 40$). | `-p, --policy <path>`, `-C, --max-cyclomatic <n>`, `-K, --max-cognitive <n>`, `-M, --min-maintainability <n>`, `-m <STRICT\|PERMISSIVE>`, `--json` |
 | `aisdlc verify traceability` | Audits the 360° Requirements Traceability Matrix (Product HOF $\leftrightarrow$ Architecture CMP $\leftrightarrow$ Tests `.feature`). | `-r, --root <path>`, `--json` |
 | `aisdlc verify governance` | Audits task governance, human review plans, and autonomy modes (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc.). | `-r, --root <path>`, `--json` |
@@ -107,6 +107,7 @@ Running `aisdlc init` (or `npx @aisdlc/cli init`) delivers a turnkey governance 
 | `aisdlc verify duplicates` | Detects redundant requirements, ID collisions, title lexical redundancy ($\ge 85\%$), and BDD overlaps before coding. | `-s, --similarity <number>` *(default: 0.85)*, `-r, --root <path>`, `--json` |
 | `aisdlc verify friction [change]` | Evaluates progressive friction and Anti-Bypass rules (verifies change scope matches risk profile: `patch`, `standard`, `critical`). | `-r, --root <path>`, `--json` |
 | `aisdlc verify security` | Unified shift-left security gate: deterministic secret scanning (Gitleaks) and SAST (OWASP Top 10 vulnerabilities). | `-d, --diff`, `-b, --base <branch>`, `-g, --gitleaks`, `-s, --semgrep`, `-e, --entropy <n>`, `-m, --min-severity <level>`, `--json` |
+| `aisdlc verify privacy` | Gate 12: Audits Data Protection & Privacy-by-Design (`DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*`, `DPIA-*`) and PII-SAST rules (`PRIV-001`–`PRIV-008`) against `privacy-policy.yaml`. Exits with code 5 on violations. | `-r, --root <path>`, `-p, --policy <path>`, `--no-reports`, `--json` |
 | `aisdlc verify secrets` | Scans for exposed credentials, API keys, tokens, and high-entropy secrets (Shannon entropy $\ge 4.3$). Fails with exit code 4. | `-d, --diff`, `-b, --base <branch>`, `-g, --gitleaks`, `-e, --entropy <n>`, `--json` |
 | `aisdlc verify sast` | Static Application Security Testing for SQL injection, command injection, eval, SSRF, path traversal, and prompt injection. | `-s, --semgrep`, `-m, --min-severity <CRITICAL\|HIGH\|MEDIUM>`, `--json` |
 
@@ -178,7 +179,7 @@ aisdlc git checkout TSK-001
 # 4. Run pre-flight check with auto-fix (syncs Gherkin and digests)
 aisdlc check --fix
 
-# 5. Run the consolidated CI/CD verification suite (all 11 gates)
+# 5. Run the consolidated CI/CD verification suite (all 12 gates)
 aisdlc verify all
 
 # 6. Generate the interactive web dashboard and open it in the browser

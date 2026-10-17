@@ -27,6 +27,7 @@ import {
   runVerifyGovernance,
   runVerifyLicenses,
   runVerifyPdac,
+  runVerifyPrivacy,
   runVerifyQuality,
   runVerifySast,
   runVerifySchemas,
@@ -41,7 +42,7 @@ const program = new Command();
 program
   .name('aisdlc')
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
-  .version('1.6.0');
+  .version('2.0.0');
 
 // --- check command (unified pre-flight with auto-fix) ---
 program
@@ -68,7 +69,7 @@ const verifyCommand = program
 
 verifyCommand
   .command('all', { isDefault: true })
-  .description('Run the full quality and governance suite (Quality Gate + RTM + Tasks + Tests + Licenses + PDaC + Schemas + Duplicates + Security)')
+  .description('Run the full quality and governance suite (Quality Gate + RTM + Tasks + Tests + Licenses + PDaC + Schemas + Duplicates + Security + Privacy)')
   .option('-r, --root <path>', 'Project root directory')
   .option('-p, --policy <path>', 'Path to quality-policy.yaml')
   .option('-C, --max-cyclomatic <number>', 'Maximum Cyclomatic Complexity threshold')
@@ -295,6 +296,29 @@ verifyCommand
       format: opts.format,
     });
     process.exit(passed ? 0 : 1);
+  });
+
+verifyCommand
+  .command('privacy')
+  .description('Verify Data Protection & Privacy-by-Design against privacy-policy.yaml (GDPR ROPA, PII-SAST, retention/erasure)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-p, --policy <path>', 'Path to privacy-policy.yaml')
+  .option('--ropa-report [path]', 'Generate GDPR Art. 30 ROPA_INVENTORY.md report')
+  .option('--report [path]', 'Generate PRIVACY_SCAN_REPORT.md report')
+  .option('-m, --min-severity <level>', 'Minimum severity for failure: CRITICAL, HIGH, MEDIUM, LOW', 'HIGH')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
+  .action((opts) => {
+    const passed = runVerifyPrivacy({
+      root: opts.root,
+      policy: opts.policy,
+      ropaReport: opts.ropaReport,
+      report: opts.report,
+      minSeverity: opts.minSeverity,
+      json: opts.json,
+      format: opts.format,
+    });
+    process.exit(passed ? 0 : 5);
   });
 
 verifyCommand

@@ -80,7 +80,7 @@
             "properties": {
               "method": {
                 "type": "string",
-                "enum": ["automated-unit-test", "cucumber-bdd", "quality-gate", "license-audit", "sast-scan", "manual-inspection", "smoke-test"]
+                "enum": ["automated-unit-test", "cucumber-bdd", "quality-gate", "license-audit", "sast-scan", "privacy-audit", "manual-inspection", "smoke-test"]
               },
               "command-or-criteria": {
                 "type": "string",
@@ -94,6 +94,7 @@
               "agent-developer",
               "agent-security-auditor",
               "agent-compliance-checker",
+              "agent-privacy-officer",
               "agent-qa",
               "human-engineer",
               "human-architect",
@@ -119,7 +120,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^(FR|QR|CON|SEC-REQ|SAF-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*$"
+              "pattern": "^(FR|QR|CON|SEC-REQ|SAF-REQ|PRIV-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*$"
             },
             "description": "Requirements satisfied by this atomic task."
           },

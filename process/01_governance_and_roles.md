@@ -17,8 +17,8 @@ The AI-SDLC framework organizes humans and AI agents into a clear, balanced gove
    - Approves Architecture Decision Records (`ADR-*`).
 3. **Security Officer / CISO / SecOps**:
    - Validates threat modeling, approves security requirements (`SEC-REQ-*`), and reviews risk exceptions.
-4. **Legal / IP & Compliance Officer**:
-   - Validates third-party license usage, approves commercial license acquisitions, or grants copyleft exceptions.
+4. **Legal / IP, Privacy & Compliance Officer (DPO)**:
+   - Validates third-party license usage, approves commercial license acquisitions, grants copyleft exceptions, validates Records of Processing Activities (`PRIV-ROPA-*`), and approves Data Protection Impact Assessments (`DPIA-*`).
 5. **Tech Lead / Senior Developer**:
    - Reviews agent-generated code in Pull Requests using the mandatory institutional template (`.github/PULL_REQUEST_TEMPLATE.md`).
    - Evaluates the **Plan Execution Matrix and Testing Status (`X` vs `O`)**:
@@ -32,22 +32,24 @@ The AI-SDLC framework organizes humans and AI agents into a clear, balanced gove
 1. **Product Analyst Agent (`agent-product-analyst`)**:
    - Executes Phase 0 Product Inception (3–5 question discovery interview and `ARCH-INTRO-*` Enterprise & Capability Vision), exploration skills (`ps:explore`), drafts product artifact candidates (`ACT-*`, `UC-*`, `BR-*`, `FR-*`, `QR-*`), and detects ambiguities.
 2. **Threat Modeler and Security Agent (`agent-threat-modeler`)**:
-   - Applies STRIDE and OWASP ASVS across use cases (`UC-*`) and technical architecture artifacts (`CMP-*`, Mermaid diagrams, ADRs) in the technical feedback loop from the architect, proposing threat actors (`ACT-THREAT-*`), abuse cases (`ABUSE-*`), and security requirements (`SEC-REQ-*`).
-3. **Systems Architect Agent (`agent-system-architect`)**:
-   - Generates Mermaid sequence diagrams, OpenAPI specifications, data models, and block decomposition proposals (`SRV-*`, `CMP-*`, `SYS-*`). Emits a technical security feedback loop toward `agent-threat-modeler` upon infrastructure or persistence decisions impacting the attack surface.
-4. **Developer / Coder Agent (`agent-developer`)**:
+   - Applies STRIDE and OWASP ASVS across use cases (`UC-*`) and technical architecture artifacts (`CMP-*`, Mermaid diagrams, ADRs) in the technical feedback loop from the architect, proposing threat actors (`ACT-THREAT-*`), abuse cases (`ABUSE-*`), and security requirements (`SEC-REQ-*`), then handing off to `agent-privacy-officer`.
+3. **Data Protection and Privacy Officer Agent (`agent-privacy-officer`)**:
+   - Operates bimodally: in Shift-Left Design mode (receiving handoff from `agent-threat-modeler`), applies LINDDUN and GDPR/LOPDGDD/ISO 27701 to classify personal data assets (`DATA-ASSET-*`), maintain Records of Processing Activities (`PRIV-ROPA-*`), derive technical privacy requirements (`PRIV-REQ-*`), and trigger DPIA workflows (`DPIA-*`) when Art. 9 Special Category data is detected, handing off to `agent-system-architect`; in Pre-Merge Audit mode, audits Pull Requests against `privacy-policy.yaml` and deterministic PII-SAST rules (`PRIV-001`–`PRIV-008`).
+4. **Systems Architect Agent (`agent-system-architect`)**:
+   - Generates Mermaid sequence diagrams, OpenAPI specifications, data models, and block decomposition proposals (`SRV-*`, `CMP-*`, `SYS-*`). Emits a technical security and privacy feedback loop toward `agent-threat-modeler` (which chains to `agent-privacy-officer`) upon infrastructure or persistence decisions impacting the attack surface or personal data flows.
+5. **Developer / Coder Agent (`agent-developer`)**:
    - Reads SDD delivery specifications and generates clean, modular, strictly-typed source code adhering to architectural contracts.
-5. **Test / QA Agent (`agent-test-engineer` / `agent-qa-engineer`)**:
+6. **Test / QA Agent (`agent-test-engineer` / `agent-qa-engineer`)**:
    - Generates exhaustive unit, integration, contract, and BDD/Gherkin test suites in RED prior to implementation.
-6. **Code and Security Auditor Agent (`agent-security-auditor`)**:
+7. **Code and Security Auditor Agent (`agent-security-auditor`)**:
    - Conducts adversarial PR code reviews searching for logic vulnerabilities, injection flaws, and authorization bypasses.
-7. **License Compliance Agent (`agent-compliance-checker`)**:
+8. **License Compliance Agent (`agent-compliance-checker`)**:
    - Inspects dependency manifests against `license-policy.yaml`, flags commercial licenses, and generates attribution drafts.
-8. **Expert User and Domain Evaluator Agent (`agent-expert-user`)**:
+9. **Expert User and Domain Evaluator Agent (`agent-expert-user`)**:
    - Operates bimodally: in design phase defines strict MVP boundaries and roadmap suggestion bank (`templates/product/user-design-feedback.template.md`); in post-development phase conducts end-to-end functional validation contrasting UI and CLI behavior against `UC-*` and `FR-*` prior to pre-merge security audit.
-9. **Technical and Architectural Reviewer Agent (`agent-code-reviewer`)**:
-   - Audits Pull Requests evaluating readability, SOLID/DRY adherence, absence of code smells, and cyclomatic/cognitive complexity limits, completing the Pre-Merge Audit Triad.
-10. **DevOps and Infrastructure Engineer Agent (`agent-devops`)**:
+10. **Technical and Architectural Reviewer Agent (`agent-code-reviewer`)**:
+    - Audits Pull Requests evaluating readability, SOLID/DRY adherence, absence of code smells, and cyclomatic/cognitive complexity limits, completing the Pre-Merge Audit Triad (alongside `agent-security-auditor`, `agent-compliance-checker`, and `agent-privacy-officer`).
+11. **DevOps and Infrastructure Engineer Agent (`agent-devops`)**:
     - Maintains and evolves automated infrastructure: CI/CD workflows, Dockerfiles, IaC manifests, and support scripts, under the strict non-invasion guardrail protecting application source code (`src/`).
 
 ---
@@ -60,12 +62,14 @@ The AI-SDLC framework organizes humans and AI agents into a clear, balanced gove
 > - **C (Consulted)**: Contributes information and context.
 > - **I (Informed)**: Receives notifications of outcomes.
 
-| **Phase / Activity** | PO (Human) | Architect (Human) | SecOps (Human) | Legal (Human) | Tech Lead / Dev (Human) | Specialized AI Agent | Guardrail / Deterministic Rule |
+| **Phase / Activity** | PO (Human) | Architect (Human) | SecOps (Human) | Legal / DPO (Human) | Tech Lead / Dev (Human) | Specialized AI Agent | Guardrail / Deterministic Rule |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | **PDaC Exploration & Scribing** | A | C | C | I | C | R (Analyst Scribe) | AI drafts compliant proposal; does not approve |
 | **Product Change Approval** | **A** | C | C | I | I | - | **Forbidden for agents (Human only)** |
 | **User Design Evaluation (MVP vs Roadmap)** | **A** | C | C | I | C | R (Expert User) | Applies canonical template; human PO decides scope |
 | **Threat Modeling (Scribing & Feedback Loop)** | C | C | A | I | C | R (Threat Modeler Scribe) | STRIDE/ASVS inference on UC-* and technical feedback from CMP-* |
+| **Privacy & Data Protection Modeling (LINDDUN / RoPA)** | C | C | C | **A** | C | R (Privacy Officer Scribe) | Receives handoff from Threat Modeler; generates `DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*` |
+| **DPIA Approval (GDPR Art. 35 / Special Categories)** | C | C | C | **A** | I | R (Privacy Officer Scribe) | **Humans (DPO/Legal) alone approve `DPIA-*` risk sign-off** |
 | **Architectural Design (arc42/NAF)** | I | **A** | C | I | C | R (Architect) | Blocks must cite valid `UC-*` use cases |
 | **ADR Approval** | C | **A** | C | I | C | - | **Humans alone approve architectural decisions** |
 | **OSS License Evaluation** | I | C | I | **A** | C | R (Compliance) | Automated detection in `license-policy.yaml` |
@@ -77,6 +81,7 @@ The AI-SDLC framework organizes humans and AI agents into a clear, balanced gove
 | **Interactive Tasks (`HUMAN_REVIEW_PLAN`)** | I | C | C | I | **A (Step-by-Step Approver)** | R (Planner / Co-implementer) | Agent halts at each step; human approves |
 | **Pre-Merge Code Review (SOLID / Clean Code)** | I | C | I | I | **A (Guarantor)** | R (Code Reviewer) | Verification of CC <= 10, MI >= 50, code smells, and SOLID principles |
 | **Vulnerability Audit and SAST** | I | I | A | I | C | R (Security Auditor) | Deterministic SAST + Adversarial Agent |
+| **Privacy & PII-SAST Pre-Merge Audit** | I | I | C | **A** | C | R (Privacy Officer) | Deterministic `verify privacy` (`PRIV-001`–`PRIV-008`) + RoPA check |
 | **Infrastructure as Code & CI/CD** | I | C | C | I | **A** | R (DevOps) | Exclusive modification of .github/, Dockerfiles, scripts (forbidden on src/) |
 | **SDD Canonical Integration** | C | C | I | I | **A** | R (Developer / CLI) | All tasks in `tasks.md` must be `COMPLETED` |
 | **PR Review and Plan Balance (`X`/`O`)** | I | C | C | I | **A (Guarantor & Approver)** | R (Declares matrix, weak points, and assumptions) | Mandatory inclusion of each and every item; justification for any `[O]` |
@@ -92,7 +97,7 @@ Traditionally, writing product specifications and security models imposes heavy 
 The **AI as Scribe** model inverts this operational burden:
 1. **Natural Language Intent**: The Product Owner, Tech Lead, or SecOps describes the functional or technical need in a simple prompt or brief description.
 2. **Automated Technical Scribing (AI as Scribe)**:
-   - Specialized agents (`agent-product-analyst` and `agent-threat-modeler`) act as technical amanuenses:
+   - Specialized agents (`agent-product-analyst`, `agent-threat-modeler`, and `agent-privacy-officer`) act as technical amanuenses:
      * Automatically assign collision-free sequential immutable IDs.
      * Fill exact YAML frontmatter conforming to canonical JSON Schema (Draft 2020-12), initially tagging with `status: draft`.
      * Draft normative statements and acceptance criteria in executable Gherkin (`Feature`, `Background`, `Scenario`, `Scenario Outline` with `Examples` tables).
@@ -127,7 +132,7 @@ To prevent context loss or invalid assumptions:
    - Product formally emits an immutable delivery subgraph with identifier `HOF-*` (use cases, requirements, business rules, and SHA-256 citations).
    - SDD ecosystem adapters (OpenSpec, GitHub Spec Kit) or the change generator (`aisdlc change new`) deposit this subgraph as a companion `handoff.yaml` file inside the change directory (`specs/changes/active/<id>/` or `specs/<id>/`).
 3. **From Architecture to SDD Specification**:
-   - Each SDD increment must reference a bounded subset of requirements (`FR-*`, `SEC-REQ-*`), architectural blocks (`SRV-*`, `SYS-*`), and BDD suites (`.feature`).
+   - Each SDD increment must reference a bounded subset of requirements (`FR-*`, `SEC-REQ-*`, `PRIV-REQ-*`), architectural blocks (`SRV-*`, `SYS-*`), and BDD suites (`.feature`).
 4. **Post-Implementation Canonical Integration**:
    - Upon completing implementation and passing deterministic verification, the change is integrated into canonical specifications via `aisdlc sdd integrate`, updating requirement statuses and architectural dependency maps.
 5. **From Agent to Agent (Subagent Delegation)**:
@@ -138,7 +143,7 @@ To prevent context loss or invalid assumptions:
      * 🟢 **`AUTONOMOUS` Mode** (or tasks where humans supervise solely final PR execution or CI pipelines): **This interactive handoff is NOT emitted**, allowing unattended, frictionless agent execution.
      * 🟡 **Autonomy Level $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **Emitting the Workflow Handoff block and HALTING is MANDATORY**, exposing completed deliverables, suggesting next roles, and **preserving an open window for human action** (review, edit, pause, divert, or delegate).
    - **Canonical Lifecycle Transition Chain**:
-     $$\text{Human PO} \rightarrow \text{agent-product-analyst} \rightarrow \text{agent-expert-user} \rightarrow \text{agent-threat-modeler} \rightarrow \text{agent-system-architect} \rightarrow \text{agent-developer} \rightarrow \text{agent-test-engineer} \rightarrow \text{agent-security-auditor} \rightarrow \text{agent-compliance-checker} \rightarrow \text{Human Tech Lead}$$
+     $$\text{Human PO} \rightarrow \text{agent-product-analyst} \rightarrow \text{agent-expert-user} \rightarrow \text{agent-threat-modeler} \rightarrow \text{agent-privacy-officer} \rightarrow \text{agent-system-architect} \rightarrow \text{agent-developer} \rightarrow \text{agent-test-engineer} \rightarrow \text{agent-security-auditor} \rightarrow \text{agent-compliance-checker} \rightarrow \text{agent-privacy-officer} \rightarrow \text{Human Tech Lead}$$
 
 ---
 
@@ -175,7 +180,7 @@ Every feature or software delta is decomposed into an atomic task plan (`tasks.m
 
 ### Autonomy Decision Table
 | Risk Level | Complexity | Ambiguity | Resulting Autonomy Mode | Required Action |
-| :---: | :---: | :---: | :---: | :--- |
+| :---: | :---: | :---: | :--- | :--- |
 | **LOW** | LOW / MED | Zero (Specified) | **`AUTONOMOUS`** 🟢 | Agent plans and codes end-to-end. |
 | **MEDIUM** | ANY | Zero (Specified) | **`HUMAN_REVIEW_PLAN`** 🟡 | Agent drafts `implementation_plan.md` and awaits approval. |
 | **HIGH** | HIGH | Zero (Specified) | **`HUMAN_REVIEW_PLAN`** 🟡 | Requires formal approval from Tech Lead or Architect. |
@@ -220,10 +225,10 @@ verification:
 
 ### C. Deterministic Anti-Bypass Guardrail (Governance Evasion Prevention)
 
-Using the `patch` profile to circumvent architectural or security controls is strictly forbidden. If a change declares `profile: patch` but touches:
+Using the `patch` profile to circumvent architectural, security, or privacy controls is strictly forbidden. If a change declares `profile: patch` but touches:
 1. Canonical JSON schemas (`schemas/`).
-2. Cybersecurity enclaves or actors (`examples/security/`, `SEC-ENC-*`, certificates/secrets).
-3. Organizational master policies (`quality-policy.yaml`, `license-policy.yaml`).
+2. Cybersecurity enclaves or actors (`examples/security/`, `SEC-ENC-*`, certificates/secrets) or Privacy artifacts (`DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*`, `DPIA-*`).
+3. Organizational master policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`).
 4. Critical deployment infrastructure or scripts.
 
 The deterministic verification command (`aisdlc verify`) will **immediately block the pipeline (EXIT 1)**, mandating change reclassification as `standard` or `critical`.

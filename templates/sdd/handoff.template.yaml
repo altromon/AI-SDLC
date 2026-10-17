@@ -19,6 +19,12 @@ subgraph:
     - QR-LATENCY-REALTIME
   securityRequirements:
     - SEC-REQ-MTLS-STREAM
+  privacyRequirements:
+    - PRIV-REQ-MASKING-001
+  dataAssets:
+    - DATA-ASSET-PILOT-IDENTITY
+  privacyRopa:
+    - PRIV-ROPA-FLIGHT-LOGS
   businessRules:
     - BR-TELEMETRY-VALIDITY
   abuseCases:
@@ -39,3 +45,6 @@ citations:
   - id: SEC-REQ-MTLS-STREAM
     digest: "sha256:57f0c2ad1059aafdb6b3c140c074abbe8ee6f6c61e9733c69454f1551ed3397d"
     comment: "Mandatory mutual authentication via client certificates"
+  - id: PRIV-REQ-MASKING-001
+    digest: "sha256:606e9ec19d675681ce265aa667367de76629ae7067d710e20f121d5c2e276f82"
+    comment: "Personal data pseudonymization and telemetry redaction"

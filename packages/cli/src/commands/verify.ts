@@ -9,6 +9,7 @@ import {
   verifyArtifactsSchemas,
   verifyLicenses,
   verifyPdacGraph,
+  verifyPrivacy,
   verifyProgressiveFriction,
   verifyQualityGate,
   verifySast,
@@ -1052,6 +1053,89 @@ export function runVerifyGherkin(options: VerifyBaseOptions = {}): boolean {
   return result.inSync;
 }
 
+export interface PrivacyVerifyCliOptions extends VerifyBaseOptions {
+  policy?: string;
+  ropaReport?: boolean | string;
+  report?: boolean | string;
+  minSeverity?: string;
+}
+
+function emitPrivacyJson(result: ReturnType<typeof verifyPrivacy>): void {
+  const payload: VerifyJsonPayload = {
+    gate: 'privacy',
+    success: result.success,
+    exitCode: result.success ? 0 : 5,
+    summary: {
+      totalFilesScanned: result.totalFilesScanned,
+      dataAssetsCount: result.dataAssetsCount,
+      ropaCount: result.ropaRecordsCount,
+      ropaRecordsCount: result.ropaRecordsCount,
+      privacyRequirementsCount: result.privacyRequirementsCount,
+      violationsCount: result.violationsCount,
+    },
+    violations: result.violations,
+    artifacts: {
+      ropaInventoryPath: result.ropaOutputPath,
+      reportPath: result.reportOutputPath,
+    },
+  };
+  console.log(JSON.stringify(payload, null, 2));
+}
+
+function printPrivacyConsole(result: ReturnType<typeof verifyPrivacy>): void {
+  console.log(`  Scanned source files:    ${pc.bold(String(result.totalFilesScanned))}`);
+  console.log(`  Data assets (DATA-ASSET):${pc.bold(String(result.dataAssetsCount))}`);
+  console.log(`  ROPA records (Art. 30):  ${pc.bold(String(result.ropaRecordsCount))}`);
+  console.log(`  Privacy reqs (PRIV-REQ): ${pc.bold(String(result.privacyRequirementsCount))}`);
+  console.log(`  Privacy violations:      ${result.violationsCount > 0 ? pc.red(String(result.violationsCount)) : pc.green('0')}`);
+  if (result.ropaOutputPath) console.log(`  ROPA Inventory generated:${pc.cyan(result.ropaOutputPath)}`);
+  if (result.reportOutputPath) console.log(`  Privacy Report generated:${pc.cyan(result.reportOutputPath)}`);
+  if (result.violations.length > 0) {
+    console.log(pc.red('\n  Detected privacy violations:'));
+    for (const v of result.violations) {
+      const loc = v.lineNumber ? `${v.relPath}:${v.lineNumber}` : v.relPath;
+      console.log(`    ${pc.red('✖')} [${v.severity}] [${v.ruleId}] ${pc.bold(loc)}: ${v.message}`);
+    }
+  }
+  console.log(result.success ? pc.green('\n✔ Data Protection & Privacy COMPLIANT\n') : pc.red('\n✖ Data Protection & Privacy BLOCKED (Exit Code 5)\n'));
+}
+
+function buildPrivacyVerifyInput(options: PrivacyVerifyCliOptions, rootDir: string) {
+  return {
+    rootDir,
+    policyPath: options.policy,
+    generateRopa: options.ropaReport !== undefined ? Boolean(options.ropaReport) : undefined,
+    ropaOutputPath: typeof options.ropaReport === 'string' ? options.ropaReport : undefined,
+    reportOutputPath:
+      typeof options.report === 'string'
+        ? options.report
+        : options.report
+          ? 'reports/PRIVACY_SCAN_REPORT.md'
+          : undefined,
+  };
+}
+
+export function runVerifyPrivacy(options: PrivacyVerifyCliOptions = {}): boolean {
+  const rootDir = options.root || process.cwd();
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
+
+  if (!isSilent) {
+    console.log(pc.bold(pc.cyan('\n🔒 [AI-SDLC] Verifying Data Protection & Privacy-by-Design (GDPR / LOPDGDD / PII-SAST)...')));
+  }
+
+  const result = verifyPrivacy(buildPrivacyVerifyInput(options, rootDir));
+
+  if (useJson) {
+    emitPrivacyJson(result);
+    return result.success;
+  }
+  if (!options.silent) {
+    printPrivacyConsole(result);
+  }
+  return result.success;
+}
+
 function collectAllGates(options: QualityVerifyOptions, root: string, isSilent: boolean) {
   return {
     quality: { success: runVerifyQuality({ ...options, root, silent: isSilent, json: false }) },
@@ -1065,15 +1149,22 @@ function collectAllGates(options: QualityVerifyOptions, root: string, isSilent: 
     duplicates: { success: runVerifyDuplicates({ root, silent: isSilent, json: false }) },
     friction: { success: runVerifyFriction({ root, silent: isSilent, json: false }) },
     security: { success: runVerifySecurity({ root, silent: isSilent, json: false }) },
+    privacy: { success: runVerifyPrivacy({ root, silent: isSilent, json: false }) },
   };
+}
+
+function resolveVerifyAllExitCode(allPassed: boolean, gatesSummary: Record<string, { success: boolean }>): number {
+  if (allPassed) return 0;
+  if (!gatesSummary.security?.success) return 4;
+  if (!gatesSummary.privacy?.success) return 5;
+  return 1;
 }
 
 function emitVerifyAllJson(gatesSummary: Record<string, { success: boolean }>, allPassed: boolean): void {
   const totalGates = Object.keys(gatesSummary).length;
   const passedCount = Object.values(gatesSummary).filter((g) => g.success).length;
   const failedCount = totalGates - passedCount;
-  const okSecurity = gatesSummary.security.success;
-  const exitCode = allPassed ? 0 : (!okSecurity ? 4 : 1);
+  const exitCode = resolveVerifyAllExitCode(allPassed, gatesSummary);
 
   const violations = Object.entries(gatesSummary)
     .filter(([, g]) => !g.success)
@@ -1102,6 +1193,7 @@ const VERIFY_ALL_GATES_LIST: Array<{ key: string; title: string }> = [
   { key: 'duplicates', title: '  9.  Duplicate Requirements (Shift-Left Gate):  ' },
   { key: 'friction', title: '  10. Progressive Friction & Anti-Bypass:        ' },
   { key: 'security', title: '  11. Shift-Left Security (Secrets & SAST):      ' },
+  { key: 'privacy', title: '  12. Data Protection & Privacy (GDPR/PII-SAST): ' },
 ];
 
 function printVerifyAllSummaryTable(gatesSummary: Record<string, { success: boolean }>, allPassed: boolean): void {

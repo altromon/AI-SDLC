@@ -530,3 +530,227 @@ subgraph:
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 });
+
+describe('SDD Data Protection & Privacy Artifact Integration', () => {
+  const tmpPrivacyDir = path.join(process.cwd(), 'scratch', 'test-sdd-privacy-integration');
+
+  it('should promote privacy requirements, data assets, and ROPA entries during integrateSddChange', () => {
+    const changeDir = path.join(tmpPrivacyDir, 'specs', 'changes', 'active', 'chg-privacy-test');
+    const privReqDir = path.join(tmpPrivacyDir, 'specs', 'privacy', 'requirements');
+    const dataAssetDir = path.join(tmpPrivacyDir, 'specs', 'privacy', 'assets');
+    const ropaDir = path.join(tmpPrivacyDir, 'specs', 'privacy', 'ropa');
+    const archDir = path.join(tmpPrivacyDir, 'architecture', 'components');
+
+    fs.mkdirSync(changeDir, { recursive: true });
+    fs.mkdirSync(privReqDir, { recursive: true });
+    fs.mkdirSync(dataAssetDir, { recursive: true });
+    fs.mkdirSync(ropaDir, { recursive: true });
+    fs.mkdirSync(archDir, { recursive: true });
+
+    // 1. Create canonical draft privacy requirement
+    fs.writeFileSync(
+      path.join(privReqDir, 'PRIV-REQ-MASKING-001.md'),
+      `---
+id: PRIV-REQ-MASKING-001
+type: privacy-requirement
+status: draft
+version: "1.0.0"
+title: Mandatory Pseudonymization
+---
+# PRIV-REQ-MASKING-001: Mandatory Pseudonymization
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-10-01 | DPO | Draft inicial | CHG-INIT |
+`
+    );
+
+    // 2. Create canonical draft data asset
+    fs.writeFileSync(
+      path.join(dataAssetDir, 'DATA-ASSET-USER-PROFILE-001.md'),
+      `---
+id: DATA-ASSET-USER-PROFILE-001
+type: data-asset
+status: draft
+version: "1.0.0"
+title: User Profile PII
+---
+# DATA-ASSET-USER-PROFILE-001: User Profile PII
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-10-01 | DPO | Draft inicial | CHG-INIT |
+`
+    );
+
+    // 3. Create canonical draft privacy ROPA
+    fs.writeFileSync(
+      path.join(ropaDir, 'PRIV-ROPA-USER-AUTH-001.md'),
+      `---
+id: PRIV-ROPA-USER-AUTH-001
+type: privacy-ropa
+status: draft
+version: "1.0.0"
+title: User Auth Processing
+---
+# PRIV-ROPA-USER-AUTH-001: User Auth Processing
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-10-01 | DPO | Draft inicial | CHG-INIT |
+`
+    );
+
+    // 4. Create canonical architecture component
+    fs.writeFileSync(
+      path.join(archDir, 'CMP-CORE-AUTH.md'),
+      `---
+id: CMP-CORE-AUTH
+type: component
+satisfies-requirements: []
+---
+# Component CMP-CORE-AUTH
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-10-01 | Architect | Creación inicial | CHG-INIT |
+`
+    );
+
+    // 5. Create change workspace: tasks.md (completed)
+    fs.writeFileSync(
+      path.join(changeDir, 'tasks.md'),
+      `---
+tasks:
+  - id: TSK-001
+    status: COMPLETED
+    satisfies-requirements:
+      - PRIV-REQ-MASKING-001
+---
+`
+    );
+
+    // 6. Create change proposal.md
+    fs.writeFileSync(
+      path.join(changeDir, 'proposal.md'),
+      `---
+id: CHG-PRIVACY-TEST
+type: spec-change-proposal
+status: approved
+---
+# Proposal Privacy Test
+`
+    );
+
+    // 7. Create change handoff.yaml
+    fs.writeFileSync(
+      path.join(changeDir, 'handoff.yaml'),
+      `id: HOF-CHG-PRIVACY-TEST
+type: handoff
+changeId: chg-privacy-test
+subgraph:
+  requirements: []
+  privacyRequirements:
+    - PRIV-REQ-MASKING-001
+  dataAssets:
+    - DATA-ASSET-USER-PROFILE-001
+  privacyRopa:
+    - PRIV-ROPA-USER-AUTH-001
+citations:
+  - id: CMP-CORE-AUTH
+`
+    );
+
+    // Run integrateSddChange
+    const res = integrateSddChange({
+      rootDir: tmpPrivacyDir,
+      changeId: 'chg-privacy-test',
+      author: 'PrivacyOfficerAgent',
+    });
+
+    expect(res.success).toBe(true);
+    expect(res.integratedRequirements).toContain('PRIV-REQ-MASKING-001');
+    expect(res.integratedRequirements).toContain('DATA-ASSET-USER-PROFILE-001');
+    expect(res.integratedRequirements).toContain('PRIV-ROPA-USER-AUTH-001');
+
+    expect(res.updatedProductArtifacts).toContain('PRIV-REQ-MASKING-001');
+    expect(res.updatedProductArtifacts).toContain('DATA-ASSET-USER-PROFILE-001');
+    expect(res.updatedProductArtifacts).toContain('PRIV-ROPA-USER-AUTH-001');
+    expect(res.updatedArchitectureArtifacts).toContain('CMP-CORE-AUTH');
+    expect(res.archived).toBe(true);
+
+    // Verify PRIV-REQ-MASKING-001 was promoted to active with revision history
+    const updatedReq = fs.readFileSync(path.join(privReqDir, 'PRIV-REQ-MASKING-001.md'), 'utf-8');
+    expect(updatedReq).toContain('status: active');
+    expect(updatedReq).toContain('chg-privacy-test');
+    expect(updatedReq).toContain('PrivacyOfficerAgent');
+
+    // Verify DATA-ASSET was promoted to active with revision history
+    const updatedAsset = fs.readFileSync(path.join(dataAssetDir, 'DATA-ASSET-USER-PROFILE-001.md'), 'utf-8');
+    expect(updatedAsset).toContain('status: active');
+    expect(updatedAsset).toContain('chg-privacy-test');
+
+    // Verify PRIV-ROPA was promoted to active with revision history
+    const updatedRopa = fs.readFileSync(path.join(ropaDir, 'PRIV-ROPA-USER-AUTH-001.md'), 'utf-8');
+    expect(updatedRopa).toContain('status: active');
+    expect(updatedRopa).toContain('chg-privacy-test');
+
+    // Verify architecture component satisfies PRIV-REQ-MASKING-001, but NOT data assets or ROPAs
+    const updatedArch = fs.readFileSync(path.join(archDir, 'CMP-CORE-AUTH.md'), 'utf-8');
+    expect(updatedArch).toContain('PRIV-REQ-MASKING-001');
+    expect(updatedArch).not.toContain('DATA-ASSET-USER-PROFILE-001');
+    expect(updatedArch).not.toContain('PRIV-ROPA-USER-AUTH-001');
+
+    fs.rmSync(tmpPrivacyDir, { recursive: true, force: true });
+  });
+
+  it('should scaffold SDD change citing privacy artifacts and deposit handoff sidecar correctly', () => {
+    const tmpScaffoldDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test-sdd-privacy-scaffold-'));
+    const privReqDir = path.join(tmpScaffoldDir, 'specs', 'privacy', 'requirements');
+    fs.mkdirSync(privReqDir, { recursive: true });
+
+    fs.writeFileSync(
+      path.join(privReqDir, 'PRIV-REQ-EXPORT-001.md'),
+      `---
+id: PRIV-REQ-EXPORT-001
+type: privacy-requirement
+status: draft
+version: "1.0.0"
+title: User Data Export Right
+---
+# PRIV-REQ-EXPORT-001: User Data Export Right
+`
+    );
+
+    try {
+      const res = scaffoldSddChange({
+        rootDir: tmpScaffoldDir,
+        name: 'Implementación de Derecho ARCO de Portabilidad',
+        changeId: 'chg-privacy-arco-export',
+        from: 'PRIV-REQ-EXPORT-001',
+        framework: 'openspec',
+        silent: true,
+      });
+
+      expect(res.success).toBe(true);
+      expect(res.citedArtifacts.some((c) => c.id === 'PRIV-REQ-EXPORT-001')).toBe(true);
+
+      const handoff = loadProductHandoffSidecar(res.changeDir);
+      expect(handoff?.subgraph.privacyRequirements).toContain('PRIV-REQ-EXPORT-001');
+
+      // Verify tasks.md includes the privacy requirement in satisfies-requirements
+      const tasksContent = fs.readFileSync(path.join(res.changeDir, 'tasks.md'), 'utf-8');
+      expect(tasksContent).toContain('PRIV-REQ-EXPORT-001');
+    } finally {
+      fs.rmSync(tmpScaffoldDir, { recursive: true, force: true });
+    }
+  });
+});

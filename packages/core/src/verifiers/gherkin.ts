@@ -64,9 +64,11 @@ export function resolveTargetFiles(rootDir: string, targetPath?: string): string
   const searchDirs = [
     path.join(rootDir, 'product'),
     path.join(rootDir, 'security'),
+    path.join(rootDir, 'privacy'),
     path.join(rootDir, 'specs'),
     path.join(rootDir, 'examples', 'product'),
     path.join(rootDir, 'examples', 'security'),
+    path.join(rootDir, 'examples', 'privacy'),
     path.join(rootDir, 'examples', 'specs'),
   ];
   return searchDirs.filter((d) => fs.existsSync(d)).flatMap((d) => walkMdFiles(d));
@@ -83,10 +85,12 @@ export function resolveFeatureFilePath(
   }
   const baseDir = path.join(rootDir, 'tests', 'features');
   const candidateSecurity = path.join(baseDir, 'security', `${id.toLowerCase()}.feature`);
+  const candidatePrivacy = path.join(baseDir, 'privacy', `${id.toLowerCase()}.feature`);
   const candidateRoot = path.join(baseDir, `${id.toLowerCase()}.feature`);
   if (fs.existsSync(candidateSecurity)) return candidateSecurity;
+  if (fs.existsSync(candidatePrivacy)) return candidatePrivacy;
   if (fs.existsSync(candidateRoot)) return candidateRoot;
-  const subDir = filePath.includes('security') ? 'security' : '';
+  const subDir = filePath.includes('security') ? 'security' : filePath.includes('privacy') ? 'privacy' : '';
   return path.join(baseDir, subDir, `${id.toLowerCase()}.feature`);
 }
 
