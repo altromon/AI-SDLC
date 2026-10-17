@@ -286,6 +286,23 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       expect(content, `${filePath} must enforce Boundary Values per interactive element`).toMatch(/Boundary Values/i);
     }
   });
+
+  it('verifies the 3 lifecycle workflow skills (Greenfield, Legacy Onboarding, Increment) exist without drift', async () => {
+    const { LIFECYCLE_SKILL_TEMPLATES, renderAntigravitySkillFile } = await import('../src/init/index.js');
+    expect(LIFECYCLE_SKILL_TEMPLATES.map((s) => s.id)).toEqual([
+      'aisdlc-greenfield',
+      'aisdlc-legacy-onboarding',
+      'aisdlc-increment',
+    ]);
+
+    for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
+      const skillPath = path.join(rootDir, `.agent/skills/${skill.id}/SKILL.md`);
+      expect(fs.existsSync(skillPath), `Lifecycle skill ${skill.id} must exist at ${skillPath}`).toBe(true);
+      const diskContent = fs.readFileSync(skillPath, 'utf-8').replace(/\r\n/g, '\n');
+      const renderedContent = renderAntigravitySkillFile(skill).replace(/\r\n/g, '\n');
+      expect(diskContent).toBe(renderedContent);
+    }
+  });
 });
 
 

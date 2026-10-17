@@ -7,7 +7,12 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { initProject, SPECIALIZED_AGENT_TEMPLATES } from '../src/init/index.js';
+import {
+  initProject,
+  SPECIALIZED_AGENT_TEMPLATES,
+  LIFECYCLE_SKILL_TEMPLATES,
+  renderAntigravitySkillFile,
+} from '../src/init/index.js';
 
 describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
   const tempDir = path.join(os.tmpdir(), 'test-core-init-agents');
@@ -48,6 +53,14 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
       expect(fs.existsSync(path.join(tempDir, `.cursor/rules/${agent.id}.mdc`))).toBe(true);
       expect(fs.existsSync(path.join(tempDir, `.claude/agents/${agent.id}.md`))).toBe(true);
       expect(fs.existsSync(path.join(tempDir, `.github/agents/${agent.id}.agent.md`))).toBe(true);
+    }
+
+    // Lifecycle workflow skills should be present for Greenfield, Legacy, and Increment
+    expect(LIFECYCLE_SKILL_TEMPLATES).toHaveLength(3);
+    for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
+      const skillPath = path.join(tempDir, `.agent/skills/${skill.id}/SKILL.md`);
+      expect(fs.existsSync(skillPath)).toBe(true);
+      expect(fs.readFileSync(skillPath, 'utf-8')).toBe(renderAntigravitySkillFile(skill));
     }
   });
 
