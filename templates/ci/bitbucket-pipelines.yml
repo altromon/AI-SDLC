@@ -6,13 +6,9 @@
 image: node:20
 
 definitions:
-  caches:
-    pnpm: $BITBUCKET_CLONE_DIR/.pnpm-store
   steps:
     - step: &build-and-verify
         name: Quality Gates & Verification
-        caches:
-          - pnpm
         script:
           - corepack enable
           - corepack prepare pnpm@10 --activate
@@ -26,8 +22,6 @@ definitions:
 
     - step: &sdd-integrate
         name: SDD Canonical Integration
-        caches:
-          - pnpm
         script:
           - corepack enable
           - corepack prepare pnpm@10 --activate
