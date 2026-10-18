@@ -435,9 +435,24 @@ export const DASHBOARD_CLIENT_SCRIPT = `
         console.error('Cytoscape library not loaded');
         return;
       }
-      cy = cytoscape({
-        container: document.getElementById('cy'),
-        elements: elements,
+      try {
+        var validNodeIds = new Set();
+        (elements || []).forEach(function(el) {
+          if (el && el.group === 'nodes' && el.data && el.data.id) {
+            validNodeIds.add(el.data.id);
+          }
+        });
+        var safeElements = (elements || []).filter(function(el) {
+          if (!el || !el.data) return false;
+          if (el.group === 'edges') {
+            return validNodeIds.has(el.data.source) && validNodeIds.has(el.data.target);
+          }
+          return true;
+        });
+
+        cy = cytoscape({
+          container: document.getElementById('cy'),
+          elements: safeElements,
         boxSelectionEnabled: false,
         autoungrabify: true,
         style: [
@@ -457,6 +472,14 @@ export const DASHBOARD_CLIENT_SCRIPT = `
               'text-wrap': 'ellipsis',
               'text-max-width': '65px'
             }
+          },
+          {
+            selector: 'node.layer-product',
+            style: { 'shape': 'diamond', 'background-color': '#0e7490', 'border-color': '#38bdf8', 'width': 50, 'height': 50 }
+          },
+          {
+            selector: 'node.layer-architecture',
+            style: { 'shape': 'hexagon', 'background-color': '#4338ca', 'border-color': '#818cf8', 'width': 60, 'height': 45 }
           },
           {
             selector: 'node.type-architecture-introduction',
@@ -608,19 +631,11 @@ export const DASHBOARD_CLIENT_SCRIPT = `
             }
           },
           {
-            selector: 'node.layer-product:not(.type-architecture-introduction):not(.type-journey):not(.type-actor):not(.type-use-case):not(.type-usecase):not(.type-business-rule):not(.type-rule):not(.type-abuse-case):not(.type-threat-actor):not(.type-data-asset):not(.type-privacy-ropa)',
-            style: { 'shape': 'diamond', 'background-color': '#0e7490', 'border-color': '#38bdf8', 'width': 50, 'height': 50 }
-          },
-          {
-            selector: 'node.layer-architecture:not(.type-component):not(.type-adr):not(.type-security-enclave)',
-            style: { 'shape': 'hexagon', 'background-color': '#4338ca', 'border-color': '#818cf8', 'width': 60, 'height': 45 }
-          },
-          {
             selector: 'node.status-conforme, node.status-compliant',
             style: { 'border-color': '#10b981' }
           },
           {
-            selector: 'node.status-huérfano, node.status-orphan, node.status-drift',
+            selector: 'node.status-orphan, node.status-drift, node.status-huerfano',
             style: { 'border-color': '#ef4444', 'background-color': '#7f1d1d' }
           },
           {
@@ -679,9 +694,9 @@ export const DASHBOARD_CLIENT_SCRIPT = `
             style: {
               'border-width': 4,
               'border-color': '#38bdf8',
-              'shadow-blur': 15,
-              'shadow-color': '#38bdf8',
-              'shadow-opacity': 0.8
+              'underlay-color': '#38bdf8',
+              'underlay-padding': 4,
+              'underlay-opacity': 0.4
             }
           },
           {
@@ -750,7 +765,10 @@ export const DASHBOARD_CLIENT_SCRIPT = `
         currentHoverNodeId = null;
         hideTooltip();
       });
+    } catch (err) {
+      console.error('Error initializing Cytoscape:', err);
     }
+  }
 
     function highlightCriticalPath(node) {
       cy.elements().removeClass('highlighted dimmed');
@@ -974,7 +992,7 @@ export const DASHBOARD_CLIENT_SCRIPT = `
         nodes.connectedEdges().show();
       } else {
         cy.elements().hide();
-        var nodes = cy.nodes('.status-orphan, .status-huérfano, .status-drift');
+        var nodes = cy.nodes('.status-orphan, .status-huerfano, .status-drift');
         nodes.show();
         nodes.connectedEdges().show();
       }

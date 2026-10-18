@@ -344,6 +344,27 @@ export function registerScannedArtifactNodes(
   }
 }
 
+function ensureNodeExists(
+  id: string,
+  nodeMap: Map<string, CytoscapeNodeData>,
+  fallbackType?: string,
+  fallbackLayer: GraphNodeLayer = 'product'
+): void {
+  if (!nodeMap.has(id)) {
+    const classification = classifyArtifactLayerAndType(id, fallbackType || '');
+    const type = classification?.type || fallbackType || 'product';
+    const layer = classification?.layer || fallbackLayer;
+    nodeMap.set(id, {
+      id,
+      label: id,
+      title: id,
+      type,
+      layer,
+      status: 'COMPLIANT',
+    });
+  }
+}
+
 function connectTargets(
   sourceId: string,
   rawTargets: unknown,
@@ -357,9 +378,8 @@ function connectTargets(
   for (const item of list) {
     if (typeof item === 'string' && item.trim()) {
       const targetId = item.trim();
-      if (defaultType && !nodeMap.has(targetId)) {
-        nodeMap.set(targetId, { id: targetId, label: targetId, title: targetId, type: defaultType, layer: defaultLayer, status: 'COMPLIANT' });
-      }
+      ensureNodeExists(sourceId, nodeMap, defaultType, defaultLayer);
+      ensureNodeExists(targetId, nodeMap, defaultType, defaultLayer);
       addEdge({ id: `edge-${sourceId}-${targetId}`, source: sourceId, target: targetId, label: relation, relation, status: 'COMPLIANT' });
     }
   }
@@ -593,14 +613,11 @@ export function connectArtifactRelationships(
 function updateTracesForEdge(e: CytoscapeEdgeData, nodeMap: Map<string, CytoscapeNodeData>): void {
   const srcNode = nodeMap.get(e.source);
   const tgtNode = nodeMap.get(e.target);
-  if (srcNode) {
-    srcNode.downstream = srcNode.downstream || [];
-    if (!srcNode.downstream.includes(e.target)) srcNode.downstream.push(e.target);
-  }
-  if (tgtNode) {
-    tgtNode.upstream = tgtNode.upstream || [];
-    if (!tgtNode.upstream.includes(e.source)) tgtNode.upstream.push(e.source);
-  }
+  if (!srcNode || !tgtNode) return;
+  srcNode.downstream = srcNode.downstream || [];
+  if (!srcNode.downstream.includes(e.target)) srcNode.downstream.push(e.target);
+  tgtNode.upstream = tgtNode.upstream || [];
+  if (!tgtNode.upstream.includes(e.source)) tgtNode.upstream.push(e.source);
 }
 
 function buildNodeElements(
@@ -624,12 +641,17 @@ function buildNodeElements(
   return { elements, conformingCount, issueCount };
 }
 
-function buildEdgeElements(edges: CytoscapeEdgeData[]): CytoscapeElement[] {
-  return edges.map((e) => ({
-    group: 'edges',
-    data: e,
-    classes: `relation-${e.relation} status-${e.status?.toLowerCase() || 'compliant'}`,
-  }));
+function buildEdgeElements(
+  edges: CytoscapeEdgeData[],
+  nodeMap: Map<string, CytoscapeNodeData>
+): CytoscapeElement[] {
+  return edges
+    .filter((e) => nodeMap.has(e.source) && nodeMap.has(e.target))
+    .map((e) => ({
+      group: 'edges',
+      data: e,
+      classes: `relation-${e.relation} status-${e.status?.toLowerCase() || 'compliant'}`,
+    }));
 }
 
 export function assembleGraphElementsResult(
@@ -640,13 +662,14 @@ export function assembleGraphElementsResult(
   for (const [id, node] of nodeMap.entries()) {
     if (driftTargets.has(id)) node.status = 'DRIFT';
   }
-  for (const e of edges) {
+  const validEdges = edges.filter((e) => nodeMap.has(e.source) && nodeMap.has(e.target));
+  for (const e of validEdges) {
     updateTracesForEdge(e, nodeMap);
   }
 
   const nodesByLayer: Record<GraphNodeLayer, number> = { product: 0, requirement: 0, architecture: 0, test: 0 };
   const { elements: nodeElements, conformingCount, issueCount } = buildNodeElements(nodeMap, nodesByLayer);
-  const edgeElements = buildEdgeElements(edges);
+  const edgeElements = buildEdgeElements(validEdges, nodeMap);
 
   return {
     elements: [...nodeElements, ...edgeElements],
