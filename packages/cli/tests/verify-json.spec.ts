@@ -499,6 +499,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
 
   describe('Unified JSON Output Suite for check, sdd, gherkin, init (#58)', () => {
     let tmpDir: string;
+    const rootDir = path.resolve(__dirname, '../../..');
 
     afterEach(() => {
       delete process.env.AISDLC_FORMAT;
@@ -515,7 +516,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
     it('should emit valid JSON without ANSI codes for runCheck({ json: true })', () => {
       let passed: boolean = false;
       const output = captureConsoleLog(() => {
-        passed = runCheck({ json: true });
+        passed = runCheck({ root: rootDir, json: true, fix: true });
       });
 
       expect(passed).toBe(true);
@@ -533,7 +534,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
       process.env.AISDLC_FORMAT = 'json';
       let passed: boolean = false;
       const output = captureConsoleLog(() => {
-        passed = runCheck();
+        passed = runCheck({ root: rootDir, fix: true });
       });
 
       expect(passed).toBe(true);
