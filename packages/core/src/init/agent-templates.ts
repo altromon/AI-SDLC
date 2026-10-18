@@ -777,7 +777,7 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ### 4. \`agent-system-architect\` (System Architect)
 - **Mission**: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4 (\`CMP-*\`, Mermaid diagrams, \`ADR-*\`).
-- **Guardrails**: Declare \`satisfies-requirements\` on every \`CMP-*\` (including \`PRIV-REQ-*\`) and trigger the technical security/privacy feedback loop toward \`agent-threat-modeler\` ➔ \`agent-privacy-officer\` when infrastructure decisions introduce new attack vectors or PII flows.
+- **Guardrails**: Declare \`satisfies-requirements\` on every \`CMP-*\` (including \`PRIV-REQ-*\`), instantiate mandatory building block \`CMP-OBSERVABILITY\` (Level 2/3) alongside Section 8 and an ADR for runtime telemetry, and trigger the technical security/privacy feedback loop toward \`agent-threat-modeler\` ➔ \`agent-privacy-officer\` when infrastructure decisions introduce new attack vectors or PII flows.
 
 ### 5. \`agent-qa-engineer\` (QA Engineer and SDET)
 - **Mission**: Translate approved requirements (\`FR-*\`, \`SEC-REQ-*\`, \`PRIV-REQ-*\`, \`QR-*\`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before \`agent-developer\` writes production code.

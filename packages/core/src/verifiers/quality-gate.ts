@@ -381,23 +381,33 @@ function auditUnitTestsPerFunction(results: AnalysisResult[], rootDir: string): 
   return untested;
 }
 
+function isVitestMidFlightCoverage(rel: string, fullPath: string): boolean {
+  if (!process.env.VITEST || rel !== 'coverage/coverage-summary.json') return false;
+  return path.resolve(fullPath) === path.resolve(process.cwd(), rel);
+}
+
+function parseCoverageSummaryFile(filePath: string, source: string): CodeCoverageSummary | null {
+  try {
+    const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Record<string, unknown>;
+    const total = raw.total as Record<string, Record<string, unknown>> | undefined;
+    if (!total) return null;
+    return {
+      linesPct: Number(total.lines?.pct ?? 0),
+      branchesPct: Number(total.branches?.pct ?? 0),
+      functionsPct: Number(total.functions?.pct ?? 0),
+      source,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function readSummaryCoverageJson(rootDir: string): CodeCoverageSummary | null {
   for (const rel of ['coverage/coverage-summary.json', 'reports/coverage-summary.json']) {
     const full = path.join(rootDir, rel);
-    if (!fs.existsSync(full)) continue;
-    try {
-      const raw = JSON.parse(fs.readFileSync(full, 'utf-8')) as Record<string, unknown>;
-      const total = raw.total as Record<string, Record<string, unknown>> | undefined;
-      if (!total) continue;
-      return {
-        linesPct: Number(total.lines?.pct ?? 0),
-        branchesPct: Number(total.branches?.pct ?? 0),
-        functionsPct: Number(total.functions?.pct ?? 0),
-        source: rel,
-      };
-    } catch {
-      // Ignore malformed JSON
-    }
+    if (!fs.existsSync(full) || isVitestMidFlightCoverage(rel, full)) continue;
+    const summary = parseCoverageSummaryFile(full, rel);
+    if (summary) return summary;
   }
   return null;
 }

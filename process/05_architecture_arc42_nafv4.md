@@ -72,6 +72,11 @@ Models internal system structure through a **single universal component schema (
 - When a requirement is satisfied in a Level 3 specialized component (e.g. a DLL or function), the 360° traceability engine resolves coverage at both the executing component level and its parent context (`parent-component`).
 - The `hosted-in-enclave: SEC-ENC-*` field is mandatory only when the component deploys into a physically or logically segmented network enclave. For DLLs or in-process functions, it is optional.
 
+#### Mandatory Observability Building Block (`CMP-OBSERVABILITY`):
+- Every software system modeled under AI-SDLC MUST instantiate an explicit building block `CMP-OBSERVABILITY` (Level 2 or 3, `implementation-type: dll` or `service`).
+- This component encapsulates the runtime telemetry subsystem, exposing typed contracts for structured logging (`ILogger`), distributed tracing (`ITracer` via OpenTelemetry / W3C Trace Context), and operational metrics (`IMetricsRegistry` via Prometheus RED metrics).
+- All functional and operational components depend on `CMP-OBSERVABILITY` unidirectionally, isolating third-party telemetry SDKs from domain business logic and satisfying `QR-OBS-*`.
+
 ### Section 6: Runtime View (NAF Sequences & Behaviour)
 - Sequence diagrams and state flows (modeled via native **Mermaid** syntax).
 - Describes orchestration across services upon business requests or asynchronous events.

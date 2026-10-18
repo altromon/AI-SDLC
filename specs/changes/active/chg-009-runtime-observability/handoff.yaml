@@ -1,0 +1,16 @@
+id: HOF-CHG-009-RUNTIME-OBSERVABILITY
+type: handoff
+title: Handoff Canónico de Producto para runtime-observability
+changeId: CHG-009-RUNTIME-OBSERVABILITY
+version: 1.0.0
+createdAt: '2026-10-18T09:59:16.534Z'
+subgraph:
+  requirements:
+    - FR-009-RUNTIME-OBSERVABILITY-001
+  useCases:
+    - UC-OBS-001
+citations:
+  - id: UC-OBS-001
+    comment: Caso de uso origen para observabilidad runtime
+  - id: FR-009-RUNTIME-OBSERVABILITY-001
+    comment: Requerimiento funcional canónico

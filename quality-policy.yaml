@@ -93,6 +93,8 @@ coding_rules:
     no_unused_vars: "ERROR"
     no_dead_code: "ERROR"
     no_console_logs_in_prod: "ERROR"
+    require_structured_logging: "ERROR"
+    require_observability_standard: "ERROR"
     require_explicit_return_types: "ERROR"
     no_empty_ui_handlers: "ERROR"
     no_production_mock_stubs: "ERROR"
@@ -171,6 +173,9 @@ agent_guardrails:
   enforce_pre_commit_linter: true
   prevent_suppression_comments: true
   auto_refactor_on_high_complexity: true
+  enforce_runtime_observability: true
+  prompt_observability_warning: >
+    ALERTA DE OBSERVABILIDAD: Los componentes y servicios en producción deben utilizar el logger estructurado en JSON con niveles configurables (LOG_LEVEL), propagar contexto de trazas W3C (trace_id) y registrar métricas operativas RED compatibles con Prometheus/Grafana.
   prompt_complexity_warning: >
     ALERTA DE COMPLEJIDAD: La función generada supera la complejidad ciclomática de 10.
     El agente debe descomponer la función en métodos auxiliares cohesivos antes de presentar el PR.

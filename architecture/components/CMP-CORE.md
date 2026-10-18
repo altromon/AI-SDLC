@@ -17,6 +17,7 @@ implements-use-cases:
   - UC-030-INIT-AGENT-SCAFFOLDING
   - UC-031-WORKFLOW-AGENT-HANDOFF
   - UC-033-ARCHITECTURE-TEMPLATES
+  - UC-OBS-001
 satisfies-requirements:
   - FR-025-STRUCTURED-JSON-VERIFY-001
   - FR-026-AGENT-NATIVE-CONFIGS-001
@@ -25,6 +26,7 @@ satisfies-requirements:
   - FR-030-INIT-AGENT-SCAFFOLDING-001
   - FR-031-WORKFLOW-AGENT-HANDOFF-001
   - FR-033-ARCHITECTURE-TEMPLATES-001
+  - FR-009-RUNTIME-OBSERVABILITY-001
   - SEC-REQ-DETERMINISTIC-VERIFY
 interfaces:
   - name: TypeScript API Engine
@@ -43,6 +45,7 @@ Biblioteca central que contiene la lógica de negocio, adaptadores SDD (SpecKit,
 graph TD
     CLI[CMP-CLI: @ai-sdlc/cli] --> CORE[CMP-CORE: @ai-sdlc/core]
     MCP[CMP-MCP-SERVER: @ai-sdlc/mcp] --> CORE
+    CORE --> OBS[CMP-OBSERVABILITY: @ai-sdlc/observability]
     CORE --> Verifiers[Verificadores: Schemas, Traceability, Quality, Governance, Licenses]
     CORE --> Adapters[Adaptadores SDD: OpenSpec, SpecKit]
 ```
