@@ -11,6 +11,7 @@ cites-quality-requirements:
   - QR-LATENCY-001
   - QR-AVAILABILITY-001
   - QR-MAINTAINABILITY-001
+  - QR-OBS-001
 supersedes: null
 superseded-by: null
 ---
@@ -26,11 +27,13 @@ graph TD
     QualityTree --> Reliability[Reliability & Resilience]
     QualityTree --> Security[Zero Trust Security]
     QualityTree --> Maintainability[As-Code Maintainability]
+    QualityTree --> Operability[Operability & Observability]
 
     Performance --> P1[Real-Time Latency: QR-LATENCY-001]
     Reliability --> R1[99.99% Availability: QR-AVAILABILITY-001]
     Security --> S1[Strict Authentication: SEC-REQ-AUTH-001]
-    Maintainability --> M1[Cyclomatic Complexity <= 10: quality-policy.yaml]
+    Maintainability --> M1["Cyclomatic Complexity <= 10: quality-policy.yaml"]
+    Operability --> O1[Structured Logs, Traces & Prometheus Metrics: QR-OBS-001]
 ```
 
 ---
@@ -43,6 +46,7 @@ Definition of concrete scenarios with stimulus, environment, response, and measu
 | `QR-LATENCY-001` | Performance | Peak load of 10,000 req/s | Processing and queuing persistence | p95 latency < 50ms |
 | `QR-AVAILABILITY-001` | Reliability | Abrupt crash of 1 worker node | Automatic pod redistribution | Service downtime = 0s |
 | `QR-MAINTAINABILITY-001`| Maintainability | Submodule refactoring | Deterministic Release Gates execution | CC $\le 10$, LOC $\le 40$ |
+| `QR-OBS-001` | Operability | Runtime execution across components | Structured JSON logging with configurable LOG_LEVEL, W3C traceparent propagation, and RED metrics exposition | Prometheus / Grafana compliant, 0 raw console logs |
 
 ---
 
