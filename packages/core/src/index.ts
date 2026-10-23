@@ -21,6 +21,7 @@ export * from './verifiers/manuals.js';
 export * from './verifiers/duplicates.js';
 export * from './verifiers/secrets.js';
 export * from './verifiers/sast.js';
+export * from './verifiers/security-suppressions.js';
 export * from './verifiers/privacy.js';
 export * from './reporters/quality-report.js';
 export * from './git/workflow.js';
