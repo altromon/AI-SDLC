@@ -274,6 +274,26 @@ describe('@aisdlc/cli Command Suite', () => {
     expect(passed).toBe(true);
   });
 
+  it('should support quality gate baseline and ratchet mode via CLI options', () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-baseline-test-'));
+    fs.mkdirSync(path.join(tempDir, 'src'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, 'src', 'legacy.ts'),
+      'export function complex(x: number) { if (x === 1) return 1; if (x === 2) return 2; if (x === 3) return 3; if (x === 4) return 4; if (x === 5) return 5; if (x === 6) return 6; return 0; }',
+      'utf-8'
+    );
+    try {
+      const updated = runVerifyQuality({ root: tempDir, maxCyclomatic: 5, updateBaseline: true, silent: true });
+      expect(updated).toBe(true);
+      expect(fs.existsSync(path.join(tempDir, 'quality-baseline.json'))).toBe(true);
+
+      const passed = runVerifyQuality({ root: tempDir, maxCyclomatic: 5, ratchet: true, silent: true });
+      expect(passed).toBe(true);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it('should verify all quality gates including schemas and security via CLI', () => {
     const passed = runVerifyAll({ silent: true });
     expect(passed).toBe(true);

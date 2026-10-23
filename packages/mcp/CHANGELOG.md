@@ -1,5 +1,11 @@
 # @aisdlc/mcp
 
+## 2.1.0
+
+### Minor Changes
+
+- feat(mcp): support `updateBaseline`, `baseline`, and `ratchet` parameters in `verify_quality` MCP tool (Closes #63).
+
 ## 1.4.1
 
 ### Patch Changes

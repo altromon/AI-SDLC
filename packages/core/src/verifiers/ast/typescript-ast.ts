@@ -200,7 +200,8 @@ function buildNodeMetrics(node: Node, filePath: string): FunctionMetrics {
   const { loc, mi } = calculateLocAndHalstead(fullText, cyclomatic);
   const codeSmells = detectAstCodeSmells(node, fullText, filePath);
 
-  return { functionName, filePath, loc, cyclomatic, cognitive, maintainability: mi, codeSmells };
+  const line = typeof node.getStartLineNumber === 'function' ? node.getStartLineNumber() : 1;
+  return { functionName, filePath, loc, cyclomatic, cognitive, maintainability: mi, codeSmells, line };
 }
 
 

@@ -1,0 +1,18 @@
+id: HOF-CHG-036-QUALITY-BASELINE-RATCHET
+type: handoff
+title: Handoff Canónico de Producto para Quality Baseline Ratchet
+changeId: CHG-036-QUALITY-BASELINE-RATCHET
+version: 1.0.0
+createdAt: '2026-10-23T16:28:51.426Z'
+subgraph:
+  requirements:
+    - FR-036-QUALITY-BASELINE-RATCHET-001
+  useCases:
+    - UC-036-QUALITY-BASELINE-RATCHET
+citations:
+  - id: UC-036-QUALITY-BASELINE-RATCHET
+    digest: sha256:022415409631ea2aa30b006af1a686cf320229821c850e13da74d5f1044da5ba
+    comment: Citación de use-case (Mecanismo de Baseline y Modo Trinquete en Quality Gate para Código Heredado)
+  - id: FR-036-QUALITY-BASELINE-RATCHET-001
+    digest: sha256:3f6a1c1b76e9715c3d5efdd4dad5fb4b342d6e97502d5ec83efd85285ecbadde
+    comment: Citación de requirement (Mecanismo de Baseline (quality-baseline.json) y Modo Ratchet en Quality Gate)
