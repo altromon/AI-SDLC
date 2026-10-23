@@ -15,7 +15,7 @@ export interface CreateMcpServerOptions extends RegisterToolsOptions, RegisterRe
 export function createMcpServer(options: CreateMcpServerOptions = {}): McpServer {
   const server = new McpServer({
     name: options.name || 'ai-sdlc-mcp-server',
-    version: options.version || '2.0.1',
+    version: options.version || '2.0.2',
   });
 
   registerAllTools(server, options);
@@ -29,3 +29,4 @@ export async function startMcpServer(options: CreateMcpServerOptions = {}): Prom
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
+
