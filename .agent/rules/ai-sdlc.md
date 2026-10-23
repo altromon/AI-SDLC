@@ -61,7 +61,7 @@ This file defines the operational rules and specialized role mappings for Google
   - FORBIDDEN to include production code or anticipate implementations.
   - **Agreed Project Technology**: Always use the testing frameworks, E2E/UI runners, and technology stack agreed upon for the project (if any), without requiring the user to specify it in the prompt.
   - **Mandatory E2E & UI Testing**: Never forget or omit End-to-End (E2E) and User Interface (UI) tests.
-  - **Per-Interactive-Element Coverage**: Create specific tests for every UI element the user can interact with, covering Happy Path, Sad Path, and Boundary Values for each one.
+  - **Per-Interactive-Element Coverage**: Create specific tests for every UI element the user can interact with, using external tools such as Playwright or FlatUI (or the agreed project testing technology), covering Happy Path, Sad Path, and Boundary Values for each one.
   - Every `FR-*` must have at least nominal + boundary + out-of-range scenarios; missing these blocks handoff to `agent-developer`.
   - Mandatory tags: `@<FR-ID> @automated @regression`.
   - Run `pnpm run verify:testing` before emitting handoff.
