@@ -8,6 +8,7 @@
     "version": { "type": "string" },
     "project": { "type": "string" },
     "enforcement_mode": { "type": "string", "enum": ["STRICT", "PERMISSIVE"] },
+    "ratchet_mode": { "type": "boolean" },
     "scope": {
       "type": "object",
       "properties": {

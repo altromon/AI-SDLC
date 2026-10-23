@@ -42,7 +42,7 @@ const program = new Command();
 program
   .name('aisdlc')
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
-  .version('2.0.2');
+  .version('2.1.0');
 
 // --- check command (unified pre-flight with auto-fix) ---
 program
@@ -90,6 +90,9 @@ verifyCommand
       enforceMode: opts.mode,
       json: opts.json,
       format: opts.format,
+      updateBaseline: opts.updateBaseline,
+      baseline: opts.baseline,
+      ratchet: opts.ratchet,
     });
     process.exit(passed ? 0 : 1);
   });
@@ -106,6 +109,9 @@ verifyCommand
   .option('-m, --mode <mode>', 'Enforcement mode: STRICT or PERMISSIVE')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text or json')
+  .option('--update-baseline', 'Update quality baseline snapshot with current violations')
+  .option('--baseline <path>', 'Path to quality baseline JSON file')
+  .option('--ratchet', 'Enforce ratchet mode against baseline')
   .action((opts) => {
     const passed = runVerifyQuality({
       root: opts.root,
@@ -117,6 +123,9 @@ verifyCommand
       enforceMode: opts.mode,
       json: opts.json,
       format: opts.format,
+      updateBaseline: opts.updateBaseline,
+      baseline: opts.baseline,
+      ratchet: opts.ratchet,
     });
     process.exit(passed ? 0 : 1);
   });
@@ -685,4 +694,5 @@ program.on('command:*', () => {
 });
 
 program.parse(process.argv);
+
 

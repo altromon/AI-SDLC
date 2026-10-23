@@ -1,5 +1,11 @@
 # @aisdlc/cli
 
+## 2.1.0
+
+### Minor Changes
+
+- feat(cli): add `--update-baseline`, `--baseline`, and `--ratchet` options to `aisdlc verify quality` and `aisdlc verify all` for legacy codebase adoption (Closes #63).
+
 ## 2.0.2
 
 ### Patch Changes

@@ -11,6 +11,7 @@
 version: "1.0"
 project: "AI-SDLC Polyglot Quality Gate"
 enforcement_mode: "STRICT" # STRICT (bloqueo en CI/CD), PERMISSIVE (solo avisos)
+ratchet_mode: false # true (tolera violaciones preexistentes en quality-baseline.json)
 
 # ------------------------------------------------------------------------------
 # 0. Alcance del Análisis (Scope Multilenguaje)

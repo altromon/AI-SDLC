@@ -55,6 +55,9 @@ export interface QualityVerifyOptions extends VerifyBaseOptions {
   minMaintainability?: number | string;
   maxLines?: number | string;
   enforceMode?: 'STRICT' | 'PERMISSIVE' | string;
+  updateBaseline?: boolean;
+  baseline?: string | boolean;
+  ratchet?: boolean;
 }
 
 function buildFunctionMetricViolations(results: ReturnType<typeof verifyQualityGate>['results']) {
@@ -96,6 +99,10 @@ function emitQualityJson(result: ReturnType<typeof verifyQualityGate>): void {
       failCount: result.failCount,
       untestedFunctionsCount: result.untestedFunctions?.length || 0,
       coverageViolationsCount: result.coverageViolations?.length || 0,
+      baselineViolationsCount: result.baselineViolationsCount || 0,
+      toleratedViolationsCount: result.toleratedViolationsCount || 0,
+      newViolationsCount: result.newViolationsCount || 0,
+      baselineUpdated: result.baselineUpdated || false,
     },
     violations,
   };
@@ -128,23 +135,29 @@ function printQualityTestAndCoverageGaps(result: ReturnType<typeof verifyQuality
   }
 }
 
-function printQualityConsole(result: ReturnType<typeof verifyQualityGate>): void {
-  const isPermissive = result.policy.enforce_mode === 'PERMISSIVE';
-  console.log(
-    `  Active thresholds:      CC <= ${result.policy.max_cyclomatic} | Cognitive <= ${result.policy.max_cognitive} | MI >= ${result.policy.min_maintainability} | Lines <= ${result.policy.max_function_lines} | Mode: ${result.policy.enforce_mode}`
-  );
+function printQualitySummary(result: ReturnType<typeof verifyQualityGate>, isPermissive: boolean): void {
   console.log(`  Analyzed files:         ${pc.bold(String(result.totalFiles))}`);
   console.log(`  Evaluated functions:    ${pc.bold(String(result.totalFunctions))}`);
   console.log(`  Compliant functions:    ${pc.green(String(result.passCount))}`);
-  console.log(`  Failing functions:      ${result.failCount > 0 ? (isPermissive ? pc.yellow(String(result.failCount)) : pc.red(String(result.failCount))) : pc.green('0')}`);
+  if (result.toleratedViolationsCount && result.toleratedViolationsCount > 0) {
+    console.log(`  Tolerated warnings:     ${pc.yellow(String(result.toleratedViolationsCount))} (Ratchet mode)`);
+  }
+  const failStr = result.failCount > 0 ? (isPermissive ? pc.yellow(String(result.failCount)) : pc.red(String(result.failCount))) : pc.green("0");
+  console.log(`  Failing functions:      ${failStr}`);
+}
 
+function printQualityConsole(result: ReturnType<typeof verifyQualityGate>): void {
+  const isPermissive = result.policy.enforce_mode === "PERMISSIVE";
+  console.log(
+    `  Active thresholds:      CC <= ${result.policy.max_cyclomatic} | Cognitive <= ${result.policy.max_cognitive} | MI >= ${result.policy.min_maintainability} | Lines <= ${result.policy.max_function_lines} | Mode: ${result.policy.enforce_mode}`
+  );
+  printQualitySummary(result, isPermissive);
   if (result.failCount > 0) {
-    printQualityFailingDetails(result.results.filter((r) => r.status === 'FAIL'), isPermissive);
+    printQualityFailingDetails(result.results.filter((r) => r.status === "FAIL"), isPermissive);
   }
   printQualityTestAndCoverageGaps(result);
-
-  const tag = isPermissive && result.failCount > 0 ? ' (PERMISSIVE mode)' : '';
-  console.log(result.success ? pc.green(`\n✔ Release Gate PASSED${tag}\n`) : pc.red('\n✖ Release Gate BLOCKED\n'));
+  const tag = isPermissive && result.failCount > 0 ? " (PERMISSIVE mode)" : "";
+  console.log(result.success ? pc.green(`\n✔ Release Gate PASSED${tag}\n`) : pc.red("\n✖ Release Gate BLOCKED\n"));
 }
 
 function buildQualityThresholds(options: QualityVerifyOptions) {
@@ -168,6 +181,9 @@ export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
     rootDir,
     policyPath: options.policy,
     thresholds: buildQualityThresholds(options),
+    updateBaseline: options.updateBaseline,
+    baseline: options.baseline,
+    ratchet: options.ratchet,
   });
 
   if (useJson) {

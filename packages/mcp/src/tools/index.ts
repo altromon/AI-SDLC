@@ -366,22 +366,40 @@ function registerGetActiveHandoffTool(server: McpServer, baseRoot: string): void
   });
 }
 
+const VERIFY_QUALITY_SCHEMA = {
+  root: z.string().optional(),
+  maxCyclomatic: z.number().optional(),
+  maxCognitive: z.number().optional(),
+  minMaintainability: z.number().optional(),
+  updateBaseline: z.boolean().optional(),
+  baseline: z.string().optional(),
+  ratchet: z.boolean().optional(),
+};
+
+function runMcpVerifyQuality(params: Record<string, unknown>, baseRoot: string) {
+  const rootDir = resolveRoot(params.root as string | undefined, baseRoot);
+  const thresholds = {
+    max_cyclomatic: params.maxCyclomatic as number | undefined,
+    max_cognitive: params.maxCognitive as number | undefined,
+    min_maintainability: params.minMaintainability as number | undefined,
+  };
+  return verifyQualityGate({
+    rootDir,
+    thresholds,
+    updateBaseline: params.updateBaseline as boolean | undefined,
+    baseline: params.baseline as string | undefined,
+    ratchet: params.ratchet as boolean | undefined,
+  });
+}
+
 function registerVerifyQualityTool(server: McpServer, baseRoot: string): void {
   server.tool(
-    'verify_quality',
-    'Evaluates cyclomatic complexity, cognitive complexity, MI, and function length.',
-    { root: z.string().optional(), maxCyclomatic: z.number().optional(), maxCognitive: z.number().optional(), minMaintainability: z.number().optional() },
+    "verify_quality",
+    "Evaluates cyclomatic complexity, cognitive complexity, MI, and function length.",
+    VERIFY_QUALITY_SCHEMA,
     async (params) => {
       try {
-        const root = resolveRoot(params.root, baseRoot);
-        const result = verifyQualityGate({
-          rootDir: root,
-          thresholds: {
-            max_cyclomatic: params.maxCyclomatic,
-            max_cognitive: params.maxCognitive,
-            min_maintainability: params.minMaintainability,
-          },
-        });
+        const result = runMcpVerifyQuality(params, baseRoot);
         return formatResponse(result, !result.success);
       } catch (err: unknown) {
         return formatCatchError(err);

@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 2.1.0
+
+### Minor Changes
+
+- feat(quality-gate): implement cryptographic baseline snapshot (`quality-baseline.json`) and ratchet mode (`--ratchet`, `ratchet_mode: true`) for progressive adoption on legacy codebases (Closes #63).
+
 ## 2.0.2
 
 ### Patch Changes

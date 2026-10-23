@@ -3,6 +3,7 @@
  * Uses modern AST static analysis with zero legacy heuristics.
  */
 
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
@@ -10,6 +11,8 @@ import {
   AnalysisResult,
   CodeCoverageSummary,
   FunctionMetrics,
+  QualityBaseline,
+  QualityBaselineEntry,
   QualityGateOptions,
   QualityGateResult,
   QualityPolicy,
@@ -71,6 +74,7 @@ export function createDefaultQualityPolicy(): QualityPolicy {
 
 function applyDocScope(policy: QualityPolicy, doc: Record<string, unknown>): void {
   if (typeof doc.enforcement_mode === 'string') policy.enforce_mode = doc.enforcement_mode;
+  if (typeof doc.ratchet_mode === 'boolean') policy.ratchet_mode = doc.ratchet_mode;
   if (!doc.scope || typeof doc.scope !== 'object') return;
   const scope = doc.scope as Record<string, unknown>;
 
@@ -434,19 +438,192 @@ function evaluateCoverageThresholds(
   return violations;
 }
 
+
+export function computeViolationSignature(relPath: string, fnName: string, metric: string): string {
+  const normPath = relPath.replace(/\\/g, "/");
+  return crypto.createHash("sha256").update(normPath + ":" + fnName + ":" + metric).digest("hex");
+}
+
+export function classifyMetricFromMessage(
+  msg: string,
+  fn?: FunctionMetrics
+): { metric: string; value?: number; threshold?: number } {
+  if (msg.startsWith("Cyclomatic Complexity")) {
+    return { metric: "cyclomatic", value: fn?.cyclomatic, threshold: 10 };
+  }
+  if (msg.startsWith("Cognitive Complexity")) {
+    return { metric: "cognitive", value: fn?.cognitive, threshold: 15 };
+  }
+  if (msg.startsWith("Maintainability Index")) {
+    return { metric: "maintainability", value: fn?.maintainability, threshold: 50 };
+  }
+  if (msg.startsWith("Function lines")) {
+    return { metric: "loc", value: fn?.loc, threshold: 40 };
+  }
+  if (msg.includes("Missing unit test")) {
+    return { metric: "unit-test" };
+  }
+  return { metric: "codeSmell" };
+}
+
+export function isMetricWorsened(
+  baselineEntry: QualityBaselineEntry,
+  current: { metric: string; value?: number }
+): boolean {
+  if (baselineEntry.value === undefined || current.value === undefined) return false;
+  if (baselineEntry.metric === "maintainability") {
+    return current.value < baselineEntry.value;
+  }
+  return current.value > baselineEntry.value;
+}
+
+export function loadQualityBaseline(baselineFile: string): QualityBaseline | null {
+  try {
+    if (!fs.existsSync(baselineFile)) return null;
+    const content = fs.readFileSync(baselineFile, "utf-8");
+    return JSON.parse(content) as QualityBaseline;
+  } catch {
+    return null;
+  }
+}
+
+export function writeQualityBaseline(
+  baselineFile: string,
+  entries: QualityBaselineEntry[]
+): QualityBaseline {
+  const baseline: QualityBaseline = {
+    version: "1.0",
+    generatedAt: new Date().toISOString(),
+    totalViolations: entries.length,
+    violations: entries,
+  };
+  fs.writeFileSync(baselineFile, JSON.stringify(baseline, null, 2) + "\n", "utf-8");
+  return baseline;
+}
+
+export function extractBaselineEntriesFromResults(results: AnalysisResult[]): QualityBaselineEntry[] {
+  const entries: QualityBaselineEntry[] = [];
+  for (const r of results) {
+    for (const v of r.violations) {
+      const { metric, value, threshold } = classifyMetricFromMessage(v, r);
+      const signature = computeViolationSignature(r.relPath, r.functionName, metric);
+      entries.push({
+        signature,
+        file: r.relPath,
+        functionName: r.functionName,
+        line: r.line || 1,
+        metric,
+        value,
+        threshold,
+        message: v,
+      });
+    }
+  }
+  return entries;
+}
+
+function applyRatchetToFunctionResult(
+  r: AnalysisResult,
+  baselineMap: Map<string, QualityBaselineEntry>
+): { tolerated: number; newViolations: number } {
+  const activeViolations: string[] = [];
+  const tolerated: string[] = [];
+  for (const v of r.violations) {
+    const classified = classifyMetricFromMessage(v, r);
+    const sig = computeViolationSignature(r.relPath, r.functionName, classified.metric);
+    const baseEntry = baselineMap.get(sig);
+    if (baseEntry && !isMetricWorsened(baseEntry, classified)) {
+      tolerated.push(v);
+    } else {
+      activeViolations.push(v);
+    }
+  }
+  r.violations = activeViolations;
+  r.toleratedViolations = tolerated;
+  r.status = activeViolations.length === 0 ? "PASS" : "FAIL";
+  return { tolerated: tolerated.length, newViolations: activeViolations.length };
+}
+
+export function applyRatchetMode(
+  results: AnalysisResult[],
+  baseline: QualityBaseline
+): { toleratedCount: number; newViolationsCount: number } {
+  const baselineMap = new Map<string, QualityBaselineEntry>();
+  for (const entry of baseline.violations) {
+    baselineMap.set(entry.signature, entry);
+  }
+  let toleratedCount = 0;
+  let newViolationsCount = 0;
+  for (const r of results) {
+    if (r.violations.length === 0) continue;
+    const res = applyRatchetToFunctionResult(r, baselineMap);
+    toleratedCount += res.tolerated;
+    newViolationsCount += res.newViolations;
+  }
+  return { toleratedCount, newViolationsCount };
+}
+
+function resolveBaselineFilePath(rootDir: string, options: QualityGateOptions): string {
+  if (options.baselinePath) return options.baselinePath;
+  if (typeof options.baseline === "string") return options.baseline;
+  return path.join(rootDir, "quality-baseline.json");
+}
+
+function isRatchetModeActive(
+  policy: QualityPolicy,
+  options: QualityGateOptions,
+  baselineExists: boolean
+): boolean {
+  if (options.ratchet !== undefined) return options.ratchet;
+  if (options.baseline === false) return false;
+  return Boolean(policy.ratchet_mode || (options.baseline && baselineExists));
+}
+
+function evaluateRatchetIfActive(
+  results: AnalysisResult[],
+  baselineFile: string,
+  isActive: boolean
+): { toleratedViolationsCount: number; newViolationsCount: number; baselineViolationsCount: number } {
+  if (!isActive || !fs.existsSync(baselineFile)) {
+    return { toleratedViolationsCount: 0, newViolationsCount: 0, baselineViolationsCount: 0 };
+  }
+  const baseline = loadQualityBaseline(baselineFile);
+  if (!baseline) {
+    return { toleratedViolationsCount: 0, newViolationsCount: 0, baselineViolationsCount: 0 };
+  }
+  const counts = applyRatchetMode(results, baseline);
+  return {
+    toleratedViolationsCount: counts.toleratedCount,
+    newViolationsCount: counts.newViolationsCount,
+    baselineViolationsCount: baseline.totalViolations,
+  };
+}
+
+interface BaselineAuditMeta {
+  baselineUpdated?: boolean;
+  baselineViolationsCount?: number;
+  toleratedViolationsCount?: number;
+  newViolationsCount?: number;
+}
+
 function buildQualityGateResult(
   results: AnalysisResult[],
   totalFiles: number,
   policy: QualityPolicy,
   coverageViolations: string[],
-  untestedFunctions: UntestedFunctionItem[]
+  untestedFunctions: UntestedFunctionItem[],
+  baselineMeta?: BaselineAuditMeta
 ): QualityGateResult {
-  const failCount = results.filter((r) => r.status === 'FAIL').length;
+  const failCount = results.filter((r) => r.status === "FAIL").length;
   const passCount = results.length - failCount;
   const violationsCount =
     results.reduce((acc, r) => acc + r.violations.length, 0) + coverageViolations.length;
   const hasFailures = failCount > 0 || coverageViolations.length > 0;
-  const success = policy.enforce_mode === 'STRICT' ? !hasFailures : true;
+  const success = baselineMeta?.baselineUpdated
+    ? true
+    : policy.enforce_mode === "STRICT"
+      ? !hasFailures
+      : true;
 
   // Reference scanAllTestArtifacts so reverse-traceability remains linked
   void scanAllTestArtifacts;
@@ -462,6 +639,10 @@ function buildQualityGateResult(
     policy,
     coverageViolations,
     untestedFunctions,
+    baselineUpdated: baselineMeta?.baselineUpdated,
+    baselineViolationsCount: baselineMeta?.baselineViolationsCount,
+    toleratedViolationsCount: baselineMeta?.toleratedViolationsCount,
+    newViolationsCount: baselineMeta?.newViolationsCount,
   };
 }
 
@@ -484,6 +665,23 @@ export function verifyQualityGate(options: QualityGateOptions = {}): QualityGate
     : [];
   const coverageViolations = evaluateCoverageThresholds(rootDir, policy, options.requireCoverageReport);
 
-  return buildQualityGateResult(results, allFiles.length, policy, coverageViolations, untestedFunctions);
-}
+  const baselineFile = resolveBaselineFilePath(rootDir, options);
+  if (options.updateBaseline) {
+    const entries = extractBaselineEntriesFromResults(results);
+    writeQualityBaseline(baselineFile, entries);
+    return buildQualityGateResult(results, allFiles.length, policy, coverageViolations, untestedFunctions, {
+      baselineUpdated: true,
+      baselineViolationsCount: entries.length,
+    });
+  }
 
+  const baselineExists = fs.existsSync(baselineFile);
+  const isRatchet = isRatchetModeActive(policy, options, baselineExists);
+  const ratchetEval = evaluateRatchetIfActive(results, baselineFile, isRatchet);
+
+  return buildQualityGateResult(results, allFiles.length, policy, coverageViolations, untestedFunctions, {
+    baselineViolationsCount: ratchetEval.baselineViolationsCount,
+    toleratedViolationsCount: ratchetEval.toleratedViolationsCount,
+    newViolationsCount: ratchetEval.newViolationsCount,
+  });
+}

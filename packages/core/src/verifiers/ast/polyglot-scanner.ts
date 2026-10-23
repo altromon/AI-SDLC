@@ -285,7 +285,7 @@ function buildMetricsFromBlocks(blocks: RawFunctionBlock[], content: string, fil
     }
     return [];
   }
-  return blocks.map((b) => calculatePolyglotMetrics(b.body, b.name, filePath));
+  return blocks.map((b) => calculatePolyglotMetrics(b.body, b.name, filePath, b.startLine));
 }
 
 function detectPolyglotSmells(body: string): string[] {
@@ -324,7 +324,7 @@ function countCommentsAndLoc(rawLines: string[], isPy: boolean): { loc: number; 
   return { loc, commentCount, cleanLines };
 }
 
-function calculatePolyglotMetrics(body: string, name: string, filePath: string): FunctionMetrics {
+function calculatePolyglotMetrics(body: string, name: string, filePath: string, startLine?: number): FunctionMetrics {
   const ext = path.extname(filePath).toLowerCase();
   const rawLines = body.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0);
   const { loc, commentCount, cleanLines } = countCommentsAndLoc(rawLines, ext === '.py');
@@ -341,6 +341,7 @@ function calculatePolyglotMetrics(body: string, name: string, filePath: string):
     cognitive,
     maintainability,
     codeSmells: detectPolyglotSmells(body),
+    line: startLine ? startLine + 1 : 1,
   };
 }
 

@@ -12,6 +12,7 @@ export interface QualityPolicy {
   min_branch_coverage: number;
   min_function_coverage: number;
   enforce_mode: 'STRICT' | 'PERMISSIVE' | string;
+  ratchet_mode?: boolean;
   target_directories: string[];
   supported_extensions: string[];
   exclude_patterns: string[];
@@ -25,12 +26,33 @@ export interface FunctionMetrics {
   cognitive: number;
   maintainability: number;
   codeSmells: string[];
+  line?: number;
 }
 
 export interface AnalysisResult extends FunctionMetrics {
   relPath: string;
   status: 'PASS' | 'FAIL';
   violations: string[];
+  toleratedViolations?: string[];
+}
+
+
+export interface QualityBaselineEntry {
+  signature: string;
+  file: string;
+  functionName: string;
+  line: number;
+  metric: string;
+  value?: number;
+  threshold?: number;
+  message: string;
+}
+
+export interface QualityBaseline {
+  version: string;
+  generatedAt: string;
+  totalViolations: number;
+  violations: QualityBaselineEntry[];
 }
 
 export interface QualityThresholds {
@@ -48,6 +70,10 @@ export interface QualityGateOptions {
   thresholds?: QualityThresholds;
   requireCoverageReport?: boolean;
   requireFunctionUnitTests?: boolean;
+  baseline?: boolean | string;
+  baselinePath?: string;
+  updateBaseline?: boolean;
+  ratchet?: boolean;
 }
 
 export interface UntestedFunctionItem {
@@ -67,6 +93,10 @@ export interface QualityGateResult {
   coverageViolations?: string[];
   untestedFunctions?: UntestedFunctionItem[];
   reportMarkdown?: string;
+  baselineViolationsCount?: number;
+  toleratedViolationsCount?: number;
+  newViolationsCount?: number;
+  baselineUpdated?: boolean;
 }
 
 // --- Traceability Types ---
