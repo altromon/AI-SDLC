@@ -63,7 +63,7 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ### 5. `agent-qa-engineer` (QA Engineer and SDET)
 - **Mission**: Translate approved requirements (`FR-*`, `SEC-REQ-*`, `PRIV-REQ-*`, `QR-*`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before `agent-developer` writes production code.
-- **Guardrails**: Always use the agreed project technology/testing stack (if any). Never omit End-to-End (E2E) and UI tests. Create specific tests for every interactive UI element covering Happy Path, Sad Path, and Boundary Values. FORBIDDEN to include production code. Mandatory tags: `@<FR-ID> @automated @regression`.
+- **Guardrails**: Always use the agreed project technology/testing stack (if any). Never omit End-to-End (E2E) and UI tests. Create specific tests for every interactive UI element using external tools like Playwright or FlatUI, covering Happy Path, Sad Path, and Boundary Values. FORBIDDEN to include production code. Mandatory tags: `@<FR-ID> @automated @regression`.
 
 ### 6. `agent-developer` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) with clean, strictly typed code and thorough tests.
