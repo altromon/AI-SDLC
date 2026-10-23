@@ -1,6 +1,6 @@
 # 📊 Formal Quality and Release Gate Report (AI-SDLC)
 
-> **Generation Date:** 2026-10-18T11:58:10.375Z
+> **Generation Date:** 2026-10-23T19:37:13.612Z
 > **Release Gate Verdict:** 🟢 APPROVED (RELEASE READY)
 > **Global Rating:** **`B`** (MI Index: 60.2/100, Average CC: 3.9)
 
@@ -11,14 +11,14 @@
 | Key Metric | Measured Value | Policy Threshold | Compliance |
 | :--- | :---: | :---: | :---: |
 | **Analyzed Files** | `59` | N/A | ℹ️ |
-| **Evaluated Functions** | `1008` | N/A | ℹ️ |
-| **Lines of Code (LOC)** | `13734` | N/A | ℹ️ |
+| **Evaluated Functions** | `1011` | N/A | ℹ️ |
+| **Lines of Code (LOC)** | `13765` | N/A | ℹ️ |
 | **Cyclomatic Complexity (Average)** | `3.9` | $\le 10$ | ✅ COMPLIANT |
 | **Cognitive Complexity (Average)** | `2.6` | $\le 15$ | ✅ COMPLIANT |
 | **Maintainability Index (SEI MI)** | `60.2 / 100` | $\ge 50$ | ✅ COMPLIANT |
-| **Line Coverage** | `78.26%` | $\ge 75\%$ | ✅ COMPLIANT |
-| **Branch Coverage** | `75.4%` | $\ge 70\%$ | ✅ COMPLIANT |
-| **Function Coverage** | `87.39%` | $\ge 85\%$ | ✅ COMPLIANT |
+| **Line Coverage** | `N/A (Run test:coverage)` | $\ge 75\%$ | ℹ️ NOT MEASURED |
+| **Branch Coverage** | `N/A (Run test:coverage)` | $\ge 70\%$ | ℹ️ NOT MEASURED |
+| **Function Coverage** | `N/A (Run test:coverage)` | $\ge 85\%$ | ℹ️ NOT MEASURED |
 | **Functions in Violation** | `0` | $0$ (Mode STRICT) | ✅ 0 VIOLATIONS |
 
 ---
@@ -27,7 +27,7 @@
 
 | Language | Functions | Total LOC | Average MI | Average CC | Rating |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **TypeScript** | `1008` | `13734` | `60.2` | `3.9` | `B` |
+| **TypeScript** | `1011` | `13765` | `60.2` | `3.9` | `B` |
 
 ---
 

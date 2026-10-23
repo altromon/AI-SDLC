@@ -1,0 +1,11 @@
+id: HOF-CHG-037-SDD-INTEGRATE-CONCURRENCY
+type: handoff
+title: Handoff para correccion de condicion de carrera en sdd-integrate
+changeId: CHG-037-SDD-INTEGRATE-CONCURRENCY
+version: 1.0.0
+createdAt: '2026-10-23T17:04:32.844Z'
+subgraph:
+  requirements:
+    - FR-037-SDD-INTEGRATE-CONCURRENCY-001
+  useCases:
+    - UC-037-SDD-INTEGRATE-CONCURRENCY

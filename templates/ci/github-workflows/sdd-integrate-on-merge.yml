@@ -18,7 +18,7 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: sdd-integrate-${{ github.ref }}
+  group: sdd-integrate-${{ github.event.pull_request.base.ref || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -70,8 +70,28 @@ jobs:
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m "chore(sdd): integrate changes into canonical baseline [skip ci]"
-            git push
-            echo "✔ Canonical integration committed and synchronized to repository."
+            TARGET_BRANCH="${{ github.event.pull_request.base.ref || github.ref_name }}"
+            MAX_RETRIES=3
+            RETRY_COUNT=0
+            DELAY=2
+
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              echo "Synchronizing with remote branch $TARGET_BRANCH (pull --rebase)..."
+              git pull --rebase origin "$TARGET_BRANCH"
+              if git push origin "$TARGET_BRANCH"; then
+                echo "✔ Canonical integration committed and synchronized to repository."
+                exit 0
+              fi
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "⚠ Push rejected (concurrency detected). Retrying in ${DELAY}s (attempt $RETRY_COUNT/$MAX_RETRIES)..."
+                sleep $DELAY
+                DELAY=$((DELAY * 2))
+              fi
+            done
+
+            echo "❌ Error: Failed to push canonical integration after $MAX_RETRIES attempts."
+            exit 1
           else
             echo "ℹ No pending changes generated in working tree."
           fi
