@@ -51,6 +51,7 @@ const PREFIX_MAP: Record<string, { type: string; layer: GraphNodeLayer }> = {
   'ACT': { type: 'actor', layer: 'product' },
   'UC': { type: 'use-case', layer: 'product' },
   'BR': { type: 'business-rule', layer: 'product' },
+  'BC': { type: 'bounded-context', layer: 'product' },
   'ABUSE': { type: 'abuse-case', layer: 'product' },
   'DATA-ASSET': { type: 'data-asset', layer: 'product' },
   'PRIV-ROPA': { type: 'privacy-ropa', layer: 'product' },
@@ -70,6 +71,7 @@ const TYPE_LOOKUP: Record<string, { type: string; layer: GraphNodeLayer }> = {
   'use-case': { type: 'use-case', layer: 'product' },
   'usecase': { type: 'use-case', layer: 'product' },
   'business-rule': { type: 'business-rule', layer: 'product' },
+  'bounded-context': { type: 'bounded-context', layer: 'product' },
   'rule': { type: 'business-rule', layer: 'product' },
   'abuse-case': { type: 'abuse-case', layer: 'product' },
   'data-asset': { type: 'data-asset', layer: 'product' },
@@ -573,6 +575,19 @@ function connectAdrRelationships(art: ScannedArtifact, nodeMap: Map<string, Cyto
   }
 }
 
+function connectBoundedContextRelationships(
+  art: ScannedArtifact,
+  nodeMap: Map<string, CytoscapeNodeData>,
+  addEdge: (e: CytoscapeEdgeData) => void
+): void {
+  for (const cmp of toList(art.frontmatter['components-involved'] || art.frontmatter.components)) {
+    const id = cmp.trim();
+    if (id) {
+      connectTargets(art.id, [id], 'encompasses', nodeMap, addEdge, 'component', 'architecture');
+    }
+  }
+}
+
 function connectEnclaveRelationships(art: ScannedArtifact, nodeMap: Map<string, CytoscapeNodeData>, addEdge: (e: CytoscapeEdgeData) => void): void {
   for (const sec of toList(art.frontmatter['enforced-by'])) {
     const id = sec.trim();
@@ -596,6 +611,7 @@ const CONNECTOR_MAP: Record<string, ConnectorFn> = {
   'security-requirement': connectRequirementMitigations,
   'privacy-requirement': connectRequirementMitigations,
   'adr': connectAdrRelationships,
+  'bounded-context': connectBoundedContextRelationships,
   'security-enclave': connectEnclaveRelationships,
 };
 

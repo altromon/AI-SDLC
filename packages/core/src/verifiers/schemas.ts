@@ -23,6 +23,7 @@ export const TYPE_TO_SCHEMA_MAP: Record<string, string> = {
   journey: 'schemas/product/journey.schema.json',
   requirement: 'schemas/product/requirement.schema.json',
   term: 'schemas/product/term.schema.json',
+  'bounded-context': 'schemas/product/bounded-context.schema.json',
   'use-case': 'schemas/product/use-case.schema.json',
 
   // Security
@@ -83,6 +84,7 @@ const PREFIX_TAXONOMY: Array<[string, string]> = [
   ['CON-', 'requirement'],
   ['JRN-', 'journey'],
   ['TERM-', 'term'],
+  ['BC-', 'bounded-context'],
   ['ABUSE-', 'abuse-case'],
   ['SEC-ENC-', 'security-enclave'],
   ['SEC-REQ-', 'security-requirement'],
