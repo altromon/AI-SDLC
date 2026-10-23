@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI-SDLC — Industrial-grade lifecycle for humans & AI agents</title>
+  <meta name="description" content="AI-SDLC: a deterministic, spec-driven development and governance framework where humans and AI agents collaborate with 12 quality gates, cryptographic traceability, security & privacy by design.">
+  <meta property="og:title" content="AI-SDLC — Hybrid Software Lifecycle for Humans and AI Agents">
+  <meta property="og:description" content="Spec-driven delivery, 11 specialized agents, 12 deterministic quality gates, anti-drift SHA-256 citations and a native MCP server.">
+  <meta name="theme-color" content="#07080d">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%238b5cf6'/><stop offset='1' stop-color='%2322d3ee'/></linearGradient></defs><rect width='32' height='32' rx='8' fill='url(%23g)'/><path d='M9 22l7-12 7 12M12 18h8' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07080d;
+      --bg-2: #0d0f18;
+      --card: rgb(255 255 255 / 0.035);
+      --border: rgb(255 255 255 / 0.09);
+      --text: #e7e9f2;
+      --muted: #9097ad;
+      --violet: #8b5cf6;
+      --cyan: #22d3ee;
+      --green: #34d399;
+      --amber: #fbbf24;
+      --red: #f87171;
+      --grad: linear-gradient(120deg, var(--violet), var(--cyan) 55%, var(--green));
+      --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    code, pre, .mono { font-family: var(--mono); }
+    .wrap { width: min(1180px, 100% - 2.5rem); margin-inline: auto; }
+    .grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font: 600 .78rem/1 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+      color: var(--cyan); padding: .45rem .8rem; border: 1px solid rgb(34 211 238 / .25);
+      border-radius: 999px; background: rgb(34 211 238 / .06);
+    }
+    section { padding: 7rem 0; position: relative; }
+    h2 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; letter-spacing: -.03em; margin: 1rem 0 1rem; }
+    .lead { color: var(--muted); font-size: 1.12rem; max-width: 720px; }
+    .center { text-align: center; }
+    .center .lead { margin-inline: auto; }
+
+    /* ---------- Background ---------- */
+    .bg-fx { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+    .bg-fx::before {
+      content: ""; position: absolute; inset: 0;
+      background-image: linear-gradient(rgb(255 255 255 / .035) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / .035) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(ellipse at 50% 0%, black 20%, transparent 70%);
+    }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .45; animation: float 18s ease-in-out infinite alternate; }
+    .orb.o1 { width: 520px; height: 520px; background: var(--violet); top: -160px; left: -120px; }
+    .orb.o2 { width: 460px; height: 460px; background: var(--cyan); top: 10%; right: -160px; animation-delay: -6s; opacity: .3; }
+    .orb.o3 { width: 380px; height: 380px; background: var(--green); top: 55%; left: 30%; animation-delay: -12s; opacity: .14; }
+    @keyframes float { to { translate: 60px 80px; scale: 1.15; } }
+    @media (prefers-reduced-motion: reduce) { .orb { animation: none; } }
+
+    /* ---------- Nav ---------- */
+    nav.top {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(14px) saturate(140%);
+      background: rgb(7 8 13 / .65);
+      border-bottom: 1px solid var(--border);
+    }
+    nav.top .wrap { display: flex; align-items: center; gap: 2rem; height: 64px; }
+    .logo { display: flex; align-items: center; gap: .6rem; font-weight: 800; letter-spacing: -.02em; font-size: 1.1rem; }
+    .logo svg { width: 30px; height: 30px; }
+    nav.top ul { display: flex; gap: 1.6rem; list-style: none; margin: 0 0 0 auto; padding: 0; font-size: .92rem; color: var(--muted); }
+    nav.top ul a:hover { color: var(--text); }
+    @media (max-width: 860px) { nav.top ul { display: none; } nav.top .btn { margin-left: auto; } }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: .55rem; font-weight: 600; font-size: .95rem;
+      padding: .8rem 1.25rem; border-radius: 12px; border: 1px solid var(--border);
+      background: var(--card); color: var(--text); cursor: pointer; font-family: inherit;
+      transition: translate .2s, border-color .2s, background .2s, box-shadow .2s;
+    }
+    .btn:hover { translate: 0 -2px; border-color: rgb(255 255 255 / .25); }
+    .btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+    .btn.primary { background: var(--grad); border: 0; color: #05060a; box-shadow: 0 10px 40px -10px rgb(139 92 246 / .7); }
+    .btn.sm { padding: .5rem .9rem; font-size: .85rem; border-radius: 10px; }
+    .btn svg { width: 18px; height: 18px; }
+
+    /* ---------- Hero ---------- */
+    .hero { padding: 5.5rem 0 4rem; }
+    .hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 3.5rem; align-items: center; }
+    @media (max-width: 980px) { .hero .wrap { grid-template-columns: 1fr; } }
+    .hero h1 { font-size: clamp(2.6rem, 5.6vw, 4.4rem); line-height: 1.02; letter-spacing: -.045em; margin: 1.2rem 0; font-weight: 800; }
+    .hero p.lead { font-size: 1.2rem; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2rem; }
+    .install {
+      display: inline-flex; align-items: center; gap: .9rem; margin-top: 1.4rem;
+      font: 500 .95rem var(--mono); padding: .7rem .7rem .7rem 1rem; border-radius: 12px;
+      background: #0b0d15; border: 1px solid var(--border);
+    }
+    .install .p { color: var(--green); }
+    .install button { background: rgb(255 255 255 / .06); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: .35rem .6rem; cursor: pointer; font: inherit; font-size: .78rem; }
+    .install button:hover { color: var(--text); }
+    .chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 2rem; }
+    .chip { font-size: .78rem; color: var(--muted); padding: .3rem .7rem; border: 1px solid var(--border); border-radius: 999px; background: var(--card); }
+
+    /* ---------- Terminal ---------- */
+    .term {
+      position: relative; border-radius: var(--radius); background: #0a0c14ee; border: 1px solid var(--border);
+      box-shadow: 0 40px 120px -30px rgb(139 92 246 / .45), 0 0 0 1px rgb(255 255 255 / .02) inset;
+      overflow: hidden;
+    }
+    .term::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; background: var(--grad); opacity: .45;
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+    .term-bar { display: flex; align-items: center; gap: .45rem; padding: .8rem 1rem; border-bottom: 1px solid var(--border); background: rgb(255 255 255 / .02); }
+    .term-bar i { width: 11px; height: 11px; border-radius: 50%; background: #ff5f57; }
+    .term-bar i:nth-child(2) { background: #febc2e; } .term-bar i:nth-child(3) { background: #28c840; }
+    .term-bar span { margin-left: .6rem; font: 500 .78rem var(--mono); color: var(--muted); }
+    .term-bar button { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; font: .72rem var(--mono); padding: .2rem .5rem; cursor: pointer; }
+    .term-body { font: .84rem/1.65 var(--mono); padding: 1.1rem 1.2rem; height: 430px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; mask-image: linear-gradient(transparent, #000 18%); }
+    .term-body .l { white-space: pre-wrap; word-break: break-word; }
+    .term-body .cmd::before { content: "❯ "; color: var(--violet); }
+    .term-body .cmd { color: #fff; }
+    .term-body .ok { color: var(--green); } .term-body .dim { color: var(--muted); } .term-body .cy { color: var(--cyan); }
+    .term-body .am { color: var(--amber); } .term-body .bad { color: var(--red); }
+    .caret { display: inline-block; width: .55em; height: 1.1em; background: var(--cyan); vertical-align: -.2em; animation: blink 1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ---------- Stats ---------- */
+    .stats { padding: 2rem 0 3rem; }
+    .stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; }
+    @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+    .stat { padding: 1.4rem 1rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--card); text-align: center; }
+    .stat b { display: block; font-size: 2.4rem; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+    .stat span { font-size: .82rem; color: var(--muted); }
+
+    /* ---------- Cards ---------- */
+    .grid { display: grid; gap: 1.2rem; }
+    .g3 { grid-template-columns: repeat(3, 1fr); }
+    .g4 { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 980px) { .g3, .g4 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 620px) { .g3, .g4 { grid-template-columns: 1fr; } }
+    .card {
+      position: relative; padding: 1.6rem; border-radius: var(--radius); border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgb(255 255 255 / .045), rgb(255 255 255 / .015));
+      transition: translate .25s, border-color .25s;
+      overflow: hidden;
+    }
+    .card:hover { translate: 0 -4px; border-color: rgb(139 92 246 / .45); }
+    .card::after { content: ""; position: absolute; inset: 0; background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 0%), rgb(139 92 246 / .14), transparent 45%); opacity: 0; transition: opacity .3s; pointer-events: none; }
+    .card:hover::after { opacity: 1; }
+    .card h3 { margin: .9rem 0 .4rem; font-size: 1.15rem; letter-spacing: -.01em; }
+    .card p { margin: 0; color: var(--muted); font-size: .95rem; }
+    .icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; font-size: 1.3rem; background: rgb(139 92 246 / .12); border: 1px solid rgb(139 92 246 / .3); }
+    .tag { display: inline-block; margin-top: 1rem; font: 500 .72rem var(--mono); color: var(--cyan); background: rgb(34 211 238 / .08); padding: .2rem .5rem; border-radius: 6px; }
+    .num { position: absolute; top: 1.2rem; right: 1.4rem; font: 700 2.4rem var(--mono); color: rgb(255 255 255 / .05); }
+
+    /* ---------- Scroll reveal (progressive enhancement) ---------- */
+    @media (prefers-reduced-motion: no-preference) {
+      @supports ((animation-timeline: view()) and (animation-range: entry)) {
+        @keyframes reveal { from { opacity: 0; translate: 0 40px; scale: .97; } }
+        .reveal { animation: reveal auto ease-out backwards; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+      }
+    }
+
+    /* ---------- Problem ---------- */
+    .questions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 3rem; }
+    @media (max-width: 760px) { .questions { grid-template-columns: 1fr; } }
+    .q { display: flex; gap: 1rem; align-items: flex-start; padding: 1.2rem 1.4rem; border-radius: 14px; border: 1px solid var(--border); background: var(--card); }
+    .q b { font: 700 .8rem var(--mono); color: var(--violet); padding-top: .25rem; }
+    .q p { margin: 0; color: var(--text); }
+
+    /* ---------- Pipeline ---------- */
+    .flow { margin-top: 3.5rem; position: relative; display: grid; grid-template-columns: repeat(8, 1fr); gap: .8rem; }
+    @media (max-width: 980px) { .flow { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 560px) { .flow { grid-template-columns: repeat(2, 1fr); } }
+    .flow::before {
+      content: ""; position: absolute; left: 4%; right: 4%; top: 34px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--violet), var(--cyan), var(--green), transparent);
+      background-size: 200% 100%; animation: flowline 3s linear infinite; opacity: .7;
+    }
+    @media (max-width: 980px) { .flow::before { display: none; } }
+    @keyframes flowline { to { background-position: -200% 0; } }
+    .step { position: relative; text-align: center; }
+    .step .dot {
+      width: 68px; height: 68px; margin: 0 auto .9rem; border-radius: 20px; display: grid; place-items: center; font-size: 1.6rem;
+      background: #0d0f18; border: 1px solid var(--border); position: relative;
+      animation: pulse 8s ease-in-out infinite; animation-delay: calc(var(--i) * 1s);
+    }
+    @keyframes pulse {
+      0%, 14%, 100% { border-color: var(--border); box-shadow: none; }
+      5% { border-color: var(--cyan); box-shadow: 0 0 0 6px rgb(34 211 238 / .12), 0 0 40px rgb(34 211 238 / .45); }
+    }
+    @media (prefers-reduced-motion: reduce) { .flow::before, .step .dot { animation: none; } }
+    .step h4 { margin: 0; font-size: .92rem; }
+    .step small { display: block; color: var(--muted); font: .7rem/1.4 var(--mono); margin-top: .3rem; }
+
+    /* ---------- Gates ---------- */
+    .gates-wrap { display: grid; grid-template-columns: 1fr 1.6fr; gap: 3rem; align-items: center; margin-top: 3rem; }
+    @media (max-width: 980px) { .gates-wrap { grid-template-columns: 1fr; } }
+    .gates { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; }
+    @media (max-width: 560px) { .gates { grid-template-columns: repeat(2, 1fr); } }
+    .gate {
+      display: flex; align-items: center; gap: .65rem; padding: .85rem .9rem; border-radius: 12px;
+      border: 1px solid var(--border); background: var(--card); font-size: .84rem; transition: border-color .3s, background .3s;
+    }
+    .gate .st { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: .72rem; font-weight: 700; border: 1.5px solid rgb(255 255 255 / .2); color: transparent; }
+    .gate small { display: block; color: var(--muted); font: .68rem var(--mono); }
+    .gate[data-s="run"] { border-color: rgb(34 211 238 / .5); }
+    .gate[data-s="run"] .st { border-color: var(--cyan) transparent var(--cyan) transparent; animation: spin .7s linear infinite; }
+    .gate[data-s="ok"] { border-color: rgb(52 211 153 / .4); background: rgb(52 211 153 / .06); }
+    .gate[data-s="ok"] .st { background: var(--green); border-color: var(--green); color: #052; }
+    .gate[data-s="fail"] { border-color: rgb(248 113 113 / .6); background: rgb(248 113 113 / .08); }
+    .gate[data-s="fail"] .st { background: var(--red); border-color: var(--red); color: #300; }
+    @keyframes spin { to { rotate: 360deg; } }
+    .gate-summary { margin-top: 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; font: 500 .9rem var(--mono); }
+    .bar { flex: 1; min-width: 160px; height: 8px; border-radius: 99px; background: rgb(255 255 255 / .06); overflow: hidden; }
+    .bar i { display: block; height: 100%; width: 0; background: var(--grad); transition: width .3s; }
+    .bar.fail i { background: var(--red); }
+    .gate-actions { display: flex; gap: .6rem; margin-top: 1.4rem; flex-wrap: wrap; }
+
+    /* ---------- Drift demo ---------- */
+    .drift { display: grid; grid-template-columns: 1fr 70px 1fr; gap: 1rem; align-items: stretch; margin-top: 3rem; }
+    @media (max-width: 900px) { .drift { grid-template-columns: 1fr; } .link-col { rotate: 90deg; height: 60px; } }
+    .file { border-radius: var(--radius); border: 1px solid var(--border); background: #0a0c14; overflow: hidden; display: flex; flex-direction: column; }
+    .file header { display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem; border-bottom: 1px solid var(--border); font: 500 .78rem var(--mono); color: var(--muted); }
+    .file header b { color: var(--text); font-weight: 500; }
+    .file .body { padding: 1rem 1.1rem; font: .82rem/1.7 var(--mono); flex: 1; }
+    .file .k { color: var(--violet); } .file .s { color: var(--green); } .file .c { color: var(--muted); }
+    .file textarea {
+      width: 100%; min-height: 92px; margin-top: .4rem; resize: vertical; font: .85rem/1.6 var(--mono); color: var(--text);
+      background: rgb(255 255 255 / .03); border: 1px dashed rgb(139 92 246 / .45); border-radius: 10px; padding: .7rem .8rem;
+    }
+    .file textarea:focus { outline: none; border-style: solid; border-color: var(--cyan); }
+    .hash { word-break: break-all; color: var(--cyan); transition: color .3s; }
+    .hash.flash { animation: flash .6s; }
+    @keyframes flash { 30% { color: #fff; text-shadow: 0 0 12px var(--cyan); } }
+    .link-col { display: grid; place-items: center; }
+    .link-col svg { width: 70px; height: 40px; }
+    .link-col path { stroke-dasharray: 6 6; animation: dash 1s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset: -12; } }
+    @media (prefers-reduced-motion: reduce) { .link-col path { animation: none; } }
+    .badge { display: inline-flex; align-items: center; gap: .4rem; font: 700 .72rem var(--mono); padding: .25rem .6rem; border-radius: 99px; margin-left: auto; }
+    .badge.ok { color: var(--green); background: rgb(52 211 153 / .12); }
+    .badge.bad { color: var(--red); background: rgb(248 113 113 / .12); animation: shake .4s; }
+    @keyframes shake { 25% { translate: -3px 0; } 75% { translate: 3px 0; } }
+    .drift-log { margin-top: 1rem; font: .82rem var(--mono); padding: .9rem 1.1rem; border-radius: 12px; border: 1px solid var(--border); background: #0a0c14; min-height: 3.2rem; }
+
+    /* ---------- Agents ---------- */
+    .agents { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: .9rem; margin-top: 3rem; }
+    .agent { display: flex; gap: .9rem; align-items: center; padding: 1rem 1.1rem; border-radius: 14px; border: 1px solid var(--border); background: var(--card); transition: border-color .25s, translate .25s; }
+    .agent:hover { border-color: rgb(34 211 238 / .45); translate: 0 -3px; }
+    .agent .av { flex: none; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 1.2rem; background: linear-gradient(135deg, rgb(139 92 246 / .25), rgb(34 211 238 / .2)); }
+    .agent b { display: block; font: 600 .82rem var(--mono); }
+    .agent span { font-size: .8rem; color: var(--muted); }
+    .modes { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; margin-top: 2.4rem; }
+    .mode { font: 600 .75rem var(--mono); padding: .45rem .8rem; border-radius: 8px; border: 1px solid; }
+
+    /* ---------- MCP chat ---------- */
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: center; }
+    @media (max-width: 980px) { .split { grid-template-columns: 1fr; } }
+    .ide { border-radius: var(--radius); border: 1px solid var(--border); background: #0a0c14; overflow: hidden; }
+    .ide .body { padding: 1.2rem; display: flex; flex-direction: column; gap: .8rem; min-height: 380px; }
+    .msg { max-width: 92%; padding: .75rem 1rem; border-radius: 14px; font-size: .9rem; opacity: 0; translate: 0 12px; transition: opacity .45s, translate .45s; }
+    .msg.show { opacity: 1; translate: 0 0; }
+    .msg.user { align-self: flex-end; background: rgb(139 92 246 / .18); border: 1px solid rgb(139 92 246 / .35); }
+    .msg.bot { background: var(--card); border: 1px solid var(--border); }
+    .msg.tool { font: .78rem/1.6 var(--mono); background: rgb(34 211 238 / .06); border: 1px solid rgb(34 211 238 / .25); color: var(--cyan); }
+    .msg.tool .ok { color: var(--green); }
+    .list-check { list-style: none; padding: 0; margin: 1.6rem 0 0; display: grid; gap: .7rem; }
+    .list-check li { display: flex; gap: .7rem; color: var(--muted); }
+    .list-check li::before { content: "✓"; color: var(--green); font-weight: 700; }
+    .list-check b { color: var(--text); font-weight: 600; }
+
+    /* ---------- Branches ---------- */
+    .branches { margin-top: 3rem; border-radius: var(--radius); border: 1px solid var(--border); background: #0a0c14; padding: 1.5rem; overflow-x: auto; }
+    .branches svg { width: 100%; min-width: 720px; height: auto; display: block; }
+    .branches .draw { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+    .branches.in .draw { animation: drawline 1.6s ease forwards; animation-delay: var(--d, 0s); }
+    .branches .node { opacity: 0; }
+    .branches.in .node { animation: pop .4s ease forwards; animation-delay: var(--d, 0s); }
+    @keyframes drawline { to { stroke-dashoffset: 0; } }
+    @keyframes pop { from { opacity: 0; } to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      .branches .draw { stroke-dashoffset: 0; } .branches .node { opacity: 1; }
+      .branches.in .draw, .branches.in .node { animation: none; }
+    }
+
+    /* ---------- Quickstart ---------- */
+    .steps { counter-reset: s; display: grid; gap: 1rem; margin-top: 3rem; }
+    .qs { display: grid; grid-template-columns: 52px 1fr; gap: 1.2rem; align-items: start; padding: 1.2rem 1.4rem; border-radius: 14px; border: 1px solid var(--border); background: var(--card); }
+    .qs::before { counter-increment: s; content: counter(s); width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font: 700 1rem var(--mono); background: var(--grad); color: #05060a; }
+    .qs h4 { margin: 0 0 .3rem; }
+    .qs code { display: block; font-size: .85rem; color: var(--cyan); background: #0a0c14; padding: .55rem .8rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; white-space: nowrap; }
+    .qs p { margin: .5rem 0 0; color: var(--muted); font-size: .9rem; }
+
+    /* ---------- CTA / Footer ---------- */
+    .cta-box { text-align: center; padding: 4.5rem 2rem; border-radius: 28px; border: 1px solid var(--border); background: radial-gradient(600px circle at 50% 0%, rgb(139 92 246 / .25), transparent 70%), var(--bg-2); }
+    footer { padding: 3rem 0; border-top: 1px solid var(--border); color: var(--muted); font-size: .88rem; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div class="bg-fx" aria-hidden="true"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+
+  <nav class="top">
+    <div class="wrap">
+      <a class="logo" href="#top" aria-label="AI-SDLC home">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect width="32" height="32" rx="8" fill="url(#lg)"/><path d="M9 22l7-12 7 12M12 18h8" stroke="white" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        AI-SDLC
+      </a>
+      <ul>
+        <li><a href="#pillars">Pillars</a></li>
+        <li><a href="#gates">Quality Gates</a></li>
+        <li><a href="#drift">Anti-Drift</a></li>
+        <li><a href="#agents">Agents</a></li>
+        <li><a href="#mcp">MCP</a></li>
+        <li><a href="#quickstart">Quickstart</a></li>
+      </ul>
+      <a class="btn sm" href="https://github.com/altromon/AI-SDLC" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </nav>
+
+  <main id="top">
+    <!-- ================= HERO ================= -->
+    <header class="hero">
+      <div class="wrap">
+        <div>
+          <span class="eyebrow">● Spec-Driven · Deterministic · Open Source</span>
+          <h1>Let AI agents write code.<br><span class="grad-text">Keep engineering rigor.</span></h1>
+          <p class="lead">AI-SDLC is a hybrid software lifecycle where humans and 11 specialized AI agents collaborate on a single, cryptographically traceable source of truth — from product vision to production, guarded by 12 deterministic quality gates.</p>
+          <div class="install" role="group" aria-label="Install command">
+            <span><span class="p">$</span> npx @aisdlc/cli init</span>
+            <button type="button" data-copy="npx @aisdlc/cli init">Copy</button>
+          </div>
+          <div class="cta-row">
+            <a class="btn primary" href="#quickstart">Get started in 5 minutes →</a>
+            <a class="btn" href="https://github.com/altromon/AI-SDLC" target="_blank" rel="noopener">★ Star on GitHub</a>
+          </div>
+          <div class="chips">
+            <span class="chip">ProductShape</span><span class="chip">arc42 + NAF v4</span><span class="chip">STRIDE / ASVS</span>
+            <span class="chip">LINDDUN / GDPR</span><span class="chip">CycloneDX SBOM</span><span class="chip">Gherkin BDD</span><span class="chip">MCP</span>
+          </div>
+        </div>
+
+        <div class="term" aria-label="Animated terminal showing an AI-SDLC workflow">
+          <div class="term-bar"><i></i><i></i><i></i><span>~/sentinel-core — zsh</span><button type="button" id="termToggle" aria-pressed="false">❚❚ pause</button></div>
+          <div class="term-body" id="term" aria-live="off"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================= STATS ================= -->
+    <div class="stats">
+      <div class="wrap stats-grid">
+        <div class="stat reveal"><b class="grad-text" data-count="11">11</b><span>Specialized AI agents</span></div>
+        <div class="stat reveal"><b class="grad-text" data-count="12">12</b><span>Deterministic quality gates</span></div>
+        <div class="stat reveal"><b class="grad-text" data-count="33">33</b><span>JSON Schemas (2020-12)</span></div>
+        <div class="stat reveal"><b class="grad-text" data-count="37">37</b><span>Canonical templates</span></div>
+        <div class="stat reveal"><b class="grad-text" data-count="24">24</b><span>MCP tools for your IDE</span></div>
+        <div class="stat reveal"><b class="grad-text" data-count="8" data-suffix="+">8+</b><span>Languages analyzed (AST)</span></div>
+      </div>
+    </div>
+
+    <!-- ================= PROBLEM ================= -->
+    <section id="why">
+      <div class="wrap center">
+        <span class="eyebrow">The new bottleneck</span>
+        <h2>Writing code is no longer the hard part.<br><span class="grad-text">Knowing what to write is.</span></h2>
+        <p class="lead">With AI, code authoring is nearly free. The critical path has shifted left — and without precise, verifiable context, agents hallucinate.</p>
+        <div class="questions" style="text-align:left">
+          <div class="q reveal"><b>01</b><p>What exactly is the product, and for whom are we building it?</p></div>
+          <div class="q reveal"><b>02</b><p>Which architecture guarantees scalability, security and interoperability?</p></div>
+          <div class="q reveal"><b>03</b><p>How do we model threats and protect personal data (GDPR) from day zero?</p></div>
+          <div class="q reveal"><b>04</b><p>Which dependencies are safe for commercial use — and which are legal liabilities?</p></div>
+          <div class="q reveal"><b>05</b><p>How do we prevent specs, code and tests from silently drifting apart?</p></div>
+          <div class="q reveal"><b>06</b><p>How do we feed atomic, verifiable context to agents so they never guess?</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PILLARS ================= -->
+    <section id="pillars">
+      <div class="wrap">
+        <div class="center">
+          <span class="eyebrow">7 Pillars</span>
+          <h2>Everything <span class="grad-text">as code</span>. Everything verifiable.</h2>
+          <p class="lead">Each pillar is a set of Markdown artifacts with YAML frontmatter, validated by JSON Schemas and linked by canonical citations.</p>
+        </div>
+        <div class="grid g3" style="margin-top:3rem">
+          <article class="card reveal"><span class="num">01</span><div class="icon">🧭</div><h3>Product Definition</h3><p>ProductShape &amp; NAF v4 vision: actors, journeys, use cases, business rules and requirements with Gherkin acceptance.</p><span class="tag">ACT · UC · FR · QR · BR</span></article>
+          <article class="card reveal"><span class="num">02</span><div class="icon">🛡️</div><h3>Security by Design</h3><p>STRIDE threat actors, abuse cases and OWASP ASVS requirements bound to Zero Trust enclaves.</p><span class="tag">ABUSE · SEC-REQ · SEC-ENC</span></article>
+          <article class="card reveal"><span class="num">03</span><div class="icon">🔏</div><h3>Privacy by Design</h3><p>LINDDUN, GDPR Art. 30 RoPA and ISO 27701 modelled as code, enforced by a PII-SAST scanner.</p><span class="tag">DATA-ASSET · PRIV-ROPA · DPIA</span></article>
+          <article class="card reveal"><span class="num">04</span><div class="icon">⚖️</div><h3>License Governance</h3><p>Permissive vs commercial vs viral. Dynamic SCA scan, CycloneDX 1.5 SBOM and third-party notices.</p><span class="tag">license-policy.yaml</span></article>
+          <article class="card reveal"><span class="num">05</span><div class="icon">📐</div><h3>Quality Release Gates</h3><p>Real AST analysis: cyclomatic ≤ 10, cognitive ≤ 15, maintainability ≥ 50 and coverage thresholds.</p><span class="tag">quality-policy.yaml</span></article>
+          <article class="card reveal"><span class="num">06</span><div class="icon">🏛️</div><h3>Systems Architecture</h3><p>arc42 sections enriched with the NAF v4 grid: components, runtime, deployment and ADRs.</p><span class="tag">ARCH-INTRO · CMP · ADR</span></article>
+          <article class="card reveal" style="grid-column: 1 / -1"><span class="num">07</span><div class="icon">🚀</div><h3>Spec-Driven Delivery (SDD)</h3><p>Bounded increments — proposal, spec, design, tasks — with PDaC handoff sidecars, TDD, 4-tier Git branching and automatic baseline integration on merge.</p><span class="tag">CHG · TSK · HOF</span></article>
+        </div>
+
+        <div class="flow" role="list" aria-label="Lifecycle flow">
+          <div class="step" role="listitem" style="--i:0"><div class="dot">🧭</div><h4>Product</h4><small>UC · FR · BR</small></div>
+          <div class="step" role="listitem" style="--i:1"><div class="dot">🛡️</div><h4>Threats</h4><small>STRIDE</small></div>
+          <div class="step" role="listitem" style="--i:2"><div class="dot">🔏</div><h4>Privacy</h4><small>LINDDUN</small></div>
+          <div class="step" role="listitem" style="--i:3"><div class="dot">🏛️</div><h4>Architecture</h4><small>arc42 · NAF</small></div>
+          <div class="step" role="listitem" style="--i:4"><div class="dot">🧪</div><h4>Red tests</h4><small>BDD · TDD</small></div>
+          <div class="step" role="listitem" style="--i:5"><div class="dot">🤖</div><h4>Implement</h4><small>agent-developer</small></div>
+          <div class="step" role="listitem" style="--i:6"><div class="dot">🚦</div><h4>12 Gates</h4><small>verify all</small></div>
+          <div class="step" role="listitem" style="--i:7"><div class="dot">✅</div><h4>Integrate</h4><small>sdd integrate</small></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= GATES ================= -->
+    <section id="gates">
+      <div class="wrap">
+        <div class="gates-wrap">
+          <div>
+            <span class="eyebrow">Deterministic CI/CD</span>
+            <h2>12 quality gates.<br><span class="grad-text">Zero hand-waving.</span></h2>
+            <p class="lead">One command — <code>aisdlc verify all</code> — evaluates every gate locally or in CI, with machine-readable <code>--json</code> output that agents can act on. Templates ship for GitHub Actions, GitLab CI, Azure DevOps and Bitbucket.</p>
+            <div class="gate-actions">
+              <button class="btn sm primary" type="button" id="runGates">▶ Run verify all</button>
+              <button class="btn sm" type="button" id="leakGates">🔑 Simulate a leaked secret</button>
+            </div>
+          </div>
+          <div>
+            <div class="gates" id="gateGrid"></div>
+            <div class="gate-summary"><span id="gateText" class="mono">idle — press run</span><div class="bar" id="gateBar"><i></i></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= DRIFT ================= -->
+    <section id="drift">
+      <div class="wrap">
+        <div class="center">
+          <span class="eyebrow">Interactive demo</span>
+          <h2>Anti-drift <span class="grad-text">cryptographic citations</span></h2>
+          <p class="lead">Every spec cites its upstream artifact by <b>id + SHA-256 digest</b>. Change a requirement and every downstream citation is flagged until a human re-reviews it. Try it — edit the requirement below (real SHA-256, computed in your browser).</p>
+        </div>
+        <div class="drift reveal">
+          <div class="file">
+            <header>📄 <b>specs/product/FR-002-ALERTS.md</b></header>
+            <div class="body">
+              <div><span class="c">---</span></div>
+              <div><span class="k">id:</span> <span class="s">"FR-002-ALERT-NOTIFICATIONS-001"</span></div>
+              <div><span class="k">status:</span> <span class="s">"active"</span></div>
+              <div><span class="c">---</span></div>
+              <div class="c"># Normative statement (editable)</div>
+              <label class="sr-only" for="reqText">Requirement statement</label>
+              <textarea id="reqText" spellcheck="false">The system MUST emit real-time alert notifications with latency under 500ms upon detected telemetry anomalies.</textarea>
+              <div style="margin-top:.6rem"><span class="c">current sha256:</span><br><span class="hash" id="liveHash">computing…</span></div>
+            </div>
+          </div>
+          <div class="link-col" aria-hidden="true">
+            <svg viewBox="0 0 70 40"><path id="linkPath" d="M2 20 H68" stroke="#34d399" stroke-width="2.5" fill="none"/></svg>
+          </div>
+          <div class="file">
+            <header>📄 <b>changes/chg-002/spec.md</b><span class="badge ok" id="driftBadge">● IN SYNC</span></header>
+            <div class="body">
+              <div><span class="c">---</span></div>
+              <div><span class="k">cites:</span></div>
+              <div>&nbsp;&nbsp;- <span class="k">id:</span> <span class="s">"FR-002-ALERT-NOTIFICATIONS-001"</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">anchor:</span> <span class="s">"#normative-statement"</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">digest:</span></div>
+              <div style="padding-left:2.2em"><span class="hash" id="pinHash">…</span></div>
+              <div><span class="c">---</span></div>
+              <div style="margin-top:1rem; display:flex; gap:.6rem; flex-wrap:wrap">
+                <button class="btn sm" type="button" id="simEdit">✎ Simulate edit</button>
+                <button class="btn sm primary" type="button" id="recite">↻ Review &amp; re-cite</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="drift-log" id="driftLog" aria-live="polite"><span class="ok" style="color:var(--green)">❯ aisdlc verify pdac</span> — ✔ 1 citation verified, 0 drifted</div>
+      </div>
+    </section>
+
+    <!-- ================= AGENTS ================= -->
+    <section id="agents">
+      <div class="wrap">
+        <div class="center">
+          <span class="eyebrow">Human + AI symmetry</span>
+          <h2>11 agents. <span class="grad-text">Clear contracts.</span> Humans sign off.</h2>
+          <p class="lead">Each agent ships as a skill with explicit inputs, outputs and guardrails — and works in Claude Code, Cursor, VS Code, Antigravity and any MCP client.</p>
+        </div>
+        <div class="agents">
+          <div class="agent reveal"><div class="av">🧭</div><div><b>product-analyst</b><span>Vision, actors, use cases &amp; requirements</span></div></div>
+          <div class="agent reveal"><div class="av">🕵️</div><div><b>threat-modeler</b><span>STRIDE adversaries, abuse cases, ASVS</span></div></div>
+          <div class="agent reveal"><div class="av">🔏</div><div><b>privacy-officer</b><span>Data assets, RoPA, LINDDUN, PII audits</span></div></div>
+          <div class="agent reveal"><div class="av">🏛️</div><div><b>system-architect</b><span>arc42 + NAF v4 components &amp; ADRs</span></div></div>
+          <div class="agent reveal"><div class="av">🧪</div><div><b>qa-engineer</b><span>Failing BDD, E2E &amp; unit suites first</span></div></div>
+          <div class="agent reveal"><div class="av">👩‍💻</div><div><b>developer</b><span>Atomic tasks, strictly typed &amp; tested</span></div></div>
+          <div class="agent reveal"><div class="av">🔍</div><div><b>code-reviewer</b><span>Clean Code, SOLID, complexity thresholds</span></div></div>
+          <div class="agent reveal"><div class="av">🗡️</div><div><b>security-auditor</b><span>Attacker mindset: injection, secrets, authz</span></div></div>
+          <div class="agent reveal"><div class="av">⚖️</div><div><b>compliance-checker</b><span>Licenses, SBOM, copyleft blocking</span></div></div>
+          <div class="agent reveal"><div class="av">🙋</div><div><b>expert-user</b><span>MVP scrutiny &amp; functional validation</span></div></div>
+          <div class="agent reveal"><div class="av">⚙️</div><div><b>devops</b><span>CI/CD &amp; IaC with non-invasion guardrails</span></div></div>
+        </div>
+        <div class="modes" aria-label="Task autonomy modes">
+          <span class="mode" style="color:var(--green);border-color:rgb(52 211 153 / .4)">AUTONOMOUS</span>
+          <span class="mode" style="color:var(--cyan);border-color:rgb(34 211 238 / .4)">HUMAN_REVIEW_PLAN</span>
+          <span class="mode" style="color:var(--red);border-color:rgb(248 113 113 / .4)">HIGH_RISK_MANUAL</span>
+          <span class="mode" style="color:var(--amber);border-color:rgb(251 191 36 / .4)">AMBIGUOUS</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= MCP ================= -->
+    <section id="mcp">
+      <div class="wrap split">
+        <div>
+          <span class="eyebrow">Native MCP server</span>
+          <h2>Full lifecycle control <span class="grad-text">from your IDE chat</span>.</h2>
+          <p class="lead">Run <code>npx @aisdlc/mcp</code> and your assistant gets 24 typed tools and 6 canonical resources. <code>aisdlc init</code> writes the MCP configs for you.</p>
+          <ul class="list-check">
+            <li><span><b>Scaffold</b> changes with SHA-256 handoff sidecars</span></li>
+            <li><span><b>Verify</b> quality, security, privacy, licenses &amp; traceability</span></li>
+            <li><span><b>Report</b> interactive PDaC / RTM dashboards</span></li>
+            <li><span><b>Measure</b> PR &amp; release KPIs: tokens, authorship, rework</span></li>
+          </ul>
+        </div>
+        <div class="ide" id="ide">
+          <div class="term-bar"><i></i><i></i><i></i><span>Agent chat · MCP: ai-sdlc</span></div>
+          <div class="body">
+            <div class="msg user">Is chg-002 ready for a pull request?</div>
+            <div class="msg tool">⚙ ai-sdlc.verify_traceability()<br><span class="ok">✔</span> HOF-002 → CMP-ALERT-ENGINE → alerts.feature</div>
+            <div class="msg tool">⚙ ai-sdlc.verify_security({ diff: true })<br><span class="ok">✔</span> 0 secrets · 0 SAST findings</div>
+            <div class="msg tool">⚙ ai-sdlc.verify({ gate: "all", json: true })<br><span class="ok">✔</span> 12/12 gates passed · exit 0</div>
+            <div class="msg bot">Yes ✅ Traceability is complete, no secrets or vulnerable patterns, and all 12 gates pass. TSK-002 is <b>HUMAN_REVIEW_PLAN</b>, so the PR needs your sign-off before merge.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= BRANCHING ================= -->
+    <section id="git">
+      <div class="wrap">
+        <div class="center">
+          <span class="eyebrow">4-tier Git model</span>
+          <h2>One command. <span class="grad-text">The whole branch cascade.</span></h2>
+          <p class="lead"><code>aisdlc git checkout TSK-001</code> resolves the release from <code>tasks.md</code> and creates every missing tier — then integrates the change into the canonical baseline when the PR merges.</p>
+        </div>
+        <div class="branches" id="branches">
+          <svg viewBox="0 0 900 250" role="img" aria-label="Branch hierarchy: main, release, feature and task branches">
+            <g font-family="JetBrains Mono, monospace" font-size="13" fill="#9097ad">
+              <text x="10" y="44">main</text><text x="10" y="104">release/v1.2.0</text><text x="10" y="164">feat/CHG-002</text><text x="10" y="224">task/…/TSK-001</text>
+            </g>
+            <line x1="140" y1="40" x2="890" y2="40" stroke="#8b5cf6" stroke-width="3" class="draw" style="--d:0s"/>
+            <path d="M200 40 C 230 40, 230 100, 260 100 L 820 100 C 850 100, 850 40, 870 40" stroke="#22d3ee" stroke-width="3" fill="none" class="draw" style="--d:.5s"/>
+            <path d="M300 100 C 330 100, 330 160, 360 160 L 740 160 C 770 160, 770 100, 790 100" stroke="#34d399" stroke-width="3" fill="none" class="draw" style="--d:1s"/>
+            <path d="M400 160 C 430 160, 430 220, 460 220 L 660 220 C 690 220, 690 160, 710 160" stroke="#fbbf24" stroke-width="3" fill="none" class="draw" style="--d:1.5s"/>
+            <g class="node" style="--d:2.4s"><circle cx="520" cy="220" r="7" fill="#fbbf24"/><text x="500" y="245" font-size="11" fill="#9097ad" font-family="JetBrains Mono, monospace">TDD</text></g>
+            <g class="node" style="--d:2.7s"><circle cx="600" cy="220" r="7" fill="#fbbf24"/><text x="570" y="245" font-size="11" fill="#9097ad" font-family="JetBrains Mono, monospace">verify all</text></g>
+            <g class="node" style="--d:3.1s"><circle cx="710" cy="160" r="8" fill="#34d399"/><text x="690" y="186" font-size="11" fill="#9097ad" font-family="JetBrains Mono, monospace">PR ✓</text></g>
+            <g class="node" style="--d:3.5s"><circle cx="870" cy="40" r="10" fill="#8b5cf6"/><text x="775" y="22" font-size="11" fill="#e7e9f2" font-family="JetBrains Mono, monospace">sdd integrate ✓</text></g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= QUICKSTART ================= -->
+    <section id="quickstart">
+      <div class="wrap">
+        <div class="center">
+          <span class="eyebrow">5-minute quickstart</span>
+          <h2>From zero to a <span class="grad-text">governed increment</span>.</h2>
+          <p class="lead">Requires Node.js 18+, pnpm 9+ and Git 2.30+.</p>
+        </div>
+        <div class="steps">
+          <div class="qs reveal"><div><h4>Bootstrap the repository</h4><code>npx @aisdlc/cli init</code><p>Schemas, templates, policies, agent skills, MCP configs and CI/CD — via an interactive wizard.</p></div></div>
+          <div class="qs reveal"><div><h4>Scaffold a change from a use case</h4><code>npx aisdlc change new "Real-Time Alerts" --from UC-STREAM-TELEMETRY</code><p>Generates proposal, spec, design, tasks and a <code style="display:inline;padding:0 .3rem">handoff.yaml</code> with SHA-256 digests.</p></div></div>
+          <div class="qs reveal"><div><h4>Branch per task</h4><code>npx aisdlc git checkout TSK-001</code><p>main ➜ release ➜ feat ➜ task, created in cascade.</p></div></div>
+          <div class="qs reveal"><div><h4>Implement with TDD, then pre-flight</h4><code>npx aisdlc check --fix</code><p>Syncs Gherkin to <code style="display:inline;padding:0 .3rem">.feature</code> files and refreshes digests.</p></div></div>
+          <div class="qs reveal"><div><h4>Run all gates &amp; integrate</h4><code>npx aisdlc verify all &amp;&amp; npx aisdlc sdd integrate --auto</code><p>Or let CI integrate automatically when the PR merges.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CTA ================= -->
+    <section style="padding-top:2rem">
+      <div class="wrap">
+        <div class="cta-box reveal">
+          <h2>Ship AI-written software<br><span class="grad-text">you can actually audit.</span></h2>
+          <p class="lead" style="margin-inline:auto">Open source under the MIT license. Bring your own agents, your own CI, your own stack.</p>
+          <div class="cta-row" style="justify-content:center">
+            <a class="btn primary" href="https://github.com/altromon/AI-SDLC" target="_blank" rel="noopener">Explore the repository →</a>
+            <a class="btn" href="https://github.com/altromon/AI-SDLC#-tutorial-1-quick-feature-creation-5-minute-quickstart" target="_blank" rel="noopener">Read the docs</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>© AI-SDLC contributors · MIT License</span>
+      <span class="mono">npx @aisdlc/cli init</span>
+    </div>
+  </footer>
+
+  <script>
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    /* ---------- Copy buttons ---------- */
+    document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(b.dataset.copy);
+      b.textContent = 'Copied ✓';
+      setTimeout(() => (b.textContent = 'Copy'), 1600);
+    }));
+
+    /* ---------- Card spotlight ---------- */
+    document.querySelectorAll('.card').forEach((c) => c.addEventListener('pointermove', (e) => {
+      const r = c.getBoundingClientRect();
+      c.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      c.style.setProperty('--my', `${e.clientY - r.top}px`);
+    }));
+
+    /* ---------- Run a callback once when an element enters the viewport ---------- */
+    const onView = (el, fn, threshold = 0.35) => {
+      const io = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) { io.disconnect(); fn(); }
+      }, { threshold });
+      io.observe(el);
+    };
+
+    /* ---------- Stats count-up ---------- */
+    document.querySelectorAll('[data-count]').forEach((el) => {
+      if (reduceMotion) return;
+      const target = +el.dataset.count, suffix = el.dataset.suffix || '';
+      el.textContent = '0';
+      onView(el, () => {
+        const t0 = performance.now();
+        const tick = (t) => {
+          const p = Math.min(1, (t - t0) / 1200);
+          el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + (p === 1 ? suffix : '');
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
+    });
+
+    /* ---------- Hero terminal ---------- */
+    const SCRIPT = [
+      ['cmd', 'npx @aisdlc/cli init'],
+      ['ok', '✔ 33 JSON schemas · 37 templates · 3 policies'],
+      ['ok', '✔ 11 agent skills · MCP: antigravity · vscode · cursor'],
+      ['ok', '✔ CI/CD provider: GitHub Actions'],
+      ['cmd', 'npx aisdlc change new "Real-Time Alerts" --from UC-STREAM-TELEMETRY'],
+      ['cy', '  specs/changes/active/chg-002-real-time-alerts/'],
+      ['dim', '  ├─ proposal.md  spec.md  design.md  tasks.md'],
+      ['ok', '✔ handoff.yaml  HOF-002  sha256:9f2c41…a71e'],
+      ['cmd', 'npx aisdlc git checkout TSK-001'],
+      ['dim', '  main ➜ release/v1.2.0 ➜ feat/CHG-002 ➜ task/CHG-002/TSK-001'],
+      ['cmd', 'npx aisdlc verify all'],
+      ['gates'],
+      ['ok', '✔ 12/12 gates passed · exit 0'],
+      ['cmd', 'npx aisdlc sdd integrate --auto'],
+      ['ok', '✔ FR-002 promoted to active · CMP-ALERT-ENGINE linked'],
+      ['ok', '✔ chg-002 archived → specs/changes/completed/'],
+    ];
+    const GATES = [
+      ['Quality (AST)', 'CC ≤ 10 · MI ≥ 50'], ['360° Traceability', 'RTM matrix'], ['Task Governance', 'autonomy modes'],
+      ['Test Coverage', 'reqs & tasks'], ['Gherkin Sync', '.feature hashes'], ['Licenses & SCA', 'SBOM CycloneDX'],
+      ['PDaC Integrity', 'SHA-256 drift'], ['JSON Schemas', 'Draft 2020-12'], ['Duplicates', 'shift-left'],
+      ['Progressive Friction', 'risk profile'], ['Security', 'secrets · SAST'], ['Privacy', 'PII-SAST'],
+    ];
+    const term = document.getElementById('term');
+    const termToggle = document.getElementById('termToggle');
+    let termPaused = false;
+    termToggle.addEventListener('click', () => {
+      termPaused = !termPaused;
+      termToggle.setAttribute('aria-pressed', termPaused);
+      termToggle.textContent = termPaused ? '▶ play' : '❚❚ pause';
+    });
+    const waitPlay = async (ms) => { await sleep(ms); while (termPaused) await sleep(150); };
+    const line = (cls, text = '') => {
+      const d = document.createElement('div');
+      d.className = `l ${cls}`; d.textContent = text; term.appendChild(d);
+      while (term.children.length > 22) term.firstChild.remove();
+      return d;
+    };
+    const renderStatic = () => {
+      term.textContent = '';
+      SCRIPT.slice(-8).forEach(([c, t]) => c !== 'gates' && line(c, t));
+    };
+    async function runTerminal() {
+      for (;;) {
+        term.textContent = '';
+        for (const [cls, text] of SCRIPT) {
+          if (cls === 'cmd') {
+            const d = line('cmd'); const caret = document.createElement('span'); caret.className = 'caret';
+            for (const ch of text) { d.textContent += ch; d.appendChild(caret); await waitPlay(22 + Math.random() * 30); }
+            caret.remove(); await waitPlay(350);
+          } else if (cls === 'gates') {
+            for (const [name] of GATES) { line('dim', `  ✔ ${name}`).innerHTML = `  <span class="ok">✔</span> ${name}`; await waitPlay(110); }
+          } else { line(cls, text); await waitPlay(260); }
+        }
+        await waitPlay(4000);
+      }
+    }
+    reduceMotion ? renderStatic() : runTerminal();
+
+    /* ---------- Gates simulation ---------- */
+    const grid = document.getElementById('gateGrid');
+    const gateText = document.getElementById('gateText');
+    const gateBar = document.getElementById('gateBar');
+    const gateEls = GATES.map(([n, s], i) => {
+      const el = document.createElement('div');
+      el.className = 'gate'; el.dataset.s = 'idle';
+      el.innerHTML = `<span class="st" aria-hidden="true"></span><div>${i + 1}. ${n}<small>${s}</small></div>`;
+      grid.appendChild(el); return el;
+    });
+    let gateRun = 0;
+    async function runGates(leak) {
+      const id = ++gateRun;
+      gateBar.classList.remove('fail');
+      gateEls.forEach((g) => { g.dataset.s = 'idle'; g.querySelector('.st').textContent = ''; });
+      for (let i = 0; i < gateEls.length; i++) {
+        if (id !== gateRun) return;
+        const g = gateEls[i];
+        g.dataset.s = 'run'; gateText.textContent = `running gate ${i + 1}/12…`;
+        await sleep(reduceMotion ? 0 : 260);
+        if (id !== gateRun) return;
+        if (leak && i === 10) {
+          g.dataset.s = 'fail'; g.querySelector('.st').textContent = '✕';
+          g.querySelector('small').textContent = 'AKIA**************** in src/aws.ts';
+          gateBar.classList.add('fail'); gateBar.firstElementChild.style.width = `${((i + 1) / 12) * 100}%`;
+          gateText.innerHTML = '<span style="color:var(--red)">✕ secret leak detected · exit code 4</span>';
+          return;
+        }
+        g.dataset.s = 'ok'; g.querySelector('.st').textContent = '✓';
+        g.querySelector('small').textContent = GATES[i][1];
+        gateBar.firstElementChild.style.width = `${((i + 1) / 12) * 100}%`;
+      }
+      gateText.innerHTML = '<span style="color:var(--green)">✔ 12/12 gates passed · exit 0</span>';
+    }
+    document.getElementById('runGates').addEventListener('click', () => runGates(false));
+    document.getElementById('leakGates').addEventListener('click', () => runGates(true));
+    onView(grid, () => runGates(false));
+
+    /* ---------- Drift demo (real SHA-256) ---------- */
+    const reqText = document.getElementById('reqText');
+    const liveHash = document.getElementById('liveHash');
+    const pinHash = document.getElementById('pinHash');
+    const badge = document.getElementById('driftBadge');
+    const linkPath = document.getElementById('linkPath');
+    const driftLog = document.getElementById('driftLog');
+    let pinned = '';
+    const sha256 = async (s) => {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+      return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+    };
+    const flash = (el) => { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); };
+    async function refreshDrift() {
+      const h = await sha256(reqText.value.trim());
+      liveHash.textContent = h; flash(liveHash);
+      const ok = h === pinned;
+      if (badge.classList.contains('ok') !== ok) {
+        badge.className = `badge ${ok ? 'ok' : 'bad'}`;
+        badge.textContent = ok ? '● IN SYNC' : '● DRIFT';
+        linkPath.setAttribute('stroke', ok ? '#34d399' : '#f87171');
+      }
+      driftLog.innerHTML = ok
+        ? '<span style="color:var(--green)">❯ aisdlc verify pdac</span> — ✔ 1 citation verified, 0 drifted'
+        : `<span style="color:var(--red)">❯ aisdlc verify pdac</span> — ✕ FR-002-ALERT-NOTIFICATIONS-001: expected ${pinned.slice(0, 12)}… got ${h.slice(0, 12)}… · gate blocked`;
+    }
+    async function recite() {
+      pinned = await sha256(reqText.value.trim());
+      pinHash.textContent = pinned; flash(pinHash);
+      await refreshDrift();
+    }
+    if (window.crypto?.subtle) {
+      recite();
+      reqText.addEventListener('input', refreshDrift);
+      document.getElementById('recite').addEventListener('click', recite);
+      document.getElementById('simEdit').addEventListener('click', async () => {
+        const v = reqText.value;
+        reqText.value = v.includes('500ms') ? v.replace('500ms', '200ms') : v.replace('200ms', '500ms');
+        await refreshDrift();
+      });
+    } else {
+      liveHash.textContent = pinHash.textContent = 'SHA-256 requires a secure (https) context';
+    }
+
+    /* ---------- MCP chat & branches reveal ---------- */
+    const msgs = [...document.querySelectorAll('#ide .msg')];
+    onView(document.getElementById('ide'), async () => {
+      for (const m of msgs) { m.classList.add('show'); await sleep(reduceMotion ? 0 : 900); }
+    });
+    onView(document.getElementById('branches'), () => document.getElementById('branches').classList.add('in'));
+  </script>
+</body>
+</html>
