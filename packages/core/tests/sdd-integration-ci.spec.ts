@@ -221,3 +221,33 @@ describe('emitCiOutput — No-Duplication Regression (#57)', () => {
     expect(fs.existsSync(tmpEnvFile)).toBe(false);
   });
 });
+
+describe('SDD Merge Integration Workflow Concurrency & Retry Suite (#68)', () => {
+  const rootDir = path.resolve(__dirname, '../../..');
+  const repoWorkflowPath = path.join(rootDir, '.github', 'workflows', 'sdd-integrate-on-merge.yml');
+  const templateWorkflowPath = path.join(rootDir, 'templates', 'ci', 'github-workflows', 'sdd-integrate-on-merge.yml');
+
+  it('repo workflow should configure concurrency serialized by base ref with cancel-in-progress false', () => {
+    const content = fs.readFileSync(repoWorkflowPath, 'utf-8');
+    expect(content).toContain('group: sdd-integrate-${{ github.event.pull_request.base.ref || github.ref_name }}');
+    expect(content).toContain('cancel-in-progress: false');
+  });
+
+  it('repo workflow should implement git pull --rebase and exponential backoff retry loop on push', () => {
+    const content = fs.readFileSync(repoWorkflowPath, 'utf-8');
+    expect(content).toContain('git pull --rebase origin "$TARGET_BRANCH"');
+    expect(content).toContain('MAX_RETRIES=3');
+    expect(content).toMatch(/sleep \$DELAY/);
+    expect(content).toMatch(/DELAY=\$\(\(DELAY \* 2\)\)/);
+  });
+
+  it('template workflow should configure concurrency and retry loop matching standards', () => {
+    const content = fs.readFileSync(templateWorkflowPath, 'utf-8');
+    expect(content).toContain('group: sdd-integrate-${{ github.event.pull_request.base.ref || github.ref_name }}');
+    expect(content).toContain('cancel-in-progress: false');
+    expect(content).toContain('git pull --rebase origin "$TARGET_BRANCH"');
+    expect(content).toContain('MAX_RETRIES=3');
+    expect(content).toMatch(/sleep \$DELAY/);
+    expect(content).toMatch(/DELAY=\$\(\(DELAY \* 2\)\)/);
+  });
+});
