@@ -63,4 +63,10 @@ describe('Active Bounded Contexts & Dashboard Integration Suite (FR-042-BOUNDED-
     expect(mcpEdge).toBeDefined();
     expect(mcpEdge?.relation).toBe('encompasses');
   });
+  it('ensures dashboard HTML template styles Bounded Context nodes, encompasses edges and registers typology selectors', async () => {
+    const { DASHBOARD_CLIENT_SCRIPT } = await import('../src/reporters/dashboard-template.js');
+    expect(DASHBOARD_CLIENT_SCRIPT).toContain('node.type-bounded-context');
+    expect(DASHBOARD_CLIENT_SCRIPT).toContain('edge.relation-encompasses');
+    expect(DASHBOARD_CLIENT_SCRIPT).toContain("'bounded-context': '.type-bounded-context'");
+  });
 });

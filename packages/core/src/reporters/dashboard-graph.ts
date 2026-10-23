@@ -586,6 +586,16 @@ function connectBoundedContextRelationships(
       connectTargets(art.id, [id], 'encompasses', nodeMap, addEdge, 'component', 'architecture');
     }
   }
+
+  const cm = art.frontmatter['context-mapping'] as Record<string, unknown> | undefined;
+  if (cm && typeof cm === 'object') {
+    for (const up of toList(cm['upstream-dependencies'])) {
+      const id = up.trim();
+      if (id) {
+        connectTargets(art.id, [id], 'depends-on', nodeMap, addEdge, 'bounded-context', 'product');
+      }
+    }
+  }
 }
 
 function connectEnclaveRelationships(art: ScannedArtifact, nodeMap: Map<string, CytoscapeNodeData>, addEdge: (e: CytoscapeEdgeData) => void): void {
