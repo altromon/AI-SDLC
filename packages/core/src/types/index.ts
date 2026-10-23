@@ -540,6 +540,24 @@ export interface CycloneDxBom {
   components: CycloneDxComponent[];
 }
 
+export interface ScaVulnerability {
+  id: string;
+  packageName: string;
+  installedVersion: string;
+  fixedVersion?: string;
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'UNKNOWN';
+  cvssV3Score?: number;
+  cvssV3Vector?: string;
+  title?: string;
+  description?: string;
+  primaryUrl?: string;
+}
+
+export interface VulnerabilityThresholds {
+  failOnSeverity?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  maxCvssScore?: number;
+}
+
 export interface LicenseVerificationOptions {
   rootDir?: string;
   policyPath?: string;
@@ -552,6 +570,8 @@ export interface LicenseVerificationOptions {
   generateNotices?: boolean;
   noticesPath?: string;
   productionOnly?: boolean;
+  scanVulnerabilities?: boolean;
+  vulnerabilityThresholds?: VulnerabilityThresholds;
 }
 
 export interface LicenseVerificationResult {
@@ -563,6 +583,7 @@ export interface LicenseVerificationResult {
   sbomPath?: string;
   noticesPath?: string;
   scannedDependencies?: ScannedDependency[];
+  vulnerabilities?: ScaVulnerability[];
 }
 
 // --- PDaC Graph & Cryptographic Drift Types ---

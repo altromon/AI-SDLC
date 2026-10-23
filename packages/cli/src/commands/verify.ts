@@ -446,6 +446,7 @@ export function runVerifyTesting(options: TestingVerifyOptions = {}): boolean {
 }
 
 export interface LicenseVerifyOptions extends VerifyBaseOptions {
+  vuln?: boolean;
   policy?: string;
   manifest?: string;
   dynamic?: boolean;
@@ -480,6 +481,14 @@ function emitLicensesJson(result: ReturnType<typeof verifyLicenses>): void {
   console.log(JSON.stringify(payload, null, 2));
 }
 
+function printDetectedVulnerabilities(vulnerabilities?: Array<{ severity: string; id: string; packageName: string; installedVersion: string; cvssV3Score?: number; primaryUrl?: string }>): void {
+  if (!vulnerabilities || vulnerabilities.length === 0) return;
+  console.log(pc.yellow('\n  Detected package vulnerabilities (CVE/GHSA):'));
+  for (const v of vulnerabilities) {
+    console.log(`    ${pc.red('✖')} [${v.severity}] [${v.id}] ${v.packageName}@${v.installedVersion} (CVSS: ${v.cvssV3Score ?? 'N/A'}): ${v.primaryUrl || ''}`);
+  }
+}
+
 function printLicensesConsole(result: ReturnType<typeof verifyLicenses>): void {
   console.log(`  Evaluated dependencies:   ${pc.bold(String(result.totalEvaluated))}`);
   console.log(`  Compliant dependencies:   ${pc.green(String(result.permittedCount))}`);
@@ -497,6 +506,7 @@ function printLicensesConsole(result: ReturnType<typeof verifyLicenses>): void {
       console.log(`    ${pc.red('✖')} [${v.category}] ${v.packageName} (${v.license}): ${v.reason}`);
     }
   }
+  printDetectedVulnerabilities(result.vulnerabilities);
   console.log(result.success ? pc.green('\n✔ OSS License Governance COMPLIANT\n') : pc.red('\n✖ OSS License Governance BLOCKED\n'));
 }
 
@@ -512,6 +522,7 @@ function buildLicenseVerifyInput(options: LicenseVerifyOptions, rootDir: string)
     sbomPath: typeof options.sbom === 'string' ? options.sbom : undefined,
     generateNotices: options.notices !== undefined ? Boolean(options.notices) : undefined,
     noticesPath: typeof options.notices === 'string' ? options.notices : undefined,
+    scanVulnerabilities: options.vuln !== undefined ? Boolean(options.vuln) : undefined,
   };
 }
 

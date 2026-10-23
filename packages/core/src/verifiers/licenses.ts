@@ -8,12 +8,13 @@ import * as path from 'path';
 import yaml from 'js-yaml';
 import {
   LicensePolicy,
+  ScaVulnerability,
   LicenseVerificationOptions,
   LicenseVerificationResult,
   LicenseViolation,
   ScannedDependency,
 } from '../types/index.js';
-import { scanInstalledLicenses } from './sca/scanner.js';
+import { scanInstalledLicenses, scanWithTrivy, evaluateVulnerabilityThresholds } from './sca/scanner.js';
 import {
   generateCycloneDxSbom,
   generateThirdPartyNotices,
@@ -439,18 +440,38 @@ function evaluateDependencyList(
   return { violations, permittedCount };
 }
 
+function checkVulnerabilities(
+  rootDir: string,
+  options: LicenseVerificationOptions
+): { vulnerabilities: ScaVulnerability[]; blocked: boolean } {
+  if (!options.scanVulnerabilities) {
+    return { vulnerabilities: [], blocked: false };
+  }
+  const trivyRes = scanWithTrivy(rootDir, { scanVulnerabilities: true });
+  const evalResult = evaluateVulnerabilityThresholds(
+    trivyRes.vulnerabilities,
+    options.vulnerabilityThresholds
+  );
+  return {
+    vulnerabilities: trivyRes.vulnerabilities,
+    blocked: evalResult.blocked,
+  };
+}
+
 function assembleDynamicLicenseResult(
   dependencies: ScannedDependency[],
   permittedCount: number,
   violations: LicenseViolation[],
   reportMarkdown: string,
-  artifacts: { sbomPath?: string; noticesPath?: string }
+  artifacts: { sbomPath?: string; noticesPath?: string },
+  vulnData: { vulnerabilities: ScaVulnerability[]; blocked: boolean }
 ): LicenseVerificationResult {
   return {
-    success: violations.length === 0,
+    success: violations.length === 0 && !vulnData.blocked,
     totalEvaluated: dependencies.length,
     permittedCount,
     violations,
+    vulnerabilities: vulnData.vulnerabilities,
     reportMarkdown,
     sbomPath: artifacts.sbomPath,
     noticesPath: artifacts.noticesPath,
@@ -495,7 +516,8 @@ export function verifyLicenses(options: LicenseVerificationOptions = {}): Licens
   const dependencies = scanDependenciesForVerification(options, rootDir, policyWithRaw.rawPolicy);
   const { violations, permittedCount } = evaluateDependencyList(dependencies, policy);
   const artifacts = handleDynamicScaArtifacts(options, rootDir, policyWithRaw.rawPolicy, dependencies);
+  const vulnData = checkVulnerabilities(rootDir, options);
   const reportMarkdown = generateLicenseReportMarkdown(dependencies, violations, policy, artifacts.sbomPath);
 
-  return assembleDynamicLicenseResult(dependencies, permittedCount, violations, reportMarkdown, artifacts);
+  return assembleDynamicLicenseResult(dependencies, permittedCount, violations, reportMarkdown, artifacts, vulnData);
 }

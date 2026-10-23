@@ -50,6 +50,7 @@ program
   .description('Unified pre-flight command: validates Quality Gates with optional non-destructive auto-fix')
   .option('--fix', 'Automatically synchronize Gherkin scenarios (.feature) and cryptographic digests of PDaC citations')
   .option('-r, --root <path>', 'Project root directory')
+  .option('--vuln', 'Scan for known vulnerabilities (CVE/GHSA) in dependencies')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
@@ -197,6 +198,7 @@ verifyCommand
       depth: opts.depth,
       sbom: opts.sbom,
       notices: opts.notices,
+      vuln: opts.vuln,
       json: opts.json,
       format: opts.format,
     });
