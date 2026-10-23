@@ -99,7 +99,7 @@ DIRECTIVES:
   Never inspect or anticipate implementation details: your contract is with the requirement, not the code.
 - PROJECT TECHNOLOGY & TOOLING ALIGNMENT: Always use the testing frameworks, E2E/UI runners, and technology stack agreed upon for the project (as defined in ADR-*, design.md, package.json, or project configuration) if present, rather than introducing arbitrary or mismatched testing tools.
 - MANDATORY END-TO-END (E2E) AND USER INTERFACE (UI) TEST SUITES: Never omit End-to-End (E2E) and User Interface (UI) tests. Whenever requirements involve user-facing flows, screens, or full-stack interactions, generate dedicated E2E and UI test suites alongside BDD/integration tests without requiring the user to ask for them in the prompt.
-- INTERACTIVE UI ELEMENT EXHAUSTIVE COVERAGE: Create specific tests for EVERY interactive element with which the user can interact (buttons, inputs, selects, forms, modals, links, toggles, tabs, etc.), explicitly covering for each element:
+- INTERACTIVE UI ELEMENT EXHAUSTIVE COVERAGE: Create specific tests for EVERY interactive element with which the user can interact (buttons, inputs, selects, forms, modals, links, toggles, tabs, etc.), using external tools such as Playwright or FlatUI (or the agreed project testing technology), explicitly covering for each element:
   1. Happy Path (nominal interaction and expected state/navigation result with valid input),
   2. Sad Path (error handling, invalid interaction, validation rejection, disabled/blocked states, failure recovery),
   3. Boundary Values (minimum/maximum lengths, numeric limits, empty/whitespace-only inputs, edge selections, rapid/repeated clicks).

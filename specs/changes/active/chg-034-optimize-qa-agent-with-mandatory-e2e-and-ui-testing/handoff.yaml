@@ -1,0 +1,18 @@
+id: HOF-CHG-034-OPTIMIZE-QA-AGENT-WITH-MANDATORY-E2E-AND-UI-TESTING
+type: handoff
+title: Handoff Canónico de Producto para Optimize QA Agent with Mandatory E2E and UI Testing
+changeId: CHG-034-OPTIMIZE-QA-AGENT-WITH-MANDATORY-E2E-AND-UI-TESTING
+version: 1.0.0
+createdAt: '2026-10-23T15:56:26.502Z'
+subgraph:
+  requirements:
+    - FR-026-AGENT-NATIVE-CONFIGS-001
+  useCases:
+    - UC-026-AGENT-NATIVE-CONFIGS
+citations:
+  - id: UC-026-AGENT-NATIVE-CONFIGS
+    digest: sha256:36b9a61c13c5fc0ca219251871049de03a2c4ebfcd32405e134c51a21265fe37
+    comment: Citación de use-case (Configuración Nativa y Prevención de Deriva para Agentes)
+  - id: FR-026-AGENT-NATIVE-CONFIGS-001
+    digest: sha256:10515f23a2276a362b1023693c433922994ccb1ac663ce8a421542dc3bb900dd
+    comment: Requerimiento derivado de UC-026-AGENT-NATIVE-CONFIGS

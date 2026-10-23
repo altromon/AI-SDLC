@@ -2,9 +2,9 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:655653f7-357a-46db-bd01-be9b2d04fdd7",
+  "serialNumber": "urn:uuid:e8a06b2f-d407-4246-acd1-a10603edb972",
   "metadata": {
-    "timestamp": "2026-10-23T19:01:52.704Z",
+    "timestamp": "2026-10-23T19:37:03.529Z",
     "tools": [
       {
         "vendor": "AI-SDLC",

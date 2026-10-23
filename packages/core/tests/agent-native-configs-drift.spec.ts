@@ -285,6 +285,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       expect(content, `${filePath} must enforce Happy Path per interactive element`).toMatch(/Happy Path/i);
       expect(content, `${filePath} must enforce Sad Path per interactive element`).toMatch(/Sad Path/i);
       expect(content, `${filePath} must enforce Boundary Values per interactive element`).toMatch(/Boundary Values/i);
+      expect(content, `${filePath} must explicitly mandate external tools such as Playwright or FlatUI`).toMatch(/Playwright|FlatUI/i);
     }
   });
 
