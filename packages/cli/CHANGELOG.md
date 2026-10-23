@@ -6,6 +6,14 @@
 
 - feat(cli): add `--update-baseline`, `--baseline`, and `--ratchet` options to `aisdlc verify quality` and `aisdlc verify all` for legacy codebase adoption (Closes #63).
 
+## 2.0.2
+
+### Patch Changes
+
+- fix(ci): serialize concurrency by base ref in sdd-integrate-on-merge and implement retry loop with backoff (#68)
+- Updated dependencies
+  - @aisdlc/core@2.0.2
+  - @aisdlc/mcp@2.0.2
 ## 1.4.1
 
 ### Patch Changes
@@ -105,3 +113,4 @@
 - Updated dependencies [198897c]
   - @aisdlc/core@1.1.0
   - @aisdlc/mcp@1.1.0
+

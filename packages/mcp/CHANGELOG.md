@@ -6,6 +6,13 @@
 
 - feat(mcp): support `updateBaseline`, `baseline`, and `ratchet` parameters in `verify_quality` MCP tool (Closes #63).
 
+## 2.0.2
+
+### Patch Changes
+
+- fix(ci): align server version with monorepo release v2.0.2 (#68)
+- Updated dependencies
+  - @aisdlc/core@2.0.2
 ## 1.4.1
 
 ### Patch Changes
@@ -88,3 +95,4 @@
 - Updated dependencies [eb184e7]
 - Updated dependencies [198897c]
   - @aisdlc/core@1.1.0
+

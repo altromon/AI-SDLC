@@ -1,6 +1,6 @@
 # 📊 Formal Quality and Release Gate Report (AI-SDLC)
 
-> **Generation Date:** 2026-10-23T16:46:19.600Z
+> **Generation Date:** 2026-10-23T19:42:45.371Z
 > **Release Gate Verdict:** 🟢 APPROVED (RELEASE READY)
 > **Global Rating:** **`B`** (MI Index: 60.2/100, Average CC: 3.9)
 
@@ -16,9 +16,9 @@
 | **Cyclomatic Complexity (Average)** | `3.9` | $\le 10$ | ✅ COMPLIANT |
 | **Cognitive Complexity (Average)** | `2.6` | $\le 15$ | ✅ COMPLIANT |
 | **Maintainability Index (SEI MI)** | `60.2 / 100` | $\ge 50$ | ✅ COMPLIANT |
-| **Line Coverage** | `78.99%` | $\ge 75\%$ | ✅ COMPLIANT |
-| **Branch Coverage** | `75.58%` | $\ge 70\%$ | ✅ COMPLIANT |
-| **Function Coverage** | `87.56%` | $\ge 85\%$ | ✅ COMPLIANT |
+| **Line Coverage** | `N/A (Run test:coverage)` | $\ge 75\%$ | ℹ️ NOT MEASURED |
+| **Branch Coverage** | `N/A (Run test:coverage)` | $\ge 70\%$ | ℹ️ NOT MEASURED |
+| **Function Coverage** | `N/A (Run test:coverage)` | $\ge 85\%$ | ℹ️ NOT MEASURED |
 | **Functions in Violation** | `0` | $0$ (Mode STRICT) | ✅ 0 VIOLATIONS |
 
 ---
