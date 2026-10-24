@@ -52,7 +52,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm changeset publish --provenance
+          publish: pnpm changeset publish
           version: pnpm changeset version
           title: "chore(release): version packages"
           commit: "chore(release): version packages"
@@ -60,6 +60,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GTH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
 
       - name: Package Distribution Tarballs
         if: steps.changesets.outputs.published == 'true'
