@@ -60,7 +60,7 @@ describe('Shift-Left SAST Verifier (@aisdlc/core)', () => {
       const vulnFile = path.join(tempDir, 'suppressed.ts');
       fs.writeFileSync(
         vulnFile,
-        'const res = await db.query(`SELECT * FROM users WHERE id = ${userId}`); // ai-sdlc:allow-sast\n'
+        'const res = await db.query(`SELECT * FROM users WHERE id = ${userId}`); // ai-sdlc:allow-sast rule="SAST-001" reason="Query sanitizada en capa previa" expires="2099-12-31" approved-by="ciso@empresa.com"\n'
       );
 
       const findings = scanFileForSast(vulnFile, tempDir);
