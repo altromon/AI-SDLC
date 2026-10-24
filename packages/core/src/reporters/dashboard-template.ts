@@ -587,6 +587,19 @@ export const DASHBOARD_CLIENT_SCRIPT = `
             }
           },
           {
+            selector: 'node.type-bounded-context',
+            style: {
+              'shape': 'round-rectangle',
+              'background-color': '#4338ca',
+              'border-color': '#a5b4fc',
+              'border-width': 2.5,
+              'width': 75,
+              'height': 42,
+              'font-weight': 'bold',
+              'text-max-width': '70px'
+            }
+          },
+          {
             selector: 'node.type-security-enclave',
             style: {
               'shape': 'hexagon',
@@ -688,6 +701,14 @@ export const DASHBOARD_CLIENT_SCRIPT = `
           {
             selector: 'edge.relation-verified-by',
             style: { 'line-color': '#10b981', 'target-arrow-color': '#10b981', 'width': 1.8 }
+          },
+          {
+            selector: 'edge.relation-encompasses',
+            style: { 'line-color': '#a5b4fc', 'target-arrow-color': '#a5b4fc', 'width': 2 }
+          },
+          {
+            selector: 'edge.relation-depends-on',
+            style: { 'line-color': '#c084fc', 'target-arrow-color': '#c084fc', 'line-style': 'dashed', 'width': 1.8 }
           },
           {
             selector: 'node.highlighted',
@@ -885,6 +906,7 @@ export const DASHBOARD_CLIENT_SCRIPT = `
       'actor': '.type-actor, .type-threat-actor',
       'use-case': '.type-use-case, .type-usecase',
       'business-rule': '.type-business-rule, .type-rule',
+      'bounded-context': '.type-bounded-context',
       'abuse-case': '.type-abuse-case, .type-threat-actor',
       'data-asset': '.type-data-asset',
       'privacy-ropa': '.type-privacy-ropa',

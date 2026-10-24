@@ -29,7 +29,7 @@ describe('Core initProject: Full Scaffolding, Templates, Schemas & CI Suite', ()
 
   it('exports starter templates and schemas correctly', () => {
     expect(STARTER_BASE_TEMPLATES.length).toBeGreaterThanOrEqual(30);
-    expect(STARTER_SCHEMAS).toHaveLength(33);
+    expect(STARTER_SCHEMAS).toHaveLength(34);
     expect(STARTER_GITHUB_PULL_REQUEST_TEMPLATE).toContain('Plan Execution Matrix');
     expect(STARTER_PULL_REQUEST_TEMPLATE).toContain('Plan Execution Matrix');
   });

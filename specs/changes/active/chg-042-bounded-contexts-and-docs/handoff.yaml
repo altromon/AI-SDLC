@@ -1,0 +1,18 @@
+id: HOF-CHG-042-BOUNDED-CONTEXTS-AND-DOCS
+type: handoff
+title: Handoff Canónico de Producto para bounded-contexts-and-docs
+changeId: CHG-042-BOUNDED-CONTEXTS-AND-DOCS
+version: 1.0.0
+createdAt: '2026-10-23T23:20:00.000Z'
+subgraph:
+  requirements:
+    - FR-042-BOUNDED-CONTEXTS-AND-DOCS-001
+  useCases:
+    - UC-042-BOUNDED-CONTEXTS-AND-DOCS
+citations:
+  - id: UC-042-BOUNDED-CONTEXTS-AND-DOCS
+    digest: sha256:PLACEHOLDER
+    comment: Citación de use-case
+  - id: FR-042-BOUNDED-CONTEXTS-AND-DOCS-001
+    digest: sha256:PLACEHOLDER
+    comment: Citación de requirement
