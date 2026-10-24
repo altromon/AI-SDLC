@@ -8,12 +8,13 @@ import * as path from 'path';
 import yaml from 'js-yaml';
 import {
   LicensePolicy,
+  ScaVulnerability,
   LicenseVerificationOptions,
   LicenseVerificationResult,
   LicenseViolation,
   ScannedDependency,
 } from '../types/index.js';
-import { scanInstalledLicenses } from './sca/scanner.js';
+import { scanInstalledLicenses, scanWithTrivy, evaluateVulnerabilityThresholds } from './sca/scanner.js';
 import {
   generateCycloneDxSbom,
   generateThirdPartyNotices,
@@ -439,18 +440,61 @@ function evaluateDependencyList(
   return { violations, permittedCount };
 }
 
+function buildSkippedVulnResult(): {
+  vulnerabilities: ScaVulnerability[];
+  blocked: boolean;
+  skipped: boolean;
+  skipReason: string;
+} {
+  return {
+    vulnerabilities: [],
+    blocked: false,
+    skipped: true,
+    skipReason: 'Trivy scanner is not installed on host environment. Vulnerability check gracefully skipped.',
+  };
+}
+
+function checkVulnerabilities(
+  rootDir: string,
+  options: LicenseVerificationOptions
+): {
+  vulnerabilities: ScaVulnerability[];
+  blocked: boolean;
+  skipped?: boolean;
+  skipReason?: string;
+} {
+  if (options.scanVulnerabilities === false) {
+    return { vulnerabilities: [], blocked: false };
+  }
+  const res = scanWithTrivy(rootDir, { scanVulnerabilities: true });
+  if (!res.executed) {
+    return buildSkippedVulnResult();
+  }
+  const evalResult = evaluateVulnerabilityThresholds(res.vulnerabilities, options.vulnerabilityThresholds);
+  return { vulnerabilities: res.vulnerabilities, blocked: evalResult.blocked };
+}
+
 function assembleDynamicLicenseResult(
   dependencies: ScannedDependency[],
   permittedCount: number,
   violations: LicenseViolation[],
   reportMarkdown: string,
-  artifacts: { sbomPath?: string; noticesPath?: string }
+  artifacts: { sbomPath?: string; noticesPath?: string },
+  vulnData: {
+    vulnerabilities: ScaVulnerability[];
+    blocked: boolean;
+    skipped?: boolean;
+    skipReason?: string;
+  }
 ): LicenseVerificationResult {
   return {
-    success: violations.length === 0,
+    success: violations.length === 0 && !vulnData.blocked,
     totalEvaluated: dependencies.length,
     permittedCount,
     violations,
+    vulnerabilities: vulnData.vulnerabilities,
+    vulnerabilitiesSkipped: vulnData.skipped,
+    vulnerabilitiesSkipReason: vulnData.skipReason,
     reportMarkdown,
     sbomPath: artifacts.sbomPath,
     noticesPath: artifacts.noticesPath,
@@ -495,7 +539,8 @@ export function verifyLicenses(options: LicenseVerificationOptions = {}): Licens
   const dependencies = scanDependenciesForVerification(options, rootDir, policyWithRaw.rawPolicy);
   const { violations, permittedCount } = evaluateDependencyList(dependencies, policy);
   const artifacts = handleDynamicScaArtifacts(options, rootDir, policyWithRaw.rawPolicy, dependencies);
+  const vulnData = checkVulnerabilities(rootDir, options);
   const reportMarkdown = generateLicenseReportMarkdown(dependencies, violations, policy, artifacts.sbomPath);
 
-  return assembleDynamicLicenseResult(dependencies, permittedCount, violations, reportMarkdown, artifacts);
+  return assembleDynamicLicenseResult(dependencies, permittedCount, violations, reportMarkdown, artifacts, vulnData);
 }

@@ -50,6 +50,7 @@ program
   .description('Unified pre-flight command: validates Quality Gates with optional non-destructive auto-fix')
   .option('--fix', 'Automatically synchronize Gherkin scenarios (.feature) and cryptographic digests of PDaC citations')
   .option('-r, --root <path>', 'Project root directory')
+  .option('--vuln', 'Scan for known vulnerabilities (CVE/GHSA) in dependencies')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
@@ -77,6 +78,7 @@ verifyCommand
   .option('-M, --min-maintainability <number>', 'Minimum Maintainability threshold (0-100)')
   .option('-L, --max-lines <number>', 'Maximum lines per function threshold')
   .option('-m, --mode <mode>', 'Enforcement mode: STRICT or PERMISSIVE')
+  .option('--no-vuln', 'Disable dependency vulnerability scanning')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
@@ -185,6 +187,8 @@ verifyCommand
   .option('--notices [path]', 'Generate THIRD_PARTY_NOTICES.md legal notices and attributions file')
   .option('--tool <tool>', 'SCA tool: native, trivy, syft', 'native')
   .option('--depth <depth>', 'Analysis depth: direct or transitive', 'transitive')
+  .option('--vuln', 'Scan for known vulnerabilities (CVE/GHSA) in dependencies')
+  .option('--no-vuln', 'Disable dependency vulnerability scanning')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
@@ -197,6 +201,7 @@ verifyCommand
       depth: opts.depth,
       sbom: opts.sbom,
       notices: opts.notices,
+      vuln: opts.vuln,
       json: opts.json,
       format: opts.format,
     });

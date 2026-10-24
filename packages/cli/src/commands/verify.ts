@@ -450,6 +450,7 @@ export function runVerifyTesting(options: TestingVerifyOptions = {}): boolean {
 }
 
 export interface LicenseVerifyOptions extends VerifyBaseOptions {
+  vuln?: boolean;
   policy?: string;
   manifest?: string;
   dynamic?: boolean;
@@ -484,22 +485,37 @@ function emitLicensesJson(result: ReturnType<typeof verifyLicenses>): void {
   console.log(JSON.stringify(payload, null, 2));
 }
 
+function printDetectedVulnerabilities(vulnerabilities?: Array<{ severity: string; id: string; packageName: string; installedVersion: string; cvssV3Score?: number; primaryUrl?: string }>): void {
+  if (!vulnerabilities || vulnerabilities.length === 0) return;
+  console.log(pc.yellow('\n  Detected package vulnerabilities (CVE/GHSA):'));
+  for (const v of vulnerabilities) {
+    console.log(`    ${pc.red('✖')} [${v.severity}] [${v.id}] ${v.packageName}@${v.installedVersion} (CVSS: ${v.cvssV3Score ?? 'N/A'}): ${v.primaryUrl || ''}`);
+  }
+}
+
+function printLicenseArtifacts(sbomPath?: string, noticesPath?: string): void {
+  if (sbomPath) console.log(`  CycloneDX SBOM generated: ${pc.cyan(sbomPath)}`);
+  if (noticesPath) console.log(`  Legal notices generated:  ${pc.cyan(noticesPath)}`);
+}
+
+function printLicenseViolations(violations: Array<{ category: string; packageName: string; license: string; reason: string }>): void {
+  if (violations.length === 0) return;
+  console.log(pc.red('\n  Detected license violations:'));
+  for (const v of violations) {
+    console.log(`    ${pc.red('✖')} [${v.category}] ${v.packageName} (${v.license}): ${v.reason}`);
+  }
+}
+
 function printLicensesConsole(result: ReturnType<typeof verifyLicenses>): void {
   console.log(`  Evaluated dependencies:   ${pc.bold(String(result.totalEvaluated))}`);
   console.log(`  Compliant dependencies:   ${pc.green(String(result.permittedCount))}`);
   console.log(`  License violations:       ${result.violations.length > 0 ? pc.red(String(result.violations.length)) : pc.green('0')}`);
-  if (result.sbomPath) {
-    console.log(`  CycloneDX SBOM generated: ${pc.cyan(result.sbomPath)}`);
-  }
-  if (result.noticesPath) {
-    console.log(`  Legal notices generated:  ${pc.cyan(result.noticesPath)}`);
-  }
-
-  if (result.violations.length > 0) {
-    console.log(pc.red('\n  Detected license violations:'));
-    for (const v of result.violations) {
-      console.log(`    ${pc.red('✖')} [${v.category}] ${v.packageName} (${v.license}): ${v.reason}`);
-    }
+  printLicenseArtifacts(result.sbomPath, result.noticesPath);
+  printLicenseViolations(result.violations);
+  if (result.vulnerabilitiesSkipped) {
+    console.log(pc.gray('  Vulnerabilities (CVE/GHSA): skipped (Trivy not installed in environment; enforced in CI)'));
+  } else {
+    printDetectedVulnerabilities(result.vulnerabilities);
   }
   console.log(result.success ? pc.green('\n✔ OSS License Governance COMPLIANT\n') : pc.red('\n✖ OSS License Governance BLOCKED\n'));
 }
@@ -516,6 +532,7 @@ function buildLicenseVerifyInput(options: LicenseVerifyOptions, rootDir: string)
     sbomPath: typeof options.sbom === 'string' ? options.sbom : undefined,
     generateNotices: options.notices !== undefined ? Boolean(options.notices) : undefined,
     noticesPath: typeof options.notices === 'string' ? options.notices : undefined,
+    scanVulnerabilities: options.vuln !== undefined ? Boolean(options.vuln) : undefined,
   };
 }
 

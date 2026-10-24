@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as child_process from 'child_process';
-import { ScannedDependency, ScaTool } from '../../types/index.js';
+import { ScannedDependency, ScaTool, ScaVulnerability, VulnerabilityThresholds } from '../../types/index.js';
 
 export interface ScanOptions {
   depth?: 'direct' | 'transitive';
@@ -217,6 +217,94 @@ export function scanWithNativeFs(rootDir: string, options: ScanOptions = {}): Sc
   return allDeps.sort((a, b) => a.name.localeCompare(b.name));
 }
 
+function extractCvssV3Score(cvss: unknown): number | undefined {
+  if (!cvss || typeof cvss !== 'object') return undefined;
+  const dict = cvss as Record<string, Record<string, unknown>>;
+  for (const source of ['nvd', 'ghsa', 'redhat']) {
+    if (dict[source]?.V3Score !== undefined) {
+      return Number(dict[source].V3Score);
+    }
+  }
+  return undefined;
+}
+
+function extractCvssV3Vector(cvss: unknown): string | undefined {
+  if (!cvss || typeof cvss !== 'object') return undefined;
+  const dict = cvss as Record<string, Record<string, unknown>>;
+  for (const source of ['nvd', 'ghsa', 'redhat']) {
+    if (dict[source]?.V3Vector) {
+      return String(dict[source].V3Vector);
+    }
+  }
+  return undefined;
+}
+
+function normalizeVulnerabilitySeverity(raw?: string): 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'UNKNOWN' {
+  if (!raw) return 'UNKNOWN';
+  const upper = raw.toUpperCase().trim();
+  if (upper === 'CRITICAL' || upper === 'HIGH' || upper === 'MEDIUM' || upper === 'LOW') {
+    return upper;
+  }
+  return 'UNKNOWN';
+}
+
+function parseSingleVulnerability(v: Record<string, unknown>): ScaVulnerability {
+  return {
+    id: (v.VulnerabilityID as string) || 'UNKNOWN',
+    packageName: (v.PkgName as string) || 'UNKNOWN',
+    installedVersion: (v.InstalledVersion as string) || 'unknown',
+    fixedVersion: (v.FixedVersion as string) || undefined,
+    severity: normalizeVulnerabilitySeverity(v.Severity as string | undefined),
+    cvssV3Score: extractCvssV3Score(v.CVSS),
+    cvssV3Vector: extractCvssV3Vector(v.CVSS),
+    title: (v.Title as string) || undefined,
+    description: (v.Description as string) || undefined,
+    primaryUrl: (v.PrimaryURL as string) || undefined,
+  };
+}
+
+export function parseTrivyVulnerabilities(stdout: string): ScaVulnerability[] {
+  try {
+    const data = JSON.parse(stdout);
+    const vulns: ScaVulnerability[] = [];
+    for (const r of data.Results || []) {
+      for (const v of r.Vulnerabilities || []) {
+        vulns.push(parseSingleVulnerability(v as Record<string, unknown>));
+      }
+    }
+    return vulns;
+  } catch {
+    return [];
+  }
+}
+
+const SEVERITY_RANK: Record<string, number> = {
+  CRITICAL: 4,
+  HIGH: 3,
+  MEDIUM: 2,
+  LOW: 1,
+  UNKNOWN: 0,
+};
+
+export function evaluateVulnerabilityThresholds(
+  vulnerabilities: ScaVulnerability[],
+  options?: VulnerabilityThresholds
+): { blocked: boolean; failingVulnerabilities: ScaVulnerability[] } {
+  const minRank = options?.failOnSeverity ? (SEVERITY_RANK[options.failOnSeverity] ?? 3) : undefined;
+  const maxScore = options?.maxCvssScore;
+
+  const failing = vulnerabilities.filter((v) => {
+    const rankMatch = minRank !== undefined && SEVERITY_RANK[v.severity] >= minRank;
+    const scoreMatch = maxScore !== undefined && v.cvssV3Score !== undefined && v.cvssV3Score >= maxScore;
+    return rankMatch || scoreMatch;
+  });
+
+  return {
+    blocked: failing.length > 0,
+    failingVulnerabilities: failing,
+  };
+}
+
 function parseTrivyOutput(stdout: string): ScannedDependency[] {
   const data = JSON.parse(stdout);
   const deps: ScannedDependency[] = [];
@@ -233,23 +321,36 @@ function parseTrivyOutput(stdout: string): ScannedDependency[] {
   return deps;
 }
 
-export function scanWithTrivy(rootDir: string): { dependencies: ScannedDependency[]; executed: boolean } {
-  if (!isToolAvailable('trivy')) {
-    return { dependencies: [], executed: false };
-  }
+function execTrivyCli(rootDir: string, checkTypes: string): string | null {
   try {
     const res = child_process.spawnSync(
       'trivy',
-      ['fs', '--format', 'json', '--security-checks', 'license', rootDir],
+      ['fs', '--format', 'json', '--security-checks', checkTypes, rootDir],
       { encoding: 'utf-8', timeout: 30000 }
     );
-    if (res.status !== 0 || !res.stdout) {
-      return { dependencies: [], executed: false };
-    }
-    return { dependencies: parseTrivyOutput(res.stdout), executed: true };
+    return res.status === 0 && res.stdout ? res.stdout : null;
   } catch {
-    return { dependencies: [], executed: false };
+    return null;
   }
+}
+
+export function scanWithTrivy(
+  rootDir: string,
+  options?: { scanVulnerabilities?: boolean }
+): { dependencies: ScannedDependency[]; vulnerabilities: ScaVulnerability[]; executed: boolean } {
+  if (!isToolAvailable('trivy')) {
+    return { dependencies: [], vulnerabilities: [], executed: false };
+  }
+  const checkTypes = options?.scanVulnerabilities !== false ? 'vuln,license' : 'license';
+  const stdout = execTrivyCli(rootDir, checkTypes);
+  if (!stdout) {
+    return { dependencies: [], vulnerabilities: [], executed: false };
+  }
+  return {
+    dependencies: parseTrivyOutput(stdout),
+    vulnerabilities: parseTrivyVulnerabilities(stdout),
+    executed: true,
+  };
 }
 
 function parseSyftOutput(stdout: string): ScannedDependency[] {
