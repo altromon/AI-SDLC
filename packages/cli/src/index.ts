@@ -78,6 +78,7 @@ verifyCommand
   .option('-M, --min-maintainability <number>', 'Minimum Maintainability threshold (0-100)')
   .option('-L, --max-lines <number>', 'Maximum lines per function threshold')
   .option('-m, --mode <mode>', 'Enforcement mode: STRICT or PERMISSIVE')
+  .option('--no-vuln', 'Disable dependency vulnerability scanning')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
@@ -186,6 +187,8 @@ verifyCommand
   .option('--notices [path]', 'Generate THIRD_PARTY_NOTICES.md legal notices and attributions file')
   .option('--tool <tool>', 'SCA tool: native, trivy, syft', 'native')
   .option('--depth <depth>', 'Analysis depth: direct or transitive', 'transitive')
+  .option('--vuln', 'Scan for known vulnerabilities (CVE/GHSA) in dependencies')
+  .option('--no-vuln', 'Disable dependency vulnerability scanning')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {

@@ -489,24 +489,30 @@ function printDetectedVulnerabilities(vulnerabilities?: Array<{ severity: string
   }
 }
 
+function printLicenseArtifacts(sbomPath?: string, noticesPath?: string): void {
+  if (sbomPath) console.log(`  CycloneDX SBOM generated: ${pc.cyan(sbomPath)}`);
+  if (noticesPath) console.log(`  Legal notices generated:  ${pc.cyan(noticesPath)}`);
+}
+
+function printLicenseViolations(violations: Array<{ category: string; packageName: string; license: string; reason: string }>): void {
+  if (violations.length === 0) return;
+  console.log(pc.red('\n  Detected license violations:'));
+  for (const v of violations) {
+    console.log(`    ${pc.red('✖')} [${v.category}] ${v.packageName} (${v.license}): ${v.reason}`);
+  }
+}
+
 function printLicensesConsole(result: ReturnType<typeof verifyLicenses>): void {
   console.log(`  Evaluated dependencies:   ${pc.bold(String(result.totalEvaluated))}`);
   console.log(`  Compliant dependencies:   ${pc.green(String(result.permittedCount))}`);
   console.log(`  License violations:       ${result.violations.length > 0 ? pc.red(String(result.violations.length)) : pc.green('0')}`);
-  if (result.sbomPath) {
-    console.log(`  CycloneDX SBOM generated: ${pc.cyan(result.sbomPath)}`);
+  printLicenseArtifacts(result.sbomPath, result.noticesPath);
+  printLicenseViolations(result.violations);
+  if (result.vulnerabilitiesSkipped) {
+    console.log(pc.gray('  Vulnerabilities (CVE/GHSA): skipped (Trivy not installed in environment; enforced in CI)'));
+  } else {
+    printDetectedVulnerabilities(result.vulnerabilities);
   }
-  if (result.noticesPath) {
-    console.log(`  Legal notices generated:  ${pc.cyan(result.noticesPath)}`);
-  }
-
-  if (result.violations.length > 0) {
-    console.log(pc.red('\n  Detected license violations:'));
-    for (const v of result.violations) {
-      console.log(`    ${pc.red('✖')} [${v.category}] ${v.packageName} (${v.license}): ${v.reason}`);
-    }
-  }
-  printDetectedVulnerabilities(result.vulnerabilities);
   console.log(result.success ? pc.green('\n✔ OSS License Governance COMPLIANT\n') : pc.red('\n✖ OSS License Governance BLOCKED\n'));
 }
 

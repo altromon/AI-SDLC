@@ -440,22 +440,38 @@ function evaluateDependencyList(
   return { violations, permittedCount };
 }
 
+function buildSkippedVulnResult(): {
+  vulnerabilities: ScaVulnerability[];
+  blocked: boolean;
+  skipped: boolean;
+  skipReason: string;
+} {
+  return {
+    vulnerabilities: [],
+    blocked: false,
+    skipped: true,
+    skipReason: 'Trivy scanner is not installed on host environment. Vulnerability check gracefully skipped.',
+  };
+}
+
 function checkVulnerabilities(
   rootDir: string,
   options: LicenseVerificationOptions
-): { vulnerabilities: ScaVulnerability[]; blocked: boolean } {
-  if (!options.scanVulnerabilities) {
+): {
+  vulnerabilities: ScaVulnerability[];
+  blocked: boolean;
+  skipped?: boolean;
+  skipReason?: string;
+} {
+  if (options.scanVulnerabilities === false) {
     return { vulnerabilities: [], blocked: false };
   }
-  const trivyRes = scanWithTrivy(rootDir, { scanVulnerabilities: true });
-  const evalResult = evaluateVulnerabilityThresholds(
-    trivyRes.vulnerabilities,
-    options.vulnerabilityThresholds
-  );
-  return {
-    vulnerabilities: trivyRes.vulnerabilities,
-    blocked: evalResult.blocked,
-  };
+  const res = scanWithTrivy(rootDir, { scanVulnerabilities: true });
+  if (!res.executed) {
+    return buildSkippedVulnResult();
+  }
+  const evalResult = evaluateVulnerabilityThresholds(res.vulnerabilities, options.vulnerabilityThresholds);
+  return { vulnerabilities: res.vulnerabilities, blocked: evalResult.blocked };
 }
 
 function assembleDynamicLicenseResult(
@@ -464,7 +480,12 @@ function assembleDynamicLicenseResult(
   violations: LicenseViolation[],
   reportMarkdown: string,
   artifacts: { sbomPath?: string; noticesPath?: string },
-  vulnData: { vulnerabilities: ScaVulnerability[]; blocked: boolean }
+  vulnData: {
+    vulnerabilities: ScaVulnerability[];
+    blocked: boolean;
+    skipped?: boolean;
+    skipReason?: string;
+  }
 ): LicenseVerificationResult {
   return {
     success: violations.length === 0 && !vulnData.blocked,
@@ -472,6 +493,8 @@ function assembleDynamicLicenseResult(
     permittedCount,
     violations,
     vulnerabilities: vulnData.vulnerabilities,
+    vulnerabilitiesSkipped: vulnData.skipped,
+    vulnerabilitiesSkipReason: vulnData.skipReason,
     reportMarkdown,
     sbomPath: artifacts.sbomPath,
     noticesPath: artifacts.noticesPath,

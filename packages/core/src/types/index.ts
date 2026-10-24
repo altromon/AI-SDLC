@@ -584,6 +584,8 @@ export interface LicenseVerificationResult {
   noticesPath?: string;
   scannedDependencies?: ScannedDependency[];
   vulnerabilities?: ScaVulnerability[];
+  vulnerabilitiesSkipped?: boolean;
+  vulnerabilitiesSkipReason?: string;
 }
 
 // --- PDaC Graph & Cryptographic Drift Types ---
