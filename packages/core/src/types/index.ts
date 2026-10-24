@@ -825,12 +825,26 @@ export interface SecretVerifierOptions {
   ignoreSecrets?: string[];
 }
 
+export interface SecuritySuppression {
+  kind: 'sast' | 'secret';
+  ruleId?: string;
+  reason?: string;
+  expires?: string;
+  approvedBy?: string;
+  status: 'active' | 'expired' | 'invalid';
+  filePath: string;
+  lineNumber: number;
+  rawComment: string;
+  invalidReason?: string;
+}
+
 export interface SecretVerifierResult {
   success: boolean;
   totalFilesScanned: number;
   findingsCount: number;
   findings: SecretViolation[];
   scannedWithGitleaks: boolean;
+  suppressions?: SecuritySuppression[];
   reportMarkdown?: string;
 }
 
@@ -869,6 +883,7 @@ export interface SastVerifierResult {
   totalFilesScanned: number;
   violationsCount: number;
   violations: SastViolation[];
+  suppressions?: SecuritySuppression[];
   reportMarkdown?: string;
 }
 

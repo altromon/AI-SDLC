@@ -1,0 +1,18 @@
+id: HOF-CHG-040-RELEASE-SUPPLY-CHAIN-PROVENANCE
+type: handoff
+title: Handoff Canónico de Producto para release-supply-chain-provenance
+changeId: CHG-040-RELEASE-SUPPLY-CHAIN-PROVENANCE
+version: 1.0.0
+createdAt: '2026-10-23T22:40:00.000Z'
+subgraph:
+  requirements:
+    - FR-040-RELEASE-SUPPLY-CHAIN-PROVENANCE-001
+  useCases:
+    - UC-040-RELEASE-SUPPLY-CHAIN-PROVENANCE
+citations:
+  - id: UC-040-RELEASE-SUPPLY-CHAIN-PROVENANCE
+    digest: sha256:PLACEHOLDER
+    comment: Citación de use-case
+  - id: FR-040-RELEASE-SUPPLY-CHAIN-PROVENANCE-001
+    digest: sha256:PLACEHOLDER
+    comment: Citación de requirement
