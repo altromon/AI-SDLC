@@ -56,5 +56,9 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/altromon/AI-SDLC.git"
   }
 }

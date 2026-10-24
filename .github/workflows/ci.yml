@@ -50,7 +50,7 @@ jobs:
 
       - name: Upload Security Findings to GitHub Code Scanning (SARIF)
         uses: github/codeql-action/upload-sarif@v3
-        if: always() && matrix.node-version == '22.x'
+        if: always() && matrix.node-version == '22.x' && hashFiles('reports/security.sarif') != ''
         with:
           sarif_file: reports/security.sarif
           category: aisdlc-security
