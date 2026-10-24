@@ -1,0 +1,18 @@
+id: HOF-CHG-043-SARIF-SECURITY-REPORTING
+type: handoff
+title: Handoff Canónico de Producto para sarif-security-reporting
+changeId: CHG-043-SARIF-SECURITY-REPORTING
+version: 1.0.0
+createdAt: '2026-10-24T20:47:48.952Z'
+subgraph:
+  requirements:
+    - FR-043-SARIF-SECURITY-REPORTING-001
+  useCases:
+    - UC-043-SARIF-SECURITY-REPORTING
+citations:
+  - id: UC-043-SARIF-SECURITY-REPORTING
+    digest: sha256:4b471a7ae1b01f41f53947211715ff443c40e8f4bffd2af904a8212c2a3114a5
+    comment: Citación de use-case (Generación de Reportes de Seguridad SAST y Secretos en Estándar OASIS SARIF 2.1.0)
+  - id: FR-043-SARIF-SECURITY-REPORTING-001
+    digest: sha256:c55b4dcaf97c2e0008ae85e023116f4afdcac36e2357caa8f744d503ee95d202
+    comment: Citación de requirement (Generación de Reportes SARIF 2.1.0 para Verificaciones de Seguridad SAST y Secretos)

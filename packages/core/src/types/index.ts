@@ -1195,7 +1195,91 @@ export interface PrivacyVerifierResult {
   reportOutputPath?: string;
 }
 
+// --- OASIS SARIF 2.1.0 Types ---
+export type SarifLevel = "error" | "warning" | "note" | "none";
 
+export interface SarifMultiformatMessageString {
+  text: string;
+  markdown?: string;
+}
 
+export interface SarifRuleConfiguration {
+  level?: SarifLevel;
+}
 
+export interface SarifReportingDescriptor {
+  id: string;
+  name?: string;
+  shortDescription?: { text: string };
+  fullDescription?: { text: string };
+  defaultConfiguration?: SarifRuleConfiguration;
+  helpUri?: string;
+  help?: SarifMultiformatMessageString;
+  properties?: {
+    tags?: string[];
+    cwe?: string[];
+    owasp?: string[];
+    precision?: string;
+    securitySeverity?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface SarifArtifactLocation {
+  uri: string;
+  uriBaseId?: string;
+}
+
+export interface SarifRegion {
+  startLine: number;
+  startColumn?: number;
+  endLine?: number;
+  endColumn?: number;
+}
+
+export interface SarifPhysicalLocation {
+  artifactLocation: SarifArtifactLocation;
+  region?: SarifRegion;
+}
+
+export interface SarifLocation {
+  physicalLocation: SarifPhysicalLocation;
+}
+
+export interface SarifResult {
+  ruleId: string;
+  level: SarifLevel;
+  message: { text: string };
+  locations: SarifLocation[];
+  ruleIndex?: number;
+  properties?: Record<string, unknown>;
+}
+
+export interface SarifToolDriver {
+  name: string;
+  version?: string;
+  informationUri?: string;
+  rules: SarifReportingDescriptor[];
+}
+
+export interface SarifRun {
+  tool: {
+    driver: SarifToolDriver;
+  };
+  results: SarifResult[];
+}
+
+export interface SarifDocument {
+  $schema: string;
+  version: "2.1.0";
+  runs: SarifRun[];
+}
+
+export interface GenerateSarifOptions {
+  sastResult?: SastVerifierResult;
+  secretsResult?: SecretVerifierResult;
+  toolName?: string;
+  toolVersion?: string;
+  informationUri?: string;
+}
 
