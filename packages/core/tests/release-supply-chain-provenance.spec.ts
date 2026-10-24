@@ -20,7 +20,8 @@ describe('Release Supply Chain Provenance & Verification Suite (FR-040-RELEASE-S
     expect(parsed.permissions['attestations']).toBe('write');
 
     // 2. Changeset publish with --provenance
-    expect(content).toContain('pnpm changeset publish --provenance');
+    expect(content).toContain('pnpm changeset publish');
+    expect(content).toContain('NPM_CONFIG_PROVENANCE: true');
 
     // 3. Sigstore/Cosign installation and signing
     expect(content).toContain('sigstore/cosign-installer');
