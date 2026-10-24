@@ -44,6 +44,7 @@ describe('Core initProject: Full Scaffolding, Templates, Schemas & CI Suite', ()
 
     // Product templates
     expect(fs.existsSync(path.join(tempDir, 'templates', 'product', 'actor.template.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'templates', 'product', 'bounded-context.template.md'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'templates', 'product', 'use-case.template.md'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'templates', 'product', 'business-rule.template.md'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'templates', 'product', 'journey.template.md'))).toBe(true);
