@@ -3,6 +3,8 @@
  */
 
 import pc from 'picocolors';
+import * as fs from 'fs';
+import * as path from 'path';
 import {
   checkGherkinInSync,
   verifyArtifactDuplicates,
@@ -17,6 +19,8 @@ import {
   verifyTasksGovernance,
   verifyTestingCoverage,
   verifyTraceability,
+  generateSuppressionsAuditReport,
+  type SecuritySuppression,
   type SastSeverity,
 } from '@aisdlc/core';
 
@@ -977,11 +981,20 @@ function emitSecurityJson(
   console.log(JSON.stringify(payload, null, 2));
 }
 
-export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boolean {
-  const rootDir = options.root || process.cwd();
-  const useJson = isJsonOutput(options);
-  const entropyThreshold = options.entropy !== undefined ? Number(options.entropy) : undefined;
+function writeSuppressionsAuditReport(rootDir: string, suppressions: SecuritySuppression[]): void {
+  const reportsDir = path.join(rootDir, 'reports');
+  if (!fs.existsSync(reportsDir)) {
+    fs.mkdirSync(reportsDir, { recursive: true });
+  }
+  fs.writeFileSync(
+    path.join(reportsDir, 'SUPPRESSIONS_AUDIT.md'),
+    generateSuppressionsAuditReport(suppressions),
+    'utf-8'
+  );
+}
 
+function executeSecurityVerifiers(rootDir: string, options: SecurityVerifyCliOptions) {
+  const entropyThreshold = options.entropy !== undefined ? Number(options.entropy) : undefined;
   const resultSecrets = verifySecrets({
     rootDir,
     diff: options.diff,
@@ -996,16 +1009,40 @@ export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boole
     minSeverity: options.minSeverity as SastSeverity,
   });
 
-  const isOk = resultSecrets.success && resultSast.success;
+  return { resultSecrets, resultSast };
+}
 
-  if (useJson) {
+function printSecurityConsoleSummary(silent: boolean | undefined, hasExpired: boolean): void {
+  if (silent) return;
+  console.log(`  Audit exceptions report: ${pc.cyan('reports/SUPPRESSIONS_AUDIT.md')}`);
+  if (hasExpired) {
+    console.log(pc.red('  ✖ One or more security suppressions have expired! Quality Gate blocked.\n'));
+  }
+}
+
+export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boolean {
+  const rootDir = options.root || process.cwd();
+  const { resultSecrets, resultSast } = executeSecurityVerifiers(rootDir, options);
+
+  const allSuppressions = [
+    ...(resultSecrets.suppressions || []),
+    ...(resultSast.suppressions || []),
+  ];
+  writeSuppressionsAuditReport(rootDir, allSuppressions);
+
+  const hasExpired = allSuppressions.some((s) => s.status === 'expired');
+  const isOk = resultSecrets.success && resultSast.success && !hasExpired;
+
+  if (isJsonOutput(options)) {
     emitSecurityJson(resultSecrets, resultSast, isOk);
     return isOk;
   }
 
   const okS = runVerifySecrets({ ...options, silent: options.silent });
   const okA = runVerifySast({ ...options, silent: options.silent });
-  return okS && okA;
+  printSecurityConsoleSummary(options.silent, hasExpired);
+
+  return okS && okA && !hasExpired;
 }
 
 function emitGherkinVerifyJson(result: ReturnType<typeof checkGherkinInSync>): void {
