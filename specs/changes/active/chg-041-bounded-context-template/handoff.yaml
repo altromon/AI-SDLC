@@ -1,0 +1,18 @@
+id: HOF-CHG-041-BOUNDED-CONTEXT-TEMPLATE
+type: handoff
+title: Handoff Canónico de Producto para bounded-context-template
+changeId: CHG-041-BOUNDED-CONTEXT-TEMPLATE
+version: 1.0.0
+createdAt: '2026-10-23T22:50:00.000Z'
+subgraph:
+  requirements:
+    - FR-041-BOUNDED-CONTEXT-TEMPLATE-001
+  useCases:
+    - UC-041-BOUNDED-CONTEXT-TEMPLATE
+citations:
+  - id: UC-041-BOUNDED-CONTEXT-TEMPLATE
+    digest: sha256:PLACEHOLDER
+    comment: Citación de use-case
+  - id: FR-041-BOUNDED-CONTEXT-TEMPLATE-001
+    digest: sha256:PLACEHOLDER
+    comment: Citación de requirement

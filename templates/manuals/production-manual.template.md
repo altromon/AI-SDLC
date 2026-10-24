@@ -87,6 +87,24 @@ To prevent discrepancies in binary or package generation, strict usage of pinned
    # Expected: [CANONICAL_SHA256_CHECKSUM]
    ```
 
+
+
+5. **Step 5: Sigstore / Cosign Signature and SLSA Provenance Verification**
+   ```bash
+   # Verify npm package provenance from registry
+   npm audit signatures
+
+   # Verify package tarball with Sigstore / Cosign (Keyless via OIDC identity)
+   cosign verify-blob \
+     --bundle release-artifacts/package.tgz.bundle \
+     --certificate-identity-regexp "^https://github.com/organization/repo-name/.*$" \
+     --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+     release-artifacts/package.tgz
+
+   # Verify SLSA Build Provenance Attestation using GitHub CLI
+   gh attestation verify release-artifacts/package.tgz --repo organization/repo-name
+   ```
+
 ---
 
 ## 2. Version, Infrastructure, and Migration Compatibility Matrix
@@ -175,7 +193,7 @@ flowchart LR
 | **Maintainability Index** | `aisdlc verify quality` | MI >= 50.0 / 100 | **Release blocked** |
 | **360° Traceability** | `aisdlc verify traceability` | 100% of requirements linked | **Release blocked** |
 | **OSS Licenses** | `aisdlc verify licenses` | Zero forbidden/viral licenses | **Release blocked** |
-| **Cryptographic Signature** | `cosign verify` | Valid signature from Corporate CA | **Deployment rejected** |
+| **Cryptographic Signature & SLSA** | `cosign verify-blob` / `gh attestation verify` | Valid signature and SLSA provenance from GitHub Actions OIDC | **Deployment rejected** |
 
 ---
 

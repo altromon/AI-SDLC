@@ -19,7 +19,9 @@ import {
   SastVerifierOptions,
   SastVerifierResult,
   SastViolation,
+  SecuritySuppression,
 } from '../types/index.js';
+import { parseSecuritySuppression } from './security-suppressions.js';
 
 export const GENERAL_SOURCE_EXTENSIONS: readonly string[] = [
   '.ts',
@@ -214,12 +216,17 @@ export function walkSourceFiles(
   return files;
 }
 
-function isLineExemptFromSast(line: string): boolean {
-  return (
-    line.includes('ai-sdlc:allow-sast') ||
-    line.includes('ai-sdlc:allow-prompt-injection') ||
-    line.includes('nosec')
-  );
+function checkLineSuppression(
+  line: string,
+  relPath: string,
+  lineNumber: number,
+  collected?: SecuritySuppression[]
+): boolean {
+  if (line.includes('ai-sdlc:allow-prompt-injection')) return true;
+  const supp = parseSecuritySuppression(line, relPath, lineNumber);
+  if (!supp) return false;
+  if (collected) collected.push(supp);
+  return supp.status === 'active';
 }
 
 function checkRuleMatch(
@@ -237,7 +244,8 @@ function checkRuleMatch(
 export function scanFileForSast(
   filePath: string,
   rootDir: string,
-  minSeverity: SastSeverity = 'HIGH'
+  minSeverity: SastSeverity = 'HIGH',
+  collectedSuppressions?: SecuritySuppression[]
 ): SastViolation[] {
   const violations: SastViolation[] = [];
   const ext = path.extname(filePath).toLowerCase();
@@ -249,7 +257,7 @@ export function scanFileForSast(
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (isLineExemptFromSast(line)) continue;
+      if (checkLineSuppression(line, relPath, i + 1, collectedSuppressions)) continue;
 
       for (const rule of SAST_RULES) {
         if (checkRuleMatch(rule, line, ext, minSeverity)) {
@@ -296,8 +304,9 @@ export function verifySast(options: SastVerifierOptions = {}): SastVerifierResul
   const filesToScan = collectSastFiles(rootDir, targetDirs);
 
   const violations: SastViolation[] = [];
+  const suppressions: SecuritySuppression[] = [];
   for (const file of filesToScan) {
-    violations.push(...scanFileForSast(file, rootDir, minSeverity));
+    violations.push(...scanFileForSast(file, rootDir, minSeverity, suppressions));
   }
 
   if (shouldRunSemgrep(options)) {
@@ -308,11 +317,13 @@ export function verifySast(options: SastVerifierOptions = {}): SastVerifierResul
     }
   }
 
+  const hasExpired = suppressions.some((s) => s.status === 'expired');
   const result: SastVerifierResult = {
-    success: violations.length === 0,
+    success: violations.length === 0 && !hasExpired,
     totalFilesScanned: filesToScan.length,
     violationsCount: violations.length,
     violations,
+    suppressions,
   };
 
   result.reportMarkdown = generateSastReportMarkdown(result);
@@ -380,7 +391,7 @@ export const PROMPT_INJECTION_SIGNATURES: readonly {
     ruleId: 'PROMPT-INJ-MODE-OVERRIDE',
     severity: 'CRITICAL',
     regex: /(?:\b(?:system\s+(?:prompt\s+)?override|override\s+system\s+prompt|developer\s+mode\s+enabled|dan\s+mode(?:\s+enabled)?|unfiltered\s+(?:ai\s+)?mode)\b)/i,
-    message: 'Attempted system prompt override, developer mode, or unrestricted mode activation', // ai-sdlc:allow-prompt-injection
+    message: 'Attempted system prompt override, developer mode, or unrestricted mode activation', // ai-sdlc:allow-sast rule="PROMPT-INJ-MODE-OVERRIDE" reason="Regla interna de deteccion" expires="2099-12-31" approved-by="security@ai-sdlc.dev"
   },
   {
     ruleId: 'PROMPT-INJ-LEAK',
@@ -405,7 +416,7 @@ export const PROMPT_INJECTION_SIGNATURES: readonly {
 function scanLinesForPromptInjection(lines: string[], findings: PromptInjectionFinding[]): void {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (line.includes('ai-sdlc:allow-prompt-injection') || line.includes('nosec')) continue;
+    if (line.includes('ai-sdlc:allow-prompt-injection')) continue;
 
     for (const sig of PROMPT_INJECTION_SIGNATURES) {
       sig.regex.lastIndex = 0;
