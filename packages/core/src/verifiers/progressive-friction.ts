@@ -56,6 +56,21 @@ export function isPathProtectedFromPatch(filePath: string): boolean {
   return PROTECTED_BYPASS_PATTERNS.some((pattern) => pattern.test(normalized));
 }
 
+function detectBranchChangeMatch(rootDir: string, dirs: string[]): string | undefined {
+  if (!fs.existsSync(path.join(rootDir, '.git'))) return undefined;
+  try {
+    const branch = execFileSync('git', ['branch', '--show-current'], {
+      cwd: rootDir,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'ignore'],
+    }).trim().toLowerCase();
+    if (!branch) return undefined;
+    return dirs.find((d) => branch.includes(path.basename(d).toLowerCase()));
+  } catch {
+    return undefined;
+  }
+}
+
 function resolveActiveChangeDir(rootDir: string): string | undefined {
   const activeRoot = path.join(rootDir, 'specs', 'changes', 'active');
   if (!fs.existsSync(activeRoot)) return undefined;
@@ -64,6 +79,8 @@ function resolveActiveChangeDir(rootDir: string): string | undefined {
       .readdirSync(activeRoot, { withFileTypes: true })
       .filter((d) => d.isDirectory())
       .map((d) => path.join(activeRoot, d.name));
+    const branchMatch = detectBranchChangeMatch(rootDir, dirs);
+    if (branchMatch) return branchMatch;
     return dirs.find((d) => detectProfileFromChange(d) === 'patch') || dirs[0];
   } catch {
     return undefined;

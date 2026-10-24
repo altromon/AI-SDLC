@@ -18,7 +18,9 @@ import {
   SecretVerifierOptions,
   SecretVerifierResult,
   SecretViolation,
+  SecuritySuppression,
 } from '../types/index.js';
+import { parseSecuritySuppression } from './security-suppressions.js';
 
 export interface SecretRule {
   id: string;
@@ -164,19 +166,22 @@ export function maskSecret(secret: string): string {
   return `${prefix}****${suffix}`;
 }
 
-export function isPlaceholderOrIgnored(secret: string, line: string): boolean {
+export function isPlaceholderOrIgnored(
+  secret: string,
+  line: string,
+  filePath = '',
+  lineNumber = 0,
+  collectedSuppressions?: SecuritySuppression[]
+): boolean {
   const lowerSecret = secret.toLowerCase();
   for (const placeholder of PLACEHOLDER_KEYWORDS) {
     if (lowerSecret.includes(placeholder)) return true;
   }
 
-  // Check inline suppression comments
-  if (
-    line.includes('ai-sdlc:allow-secret') ||
-    line.includes('gitleaks:allow') ||
-    line.includes('pragma: allowlist secret')
-  ) {
-    return true;
+  const suppression = parseSecuritySuppression(line, filePath, lineNumber);
+  if (suppression) {
+    if (collectedSuppressions) collectedSuppressions.push(suppression);
+    return suppression.status === 'active';
   }
 
   return false;
@@ -388,7 +393,8 @@ function checkRuleOnLine(
   lineNumber: number,
   filePath: string,
   relPath: string,
-  entropyThreshold: number
+  entropyThreshold: number,
+  collectedSuppressions?: SecuritySuppression[]
 ): SecretViolation[] {
   const violations: SecretViolation[] = [];
   rule.regex.lastIndex = 0;
@@ -397,7 +403,7 @@ function checkRuleOnLine(
   while ((match = rule.regex.exec(line)) !== null) {
     const rawMatch = rule.captureIndex ? match[rule.captureIndex] : match[0];
     if (!rawMatch || rawMatch.length < 8) continue;
-    if (isPlaceholderOrIgnored(rawMatch, line)) continue;
+    if (isPlaceholderOrIgnored(rawMatch, line, filePath, lineNumber, collectedSuppressions)) continue;
 
     const entropy = calculateShannonEntropy(rawMatch);
     if (rule.minEntropy && entropy < (entropyThreshold || rule.minEntropy)) {
@@ -414,12 +420,13 @@ function scanLineForSecrets(
   lineNumber: number,
   filePath: string,
   relPath: string,
-  entropyThreshold: number
+  entropyThreshold: number,
+  collectedSuppressions?: SecuritySuppression[]
 ): SecretViolation[] {
   if (!line || line.trim().length === 0) return [];
   const lineViolations: SecretViolation[] = [];
   for (const rule of SECRET_RULES) {
-    lineViolations.push(...checkRuleOnLine(rule, line, lineNumber, filePath, relPath, entropyThreshold));
+    lineViolations.push(...checkRuleOnLine(rule, line, lineNumber, filePath, relPath, entropyThreshold, collectedSuppressions));
   }
   return lineViolations;
 }
@@ -428,14 +435,15 @@ export function scanContentForSecrets(
   content: string,
   filePath: string,
   rootDir: string,
-  entropyThreshold = 4.3
+  entropyThreshold = 4.3,
+  collectedSuppressions?: SecuritySuppression[]
 ): SecretViolation[] {
   const violations: SecretViolation[] = [];
   const lines = content.split(/\r?\n/);
   const relPath = path.relative(rootDir, filePath).replace(/\\/g, '/');
 
   for (let i = 0; i < lines.length; i++) {
-    violations.push(...scanLineForSecrets(lines[i], i + 1, filePath, relPath, entropyThreshold));
+    violations.push(...scanLineForSecrets(lines[i], i + 1, filePath, relPath, entropyThreshold, collectedSuppressions));
   }
 
   return violations;
@@ -456,39 +464,41 @@ function scanDiffItems(
   rootDir: string,
   excludePatterns: string[],
   entropyThreshold: number
-): { findings: SecretViolation[]; filesScannedCount: number } {
+): { findings: SecretViolation[]; filesScannedCount: number; suppressions: SecuritySuppression[] } {
   const fileGroups = groupDiffLinesByFile(diffLines);
   const findings: SecretViolation[] = [];
+  const suppressions: SecuritySuppression[] = [];
 
   for (const [relFile, items] of fileGroups) {
     if (isPathExcluded(relFile, excludePatterns)) continue;
     const absPath = path.resolve(rootDir, relFile);
     for (const item of items) {
-      const lineViolations = scanLineForSecrets(item.content, item.lineNumber, absPath, relFile, entropyThreshold);
+      const lineViolations = scanLineForSecrets(item.content, item.lineNumber, absPath, relFile, entropyThreshold, suppressions);
       for (const v of lineViolations) {
         findings.push({ ...v, message: `[DIFF] ${v.message}` });
       }
     }
   }
-  return { findings, filesScannedCount: fileGroups.size };
+  return { findings, filesScannedCount: fileGroups.size, suppressions };
 }
 
 function scanAllProjectFiles(
   rootDir: string,
   excludePatterns: string[],
   entropyThreshold: number
-): { findings: SecretViolation[]; filesScannedCount: number } {
+): { findings: SecretViolation[]; filesScannedCount: number; suppressions: SecuritySuppression[] } {
   const allFiles = walkProjectFiles(rootDir, rootDir, excludePatterns);
   const findings: SecretViolation[] = [];
+  const suppressions: SecuritySuppression[] = [];
   for (const file of allFiles) {
     try {
       const content = fs.readFileSync(file, 'utf-8');
-      findings.push(...scanContentForSecrets(content, file, rootDir, entropyThreshold));
+      findings.push(...scanContentForSecrets(content, file, rootDir, entropyThreshold, suppressions));
     } catch {
       // Skip unreadable files
     }
   }
-  return { findings, filesScannedCount: allFiles.length };
+  return { findings, filesScannedCount: allFiles.length, suppressions };
 }
 
 function appendNonDuplicateFindings(target: SecretViolation[], incoming: SecretViolation[]): void {
@@ -529,18 +539,20 @@ export function verifySecrets(options: SecretVerifierOptions = {}): SecretVerifi
   const entropyThreshold = options.entropyThreshold ?? 4.3;
   const excludePatterns = options.excludePatterns || DEFAULT_EXCLUDED_PATTERNS;
 
-  const { findings, filesScannedCount } = options.diff
+  const { findings, filesScannedCount, suppressions } = options.diff
     ? scanDiffItems(getGitDiffLines(rootDir, options.baseBranch), rootDir, excludePatterns, entropyThreshold)
     : scanAllProjectFiles(rootDir, excludePatterns, entropyThreshold);
 
   const merged = mergeGitleaksFindings(findings, rootDir, options.gitleaks);
+  const hasExpired = (suppressions || []).some((s) => s.status === 'expired');
 
   const result: SecretVerifierResult = {
-    success: merged.findings.length === 0,
+    success: merged.findings.length === 0 && !hasExpired,
     totalFilesScanned: filesScannedCount,
     findingsCount: merged.findings.length,
     findings: merged.findings,
     scannedWithGitleaks: merged.scannedWithGitleaks,
+    suppressions,
   };
 
   result.reportMarkdown = generateSecretsReportMarkdown(result);

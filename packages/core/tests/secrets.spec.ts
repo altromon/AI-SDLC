@@ -94,7 +94,7 @@ const key3 = "dummy_token_for_tests";
 
   it('should respect inline suppression comments (ai-sdlc:allow-secret)', () => {
     const fakeToken = ['ghp_', '123456789012345678901234567890123456'].join('');
-    const snippet = `\nconst realLookingToken = "${fakeToken}"; // ai-sdlc:allow-secret\n`;
+    const snippet = `\nconst realLookingToken = "${fakeToken}"; // ai-sdlc:allow-secret rule="SEC-001" reason="Fixture de prueba" expires="2099-12-31" approved-by="ciso@empresa.com"\n`;
     const violations = scanContentForSecrets(snippet, 'test.ts', process.cwd());
     expect(violations.length).toBe(0);
   });

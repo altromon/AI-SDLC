@@ -101,8 +101,8 @@ AI-SDLC/
 │   ├── 10_quality_management_and_release_gates.md # Coding rules, Cyclomatic Complexity, and Release Gates
 │   └── 11_git_branching_and_lifecycle.md     # 4-tier Git branching model (main, release, feat/bug, task)
 │
-├── schemas/                                  # JSON Schemas (33 Deterministic Schemas - Draft 2020-12)
-│   ├── product/                              # Schemas: actor, use-case, requirement, business-rule
+├── schemas/                                  # JSON Schemas (34 Deterministic Schemas - Draft 2020-12)
+│   ├── product/                              # Schemas: actor, use-case, requirement, business-rule, bounded-context
 │   ├── security/                             # Schemas: threat-actor, abuse-case, security-req, enclave
 │   ├── privacy/                              # Schemas: privacy-policy, data-asset, privacy-ropa, privacy-req
 │   ├── compliance/                           # Schemas: license-policy, dependency-manifest
@@ -110,8 +110,8 @@ AI-SDLC/
 │   ├── sdd/                                  # Schemas: tasks, handoff
 │   └── manuals/                              # Schemas: user-manual, production-manual
 │
-├── templates/                                # Standard Markdown templates with YAML frontmatter (37 Templates)
-│   ├── product/                              # ACT, JRN, UC, BR, FR, QR, CON templates
+├── templates/                                # Standard Markdown templates with YAML frontmatter (38 Templates)
+│   ├── product/                              # ACT, JRN, UC, BR, FR, QR, CON, BC templates
 │   ├── security/                             # THREAT, ABUSE, SEC-REQ, SEC-POL templates
 │   ├── privacy/                              # DATA-ASSET, PRIV-ROPA, PRIV-REQ, DPIA-REQUEST templates
 │   ├── compliance/                           # CON-LIC, ADR-LIC, Commercial Acquisition Request templates
@@ -160,7 +160,7 @@ This accelerated flow demonstrates how to create, implement, verify, and integra
 ### 2. Fast 7-Step Workflow with Simplified Commands
 
 ```bash
-# 0. Turnkey Bootstrapping: initialize 33 schemas, 37 starter templates, universal MCP, and CI/CD:
+# 0. Turnkey Bootstrapping: initialize 34 schemas, 38 starter templates, universal MCP, and CI/CD:
 npx @aisdlc/cli init
 
 # 1. Define canonical product (ProductShape / PDaC) upstream in specs/product/
@@ -201,7 +201,7 @@ npx aisdlc sdd integrate --auto
 
 | CLI Tool / Command | Equivalent pnpm Command | Lifecycle Phase | Output / Action Performed |
 |---|---|---|---|
-| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository with all 33 JSON schemas (Draft 2020-12), 37 canonical starter templates, Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`), and AI agent rules (11 specialized agents). Unconditionally generates universal MCP configs (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Injects standard npm scripts into consumer `package.json`. Interactive TTY wizard prompts for CI/CD provider, Architecture granularity, and AI Agents. Supports `--dry-run`, `--json`, and `-F, --format <format>` |
+| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository with all 34 JSON schemas (Draft 2020-12), 38 canonical starter templates, Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`), and AI agent rules (11 specialized agents). Unconditionally generates universal MCP configs (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Injects standard npm scripts into consumer `package.json`. Interactive TTY wizard prompts for CI/CD provider, Architecture granularity, and AI Agents. Supports `--dry-run`, `--json`, and `-F, --format <format>` |
 | `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry Setup** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
 | `npx aisdlc mcp` / `npx @aisdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 24 typed tools (including `new`, `verify`, `verify_privacy`, `report`) and 6 canonical resources |
 | `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | **SDD Scaffolding** | Generates `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` sidecar (`HOF-*`) with SHA-256 digests |
@@ -222,7 +222,7 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc verify testing [--json]` | `pnpm run verify:testing` | **Testing Audit** | Verifies 100% test coverage for requirements and tasks with physical disk tests (`--json`) |
 | `npx aisdlc verify traceability [--json]` | `pnpm run verify:traceability` | **360° RTM Matrix** | Enforces mandatory triangulation: Product (`HOF-*`) ➔ Architecture (`CMP-*`) ➔ Tests (`.feature`) |
 | `npx aisdlc verify governance [--json]` | `pnpm run verify:governance` | **Task Governance** | Audits task autonomy modes (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc., supports `--json`) |
-| `npx aisdlc verify licenses [options]` | `pnpm run verify:licenses` | **IP / OSS Governance & SCA** | Dynamic dependency scan, CycloneDX 1.5 SBOM, and legal attribution against `license-policy.yaml` (`--json`) |
+| `npx aisdlc verify licenses [options]` | `pnpm run verify:licenses` | **IP / OSS Governance & SCA** | Dynamic dependency scan, CycloneDX 1.5 SBOM, vulnerability threshold audit (`--vuln`), and legal attribution against `license-policy.yaml` (`--json`) |
 | `npx aisdlc sdd verify` | - | **SDD Compliance** | Audits active changes for specification compliance and valid sidecars |
 | `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 12 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
 | `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship) for PRs (supports `--json`) |
@@ -361,6 +361,9 @@ Before introducing any third-party dependency:
    ```bash
    pnpm run verify:licenses
    # or: npx aisdlc verify licenses
+
+# Scan with vulnerability threshold evaluation (Gate 10)
+npx aisdlc verify licenses --vuln --vuln-max-critical 0 --vuln-max-high 0
    
    # Optional: Generate CycloneDX 1.5 SBOM and Attribution Notices in one pass
    npx aisdlc verify licenses --sbom reports/sbom.cdx.json --notices THIRD_PARTY_NOTICES.md
@@ -635,6 +638,9 @@ AI-SDLC includes a dynamic software composition analysis (SCA) engine that inspe
 pnpm run verify:licenses
 # or: npx aisdlc verify licenses
 
+# Scan with vulnerability threshold evaluation (Gate 10)
+npx aisdlc verify licenses --vuln --vuln-max-critical 0 --vuln-max-high 0
+
 # Generate CycloneDX 1.5 JSON SBOM
 npx aisdlc verify licenses --sbom reports/sbom.cdx.json
 
@@ -646,6 +652,20 @@ npx aisdlc verify licenses --sbom reports/sbom.cdx.json --notices THIRD_PARTY_NO
 
 # Run with Trivy or Syft in corporate CI runners
 npx aisdlc verify licenses --tool trivy --sbom reports/trivy-sbom.cdx.json
+```
+
+### 3. Vulnerability Threshold Evaluation (Gate 10)
+
+`aisdlc verify licenses` includes automated vulnerability detection from CycloneDX SBOMs or Trivy integrations:
+- Evaluates CVE/GHSA alerts against configurable thresholds (`--vuln`, `--vuln-max-critical <n>`, `--vuln-max-high <n>`).
+- Blocks build pipelines when unmitigated critical or high vulnerabilities exceed defined thresholds.
+
+### 4. Software Supply Chain Provenance (SLSA v1.0 & Sigstore Cosign)
+
+AI-SDLC automates release integrity across every package published to npm:
+- **NPM Provenance**: Automated `--provenance` attestation linking packages directly to source GitHub workflows via OIDC.
+- **Keyless Sigstore Cosign Signing**: Release distribution tarballs are signed keylessly with Cosign bundles (`.tgz.bundle`).
+- **SLSA v1.0 Build Attestation**: GitHub Actions workflow generates cryptographic SLSA build provenance attestations via `actions/attest-build-provenance`.
 ```
 
 ---
@@ -666,10 +686,11 @@ Scans the repository for credentials, API keys, tokens, or private certificates 
 - **Gitleaks Integration (`--gitleaks`)**:
   - Delegates to official `gitleaks` binary if installed, with graceful fallback.
 - **Secure Masking**: Secrets are never output in plain text (`AKIA****************`).
-- **Controlled Suppressions**: Inline comments allow explicit test mocks:
+- **Controlled & Audited Suppressions**: Inline comments allow explicit test mocks with mandatory structured audit metadata (`rule`, `reason`, `expires`, `approved-by`):
   ```typescript
-  const testPlaceholder = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // ai-sdlc:allow-secret
+  const testPlaceholder = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // ai-sdlc:allow-secret rule="secret-github-token" reason="Unit test fixture" expires="2026-12-31" approved-by="sec-team"
   ```
+- **Suppression Audit**: Exceptions are validated via `npx aisdlc verify security --audit-suppressions` and compiled into `reports/SUPPRESSIONS_AUDIT.md`. Informally formatted comments (such as bare `nosec` or missing fields) are strictly rejected.
 - **Exit Code 4**: Any detected secret exits with code 4, immediately failing CI.
 
 ### 2. Static Application Security Testing SAST (`verify sast`)
@@ -715,10 +736,10 @@ AI-SDLC generates a self-contained interactive web dashboard and dependency grap
 
 ### 1. Key Features
 - **PDaC / RTM Network Visualizer**:
-  - 4 layers: Product (Upstream: root Vision / Goals `ARCH-INTRO-*` with `identifies`, `envisions`, and `defines-goal` edges, plus `JRN-*`, `ACT-*`, `UC-*`, `BR-*`, and Privacy Assets/RoPA `DATA-ASSET-*`, `PRIV-ROPA-*`), Requirements (`FR-*`, `QR-*`, `SEC-REQ-*`, `PRIV-REQ-*`), Architecture (Midstream: `CMP-*`, `ADR-*`, `SEC-ENC-*`), and BDD Tests (Downstream: `.feature`).
+  - 4 layers: Product (Upstream: root Vision / Goals `ARCH-INTRO-*` with `identifies`, `envisions`, and `defines-goal` edges, plus `JRN-*`, `ACT-*`, `UC-*`, `BR-*`, Bounded Contexts `BC-*` with `encompasses` edges, and Privacy Assets/RoPA `DATA-ASSET-*`, `PRIV-ROPA-*`), Requirements (`FR-*`, `QR-*`, `SEC-REQ-*`, `PRIV-REQ-*`), Architecture (Midstream: `CMP-*`, `ADR-*`, `SEC-ENC-*`), and BDD Tests (Downstream: `.feature`).
   - Deterministic health status: Green (compliant) vs. Red (orphans or SHA-256 drift).
   - **Critical Path Highlighting**: Clicking any node illuminates its full upstream and downstream dependency chain.
-  - Live filters by layer, typology (including `Vision / Goals (ARCH-INTRO)`, `DATA-ASSET`, `PRIV-ROPA`, `PRIV-REQ`), and health, auto-focus search, and multiple layout algorithms.
+  - Live filters by layer, typology (including `Vision / Goals (ARCH-INTRO)`, `Bounded Contexts (BC-*)`, `DATA-ASSET`, `PRIV-ROPA`, `PRIV-REQ`), and health, auto-focus search, and multiple layout algorithms.
 - **360° Traceability Matrix Table**: Interactive table with bidirectional graph navigation.
 - **Quality & Autonomy Governance Metrics**: Executive cards (SEI MI, average CC, Release Gate verdict) and autonomy mode distribution.
 - **Telemetry and Historical KPIs**: Active branch metrics and historical trends tracking KLoC, bugs, DIR, and rework from `reports/releases/*.kpis.json`.
