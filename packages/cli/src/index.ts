@@ -254,7 +254,8 @@ verifyCommand
   .option('-e, --entropy <number>', 'Minimum Shannon entropy threshold (0.0 to 8.0)', '4.3')
   .option('-m, --min-severity <level>', 'Minimum severity for SAST failure: CRITICAL, HIGH, MEDIUM', 'HIGH')
   .option('--json', 'Emit verification results in structured JSON format')
-  .option('-F, --format <format>', 'Output format: text or json')
+  .option('-F, --format <format>', 'Output format: text, json, or sarif')
+  .option('-o, --output <path>', 'Output SARIF report file path (default: reports/security.sarif)')
   .action((opts) => {
     const passed = runVerifySecurity({
       root: opts.root,
@@ -266,6 +267,7 @@ verifyCommand
       minSeverity: opts.minSeverity,
       json: opts.json,
       format: opts.format,
+      output: opts.output,
     });
     process.exit(passed ? 0 : 4);
   });
@@ -279,7 +281,8 @@ verifyCommand
   .option('-g, --gitleaks', 'Delegate or contrast with native Gitleaks binary if available')
   .option('-e, --entropy <number>', 'Minimum Shannon entropy threshold (0.0 to 8.0)', '4.3')
   .option('--json', 'Emit verification results in structured JSON format')
-  .option('-F, --format <format>', 'Output format: text or json')
+  .option('-F, --format <format>', 'Output format: text, json, or sarif')
+  .option('-o, --output <path>', 'Output file path (e.g. reports/secrets.sarif)')
   .action((opts) => {
     const passed = runVerifySecrets({
       root: opts.root,
@@ -289,6 +292,7 @@ verifyCommand
       entropy: opts.entropy,
       json: opts.json,
       format: opts.format,
+      output: opts.output,
     });
     process.exit(passed ? 0 : 4);
   });
@@ -300,7 +304,8 @@ verifyCommand
   .option('-s, --semgrep', 'Delegate to Semgrep CLI if installed')
   .option('-m, --min-severity <level>', 'Minimum severity for failure: CRITICAL, HIGH, MEDIUM', 'HIGH')
   .option('--json', 'Emit verification results in structured JSON format')
-  .option('-F, --format <format>', 'Output format: text or json')
+  .option('-F, --format <format>', 'Output format: text, json, or sarif')
+  .option('-o, --output <path>', 'Output file path (e.g. reports/sast.sarif)')
   .action((opts) => {
     const passed = runVerifySast({
       root: opts.root,
@@ -308,6 +313,7 @@ verifyCommand
       minSeverity: opts.minSeverity,
       json: opts.json,
       format: opts.format,
+      output: opts.output,
     });
     process.exit(passed ? 0 : 1);
   });

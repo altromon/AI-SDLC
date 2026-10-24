@@ -20,6 +20,9 @@ import {
   verifyTestingCoverage,
   verifyTraceability,
   generateSuppressionsAuditReport,
+  generateSecuritySarifReport,
+  serializeSarifDocument,
+  writeSecuritySarifReport,
   type SecuritySuppression,
   type SastSeverity,
 } from '@aisdlc/core';
@@ -29,6 +32,7 @@ export interface VerifyBaseOptions {
   silent?: boolean;
   json?: boolean;
   format?: string;
+  output?: string;
 }
 
 export function isJsonOutput(options: VerifyBaseOptions = {}): boolean {
@@ -41,6 +45,15 @@ export function isJsonOutput(options: VerifyBaseOptions = {}): boolean {
   const env = process.env.AISDLC_FORMAT?.trim().toLowerCase() ||
               process.env.AISDLC_OUTPUT?.trim().toLowerCase();
   return env === 'json';
+}
+
+export function isSarifOutput(options: VerifyBaseOptions = {}): boolean {
+  if (options.format !== undefined) {
+    return options.format.trim().toLowerCase() === "sarif";
+  }
+  const env = process.env.AISDLC_FORMAT?.trim().toLowerCase() ||
+              process.env.AISDLC_OUTPUT?.trim().toLowerCase();
+  return env === "sarif";
 }
 
 export interface VerifyJsonPayload<TSummary = Record<string, unknown>, TViolation = unknown> {
@@ -854,14 +867,43 @@ function printSecretsConsole(result: ReturnType<typeof verifySecrets>): void {
   console.log(result.success ? pc.green('\n✔ Secrets Detection COMPLIANT (0 Credential Leaks)\n') : pc.red('\n✖ Secrets Detection BLOCKED (Exit Code 4: Exposed Secret)\n'));
 }
 
+function emitSecretsSarif(result: ReturnType<typeof verifySecrets>, output?: string): void {
+  const doc = generateSecuritySarifReport({ secretsResult: result });
+  if (output) {
+    writeSecuritySarifReport(output, doc);
+  } else {
+    console.log(serializeSarifDocument(doc));
+  }
+}
+
+function handleSecretsOutput(
+  result: ReturnType<typeof verifySecrets>,
+  options: SecretVerifyCliOptions,
+  useSarif: boolean,
+  useJson: boolean
+): boolean {
+  if (useSarif || options.output) {
+    emitSecretsSarif(result, options.output);
+    return result.success;
+  }
+  if (useJson) {
+    emitSecretsJson(result);
+    return result.success;
+  }
+  if (!options.silent) {
+    printSecretsConsole(result);
+  }
+  return result.success;
+}
+
 export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
   const entropyThreshold = options.entropy !== undefined ? Number(options.entropy) : undefined;
   const useJson = isJsonOutput(options);
-  const isSilent = Boolean(options.silent || useJson);
+  const useSarif = isSarifOutput(options);
 
-  if (!isSilent) {
-    console.log(pc.bold(pc.cyan('\n🔐 [AI-SDLC] Verifying Deterministic Secrets and Credentials Detection (Gitleaks Gate)...')));
+  if (!options.silent && !useJson && !useSarif) {
+    console.log(pc.bold(pc.cyan("\n🔐 [AI-SDLC] Verifying Deterministic Secrets and Credentials Detection (Gitleaks Gate)...")));
   }
 
   const result = verifySecrets({
@@ -872,14 +914,7 @@ export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean 
     entropyThreshold,
   });
 
-  if (useJson) {
-    emitSecretsJson(result);
-    return result.success;
-  }
-  if (!options.silent) {
-    printSecretsConsole(result);
-  }
-  return result.success;
+  return handleSecretsOutput(result, options, useSarif, useJson);
 }
 
 export interface SastVerifyCliOptions extends VerifyBaseOptions {
@@ -921,21 +956,25 @@ function printSastConsole(result: ReturnType<typeof verifySast>): void {
   console.log(result.success ? pc.green('\n✔ SAST Analysis COMPLIANT (0 Critical Vulnerabilities)\n') : pc.red('\n✖ SAST Analysis BLOCKED (Vulnerabilities Detected)\n'));
 }
 
-export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
-  const rootDir = options.root || process.cwd();
-  const useJson = isJsonOutput(options);
-  const isSilent = Boolean(options.silent || useJson);
-
-  if (!isSilent) {
-    console.log(pc.bold(pc.cyan('\n🛡️  [AI-SDLC] Verifying Shift-Left SAST Security (Injections & OWASP Top 10)...')));
+function emitSastSarif(result: ReturnType<typeof verifySast>, output?: string): void {
+  const doc = generateSecuritySarifReport({ sastResult: result });
+  if (output) {
+    writeSecuritySarifReport(output, doc);
+  } else {
+    console.log(serializeSarifDocument(doc));
   }
+}
 
-  const result = verifySast({
-    rootDir,
-    semgrep: options.semgrep,
-    minSeverity: options.minSeverity as SastSeverity,
-  });
-
+function handleSastOutput(
+  result: ReturnType<typeof verifySast>,
+  options: SastVerifyCliOptions,
+  useSarif: boolean,
+  useJson: boolean
+): boolean {
+  if (useSarif || options.output) {
+    emitSastSarif(result, options.output);
+    return result.success;
+  }
   if (useJson) {
     emitSastJson(result);
     return result.success;
@@ -944,6 +983,24 @@ export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
     printSastConsole(result);
   }
   return result.success;
+}
+
+export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
+  const rootDir = options.root || process.cwd();
+  const useJson = isJsonOutput(options);
+  const useSarif = isSarifOutput(options);
+
+  if (!options.silent && !useJson && !useSarif) {
+    console.log(pc.bold(pc.cyan("\n🛡️  [AI-SDLC] Verifying Shift-Left SAST Security (Injections & OWASP Top 10)...")));
+  }
+
+  const result = verifySast({
+    rootDir,
+    semgrep: options.semgrep,
+    minSeverity: options.minSeverity as SastSeverity,
+  });
+
+  return handleSastOutput(result, options, useSarif, useJson);
 }
 
 export interface SecurityVerifyCliOptions extends VerifyBaseOptions {
@@ -1037,6 +1094,47 @@ function printSecurityConsoleSummary(silent: boolean | undefined, hasExpired: bo
   }
 }
 
+function persistSecuritySarif(
+  rootDir: string,
+  resultSecrets: ReturnType<typeof verifySecrets>,
+  resultSast: ReturnType<typeof verifySast>,
+  customOutput?: string
+): void {
+  const doc = generateSecuritySarifReport({
+    secretsResult: resultSecrets,
+    sastResult: resultSast,
+  });
+  const targetPath = customOutput || path.join(rootDir, "reports", "security.sarif");
+  writeSecuritySarifReport(targetPath, doc);
+}
+
+function handleSecurityOutput(
+  options: SecurityVerifyCliOptions,
+  resultSecrets: ReturnType<typeof verifySecrets>,
+  resultSast: ReturnType<typeof verifySast>,
+  isOk: boolean,
+  hasExpired: boolean
+): boolean {
+  if (isSarifOutput(options)) {
+    if (!options.output) {
+      const doc = generateSecuritySarifReport({
+        secretsResult: resultSecrets,
+        sastResult: resultSast,
+      });
+      console.log(serializeSarifDocument(doc));
+    }
+    return isOk;
+  }
+  if (isJsonOutput(options)) {
+    emitSecurityJson(resultSecrets, resultSast, isOk);
+    return isOk;
+  }
+  const okS = runVerifySecrets({ ...options, silent: options.silent });
+  const okA = runVerifySast({ ...options, silent: options.silent });
+  printSecurityConsoleSummary(options.silent, hasExpired);
+  return okS && okA && !hasExpired;
+}
+
 export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
   const { resultSecrets, resultSast } = executeSecurityVerifiers(rootDir, options);
@@ -1046,20 +1144,12 @@ export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boole
     ...(resultSast.suppressions || []),
   ];
   writeSuppressionsAuditReport(rootDir, allSuppressions);
+  persistSecuritySarif(rootDir, resultSecrets, resultSast, options.output);
 
-  const hasExpired = allSuppressions.some((s) => s.status === 'expired');
+  const hasExpired = allSuppressions.some((s) => s.status === "expired");
   const isOk = resultSecrets.success && resultSast.success && !hasExpired;
 
-  if (isJsonOutput(options)) {
-    emitSecurityJson(resultSecrets, resultSast, isOk);
-    return isOk;
-  }
-
-  const okS = runVerifySecrets({ ...options, silent: options.silent });
-  const okA = runVerifySast({ ...options, silent: options.silent });
-  printSecurityConsoleSummary(options.silent, hasExpired);
-
-  return okS && okA && !hasExpired;
+  return handleSecurityOutput(options, resultSecrets, resultSast, isOk, hasExpired);
 }
 
 function emitGherkinVerifyJson(result: ReturnType<typeof checkGherkinInSync>): void {
