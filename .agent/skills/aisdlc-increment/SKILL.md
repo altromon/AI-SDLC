@@ -25,7 +25,7 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 ### Step 2: SDD Change Scaffolding & Architectural Design (`agent-system-architect`)
 1. Scaffold the bounded change package and its cryptographic `handoff.yaml` sidecar (`HOF-*`) targeting **a single Use Case (`1 UC-* = 1 CHG-*`)** using MCP tool `sdd_change_new` (or CLI `npx aisdlc change new "<Title>" --from <UC-ID> --profile <patch|standard|critical>`).
 2. Use [`agent-system-architect`](../agent-system-architect/SKILL.md) to complete `specs/changes/active/<chg-id>/design.md` and `specs/architecture/CMP-*.md`:
-   - Define **Contract-First** shared interfaces/DTOs/schemas when spanning Frontend and Backend.
+   - Structure `CMP-*` and `design.md` around **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports) and define **Contract-First** shared interfaces/DTOs/schemas when spanning Frontend and Backend.
    - Map 100% of `handoff.yaml` requirements and components to atomic tasks (`TSK-*`) in `tasks.md` with explicit `autonomy-mode` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `HIGH_RISK_MANUAL`, `AMBIGUOUS`).
 3. Run `verify_governance` and `verify_friction` to validate task governance, 100% design/handoff scope coverage, and anti-monolith limits (`maxUseCasesPerChange = 1`).
 
@@ -45,7 +45,7 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 ### Step 5: Green & Refactor Phase — Surgical Implementation (`agent-developer`)
 1. Delegate to or adopt [`agent-developer`](../agent-developer/SKILL.md).
 2. Execute the **Mandatory 4-Step Implementation Order**:
-   - (1) Clean Architecture boundaries, (2) Inter-module interfaces first, (3) Concrete component implementation (zero fake-wiring; all 4 UI states `Loading`, `Empty`, `Error`, `Nominal`), (4) Exhaustive per-function unit tests in `tests/unit/` (Happy Path, Sad Path, Boundary, Null/Empty).
+   - (1) Modular & Hexagonal Architecture (Ports & Adapters) boundaries, (2) Inter-module interfaces/ports first, (3) Concrete component implementation (zero fake-wiring; all 4 UI states `Loading`, `Empty`, `Error`, `Nominal`), (4) Exhaustive per-function unit tests in `tests/unit/` (Happy Path, Sad Path, Boundary, Null/Empty).
 3. Verify any new dependency against `license-policy.yaml` via `verify_licenses` and PII handling against `privacy-policy.yaml` via `verify_privacy`.
 4. Run `sdd_check_fix` (`npx aisdlc check --fix`) and `verify_quality` (`npx aisdlc verify quality`) until Cyclomatic Complexity $\le 10$, Cognitive $\le 15$, Maintainability $\ge 50$, and Function Length $\le 40$ lines pass with zero violations.
 

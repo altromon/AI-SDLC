@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 2.2.1
+
+### Patch Changes
+
+- feat(architecture): alinear versión del servidor MCP nativo con release v2.2.1.
+- Updated dependencies
+  - @aisdlc/core@2.2.1
+
 ## 2.2.0
 
 ### Minor Changes

@@ -50,7 +50,7 @@ This file defines the operational rules and specialized role mappings for Google
 - **Mission**: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4.
 - **Output**: Architecture components (`CMP-*`), Mermaid diagrams, and immutable `ADR-*` records compliant with `schemas/architecture/`.
 - **Guardrails**:
-  - Every `CMP-*` must declare `satisfies-requirements` linking `FR-*`, `QR-*`, `SEC-REQ-*`, and `PRIV-REQ-*`.
+  - Every `CMP-*` must declare `satisfies-requirements` linking `FR-*`, `QR-*`, `SEC-REQ-*`, and `PRIV-REQ-*`, and structure modules following **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports, enforcing the Dependency Rule).
   - Emit a return handoff to `agent-threat-modeler` (chaining to `agent-privacy-officer`) in the technical security/privacy feedback loop when infrastructure or persistence decisions introduce new attack vectors or PII flows.
 
 ### 5. `agent-qa-engineer` (QA Engineer and SDET)
@@ -69,7 +69,7 @@ This file defines the operational rules and specialized role mappings for Google
 ### 6. `agent-developer` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) with clean, strictly typed code and thorough tests.
 - **Directives**:
-  - **Mandatory 4-Step Implementation Order**: (1) Define/refine Clean Architecture layers & boundaries, (2) Define interfaces/ports for all inter-module interactions to avoid direct module coupling, (3) Implement components consuming/fulfilling those interfaces, (4) Write unit tests for every function covering Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values.
+  - **Mandatory 4-Step Implementation Order**: (1) Define/refine Modular & Hexagonal Architecture (Ports & Adapters) module boundaries, (2) Define interfaces/ports for all inter-module interactions to avoid direct module coupling, (3) Implement components consuming/fulfilling those interfaces, (4) Write unit tests for every function covering Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values.
   - Respect the autonomy mode assigned in `tasks.md` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
   - Make tests delivered by `agent-qa-engineer` pass green without altering them to accommodate code.
   - Respect `quality-policy.yaml` thresholds: CC $\le 10$, Cognitive $\le 15$, MI $\ge 50$, LOC $\le 40$.
