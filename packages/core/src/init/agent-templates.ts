@@ -97,6 +97,7 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
 
 ## Operational Directives & Guardrails
 - Decompose the system into building blocks \`CMP-*\` ensuring each component declares which use cases \`UC-*\` it implements and which requirements (\`FR-*\`, \`QR-*\`, \`SEC-REQ-*\`, \`PRIV-REQ-*\`) it fulfills under \`satisfies-requirements\`.
+- **Modular & Hexagonal Architecture (Ports & Adapters)**: Structure building blocks (\`CMP-*\`, Level 2/3 of arc42) around Bounded Contexts (\`BC-*\`) and Vertical Slices (\`UC-*\`) following Hexagonal Architecture (Ports & Adapters). Separate the pure Domain/Application Core from Inbound/Driving Ports (API, CLI, UI handlers) and Outbound/Driven Ports (persistence, queues, external SDKs/LLMs), enforcing the Dependency Rule (dependencies point strictly inward toward the Core; avoid speculative empty layers per YAGNI and respect existing \`ADR-*\` architecture in brownfield repos).
 - **Contract-First Full-Stack Integration**: Whenever a feature or change spans Frontend (UI) and Backend (API/services), define an explicit shared typed contract (Zod schemas, shared TypeScript DTOs, or OpenAPI specification) in \`design.md\` before implementation so both layers compile against a single source of truth.
 - Generate interaction and sequence diagrams in native Mermaid syntax.
 - Document critical technological decisions using immutable \`ADR-*\` records conforming to \`schemas/architecture/adr.schema.json\`.
@@ -146,7 +147,7 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
 
 ## Mandatory 4-Step Implementation Order
 Execute every implementation task following this strict sequential order:
-1. **Clean Architecture Definition / Redefinition**: Define or refine the module/layer architecture adhering to Clean Architecture patterns (Domain/Entities, Application/Use Cases, Interface Adapters, Frameworks/Drivers), strictly enforcing the Dependency Rule (dependencies point inward toward the domain).
+1. **Modular & Hexagonal Architecture (Ports & Adapters) Definition / Redefinition**: Define or refine the module structure organized by Bounded Context (\`BC-*\`) or Vertical Slice (\`UC-*\`) adhering to Hexagonal Architecture (Ports & Adapters — isolating the pure Domain/Application Core from Inbound/Outbound Adapters and Frameworks/Drivers), strictly enforcing the Dependency Rule (dependencies point inward toward the Core; avoid speculative empty layers per YAGNI).
 2. **Inter-Module Interfaces First**: Define explicit interfaces/ports (contracts, DTOs, types) for all interactions across module boundaries before writing concrete logic, avoiding direct coupling between modules.
 3. **Component Implementation**: Implement the concrete components, use cases, and adapters that implement and consume the defined interfaces.
 4. **Exhaustive Per-Function Unit Testing**: Write unit tests for every function in \`tests/unit/\`, always verifying:
@@ -407,7 +408,7 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 ### Step 2: SDD Change Scaffolding & Architectural Design (\`agent-system-architect\`)
 1. Scaffold the bounded change package and its cryptographic \`handoff.yaml\` sidecar (\`HOF-*\`) targeting **a single Use Case (\`1 UC-* = 1 CHG-*\`)** using MCP tool \`sdd_change_new\` (or CLI \`npx aisdlc change new "<Title>" --from <UC-ID> --profile <patch|standard|critical>\`).
 2. Use [\`agent-system-architect\`](../agent-system-architect/SKILL.md) to complete \`specs/changes/active/<chg-id>/design.md\` and \`specs/architecture/CMP-*.md\`:
-   - Define **Contract-First** shared interfaces/DTOs/schemas when spanning Frontend and Backend.
+   - Structure \`CMP-*\` and \`design.md\` around **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports) and define **Contract-First** shared interfaces/DTOs/schemas when spanning Frontend and Backend.
    - Map 100% of \`handoff.yaml\` requirements and components to atomic tasks (\`TSK-*\`) in \`tasks.md\` with explicit \`autonomy-mode\` (\`AUTONOMOUS\`, \`HUMAN_REVIEW_PLAN\`, \`HIGH_RISK_MANUAL\`, \`AMBIGUOUS\`).
 3. Run \`verify_governance\` and \`verify_friction\` to validate task governance, 100% design/handoff scope coverage, and anti-monolith limits (\`maxUseCasesPerChange = 1\`).
 
@@ -427,7 +428,7 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 ### Step 5: Green & Refactor Phase — Surgical Implementation (\`agent-developer\`)
 1. Delegate to or adopt [\`agent-developer\`](../agent-developer/SKILL.md).
 2. Execute the **Mandatory 4-Step Implementation Order**:
-   - (1) Clean Architecture boundaries, (2) Inter-module interfaces first, (3) Concrete component implementation (zero fake-wiring; all 4 UI states \`Loading\`, \`Empty\`, \`Error\`, \`Nominal\`), (4) Exhaustive per-function unit tests in \`tests/unit/\` (Happy Path, Sad Path, Boundary, Null/Empty).
+   - (1) Modular & Hexagonal Architecture (Ports & Adapters) boundaries, (2) Inter-module interfaces/ports first, (3) Concrete component implementation (zero fake-wiring; all 4 UI states \`Loading\`, \`Empty\`, \`Error\`, \`Nominal\`), (4) Exhaustive per-function unit tests in \`tests/unit/\` (Happy Path, Sad Path, Boundary, Null/Empty).
 3. Verify any new dependency against \`license-policy.yaml\` via \`verify_licenses\` and PII handling against \`privacy-policy.yaml\` via \`verify_privacy\`.
 4. Run \`sdd_check_fix\` (\`npx aisdlc check --fix\`) and \`verify_quality\` (\`npx aisdlc verify quality\`) until Cyclomatic Complexity $\\le 10$, Cognitive $\\le 15$, Maintainability $\\ge 50$, and Function Length $\\le 40$ lines pass with zero violations.
 
@@ -509,7 +510,7 @@ This file defines the operational rules and specialized role mappings for Google
 - **Mission**: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4.
 - **Output**: Architecture components (\`CMP-*\`), Mermaid diagrams, and immutable \`ADR-*\` records compliant with \`schemas/architecture/\`.
 - **Guardrails**:
-  - Every \`CMP-*\` must declare \`satisfies-requirements\` linking \`FR-*\`, \`QR-*\`, \`SEC-REQ-*\`, and \`PRIV-REQ-*\`.
+  - Every \`CMP-*\` must declare \`satisfies-requirements\` linking \`FR-*\`, \`QR-*\`, \`SEC-REQ-*\`, and \`PRIV-REQ-*\`, and structure modules following **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports, enforcing the Dependency Rule).
   - Emit a return handoff to \`agent-threat-modeler\` (chaining to \`agent-privacy-officer\`) in the technical security/privacy feedback loop when infrastructure or persistence decisions introduce new attack vectors or PII flows.
 
 ### 5. \`agent-qa-engineer\` (QA Engineer and SDET)
@@ -528,7 +529,7 @@ This file defines the operational rules and specialized role mappings for Google
 ### 6. \`agent-developer\` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (\`tasks.md\`) with clean, strictly typed code and thorough tests.
 - **Directives**:
-  - **Mandatory 4-Step Implementation Order**: (1) Define/refine Clean Architecture layers & boundaries, (2) Define interfaces/ports for all inter-module interactions to avoid direct module coupling, (3) Implement components consuming/fulfilling those interfaces, (4) Write unit tests for every function covering Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values.
+  - **Mandatory 4-Step Implementation Order**: (1) Define/refine Modular & Hexagonal Architecture (Ports & Adapters) module boundaries, (2) Define interfaces/ports for all inter-module interactions to avoid direct module coupling, (3) Implement components consuming/fulfilling those interfaces, (4) Write unit tests for every function covering Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values.
   - Respect the autonomy mode assigned in \`tasks.md\` (\`AUTONOMOUS\`, \`HUMAN_REVIEW_PLAN\`, \`AMBIGUOUS\`, \`HIGH_RISK_MANUAL\`).
   - Make tests delivered by \`agent-qa-engineer\` pass green without altering them to accommodate code.
   - Respect \`quality-policy.yaml\` thresholds: CC $\\le 10$, Cognitive $\\le 15$, MI $\\ge 50$, LOC $\\le 40$.
@@ -701,8 +702,8 @@ Canonical Reference: [\`process/09_agent_protocols.md\`](process/09_agent_protoc
 - **Function Length**: $\\le 40$ lines (warning if $> 30$).
 - If a function exceeds these limits, decompose logic into cohesive helper functions before completing the task.
 
-## 2. TDD Methodology, Clean Architecture & Unit Testing
-- **Mandatory 4-Step Implementation Order**: (1) Define/refine Clean Architecture layers & boundaries, (2) Define interfaces/ports for all inter-module interactions to avoid direct module coupling, (3) Implement components consuming/fulfilling those interfaces, (4) Write unit tests for every function covering Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values.
+## 2. TDD Methodology, Modular & Hexagonal Architecture (Ports & Adapters) & Unit Testing
+- **Mandatory 4-Step Implementation Order**: (1) Define/refine Modular & Hexagonal Architecture (Ports & Adapters) module boundaries, (2) Define interfaces/ports for all inter-module interactions to avoid direct module coupling, (3) Implement components consuming/fulfilling those interfaces, (4) Write unit tests for every function covering Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values.
 - Apply Test-Driven Development: generate unit tests before or alongside component logic.
 - Tag tests linked to requirements with header comments citing the ID (\`FR-*\`, \`SEC-REQ-*\`, or \`PRIV-REQ-*\`) to enable reverse traceability.
 - Suppressing types (\`any\`), linter rules (\`eslint-disable\`), or unit tests to force pipeline passage is prohibited.
@@ -777,7 +778,7 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ### 4. \`agent-system-architect\` (System Architect)
 - **Mission**: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4 (\`CMP-*\`, Mermaid diagrams, \`ADR-*\`).
-- **Guardrails**: Declare \`satisfies-requirements\` on every \`CMP-*\` (including \`PRIV-REQ-*\`), instantiate mandatory building block \`CMP-OBSERVABILITY\` (Level 2/3) alongside Section 8 and an ADR for runtime telemetry, and trigger the technical security/privacy feedback loop toward \`agent-threat-modeler\` ➔ \`agent-privacy-officer\` when infrastructure decisions introduce new attack vectors or PII flows.
+- **Guardrails**: Declare \`satisfies-requirements\` on every \`CMP-*\` (including \`PRIV-REQ-*\`), structure components following **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports), instantiate mandatory building block \`CMP-OBSERVABILITY\` (Level 2/3) alongside Section 8 and an ADR for runtime telemetry, and trigger the technical security/privacy feedback loop toward \`agent-threat-modeler\` ➔ \`agent-privacy-officer\` when infrastructure decisions introduce new attack vectors or PII flows.
 
 ### 5. \`agent-qa-engineer\` (QA Engineer and SDET)
 - **Mission**: Translate approved requirements (\`FR-*\`, \`SEC-REQ-*\`, \`PRIV-REQ-*\`, \`QR-*\`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before \`agent-developer\` writes production code.
@@ -785,7 +786,7 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ### 6. \`agent-developer\` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (\`tasks.md\`) with clean, strictly typed code and thorough tests.
-- **Directives**: Execute the mandatory 4-step order: (1) Clean Architecture definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by \`agent-qa-engineer\` pass green. Run \`pnpm run check:fix\` and \`pnpm run verify:all\`.
+- **Directives**: Execute the mandatory 4-step order: (1) Modular & Hexagonal Architecture (Ports & Adapters) definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by \`agent-qa-engineer\` pass green. Run \`pnpm run check:fix\` and \`pnpm run verify:all\`.
 
 ### 7. \`agent-security-auditor\` (Adversarial Code Auditor)
 - **Mission**: Examine Pull Requests for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws as part of the Pre-Merge Audit Triad.

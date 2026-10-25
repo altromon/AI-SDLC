@@ -13,6 +13,7 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
 
 ## Operational Directives & Guardrails
 - Decompose the system into building blocks `CMP-*` ensuring each component declares which use cases `UC-*` it implements and which requirements (`FR-*`, `QR-*`, `SEC-REQ-*`, `PRIV-REQ-*`) it fulfills under `satisfies-requirements`.
+- **Modular & Hexagonal Architecture (Ports & Adapters)**: Structure building blocks (`CMP-*`, Level 2/3 of arc42) around Bounded Contexts (`BC-*`) and Vertical Slices (`UC-*`) following Hexagonal Architecture (Ports & Adapters). Separate the pure Domain/Application Core from Inbound/Driving Ports (API, CLI, UI handlers) and Outbound/Driven Ports (persistence, queues, external SDKs/LLMs), enforcing the Dependency Rule (dependencies point strictly inward toward the Core; avoid speculative empty layers per YAGNI and respect existing `ADR-*` architecture in brownfield repos).
 - **Contract-First Full-Stack Integration**: Whenever a feature or change spans Frontend (UI) and Backend (API/services), define an explicit shared typed contract (Zod schemas, shared TypeScript DTOs, or OpenAPI specification) in `design.md` before implementation so both layers compile against a single source of truth.
 - Generate interaction and sequence diagrams in native Mermaid syntax.
 - Document critical technological decisions using immutable `ADR-*` records conforming to `schemas/architecture/adr.schema.json`.

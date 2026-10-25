@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 2.2.1
+
+### Patch Changes
+
+- feat(architecture): unificar directivas de `agent-system-architect` y `agent-developer` en Arquitectura Modular & Hexagonal (Ports & Adapters) con cortes verticales (`UC-*`) y Bounded Contexts (`BC-*`).
+
 ## 2.2.0
 
 ### Minor Changes

@@ -14,7 +14,7 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
 
 ## Mandatory 4-Step Implementation Order
 Execute every implementation task following this strict sequential order:
-1. **Clean Architecture Definition / Redefinition**: Define or refine the module/layer architecture adhering to Clean Architecture patterns (Domain/Entities, Application/Use Cases, Interface Adapters, Frameworks/Drivers), strictly enforcing the Dependency Rule (dependencies point inward toward the domain).
+1. **Modular & Hexagonal Architecture (Ports & Adapters) Definition / Redefinition**: Define or refine the module structure organized by Bounded Context (`BC-*`) or Vertical Slice (`UC-*`) adhering to Hexagonal Architecture (Ports & Adapters — isolating the pure Domain/Application Core from Inbound/Outbound Adapters and Frameworks/Drivers), strictly enforcing the Dependency Rule (dependencies point inward toward the Core; avoid speculative empty layers per YAGNI).
 2. **Inter-Module Interfaces First**: Define explicit interfaces/ports (contracts, DTOs, types) for all interactions across module boundaries before writing concrete logic, avoiding direct coupling between modules.
 3. **Component Implementation**: Implement the concrete components, use cases, and adapters that implement and consume the defined interfaces.
 4. **Exhaustive Per-Function Unit Testing**: Write unit tests for every function in `tests/unit/`, always verifying:

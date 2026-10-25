@@ -15,8 +15,8 @@ Canonical Reference: [`process/09_agent_protocols.md`](process/09_agent_protocol
 - **Function Length**: $\le 40$ lines (warning if $> 30$).
 - If a function exceeds these limits, decompose logic into cohesive helper functions before completing the task.
 
-## 2. TDD Methodology, Clean Architecture & Unit Testing
-- **Mandatory 4-Step Implementation Order**: (1) Define/refine Clean Architecture layers & boundaries, (2) Define interfaces/ports for all inter-module interactions to avoid direct module coupling, (3) Implement components consuming/fulfilling those interfaces, (4) Write unit tests for every function covering Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values.
+## 2. TDD Methodology, Modular & Hexagonal Architecture (Ports & Adapters) & Unit Testing
+- **Mandatory 4-Step Implementation Order**: (1) Define/refine Modular & Hexagonal Architecture (Ports & Adapters) module boundaries, (2) Define interfaces/ports for all inter-module interactions to avoid direct module coupling, (3) Implement components consuming/fulfilling those interfaces, (4) Write unit tests for every function covering Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values.
 - Apply Test-Driven Development: generate unit tests before or alongside component logic.
 - Tag tests linked to requirements with header comments citing the ID (`FR-*`, `SEC-REQ-*`, or `PRIV-REQ-*`) to enable reverse traceability.
 - Suppressing types (`any`), linter rules (`eslint-disable`), or unit tests to force pipeline passage is prohibited.

@@ -36,13 +36,13 @@ Human PO ──► agent-product-analyst ──► agent-expert-user (Design MVP
                                     agent-privacy-officer (LINDDUN / GDPR: DATA-ASSET-*, PRIV-ROPA-*, PRIV-REQ-*)
                                               │         ▲
                                               ▼         │ (Technical Security & Privacy Feedback Loop)
-                                    agent-system-architect (arc42 / NAF v4: CMP-*, ADR-*, design.md)
+                                    agent-system-architect (arc42 / NAF v4 + Hexagonal Ports & Adapters: CMP-*, ADR-*, design.md)
                                               │
                                               ▼
                                      agent-qa-engineer (Failing BDD / E2E / Unit Tests in RED)
                                               │
                                               ▼
-                                      agent-developer (Clean Architecture + TDD GREEN)
+                                      agent-developer (Modular & Hexagonal Ports & Adapters + TDD GREEN)
                                               │
                                               ▼
                                     agent-expert-user (Post-Development Functional Validation)

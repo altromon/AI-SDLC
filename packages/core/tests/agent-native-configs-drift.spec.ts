@@ -241,7 +241,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(reviewerSkill).toMatch(/Fake-Wiring/i);
   });
 
-  it('verifies agent-developer enforces the mandatory 4-step Clean Architecture & exhaustive unit testing order across protocols and agent configs', () => {
+  it('verifies agent-system-architect and agent-developer enforce Modular & Hexagonal Architecture (Ports & Adapters) & exhaustive unit testing order across protocols and agent configs', () => {
     const filesToCheck = [
       canonicalProtocolPath,
       path.join(rootDir, '.agent/skills/agent-developer/SKILL.md'),
@@ -256,12 +256,23 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
 
     for (const filePath of filesToCheck) {
       const content = fs.readFileSync(filePath, 'utf-8');
-      expect(content, `${filePath} must enforce Clean Architecture step`).toMatch(/Clean Architecture/i);
+      expect(content, `${filePath} must enforce Modular & Hexagonal Architecture (Ports & Adapters) step`).toMatch(/Hexagonal.*Ports & Adapters/i);
       expect(content, `${filePath} must enforce inter-module interfaces step`).toMatch(/interfaces/i);
       expect(content, `${filePath} must enforce Happy Path testing`).toMatch(/Happy Path/i);
       expect(content, `${filePath} must enforce Sad Path testing`).toMatch(/Sad Path/i);
       expect(content, `${filePath} must enforce Boundary Values testing`).toMatch(/Boundary Values/i);
       expect(content, `${filePath} must enforce Null and Empty values testing`).toMatch(/Null.*Empty/is);
+    }
+    const archFiles = [
+      path.join(rootDir, '.agent/skills/agent-system-architect/SKILL.md'),
+      path.join(rootDir, '.agent/agents/agent-system-architect.md'),
+      path.join(rootDir, '.claude/agents/agent-system-architect.md'),
+      path.join(rootDir, '.cursor/rules/agent-system-architect.mdc'),
+      path.join(rootDir, '.github/agents/agent-system-architect.agent.md'),
+    ];
+    for (const filePath of archFiles) {
+      const archContent = fs.readFileSync(filePath, 'utf-8');
+      expect(archContent, `${filePath} must enforce Modular & Hexagonal Architecture (Ports & Adapters)`).toMatch(/Hexagonal.*Ports & Adapters/i);
     }
   });
 
