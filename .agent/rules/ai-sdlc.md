@@ -74,6 +74,8 @@ This file defines the operational rules and specialized role mappings for Google
   - Make tests delivered by `agent-qa-engineer` pass green without altering them to accommodate code.
   - Respect `quality-policy.yaml` thresholds: CC $\le 10$, Cognitive $\le 15$, MI $\ge 50$, LOC $\le 40$.
   - Run pre-flight with auto-fix: `pnpm run check:fix` and full verification: `pnpm run verify:all`.
+  - **Mandatory Regression Verification**: Never declare build, typecheck, or bug fixes complete without executing the relevant automated test suite (`pnpm test`, `dotnet test`) and confirming zero regressions.
+  - **Global Styles Protection**: When touching or refactoring frontend views, verify that global stylesheet/asset imports remain intact and that layouts suffer no visual disruption.
   - Upon completing green implementation, suggest handoff to `agent-expert-user` for post-development functional validation prior to security and privacy audit.
 
 ### 7. `agent-security-auditor` (Adversarial Code Auditor)
@@ -110,6 +112,8 @@ This file defines the operational rules and specialized role mappings for Google
   - **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying or refactoring application source code files (`src/`, `packages/*/src/`). Your responsibility is the pipeline and scaffolding, never application business logic.
   - Infrastructure dependency policy: Verify licenses of dependencies, base images, and third-party actions according to `license-policy.yaml`.
   - Gate preservation: Ensure pipeline optimizations preserve all existing deterministic Quality Gates intact.
+  - **Cross-Workflow Audit**: When fixing any CI/CD or configuration defect detected in a PR, search all `.github/workflows/*.yml` for the same pattern (including release, post-merge, and publishing pipelines) before declaring the fix complete.
+  - **Remote Verification**: Creating a PR (`gh pr create`) does not equal success; actively verify that remote checks pass (`gh pr checks`).
 
 ---
 

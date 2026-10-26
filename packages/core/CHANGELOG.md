@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 2.2.2
+
+### Patch Changes
+
+- feat(governance): enforzar reglas de regresión obligatoria, protección de estilos y verificación cruzada de workflows CI/CD en agentes.
+
 ## 2.2.1
 
 ### Patch Changes

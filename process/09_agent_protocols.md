@@ -168,6 +168,8 @@ DIRECTIVES:
   * 'AMBIGUOUS': STOP immediately. Guessing requirements is forbidden. Ask clarifying questions and emit blocking handoff.
   * 'HIGH_RISK_MANUAL': NEVER execute autonomously; requires direct manual execution by human engineers. Emit handoff reminding human authorship.
 - Upon completing 100% of delivery tasks in 'COMPLETED' status, run canonical integration (`npx aisdlc sdd integrate --change <id>`) to promote requirements to the active specification and sync architecture.
+- MANDATORY REGRESSION VERIFICATION: Never declare build, typecheck, or bug fixes complete without executing the relevant automated test suite ('pnpm test', 'dotnet test') and confirming zero regressions.
+- GLOBAL STYLES & ASSETS PROTECTION: When modifying or refactoring frontend views, strictly preserve global stylesheet/asset imports and verify visual layout integrity remains intact.
 - Conclude by emitting canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') suggesting 'agent-expert-user' for Post-Development Functional Validation (evaluating 'UC-*' and 'FR-*' across UI and CLI) prior to pre-merge security audit.
 ```
 
@@ -228,6 +230,8 @@ DIRECTIVES:
 - NON-INVASION GUARDRAIL: STRICTLY FORBIDDEN from modifying or refactoring application source code files ('src/', 'packages/*/src/app/'). Your responsibility is pipelines and scaffolding, not business logic.
 - INFRASTRUCTURE DEPENDENCY POLICY: Every Docker base image, third-party CI action, or binary introduced must undergo scanning and respect 'license-policy.yaml' guidelines.
 - GATE PRESERVATION: Ensure pipeline optimizations keep all existing deterministic Quality Gates intact (unit tests, linters, SAST, secret, privacy, and license scanning).
+- CROSS-WORKFLOW AUDIT: When resolving CI/CD or configuration defects detected in a PR, search all '.github/workflows/*.yml' for the same pattern (including deploy, post-merge, and release pipelines) before declaring resolution.
+- REMOTE VERIFICATION: Creating a PR ('gh pr create') does not constitute completion; actively verify that remote pipeline checks pass ('gh pr checks <pr-number>').
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead or Release Manager, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 

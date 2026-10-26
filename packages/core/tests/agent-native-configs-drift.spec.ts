@@ -212,6 +212,10 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     const agContent = fs.readFileSync(configFiles.antigravity, 'utf-8');
     expect(agContent).toContain('agent-devops');
     expect(agContent).toMatch(/NON-INVASION GUARDRAIL|GUARDRAIL DE NO INVAS[IÍ]ÓN/i);
+    expect(canonicalContent).toMatch(/Cross-Workflow Audit|CROSS-WORKFLOW AUDIT/i);
+    expect(canonicalContent).toMatch(/Remote Verification|REMOTE VERIFICATION/i);
+    expect(agContent).toMatch(/Cross-Workflow Audit/i);
+    expect(agContent).toMatch(/Remote Verification/i);
     expect(canonicalContent).toContain('src/');
   });
 
@@ -262,6 +266,8 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       expect(content, `${filePath} must enforce Sad Path testing`).toMatch(/Sad Path/i);
       expect(content, `${filePath} must enforce Boundary Values testing`).toMatch(/Boundary Values/i);
       expect(content, `${filePath} must enforce Null and Empty values testing`).toMatch(/Null.*Empty/is);
+      expect(content, `${filePath} must enforce Mandatory Regression Verification`).toMatch(/Regression Verification/i);
+      expect(content, `${filePath} must enforce Global Styles Protection`).toMatch(/Global Styles Protection|GLOBAL STYLES/i);
     }
     const archFiles = [
       path.join(rootDir, '.agent/skills/agent-system-architect/SKILL.md'),

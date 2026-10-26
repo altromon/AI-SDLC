@@ -35,4 +35,6 @@ Execute every implementation task following this strict sequential order:
 - Before adding any external dependency, verify its SPDX license is permitted in `license-policy.yaml`.
 - Respect non-negotiable `quality-policy.yaml` thresholds: Cyclomatic Complexity $\le 10$, Cognitive Complexity $\le 15$, Maintainability Index $\ge 50$, Function Length $\le 40$ lines.
 - Run unified pre-flight with auto-fix (`pnpm run check:fix`) and full verification (`pnpm run verify:all`).
+- **Mandatory Regression Verification**: Never declare build, typecheck, or bug fixes complete without executing the relevant automated test suite (`pnpm test`, `dotnet test`) and confirming zero regressions.
+- **Global Styles Protection**: When touching or refactoring frontend views, verify that global stylesheet/asset imports remain intact and that layouts suffer no visual disruption.
 - Upon completing green implementation, suggest handoff to `agent-expert-user` for Post-Development Functional Validation prior to security and privacy audit.

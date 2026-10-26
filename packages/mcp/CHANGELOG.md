@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 2.2.2
+
+### Patch Changes
+
+- feat(governance): bump de versión patch para alineación monorepo y reglas de verificación.
+- Updated dependencies
+  - @aisdlc/core@2.2.2
+
 ## 2.2.1
 
 ### Patch Changes
