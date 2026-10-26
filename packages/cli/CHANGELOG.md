@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 2.2.2
+
+### Patch Changes
+
+- feat(governance): actualizar plantillas y directivas nativas de agentes con verificación de regresión y CI/CD cruzado.
+- Updated dependencies
+  - @aisdlc/core@2.2.2
+  - @aisdlc/mcp@2.2.2
+
 ## 2.2.1
 
 ### Patch Changes

@@ -67,7 +67,7 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ### 6. `agent-developer` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) with clean, strictly typed code and thorough tests.
-- **Directives**: Execute the mandatory 4-step order: (1) Modular & Hexagonal Architecture (Ports & Adapters) definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by `agent-qa-engineer` pass green. Run `pnpm run check:fix` and `pnpm run verify:all`.
+- **Directives**: Execute the mandatory 4-step order: (1) Modular & Hexagonal Architecture (Ports & Adapters) definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by `agent-qa-engineer` pass green. Run `pnpm run check:fix` and `pnpm run verify:all`. Enforce Mandatory Regression Verification (never declare complete without automated tests) and Global Styles Protection (preserve assets/styles without layout breakage).
 
 ### 7. `agent-security-auditor` (Adversarial Code Auditor)
 - **Mission**: Examine Pull Requests for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws as part of the Pre-Merge Audit Triad.
@@ -86,7 +86,7 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ### 11. `agent-devops` (Automation and Infrastructure Engineer)
 - **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts.
-- **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying application source code (`src/`, `packages/*/src/`).
+- **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying application source code (`src/`, `packages/*/src/`). Enforce Cross-Workflow Audit across `.github/workflows/*.yml` and Remote Verification of PR checks (`gh pr checks`).
 
 ---
 
