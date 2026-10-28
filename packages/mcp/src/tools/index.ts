@@ -645,7 +645,7 @@ function registerKpiReleaseTool(server: McpServer, baseRoot: string): void {
   server.tool('kpi_release', 'Calculates consolidated Release KPIs.', KPI_RELEASE_SCHEMA, async (params) => {
     try {
       const root = resolveRoot(params.root, baseRoot);
-      const report = aggregateReleaseKpis(params.release, params.base || 'main', { cwd: root });
+      const report = aggregateReleaseKpis(params.release, params.base, { cwd: root });
       let filesWritten: { markdownPath: string; jsonPath: string } | undefined;
       if (params.writeReports || params.outputDir) {
         filesWritten = writeReleaseKpiReport(report, {
