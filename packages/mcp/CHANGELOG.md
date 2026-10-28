@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 2.2.3
+
+### Patch Changes
+
+- fix(kpi): permitir resolución autónoma de baseBranch en tool MCP `kpi_release`.
+- Updated dependencies
+  - @aisdlc/core@2.2.3
+
 ## 2.2.2
 
 ### Patch Changes

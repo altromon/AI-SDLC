@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 2.2.3
+
+### Patch Changes
+
+- fix(kpi): resolver automáticamente línea base ante releases sin base explícita y mostrar baseline en logs.
+- Updated dependencies
+  - @aisdlc/core@2.2.3
+  - @aisdlc/mcp@2.2.3
+
 ## 2.2.2
 
 ### Patch Changes
