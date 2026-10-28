@@ -9,6 +9,7 @@ import {
   formatPrKpiMarkdown,
   injectKpisIntoPrBody,
   aggregateReleaseKpis,
+  resolveReleaseBaseBranch,
   writeReleaseKpiReport,
 } from '@aisdlc/core';
 
@@ -92,7 +93,7 @@ function executeKpiReleaseReport(
     rootDir,
   });
   if (report.totalCommits === 0) {
-    console.warn(pc.yellow(`\n⚠ [WARNING] No commits found between '${baseBranch}' and '${release}'.`));
+    console.warn(pc.yellow(`\n⚠ [WARNING] No commits found between '${report.baseBranch}' and '${report.releaseBranch}'.`));
   }
   printReleaseKpiSummary(report, markdownPath, jsonPath);
 }
@@ -103,11 +104,11 @@ export function runKpiRelease(options: KpiReleaseCliOptions): boolean {
     return false;
   }
 
-  const baseBranch = options.base || 'main';
   const rootDir = options.root || process.cwd();
+  const baseBranch = resolveReleaseBaseBranch(options.release, options.base, { cwd: rootDir });
 
   try {
-    console.log(pc.cyan(`\n📊 [AI-SDLC Release KPI] Consolidating metrics for '${pc.bold(options.release)}'...`));
+    console.log(pc.cyan(`\n📊 [AI-SDLC Release KPI] Consolidating metrics for '${pc.bold(options.release)}' (baseline: '${pc.bold(baseBranch)}')...`));
     if (options.json) {
       const report = aggregateReleaseKpis(options.release, baseBranch, { cwd: rootDir });
       console.log(JSON.stringify(report, null, 2));

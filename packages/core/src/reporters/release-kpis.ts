@@ -4,6 +4,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { execFileSync } from 'child_process';
 import { CommitKpiRecord, extractCommitKpisFromRange, resolveGitRef } from '../git/trailers.js';
 
 export interface ModelDefectStats {
@@ -163,16 +164,63 @@ function computeReworkRatios(totalTime: number, totalTokens: number, totalCost: 
 }
 
 /**
+ * Resolves an intelligent baseline for a release branch when not explicitly specified
+ * or when release and base branches collide (e.g. evaluating canonical 'main').
+ */
+export function resolveReleaseBaseBranch(
+  release: string,
+  explicitBase?: string,
+  options: { cwd?: string } = {}
+): string {
+  const cwd = options.cwd || process.cwd();
+  if (explicitBase && explicitBase !== release) {
+    return explicitBase;
+  }
+
+  // If the target release is not 'main'/'master', 'main' is the natural base
+  if (release !== 'main' && release !== 'master') {
+    return 'main';
+  }
+
+  // If evaluating 'main', try to resolve the previous tag
+  try {
+    const lastTag = execFileSync('git', ['describe', '--tags', '--abbrev=0', `${release}^`], {
+      cwd,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+    if (lastTag) return lastTag;
+  } catch {
+    // No previous tags reachable
+  }
+
+  // Fallback to initial root commit
+  try {
+    const rootSha = execFileSync('git', ['rev-list', '--max-parents=0', release], {
+      cwd,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim().split('\n')[0];
+    if (rootSha) return rootSha;
+  } catch {
+    // Git error fallback
+  }
+
+  return release;
+}
+
+/**
  * Aggregates all commits in a release branch relative to base (e.g. main..release/vX.Y.Z).
  */
 export function aggregateReleaseKpis(
   releaseBranch: string,
-  baseBranch: string = 'main',
+  baseBranch?: string,
   options: { cwd?: string } = {}
 ): ReleaseKpiReport {
   const cwd = options.cwd || process.cwd();
+  const effectiveBase = resolveReleaseBaseBranch(releaseBranch, baseBranch, { cwd });
   const resolvedRelease = resolveGitRef(cwd, releaseBranch);
-  const resolvedBase = resolveGitRef(cwd, baseBranch);
+  const resolvedBase = resolveGitRef(cwd, effectiveBase);
   const records = extractCommitKpisFromRange(resolvedBase, resolvedRelease, options);
   const statsMap: Record<string, ModelDefectStats> = {};
   const bugList: BugRecordSummary[] = [];

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { execFileSync } from 'child_process';
 import {
   buildGraphElements,
   collectDashboardMetrics,
@@ -9,6 +10,8 @@ import {
   generateDashboardReport,
   getCytoscapeScript,
   resolveCytoscapePath,
+  resolveDefaultBranchBase,
+  aggregatePrKpis,
 } from '../src/index.js';
 
 describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
@@ -627,3 +630,48 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
 });
 
 
+
+describe('resolveDefaultBranchBase with non-linear DAG', () => {
+  let tmpDir: string;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-dag-test-'));
+    execFileSync('git', ['init'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.name', 'Tester'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.email', 'test@ai-sdlc.org'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['checkout', '-b', 'main'], { cwd: tmpDir, stdio: 'pipe' });
+  });
+
+  afterEach(() => {
+    try {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    } catch {
+      // ignore
+    }
+  });
+
+  it('should not fail with unreachable HEAD~20 when total commits > 20 but first-parent commits <= 20', () => {
+    fs.writeFileSync(path.join(tmpDir, 'root.txt'), 'root');
+    execFileSync('git', ['add', '.'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['commit', '-m', 'root commit'], { cwd: tmpDir, stdio: 'pipe' });
+
+    execFileSync('git', ['checkout', '-b', 'feat/big-branch'], { cwd: tmpDir, stdio: 'pipe' });
+    for (let i = 1; i <= 22; i++) {
+      fs.writeFileSync(path.join(tmpDir, `file_${i}.txt`), `content ${i}`);
+      execFileSync('git', ['add', '.'], { cwd: tmpDir, stdio: 'pipe' });
+      execFileSync('git', ['commit', '-m', `feat: commit ${i}`], { cwd: tmpDir, stdio: 'pipe' });
+    }
+
+    execFileSync('git', ['checkout', 'main'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['merge', '--no-ff', 'feat/big-branch', '-m', 'merge feat/big-branch into main'], {
+      cwd: tmpDir,
+      stdio: 'pipe',
+    });
+
+    const base = resolveDefaultBranchBase(tmpDir, 'HEAD');
+    expect(base).not.toBe('HEAD~20');
+
+    const prKpi = aggregatePrKpis(base, 'HEAD', { cwd: tmpDir });
+    expect(prKpi.totalCommits).toBeGreaterThan(0);
+  });
+});

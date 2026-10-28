@@ -114,34 +114,46 @@ function resolveActiveBranch(rootDir: string): string {
   }
 }
 
-function resolveDefaultBranchBase(rootDir: string): string {
+function resolveRootCommit(rootDir: string, targetRef: string): string {
   try {
-    const count = parseInt(
-      execFileSync('git', ['rev-list', '--count', 'HEAD'], {
-        cwd: rootDir,
-        encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'pipe'],
-      }).trim(),
-      10
-    );
-    if (count <= 20) {
-      return execFileSync('git', ['rev-list', '--max-parents=0', 'HEAD'], {
-        cwd: rootDir,
-        encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'pipe'],
-      }).trim().split('\n')[0];
-    }
-    return 'HEAD~20';
+    return execFileSync('git', ['rev-list', '--max-parents=0', targetRef], {
+      cwd: rootDir,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim().split('\n')[0] || targetRef;
   } catch {
-    return 'HEAD~1';
+    return targetRef;
   }
+}
+
+export function resolveDefaultBranchBase(rootDir: string, targetRef: string = 'HEAD'): string {
+  try {
+    const rawCount = execFileSync('git', ['rev-list', '--count', '--first-parent', targetRef], {
+      cwd: rootDir,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+    const firstParentCount = parseInt(rawCount, 10);
+
+    if (firstParentCount > 20) {
+      const candidateRef = `${targetRef}~20`;
+      execFileSync('git', ['rev-parse', '--verify', '--quiet', candidateRef], {
+        cwd: rootDir,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      return candidateRef;
+    }
+  } catch {
+    // Fall back to root commit
+  }
+  return resolveRootCommit(rootDir, targetRef);
 }
 
 function resolveActivePrKpi(rootDir: string, activeBranch: string) {
   try {
     const isDefaultBranch = activeBranch === 'main' || activeBranch === 'master';
     if (isDefaultBranch) {
-      const base = resolveDefaultBranchBase(rootDir);
+      const base = resolveDefaultBranchBase(rootDir, 'HEAD');
       return aggregatePrKpis(base, 'HEAD', { cwd: rootDir });
     }
     const prKpi = aggregatePrKpis('main', 'HEAD', { cwd: rootDir });
@@ -207,7 +219,7 @@ function resolveCandidateBranches(rootDir: string, activeBranch: string, history
 function fetchBranchKpi(rootDir: string, branch: string): PrKpiAggregation | null {
   try {
     const isDefault = branch === 'main' || branch === 'master';
-    const base = isDefault ? resolveDefaultBranchBase(rootDir) : 'main';
+    const base = isDefault ? resolveDefaultBranchBase(rootDir, branch) : 'main';
     const kpi = aggregatePrKpis(base, branch, { cwd: rootDir });
     return kpi && kpi.totalCommits > 0 ? kpi : null;
   } catch {

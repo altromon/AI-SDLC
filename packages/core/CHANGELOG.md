@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 2.2.3
+
+### Patch Changes
+
+- fix(kpi): resolver baseline inteligente en reportes de release para `main` y robustecer cálculo de base en dashboard web para repositorios con árboles Git no lineales (`--first-parent`).
+
 ## 2.2.2
 
 ### Patch Changes

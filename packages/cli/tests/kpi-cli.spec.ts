@@ -115,4 +115,34 @@ Active-Time-Seconds: 300
     expect(files.some((f) => f.startsWith('RELEASE_KPIS_'))).toBe(true);
     expect(files.some((f) => f.endsWith('.kpis.json'))).toBe(true);
   });
+
+  it('runs runKpiRelease for main branch without explicit base and avoids empty main..main diff', () => {
+    execFileSync('git', ['init'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.name', 'Tester'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.email', 'test@ai-sdlc.org'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['checkout', '-b', 'main'], { cwd: tmpDir, stdio: 'pipe' });
+
+    fs.writeFileSync(path.join(tmpDir, 'init.txt'), 'init');
+    execFileSync('git', ['add', '.'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['commit', '-m', 'chore: initial release\n\nAuthor-Type: human'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['tag', 'v1.0.0'], { cwd: tmpDir, stdio: 'pipe' });
+
+    fs.writeFileSync(path.join(tmpDir, 'update.txt'), 'update');
+    execFileSync('git', ['add', '.'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['commit', '-m', 'feat: update after v1.0.0\n\nAuthor-Type: agent\nAI-Model: gemini-3.8-flash'], { cwd: tmpDir, stdio: 'pipe' });
+
+    const outDir = path.join(tmpDir, 'reports', 'releases');
+    const releaseSuccess = runKpiRelease({
+      release: 'main',
+      output: outDir,
+      root: tmpDir,
+    });
+
+    expect(releaseSuccess).toBe(true);
+    const jsonFile = path.join(outDir, 'release_main.kpis.json');
+    expect(fs.existsSync(jsonFile)).toBe(true);
+    const data = JSON.parse(fs.readFileSync(jsonFile, 'utf-8'));
+    expect(data.baseBranch).toBe('v1.0.0');
+    expect(data.totalCommits).toBe(1);
+  });
 });
