@@ -147,8 +147,7 @@ describe('@aisdlc/cli check command and auto-fix suite', () => {
   });
 
   it('should return boolean exit status via runCheck', () => {
-    const rootDir = path.resolve(__dirname, '../../..');
-    const passed = runCheck({ root: rootDir, fix: true, silent: true });
+    const passed = runCheck({ root: tempDir, silent: true });
     expect(typeof passed).toBe('boolean');
     expect(passed).toBe(true);
   });
