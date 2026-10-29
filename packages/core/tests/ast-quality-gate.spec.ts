@@ -309,6 +309,134 @@ def analyze_telemetry(data, threshold=100):
     });
   });
 
+  describe('Polyglot Advanced Syntax & Delimiters (Issue #77)', () => {
+    it('should accurately calculate complexity in Python 3.10+ match/case without counting keywords in docstrings', () => {
+      const pyCode = `
+def route_command(cmd, payload):
+    """
+    Note: if this docstring contains for, while, case, or except,
+    they must NOT increment cyclomatic or cognitive complexity!
+    """
+    match cmd:
+        case "START":
+            if payload:
+                return 1
+            return 0
+        case "STOP":
+            return 2
+        case _:
+            return -1
+      `;
+      const metrics = extractFunctionsPolyglot(pyCode, 'src/router.py');
+      expect(metrics.length).toBe(1);
+      expect(metrics[0].functionName).toBe('route_command');
+      expect(metrics[0].cyclomatic).toBe(5);
+      expect(metrics[0].cognitive).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should handle Rust multi-hash raw strings r###"..."### and ? operator without false brace closes', () => {
+      const rustCode = `
+        pub fn parse_frame(input: &str) -> Result<usize, String> {
+          let raw_json = r###"
+            {
+              "unbalanced_braces": "}}}",
+              "keywords": "if match for while"
+            }
+          "###;
+          if input.is_empty() {
+            return Err(raw_json.to_string());
+          }
+          let val = input.trim().parse::<usize>().map_err(|e| e.to_string())?;
+          match val {
+            0 => Ok(0),
+            _ => Ok(val),
+          }
+        }
+      `;
+      const metrics = extractFunctionsPolyglot(rustCode, 'src/parser.rs');
+      expect(metrics.length).toBe(1);
+      expect(metrics[0].functionName).toBe('parse_frame');
+      expect(metrics[0].cyclomatic).toBe(4);
+    });
+
+    it('should handle C# 11 raw string literals """...""", foreach, pattern matching when, and ?? / ?. operators', () => {
+      const csCode = `
+        public class TelemetryProcessor {
+          public async Task<int> EvaluateBatchAsync(List<string>? items, string? fallback) {
+            string rawTemplate = """
+              {
+                "unbalanced": "}}}",
+                "fake_if": "if (true) { while (true) {} }"
+              }
+              """;
+            var effective = fallback ?? rawTemplate;
+            var len = effective?.Length ?? 0;
+            int count = 0;
+            if (items != null) {
+              foreach (var item in items) {
+                switch (item) {
+                  case string s when s.Length > 5:
+                    count += len;
+                    break;
+                }
+              }
+            }
+            return count;
+          }
+        }
+      `;
+      const metrics = extractFunctionsPolyglot(csCode, 'src/TelemetryProcessor.cs');
+      expect(metrics.length).toBe(1);
+      expect(metrics[0].functionName).toBe('EvaluateBatchAsync');
+      expect(metrics[0].cyclomatic).toBe(8);
+      expect(metrics[0].cognitive).toBeGreaterThanOrEqual(6);
+    });
+
+    it('should handle Java 17/21 text blocks """...""", generics, and pattern matching switch when', () => {
+      const javaCode = `
+        public class EventDispatcher {
+          public <T extends CharSequence> int dispatch(T event, int retries) throws IllegalArgumentException {
+            String query = """
+              SELECT * FROM events
+              WHERE payload = '{ "if": "while && || case" }'
+              """;
+            if (event == null || retries < 0) {
+              return -1;
+            }
+            switch (event.toString()) {
+              case String s when s.startsWith("ERR") -> {
+                return 0;
+              }
+              default -> {
+                return query.length();
+              }
+            }
+          }
+        }
+      `;
+      const metrics = extractFunctionsPolyglot(javaCode, 'src/EventDispatcher.java');
+      expect(metrics.length).toBe(1);
+      expect(metrics[0].functionName).toBe('dispatch');
+      expect(metrics[0].cyclomatic).toBe(5);
+    });
+
+    it('should handle C++ raw strings R"delim(...)delim"', () => {
+      const cppCode = `
+        int validateCppPacket(int code) {
+          const char* raw = R"json({ "if": "}}}", "while": "&&" })json";
+          if (code > 0 && raw != nullptr) {
+            return 1;
+          }
+          return 0;
+        }
+      `;
+      const cppMetrics = extractFunctionsPolyglot(cppCode, 'src/packet.cpp');
+      expect(cppMetrics.length).toBe(1);
+      expect(cppMetrics[0].functionName).toBe('validateCppPacket');
+      expect(cppMetrics[0].cyclomatic).toBe(3);
+    });
+  });
+
   describe('Pre-flight Performance & False Positive Verification', () => {
     it('should execute AST extraction in under 300ms for multiple complex modules', () => {
       const tsx = `
