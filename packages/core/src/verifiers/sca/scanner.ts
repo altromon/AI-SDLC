@@ -224,28 +224,31 @@ function extractPyprojectDirectDeps(content: string): Set<string> {
   return direct;
 }
 
+function parseSingleTomlBlock(block: string, lockPath: string, directNames: Set<string>): ScannedDependency | null {
+  const name = extractTomlField(block, 'name');
+  const version = extractTomlField(block, 'version');
+  if (!name || !version) return null;
+  const spdx = normalizeSpdxLicense(extractTomlField(block, 'license') || 'UNKNOWN');
+  return {
+    name,
+    version,
+    spdxLicense: spdx,
+    purl: `pkg:pypi/${name.toLowerCase()}@${version}`,
+    path: lockPath,
+    isDirect: directNames.size === 0 || directNames.has(name.toLowerCase()),
+  };
+}
+
 function parseTomlPackageBlocks(
   content: string,
   lockPath: string,
   directNames: Set<string>,
   seen: Map<string, ScannedDependency>
 ): void {
-  const blocks = content.split(/\[\[package\]\]/g).slice(1);
-  for (const block of blocks) {
-    const name = extractTomlField(block, 'name');
-    const version = extractTomlField(block, 'version');
-    if (!name || !version) continue;
-    const spdx = normalizeSpdxLicense(extractTomlField(block, 'license') || 'UNKNOWN');
-    const key = `pypi:${name}@${version}`;
-    if (!seen.has(key)) {
-      seen.set(key, {
-        name,
-        version,
-        spdxLicense: spdx,
-        purl: `pkg:pypi/${name.toLowerCase()}@${version}`,
-        path: lockPath,
-        isDirect: directNames.size === 0 || directNames.has(name.toLowerCase()),
-      });
+  for (const block of content.split(/\[\[package\]\]/g).slice(1)) {
+    const dep = parseSingleTomlBlock(block, lockPath, directNames);
+    if (dep && !seen.has(`pypi:${dep.name}@${dep.version}`)) {
+      seen.set(`pypi:${dep.name}@${dep.version}`, dep);
     }
   }
 }
@@ -319,24 +322,27 @@ function parseGoRequireLine(line: string, goModPath: string): ScannedDependency 
   };
 }
 
+function extractGoCandidateLines(content: string): string[] {
+  const out: string[] = [];
+  let inBlock = false;
+  for (const rawLine of content.split(/\r?\n/)) {
+    const trimmed = rawLine.trim();
+    if (/^require\s*\($/.test(trimmed)) inBlock = true;
+    else if (inBlock && trimmed === ')') inBlock = false;
+    else if (inBlock || trimmed.startsWith('require ')) out.push(trimmed);
+  }
+  return out;
+}
+
 export function scanGoDependencies(rootDir: string, seen: Map<string, ScannedDependency>): void {
   const goModPath = path.join(rootDir, 'go.mod');
   const content = readTextIfExists(goModPath);
   if (!content) return;
 
-  let inRequireBlock = false;
-  for (const rawLine of content.split(/\r?\n/)) {
-    const trimmed = rawLine.trim();
-    if (!trimmed || trimmed.startsWith('//')) continue;
-    if (/^require\s*\($/.test(trimmed)) {
-      inRequireBlock = true;
-    } else if (inRequireBlock && trimmed === ')') {
-      inRequireBlock = false;
-    } else if (inRequireBlock || trimmed.startsWith('require ')) {
-      const dep = parseGoRequireLine(trimmed, goModPath);
-      if (dep && !seen.has(`golang:${dep.name}@${dep.version}`)) {
-        seen.set(`golang:${dep.name}@${dep.version}`, dep);
-      }
+  for (const line of extractGoCandidateLines(content)) {
+    const dep = parseGoRequireLine(line, goModPath);
+    if (dep && !seen.has(`golang:${dep.name}@${dep.version}`)) {
+      seen.set(`golang:${dep.name}@${dep.version}`, dep);
     }
   }
 }
@@ -360,6 +366,26 @@ function extractCargoDirectDeps(cargoToml: string): Map<string, string> {
   return map;
 }
 
+function parseCargoLockBlock(
+  block: string,
+  rootName: string | undefined,
+  directMeta: Map<string, string>,
+  cargoLockPath: string
+): ScannedDependency | null {
+  const name = extractTomlField(block, 'name');
+  const version = extractTomlField(block, 'version');
+  if (!name || !version || name === rootName) return null;
+  const blockLic = extractTomlField(block, 'license') || directMeta.get(name) || 'UNKNOWN';
+  return {
+    name,
+    version,
+    spdxLicense: normalizeSpdxLicense(blockLic),
+    purl: `pkg:cargo/${name}@${version}`,
+    path: cargoLockPath,
+    isDirect: directMeta.size === 0 || directMeta.has(name),
+  };
+}
+
 export function scanRustDependencies(rootDir: string, seen: Map<string, ScannedDependency>): void {
   const cargoLockPath = path.join(rootDir, 'Cargo.lock');
   const lockContent = readTextIfExists(cargoLockPath);
@@ -369,22 +395,10 @@ export function scanRustDependencies(rootDir: string, seen: Map<string, ScannedD
   const directMeta = extractCargoDirectDeps(cargoToml);
   const rootName = extractTomlField(cargoToml, 'name');
 
-  const blocks = lockContent.split(/\[\[package\]\]/g).slice(1);
-  for (const block of blocks) {
-    const name = extractTomlField(block, 'name');
-    const version = extractTomlField(block, 'version');
-    if (!name || !version || name === rootName) continue;
-    const blockLic = extractTomlField(block, 'license') || directMeta.get(name) || 'UNKNOWN';
-    const key = `cargo:${name}@${version}`;
-    if (!seen.has(key)) {
-      seen.set(key, {
-        name,
-        version,
-        spdxLicense: normalizeSpdxLicense(blockLic),
-        purl: `pkg:cargo/${name}@${version}`,
-        path: cargoLockPath,
-        isDirect: directMeta.size === 0 || directMeta.has(name),
-      });
+  for (const block of lockContent.split(/\[\[package\]\]/g).slice(1)) {
+    const dep = parseCargoLockBlock(block, rootName, directMeta, cargoLockPath);
+    if (dep && !seen.has(`cargo:${dep.name}@${dep.version}`)) {
+      seen.set(`cargo:${dep.name}@${dep.version}`, dep);
     }
   }
 }
@@ -401,33 +415,35 @@ function resolveMavenBlockLicense(block: string, defaultLic: string): string {
   return commentLic || defaultLic;
 }
 
+function parseMavenDepBlock(block: string, defaultLic: string, pomPath: string): ScannedDependency | null {
+  const groupId = extractXmlTag(block, 'groupId');
+  const artifactId = extractXmlTag(block, 'artifactId');
+  if (!groupId || !artifactId) return null;
+  const version = extractXmlTag(block, 'version') || 'unknown';
+  const inlineLic = resolveMavenBlockLicense(block, defaultLic);
+  return {
+    name: `${groupId}:${artifactId}`,
+    version,
+    spdxLicense: normalizeSpdxLicense(inlineLic),
+    purl: `pkg:maven/${groupId}/${artifactId}@${version}`,
+    path: pomPath,
+    isDirect: true,
+  };
+}
+
 export function scanMavenDependencies(rootDir: string, seen: Map<string, ScannedDependency>): void {
   const pomPath = path.join(rootDir, 'pom.xml');
   const content = readTextIfExists(pomPath);
   if (!content) return;
 
   const projectLicBlock = content.match(/<licenses>([\s\S]*?)<\/licenses>/)?.[1] || '';
-  const projectDefaultLic = extractXmlTag(projectLicBlock, 'name') || 'UNKNOWN';
+  const defaultLic = extractXmlTag(projectLicBlock, 'name') || 'UNKNOWN';
   const depBlocks = content.match(/<dependency>[\s\S]*?<\/dependency>/g) || [];
 
   for (const block of depBlocks) {
-    const groupId = extractXmlTag(block, 'groupId');
-    const artifactId = extractXmlTag(block, 'artifactId');
-    const version = extractXmlTag(block, 'version') || 'unknown';
-    if (!groupId || !artifactId) continue;
-
-    const inlineLic = resolveMavenBlockLicense(block, projectDefaultLic);
-    const fullName = `${groupId}:${artifactId}`;
-    const key = `maven:${fullName}@${version}`;
-    if (!seen.has(key)) {
-      seen.set(key, {
-        name: fullName,
-        version,
-        spdxLicense: normalizeSpdxLicense(inlineLic),
-        purl: `pkg:maven/${groupId}/${artifactId}@${version}`,
-        path: pomPath,
-        isDirect: true,
-      });
+    const dep = parseMavenDepBlock(block, defaultLic, pomPath);
+    if (dep && !seen.has(`maven:${dep.name}@${dep.version}`)) {
+      seen.set(`maven:${dep.name}@${dep.version}`, dep);
     }
   }
 }

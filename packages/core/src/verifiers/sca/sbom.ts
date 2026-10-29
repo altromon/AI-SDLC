@@ -62,45 +62,40 @@ function buildVexAnalysis(vex?: VexStatement): CycloneDxVulnerability['analysis'
   };
 }
 
+function mapScaVulnToCycloneDx(v: ScaVulnerability, vexStatements: VexStatement[]): CycloneDxVulnerability {
+  const matchingVex = vexStatements.find(
+    (stmt) => stmt.id === v.id && (!stmt.package || stmt.package === v.packageName)
+  );
+  return {
+    id: v.id,
+    source: v.primaryUrl ? { name: 'NVD/GHSA', url: v.primaryUrl } : undefined,
+    ratings: [{ score: v.cvssV3Score, severity: v.severity.toLowerCase(), method: 'CVSSv3', vector: v.cvssV3Vector }],
+    analysis: buildVexAnalysis(matchingVex),
+    affects: [{ ref: `pkg:npm/${v.packageName}@${v.installedVersion}` }],
+  };
+}
+
+function mapStandaloneVex(stmt: VexStatement): CycloneDxVulnerability {
+  return {
+    id: stmt.id,
+    analysis: buildVexAnalysis(stmt),
+    affects: stmt.package ? [{ ref: stmt.package }] : undefined,
+  };
+}
+
 export function buildCycloneDxVulnerabilities(
   vulnerabilities: ScaVulnerability[] = [],
   vexStatements: VexStatement[] = []
 ): CycloneDxVulnerability[] {
-  const map = new Map<string, CycloneDxVulnerability>();
-
-  for (const v of vulnerabilities) {
-    const matchingVex = vexStatements.find(
-      (stmt) => stmt.id === v.id && (!stmt.package || stmt.package === v.packageName)
-    );
-    map.set(`${v.id}:${v.packageName}`, {
-      id: v.id,
-      source: v.primaryUrl ? { name: 'NVD/GHSA', url: v.primaryUrl } : undefined,
-      ratings: [
-        {
-          score: v.cvssV3Score,
-          severity: v.severity.toLowerCase(),
-          method: 'CVSSv3',
-          vector: v.cvssV3Vector,
-        },
-      ],
-      analysis: buildVexAnalysis(matchingVex),
-      affects: [{ ref: `pkg:npm/${v.packageName}@${v.installedVersion}` }],
-    });
-  }
-
+  const out: CycloneDxVulnerability[] = vulnerabilities.map((v) => mapScaVulnToCycloneDx(v, vexStatements));
+  const seenIds = new Set(out.map((item) => item.id));
   for (const stmt of vexStatements) {
-    const key = `${stmt.id}:${stmt.package || '*'}`;
-    const alreadyMapped = Array.from(map.keys()).some((k) => k.startsWith(`${stmt.id}:`));
-    if (!alreadyMapped && !map.has(key)) {
-      map.set(key, {
-        id: stmt.id,
-        analysis: buildVexAnalysis(stmt),
-        affects: stmt.package ? [{ ref: stmt.package }] : undefined,
-      });
+    if (!seenIds.has(stmt.id)) {
+      out.push(mapStandaloneVex(stmt));
+      seenIds.add(stmt.id);
     }
   }
-
-  return Array.from(map.values());
+  return out;
 }
 
 export function generateCycloneDxSbom(
