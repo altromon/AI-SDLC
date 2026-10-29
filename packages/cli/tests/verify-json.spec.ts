@@ -514,9 +514,10 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
     });
 
     it('should emit valid JSON without ANSI codes for runCheck({ json: true })', () => {
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-test-check-json-'));
       let passed: boolean = false;
       const output = captureConsoleLog(() => {
-        passed = runCheck({ root: rootDir, json: true, fix: true });
+        passed = runCheck({ root: tmpDir, json: true });
       });
 
       expect(passed).toBe(true);
@@ -531,10 +532,11 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
     });
 
     it('should emit valid JSON for runCheck when AISDLC_FORMAT=json is set', () => {
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-test-check-format-'));
       process.env.AISDLC_FORMAT = 'json';
       let passed: boolean = false;
       const output = captureConsoleLog(() => {
-        passed = runCheck({ root: rootDir, fix: true });
+        passed = runCheck({ root: tmpDir });
       });
 
       expect(passed).toBe(true);

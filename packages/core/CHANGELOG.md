@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 2.2.4
+
+### Patch Changes
+
+- feat(init): desplegar skills nativas y playbooks de ciclo de vida en Claude Code, Cursor y GitHub Copilot.
+
 ## 2.2.3
 
 ### Patch Changes

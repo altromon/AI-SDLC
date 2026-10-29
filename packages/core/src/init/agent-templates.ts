@@ -280,6 +280,7 @@ export interface LifecycleSkillTemplate {
   title: string;
   description: string;
   references: string;
+  globs?: string;
   body: string;
 }
 
@@ -291,6 +292,7 @@ export const LIFECYCLE_SKILL_TEMPLATES: readonly LifecycleSkillTemplate[] = [
       'Orchestrate end-to-end AI-SDLC onboarding and Phase 0 Inception for brand-new (Greenfield) projects, from repository initialization (aisdlc init) and NAF v4 Vision (ARCH-INTRO-*) through ProductShape, STRIDE Threat Modeling, arc42 Architecture, and initial SDD increment delivery.',
     references:
       '[`process/02_product_definition.md`](../../process/02_product_definition.md), [`process/04b_data_protection_and_privacy.md`](../../process/04b_data_protection_and_privacy.md), [`process/05_architecture_arc42_nafv4.md`](../../process/05_architecture_arc42_nafv4.md), [`process/06_spec_driven_development.md`](../../process/06_spec_driven_development.md), and [`process/09_agent_protocols.md`](../../process/09_agent_protocols.md).',
+    globs: 'product/**, specs/product/**, architecture/**, templates/**',
     body: `## Purpose & Trigger
 Use this skill when starting a **brand-new software project from scratch (Greenfield)** or when \`specs/product/\` has no canonical baseline yet. It coordinates the sequential execution of AI-SDLC MCP/CLI tools and specialized role agents so no code is written before product vision, security enclaves, privacy-by-design controls, and architecture contracts exist.
 
@@ -350,6 +352,7 @@ Use this skill when starting a **brand-new software project from scratch (Greenf
       'Orchestrate progressive AI-SDLC adoption and Brownfield retro-inception on existing or legacy repositories without breaking production code, reverse-engineering architecture (ARCH-INTRO-*, CMP-*) and establishing baseline quality, security, and license audits before new SDD increments.',
     references:
       '[`process/02_product_definition.md`](../../process/02_product_definition.md), [`process/04_open_source_license_compliance.md`](../../process/04_open_source_license_compliance.md), [`process/04b_data_protection_and_privacy.md`](../../process/04b_data_protection_and_privacy.md), [`process/05_architecture_arc42_nafv4.md`](../../process/05_architecture_arc42_nafv4.md), [`process/10_quality_management_and_release_gates.md`](../../process/10_quality_management_and_release_gates.md), and [`process/09_agent_protocols.md`](../../process/09_agent_protocols.md).',
+    globs: 'architecture/**, specs/**, src/**, packages/**',
     body: `## Purpose & Trigger
 Use this skill when **adopting AI-SDLC in an existing or legacy codebase (Brownfield)** that already has production source code (\`src/\`, \`packages/\`, etc.) but lacks canonical PDaC specifications, arc42 architecture views, or deterministic quality/license/privacy gates.
 
@@ -393,6 +396,7 @@ Once the target domain's baseline artifacts (\`ARCH-INTRO-*\`, \`UC-*\`, \`FR-*\
       'Orchestrate the complete Spec-Driven Development (SDD) lifecycle for bounded feature increments, enhancements, and bugfixes (CHG-* / TSK-*), from upstream requirement derivation and 4-tier Git branching through Red-Green-Refactor TDD, Pre-Merge Audit Triad, all 11 Quality Gates, and canonical baseline integration.',
     references:
       '[`process/06_spec_driven_development.md`](../../process/06_spec_driven_development.md), [`process/08_citation_contract_and_drift.md`](../../process/08_citation_contract_and_drift.md), [`process/10_quality_management_and_release_gates.md`](../../process/10_quality_management_and_release_gates.md), [`process/11_git_branching_and_lifecycle.md`](../../process/11_git_branching_and_lifecycle.md), and [`process/09_agent_protocols.md`](../../process/09_agent_protocols.md).',
+    globs: 'specs/changes/**, src/**, packages/**, tests/**',
     body: `## Purpose & Trigger
 Use this skill for **every evolutionary increment (new feature, enhancement, refactoring, or bugfix)** on a project that already has an AI-SDLC baseline. It enforces strict 360° traceability from upstream ProductShape (\`UC-*\`, \`FR-*\`) through SDD (\`CHG-*\`, \`HOF-*\`, \`TSK-*\`), TDD implementation, the 12 Quality Gates, and baseline promotion.
 
@@ -458,6 +462,19 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 
 export function renderAntigravitySkillFile(skill: LifecycleSkillTemplate): string {
   return `---\nname: ${skill.id}\ndescription: >-\n  ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}\n`;
+}
+
+export function renderCursorSkillFile(skill: LifecycleSkillTemplate): string {
+  const globs = skill.globs || '';
+  return `---\ndescription: ${skill.id} (${skill.title}) - ${skill.description}\nglobs: ${globs}\nalwaysApply: false\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}\n`;
+}
+
+export function renderClaudeSkillFile(skill: LifecycleSkillTemplate): string {
+  return `---\nname: ${skill.id}\ndescription: ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}\n`;
+}
+
+export function renderCopilotSkillFile(skill: LifecycleSkillTemplate): string {
+  return `---\nname: ${skill.id}\ndescription: ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}\n`;
 }
 
 export const STARTER_ANTIGRAVITY_RULES = `# Google Antigravity & Gemini CLI Rules - AI-SDLC Framework

@@ -1,6 +1,6 @@
 {
   "name": "@aisdlc/mcp",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Model Context Protocol (MCP) native server for AI-SDLC tools, resources, and governance",
   "license": "MIT",
   "type": "module",

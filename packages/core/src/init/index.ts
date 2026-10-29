@@ -20,8 +20,11 @@ import {
   renderAntigravityAgentFile,
   renderAntigravitySkillFile,
   renderClaudeAgentFile,
+  renderClaudeSkillFile,
   renderCopilotAgentFile,
+  renderCopilotSkillFile,
   renderCursorAgentFile,
+  renderCursorSkillFile,
 } from './agent-templates.js';
 import {
   getArchitectureTemplates,
@@ -796,13 +799,25 @@ function appendCursorFiles(dirs: string[], files: { relPath: string; content: st
   for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
     files.push({ relPath: `.cursor/rules/${agent.id}.mdc`, content: renderCursorAgentFile(agent) });
   }
+  for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
+    files.push({ relPath: `.cursor/rules/${skill.id}.mdc`, content: renderCursorSkillFile(skill) });
+  }
 }
 
 function appendClaudeFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
-  dirs.push('.claude/agents');
+  dirs.push('.claude/agents', '.claude/skills');
   files.push({ relPath: 'CLAUDE.md', content: STARTER_CLAUDE_RULES });
   for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
-    files.push({ relPath: `.claude/agents/${agent.id}.md`, content: renderClaudeAgentFile(agent) });
+    const content = renderClaudeAgentFile(agent);
+    dirs.push(`.claude/skills/${agent.id}`);
+    files.push(
+      { relPath: `.claude/agents/${agent.id}.md`, content },
+      { relPath: `.claude/skills/${agent.id}/SKILL.md`, content }
+    );
+  }
+  for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
+    dirs.push(`.claude/skills/${skill.id}`);
+    files.push({ relPath: `.claude/skills/${skill.id}/SKILL.md`, content: renderClaudeSkillFile(skill) });
   }
 }
 
@@ -811,6 +826,9 @@ function appendCopilotFiles(dirs: string[], files: { relPath: string; content: s
   files.push({ relPath: '.github/copilot-instructions.md', content: STARTER_COPILOT_RULES });
   for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
     files.push({ relPath: `.github/agents/${agent.id}.agent.md`, content: renderCopilotAgentFile(agent) });
+  }
+  for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
+    files.push({ relPath: `.github/agents/${skill.id}.agent.md`, content: renderCopilotSkillFile(skill) });
   }
 }
 

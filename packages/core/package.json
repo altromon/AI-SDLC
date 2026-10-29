@@ -1,6 +1,6 @@
 {
   "name": "@aisdlc/core",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Deterministic domain verification, compliance, and reporting engine for AI-SDLC",
   "license": "MIT",
   "type": "module",

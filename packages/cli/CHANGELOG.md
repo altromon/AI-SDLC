@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 2.2.4
+
+### Patch Changes
+
+- feat(init): soportar scaffolding de skills y playbooks de ciclo de vida para Claude Code, Cursor y GitHub Copilot.
+- Updated dependencies
+  - @aisdlc/core@2.2.4
+  - @aisdlc/mcp@2.2.4
+
 ## 2.2.3
 
 ### Patch Changes

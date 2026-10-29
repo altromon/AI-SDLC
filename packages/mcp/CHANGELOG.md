@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 2.2.4
+
+### Patch Changes
+
+- feat(init): propagar soporte de skills nativas multientorno en inicialización vía MCP tool `new`.
+- Updated dependencies
+  - @aisdlc/core@2.2.4
+
 ## 2.2.3
 
 ### Patch Changes
