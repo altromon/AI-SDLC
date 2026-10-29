@@ -526,16 +526,72 @@ function collectTestCorpus(rootDir: string, allMdFiles: string[]): { gherkinSour
   return { gherkinSources, combinedTests: testContents.join('\n') };
 }
 
+function isCucumberScenarioPassed(element: Record<string, unknown>): boolean {
+  const steps = Array.isArray(element.steps) ? (element.steps as Array<Record<string, unknown>>) : [];
+  if (steps.length === 0) return false;
+  return steps.every((s) => {
+    const res = s.result as Record<string, unknown> | undefined;
+    return res && res.status === 'passed';
+  });
+}
+
+function countCucumberScenarios(raw: Array<Record<string, unknown>>): { passed: number; failed: number } {
+  let passed = 0;
+  let failed = 0;
+  for (const feat of raw) {
+    const elements = Array.isArray(feat.elements) ? (feat.elements as Array<Record<string, unknown>>) : [];
+    for (const el of elements) {
+      if (isCucumberScenarioPassed(el)) passed++;
+      else failed++;
+    }
+  }
+  return { passed, failed };
+}
+
+function parseCucumberReportFile(reportPath: string): NonNullable<TestingCoverageResult['cucumberExecution']> | undefined {
+  if (!fs.existsSync(reportPath)) return undefined;
+  try {
+    const raw = JSON.parse(fs.readFileSync(reportPath, 'utf-8'));
+    if (!Array.isArray(raw)) return undefined;
+    const { passed, failed } = countCucumberScenarios(raw as Array<Record<string, unknown>>);
+    return {
+      evaluatedFeatures: raw.length,
+      passedScenarios: passed,
+      failedScenarios: failed,
+      passed: passed + failed > 0 && failed === 0,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+function resolveCucumberReport(
+  rootDir: string,
+  options: TestingCoverageOptions
+): NonNullable<TestingCoverageResult['cucumberExecution']> | undefined {
+  const candidate = options.cucumberReportPath
+    ? (path.isAbsolute(options.cucumberReportPath)
+        ? options.cucumberReportPath
+        : path.join(rootDir, options.cucumberReportPath))
+    : path.join(rootDir, 'reports', 'cucumber-report.json');
+  const parsed = parseCucumberReportFile(candidate);
+  if (parsed) return parsed;
+  if (options.enforceCucumberExecution) {
+    return { evaluatedFeatures: 0, passedScenarios: 0, failedScenarios: 1, passed: false };
+  }
+  return undefined;
+}
+
 function assembleCoverageResult(
   reqAudit: RequirementAuditItem[],
   taskAudit: TaskAuditItem[],
   useCaseFlows: UseCaseFlowAuditItem[],
   reqErrors: number,
   taskErrors: number,
-  ucErrors: number
+  ucErrors: number, rootDir: string, options: TestingCoverageOptions
 ): TestingCoverageResult {
   return {
-    success: reqErrors === 0 && taskErrors === 0 && ucErrors === 0,
+    success: reqErrors === 0 && taskErrors === 0 && ucErrors === 0 && (!resolveCucumberReport(rootDir, options) || resolveCucumberReport(rootDir, options)!.passed),
     totalRequirements: reqAudit.length,
     passedRequirements: reqAudit.length - reqErrors,
     failedRequirements: reqErrors,
@@ -546,6 +602,7 @@ function assembleCoverageResult(
     tasks: taskAudit,
     useCaseFlows,
     failedUseCaseFlows: ucErrors,
+    ...(resolveCucumberReport(rootDir, options) ? { cucumberExecution: resolveCucumberReport(rootDir, options) } : {}),
     reportMarkdown: generateTestingCoverageReportMarkdown(reqAudit, taskAudit, reqErrors, taskErrors),
   };
 }
@@ -625,7 +682,7 @@ export function verifyTestingCoverage(options: TestingCoverageOptions = {}): Tes
   }
 
   return assembleCoverageResult(
-    state.reqAudit, state.taskAudit, state.useCaseFlows, state.reqErrors, state.taskErrors, state.ucErrors
+    state.reqAudit, state.taskAudit, state.useCaseFlows, state.reqErrors, state.taskErrors, state.ucErrors, rootDir, options
   );
 }
 

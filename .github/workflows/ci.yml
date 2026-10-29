@@ -42,6 +42,9 @@ jobs:
       - name: Run Vitest Unit & Integration Suites
         run: pnpm test
 
+      - name: Run Executable BDD / Cucumber Feature Suite
+        run: pnpm run test:bdd
+
       - name: Run Vitest Coverage (thresholds enforced)
         run: pnpm run test:coverage
 

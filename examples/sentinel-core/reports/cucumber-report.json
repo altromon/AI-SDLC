@@ -1,0 +1,254 @@
+[
+  {
+    "uri": "tests/features/fr-telemetry-stream-001.feature",
+    "name": "Ingesta Continua de Telemetría UAV",
+    "tags": [
+      {
+        "name": "@FR-TELEMETRY-STREAM-001"
+      },
+      {
+        "name": "@telemetry"
+      },
+      {
+        "name": "@automated"
+      }
+    ],
+    "elements": [
+      {
+        "type": "scenario",
+        "name": "Recepción y publicación exitosa de telemetría nominal",
+        "tags": [
+          {
+            "name": "@FR-TELEMETRY-STREAM-001"
+          },
+          {
+            "name": "@telemetry"
+          },
+          {
+            "name": "@automated"
+          }
+        ],
+        "steps": [
+          {
+            "keyword": "Given ",
+            "name": "el gateway de ingesta en el enclave DMZ se encuentra activo y escuchando",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "And ",
+            "name": "el dron \"UAV-ALPHA-01\" ha completado el handshake mTLS con certificado de CA válido",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Given ",
+            "name": "que el dron envía una trama de telemetría con:",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "When ",
+            "name": "el gateway procesa la trama recibida",
+            "result": {
+              "status": "passed",
+              "duration": 1000000
+            }
+          },
+          {
+            "keyword": "Then ",
+            "name": "la trama es validada exitosamente en menos de 50 milisegundos",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "And ",
+            "name": "se envía un ACK de confirmación al dron",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "And ",
+            "name": "se publica el evento en el topic Kafka \"telemetry.normalized.v1\"",
+            "result": {
+              "status": "passed",
+              "duration": 1000000
+            }
+          }
+        ]
+      },
+      {
+        "type": "scenario",
+        "name": "Detección y rechazo de tramas con saltos cinemáticos anómalos (Example #1)",
+        "tags": [
+          {
+            "name": "@FR-TELEMETRY-STREAM-001"
+          },
+          {
+            "name": "@telemetry"
+          },
+          {
+            "name": "@automated"
+          }
+        ],
+        "steps": [
+          {
+            "keyword": "Given ",
+            "name": "el gateway de ingesta en el enclave DMZ se encuentra activo y escuchando",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "And ",
+            "name": "el dron \"UAV-ALPHA-01\" ha completado el handshake mTLS con certificado de CA válido",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Given ",
+            "name": "que la última posición registrada del dron fue latitud 40.4168 y longitud -3.7038",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "When ",
+            "name": "el dron envía 100ms después una trama con salto imposible \"50.0\" km",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Then ",
+            "name": "el sistema debe detectar la violación de la regla cinemática BR-TELEMETRY-VALIDITY",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "And ",
+            "name": "la trama debe ser descartada inmediatamente",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "And ",
+            "name": "el gateway debe responder con el error \"NACK-INVALID-KINEMATICS\"",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "And ",
+            "name": "se debe registrar un evento de alerta geospacial en el log estructurado",
+            "result": {
+              "status": "passed",
+              "duration": 1000000
+            }
+          }
+        ]
+      },
+      {
+        "type": "scenario",
+        "name": "Detección y rechazo de tramas con saltos cinemáticos anómalos (Example #2)",
+        "tags": [
+          {
+            "name": "@FR-TELEMETRY-STREAM-001"
+          },
+          {
+            "name": "@telemetry"
+          },
+          {
+            "name": "@automated"
+          }
+        ],
+        "steps": [
+          {
+            "keyword": "Given ",
+            "name": "el gateway de ingesta en el enclave DMZ se encuentra activo y escuchando",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "And ",
+            "name": "el dron \"UAV-ALPHA-01\" ha completado el handshake mTLS con certificado de CA válido",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Given ",
+            "name": "que la última posición registrada del dron fue latitud 40.4168 y longitud -3.7038",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "When ",
+            "name": "el dron envía 100ms después una trama con salto imposible \"250.0\" km",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Then ",
+            "name": "el sistema debe detectar la violación de la regla cinemática BR-TELEMETRY-VALIDITY",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "And ",
+            "name": "la trama debe ser descartada inmediatamente",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "And ",
+            "name": "el gateway debe responder con el error \"NACK-INVALID-KINEMATICS\"",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "And ",
+            "name": "se debe registrar un evento de alerta geospacial en el log estructurado",
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

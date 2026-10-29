@@ -10,6 +10,7 @@ export * from './verifiers/ast/polyglot-scanner.js';
 export * from './verifiers/traceability.js';
 export * from './verifiers/governance.js';
 export * from './verifiers/testing-coverage.js';
+export * from './verifiers/bdd-runner.js';
 export * from './verifiers/gherkin.js';
 export * from './verifiers/licenses.js';
 export * from './verifiers/sca/scanner.js';

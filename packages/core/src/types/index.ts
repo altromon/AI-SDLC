@@ -432,6 +432,8 @@ export interface TestingCoverageOptions {
   rootDir?: string;
   enforceBddVariants?: boolean;
   enforceUseCaseFlows?: boolean;
+  cucumberReportPath?: string;
+  enforceCucumberExecution?: boolean;
 }
 
 export interface TestingCoverageResult {
@@ -446,6 +448,12 @@ export interface TestingCoverageResult {
   tasks: TaskAuditItem[];
   useCaseFlows?: UseCaseFlowAuditItem[];
   failedUseCaseFlows?: number;
+  cucumberExecution?: {
+    evaluatedFeatures: number;
+    passedScenarios: number;
+    failedScenarios: number;
+    passed: boolean;
+  };
   reportMarkdown: string;
 }
 
@@ -1320,3 +1328,26 @@ export interface GenerateSarifOptions {
   informationUri?: string;
 }
 
+
+export interface BddStepExecution {
+  keyword: string;
+  text: string;
+  status: 'passed' | 'failed' | 'undefined' | 'skipped';
+  durationMs: number;
+  errorMessage?: string;
+}
+
+export interface BddScenarioExecution {
+  name: string;
+  tags: string[];
+  status: 'passed' | 'failed' | 'undefined';
+  steps: BddStepExecution[];
+}
+
+export interface BddFeatureExecutionReport {
+  uri: string;
+  featureName: string;
+  tags: string[];
+  scenarios: BddScenarioExecution[];
+  passed: boolean;
+}
