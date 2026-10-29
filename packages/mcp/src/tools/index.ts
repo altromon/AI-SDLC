@@ -18,7 +18,9 @@ import {
   generateQualityReport,
   initProject,
   integrateSddChange,
+  loadDlpPolicy,
   ProductHandoff,
+  sanitizeDlpText,
   scaffoldSddChange,
   syncPdacDigests,
   verifyArtifactDuplicates,
@@ -45,12 +47,15 @@ function resolveRoot(customRoot?: string, defaultRoot?: string): string {
   return customRoot ? path.resolve(customRoot) : defaultRoot || process.cwd();
 }
 
-function formatResponse(data: unknown, isError = false) {
+function formatResponse(data: unknown, isError = false, rootDir?: string) {
+  const rawText = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+  const dlpPolicy = loadDlpPolicy(rootDir);
+  const { sanitizedText } = sanitizeDlpText(rawText, dlpPolicy);
   return {
     content: [
       {
         type: 'text' as const,
-        text: typeof data === 'string' ? data : JSON.stringify(data, null, 2),
+        text: sanitizedText,
       },
     ],
     isError,
@@ -353,13 +358,17 @@ function registerGetActiveHandoffTool(server: McpServer, baseRoot: string): void
       if (!resolved) {
         return formatResponse({ success: false, error: `SDD change '${params.change}' not found.` }, true);
       }
-      return formatResponse({
-        success: true,
-        changeId: params.change,
-        directory: resolved.dir,
-        isCompleted: resolved.isCompleted,
-        files: readActiveHandoffFiles(resolved.dir),
-      });
+      return formatResponse(
+        {
+          success: true,
+          changeId: params.change,
+          directory: resolved.dir,
+          isCompleted: resolved.isCompleted,
+          files: readActiveHandoffFiles(resolved.dir),
+        },
+        false,
+        root
+      );
     } catch (err: unknown) {
       return formatCatchError(err);
     }

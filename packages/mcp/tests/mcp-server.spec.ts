@@ -3,6 +3,9 @@
  * Cites: FR-028-NATIVE-MCP-SERVER-001
  */
 
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
@@ -258,6 +261,32 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       expect(content.releaseBranch).toBe('HEAD');
       expect(content.totalCommits).toBeDefined();
       expect(content.authorStats).toBeDefined();
+    });
+
+    it('should sanitize sensitive patterns via DLP filter in get_active_handoff (#74)', async () => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-mcp-dlp-'));
+      try {
+        const changeDir = path.join(tmpDir, 'specs', 'changes', 'active', 'chg-dlp-test');
+        fs.mkdirSync(changeDir, { recursive: true });
+        const fakeGhp = ['ghp_', '1234567890abcdefghijklmnopqrstuvwxyzABCD'].join('');
+        fs.writeFileSync(
+          path.join(changeDir, 'proposal.md'),
+          `Contact: secret.owner@corporate.io and token ${fakeGhp}`
+        );
+
+        const result = await client.callTool({
+          name: 'get_active_handoff',
+          arguments: { change: 'chg-dlp-test', root: tmpDir },
+        });
+
+        expect(result.isError).toBeFalsy();
+        const rawText = (result.content[0] as any).text as string;
+        expect(rawText).toContain('[REDACTED:EMAIL]');
+        expect(rawText).toContain('[REDACTED:API_TOKEN]');
+        expect(rawText).not.toContain('secret.owner@corporate.io');
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
     });
   });
 });

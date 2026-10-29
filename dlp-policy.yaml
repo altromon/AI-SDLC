@@ -1,0 +1,50 @@
+# ==============================================================================
+# AI-SDLC: Deterministic Data Loss Prevention (DLP) & Pre-Prompt Sanitization Policy
+# ==============================================================================
+# Version: 1.0.0
+# Status: Canonical
+# Purpose: Declarative, offline-first DLP rules to mask credentials, private keys,
+#          internal endpoints, and PII before context is dispatched via MCP/CLI to LLMs.
+# ==============================================================================
+
+version: "1.0"
+project: "AI-SDLC Standard Organization"
+enabled: true
+zero_data_retention_required: true
+
+rules:
+  - id: "DLP-001-PRIVATE-KEY"
+    description: "PEM / RSA / EC / OPENSSH Private Key Block"
+    pattern: "-----BEGIN (?:[A-Z0-9_-]+ )?PRIVATE KEY-----[\\s\\S]*?-----END (?:[A-Z0-9_-]+ )?PRIVATE KEY-----"
+    replacement: "[REDACTED:PRIVATE_KEY]"
+    enabled: true
+
+  - id: "DLP-002-API-TOKEN"
+    description: "Cloud, GitHub, Slack, OpenAI, Stripe, and AWS Access Tokens"
+    pattern: "\\b(?:gh[pousr]_[A-Za-z0-9_]{36,255}|github_pat_[0-9a-zA-Z_]{82}|sk-(?:proj-|live-)?[a-zA-Z0-9_-]{32,}|AKIA[0-9A-Z]{16}|xox[baprs]-[0-9]{10,13}-[0-9]{10,13}[a-zA-Z0-9-]*|(?:sk|rk)_(?:live|test)_[0-9a-zA-Z]{24,99})\\b"
+    replacement: "[REDACTED:API_TOKEN]"
+    enabled: true
+
+  - id: "DLP-003-JWT"
+    description: "Plaintext JSON Web Token (JWT)"
+    pattern: "\\beyJ[A-Za-z0-9_-]{10,}\\.eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\b"
+    replacement: "[REDACTED:JWT_TOKEN]"
+    enabled: true
+
+  - id: "DLP-004-CREDIT-CARD"
+    description: "Payment Card Number (13-19 digits formatted)"
+    pattern: "\\b(?:\\d{4}[- ]\\d{4}[- ]\\d{4}[- ]\\d{4}|\\d{16})\\b"
+    replacement: "[REDACTED:CREDIT_CARD]"
+    enabled: true
+
+  - id: "DLP-005-EMAIL"
+    description: "Personal or Corporate Email Address"
+    pattern: "\\b[A-Za-z0-9._%+-]+@(?!example\\.com|localhost|test\\.local)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b"
+    replacement: "[REDACTED:EMAIL]"
+    enabled: true
+
+  - id: "DLP-006-INTERNAL-URL"
+    description: "Internal Intranet / Corp / Localhost Service URL with Credentials or Internal Host"
+    pattern: "https?://(?:[A-Za-z0-9._-]+:[A-Za-z0-9._-]+@|[A-Za-z0-9.-]+\\.(?:internal|corp|intranet|local)\\b)[^\\s\"'`<>]*"
+    replacement: "[REDACTED:INTERNAL_URL]"
+    enabled: true
