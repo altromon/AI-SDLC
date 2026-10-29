@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as child_process from 'child_process';
-import { ScannedDependency, ScaTool, ScaVulnerability, VulnerabilityThresholds } from '../../types/index.js';
+import { ScannedDependency, ScaTool, ScaVulnerability, VexStatement, VulnerabilityThresholds } from '../../types/index.js';
 
 export interface ScanOptions {
   depth?: 'direct' | 'transitive';
@@ -286,14 +286,25 @@ const SEVERITY_RANK: Record<string, number> = {
   UNKNOWN: 0,
 };
 
+function isExemptByVex(v: ScaVulnerability, vexStatements?: VexStatement[]): boolean {
+  if (!vexStatements || vexStatements.length === 0) return false;
+  return vexStatements.some(
+    (stmt) =>
+      stmt.id === v.id &&
+      (stmt.state === 'not_affected' || stmt.state === 'fixed') &&
+      (!stmt.package || stmt.package === v.packageName)
+  );
+}
+
 export function evaluateVulnerabilityThresholds(
   vulnerabilities: ScaVulnerability[],
-  options?: VulnerabilityThresholds
+  options?: VulnerabilityThresholds & { vexStatements?: VexStatement[] }
 ): { blocked: boolean; failingVulnerabilities: ScaVulnerability[] } {
   const minRank = options?.failOnSeverity ? (SEVERITY_RANK[options.failOnSeverity] ?? 3) : undefined;
   const maxScore = options?.maxCvssScore;
 
   const failing = vulnerabilities.filter((v) => {
+    if (isExemptByVex(v, options?.vexStatements)) return false;
     const rankMatch = minRank !== undefined && SEVERITY_RANK[v.severity] >= minRank;
     const scoreMatch = maxScore !== undefined && v.cvssV3Score !== undefined && v.cvssV3Score >= maxScore;
     return rankMatch || scoreMatch;
