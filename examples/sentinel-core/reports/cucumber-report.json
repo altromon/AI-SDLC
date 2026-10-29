@@ -82,7 +82,7 @@
             "name": "se publica el evento en el topic Kafka \"telemetry.normalized.v1\"",
             "result": {
               "status": "passed",
-              "duration": 1000000
+              "duration": 0
             }
           }
         ]
@@ -163,7 +163,7 @@
             "name": "se debe registrar un evento de alerta geospacial en el log estructurado",
             "result": {
               "status": "passed",
-              "duration": 1000000
+              "duration": 0
             }
           }
         ]
@@ -220,7 +220,7 @@
             "name": "el sistema debe detectar la violación de la regla cinemática BR-TELEMETRY-VALIDITY",
             "result": {
               "status": "passed",
-              "duration": 0
+              "duration": 1000000
             }
           },
           {
