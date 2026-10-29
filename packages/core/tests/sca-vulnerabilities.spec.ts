@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   parseTrivyVulnerabilities,
   evaluateVulnerabilityThresholds,
+  generateCycloneDxSbom,
+  parseLicensePolicy,
   verifyLicenses,
   type ScaVulnerability,
 } from '../src/index.js';
@@ -191,6 +193,74 @@ describe('SCA Vulnerability Detection & Evaluation Suite (#76 / CHG-039)', () =>
 
       expect(result.success).toBe(true);
       expect(result.vulnerabilitiesSkipped).toBeUndefined();
+    });
+  });
+
+  describe('CycloneDX 1.5 VEX (Vulnerability Exploitability eXchange) Attestations (#76)', () => {
+    it('should exempt vulnerabilities marked as not_affected in VEX statements during threshold evaluation', () => {
+      const vulns: ScaVulnerability[] = [
+        {
+          id: 'CVE-2023-45857',
+          packageName: 'axios',
+          installedVersion: '0.21.1',
+          severity: 'CRITICAL',
+          cvssV3Score: 9.8,
+        },
+      ];
+
+      const policy = parseLicensePolicy(`
+version: "1.0"
+vex_statements:
+  - id: "CVE-2023-45857"
+    package: "axios"
+    state: "not_affected"
+    justification: "code_not_reachable"
+    detail: "XSRF-TOKEN cookie functionality is never enabled in server-to-server calls."
+      `);
+
+      expect(policy.vex_statements?.length).toBe(1);
+
+      const evaluation = evaluateVulnerabilityThresholds(vulns, {
+        failOnSeverity: 'HIGH',
+        vexStatements: policy.vex_statements,
+      });
+
+      expect(evaluation.blocked).toBe(false);
+      expect(evaluation.failingVulnerabilities.length).toBe(0);
+    });
+
+    it('should embed VEX analysis statements into CycloneDX 1.5 SBOM vulnerabilities section', () => {
+      const sbom = generateCycloneDxSbom(
+        [{ name: 'axios', version: '0.21.1', spdxLicense: 'MIT' }],
+        {
+          projectName: 'vex-test-app',
+          vulnerabilities: [
+            {
+              id: 'CVE-2023-45857',
+              packageName: 'axios',
+              installedVersion: '0.21.1',
+              severity: 'CRITICAL',
+              cvssV3Score: 9.8,
+              primaryUrl: 'https://nvd.nist.gov/vuln/detail/CVE-2023-45857',
+            },
+          ],
+          vexStatements: [
+            {
+              id: 'CVE-2023-45857',
+              package: 'axios',
+              state: 'not_affected',
+              justification: 'code_not_reachable',
+              detail: 'Not reachable in backend CLI.',
+            },
+          ],
+        }
+      );
+
+      expect(sbom.vulnerabilities).toBeDefined();
+      expect(sbom.vulnerabilities?.length).toBe(1);
+      expect(sbom.vulnerabilities?.[0].id).toBe('CVE-2023-45857');
+      expect(sbom.vulnerabilities?.[0].analysis?.state).toBe('not_affected');
+      expect(sbom.vulnerabilities?.[0].analysis?.justification).toBe('code_not_reachable');
     });
   });
 });

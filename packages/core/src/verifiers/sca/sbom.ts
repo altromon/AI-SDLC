@@ -5,12 +5,21 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { CycloneDxBom, CycloneDxComponent, ScannedDependency } from '../../types/index.js';
+import {
+  CycloneDxBom,
+  CycloneDxComponent,
+  CycloneDxVulnerability,
+  ScaVulnerability,
+  ScannedDependency,
+  VexStatement,
+} from '../../types/index.js';
 
 export interface SbomGenerateOptions {
   rootDir?: string;
   projectName?: string;
   projectVersion?: string;
+  vulnerabilities?: ScaVulnerability[];
+  vexStatements?: VexStatement[];
 }
 
 export function buildCycloneDxComponent(dep: ScannedDependency): CycloneDxComponent {
@@ -43,6 +52,57 @@ export function buildCycloneDxComponent(dep: ScannedDependency): CycloneDxCompon
   return comp;
 }
 
+function buildVexAnalysis(vex?: VexStatement): CycloneDxVulnerability['analysis'] | undefined {
+  if (!vex) return undefined;
+  return {
+    state: vex.state,
+    justification: vex.justification,
+    detail: vex.detail,
+    response: vex.response,
+  };
+}
+
+export function buildCycloneDxVulnerabilities(
+  vulnerabilities: ScaVulnerability[] = [],
+  vexStatements: VexStatement[] = []
+): CycloneDxVulnerability[] {
+  const map = new Map<string, CycloneDxVulnerability>();
+
+  for (const v of vulnerabilities) {
+    const matchingVex = vexStatements.find(
+      (stmt) => stmt.id === v.id && (!stmt.package || stmt.package === v.packageName)
+    );
+    map.set(`${v.id}:${v.packageName}`, {
+      id: v.id,
+      source: v.primaryUrl ? { name: 'NVD/GHSA', url: v.primaryUrl } : undefined,
+      ratings: [
+        {
+          score: v.cvssV3Score,
+          severity: v.severity.toLowerCase(),
+          method: 'CVSSv3',
+          vector: v.cvssV3Vector,
+        },
+      ],
+      analysis: buildVexAnalysis(matchingVex),
+      affects: [{ ref: `pkg:npm/${v.packageName}@${v.installedVersion}` }],
+    });
+  }
+
+  for (const stmt of vexStatements) {
+    const key = `${stmt.id}:${stmt.package || '*'}`;
+    const alreadyMapped = Array.from(map.keys()).some((k) => k.startsWith(`${stmt.id}:`));
+    if (!alreadyMapped && !map.has(key)) {
+      map.set(key, {
+        id: stmt.id,
+        analysis: buildVexAnalysis(stmt),
+        affects: stmt.package ? [{ ref: stmt.package }] : undefined,
+      });
+    }
+  }
+
+  return Array.from(map.values());
+}
+
 export function generateCycloneDxSbom(
   dependencies: ScannedDependency[],
   options: SbomGenerateOptions = {}
@@ -64,6 +124,7 @@ export function generateCycloneDxSbom(
   }
 
   const components = dependencies.map(buildCycloneDxComponent);
+  const cdxVulns = buildCycloneDxVulnerabilities(options.vulnerabilities, options.vexStatements);
 
   return {
     bomFormat: 'CycloneDX',
@@ -86,6 +147,7 @@ export function generateCycloneDxSbom(
       },
     },
     components,
+    ...(cdxVulns.length > 0 ? { vulnerabilities: cdxVulns } : {}),
   };
 }
 
