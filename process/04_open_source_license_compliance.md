@@ -93,10 +93,10 @@ When a critical capability requires a Category D library:
 
 On every CI pipeline run and pre-flight gate (`aisdlc check`):
 1. **Dynamic Dependency Inspection (SCA)**:
-   - The native `@ai-sdlc/core` engine inspects the installed package tree (`node_modules` and `.pnpm` store) without requiring hand-crafted manifests.
+   - The native `@ai-sdlc/core` engine inspects the installed package tree (`node_modules` and `.pnpm` store) alongside deterministic polyglot lockfiles and manifests for Python (`pyproject.toml`, `poetry.lock`, `requirements.txt`), Go (`go.mod`, `go.sum`), Rust (`Cargo.toml`, `Cargo.lock`), and Java/Maven (`pom.xml`) without requiring hand-crafted manifests.
    - Resolves `package.json` metadata, identifies license files (`LICENSE`, `LICENSE.md`, `LICENSE.txt`), normalizes SPDX identifiers, and analyzes compound expressions (`AND`/`OR`).
 2. **SBOM (Software Bill of Materials) Generation**:
-   - Compiles the full direct and transitive dependency inventory in standard **CycloneDX 1.5 JSON** format (`reports/sbom.cdx.json`).
+   - Compiles the full direct and transitive dependency inventory in standard **CycloneDX 1.5 JSON** format (`reports/sbom.cdx.json`), including `vulnerabilities` and VEX (`vex_statements`) exploitability analysis blocks.
 3. **Automated Scanning and Classification Against `license-policy.yaml`**:
    - Each package is evaluated against permitted (`permissive_free`), restricted (`weak_copyleft_conditional` / `commercial_acquisition_required`), and denylisted (`strong_copyleft_viral`) lists.
    - If any denylisted (unexcepted GPL/AGPL) or unknown license is detected, the pipeline **fails immediately (exit code 1)**.

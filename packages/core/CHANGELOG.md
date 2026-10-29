@@ -1,5 +1,13 @@
 # @aisdlc/core
 
+## 2.3.0
+
+### Minor Changes
+
+- feat(sca): implementar motor SCA nativo políglota determinista (`zero-network`, `zero-binary`) sobre lockfiles de Python (`pyproject.toml`, `poetry.lock`, `requirements.txt`), Go (`go.mod`, `go.sum`), Rust (`Cargo.toml`, `Cargo.lock`) y Java/Maven (`pom.xml`) (#75).
+- feat(security): implementar sanitizador determinista DLP pre-prompt (`sanitizeDlpText`, `loadDlpPolicy`, `dlp-policy.yaml`) para redactar secretos, claves privadas y PII antes del envío a contextos LLM (#74).
+- feat(sca): soportar declaraciones VEX (`vex_statements` en `license-policy.yaml`) y bloque `vulnerabilities` / `analysis` en SBOM CycloneDX 1.5, eximiendo vulnerabilidades justificadas (`not_affected`, `fixed`) de los umbrales de bloqueo (#76).
+
 ## 2.2.4
 
 ### Patch Changes

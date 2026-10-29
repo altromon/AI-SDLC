@@ -13,6 +13,7 @@ import {
   LicenseVerificationResult,
   LicenseViolation,
   ScannedDependency,
+  VexStatement,
 } from '../types/index.js';
 import { scanInstalledLicenses, scanWithTrivy, evaluateVulnerabilityThresholds } from './sca/scanner.js';
 import {
@@ -33,7 +34,9 @@ interface RawLicensePolicy {
   categories?: Record<string, RawPolicyCategory>;
   exceptions?: {
     approved_commercial_packages?: { package: string; license: string; reason?: string }[];
+    vex_statements?: VexStatement[];
   };
+  vex_statements?: VexStatement[];
   ci_gates?: {
     generate_sbom?: boolean;
     sbom_format?: string;
@@ -130,11 +133,18 @@ function parseExceptions(exceptions?: RawLicensePolicy['exceptions']): Record<st
   return map;
 }
 
+function parseVexStatements(doc?: RawLicensePolicy): VexStatement[] {
+  const rawList = doc?.vex_statements || doc?.exceptions?.vex_statements || [];
+  if (!Array.isArray(rawList)) return [];
+  return rawList.filter((item): item is VexStatement => Boolean(item && typeof item.id === 'string' && typeof item.state === 'string'));
+}
+
 export function parseLicensePolicy(content: string): LicensePolicy & { rawPolicy?: RawLicensePolicy } {
   try {
     const doc = yaml.load(content) as RawLicensePolicy;
     const { permitted, restricted, blocked } = classifyCategories(doc?.categories);
     const exception_packages = parseExceptions(doc?.exceptions);
+    const vex_statements = parseVexStatements(doc);
 
     return {
       version: doc?.version || '1.0',
@@ -142,6 +152,7 @@ export function parseLicensePolicy(content: string): LicensePolicy & { rawPolicy
       restricted: restricted.length > 0 ? restricted : DEFAULT_RESTRICTED,
       blocked: blocked.length > 0 ? blocked : DEFAULT_BLOCKED,
       exception_packages,
+      vex_statements,
       rawPolicy: doc,
     };
   } catch {
@@ -151,6 +162,7 @@ export function parseLicensePolicy(content: string): LicensePolicy & { rawPolicy
       restricted: DEFAULT_RESTRICTED,
       blocked: DEFAULT_BLOCKED,
       exception_packages: {},
+      vex_statements: [],
     };
   }
 }
@@ -378,11 +390,13 @@ function maybeGenerateSbom(
   options: LicenseVerificationOptions,
   rootDir: string,
   rawPolicy: RawLicensePolicy | undefined,
-  dependencies: ScannedDependency[]
+  dependencies: ScannedDependency[],
+  vulnerabilities?: ScaVulnerability[],
+  vexStatements?: VexStatement[]
 ): string | undefined {
   if (!shouldGenerateSbom(options, rawPolicy)) return undefined;
   const sbomPath = options.sbomPath || path.join(rootDir, 'reports', 'sbom.cdx.json');
-  const sbom = generateCycloneDxSbom(dependencies, { rootDir });
+  const sbom = generateCycloneDxSbom(dependencies, { rootDir, vulnerabilities, vexStatements });
   writeCycloneDxSbom(sbom, sbomPath);
   return sbomPath;
 }
@@ -408,10 +422,12 @@ function handleDynamicScaArtifacts(
   options: LicenseVerificationOptions,
   rootDir: string,
   rawPolicy: RawLicensePolicy | undefined,
-  dependencies: ScannedDependency[]
+  dependencies: ScannedDependency[],
+  vulnerabilities?: ScaVulnerability[],
+  vexStatements?: VexStatement[]
 ): { sbomPath?: string; noticesPath?: string } {
   return {
-    sbomPath: maybeGenerateSbom(options, rootDir, rawPolicy, dependencies),
+    sbomPath: maybeGenerateSbom(options, rootDir, rawPolicy, dependencies, vulnerabilities, vexStatements),
     noticesPath: maybeGenerateNotices(options, rootDir, rawPolicy, dependencies),
   };
 }
@@ -456,7 +472,8 @@ function buildSkippedVulnResult(): {
 
 function checkVulnerabilities(
   rootDir: string,
-  options: LicenseVerificationOptions
+  options: LicenseVerificationOptions,
+  vexStatements?: VexStatement[]
 ): {
   vulnerabilities: ScaVulnerability[];
   blocked: boolean;
@@ -470,7 +487,10 @@ function checkVulnerabilities(
   if (!res.executed) {
     return buildSkippedVulnResult();
   }
-  const evalResult = evaluateVulnerabilityThresholds(res.vulnerabilities, options.vulnerabilityThresholds);
+  const evalResult = evaluateVulnerabilityThresholds(res.vulnerabilities, {
+    ...options.vulnerabilityThresholds,
+    vexStatements,
+  });
   return { vulnerabilities: res.vulnerabilities, blocked: evalResult.blocked };
 }
 
@@ -509,6 +529,7 @@ function toCleanPolicy(policyWithRaw: ReturnType<typeof loadLicensePolicy>): Lic
     restricted: policyWithRaw.restricted,
     blocked: policyWithRaw.blocked,
     exception_packages: policyWithRaw.exception_packages,
+    vex_statements: policyWithRaw.vex_statements,
   };
 }
 
@@ -538,8 +559,15 @@ export function verifyLicenses(options: LicenseVerificationOptions = {}): Licens
 
   const dependencies = scanDependenciesForVerification(options, rootDir, policyWithRaw.rawPolicy);
   const { violations, permittedCount } = evaluateDependencyList(dependencies, policy);
-  const artifacts = handleDynamicScaArtifacts(options, rootDir, policyWithRaw.rawPolicy, dependencies);
-  const vulnData = checkVulnerabilities(rootDir, options);
+  const vulnData = checkVulnerabilities(rootDir, options, policy.vex_statements);
+  const artifacts = handleDynamicScaArtifacts(
+    options,
+    rootDir,
+    policyWithRaw.rawPolicy,
+    dependencies,
+    vulnData.vulnerabilities,
+    policy.vex_statements
+  );
   const reportMarkdown = generateLicenseReportMarkdown(dependencies, violations, policy, artifacts.sbomPath);
 
   return assembleDynamicLicenseResult(dependencies, permittedCount, violations, reportMarkdown, artifacts, vulnData);

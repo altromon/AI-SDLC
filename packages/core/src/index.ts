@@ -37,3 +37,4 @@ export * from './reporters/sarif.js';
 export * from './adapters/sdd/index.js';
 export * from './init/index.js';
 export * from './utils/fs.js';
+export * from './security/dlp-sanitizer.js';

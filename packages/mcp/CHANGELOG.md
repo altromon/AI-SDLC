@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 2.3.0
+
+### Minor Changes
+
+- feat(security): integrar filtro determinista DLP pre-prompt en todas las respuestas de herramientas del servidor MCP (`formatResponse`) según `dlp-policy.yaml` (#74).
+- Updated dependencies
+  - @aisdlc/core@2.3.0
+
 ## 2.2.4
 
 ### Patch Changes

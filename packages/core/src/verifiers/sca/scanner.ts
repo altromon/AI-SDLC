@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as child_process from 'child_process';
-import { ScannedDependency, ScaTool, ScaVulnerability, VulnerabilityThresholds } from '../../types/index.js';
+import { ScannedDependency, ScaTool, ScaVulnerability, VexStatement, VulnerabilityThresholds } from '../../types/index.js';
 
 export interface ScanOptions {
   depth?: 'direct' | 'transitive';
@@ -198,6 +198,256 @@ export function scanPnpmStore(pnpmDir: string, directNames: Set<string>, seen: M
   }
 }
 
+function readTextIfExists(filePath: string): string | null {
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    return fs.readFileSync(filePath, 'utf-8');
+  } catch {
+    return null;
+  }
+}
+
+function extractTomlField(block: string, key: string): string | undefined {
+  const m = block.match(new RegExp(`^\\s*${key}\\s*=\\s*["']([^"']+)["']`, 'm'));
+  return m ? m[1].trim() : undefined;
+}
+
+function extractPyprojectDirectDeps(content: string): Set<string> {
+  const direct = new Set<string>();
+  const matches = content.matchAll(/^([a-zA-Z0-9_.-]+)\s*=\s*(?:["'{]|true)/gm);
+  for (const m of matches) {
+    const key = m[1].toLowerCase();
+    if (!['name', 'version', 'description', 'license', 'python', 'readme'].includes(key)) {
+      direct.add(key);
+    }
+  }
+  return direct;
+}
+
+function parseSingleTomlBlock(block: string, lockPath: string, directNames: Set<string>): ScannedDependency | null {
+  const name = extractTomlField(block, 'name');
+  const version = extractTomlField(block, 'version');
+  if (!name || !version) return null;
+  const spdx = normalizeSpdxLicense(extractTomlField(block, 'license') || 'UNKNOWN');
+  return {
+    name,
+    version,
+    spdxLicense: spdx,
+    purl: `pkg:pypi/${name.toLowerCase()}@${version}`,
+    path: lockPath,
+    isDirect: directNames.size === 0 || directNames.has(name.toLowerCase()),
+  };
+}
+
+function parseTomlPackageBlocks(
+  content: string,
+  lockPath: string,
+  directNames: Set<string>,
+  seen: Map<string, ScannedDependency>
+): void {
+  for (const block of content.split(/\[\[package\]\]/g).slice(1)) {
+    const dep = parseSingleTomlBlock(block, lockPath, directNames);
+    if (dep && !seen.has(`pypi:${dep.name}@${dep.version}`)) {
+      seen.set(`pypi:${dep.name}@${dep.version}`, dep);
+    }
+  }
+}
+
+function parsePipfileSection(
+  pkgs: Record<string, Record<string, unknown>>,
+  isDirect: boolean,
+  lockPath: string,
+  seen: Map<string, ScannedDependency>
+): void {
+  for (const [name, meta] of Object.entries(pkgs)) {
+    const rawVer = String(meta.version || '').replace(/^==/, '') || 'unknown';
+    const spdx = normalizeSpdxLicense(meta.license || 'UNKNOWN');
+    const key = `pypi:${name}@${rawVer}`;
+    if (!seen.has(key)) {
+      seen.set(key, {
+        name,
+        version: rawVer,
+        spdxLicense: spdx,
+        purl: `pkg:pypi/${name.toLowerCase()}@${rawVer}`,
+        path: lockPath,
+        isDirect,
+      });
+    }
+  }
+}
+
+export function scanPythonDependencies(rootDir: string, seen: Map<string, ScannedDependency>): void {
+  const pyproject = readTextIfExists(path.join(rootDir, 'pyproject.toml')) || '';
+  const directNames = extractPyprojectDirectDeps(pyproject);
+
+  for (const lockName of ['poetry.lock', 'uv.lock']) {
+    const lockPath = path.join(rootDir, lockName);
+    const content = readTextIfExists(lockPath);
+    if (content) parseTomlPackageBlocks(content, lockPath, directNames, seen);
+  }
+
+  const pipfileLockPath = path.join(rootDir, 'Pipfile.lock');
+  const pipfileRaw = readTextIfExists(pipfileLockPath);
+  if (!pipfileRaw) return;
+  try {
+    const data = JSON.parse(pipfileRaw) as Record<string, Record<string, Record<string, unknown>>>;
+    parsePipfileSection(data.default || {}, true, pipfileLockPath, seen);
+    parsePipfileSection(data.develop || {}, false, pipfileLockPath, seen);
+  } catch {
+    // Ignore malformed Pipfile.lock
+  }
+}
+
+function parseGoRequireLine(line: string, goModPath: string): ScannedDependency | null {
+  const cleaned = line.replace(/^require\s+/, '').trim();
+  const commentIdx = cleaned.indexOf('//');
+  const codePart = (commentIdx >= 0 ? cleaned.slice(0, commentIdx) : cleaned).trim();
+  const commentPart = commentIdx >= 0 ? cleaned.slice(commentIdx + 2).trim() : '';
+  const parts = codePart.split(/\s+/);
+  if (parts.length < 2) return null;
+
+  const modName = parts[0];
+  const rawVer = parts[1].replace(/^v/, '');
+  const isIndirect = /\bindirect\b/i.test(commentPart);
+  const licenseMatch = commentPart.match(/(?:spdx|license)\s*:\s*([A-Za-z0-9.+-]+)/i);
+  const spdx = licenseMatch ? normalizeSpdxLicense(licenseMatch[1]) : 'UNKNOWN';
+
+  return {
+    name: modName,
+    version: rawVer,
+    spdxLicense: spdx,
+    purl: `pkg:golang/${modName}@v${rawVer}`,
+    path: goModPath,
+    isDirect: !isIndirect,
+  };
+}
+
+function extractGoCandidateLines(content: string): string[] {
+  const out: string[] = [];
+  let inBlock = false;
+  for (const rawLine of content.split(/\r?\n/)) {
+    const trimmed = rawLine.trim();
+    if (/^require\s*\($/.test(trimmed)) inBlock = true;
+    else if (inBlock && trimmed === ')') inBlock = false;
+    else if (inBlock || trimmed.startsWith('require ')) out.push(trimmed);
+  }
+  return out;
+}
+
+export function scanGoDependencies(rootDir: string, seen: Map<string, ScannedDependency>): void {
+  const goModPath = path.join(rootDir, 'go.mod');
+  const content = readTextIfExists(goModPath);
+  if (!content) return;
+
+  for (const line of extractGoCandidateLines(content)) {
+    const dep = parseGoRequireLine(line, goModPath);
+    if (dep && !seen.has(`golang:${dep.name}@${dep.version}`)) {
+      seen.set(`golang:${dep.name}@${dep.version}`, dep);
+    }
+  }
+}
+
+function extractCargoDirectDeps(cargoToml: string): Map<string, string> {
+  const map = new Map<string, string>();
+  let inDeps = false;
+  for (const line of cargoToml.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('[')) {
+      inDeps = /^\[(?:dev-|build-)?dependencies\]$/.test(trimmed);
+      continue;
+    }
+    if (!inDeps || !trimmed || trimmed.startsWith('#')) continue;
+    const m = trimmed.match(/^([a-zA-Z0-9_-]+)\s*=\s*(.+)$/);
+    if (m) {
+      const licMatch = m[2].match(/license\s*=\s*["']([^"']+)["']/);
+      map.set(m[1], licMatch ? licMatch[1] : 'UNKNOWN');
+    }
+  }
+  return map;
+}
+
+function parseCargoLockBlock(
+  block: string,
+  rootName: string | undefined,
+  directMeta: Map<string, string>,
+  cargoLockPath: string
+): ScannedDependency | null {
+  const name = extractTomlField(block, 'name');
+  const version = extractTomlField(block, 'version');
+  if (!name || !version || name === rootName) return null;
+  const blockLic = extractTomlField(block, 'license') || directMeta.get(name) || 'UNKNOWN';
+  return {
+    name,
+    version,
+    spdxLicense: normalizeSpdxLicense(blockLic),
+    purl: `pkg:cargo/${name}@${version}`,
+    path: cargoLockPath,
+    isDirect: directMeta.size === 0 || directMeta.has(name),
+  };
+}
+
+export function scanRustDependencies(rootDir: string, seen: Map<string, ScannedDependency>): void {
+  const cargoLockPath = path.join(rootDir, 'Cargo.lock');
+  const lockContent = readTextIfExists(cargoLockPath);
+  if (!lockContent) return;
+
+  const cargoToml = readTextIfExists(path.join(rootDir, 'Cargo.toml')) || '';
+  const directMeta = extractCargoDirectDeps(cargoToml);
+  const rootName = extractTomlField(cargoToml, 'name');
+
+  for (const block of lockContent.split(/\[\[package\]\]/g).slice(1)) {
+    const dep = parseCargoLockBlock(block, rootName, directMeta, cargoLockPath);
+    if (dep && !seen.has(`cargo:${dep.name}@${dep.version}`)) {
+      seen.set(`cargo:${dep.name}@${dep.version}`, dep);
+    }
+  }
+}
+
+function extractXmlTag(xml: string, tag: string): string | undefined {
+  const m = xml.match(new RegExp(`<${tag}>([^<]+)</${tag}>`));
+  return m ? m[1].trim() : undefined;
+}
+
+function resolveMavenBlockLicense(block: string, defaultLic: string): string {
+  const tagLic = extractXmlTag(block, 'license');
+  if (tagLic) return tagLic;
+  const commentLic = block.match(/<!--\s*(?:spdx|license)\s*:\s*([A-Za-z0-9.+-]+)\s*-->/i)?.[1];
+  return commentLic || defaultLic;
+}
+
+function parseMavenDepBlock(block: string, defaultLic: string, pomPath: string): ScannedDependency | null {
+  const groupId = extractXmlTag(block, 'groupId');
+  const artifactId = extractXmlTag(block, 'artifactId');
+  if (!groupId || !artifactId) return null;
+  const version = extractXmlTag(block, 'version') || 'unknown';
+  const inlineLic = resolveMavenBlockLicense(block, defaultLic);
+  return {
+    name: `${groupId}:${artifactId}`,
+    version,
+    spdxLicense: normalizeSpdxLicense(inlineLic),
+    purl: `pkg:maven/${groupId}/${artifactId}@${version}`,
+    path: pomPath,
+    isDirect: true,
+  };
+}
+
+export function scanMavenDependencies(rootDir: string, seen: Map<string, ScannedDependency>): void {
+  const pomPath = path.join(rootDir, 'pom.xml');
+  const content = readTextIfExists(pomPath);
+  if (!content) return;
+
+  const projectLicBlock = content.match(/<licenses>([\s\S]*?)<\/licenses>/)?.[1] || '';
+  const defaultLic = extractXmlTag(projectLicBlock, 'name') || 'UNKNOWN';
+  const depBlocks = content.match(/<dependency>[\s\S]*?<\/dependency>/g) || [];
+
+  for (const block of depBlocks) {
+    const dep = parseMavenDepBlock(block, defaultLic, pomPath);
+    if (dep && !seen.has(`maven:${dep.name}@${dep.version}`)) {
+      seen.set(`maven:${dep.name}@${dep.version}`, dep);
+    }
+  }
+}
+
 export function scanWithNativeFs(rootDir: string, options: ScanOptions = {}): ScannedDependency[] {
   const directNames = extractDirectDepNames(rootDir, options.productionOnly);
   const seen = new Map<string, ScannedDependency>();
@@ -209,6 +459,11 @@ export function scanWithNativeFs(rootDir: string, options: ScanOptions = {}): Sc
       scanPnpmStore(path.join(nmDir, '.pnpm'), directNames, seen);
     }
   }
+
+  scanPythonDependencies(rootDir, seen);
+  scanGoDependencies(rootDir, seen);
+  scanRustDependencies(rootDir, seen);
+  scanMavenDependencies(rootDir, seen);
 
   const allDeps = Array.from(seen.values());
   if (options.depth === 'direct') {
@@ -286,14 +541,25 @@ const SEVERITY_RANK: Record<string, number> = {
   UNKNOWN: 0,
 };
 
+function isExemptByVex(v: ScaVulnerability, vexStatements?: VexStatement[]): boolean {
+  if (!vexStatements || vexStatements.length === 0) return false;
+  return vexStatements.some(
+    (stmt) =>
+      stmt.id === v.id &&
+      (stmt.state === 'not_affected' || stmt.state === 'fixed') &&
+      (!stmt.package || stmt.package === v.packageName)
+  );
+}
+
 export function evaluateVulnerabilityThresholds(
   vulnerabilities: ScaVulnerability[],
-  options?: VulnerabilityThresholds
+  options?: VulnerabilityThresholds & { vexStatements?: VexStatement[] }
 ): { blocked: boolean; failingVulnerabilities: ScaVulnerability[] } {
   const minRank = options?.failOnSeverity ? (SEVERITY_RANK[options.failOnSeverity] ?? 3) : undefined;
   const maxScore = options?.maxCvssScore;
 
   const failing = vulnerabilities.filter((v) => {
+    if (isExemptByVex(v, options?.vexStatements)) return false;
     const rankMatch = minRank !== undefined && SEVERITY_RANK[v.severity] >= minRank;
     const scoreMatch = maxScore !== undefined && v.cvssV3Score !== undefined && v.cvssV3Score >= maxScore;
     return rankMatch || scoreMatch;

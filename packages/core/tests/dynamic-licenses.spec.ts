@@ -304,4 +304,78 @@ categories:
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
+
+  it('should deterministically scan polyglot lockfiles (Python poetry.lock/Pipfile.lock, Go go.mod, Rust Cargo.lock, Java pom.xml) (#75)', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-polyglot-sca-'));
+    try {
+      // 1. Python poetry.lock + pyproject.toml
+      fs.writeFileSync(
+        path.join(tmpDir, 'pyproject.toml'),
+        `[tool.poetry.dependencies]\npython = "^3.11"\nfastapi = "^0.110.0"\n`
+      );
+      fs.writeFileSync(
+        path.join(tmpDir, 'poetry.lock'),
+        `[[package]]\nname = "fastapi"\nversion = "0.110.0"\nlicense = "MIT"\n\n[[package]]\nname = "pydantic"\nversion = "2.6.4"\nlicense = "MIT"\n`
+      );
+
+      // 2. Python Pipfile.lock
+      fs.writeFileSync(
+        path.join(tmpDir, 'Pipfile.lock'),
+        JSON.stringify({
+          default: {
+            requests: { version: '==2.31.0', license: 'Apache-2.0' },
+          },
+          develop: {
+            pytest: { version: '==8.0.0', license: 'MIT' },
+          },
+        })
+      );
+
+      // 3. Go go.mod
+      fs.writeFileSync(
+        path.join(tmpDir, 'go.mod'),
+        `module example.com/app\n\ngo 1.22\n\nrequire (\n\tgithub.com/gin-gonic/gin v1.9.1 // license: MIT\n\tgolang.org/x/sys v0.18.0 // indirect; spdx: BSD-3-Clause\n)\n`
+      );
+
+      // 4. Rust Cargo.toml + Cargo.lock
+      fs.writeFileSync(
+        path.join(tmpDir, 'Cargo.toml'),
+        `[package]\nname = "my-rust-app"\nversion = "0.1.0"\n\n[dependencies]\nserde = { version = "1.0.197", license = "MIT OR Apache-2.0" }\n`
+      );
+      fs.writeFileSync(
+        path.join(tmpDir, 'Cargo.lock'),
+        `[[package]]\nname = "my-rust-app"\nversion = "0.1.0"\n\n[[package]]\nname = "serde"\nversion = "1.0.197"\n\n[[package]]\nname = "syn"\nversion = "2.0.52"\nlicense = "MIT"\n`
+      );
+
+      // 5. Java Maven pom.xml
+      fs.writeFileSync(
+        path.join(tmpDir, 'pom.xml'),
+        `<project>\n  <licenses><license><name>Apache-2.0</name></license></licenses>\n  <dependencies>\n    <dependency>\n      <groupId>org.slf4j</groupId>\n      <artifactId>slf4j-api</artifactId>\n      <version>2.0.12</version>\n      <!-- license: MIT -->\n    </dependency>\n  </dependencies>\n</project>\n`
+      );
+
+      const allDeps = scanWithNativeFs(tmpDir, { depth: 'transitive' });
+      expect(allDeps.some((d) => d.purl === 'pkg:pypi/fastapi@0.110.0' && d.isDirect === true)).toBe(true);
+      expect(allDeps.some((d) => d.purl === 'pkg:pypi/pydantic@2.6.4' && d.isDirect === false)).toBe(true);
+      expect(allDeps.some((d) => d.purl === 'pkg:pypi/requests@2.31.0' && d.spdxLicense === 'Apache-2.0')).toBe(true);
+      expect(allDeps.some((d) => d.purl === 'pkg:golang/github.com/gin-gonic/gin@v1.9.1' && d.isDirect === true)).toBe(true);
+      expect(allDeps.some((d) => d.purl === 'pkg:golang/golang.org/x/sys@v0.18.0' && d.isDirect === false)).toBe(true);
+      expect(allDeps.some((d) => d.purl === 'pkg:cargo/serde@1.0.197' && d.isDirect === true)).toBe(true);
+      expect(allDeps.some((d) => d.purl === 'pkg:cargo/syn@2.0.52' && d.isDirect === false)).toBe(true);
+      expect(allDeps.some((d) => d.purl === 'pkg:maven/org.slf4j/slf4j-api@2.0.12' && d.spdxLicense === 'MIT')).toBe(true);
+
+      const result = verifyLicenses({
+        rootDir: tmpDir,
+        dynamic: true,
+        generateSbom: true,
+        scanVulnerabilities: false,
+      });
+      expect(result.success).toBe(true);
+      expect(result.totalEvaluated).toBeGreaterThanOrEqual(8);
+      expect(result.sbomPath).toBeDefined();
+      const sbomJson = JSON.parse(fs.readFileSync(result.sbomPath!, 'utf-8'));
+      expect(sbomJson.components.some((c: { purl?: string }) => c.purl === 'pkg:cargo/serde@1.0.197')).toBe(true);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
 });

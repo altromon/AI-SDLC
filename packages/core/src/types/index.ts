@@ -477,12 +477,48 @@ export interface GherkinSyncCheckResult {
 }
 
 // --- License Compliance Types ---
+export type VexAnalysisState = 'not_affected' | 'affected' | 'fixed' | 'in_triage';
+
+export type VexAnalysisJustification =
+  | 'code_not_present'
+  | 'code_not_reachable'
+  | 'requires_configuration'
+  | 'requires_dependency'
+  | 'requires_environment'
+  | 'protected_by_compiler'
+  | 'protected_at_runtime'
+  | 'protected_at_perimeter'
+  | 'protected_by_mitigating_control';
+
+export interface VexStatement {
+  id: string; // e.g., CVE-2023-45857
+  package?: string;
+  state: VexAnalysisState;
+  justification?: VexAnalysisJustification;
+  detail?: string;
+  response?: Array<'can_not_fix' | 'will_not_fix' | 'update' | 'rollback' | 'workaround_available'>;
+}
+
+export interface CycloneDxVulnerability {
+  id: string;
+  source?: { name?: string; url?: string };
+  ratings?: Array<{ score?: number; severity?: string; method?: string; vector?: string }>;
+  analysis?: {
+    state: VexAnalysisState;
+    justification?: VexAnalysisJustification;
+    detail?: string;
+    response?: string[];
+  };
+  affects?: Array<{ ref: string }>;
+}
+
 export interface LicensePolicy {
   version: string;
   permitted: string[];
   restricted: string[];
   blocked: string[];
   exception_packages?: Record<string, string>;
+  vex_statements?: VexStatement[];
 }
 
 export interface LicenseViolation {
@@ -538,6 +574,7 @@ export interface CycloneDxBom {
     };
   };
   components: CycloneDxComponent[];
+  vulnerabilities?: CycloneDxVulnerability[];
 }
 
 export interface ScaVulnerability {

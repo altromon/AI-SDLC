@@ -5,12 +5,21 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { CycloneDxBom, CycloneDxComponent, ScannedDependency } from '../../types/index.js';
+import {
+  CycloneDxBom,
+  CycloneDxComponent,
+  CycloneDxVulnerability,
+  ScaVulnerability,
+  ScannedDependency,
+  VexStatement,
+} from '../../types/index.js';
 
 export interface SbomGenerateOptions {
   rootDir?: string;
   projectName?: string;
   projectVersion?: string;
+  vulnerabilities?: ScaVulnerability[];
+  vexStatements?: VexStatement[];
 }
 
 export function buildCycloneDxComponent(dep: ScannedDependency): CycloneDxComponent {
@@ -43,49 +52,90 @@ export function buildCycloneDxComponent(dep: ScannedDependency): CycloneDxCompon
   return comp;
 }
 
+function buildVexAnalysis(vex?: VexStatement): CycloneDxVulnerability['analysis'] | undefined {
+  if (!vex) return undefined;
+  return {
+    state: vex.state,
+    justification: vex.justification,
+    detail: vex.detail,
+    response: vex.response,
+  };
+}
+
+function mapScaVulnToCycloneDx(v: ScaVulnerability, vexStatements: VexStatement[]): CycloneDxVulnerability {
+  const matchingVex = vexStatements.find(
+    (stmt) => stmt.id === v.id && (!stmt.package || stmt.package === v.packageName)
+  );
+  return {
+    id: v.id,
+    source: v.primaryUrl ? { name: 'NVD/GHSA', url: v.primaryUrl } : undefined,
+    ratings: [{ score: v.cvssV3Score, severity: v.severity.toLowerCase(), method: 'CVSSv3', vector: v.cvssV3Vector }],
+    analysis: buildVexAnalysis(matchingVex),
+    affects: [{ ref: `pkg:npm/${v.packageName}@${v.installedVersion}` }],
+  };
+}
+
+function mapStandaloneVex(stmt: VexStatement): CycloneDxVulnerability {
+  return {
+    id: stmt.id,
+    analysis: buildVexAnalysis(stmt),
+    affects: stmt.package ? [{ ref: stmt.package }] : undefined,
+  };
+}
+
+export function buildCycloneDxVulnerabilities(
+  vulnerabilities: ScaVulnerability[] = [],
+  vexStatements: VexStatement[] = []
+): CycloneDxVulnerability[] {
+  const out: CycloneDxVulnerability[] = vulnerabilities.map((v) => mapScaVulnToCycloneDx(v, vexStatements));
+  const seenIds = new Set(out.map((item) => item.id));
+  for (const stmt of vexStatements) {
+    if (!seenIds.has(stmt.id)) {
+      out.push(mapStandaloneVex(stmt));
+      seenIds.add(stmt.id);
+    }
+  }
+  return out;
+}
+
+function resolveProjectIdentity(options: SbomGenerateOptions): { name: string; version: string } {
+  let name = options.projectName || 'ai-sdlc-project';
+  let version = options.projectVersion || '1.0.0';
+  if (!options.rootDir) return { name, version };
+  const pkgPath = path.join(options.rootDir, 'package.json');
+  if (!fs.existsSync(pkgPath)) return { name, version };
+  try {
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+    if (pkg.name) name = pkg.name;
+    if (pkg.version) version = pkg.version;
+  } catch {
+    // Ignore read error
+  }
+  return { name, version };
+}
+
+function buildBomMetadata(name: string, version: string): CycloneDxBom['metadata'] {
+  return {
+    timestamp: new Date().toISOString(),
+    tools: [{ vendor: 'AI-SDLC', name: '@aisdlc/core', version: '2.3.0' }],
+    component: { type: 'application', name, version },
+  };
+}
+
 export function generateCycloneDxSbom(
   dependencies: ScannedDependency[],
   options: SbomGenerateOptions = {}
 ): CycloneDxBom {
-  let name = options.projectName || 'ai-sdlc-project';
-  let version = options.projectVersion || '1.0.0';
-
-  if (options.rootDir) {
-    const pkgPath = path.join(options.rootDir, 'package.json');
-    if (fs.existsSync(pkgPath)) {
-      try {
-        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-        if (pkg.name) name = pkg.name;
-        if (pkg.version) version = pkg.version;
-      } catch {
-        // Ignore read error
-      }
-    }
-  }
-
-  const components = dependencies.map(buildCycloneDxComponent);
-
+  const { name, version } = resolveProjectIdentity(options);
+  const cdxVulns = buildCycloneDxVulnerabilities(options.vulnerabilities, options.vexStatements);
   return {
     bomFormat: 'CycloneDX',
     specVersion: '1.5',
     version: 1,
     serialNumber: `urn:uuid:${crypto.randomUUID()}`,
-    metadata: {
-      timestamp: new Date().toISOString(),
-      tools: [
-        {
-          vendor: 'AI-SDLC',
-          name: '@aisdlc/core',
-          version: '1.0.0',
-        },
-      ],
-      component: {
-        type: 'application',
-        name,
-        version,
-      },
-    },
-    components,
+    metadata: buildBomMetadata(name, version),
+    components: dependencies.map(buildCycloneDxComponent),
+    ...(cdxVulns.length > 0 ? { vulnerabilities: cdxVulns } : {}),
   };
 }
 

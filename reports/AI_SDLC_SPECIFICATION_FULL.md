@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-10-25 21:05:57 UTC` | *Módulos Integrados:* `15`  
+> *Fecha de Compilación:* `2026-10-29 19:41:10 UTC` | *Módulos Integrados:* `15`  
 
 ---
 
@@ -228,6 +228,9 @@
     - [2. Autonomy Level Conditional Activation Rule](#cap-09-agent-protocols-2-autonomy-level-conditional-activation-rule)
     - [3. Canonical Template](#cap-09-agent-protocols-3-canonical-template)
     - [4. Canonical Lifecycle Transition Chain](#cap-09-agent-protocols-4-canonical-lifecycle-transition-chain)
+  - [9. Deterministic Pre-Prompt Data Loss Prevention (DLP) & Zero Data Retention (ZDR)](#cap-09-agent-protocols-9-deterministic-pre-prompt-data-loss-prevention-dlp-zero-data-retention-zdr)
+    - [1. Mandatory Pre-Prompt DLP Filtering](#cap-09-agent-protocols-1-mandatory-pre-prompt-dlp-filtering)
+    - [2. Zero Data Retention (ZDR) Governance](#cap-09-agent-protocols-2-zero-data-retention-zdr-governance)
 
 - [**10. Quality Management, Coding Rules, and Release Gates**](#cap-10-quality-management-and-release-gates) *(Fuente: `process/10_quality_management_and_release_gates.md`)*
   - [1. Quality Management in AI-SDLC: Software Quality as Code](#cap-10-quality-management-and-release-gates-1-quality-management-in-ai-sdlc-software-quality-as-code)
@@ -370,6 +373,7 @@ AI-SDLC/
 ├── README.md                                 # This guide
 ├── license-policy.yaml                       # Declarative allowed/blocked license policy
 ├── privacy-policy.yaml                       # Declarative GDPR/LOPDGDD/ISO 27701 & PII-SAST policy
+├── dlp-policy.yaml                           # Deterministic Pre-Prompt DLP & Zero Data Retention policy
 │
 ├── packages/                                 # Monorepo Workspace (pnpm + Changesets)
 │   ├── core/                                 # @aisdlc/core: Domain engine, pure verifiers, and reporters
@@ -957,7 +961,7 @@ AI-SDLC includes a dynamic software composition analysis (SCA) engine that inspe
 - **Native Dynamic Scan (Default)**:
   - Deterministically inspects installed dependencies on disk, resolving physical packages and symlinks.
   - Extracts metadata from `package.json`, resolves compound expressions (`AND` / `OR`), and extracts full license texts (`LICENSE`, `COPYING`, `NOTICE`).
-  - Requires no external binaries or third-party tools.
+  - Requires no external binaries or third-party tools, supporting native polyglot lockfile inspection across Node.js, Python (`pyproject.toml`, `poetry.lock`, `requirements.txt`), Go (`go.mod`, `go.sum`), Rust (`Cargo.toml`, `Cargo.lock`), and Java/Maven (`pom.xml`).
 - **Optional Bring-Your-Own-Tool Connectors (`--tool`)**:
   - Connects to **Trivy** (`--tool trivy`) or **Syft** (`--tool syft`) if installed in the host environment.
   - Provides graceful fallback: reverts automatically to native scanner if the binary is absent.
@@ -993,7 +997,7 @@ npx aisdlc verify licenses --tool trivy --sbom reports/trivy-sbom.cdx.json
 
 `aisdlc verify licenses` includes automated vulnerability detection from CycloneDX SBOMs or Trivy integrations:
 - Evaluates CVE/GHSA alerts against configurable thresholds (`--vuln`, `--vuln-max-critical <n>`, `--vuln-max-high <n>`).
-- Blocks build pipelines when unmitigated critical or high vulnerabilities exceed defined thresholds.
+- Blocks build pipelines when unmitigated critical or high vulnerabilities exceed defined thresholds, while honoring declarative `vex_statements` (`not_affected`, `fixed`) in `license-policy.yaml` and emitting CycloneDX 1.5 VEX `vulnerabilities` / `analysis` blocks.
 
 <a id="doc-readme-4-software-supply-chain-provenance-slsa-v10-sigstore-cosign"></a>
 
@@ -2120,10 +2124,10 @@ When a critical capability requires a Category D library:
 
 On every CI pipeline run and pre-flight gate (`aisdlc check`):
 1. **Dynamic Dependency Inspection (SCA)**:
-   - The native `@ai-sdlc/core` engine inspects the installed package tree (`node_modules` and `.pnpm` store) without requiring hand-crafted manifests.
+   - The native `@ai-sdlc/core` engine inspects the installed package tree (`node_modules` and `.pnpm` store) alongside deterministic polyglot lockfiles and manifests for Python (`pyproject.toml`, `poetry.lock`, `requirements.txt`), Go (`go.mod`, `go.sum`), Rust (`Cargo.toml`, `Cargo.lock`), and Java/Maven (`pom.xml`) without requiring hand-crafted manifests.
    - Resolves `package.json` metadata, identifies license files (`LICENSE`, `LICENSE.md`, `LICENSE.txt`), normalizes SPDX identifiers, and analyzes compound expressions (`AND`/`OR`).
 2. **SBOM (Software Bill of Materials) Generation**:
-   - Compiles the full direct and transitive dependency inventory in standard **CycloneDX 1.5 JSON** format (`reports/sbom.cdx.json`).
+   - Compiles the full direct and transitive dependency inventory in standard **CycloneDX 1.5 JSON** format (`reports/sbom.cdx.json`), including `vulnerabilities` and VEX (`vex_statements`) exploitability analysis blocks.
 3. **Automated Scanning and Classification Against `license-policy.yaml`**:
    - Each package is evaluated against permitted (`permissive_free`), restricted (`weak_copyleft_conditional` / `commercial_acquisition_required`), and denylisted (`strong_copyleft_viral`) lists.
    - If any denylisted (unexcepted GPL/AGPL) or unknown license is detected, the pipeline **fails immediately (exit code 1)**.
@@ -3343,6 +3347,8 @@ DIRECTIVES:
   * 'AMBIGUOUS': STOP immediately. Guessing requirements is forbidden. Ask clarifying questions and emit blocking handoff.
   * 'HIGH_RISK_MANUAL': NEVER execute autonomously; requires direct manual execution by human engineers. Emit handoff reminding human authorship.
 - Upon completing 100% of delivery tasks in 'COMPLETED' status, run canonical integration (`npx aisdlc sdd integrate --change <id>`) to promote requirements to the active specification and sync architecture.
+- MANDATORY REGRESSION VERIFICATION: Never declare build, typecheck, or bug fixes complete without executing the relevant automated test suite ('pnpm test', 'dotnet test') and confirming zero regressions.
+- GLOBAL STYLES & ASSETS PROTECTION: When modifying or refactoring frontend views, strictly preserve global stylesheet/asset imports and verify visual layout integrity remains intact.
 - Conclude by emitting canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') suggesting 'agent-expert-user' for Post-Development Functional Validation (evaluating 'UC-*' and 'FR-*' across UI and CLI) prior to pre-merge security audit.
 ```
 
@@ -3413,6 +3419,8 @@ DIRECTIVES:
 - NON-INVASION GUARDRAIL: STRICTLY FORBIDDEN from modifying or refactoring application source code files ('src/', 'packages/*/src/app/'). Your responsibility is pipelines and scaffolding, not business logic.
 - INFRASTRUCTURE DEPENDENCY POLICY: Every Docker base image, third-party CI action, or binary introduced must undergo scanning and respect 'license-policy.yaml' guidelines.
 - GATE PRESERVATION: Ensure pipeline optimizations keep all existing deterministic Quality Gates intact (unit tests, linters, SAST, secret, privacy, and license scanning).
+- CROSS-WORKFLOW AUDIT: When resolving CI/CD or configuration defects detected in a PR, search all '.github/workflows/*.yml' for the same pattern (including deploy, post-merge, and release pipelines) before declaring resolution.
+- REMOTE VERIFICATION: Creating a PR ('gh pr create') does not constitute completion; actively verify that remote pipeline checks pass ('gh pr checks <pr-number>').
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead or Release Manager, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
@@ -3657,10 +3665,10 @@ To ensure any AI agent operating in the repository automatically loads canonical
 
 | Agent Environment | Configuration File | Activation Scope | Injection Mechanism and Core Directives |
 | :--- | :--- | :--- | :--- |
-| **Cursor** | `.cursor/rules/ai-sdlc-core.mdc`<br>`.cursor/rules/ai-sdlc-product.mdc`<br>`.cursor/rules/ai-sdlc-quality.mdc` | Modular (`alwaysApply` for core, `specs/**` for product, `src/**`/`packages/**` for code) | Automatic context injection into Cursor Agent / Composer. Loads the 5 commandments, ProductShape taxonomy (`ACT-*`, `UC-*`, `FR-*`), JSON schemas, and complexity thresholds (CC $\le 10$, MI $\ge 50$). |
-| **Claude Code** | `CLAUDE.md` | Repository Root | Unified CLI command guide (`pnpm run check:fix`, `pnpm run verify:all`), commit trailer rules, SDD workflow, and auto-merge prohibition. |
-| **GitHub Copilot** | `.github/copilot-instructions.md` | Global (Copilot Chat and Copilot Workspace) | Automatic injection into every Copilot prompt. Context on SDD lifecycle, Git 4-tier branch structure, and strict license policy (`license-policy.yaml`). |
-| **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md` | Workspace Global | Deterministic mapping of specialized roles (`agent-product-analyst`, `agent-threat-modeler`, `agent-privacy-officer`, `agent-developer`), guardrails, and "AI as Scribe" protocol. |
+| **Cursor** | `.cursor/rules/ai-sdlc-core.mdc`<br>`.cursor/rules/ai-sdlc-product.mdc`<br>`.cursor/rules/ai-sdlc-quality.mdc`<br>`.cursor/rules/*.mdc` | Modular (`alwaysApply` for core, `specs/**` for product, `src/**`/`packages/**` for code) | Automatic context injection into Cursor Agent / Composer. Loads the 5 commandments, ProductShape taxonomy (`ACT-*`, `UC-*`, `FR-*`), JSON schemas, complexity thresholds (CC $\le 10$, MI $\ge 50$), specialized role rules, and lifecycle playbooks (`aisdlc-greenfield`, `aisdlc-increment`, `aisdlc-legacy-onboarding`). |
+| **Claude Code** | `CLAUDE.md`<br>`.claude/agents/*.md`<br>`.claude/skills/*/SKILL.md` | Repository Root & `.claude/` | Unified CLI command guide, specialized subagents, and native Claude Code skills for all 11 roles and 3 lifecycle playbooks. |
+| **GitHub Copilot** | `.github/copilot-instructions.md`<br>`.github/agents/*.agent.md` | Global & `.github/agents/` | Automatic injection into every Copilot prompt. Context on SDD lifecycle, Git 4-tier branch structure, license policy, specialized agents, and lifecycle playbooks. |
+| **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md`<br>`.agent/agents/*.md`<br>`.agent/skills/*/SKILL.md` | Workspace Global | Deterministic mapping of specialized roles, guardrails, and lifecycle playbooks (`aisdlc-greenfield`, `aisdlc-increment`, `aisdlc-legacy-onboarding`). |
 | **Model Context Protocol (MCP)** | `.cursor/mcp.json`<br>`antigravity.mcp.json`<br>`.vscode/mcp.json` | IDE / Workspace | MCP server declarations for direct IDE access to AI-SDLC deterministic tools. |
 
 <a id="cap-09-agent-protocols-automated-agent-scaffolding-aisdlc-init---agents"></a>
@@ -3916,6 +3924,25 @@ Every formal handoff adopts the structure in [`templates/workflow/agent-handoff.
      └── agent-devops (DevOps / IaC): Autonomously maintains CI/CD (.github/workflows),
          Dockerfiles, and infra scripts, under strict NON-INVASION GUARDRAIL on src/.
 ```
+
+---
+
+<a id="cap-09-agent-protocols-9-deterministic-pre-prompt-data-loss-prevention-dlp-zero-data-retention-zdr"></a>
+
+## 9. Deterministic Pre-Prompt Data Loss Prevention (DLP) & Zero Data Retention (ZDR)
+
+<a id="cap-09-agent-protocols-1-mandatory-pre-prompt-dlp-filtering"></a>
+
+### 1. Mandatory Pre-Prompt DLP Filtering
+When autonomous agents or developers interact with external foundation models (OpenAI, Anthropic, Google Gemini, etc.) via the AI-SDLC MCP server (`@aisdlc/mcp`) or CLI, all context payloads pass through the deterministic DLP sanitizer (`packages/core/src/security/dlp-sanitizer.ts`) governed by `dlp-policy.yaml`:
+- **Private Keys & Credentials**: PEM/RSA/OPENSSH blocks, GitHub/AWS/OpenAI/Slack/Stripe tokens, and plaintext JWTs are deterministically replaced with `[REDACTED:PRIVATE_KEY]`, `[REDACTED:API_TOKEN]`, and `[REDACTED:JWT_TOKEN]`.
+- **PII & Payment Data**: Payment card numbers and non-example personal/corporate email addresses are masked (`[REDACTED:CREDIT_CARD]`, `[REDACTED:EMAIL]`).
+- **Internal Topology**: Internal intranet URLs (`.internal`, `.corp`, `.intranet`, `.local`) and basic-auth embedded URLs are obfuscated (`[REDACTED:INTERNAL_URL]`).
+
+<a id="cap-09-agent-protocols-2-zero-data-retention-zdr-governance"></a>
+
+### 2. Zero Data Retention (ZDR) Governance
+- Enterprise deployments connecting AI-SDLC agents to external LLM APIs MUST enforce **Zero Data Retention (ZDR)** agreements so prompt contexts and code diffs are never used for model training or persisted beyond the synchronous inference window.
 
 ---
 
