@@ -79,6 +79,7 @@ AI-SDLC/
 ├── README.md                                 # This guide
 ├── license-policy.yaml                       # Declarative allowed/blocked license policy
 ├── privacy-policy.yaml                       # Declarative GDPR/LOPDGDD/ISO 27701 & PII-SAST policy
+├── dlp-policy.yaml                           # Deterministic Pre-Prompt DLP & Zero Data Retention policy
 │
 ├── packages/                                 # Monorepo Workspace (pnpm + Changesets)
 │   ├── core/                                 # @aisdlc/core: Domain engine, pure verifiers, and reporters
@@ -626,7 +627,7 @@ AI-SDLC includes a dynamic software composition analysis (SCA) engine that inspe
 - **Native Dynamic Scan (Default)**:
   - Deterministically inspects installed dependencies on disk, resolving physical packages and symlinks.
   - Extracts metadata from `package.json`, resolves compound expressions (`AND` / `OR`), and extracts full license texts (`LICENSE`, `COPYING`, `NOTICE`).
-  - Requires no external binaries or third-party tools.
+  - Requires no external binaries or third-party tools, supporting native polyglot lockfile inspection across Node.js, Python (`pyproject.toml`, `poetry.lock`, `requirements.txt`), Go (`go.mod`, `go.sum`), Rust (`Cargo.toml`, `Cargo.lock`), and Java/Maven (`pom.xml`).
 - **Optional Bring-Your-Own-Tool Connectors (`--tool`)**:
   - Connects to **Trivy** (`--tool trivy`) or **Syft** (`--tool syft`) if installed in the host environment.
   - Provides graceful fallback: reverts automatically to native scanner if the binary is absent.
@@ -658,7 +659,7 @@ npx aisdlc verify licenses --tool trivy --sbom reports/trivy-sbom.cdx.json
 
 `aisdlc verify licenses` includes automated vulnerability detection from CycloneDX SBOMs or Trivy integrations:
 - Evaluates CVE/GHSA alerts against configurable thresholds (`--vuln`, `--vuln-max-critical <n>`, `--vuln-max-high <n>`).
-- Blocks build pipelines when unmitigated critical or high vulnerabilities exceed defined thresholds.
+- Blocks build pipelines when unmitigated critical or high vulnerabilities exceed defined thresholds, while honoring declarative `vex_statements` (`not_affected`, `fixed`) in `license-policy.yaml` and emitting CycloneDX 1.5 VEX `vulnerabilities` / `analysis` blocks.
 
 ### 4. Software Supply Chain Provenance (SLSA v1.0 & Sigstore Cosign)
 

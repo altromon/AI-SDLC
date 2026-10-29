@@ -98,50 +98,43 @@ export function buildCycloneDxVulnerabilities(
   return out;
 }
 
+function resolveProjectIdentity(options: SbomGenerateOptions): { name: string; version: string } {
+  let name = options.projectName || 'ai-sdlc-project';
+  let version = options.projectVersion || '1.0.0';
+  if (!options.rootDir) return { name, version };
+  const pkgPath = path.join(options.rootDir, 'package.json');
+  if (!fs.existsSync(pkgPath)) return { name, version };
+  try {
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+    if (pkg.name) name = pkg.name;
+    if (pkg.version) version = pkg.version;
+  } catch {
+    // Ignore read error
+  }
+  return { name, version };
+}
+
+function buildBomMetadata(name: string, version: string): CycloneDxBom['metadata'] {
+  return {
+    timestamp: new Date().toISOString(),
+    tools: [{ vendor: 'AI-SDLC', name: '@aisdlc/core', version: '2.3.0' }],
+    component: { type: 'application', name, version },
+  };
+}
+
 export function generateCycloneDxSbom(
   dependencies: ScannedDependency[],
   options: SbomGenerateOptions = {}
 ): CycloneDxBom {
-  let name = options.projectName || 'ai-sdlc-project';
-  let version = options.projectVersion || '1.0.0';
-
-  if (options.rootDir) {
-    const pkgPath = path.join(options.rootDir, 'package.json');
-    if (fs.existsSync(pkgPath)) {
-      try {
-        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-        if (pkg.name) name = pkg.name;
-        if (pkg.version) version = pkg.version;
-      } catch {
-        // Ignore read error
-      }
-    }
-  }
-
-  const components = dependencies.map(buildCycloneDxComponent);
+  const { name, version } = resolveProjectIdentity(options);
   const cdxVulns = buildCycloneDxVulnerabilities(options.vulnerabilities, options.vexStatements);
-
   return {
     bomFormat: 'CycloneDX',
     specVersion: '1.5',
     version: 1,
     serialNumber: `urn:uuid:${crypto.randomUUID()}`,
-    metadata: {
-      timestamp: new Date().toISOString(),
-      tools: [
-        {
-          vendor: 'AI-SDLC',
-          name: '@aisdlc/core',
-          version: '1.0.0',
-        },
-      ],
-      component: {
-        type: 'application',
-        name,
-        version,
-      },
-    },
-    components,
+    metadata: buildBomMetadata(name, version),
+    components: dependencies.map(buildCycloneDxComponent),
     ...(cdxVulns.length > 0 ? { vulnerabilities: cdxVulns } : {}),
   };
 }

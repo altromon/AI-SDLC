@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 2.3.0
+
+### Minor Changes
+
+- feat(cli): incorporar soporte de inspección SCA políglota nativa, atestaciones VEX en CycloneDX 1.5 y sanitización DLP pre-prompt en MCP (#74, #75, #76).
+- Updated dependencies
+  - @aisdlc/core@2.3.0
+  - @aisdlc/mcp@2.3.0
+
 ## 2.2.4
 
 ### Patch Changes
