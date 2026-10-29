@@ -691,3 +691,16 @@ Every formal handoff adopts the structure in [`templates/workflow/agent-handoff.
      └── agent-devops (DevOps / IaC): Autonomously maintains CI/CD (.github/workflows),
          Dockerfiles, and infra scripts, under strict NON-INVASION GUARDRAIL on src/.
 ```
+
+---
+
+## 9. Deterministic Pre-Prompt Data Loss Prevention (DLP) & Zero Data Retention (ZDR)
+
+### 1. Mandatory Pre-Prompt DLP Filtering
+When autonomous agents or developers interact with external foundation models (OpenAI, Anthropic, Google Gemini, etc.) via the AI-SDLC MCP server (`@aisdlc/mcp`) or CLI, all context payloads pass through the deterministic DLP sanitizer (`packages/core/src/security/dlp-sanitizer.ts`) governed by `dlp-policy.yaml`:
+- **Private Keys & Credentials**: PEM/RSA/OPENSSH blocks, GitHub/AWS/OpenAI/Slack/Stripe tokens, and plaintext JWTs are deterministically replaced with `[REDACTED:PRIVATE_KEY]`, `[REDACTED:API_TOKEN]`, and `[REDACTED:JWT_TOKEN]`.
+- **PII & Payment Data**: Payment card numbers and non-example personal/corporate email addresses are masked (`[REDACTED:CREDIT_CARD]`, `[REDACTED:EMAIL]`).
+- **Internal Topology**: Internal intranet URLs (`.internal`, `.corp`, `.intranet`, `.local`) and basic-auth embedded URLs are obfuscated (`[REDACTED:INTERNAL_URL]`).
+
+### 2. Zero Data Retention (ZDR) Governance
+- Enterprise deployments connecting AI-SDLC agents to external LLM APIs MUST enforce **Zero Data Retention (ZDR)** agreements so prompt contexts and code diffs are never used for model training or persisted beyond the synchronous inference window.
