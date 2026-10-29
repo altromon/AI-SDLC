@@ -306,8 +306,14 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     }
   });
 
-  it('verifies the 3 lifecycle workflow skills (Greenfield, Legacy Onboarding, Increment) exist without drift', async () => {
-    const { LIFECYCLE_SKILL_TEMPLATES, renderAntigravitySkillFile } = await import('../src/init/index.js');
+  it('verifies the 3 lifecycle workflow skills (Greenfield, Legacy Onboarding, Increment) exist across all IDEs without drift', async () => {
+    const {
+      LIFECYCLE_SKILL_TEMPLATES,
+      renderAntigravitySkillFile,
+      renderClaudeSkillFile,
+      renderCursorSkillFile,
+      renderCopilotSkillFile,
+    } = await import('../src/init/index.js');
     expect(LIFECYCLE_SKILL_TEMPLATES.map((s) => s.id)).toEqual([
       'aisdlc-greenfield',
       'aisdlc-legacy-onboarding',
@@ -315,11 +321,44 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     ]);
 
     for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
-      const skillPath = path.join(rootDir, `.agent/skills/${skill.id}/SKILL.md`);
-      expect(fs.existsSync(skillPath), `Lifecycle skill ${skill.id} must exist at ${skillPath}`).toBe(true);
-      const diskContent = fs.readFileSync(skillPath, 'utf-8').replace(/\r\n/g, '\n');
-      const renderedContent = renderAntigravitySkillFile(skill).replace(/\r\n/g, '\n');
-      expect(diskContent).toBe(renderedContent);
+      // Antigravity
+      const agPath = path.join(rootDir, `.agent/skills/${skill.id}/SKILL.md`);
+      expect(fs.existsSync(agPath), `Antigravity lifecycle skill ${skill.id} must exist at ${agPath}`).toBe(true);
+      expect(fs.readFileSync(agPath, 'utf-8').replace(/\r\n/g, '\n')).toBe(
+        renderAntigravitySkillFile(skill).replace(/\r\n/g, '\n')
+      );
+
+      // Claude Code
+      const claudePath = path.join(rootDir, `.claude/skills/${skill.id}/SKILL.md`);
+      expect(fs.existsSync(claudePath), `Claude lifecycle skill ${skill.id} must exist at ${claudePath}`).toBe(true);
+      expect(fs.readFileSync(claudePath, 'utf-8').replace(/\r\n/g, '\n')).toBe(
+        renderClaudeSkillFile(skill).replace(/\r\n/g, '\n')
+      );
+
+      // Cursor
+      const cursorPath = path.join(rootDir, `.cursor/rules/${skill.id}.mdc`);
+      expect(fs.existsSync(cursorPath), `Cursor lifecycle rule ${skill.id} must exist at ${cursorPath}`).toBe(true);
+      expect(fs.readFileSync(cursorPath, 'utf-8').replace(/\r\n/g, '\n')).toBe(
+        renderCursorSkillFile(skill).replace(/\r\n/g, '\n')
+      );
+
+      // Copilot
+      const copilotPath = path.join(rootDir, `.github/agents/${skill.id}.agent.md`);
+      expect(fs.existsSync(copilotPath), `Copilot lifecycle agent ${skill.id} must exist at ${copilotPath}`).toBe(true);
+      expect(fs.readFileSync(copilotPath, 'utf-8').replace(/\r\n/g, '\n')).toBe(
+        renderCopilotSkillFile(skill).replace(/\r\n/g, '\n')
+      );
+    }
+  });
+
+  it('verifies all 11 specialized agent skills exist in .claude/skills without drift', async () => {
+    const { SPECIALIZED_AGENT_TEMPLATES, renderClaudeAgentFile } = await import('../src/init/index.js');
+    for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
+      const claudeSkillPath = path.join(rootDir, `.claude/skills/${agent.id}/SKILL.md`);
+      expect(fs.existsSync(claudeSkillPath), `Claude agent skill ${agent.id} must exist at ${claudeSkillPath}`).toBe(true);
+      expect(fs.readFileSync(claudeSkillPath, 'utf-8').replace(/\r\n/g, '\n')).toBe(
+        renderClaudeAgentFile(agent).replace(/\r\n/g, '\n')
+      );
     }
   });
 });

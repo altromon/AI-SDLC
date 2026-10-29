@@ -12,6 +12,9 @@ import {
   SPECIALIZED_AGENT_TEMPLATES,
   LIFECYCLE_SKILL_TEMPLATES,
   renderAntigravitySkillFile,
+  renderClaudeSkillFile,
+  renderCursorSkillFile,
+  renderCopilotSkillFile,
 } from '../src/init/index.js';
 
 describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
@@ -52,15 +55,28 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
       expect(fs.existsSync(path.join(tempDir, `.agent/skills/${agent.id}/SKILL.md`))).toBe(true);
       expect(fs.existsSync(path.join(tempDir, `.cursor/rules/${agent.id}.mdc`))).toBe(true);
       expect(fs.existsSync(path.join(tempDir, `.claude/agents/${agent.id}.md`))).toBe(true);
+      expect(fs.existsSync(path.join(tempDir, `.claude/skills/${agent.id}/SKILL.md`))).toBe(true);
       expect(fs.existsSync(path.join(tempDir, `.github/agents/${agent.id}.agent.md`))).toBe(true);
     }
 
-    // Lifecycle workflow skills should be present for Greenfield, Legacy, and Increment
+    // Lifecycle workflow skills should be present for Greenfield, Legacy, and Increment across all supported IDEs
     expect(LIFECYCLE_SKILL_TEMPLATES).toHaveLength(3);
     for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
-      const skillPath = path.join(tempDir, `.agent/skills/${skill.id}/SKILL.md`);
-      expect(fs.existsSync(skillPath)).toBe(true);
-      expect(fs.readFileSync(skillPath, 'utf-8')).toBe(renderAntigravitySkillFile(skill));
+      const agPath = path.join(tempDir, `.agent/skills/${skill.id}/SKILL.md`);
+      expect(fs.existsSync(agPath)).toBe(true);
+      expect(fs.readFileSync(agPath, 'utf-8')).toBe(renderAntigravitySkillFile(skill));
+
+      const claudePath = path.join(tempDir, `.claude/skills/${skill.id}/SKILL.md`);
+      expect(fs.existsSync(claudePath)).toBe(true);
+      expect(fs.readFileSync(claudePath, 'utf-8')).toBe(renderClaudeSkillFile(skill));
+
+      const cursorPath = path.join(tempDir, `.cursor/rules/${skill.id}.mdc`);
+      expect(fs.existsSync(cursorPath)).toBe(true);
+      expect(fs.readFileSync(cursorPath, 'utf-8')).toBe(renderCursorSkillFile(skill));
+
+      const copilotPath = path.join(tempDir, `.github/agents/${skill.id}.agent.md`);
+      expect(fs.existsSync(copilotPath)).toBe(true);
+      expect(fs.readFileSync(copilotPath, 'utf-8')).toBe(renderCopilotSkillFile(skill));
     }
   });
 
@@ -128,11 +144,14 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
     expect(result.agentsConfigured).toContain('claude');
     expect(result.agentsConfigured).not.toContain('antigravity');
 
-    // Cursor & Claude exist (both global and individual agent files)
+    // Cursor & Claude exist (both global, individual agent files, and skills)
     expect(fs.existsSync(path.join(tempDir, '.cursor/rules/ai-sdlc-core.mdc'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, '.cursor/rules/agent-developer.mdc'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.cursor/rules/aisdlc-increment.mdc'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'CLAUDE.md'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, '.claude/agents/agent-developer.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.claude/skills/agent-developer/SKILL.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.claude/skills/aisdlc-increment/SKILL.md'))).toBe(true);
 
     // Antigravity & Copilot do not exist
     expect(fs.existsSync(path.join(tempDir, '.agent/rules/ai-sdlc.md'))).toBe(false);
