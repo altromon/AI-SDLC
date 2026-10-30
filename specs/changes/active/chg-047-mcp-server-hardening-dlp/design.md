@@ -8,7 +8,7 @@ schema-version: "1.0"
 handoff: "HOF-CHG-047-MCP-SERVER-HARDENING-DLP"
 architecture-component: "CMP-CORE"
 enclave: "SEC-ENC-DMZ"
-status: draft
+status: approved
 contracts: []
 citations:
   - id: FR-047-MCP-SERVER-HARDENING-DLP-001

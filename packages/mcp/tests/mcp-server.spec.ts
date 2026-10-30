@@ -264,7 +264,8 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
     });
 
     it('should sanitize sensitive patterns via DLP filter in get_active_handoff (#74)', async () => {
-      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-mcp-dlp-'));
+      const tmpDir = path.join(process.cwd(), 'scratch', 'ai-sdlc-mcp-dlp');
+      fs.mkdirSync(tmpDir, { recursive: true });
       try {
         const changeDir = path.join(tmpDir, 'specs', 'changes', 'active', 'chg-dlp-test');
         fs.mkdirSync(changeDir, { recursive: true });

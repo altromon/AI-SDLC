@@ -5,7 +5,7 @@ change-id: CHG-047-MCP-SERVER-HARDENING-DLP
 title: 'Desglose de Tareas Verificables: mcp-server-hardening-dlp'
 version: 1.0.0
 schema-version: '1.0'
-status: draft
+status: approved
 governance-summary:
   autonomous-tasks-count: 1
   human-review-plan-count: 1
@@ -21,7 +21,7 @@ tasks:
       method: quality-gate
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-CORE
     satisfies-requirements: &ref_0
@@ -35,7 +35,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-CORE
     satisfies-requirements: *ref_0

@@ -2,7 +2,7 @@
 id: CHG-047-MCP-SERVER-HARDENING-DLP
 type: spec-change-proposal
 title: "mcp-server-hardening-dlp"
-status: draft
+status: approved
 author: "Agent Developer"
 citations:
   - id: FR-047-MCP-SERVER-HARDENING-DLP-001

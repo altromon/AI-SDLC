@@ -1,8 +1,11 @@
 /**
  * AI-SDLC Native MCP Server Tools
  * Full catalog of SDD scaffolding, verification, reporting, and governance tools.
+ * Includes hardening: Path Confinement, Universal DLP, Role-Based Access Control & Audit Trail.
+ * Cites: FR-028-NATIVE-MCP-SERVER-001, FR-047-MCP-SERVER-HARDENING-DLP-001
  */
 
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -39,12 +42,104 @@ import {
   type SastSeverity,
 } from '@aisdlc/core';
 
-export interface RegisterToolsOptions {
-  rootDir?: string;
+export type McpRole =
+  | 'admin'
+  | 'developer'
+  | 'architect'
+  | 'qa'
+  | 'devops'
+  | 'auditor'
+  | 'reviewer'
+  | 'readonly'
+  | string;
+
+export interface McpAuditLogEntry {
+  timestamp: string;
+  tool: string;
+  role: string;
+  paramsHash: string;
+  success: boolean;
+  durationMs: number;
+  error?: string;
 }
 
-function resolveRoot(customRoot?: string, defaultRoot?: string): string {
-  return customRoot ? path.resolve(customRoot) : defaultRoot || process.cwd();
+export interface RegisterToolsOptions {
+  rootDir?: string;
+  role?: McpRole;
+  auditLogPath?: string;
+  enableAuditLog?: boolean;
+  onAuditLog?: (entry: McpAuditLogEntry) => void;
+}
+
+export const MUTATION_TOOLS = new Set([
+  'new',
+  'sdd_change_new',
+  'sdd_check_fix',
+  'sdd_deposit',
+  'sdd_integrate',
+]);
+
+export const READONLY_ROLES = new Set([
+  'auditor',
+  'reviewer',
+  'readonly',
+  'agent-code-reviewer',
+  'agent-security-auditor',
+  'agent-compliance-checker',
+  'agent-privacy-officer',
+]);
+
+export function hashParams(params: unknown): string {
+  try {
+    const raw = params && typeof params === 'object' ? params : {};
+    const sortedKeys = Object.keys(raw as Record<string, unknown>).sort();
+    const sortedObj: Record<string, unknown> = {};
+    for (const key of sortedKeys) {
+      sortedObj[key] = (raw as Record<string, unknown>)[key];
+    }
+    return crypto.createHash('sha256').update(JSON.stringify(sortedObj)).digest('hex');
+  } catch {
+    return crypto.createHash('sha256').update(String(params || '')).digest('hex');
+  }
+}
+
+export function assertWithinRoot(targetPath: string, rootDir: string, paramName = 'path'): string {
+  const normalizedRoot = path.resolve(rootDir);
+  const resolvedTarget = path.resolve(normalizedRoot, targetPath);
+  const relative = path.relative(normalizedRoot, resolvedTarget);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error(
+      `Security violation: ${paramName} '${targetPath}' escapes workspace root '${normalizedRoot}' (Path Traversal blocked).`
+    );
+  }
+  return resolvedTarget;
+}
+
+function resolveRoot(customRoot: string | undefined, defaultRoot: string): string {
+  const base = defaultRoot || process.cwd();
+  if (!customRoot) return path.resolve(base);
+  return assertWithinRoot(customRoot, base, 'root');
+}
+
+export function recordAuditLog(options: RegisterToolsOptions, entry: McpAuditLogEntry): void {
+  if (options.onAuditLog) {
+    try {
+      options.onAuditLog(entry);
+    } catch {
+      // ignore callback error
+    }
+  }
+
+  if (options.enableAuditLog !== false) {
+    try {
+      const baseRoot = options.rootDir || process.cwd();
+      const logFile = options.auditLogPath || path.join(baseRoot, 'reports', 'mcp-audit.jsonl');
+      fs.mkdirSync(path.dirname(logFile), { recursive: true });
+      fs.appendFileSync(logFile, JSON.stringify(entry) + '\n', 'utf-8');
+    } catch {
+      // ignore disk write failure
+    }
+  }
 }
 
 function formatResponse(data: unknown, isError = false, rootDir?: string) {
@@ -62,9 +157,103 @@ function formatResponse(data: unknown, isError = false, rootDir?: string) {
   };
 }
 
-function formatCatchError(err: unknown) {
+function formatCatchError(err: unknown, rootDir?: string) {
   const message = err instanceof Error ? err.message : String(err);
-  return formatResponse({ success: false, error: message }, true);
+  return formatResponse({ success: false, error: message }, true, rootDir);
+}
+
+function resolveEffectiveRole(optionsRole?: string, paramsRole?: unknown): string {
+  if (optionsRole) return optionsRole;
+  if (typeof paramsRole === 'string' && paramsRole) return paramsRole;
+  return process.env.AISDLC_MCP_ROLE || 'developer';
+}
+
+function isRoleAuthorized(tool: string, role: string): boolean {
+  if (!MUTATION_TOOLS.has(tool)) return true;
+  return !READONLY_ROLES.has(role.toLowerCase());
+}
+
+function recordToolAudit(
+  options: RegisterToolsOptions,
+  tool: string,
+  role: string,
+  paramsHash: string,
+  startMs: number,
+  success: boolean,
+  error?: string
+): void {
+  recordAuditLog(options, {
+    timestamp: new Date().toISOString(),
+    tool,
+    role,
+    paramsHash,
+    success,
+    durationMs: Date.now() - startMs,
+    error,
+  });
+}
+
+type ToolExecutor = (resolvedRoot: string) => Promise<{ data: unknown; isError?: boolean; root?: string }> | { data: unknown; isError?: boolean; root?: string };
+
+async function runToolExecutor(executor: ToolExecutor, targetRoot: string) {
+  const result = await executor(targetRoot);
+  return {
+    data: result.data,
+    isError: Boolean(result.isError),
+    root: result.root || targetRoot,
+  };
+}
+
+function handleUnauthRole(
+  options: RegisterToolsOptions,
+  tool: string,
+  role: string,
+  hash: string,
+  start: number,
+  root: string
+) {
+  const msg = `Security violation: Role '${role}' is not authorized to invoke mutation tool '${tool}' (RBAC blocked).`;
+  recordToolAudit(options, tool, role, hash, start, false, msg);
+  return formatCatchError(new Error(msg), root);
+}
+
+function handleToolError(
+  options: RegisterToolsOptions,
+  tool: string,
+  role: string,
+  hash: string,
+  start: number,
+  root: string,
+  err: unknown
+) {
+  const msg = err instanceof Error ? err.message : String(err);
+  recordToolAudit(options, tool, role, hash, start, false, msg);
+  return formatCatchError(err, root);
+}
+
+async function executeSecuredTool<T extends Record<string, unknown>>(
+  toolName: string,
+  params: T,
+  options: RegisterToolsOptions,
+  executor: ToolExecutor
+) {
+  const start = Date.now();
+  const role = resolveEffectiveRole(options.role, params.role);
+  const hash = hashParams(params);
+  const baseRoot = options.rootDir || process.cwd();
+
+  if (!isRoleAuthorized(toolName, role)) {
+    return handleUnauthRole(options, toolName, role, hash, start, baseRoot);
+  }
+
+  try {
+    const targetRoot = resolveRoot(params.root as string | undefined, baseRoot);
+    const res = await runToolExecutor(executor, targetRoot);
+    recordToolAudit(options, toolName, role, hash, start, !res.isError);
+    return formatResponse(res.data, res.isError, res.root);
+  } catch (err: unknown) {
+    return handleToolError(options, toolName, role, hash, start, baseRoot, err);
+  }
 }
 
 function runCoreGates(root: string) {
@@ -153,9 +342,13 @@ const NEW_TOOL_SCHEMA = {
   architecture: z.enum(['minimal', 'full', 'complete', 'none']).optional(),
 };
 
-function registerNewTool(server: McpServer, baseRoot: string): void {
+function registerNewTool(server: McpServer, options: RegisterToolsOptions): void {
+  const baseRoot = options.rootDir || process.cwd();
   server.tool('new', 'Initializes a new project or configures AI-SDLC governance.', NEW_TOOL_SCHEMA, async (params) => {
-    try {
+    return executeSecuredTool('new', params, options, () => {
+      if (params.targetDir) {
+        assertWithinRoot(params.targetDir, baseRoot, 'targetDir');
+      }
       const result = initProject({
         rootDir: baseRoot,
         targetDir: params.targetDir,
@@ -164,25 +357,21 @@ function registerNewTool(server: McpServer, baseRoot: string): void {
         architecture: params.architecture,
         dryRun: params.dryRun,
       });
-      return formatResponse(result, !result.success);
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: result, isError: !result.success, root: baseRoot };
+    });
   });
 }
 
-function registerVerifyTool(server: McpServer, baseRoot: string): void {
+function registerVerifyTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool(
     'verify',
     'Executes deterministic AI-SDLC Quality Gates.',
     { root: z.string().optional(), profile: z.enum(['full', 'lite']).optional() },
     async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
-        return formatResponse(runVerifyAllGates(root, params.profile === 'lite'));
-      } catch (err: unknown) {
-        return formatCatchError(err);
-      }
+      return executeSecuredTool('verify', params, options, (root) => {
+        const result = runVerifyAllGates(root, params.profile === 'lite');
+        return { data: result, isError: !result.success, root };
+      });
     }
   );
 }
@@ -193,26 +382,28 @@ const REPORT_TOOL_SCHEMA = {
   qualityPolicy: z.string().optional(),
 };
 
-function registerReportTool(server: McpServer, baseRoot: string): void {
+function registerReportTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('report', 'Generates all AI-SDLC reports combined.', REPORT_TOOL_SCHEMA, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('report', params, options, (root) => {
+      if (params.dashboardOutput) assertWithinRoot(params.dashboardOutput, root, 'dashboardOutput');
+      if (params.qualityPolicy) assertWithinRoot(params.qualityPolicy, root, 'qualityPolicy');
       const dashRes = generateDashboardReport({ rootDir: root, outputPath: params.dashboardOutput });
       const qualRes = generateQualityReport({ rootDir: root, policyPath: params.qualityPolicy });
-      return formatResponse({
-        success: true,
-        dashboard: { outputPath: dashRes.outputPath, totalNodes: dashRes.totalNodes, totalEdges: dashRes.totalEdges },
-        qualityReport: {
-          totalFiles: qualRes.totalFiles,
-          totalFunctions: qualRes.totalFunctions,
-          avgMaintainability: qualRes.avgMaintainability,
-          avgCyclomatic: qualRes.avgCyclomatic,
-          verdict: qualRes.verdict,
+      return {
+        data: {
+          success: true,
+          dashboard: { outputPath: dashRes.outputPath, totalNodes: dashRes.totalNodes, totalEdges: dashRes.totalEdges },
+          qualityReport: {
+            totalFiles: qualRes.totalFiles,
+            totalFunctions: qualRes.totalFunctions,
+            avgMaintainability: qualRes.avgMaintainability,
+            avgCyclomatic: qualRes.avgCyclomatic,
+            verdict: qualRes.verdict,
+          },
         },
-      });
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+        root,
+      };
+    });
   });
 }
 
@@ -226,10 +417,9 @@ const SDD_CHANGE_NEW_SCHEMA = {
   root: z.string().optional(),
 };
 
-function registerSddChangeNewTool(server: McpServer, baseRoot: string): void {
+function registerSddChangeNewTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('sdd_change_new', 'Creates deterministic scaffolding for a new SDD change.', SDD_CHANGE_NEW_SCHEMA, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('sdd_change_new', params, options, (root) => {
       const result = scaffoldSddChange({
         rootDir: root,
         name: params.name,
@@ -239,33 +429,33 @@ function registerSddChangeNewTool(server: McpServer, baseRoot: string): void {
         author: params.author,
         from: params.from,
       });
-      return formatResponse(result, !result.success);
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: result, isError: !result.success, root };
+    });
   });
 }
 
-function registerSddCheckFixTool(server: McpServer, baseRoot: string): void {
+function registerSddCheckFixTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('sdd_check_fix', 'Synchronizes Gherkin features and PDaC digests.', { root: z.string().optional() }, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('sdd_check_fix', params, options, (root) => {
       const gherkinRes = extractGherkinFeatures({ rootDir: root });
       const pdacRes = syncPdacDigests({ rootDir: root });
       const gherkinSync = checkGherkinInSync({ rootDir: root });
       const pdacVerify = verifyPdacGraph({ rootDir: root });
-      return formatResponse({
-        success: gherkinSync.inSync && pdacVerify.success,
-        extractedFeaturesCount: gherkinRes.features.length,
-        totalScenarios: gherkinRes.totalScenarios,
-        syncedDigestsCount: pdacRes.syncedCount,
-        updatedFiles: pdacRes.updatedFiles,
-        gherkinInSync: gherkinSync.inSync,
-        pdacInSync: pdacVerify.success,
-      });
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      const success = gherkinSync.inSync && pdacVerify.success;
+      return {
+        data: {
+          success,
+          extractedFeaturesCount: gherkinRes.features.length,
+          totalScenarios: gherkinRes.totalScenarios,
+          syncedDigestsCount: pdacRes.syncedCount,
+          updatedFiles: pdacRes.updatedFiles,
+          gherkinInSync: gherkinSync.inSync,
+          pdacInSync: pdacVerify.success,
+        },
+        isError: !success,
+        root,
+      };
+    });
   });
 }
 
@@ -293,10 +483,10 @@ function buildDepositHandoff(change: string, title?: string, reqs?: string[], uc
   };
 }
 
-function registerSddDepositTool(server: McpServer, baseRoot: string): void {
+function registerSddDepositTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('sdd_deposit', 'Deposits or regenerates handoff.yaml sidecar.', SDD_DEPOSIT_SCHEMA, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('sdd_deposit', params, options, (root) => {
+      assertWithinRoot(path.join('specs', 'changes', 'active', params.change), root, 'change');
       const handoff = buildDepositHandoff(params.change, params.title, params.requirements, params.useCases);
       const depositedPath = depositProductHandoffSidecar({
         rootDir: root,
@@ -304,10 +494,8 @@ function registerSddDepositTool(server: McpServer, baseRoot: string): void {
         framework: params.framework || 'openspec',
         handoff,
       });
-      return formatResponse({ success: true, depositedPath, handoffId: handoff.id, changeId: params.change });
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: { success: true, depositedPath, handoffId: handoff.id, changeId: params.change }, root };
+    });
   });
 }
 
@@ -318,15 +506,15 @@ const SDD_INTEGRATE_SCHEMA = {
   root: z.string().optional(),
 };
 
-function registerSddIntegrateTool(server: McpServer, baseRoot: string): void {
+function registerSddIntegrateTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('sdd_integrate', 'Integrates and promotes a completed SDD change.', SDD_INTEGRATE_SCHEMA, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('sdd_integrate', params, options, (root) => {
+      if (params.change) {
+        assertWithinRoot(path.join('specs', 'changes', 'active', params.change), root, 'change');
+      }
       const result = integrateSddChange({ rootDir: root, changeId: params.change || '', author: params.author, autoArchive: true });
-      return formatResponse(result, !result.success);
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: result, isError: !result.success, root };
+    });
   });
 }
 
@@ -350,28 +538,25 @@ function resolveTargetChangeDir(root: string, change: string) {
   return null;
 }
 
-function registerGetActiveHandoffTool(server: McpServer, baseRoot: string): void {
+function registerGetActiveHandoffTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('get_active_handoff', 'Queries active change subgraph.', { change: z.string(), root: z.string().optional() }, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('get_active_handoff', params, options, (root) => {
+      assertWithinRoot(path.join('specs', 'changes', 'active', params.change), root, 'change');
       const resolved = resolveTargetChangeDir(root, params.change);
       if (!resolved) {
-        return formatResponse({ success: false, error: `SDD change '${params.change}' not found.` }, true);
+        throw new Error(`SDD change '${params.change}' not found.`);
       }
-      return formatResponse(
-        {
+      return {
+        data: {
           success: true,
           changeId: params.change,
           directory: resolved.dir,
           isCompleted: resolved.isCompleted,
           files: readActiveHandoffFiles(resolved.dir),
         },
-        false,
-        root
-      );
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+        root,
+      };
+    });
   });
 }
 
@@ -385,47 +570,38 @@ const VERIFY_QUALITY_SCHEMA = {
   ratchet: z.boolean().optional(),
 };
 
-function runMcpVerifyQuality(params: Record<string, unknown>, baseRoot: string) {
-  const rootDir = resolveRoot(params.root as string | undefined, baseRoot);
-  const thresholds = {
-    max_cyclomatic: params.maxCyclomatic as number | undefined,
-    max_cognitive: params.maxCognitive as number | undefined,
-    min_maintainability: params.minMaintainability as number | undefined,
-  };
-  return verifyQualityGate({
-    rootDir,
-    thresholds,
-    updateBaseline: params.updateBaseline as boolean | undefined,
-    baseline: params.baseline as string | undefined,
-    ratchet: params.ratchet as boolean | undefined,
-  });
-}
-
-function registerVerifyQualityTool(server: McpServer, baseRoot: string): void {
+function registerVerifyQualityTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool(
     "verify_quality",
     "Evaluates cyclomatic complexity, cognitive complexity, MI, and function length.",
     VERIFY_QUALITY_SCHEMA,
     async (params) => {
-      try {
-        const result = runMcpVerifyQuality(params, baseRoot);
-        return formatResponse(result, !result.success);
-      } catch (err: unknown) {
-        return formatCatchError(err);
-      }
+      return executeSecuredTool('verify_quality', params, options, (root) => {
+        if (params.baseline) assertWithinRoot(params.baseline, root, 'baseline');
+        const thresholds = {
+          max_cyclomatic: params.maxCyclomatic,
+          max_cognitive: params.maxCognitive,
+          min_maintainability: params.minMaintainability,
+        };
+        const result = verifyQualityGate({
+          rootDir: root,
+          thresholds,
+          updateBaseline: params.updateBaseline,
+          baseline: params.baseline,
+          ratchet: params.ratchet,
+        });
+        return { data: result, isError: !result.success, root };
+      });
     }
   );
 }
 
-function registerVerifySchemasTool(server: McpServer, baseRoot: string): void {
+function registerVerifySchemasTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('verify_schemas', 'Validates specification Markdown artifacts against canonical JSON Schemas.', { root: z.string().optional() }, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('verify_schemas', params, options, (root) => {
       const result = verifyArtifactsSchemas({ rootDir: root });
-      return formatResponse(result, !result.success);
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: result, isError: !result.success, root };
+    });
   });
 }
 
@@ -446,117 +622,97 @@ function executeSecurityVerification(root: string, minSeverity?: SastSeverity) {
   };
 }
 
-function registerVerifySecurityTool(server: McpServer, baseRoot: string): void {
+function registerVerifySecurityTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('verify_security', 'Deterministic secret scanning and SAST.', VERIFY_SECURITY_SCHEMA, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('verify_security', params, options, (root) => {
       const res = executeSecurityVerification(root, params.minSeverity as SastSeverity);
-      return formatResponse(res, !res.success);
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: res, isError: !res.success, root };
+    });
   });
 }
 
-function registerVerifyTraceabilityTool(server: McpServer, baseRoot: string): void {
+function registerVerifyTraceabilityTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('verify_traceability', 'Audits the 360° inverted traceability matrix.', { root: z.string().optional() }, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('verify_traceability', params, options, (root) => {
       const result = verifyTraceability({ rootDir: root });
-      return formatResponse(result, !result.success);
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: result, isError: !result.success, root };
+    });
   });
 }
 
-function registerVerifyGovernanceTool(server: McpServer, baseRoot: string): void {
+function registerVerifyGovernanceTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('verify_governance', 'Audits task governance compliance.', { root: z.string().optional() }, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('verify_governance', params, options, (root) => {
       const result = verifyTasksGovernance({ rootDir: root });
-      return formatResponse(result, !result.success);
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: result, isError: !result.success, root };
+    });
   });
 }
 
-function registerVerifyTestingTool(server: McpServer, baseRoot: string): void {
+function registerVerifyTestingTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('verify_testing', 'Audits test coverage in requirements and tasks.', { root: z.string().optional() }, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('verify_testing', params, options, (root) => {
       const result = verifyTestingCoverage({ rootDir: root });
-      return formatResponse(result, !result.success);
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: result, isError: !result.success, root };
+    });
   });
 }
 
-function registerVerifyLicensesTool(server: McpServer, baseRoot: string): void {
+function registerVerifyLicensesTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool(
     'verify_licenses',
     'Audits Open Source license compliance.',
     { root: z.string().optional(), policy: z.string().optional(), depth: z.enum(['direct', 'transitive']).optional() },
     async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
+      return executeSecuredTool('verify_licenses', params, options, (root) => {
+        if (params.policy) assertWithinRoot(params.policy, root, 'policy');
         const result = verifyLicenses({ rootDir: root, policyPath: params.policy, depth: params.depth || 'transitive' });
-        return formatResponse(result, !result.success);
-      } catch (err: unknown) {
-        return formatCatchError(err);
-      }
+        return { data: result, isError: !result.success, root };
+      });
     }
   );
 }
 
-function registerVerifyDuplicatesTool(server: McpServer, baseRoot: string): void {
+function registerVerifyDuplicatesTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('verify_duplicates', 'Audits identifier collisions and specification overlaps.', { root: z.string().optional() }, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('verify_duplicates', params, options, (root) => {
       const result = verifyArtifactDuplicates({ rootDir: root });
-      return formatResponse(result, !result.success);
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: result, isError: !result.success, root };
+    });
   });
 }
 
-function registerVerifyFrictionTool(server: McpServer, baseRoot: string): void {
+function registerVerifyFrictionTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool(
     'verify_friction',
     'Evaluates progressive friction rules and anti-bypass guardrails.',
     { change: z.string().optional(), diffFiles: z.array(z.string()).optional(), root: z.string().optional() },
     async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
+      return executeSecuredTool('verify_friction', params, options, (root) => {
+        if (params.change) {
+          assertWithinRoot(path.join('specs', 'changes', 'active', params.change), root, 'change');
+        }
         const result = verifyProgressiveFriction({ rootDir: root, changeId: params.change, diffFiles: params.diffFiles });
-        return formatResponse(result, !result.success);
-      } catch (err: unknown) {
-        return formatCatchError(err);
-      }
+        return { data: result, isError: !result.success, root };
+      });
     }
   );
 }
 
-function registerVerifyPdacTool(server: McpServer, baseRoot: string): void {
+function registerVerifyPdacTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool(
     'verify_pdac',
     'Audits product graph and cryptographic drift.',
     { root: z.string().optional(), autoSync: z.boolean().optional() },
     async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
+      return executeSecuredTool('verify_pdac', params, options, (root) => {
         if (params.autoSync) {
           const syncResult = syncPdacDigests({ rootDir: root });
-          return formatResponse(syncResult, !syncResult.success);
+          return { data: syncResult, isError: !syncResult.success, root };
         }
         const result = verifyPdacGraph({ rootDir: root });
-        return formatResponse(result, !result.success);
-      } catch (err: unknown) {
-        return formatCatchError(err);
-      }
+        return { data: result, isError: !result.success, root };
+      });
     }
   );
 }
@@ -569,10 +725,12 @@ const VERIFY_PRIVACY_SCHEMA = {
   reportOutputPath: z.string().optional(),
 };
 
-function registerVerifyPrivacyTool(server: McpServer, baseRoot: string): void {
+function registerVerifyPrivacyTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('verify_privacy', 'Audits Data Protection & Privacy-by-Design (GDPR ROPA, PII-SAST, retention/erasure).', VERIFY_PRIVACY_SCHEMA, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('verify_privacy', params, options, (root) => {
+      if (params.policyPath) assertWithinRoot(params.policyPath, root, 'policyPath');
+      if (params.ropaOutputPath) assertWithinRoot(params.ropaOutputPath, root, 'ropaOutputPath');
+      if (params.reportOutputPath) assertWithinRoot(params.reportOutputPath, root, 'reportOutputPath');
       const result = verifyPrivacy({
         rootDir: root,
         policyPath: params.policyPath,
@@ -580,64 +738,55 @@ function registerVerifyPrivacyTool(server: McpServer, baseRoot: string): void {
         ropaOutputPath: params.ropaOutputPath,
         reportOutputPath: params.reportOutputPath,
       });
-      return formatResponse(result, !result.success);
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: result, isError: !result.success, root };
+    });
   });
 }
 
-function registerReportDashboardTool(server: McpServer, baseRoot: string): void {
+function registerReportDashboardTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool(
     'report_dashboard',
     'Generates interactive web dashboard and Cytoscape.js graph.',
     { output: z.string().optional(), title: z.string().optional(), root: z.string().optional() },
     async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
+      return executeSecuredTool('report_dashboard', params, options, (root) => {
+        if (params.output) assertWithinRoot(params.output, root, 'output');
         const result = generateDashboardReport({ rootDir: root, outputPath: params.output, title: params.title });
-        return formatResponse(result);
-      } catch (err: unknown) {
-        return formatCatchError(err);
-      }
+        return { data: result, root };
+      });
     }
   );
 }
 
-function registerReportQualityTool(server: McpServer, baseRoot: string): void {
+function registerReportQualityTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool(
     'report_quality',
     'Generates formal polyglot code quality report at reports/QUALITY_REPORT.md.',
     { policy: z.string().optional(), mode: z.enum(['STRICT', 'PERMISSIVE']).optional(), root: z.string().optional() },
     async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
+      return executeSecuredTool('report_quality', params, options, (root) => {
+        if (params.policy) assertWithinRoot(params.policy, root, 'policy');
         const result = generateQualityReport({
           rootDir: root,
           policyPath: params.policy,
           thresholds: params.mode ? { enforce_mode: params.mode } : undefined,
         });
-        return formatResponse(result);
-      } catch (err: unknown) {
-        return formatCatchError(err);
-      }
+        return { data: result, root };
+      });
     }
   );
 }
 
-function registerKpiPrTool(server: McpServer, baseRoot: string): void {
+function registerKpiPrTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool(
     'kpi_pr',
     'Calculates commit KPI aggregation and telemetry for a PR.',
     { base: z.string().optional(), head: z.string().optional(), root: z.string().optional() },
     async (params) => {
-      try {
-        const root = resolveRoot(params.root, baseRoot);
+      return executeSecuredTool('kpi_pr', params, options, (root) => {
         const result = aggregatePrKpis(params.base || 'main', params.head || 'HEAD', { cwd: root });
-        return formatResponse(result);
-      } catch (err: unknown) {
-        return formatCatchError(err);
-      }
+        return { data: result, root };
+      });
     }
   );
 }
@@ -650,10 +799,10 @@ const KPI_RELEASE_SCHEMA = {
   root: z.string().optional(),
 };
 
-function registerKpiReleaseTool(server: McpServer, baseRoot: string): void {
+function registerKpiReleaseTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('kpi_release', 'Calculates consolidated Release KPIs.', KPI_RELEASE_SCHEMA, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('kpi_release', params, options, (root) => {
+      if (params.outputDir) assertWithinRoot(params.outputDir, root, 'outputDir');
       const report = aggregateReleaseKpis(params.release, params.base, { cwd: root });
       let filesWritten: { markdownPath: string; jsonPath: string } | undefined;
       if (params.writeReports || params.outputDir) {
@@ -662,61 +811,55 @@ function registerKpiReleaseTool(server: McpServer, baseRoot: string): void {
           rootDir: root,
         });
       }
-      return formatResponse({ ...report, filesWritten });
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: { ...report, filesWritten }, root };
+    });
   });
 }
 
-function registerGitDetectAuthorTool(server: McpServer, baseRoot: string): void {
+function registerGitDetectAuthorTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('git_detect_author', 'Detects whether current author is human or AI agent.', { root: z.string().optional() }, async (params) => {
-    try {
-      const root = resolveRoot(params.root, baseRoot);
+    return executeSecuredTool('git_detect_author', params, options, (root) => {
       const result = detectAuthorIdentity({ cwd: root });
-      return formatResponse(result);
-    } catch (err: unknown) {
-      return formatCatchError(err);
-    }
+      return { data: result, root };
+    });
   });
 }
 
-function registerLifecycleAndSddTools(server: McpServer, baseRoot: string): void {
-  registerNewTool(server, baseRoot);
-  registerVerifyTool(server, baseRoot);
-  registerReportTool(server, baseRoot);
-  registerSddChangeNewTool(server, baseRoot);
-  registerSddCheckFixTool(server, baseRoot);
-  registerSddDepositTool(server, baseRoot);
-  registerSddIntegrateTool(server, baseRoot);
-  registerGetActiveHandoffTool(server, baseRoot);
+function registerLifecycleAndSddTools(server: McpServer, options: RegisterToolsOptions): void {
+  registerNewTool(server, options);
+  registerVerifyTool(server, options);
+  registerReportTool(server, options);
+  registerSddChangeNewTool(server, options);
+  registerSddCheckFixTool(server, options);
+  registerSddDepositTool(server, options);
+  registerSddIntegrateTool(server, options);
+  registerGetActiveHandoffTool(server, options);
 }
 
-function registerVerificationTools(server: McpServer, baseRoot: string): void {
-  registerVerifyQualityTool(server, baseRoot);
-  registerVerifySchemasTool(server, baseRoot);
-  registerVerifySecurityTool(server, baseRoot);
-  registerVerifyTraceabilityTool(server, baseRoot);
-  registerVerifyGovernanceTool(server, baseRoot);
-  registerVerifyTestingTool(server, baseRoot);
-  registerVerifyLicensesTool(server, baseRoot);
-  registerVerifyDuplicatesTool(server, baseRoot);
-  registerVerifyFrictionTool(server, baseRoot);
-  registerVerifyPdacTool(server, baseRoot);
-  registerVerifyPrivacyTool(server, baseRoot);
+function registerVerificationTools(server: McpServer, options: RegisterToolsOptions): void {
+  registerVerifyQualityTool(server, options);
+  registerVerifySchemasTool(server, options);
+  registerVerifySecurityTool(server, options);
+  registerVerifyTraceabilityTool(server, options);
+  registerVerifyGovernanceTool(server, options);
+  registerVerifyTestingTool(server, options);
+  registerVerifyLicensesTool(server, options);
+  registerVerifyDuplicatesTool(server, options);
+  registerVerifyFrictionTool(server, options);
+  registerVerifyPdacTool(server, options);
+  registerVerifyPrivacyTool(server, options);
 }
 
-function registerReportingAndKpiTools(server: McpServer, baseRoot: string): void {
-  registerReportDashboardTool(server, baseRoot);
-  registerReportQualityTool(server, baseRoot);
-  registerKpiPrTool(server, baseRoot);
-  registerKpiReleaseTool(server, baseRoot);
-  registerGitDetectAuthorTool(server, baseRoot);
+function registerReportingAndKpiTools(server: McpServer, options: RegisterToolsOptions): void {
+  registerReportDashboardTool(server, options);
+  registerReportQualityTool(server, options);
+  registerKpiPrTool(server, options);
+  registerKpiReleaseTool(server, options);
+  registerGitDetectAuthorTool(server, options);
 }
 
 export function registerAllTools(server: McpServer, options: RegisterToolsOptions = {}): void {
-  const baseRoot = options.rootDir || process.cwd();
-  registerLifecycleAndSddTools(server, baseRoot);
-  registerVerificationTools(server, baseRoot);
-  registerReportingAndKpiTools(server, baseRoot);
+  registerLifecycleAndSddTools(server, options);
+  registerVerificationTools(server, options);
+  registerReportingAndKpiTools(server, options);
 }

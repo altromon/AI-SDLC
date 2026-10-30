@@ -693,8 +693,9 @@ program
   .command('mcp')
   .description('Start native AI-SDLC Model Context Protocol (MCP) server (stdio)')
   .option('-r, --root <path>', 'Project root directory')
+  .option('--role <role>', 'Role context for MCP server authorization')
   .action(async (opts) => {
-    await runMcpServer({ root: opts.root });
+    await runMcpServer({ root: opts.root, role: opts.role });
   });
 
 // Handle unknown commands gracefully
