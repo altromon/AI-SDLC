@@ -11,7 +11,7 @@ enclave: "SEC-ENC-DMZ"
 status: draft
 citations:
   - id: FR-027-NORMALIZE-IDE-RULESETS-001
-    digest: sha256:21c0adb1609ba2ff2ce1dadf63e9bc50693a94e3d396d67497d0f789e2a6cae3
+    digest: sha256:0c21b987a66e6105b5084b40fa90299091fa94b6cd04669c802005e85aeab5b1
     comment: Requerimiento funcional canónico asociado (Génesis CHG-027-NORMALIZE-IDE-RULESETS)
 ---
 

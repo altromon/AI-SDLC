@@ -1,0 +1,15 @@
+id: HOF-CHG-045-PDAC-SCHEMA-FAIL-CLOSED
+type: handoff
+title: Handoff Canónico de Producto para pdac-schema-fail-closed
+changeId: CHG-045-PDAC-SCHEMA-FAIL-CLOSED
+version: 1.0.0
+createdAt: '2026-10-30T14:30:17.996Z'
+subgraph:
+  requirements:
+    - FR-045-PDAC-SCHEMA-FAIL-CLOSED-001
+  useCases:
+    - UC-045-PDAC-SCHEMA-FAIL-CLOSED
+citations:
+  - id: FR-045-PDAC-SCHEMA-FAIL-CLOSED-001
+    digest: sha256:d0df07a1901dde17f68e73625eb38bf3f84071571708257a725bc52fd402798c
+    comment: Requerimiento funcional canónico asociado (Génesis CHG-045-PDAC-SCHEMA-FAIL-CLOSED)

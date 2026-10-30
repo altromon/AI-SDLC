@@ -149,21 +149,32 @@ function applyOptionOverrides(policy: QualityPolicy, overrides?: QualityThreshol
   if (overrides.enforce_mode !== undefined) policy.enforce_mode = overrides.enforce_mode;
 }
 
+function parsePolicyYaml(content: string): Record<string, unknown> {
+  let doc: unknown;
+  try {
+    doc = yaml.load(content);
+  } catch (err: unknown) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid YAML in quality-policy: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  if (!doc || typeof doc !== 'object' || Array.isArray(doc)) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid quality policy structure: root must be a YAML mapping`);
+  }
+  return doc as Record<string, unknown>;
+}
+
 export function parseQualityPolicy(content: string, overrides?: QualityThresholds): QualityPolicy {
   const policy = createDefaultQualityPolicy();
-  try {
-    const doc = yaml.load(content);
-    if (doc && typeof doc === 'object') {
-      const record = doc as Record<string, unknown>;
-      applyDocScope(policy, record);
-      applyDocThresholds(policy, record);
-      if (record.max_per_function !== undefined) policy.max_cyclomatic = Number(record.max_per_function);
-      if (record.min_acceptable_score !== undefined) policy.min_maintainability = Number(record.min_acceptable_score);
-      if (record.max_function_lines !== undefined) policy.max_function_lines = Number(record.max_function_lines);
-    }
-  } catch {
-    // Keep defaults on YAML error
+  if (!content || !content.trim()) {
+    applyEnvThresholds(policy);
+    applyOptionOverrides(policy, overrides);
+    return policy;
   }
+  const record = parsePolicyYaml(content);
+  applyDocScope(policy, record);
+  applyDocThresholds(policy, record);
+  if (record.max_per_function !== undefined) policy.max_cyclomatic = Number(record.max_per_function);
+  if (record.min_acceptable_score !== undefined) policy.min_maintainability = Number(record.min_acceptable_score);
+  if (record.max_function_lines !== undefined) policy.max_function_lines = Number(record.max_function_lines);
   applyEnvThresholds(policy);
   applyOptionOverrides(policy, overrides);
   return policy;
@@ -308,6 +319,8 @@ function scanDirectTarget(rootDir: string, targetDir: string, policy: QualityPol
   }
 }
 
+export const UNIT_TEST_SUFFIXES = ['.spec.ts', '.test.ts', '.spec.js', '.test.js', '_test.py', '_test.go'];
+
 function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
   const files = new Set<string>();
   const monorepoContainers = ['packages', 'apps', 'libs', 'modules', 'services'];
@@ -319,7 +332,7 @@ function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
     }
   }
 
-  return Array.from(files);
+  return Array.from(files).filter((f) => !UNIT_TEST_SUFFIXES.some((s) => f.endsWith(s)));
 }
 
 function evaluateViolations(fn: FunctionMetrics, policy: QualityPolicy): string[] {
@@ -355,9 +368,6 @@ function evaluateFileQuality(file: string, rootDir: string, policy: QualityPolic
     };
   });
 }
-
-const UNIT_TEST_SUFFIXES = ['.spec.ts', '.test.ts', '.spec.js', '.test.js', '_test.py', '_test.go'];
-
 function collectUnitTestCorpus(rootDir: string): string {
   const allCodeFiles = walkDir(rootDir, DEFAULT_EXTENSIONS, DEFAULT_EXCLUDES);
   const chunks: string[] = [];

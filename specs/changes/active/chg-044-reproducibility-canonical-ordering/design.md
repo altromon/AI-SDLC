@@ -12,7 +12,7 @@ status: draft
 contracts: []
 citations:
   - id: FR-044-REPRODUCIBILITY-CANONICAL-ORDERING-001
-    digest: sha256:49a0c688c2c42e9daf82dc607789ccd2f6246787d6007d5e523ac31e78dd4264
+    digest: sha256:598e44016dde9411c0481e5f9260c22953f4d8bd3918de13977b5df7f8eb69d4
     comment: Requerimiento funcional canónico asociado (Génesis CHG-044-REPRODUCIBILITY-CANONICAL-ORDERING)
 ---
 

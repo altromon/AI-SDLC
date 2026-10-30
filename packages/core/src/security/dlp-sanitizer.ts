@@ -96,26 +96,38 @@ function normalizeParsedRule(raw: Record<string, unknown>, idx: number): DlpRule
   };
 }
 
+function parseDlpDoc(yamlContent: string): Record<string, unknown> {
+  let doc: unknown;
+  try {
+    doc = yaml.load(yamlContent);
+  } catch (err: unknown) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid YAML in dlp-policy: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  if (!doc || typeof doc !== 'object' || Array.isArray(doc)) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid dlp-policy structure: root must be a YAML mapping`);
+  }
+  const record = doc as Record<string, unknown>;
+  if (record.rules !== undefined && !Array.isArray(record.rules)) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid dlp-policy: rules must be an array`);
+  }
+  return record;
+}
+
 export function parseDlpPolicy(yamlContent: string): DlpPolicy {
   const fallback = createDefaultDlpPolicy();
   if (!yamlContent || !yamlContent.trim()) return fallback;
-  try {
-    const doc = yaml.load(yamlContent) as Record<string, unknown> | undefined;
-    if (!doc || typeof doc !== 'object') return fallback;
-    const rawRules = Array.isArray(doc.rules) ? (doc.rules as Record<string, unknown>[]) : [];
-    const parsedRules = rawRules
-      .map((r, i) => normalizeParsedRule(r, i))
-      .filter((r): r is DlpRule => r !== null);
+  const record = parseDlpDoc(yamlContent);
+  const rawRules = Array.isArray(record.rules) ? (record.rules as Record<string, unknown>[]) : [];
+  const parsedRules = rawRules
+    .map((r, i) => normalizeParsedRule(r, i))
+    .filter((r): r is DlpRule => r !== null);
 
-    return {
-      version: typeof doc.version === 'string' ? doc.version : '1.0',
-      enabled: doc.enabled !== false,
-      zero_data_retention_required: Boolean(doc.zero_data_retention_required ?? true),
-      rules: parsedRules.length > 0 ? parsedRules : fallback.rules,
-    };
-  } catch {
-    return fallback;
-  }
+  return {
+    version: typeof record.version === 'string' ? record.version : '1.0',
+    enabled: record.enabled !== false,
+    zero_data_retention_required: Boolean(record.zero_data_retention_required ?? true),
+    rules: parsedRules.length > 0 ? parsedRules : fallback.rules,
+  };
 }
 
 export function loadDlpPolicy(rootDir?: string, customPolicyPath?: string): DlpPolicy {
@@ -127,11 +139,7 @@ export function loadDlpPolicy(rootDir?: string, customPolicyPath?: string): DlpP
     : path.join(base, 'dlp-policy.yaml');
 
   if (!fs.existsSync(filePath)) return createDefaultDlpPolicy();
-  try {
-    return parseDlpPolicy(fs.readFileSync(filePath, 'utf-8'));
-  } catch {
-    return createDefaultDlpPolicy();
-  }
+  return parseDlpPolicy(fs.readFileSync(filePath, 'utf-8'));
 }
 
 function applySingleDlpRule(text: string, rule: DlpRule): { output: string; matches: number } {
