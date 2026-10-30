@@ -1,6 +1,20 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+/**
+ * Strict canonical sort function by Unicode UTF-8 codepoint.
+ */
+export function canonicalSort(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/**
+ * Normalizes file paths to POSIX forward slashes and Unicode NFC form.
+ */
+export function normalizePath(p: string): string {
+  return p.normalize('NFC').replace(/\\/g, '/');
+}
+
 export function walkMdFiles(
   dir: string,
   fileList: string[] = [],
@@ -32,7 +46,7 @@ export function walkMdFiles(
 ): string[] {
   try {
     if (!fs.existsSync(dir)) return fileList;
-    const files = fs.readdirSync(dir);
+    const files = fs.readdirSync(dir).sort(canonicalSort);
     for (const file of files) {
       const fullPath = path.join(dir, file);
       try {
@@ -50,5 +64,5 @@ export function walkMdFiles(
   } catch {
     // Ignore directories removed concurrently
   }
-  return fileList;
+  return fileList.sort(canonicalSort);
 }

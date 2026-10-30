@@ -13,7 +13,8 @@ import {
   TestingCoverageResult,
   UseCaseFlowAuditItem,
 } from '../types/index.js';
-import { walkMdFiles } from '../utils/fs.js';
+import { walkMdFiles, canonicalSort } from '../utils/fs.js';
+import { resolveDeterministicDate } from '../utils/time.js';
 import { extractGherkinBlock } from './gherkin.js';
 
 interface ParsedTaskItem {
@@ -142,7 +143,7 @@ export function generateTestingCoverageReportMarkdown(
   const reportLines: string[] = [
     `# 🧪 Deterministic Test Coverage Audit for Requirements and Tasks`,
     ``,
-    `> **Audit Date:** ${new Date().toISOString()}`,
+    `> **Audit Date:** ${resolveDeterministicDate().toISOString()}`,
     `> **Overall Verdict:** ${verdict}`,
     ``,
     `---`,
@@ -215,7 +216,7 @@ function processTestFile(fullPath: string, rootDir: string, reqToTestsMap: Map<s
 function collectTestFiles(dir: string, files: string[] = []): string[] {
   if (!fs.existsSync(dir)) return files;
   try {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const entries = fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => canonicalSort(a.name, b.name));
     for (const e of entries) {
       if (e.isDirectory()) {
         if (!EXCLUDED_TEST_DIRS.has(e.name)) {

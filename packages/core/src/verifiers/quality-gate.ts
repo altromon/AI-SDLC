@@ -7,6 +7,8 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
+import { canonicalSort } from '../utils/fs.js';
+import { resolveDeterministicDate } from '../utils/time.js';
 import {
   AnalysisResult,
   CodeCoverageSummary,
@@ -227,7 +229,7 @@ export function walkDir(
 ): string[] {
   if (!fs.existsSync(dir)) return [];
   const results: string[] = [];
-  for (const file of fs.readdirSync(dir)) {
+  for (const file of fs.readdirSync(dir).sort(canonicalSort)) {
     const fullPath = path.join(dir, file);
     const normalized = fullPath.replace(/\\/g, '/');
     if (isExcludedFile(file, normalized, excludePatterns)) continue;
@@ -504,7 +506,7 @@ export function writeQualityBaseline(
 ): QualityBaseline {
   const baseline: QualityBaseline = {
     version: "1.0",
-    generatedAt: new Date().toISOString(),
+    generatedAt: resolveDeterministicDate(path.dirname(baselineFile)).toISOString(),
     totalViolations: entries.length,
     violations: entries,
   };
