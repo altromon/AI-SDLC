@@ -568,6 +568,30 @@ export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
 
 export interface PdacVerifyOptions extends VerifyBaseOptions {}
 
+function buildPdacViolations(result: ReturnType<typeof verifyPdacGraph>) {
+  const drifts = result.drifts.map((d) => ({
+    sourceId: d.sourceId,
+    targetId: d.targetId,
+    sourceFile: d.sourceFile,
+    expectedDigest: d.expectedDigest,
+    actualDigest: d.actualDigest,
+    message: `Cryptographic drift in ${d.sourceFile} citing ${d.targetId}`,
+  }));
+  const unresolved = (result.unresolvedCitations || []).map((u) => ({
+    sourceId: u.sourceFile,
+    targetId: u.targetId,
+    sourceFile: u.sourceFile,
+    message: `Unresolved citation in ${u.sourceFile} citing non-existent artifact '${u.targetId}'`,
+  }));
+  const anchors = (result.invalidAnchors || []).map((a) => ({
+    sourceId: a.sourceFile,
+    targetId: a.targetId,
+    sourceFile: a.sourceFile,
+    message: a.reason,
+  }));
+  return [...drifts, ...unresolved, ...anchors];
+}
+
 function emitPdacJson(result: ReturnType<typeof verifyPdacGraph>): void {
   const payload: VerifyJsonPayload = {
     gate: 'pdac',
@@ -577,31 +601,54 @@ function emitPdacJson(result: ReturnType<typeof verifyPdacGraph>): void {
       totalNodes: result.totalNodes,
       totalEdges: result.totalEdges,
       driftCount: result.drifts.length,
+      unresolvedCount: result.unresolvedCount || 0,
+      invalidAnchorCount: result.invalidAnchors?.length || 0,
     },
-    violations: result.drifts.map((d) => ({
-      sourceId: d.sourceId,
-      targetId: d.targetId,
-      sourceFile: d.sourceFile,
-      expectedDigest: d.expectedDigest,
-      actualDigest: d.actualDigest,
-      message: `Cryptographic drift in ${d.sourceFile} citing ${d.targetId}`,
-    })),
+    violations: buildPdacViolations(result),
   };
   console.log(JSON.stringify(payload, null, 2));
+}
+
+function printDrifts(drifts: ReturnType<typeof verifyPdacGraph>['drifts']): void {
+  if (drifts.length === 0) return;
+  console.log(pc.red('\n  Detected drifts (Status: STALE):'));
+  for (const d of drifts) {
+    console.log(`    ${pc.red('✖')} In ${d.sourceFile} citing ${d.targetId}: misaligned digest.`);
+  }
+}
+
+function printUnresolved(unresolved: ReturnType<typeof verifyPdacGraph>['unresolvedCitations']): void {
+  if (!unresolved || unresolved.length === 0) return;
+  console.log(pc.red('\n  Unresolved citations:'));
+  for (const u of unresolved) {
+    console.log(`    ${pc.red('✖')} In ${u.sourceFile}: references non-existent artifact '${u.targetId}'.`);
+  }
+}
+
+function printInvalidAnchors(anchors: ReturnType<typeof verifyPdacGraph>['invalidAnchors']): void {
+  if (!anchors || anchors.length === 0) return;
+  console.log(pc.red('\n  Invalid anchors:'));
+  for (const a of anchors) {
+    console.log(`    ${pc.red('✖')} In ${a.sourceFile}: ${a.reason}`);
+  }
 }
 
 function printPdacConsole(result: ReturnType<typeof verifyPdacGraph>): void {
   console.log(`  PDaC baseline nodes:    ${pc.bold(String(result.totalNodes))}`);
   console.log(`  Evaluated citations:    ${pc.bold(String(result.totalEdges))}`);
   console.log(`  Cryptographic drifts:   ${result.drifts.length > 0 ? pc.red(String(result.drifts.length)) : pc.green('0')}`);
-
-  if (result.drifts.length > 0) {
-    console.log(pc.red('\n  Detected drifts (Status: STALE):'));
-    for (const d of result.drifts) {
-      console.log(`    ${pc.red('✖')} In ${d.sourceFile} citing ${d.targetId}: misaligned digest.`);
-    }
+  if (result.unresolvedCount && result.unresolvedCount > 0) {
+    console.log(`  Unresolved citations:   ${pc.red(String(result.unresolvedCount))}`);
   }
-  console.log(result.success ? pc.green('\n✔ PDaC Graph Free of Drift\n') : pc.red('\n✖ Cryptographic Drift Detected\n'));
+  if (result.invalidAnchors && result.invalidAnchors.length > 0) {
+    console.log(`  Invalid anchors:        ${pc.red(String(result.invalidAnchors.length))}`);
+  }
+
+  printDrifts(result.drifts);
+  printUnresolved(result.unresolvedCitations);
+  printInvalidAnchors(result.invalidAnchors);
+
+  console.log(result.success ? pc.green('\n✔ PDaC Graph Free of Drift and Fully Verified\n') : pc.red('\n✖ PDaC Verification Failed (Drift, Unresolved Citations, or Invalid Anchors)\n'));
 }
 
 export function runVerifyPdac(options: PdacVerifyOptions = {}): boolean {

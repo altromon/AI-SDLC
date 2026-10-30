@@ -9,17 +9,67 @@ import {
   PdacDrift,
   PdacGraphOptions,
   PdacGraphResult,
+  PdacInvalidAnchor,
   PdacNode,
+  PdacUnresolvedCitation,
   PdacSyncDetail,
   PdacSyncOptions,
   PdacSyncResult,
 } from '../types/index.js';
 import { walkMdFiles } from '../utils/fs.js';
 
-export function computeCanonicalSha256(content: string): string {
-  // Normalize newlines to LF for deterministic hashing
+export function extractSemanticContent(content: string): string {
+  let normalized = content.replace(/\r\n/g, '\n');
+  // Strip revision history section (heading and everything after, up to next same/higher heading or end of file)
+  normalized = normalized.replace(/(?:\n|^)##?\s+.*(?:Historial de Revisiones|Revision History)(?:[\s\S]*?(?=(?:\n##?\s+[^\n]+)|\s*$))/i, '');
+  // Also strip standalone revision history table if not under heading
+  normalized = normalized.replace(/(?:\n|^)\|\s*\*?Versi[oó]n\*?\s*\|\s*Fecha\s*\|\s*Autor[\s\S]*?(?=(?:\n##?\s+[^\n]+)|\s*$)/i, '');
+  return normalized.trimEnd() + '\n';
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
+function matchesSlug(line: string, clean: string): boolean {
+  const headingText = line.replace(/^#+\s*/, '').trim();
+  const slug = slugify(headingText);
+  if (slug === clean || slug.includes(clean) || clean.includes(slug)) return true;
+  const slugNoNums = slugify(headingText.replace(/^\d+[\.\)]\s*/, '').trim());
+  return slugNoNums === clean || clean === slugNoNums;
+}
+
+function matchesHeading(content: string, clean: string): boolean {
+  for (const line of content.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('#') && matchesSlug(trimmed, clean)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function validateAnchorExistence(targetContent: string, anchor: string): boolean {
+  if (!anchor) return true;
+  const clean = anchor.replace(/^#/, '').trim().toLowerCase();
+  if (!clean || targetContent.toLowerCase().includes(clean)) return true;
+  if (matchesHeading(targetContent, clean)) return true;
+  const anchorRegex = new RegExp(`(?:id|name)=["']${clean}["']|\\{#${clean}\\}`, 'i');
+  return anchorRegex.test(targetContent);
+}
+
+export function computeRawSha256(content: string): string {
   const normalized = content.replace(/\r\n/g, '\n');
   return crypto.createHash('sha256').update(normalized, 'utf-8').digest('hex');
+}
+
+export function computeCanonicalSha256(content: string): string {
+  const semantic = extractSemanticContent(content);
+  return crypto.createHash('sha256').update(semantic, 'utf-8').digest('hex');
 }
 
 export function parseFrontmatterId(content: string): { id?: string; type?: string; title?: string } {
@@ -175,9 +225,10 @@ function buildPdacReportHeader(isOk: boolean, driftsCount: number, nodesCount: n
 export function generatePdacReportMarkdown(
   nodes: PdacNode[],
   drifts: PdacDrift[],
-  unresolvedCount: number
+  unresolvedCount: number,
+  invalidAnchors: PdacInvalidAnchor[] = []
 ): string {
-  const isOk = drifts.length === 0 && unresolvedCount === 0;
+  const isOk = drifts.length === 0 && unresolvedCount === 0 && invalidAnchors.length === 0;
   const header = buildPdacReportHeader(isOk, drifts.length, nodes.length);
   const nodeRows = nodes.map(
     (n) => `| **\`${n.id}\`** | \`${n.type}\` | ${n.title || 'Untitled'} | \`sha256:${n.digest.substring(0, 16)}...\` |`
@@ -216,6 +267,7 @@ function processPdacFile(
         filePath: relFile,
         title,
         digest: computeCanonicalSha256(content),
+        rawDigest: computeRawSha256(content),
         rawContent: content,
         citations: citations.map((c) => ({
           targetId: c.targetId,
@@ -245,46 +297,90 @@ function scanPdacWorkspace(
   return { baselineMap, allCitations };
 }
 
+function checkAnchor(
+  citation: CitationEntry,
+  targetNode: PdacNode,
+  invalidAnchors: PdacInvalidAnchor[]
+): void {
+  if (citation.anchor && targetNode.rawContent) {
+    if (!validateAnchorExistence(targetNode.rawContent, citation.anchor)) {
+      invalidAnchors.push({
+        sourceFile: citation.sourceFile,
+        targetId: citation.targetId,
+        anchor: citation.anchor,
+        reason: `Anchor '${citation.anchor}' not found in target artifact '${citation.targetId}' (${targetNode.filePath})`,
+      });
+    }
+  }
+}
+
+function checkDigest(
+  citation: CitationEntry,
+  targetNode: PdacNode,
+  drifts: PdacDrift[]
+): void {
+  if (!citation.expectedDigest) return;
+  const matches =
+    citation.expectedDigest === targetNode.digest ||
+    (targetNode.rawDigest !== undefined && citation.expectedDigest === targetNode.rawDigest);
+  if (!matches) {
+    drifts.push({
+      sourceId: citation.sourceFile,
+      targetId: citation.targetId,
+      sourceFile: citation.sourceFile,
+      expectedDigest: citation.expectedDigest,
+      actualDigest: targetNode.digest,
+    });
+  }
+}
+
 function computePdacDrifts(
   allCitations: CitationEntry[],
   baselineMap: Map<string, PdacNode>
-): { drifts: PdacDrift[]; unresolvedCount: number } {
+): {
+  drifts: PdacDrift[];
+  unresolvedCount: number;
+  unresolvedCitations: PdacUnresolvedCitation[];
+  invalidAnchors: PdacInvalidAnchor[];
+} {
   const drifts: PdacDrift[] = [];
+  const unresolvedCitations: PdacUnresolvedCitation[] = [];
+  const invalidAnchors: PdacInvalidAnchor[] = [];
   let unresolvedCount = 0;
 
   for (const citation of allCitations) {
     const targetNode = baselineMap.get(citation.targetId);
     if (!targetNode) {
       unresolvedCount++;
+      unresolvedCitations.push({
+        sourceFile: citation.sourceFile,
+        targetId: citation.targetId,
+      });
       continue;
     }
 
-    if (citation.expectedDigest && citation.expectedDigest !== targetNode.digest) {
-      drifts.push({
-        sourceId: citation.sourceFile,
-        targetId: citation.targetId,
-        sourceFile: citation.sourceFile,
-        expectedDigest: citation.expectedDigest,
-        actualDigest: targetNode.digest,
-      });
-    }
+    checkAnchor(citation, targetNode, invalidAnchors);
+    checkDigest(citation, targetNode, drifts);
   }
 
-  return { drifts, unresolvedCount };
+  return { drifts, unresolvedCount, unresolvedCitations, invalidAnchors };
 }
 
 export function verifyPdacGraph(options: PdacGraphOptions = {}): PdacGraphResult {
   const rootDir = options.rootDir || process.cwd();
   const { baselineMap, allCitations } = scanPdacWorkspace(rootDir);
-  const { drifts, unresolvedCount } = computePdacDrifts(allCitations, baselineMap);
+  const { drifts, unresolvedCount, unresolvedCitations, invalidAnchors } = computePdacDrifts(allCitations, baselineMap);
   const nodes = Array.from(baselineMap.values());
-  const reportMarkdown = generatePdacReportMarkdown(nodes, drifts, unresolvedCount);
+  const reportMarkdown = generatePdacReportMarkdown(nodes, drifts, unresolvedCount, invalidAnchors);
 
   return {
-    success: drifts.length === 0,
+    success: drifts.length === 0 && unresolvedCount === 0 && invalidAnchors.length === 0,
     totalNodes: nodes.length,
     totalEdges: allCitations.length,
     drifts,
+    unresolvedCount,
+    unresolvedCitations,
+    invalidAnchors,
     reportMarkdown,
   };
 }

@@ -139,23 +139,21 @@ function parseVexStatements(doc?: RawLicensePolicy): VexStatement[] {
   return rawList.filter((item): item is VexStatement => Boolean(item && typeof item.id === 'string' && typeof item.state === 'string'));
 }
 
-export function parseLicensePolicy(content: string): LicensePolicy & { rawPolicy?: RawLicensePolicy } {
+function parseLicenseDoc(content: string): RawLicensePolicy {
+  let doc: unknown;
   try {
-    const doc = yaml.load(content) as RawLicensePolicy;
-    const { permitted, restricted, blocked } = classifyCategories(doc?.categories);
-    const exception_packages = parseExceptions(doc?.exceptions);
-    const vex_statements = parseVexStatements(doc);
+    doc = yaml.load(content);
+  } catch (err: unknown) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid YAML in license-policy: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  if (!doc || typeof doc !== 'object' || Array.isArray(doc)) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid license policy structure: root must be a YAML mapping`);
+  }
+  return doc as RawLicensePolicy;
+}
 
-    return {
-      version: doc?.version || '1.0',
-      permitted: permitted.length > 0 ? permitted : DEFAULT_PERMITTED,
-      restricted: restricted.length > 0 ? restricted : DEFAULT_RESTRICTED,
-      blocked: blocked.length > 0 ? blocked : DEFAULT_BLOCKED,
-      exception_packages,
-      vex_statements,
-      rawPolicy: doc,
-    };
-  } catch {
+export function parseLicensePolicy(content: string): LicensePolicy & { rawPolicy?: RawLicensePolicy } {
+  if (!content || !content.trim()) {
     return {
       version: '1.0',
       permitted: DEFAULT_PERMITTED,
@@ -165,6 +163,18 @@ export function parseLicensePolicy(content: string): LicensePolicy & { rawPolicy
       vex_statements: [],
     };
   }
+  const doc = parseLicenseDoc(content);
+  const { permitted, restricted, blocked } = classifyCategories(doc?.categories);
+
+  return {
+    version: doc?.version || '1.0',
+    permitted: permitted.length > 0 ? permitted : DEFAULT_PERMITTED,
+    restricted: restricted.length > 0 ? restricted : DEFAULT_RESTRICTED,
+    blocked: blocked.length > 0 ? blocked : DEFAULT_BLOCKED,
+    exception_packages: parseExceptions(doc?.exceptions),
+    vex_statements: parseVexStatements(doc),
+    rawPolicy: doc,
+  };
 }
 
 export function evaluateCompoundLicense(

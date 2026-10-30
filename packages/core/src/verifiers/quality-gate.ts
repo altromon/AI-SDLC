@@ -147,21 +147,32 @@ function applyOptionOverrides(policy: QualityPolicy, overrides?: QualityThreshol
   if (overrides.enforce_mode !== undefined) policy.enforce_mode = overrides.enforce_mode;
 }
 
+function parsePolicyYaml(content: string): Record<string, unknown> {
+  let doc: unknown;
+  try {
+    doc = yaml.load(content);
+  } catch (err: unknown) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid YAML in quality-policy: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  if (!doc || typeof doc !== 'object' || Array.isArray(doc)) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid quality policy structure: root must be a YAML mapping`);
+  }
+  return doc as Record<string, unknown>;
+}
+
 export function parseQualityPolicy(content: string, overrides?: QualityThresholds): QualityPolicy {
   const policy = createDefaultQualityPolicy();
-  try {
-    const doc = yaml.load(content);
-    if (doc && typeof doc === 'object') {
-      const record = doc as Record<string, unknown>;
-      applyDocScope(policy, record);
-      applyDocThresholds(policy, record);
-      if (record.max_per_function !== undefined) policy.max_cyclomatic = Number(record.max_per_function);
-      if (record.min_acceptable_score !== undefined) policy.min_maintainability = Number(record.min_acceptable_score);
-      if (record.max_function_lines !== undefined) policy.max_function_lines = Number(record.max_function_lines);
-    }
-  } catch {
-    // Keep defaults on YAML error
+  if (!content || !content.trim()) {
+    applyEnvThresholds(policy);
+    applyOptionOverrides(policy, overrides);
+    return policy;
   }
+  const record = parsePolicyYaml(content);
+  applyDocScope(policy, record);
+  applyDocThresholds(policy, record);
+  if (record.max_per_function !== undefined) policy.max_cyclomatic = Number(record.max_per_function);
+  if (record.min_acceptable_score !== undefined) policy.min_maintainability = Number(record.min_acceptable_score);
+  if (record.max_function_lines !== undefined) policy.max_function_lines = Number(record.max_function_lines);
   applyEnvThresholds(policy);
   applyOptionOverrides(policy, overrides);
   return policy;

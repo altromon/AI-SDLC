@@ -6,7 +6,7 @@ status: draft
 author: "Agent Developer"
 citations:
   - id: FR-045-PDAC-SCHEMA-FAIL-CLOSED-001
-    digest: sha256:d0df07a1901dde17f68e73625eb38bf3f84071571708257a725bc52fd402798c
+    digest: sha256:f10f8cfb406c1bda761bad442e42e43375622414276cbdc17316f49ad49c01fc
     comment: Requerimiento funcional canónico asociado (Génesis CHG-045-PDAC-SCHEMA-FAIL-CLOSED)
 ---
 
