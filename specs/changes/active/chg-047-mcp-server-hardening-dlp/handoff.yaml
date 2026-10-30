@@ -1,0 +1,15 @@
+id: HOF-CHG-047-MCP-SERVER-HARDENING-DLP
+type: handoff
+title: Handoff Canónico de Producto para mcp-server-hardening-dlp
+changeId: CHG-047-MCP-SERVER-HARDENING-DLP
+version: 1.0.0
+createdAt: '2026-10-30T14:31:16.581Z'
+subgraph:
+  requirements:
+    - FR-047-MCP-SERVER-HARDENING-DLP-001
+  useCases:
+    - UC-047-MCP-SERVER-HARDENING-DLP
+citations:
+  - id: FR-047-MCP-SERVER-HARDENING-DLP-001
+    digest: sha256:f31685ae4bde448ebff5bb3ef40548b49232e022551d3a482328e0c629f11e21
+    comment: Requerimiento funcional canónico asociado (Génesis CHG-047-MCP-SERVER-HARDENING-DLP)

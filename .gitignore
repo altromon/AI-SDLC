@@ -55,6 +55,7 @@ ENV/
 *.key
 
 # Logs
+reports/*.jsonl
 logs/
 *.log
 npm-debug.log*
