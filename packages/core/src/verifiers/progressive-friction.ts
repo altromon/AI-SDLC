@@ -59,18 +59,24 @@ export function isPathProtectedFromPatch(filePath: string): boolean {
 }
 
 function detectBranchChangeMatch(rootDir: string, dirs: string[]): string | undefined {
-  if (!fs.existsSync(path.join(rootDir, '.git'))) return undefined;
-  try {
-    const branch = execFileSync('git', ['branch', '--show-current'], {
-      cwd: rootDir,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'ignore'],
-    }).trim().toLowerCase();
-    if (!branch) return undefined;
-    return dirs.find((d) => branch.includes(path.basename(d).toLowerCase()));
-  } catch {
-    return undefined;
+  let branch = '';
+  if (fs.existsSync(path.join(rootDir, '.git'))) {
+    try {
+      branch = execFileSync('git', ['branch', '--show-current'], {
+        cwd: rootDir,
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'ignore'],
+      }).trim().toLowerCase();
+    } catch {
+      // ignore git failure
+    }
   }
+  if (!branch) {
+    const ciBranch = (process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || process.env.CI_COMMIT_REF_NAME || process.env.BRANCH_NAME || '').toLowerCase();
+    branch = ciBranch;
+  }
+  if (!branch) return undefined;
+  return dirs.find((d) => branch.includes(path.basename(d).toLowerCase()));
 }
 
 function resolveActiveChangeDir(rootDir: string): string | undefined {
@@ -90,6 +96,18 @@ function resolveActiveChangeDir(rootDir: string): string | undefined {
   }
 }
 
+function isEphemeralOrIgnored(file: string): boolean {
+  const norm = file.replace(/\\/g, '/');
+  return (
+    norm.startsWith('scratch/') ||
+    norm.startsWith('reports/') ||
+    norm.startsWith('coverage/') ||
+    norm.startsWith('dist/') ||
+    norm.startsWith('temp/') ||
+    norm.startsWith('tmp/')
+  );
+}
+
 function detectGitDiffFiles(rootDir: string): string[] {
   if (!fs.existsSync(path.join(rootDir, '.git'))) return [];
   try {
@@ -106,7 +124,7 @@ function detectGitDiffFiles(rootDir: string): string[] {
     const combined = `${tracked}\n${untracked}`
       .split(/\r?\n/)
       .map((f) => f.trim())
-      .filter(Boolean);
+      .filter((f) => Boolean(f) && !isEphemeralOrIgnored(f));
     return Array.from(new Set(combined));
   } catch {
     return [];
