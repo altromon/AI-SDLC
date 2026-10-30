@@ -14,7 +14,7 @@ interface RawFunctionBlock {
 
 export function extractFunctionsPolyglot(content: string, filePath: string): FunctionMetrics[] {
   const ext = path.extname(filePath).toLowerCase();
-  return ext === '.py' ? extractPythonFunctions(content, filePath) : extractBraceFunctions(content, filePath);
+  return ext === '.py' ? extractPythonFunctionsPolyglot(content, filePath) : extractBraceFunctions(content, filePath);
 }
 
 function isDocstringToggle(trimmed: string): boolean {
@@ -82,7 +82,7 @@ function processPythonLine(
   }
 }
 
-function extractPythonFunctions(content: string, filePath: string): FunctionMetrics[] {
+export function extractPythonFunctionsPolyglot(content: string, filePath: string): FunctionMetrics[] {
   const lines = content.split('\n');
   const blocks: RawFunctionBlock[] = [];
   const state = { currentFn: null as string | null, fnLines: [] as string[], baseIndent: 0, inDocstring: false };
