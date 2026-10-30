@@ -2,6 +2,8 @@
  * AI-SDLC: Progressive Friction & Anti-Bypass Verifier
  */
 
+import { canonicalSort } from '../utils/fs.js';
+import { resolveDeterministicDate } from '../utils/time.js';
 import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -84,7 +86,8 @@ function resolveActiveChangeDir(rootDir: string): string | undefined {
     const dirs = fs
       .readdirSync(activeRoot, { withFileTypes: true })
       .filter((d) => d.isDirectory())
-      .map((d) => path.join(activeRoot, d.name));
+      .map((d) => path.join(activeRoot, d.name))
+      .sort((a, b) => canonicalSort(a, b));
     const branchMatch = detectBranchChangeMatch(rootDir, dirs);
     if (branchMatch) return branchMatch;
     return dirs.find((d) => detectProfileFromChange(d) === 'patch') || dirs[0];
@@ -159,7 +162,7 @@ function buildFrictionHeader(profile: ChangeProfile, success: boolean, fileCount
   return [
     `# 🛡️ Progressive Friction and Anti-Bypass Verification Report`,
     ``,
-    `> **Date:** ${new Date().toISOString()}`,
+    `> **Date:** ${resolveDeterministicDate().toISOString()}`,
     `> **Evaluated Profile:** \`${profile.toUpperCase()}\``,
     `> **Verdict:** ${success ? 'COMPLIANT ✅' : 'BLOCKED ❌'}`,
     ``,

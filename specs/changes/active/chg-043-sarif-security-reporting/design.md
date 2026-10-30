@@ -15,7 +15,7 @@ citations:
     digest: sha256:4b471a7ae1b01f41f53947211715ff443c40e8f4bffd2af904a8212c2a3114a5
     comment: Citación de use-case (Generación de Reportes de Seguridad SAST y Secretos en Estándar OASIS SARIF 2.1.0)
   - id: FR-043-SARIF-SECURITY-REPORTING-001
-    digest: sha256:c55b4dcaf97c2e0008ae85e023116f4afdcac36e2357caa8f744d503ee95d202
+    digest: sha256:c7d6f547af0c384b4708ea530b5859b257610e7ea483ddb0f22fefb515af6f45
     comment: Citación de requirement (Generación de Reportes SARIF 2.1.0 para Verificaciones de Seguridad SAST y Secretos)
 ---
 

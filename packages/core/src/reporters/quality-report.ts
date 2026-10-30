@@ -1,3 +1,4 @@
+import { resolveDeterministicDate } from '../utils/time.js';
 /**
  * AI-SDLC: Automated Formal Quality Report Generator (Polyglot)
  */
@@ -222,7 +223,7 @@ function buildReportHeader(verdict: string, rating: string, mi: number, cc: numb
   return [
     `# 📊 Formal Quality and Release Gate Report (AI-SDLC)`,
     '',
-    `> **Generation Date:** ${new Date().toISOString()}`,
+    `> **Generation Date:** ${resolveDeterministicDate().toISOString()}`,
     `> **Release Gate Verdict:** ${status}`,
     `> **Global Rating:** **\`${rating}\`** (MI Index: ${mi}/100, Average CC: ${cc})`,
   ];

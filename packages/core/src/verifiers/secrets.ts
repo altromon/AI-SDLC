@@ -11,6 +11,8 @@
  */
 
 import { execFileSync } from 'child_process';
+import { canonicalSort } from '../utils/fs.js';
+import { resolveDeterministicDate } from '../utils/time.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
@@ -274,7 +276,7 @@ export function walkProjectFiles(
   const results: string[] = [];
 
   try {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const entries = fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => canonicalSort(a.name, b.name));
 
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
@@ -564,7 +566,7 @@ function buildReportHeader(result: SecretVerifierResult): string[] {
   return [
     `# 🔐 Deterministic Secrets and Credentials Audit (Gitleaks Gate)`,
     ``,
-    `> **Evaluation Date:** ${new Date().toISOString()}`,
+    `> **Evaluation Date:** ${resolveDeterministicDate().toISOString()}`,
     `> **Verdict:** ${isOk ? '✅ COMPLIANT (No exposed secrets or credentials)' : `❌ BLOCKED (${result.findingsCount} exposed credentials detected)`}`,
     `> **Audited Files:** ${result.totalFilesScanned} | **Security Violations:** ${result.findingsCount}`,
     `> **Native Gitleaks Engine:** ${result.scannedWithGitleaks ? '🟢 Active / Integrated' : '⚪ Deterministic Native Scanner (@aisdlc/core)'}`,

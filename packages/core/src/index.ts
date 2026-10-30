@@ -42,3 +42,5 @@ export * from './security/dlp-sanitizer.js';
 
 export * from './verifiers/ast/python-ast.js';
 export * from './verifiers/ast/native-ast-orchestrator.js';
+export { resolveDeterministicDate, generateDeterministicUuidV5 } from './utils/time.js';
+export { canonicalSort, normalizePath } from './utils/fs.js';

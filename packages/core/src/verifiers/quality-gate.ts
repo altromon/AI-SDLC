@@ -7,6 +7,8 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
+import { canonicalSort } from '../utils/fs.js';
+import { resolveDeterministicDate } from '../utils/time.js';
 import {
   AnalysisResult,
   CodeCoverageSummary,
@@ -146,21 +148,32 @@ function applyOptionOverrides(policy: QualityPolicy, overrides?: QualityThreshol
   if (overrides.enforce_mode !== undefined) policy.enforce_mode = overrides.enforce_mode;
 }
 
+function parsePolicyYaml(content: string): Record<string, unknown> {
+  let doc: unknown;
+  try {
+    doc = yaml.load(content);
+  } catch (err: unknown) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid YAML in quality-policy: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  if (!doc || typeof doc !== 'object' || Array.isArray(doc)) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid quality policy structure: root must be a YAML mapping`);
+  }
+  return doc as Record<string, unknown>;
+}
+
 export function parseQualityPolicy(content: string, overrides?: QualityThresholds): QualityPolicy {
   const policy = createDefaultQualityPolicy();
-  try {
-    const doc = yaml.load(content);
-    if (doc && typeof doc === 'object') {
-      const record = doc as Record<string, unknown>;
-      applyDocScope(policy, record);
-      applyDocThresholds(policy, record);
-      if (record.max_per_function !== undefined) policy.max_cyclomatic = Number(record.max_per_function);
-      if (record.min_acceptable_score !== undefined) policy.min_maintainability = Number(record.min_acceptable_score);
-      if (record.max_function_lines !== undefined) policy.max_function_lines = Number(record.max_function_lines);
-    }
-  } catch {
-    // Keep defaults on YAML error
+  if (!content || !content.trim()) {
+    applyEnvThresholds(policy);
+    applyOptionOverrides(policy, overrides);
+    return policy;
   }
+  const record = parsePolicyYaml(content);
+  applyDocScope(policy, record);
+  applyDocThresholds(policy, record);
+  if (record.max_per_function !== undefined) policy.max_cyclomatic = Number(record.max_per_function);
+  if (record.min_acceptable_score !== undefined) policy.min_maintainability = Number(record.min_acceptable_score);
+  if (record.max_function_lines !== undefined) policy.max_function_lines = Number(record.max_function_lines);
   applyEnvThresholds(policy);
   applyOptionOverrides(policy, overrides);
   return policy;
@@ -213,7 +226,7 @@ export function walkDir(
 ): string[] {
   if (!fs.existsSync(dir)) return [];
   const results: string[] = [];
-  for (const file of fs.readdirSync(dir)) {
+  for (const file of fs.readdirSync(dir).sort(canonicalSort)) {
     const fullPath = path.join(dir, file);
     const normalized = fullPath.replace(/\\/g, '/');
     if (isExcludedFile(file, normalized, excludePatterns)) continue;
@@ -352,7 +365,6 @@ function evaluateFileQuality(file: string, rootDir: string, policy: QualityPolic
     };
   });
 }
-
 
 function collectUnitTestCorpus(rootDir: string): string {
   const allCodeFiles = walkDir(rootDir, DEFAULT_EXTENSIONS, DEFAULT_EXCLUDES);
@@ -529,7 +541,7 @@ export function writeQualityBaseline(
 ): QualityBaseline {
   const baseline: QualityBaseline = {
     version: "1.0",
-    generatedAt: new Date().toISOString(),
+    generatedAt: resolveDeterministicDate(path.dirname(baselineFile)).toISOString(),
     totalViolations: entries.length,
     violations: entries,
   };

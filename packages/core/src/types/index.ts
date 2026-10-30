@@ -649,6 +649,7 @@ export interface PdacNode {
   filePath: string;
   title?: string;
   digest: string;
+  rawDigest?: string;
   rawContent: string;
   citations: {
     targetId: string;
@@ -669,11 +670,26 @@ export interface PdacGraphOptions {
   rootDir?: string;
 }
 
+export interface PdacInvalidAnchor {
+  sourceFile: string;
+  targetId: string;
+  anchor: string;
+  reason: string;
+}
+
+export interface PdacUnresolvedCitation {
+  sourceFile: string;
+  targetId: string;
+}
+
 export interface PdacGraphResult {
   success: boolean;
   totalNodes: number;
   totalEdges: number;
   drifts: PdacDrift[];
+  unresolvedCount?: number;
+  unresolvedCitations?: PdacUnresolvedCitation[];
+  invalidAnchors?: PdacInvalidAnchor[];
   reportMarkdown: string;
 }
 
