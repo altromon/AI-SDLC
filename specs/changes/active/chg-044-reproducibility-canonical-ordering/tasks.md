@@ -5,7 +5,7 @@ change-id: CHG-044-REPRODUCIBILITY-CANONICAL-ORDERING
 title: 'Desglose de Tareas Verificables: reproducibility-canonical-ordering'
 version: 1.0.0
 schema-version: '1.0'
-status: draft
+status: approved
 governance-summary:
   autonomous-tasks-count: 1
   human-review-plan-count: 1
