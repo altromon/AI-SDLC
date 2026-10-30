@@ -1,3 +1,4 @@
+import { resolveDeterministicDate } from '../utils/time.js';
 /**
  * AI-SDLC: Automated 360° Traceability Engine (RTM Validator)
  * Verifies complete coverage across:
@@ -71,7 +72,7 @@ function buildTraceabilityHeader(isOk: boolean, errors: number): string[] {
   return [
     '# 360° Requirements Traceability Matrix (RTM)',
     '',
-    `*Verification Date: ${new Date().toISOString()}*`,
+    `*Verification Date: ${resolveDeterministicDate().toISOString()}*`,
     `*Overall Status: ${isOk ? '100% TRACEABLE (PASSED)' : `ERRORS DETECTED (${errors} gaps)`}*`,
     '',
     '## 1. End-to-End Coverage (PDaC Handoff ➔ arc42/NAF v4 ➔ BDD/Gherkin)',

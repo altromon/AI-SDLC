@@ -39,3 +39,6 @@ export * from './adapters/sdd/index.js';
 export * from './init/index.js';
 export * from './utils/fs.js';
 export * from './security/dlp-sanitizer.js';
+
+export { resolveDeterministicDate, generateDeterministicUuidV5 } from './utils/time.js';
+export { canonicalSort, normalizePath } from './utils/fs.js';
