@@ -303,6 +303,8 @@ function scanDirectTarget(rootDir: string, targetDir: string, policy: QualityPol
   }
 }
 
+export const UNIT_TEST_SUFFIXES = ['.spec.ts', '.test.ts', '.spec.js', '.test.js', '_test.py', '_test.go'];
+
 function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
   const files = new Set<string>();
   const monorepoContainers = ['packages', 'apps', 'libs', 'modules', 'services'];
@@ -314,7 +316,7 @@ function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
     }
   }
 
-  return Array.from(files);
+  return Array.from(files).filter((f) => !UNIT_TEST_SUFFIXES.some((s) => f.endsWith(s)));
 }
 
 function evaluateViolations(fn: FunctionMetrics, policy: QualityPolicy): string[] {
@@ -351,7 +353,6 @@ function evaluateFileQuality(file: string, rootDir: string, policy: QualityPolic
   });
 }
 
-const UNIT_TEST_SUFFIXES = ['.spec.ts', '.test.ts', '.spec.js', '.test.js', '_test.py', '_test.go'];
 
 function collectUnitTestCorpus(rootDir: string): string {
   const allCodeFiles = walkDir(rootDir, DEFAULT_EXTENSIONS, DEFAULT_EXCLUDES);

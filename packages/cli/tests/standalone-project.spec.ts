@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { runGherkinExtract } from '../src/commands/gherkin.js';
@@ -13,7 +14,7 @@ import {
 } from '../src/commands/verify.js';
 
 describe('Standalone Unknown Project End-to-End Suite', () => {
-  const tempProjectDir = path.join(process.cwd(), 'scratch', 'test-standalone-unknown-project');
+  const tempProjectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-standalone-'));
   const examplesDir = path.join(process.cwd(), 'examples', 'sentinel-core');
 
   beforeAll(() => {
