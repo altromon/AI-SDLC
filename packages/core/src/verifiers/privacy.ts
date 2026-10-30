@@ -8,6 +8,7 @@
  */
 
 import * as fs from 'fs';
+import { writeReportFileIfChanged } from '../utils/fs.js';
 import * as path from 'path';
 import yaml from 'js-yaml';
 import {
@@ -607,16 +608,14 @@ function writePrivacyOutputsIfNeeded(
   if (options.generateRopa) {
     const relRopa = options.ropaOutputPath || policy.ci_gates.output_ropa_file || 'reports/ROPA_INVENTORY.md';
     const fullRopa = path.isAbsolute(relRopa) ? relRopa : path.join(rootDir, relRopa);
-    fs.mkdirSync(path.dirname(fullRopa), { recursive: true });
-    fs.writeFileSync(fullRopa, result.ropaMarkdown, 'utf-8');
+    writeReportFileIfChanged(fullRopa, result.ropaMarkdown);
     result.ropaOutputPath = fullRopa;
   }
   if (options.reportOutputPath) {
     const fullReport = path.isAbsolute(options.reportOutputPath)
       ? options.reportOutputPath
       : path.join(rootDir, options.reportOutputPath);
-    fs.mkdirSync(path.dirname(fullReport), { recursive: true });
-    fs.writeFileSync(fullReport, result.reportMarkdown, 'utf-8');
+    writeReportFileIfChanged(fullReport, result.reportMarkdown);
     result.reportOutputPath = fullReport;
   }
 }

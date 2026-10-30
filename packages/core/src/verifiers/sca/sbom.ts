@@ -5,7 +5,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { resolveDeterministicDate, generateDeterministicUuidV5 } from '../../utils/time.js';
-import { canonicalSort } from '../../utils/fs.js';
+import { canonicalSort, writeReportFileIfChanged } from '../../utils/fs.js';
 import {
   CycloneDxBom,
   CycloneDxComponent,
@@ -118,7 +118,7 @@ function resolveProjectIdentity(options: SbomGenerateOptions): { name: string; v
 function buildBomMetadata(name: string, version: string, rootDir?: string): CycloneDxBom['metadata'] {
   return {
     timestamp: resolveDeterministicDate(rootDir).toISOString(),
-    tools: [{ vendor: 'AI-SDLC', name: '@aisdlc/core', version: '2.4.0' }],
+    tools: [{ vendor: 'AI-SDLC', name: '@aisdlc/core', version: '2.5.0' }],
     component: { type: 'application', name, version },
   };
 }
@@ -140,49 +140,9 @@ export function generateCycloneDxSbom(
   };
 }
 
-function tryAtomicWrite(filePath: string, content: string): boolean {
-  const tempPath = `${filePath}.${process.pid}.${Math.random().toString(36).substring(2)}.tmp`;
-  try {
-    fs.writeFileSync(tempPath, content, 'utf-8');
-    try {
-      if (fs.existsSync(filePath)) {
-        fs.rmSync(filePath, { force: true });
-      }
-      fs.renameSync(tempPath, filePath);
-    } catch {
-      fs.copyFileSync(tempPath, filePath);
-      fs.unlinkSync(tempPath);
-    }
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function safeWriteFileSync(filePath: string, content: string): void {
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-
-  for (let attempt = 0; attempt < 10; attempt++) {
-    if (tryAtomicWrite(filePath, content)) return;
-    const delay = Math.floor(Math.random() * 50) + 50;
-    const start = Date.now();
-    while (Date.now() - start < delay) {
-      // wait
-    }
-  }
-
-  try {
-    fs.writeFileSync(filePath, content, 'utf-8');
-  } catch {
-    // Ignore transient lock error if another worker already wrote the report
-  }
-}
 
 export function writeCycloneDxSbom(sbom: CycloneDxBom, outputPath: string): void {
-  safeWriteFileSync(outputPath, JSON.stringify(sbom, null, 2));
+  writeReportFileIfChanged(outputPath, JSON.stringify(sbom, null, 2));
 }
 
 function buildThirdPartyHeader(projectName: string, count: number): string[] {
@@ -253,5 +213,5 @@ export function generateThirdPartyNotices(
 }
 
 export function writeThirdPartyNotices(noticesContent: string, outputPath: string): void {
-  safeWriteFileSync(outputPath, noticesContent);
+  writeReportFileIfChanged(outputPath, noticesContent);
 }

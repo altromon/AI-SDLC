@@ -5,8 +5,7 @@
  * for automated ingestion by GitHub Advanced Security (GHAS), DefectDojo, Snyk, and ASPM platforms.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import { writeReportFileIfChanged } from '../utils/fs.js';
 import {
   GenerateSarifOptions,
   SarifDocument,
@@ -190,9 +189,5 @@ export function writeSecuritySarifReport(
   doc: SarifDocument,
   pretty = true
 ): void {
-  const dir = path.dirname(outputPath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  fs.writeFileSync(outputPath, serializeSarifDocument(doc, pretty), 'utf-8');
+  writeReportFileIfChanged(outputPath, serializeSarifDocument(doc, pretty));
 }

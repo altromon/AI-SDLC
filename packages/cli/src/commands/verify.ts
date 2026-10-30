@@ -6,6 +6,7 @@ import pc from 'picocolors';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
+  writeReportFileIfChanged,
   checkGherkinInSync,
   verifyArtifactDuplicates,
   verifyArtifactsSchemas,
@@ -1103,15 +1104,8 @@ function emitSecurityJson(
 }
 
 function writeSuppressionsAuditReport(rootDir: string, suppressions: SecuritySuppression[]): void {
-  const reportsDir = path.join(rootDir, 'reports');
-  if (!fs.existsSync(reportsDir)) {
-    fs.mkdirSync(reportsDir, { recursive: true });
-  }
-  fs.writeFileSync(
-    path.join(reportsDir, 'SUPPRESSIONS_AUDIT.md'),
-    generateSuppressionsAuditReport(suppressions),
-    'utf-8'
-  );
+  const targetPath = path.join(rootDir, 'reports', 'SUPPRESSIONS_AUDIT.md');
+  writeReportFileIfChanged(targetPath, generateSuppressionsAuditReport(suppressions));
 }
 
 function executeSecurityVerifiers(rootDir: string, options: SecurityVerifyCliOptions) {

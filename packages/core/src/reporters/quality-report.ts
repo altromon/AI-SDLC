@@ -1,4 +1,5 @@
 import { resolveDeterministicDate } from '../utils/time.js';
+import { writeReportFileIfChanged } from '../utils/fs.js';
 /**
  * AI-SDLC: Automated Formal Quality Report Generator (Polyglot)
  */
@@ -293,10 +294,9 @@ function renderQualityReportMarkdown(
   return [...header, '', '---', '', ...table, '', '---', '', ...polyglot, ...violationsSection, '', EVALUATION_STANDARDS_MD].join('\n');
 }
 
-function writeQualityReportFile(rootDir: string, markdown: string): void {
-  const reportsDir = path.join(rootDir, 'reports');
-  fs.mkdirSync(reportsDir, { recursive: true });
-  fs.writeFileSync(path.join(reportsDir, 'QUALITY_REPORT.md'), markdown, 'utf-8');
+function writeQualityReportFile(rootDir: string, markdown: string): boolean {
+  const targetPath = path.join(rootDir, 'reports', 'QUALITY_REPORT.md');
+  return writeReportFileIfChanged(targetPath, markdown);
 }
 
 export function generateQualityReport(options: QualityReportOptions = {}): QualityReportResult {

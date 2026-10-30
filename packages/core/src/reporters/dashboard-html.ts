@@ -1,3 +1,4 @@
+import { resolveDeterministicDate } from '../utils/time.js';
 /**
  * AI-SDLC: Dashboard HTML Renderer
  * Generates modular offline HTML for Cytoscape Graph, RTM 360°, Quality Gates, and KPIs.
@@ -601,10 +602,12 @@ function renderDashboardMain(metricsData: DashboardMetricsData): string {
 export function renderDashboardHtml(
   graphData: GraphElementsResult,
   metricsData: DashboardMetricsData,
-  title: string = 'AI-SDLC: Dashboard Interactivo de Trazabilidad y Calidad'
+  title: string = 'AI-SDLC: Dashboard Interactivo de Trazabilidad y Calidad',
+  generationDate?: string
 ): string {
   const head = renderDashboardHead(title);
-  const header = renderHeaderHtml(graphData.issueCount, new Date().toISOString());
+  const effectiveDate = generationDate || resolveDeterministicDate().toISOString();
+  const header = renderHeaderHtml(graphData.issueCount, effectiveDate);
   const nav = renderNavTabsHtml();
   const main = renderDashboardMain(metricsData);
   const sidebar = renderTaskSidebarHtml();
