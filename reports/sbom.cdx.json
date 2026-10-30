@@ -2,20 +2,20 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:8bf966b5-0f99-407d-a00a-361f8cd81089",
+  "serialNumber": "urn:uuid:d2068850-44cf-416e-88dc-8404adbd1a28",
   "metadata": {
-    "timestamp": "2026-10-29T19:45:33.705Z",
+    "timestamp": "2026-10-30T08:30:36.816Z",
     "tools": [
       {
         "vendor": "AI-SDLC",
         "name": "@aisdlc/core",
-        "version": "2.3.0"
+        "version": "2.4.0"
       }
     ],
     "component": {
       "type": "application",
       "name": "ai-sdlc-monorepo",
-      "version": "2.3.0"
+      "version": "2.4.0"
     }
   },
   "components": [

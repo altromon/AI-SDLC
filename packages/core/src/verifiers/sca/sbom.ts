@@ -117,7 +117,7 @@ function resolveProjectIdentity(options: SbomGenerateOptions): { name: string; v
 function buildBomMetadata(name: string, version: string): CycloneDxBom['metadata'] {
   return {
     timestamp: new Date().toISOString(),
-    tools: [{ vendor: 'AI-SDLC', name: '@aisdlc/core', version: '2.3.0' }],
+    tools: [{ vendor: 'AI-SDLC', name: '@aisdlc/core', version: '2.4.0' }],
     component: { type: 'application', name, version },
   };
 }

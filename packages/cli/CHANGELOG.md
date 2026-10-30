@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 2.4.0
+
+### Minor Changes
+
+- feat(cli): alinear `aisdlc verify quality` y `aisdlc verify testing` con analizador AST políglota avanzado y runner ejecutable BDD (`v2.4.0`) (#77, #78).
+- Updated dependencies
+  - @aisdlc/core@2.4.0
+  - @aisdlc/mcp@2.4.0
+
 ## 2.3.0
 
 ### Minor Changes
