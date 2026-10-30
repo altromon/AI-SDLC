@@ -21,6 +21,10 @@ describe('@aisdlc/cli check command and auto-fix suite', () => {
   it('should pass on repository root when fully synchronized', () => {
     const rootDir = path.resolve(__dirname, '../../..');
     const result = executePreflightCheck({ root: rootDir, fix: true, silent: true });
+    if (!result.success) {
+      const failed = result.gates.filter((g) => g.status !== 'PASSED' && g.status !== 'FIXED');
+      console.error('FAILED GATES IN CHECK SPEC:', JSON.stringify(failed, null, 2));
+    }
 
     expect(result.success).toBe(true);
     expect(result.gates.length).toBeGreaterThanOrEqual(8);
