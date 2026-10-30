@@ -12,7 +12,7 @@ status: draft
 contracts: []
 citations:
   - id: FR-046-NATIVE-SDK-CLI-AST-001
-    digest: sha256:4bddacde65efcf2126d441bc96be886588007d0bcbe3dfa2a98ea22e81bb2f7a
+    digest: sha256:c14d6fd829711a8e0205a8d21e2df2f9be69f6a75cbd22276e503d2d2bac6e95
     comment: Requerimiento funcional canónico asociado (Génesis CHG-046-NATIVE-SDK-CLI-AST)
 ---
 
