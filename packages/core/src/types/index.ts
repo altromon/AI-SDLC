@@ -29,6 +29,15 @@ export interface FunctionMetrics {
   line?: number;
 }
 
+export interface LanguageAstReport {
+  language: string;
+  filePath: string;
+  functions: FunctionMetrics[];
+  unsafeTypesCount?: number;
+  emptyStubsCount?: number;
+  rawMetrics?: Record<string, unknown>;
+}
+
 export interface AnalysisResult extends FunctionMetrics {
   relPath: string;
   status: 'PASS' | 'FAIL';
