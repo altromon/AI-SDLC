@@ -1,5 +1,12 @@
 # @aisdlc/core
 
+## 2.4.0
+
+### Minor Changes
+
+- feat(ast): evolucionar analizador estructural AST políglota síncrono (`zero-WASM`) con soporte de delimitadores multilínea y sintaxis avanzada en Python 3.10+ (`match/case`, exclusión de docstrings), Rust (`r###"..."###`, `match`, `?`), Go (`select`, raw strings), C# 11+ (`"""..."""`, `@"..."`, `foreach`, `when`, `??`, `?.`), Java 17/21 (`"""..."""`, genéricos `<T>`, `when`) y C++ (`R"delim(...)delim"`) (#77).
+- feat(bdd): incorporar runner ejecutable determinista `zero-dependency` para archivos `.feature` (`BddStepRegistry`, `parseFeatureDocument`, `executeBddFeature`, `writeCucumberJsonReport`) e ingesta de `reports/cucumber-report.json` en `verifyTestingCoverage` (#78).
+
 ## 2.3.0
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 2.4.0
+
+### Minor Changes
+
+- feat(mcp): propagar soporte de verificación de reportes de ejecución Cucumber (`verify_testing`) y precisión AST políglota en herramientas MCP (#77, #78).
+- Updated dependencies
+  - @aisdlc/core@2.4.0
+
 ## 2.3.0
 
 ### Minor Changes

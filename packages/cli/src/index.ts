@@ -42,7 +42,7 @@ const program = new Command();
 program
   .name('aisdlc')
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
-  .version('2.3.0');
+  .version('2.4.0');
 
 // --- check command (unified pre-flight with auto-fix) ---
 program
