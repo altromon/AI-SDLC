@@ -12,7 +12,7 @@ status: approved
 contracts: []
 citations:
   - id: FR-047-MCP-SERVER-HARDENING-DLP-001
-    digest: sha256:f31685ae4bde448ebff5bb3ef40548b49232e022551d3a482328e0c629f11e21
+    digest: sha256:4755ec78751e2cbd12ee2ad39629ac5a5248949b1c3ea43fd5443dbc30e94780
     comment: Requerimiento funcional canónico asociado (Génesis CHG-047-MCP-SERVER-HARDENING-DLP)
 ---
 
