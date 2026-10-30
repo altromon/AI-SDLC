@@ -14,6 +14,45 @@ import {
   ArtifactValidationResult,
 } from '../types/index.js';
 import { walkMdFiles } from '../utils/fs.js';
+import Ajv2020 from 'ajv/dist/2020.js';
+import addFormats from 'ajv-formats';
+import type { ErrorObject, ValidateFunction } from 'ajv';
+
+const ajvInstance = new (Ajv2020 as unknown as typeof import('ajv').default)({
+  allErrors: true,
+  strict: false,
+  validateFormats: true,
+  verbose: true,
+});
+(addFormats as unknown as (instance: unknown) => void)(ajvInstance);
+
+const compiledSchemaCache = new WeakMap<object, ValidateFunction>();
+
+function formatFieldPath(err: ErrorObject, propPath: string): string {
+  const field = err.instancePath ? err.instancePath.replace(/^\//, '').replace(/\//g, '.') : propPath || 'root';
+  return propPath && field !== 'root' && field ? `${propPath}.${field}` : field || 'root';
+}
+
+const KEYWORD_FORMATTERS: Record<string, (p: Record<string, unknown>, err: ErrorObject, fullPath: string) => string> = {
+  required: (p, _err, fullPath) => `'${fullPath}' missing required field '${String(p?.missingProperty)}'`,
+  additionalProperties: (p, _err, fullPath) => `'${fullPath}' contains disallowed extra property '${String(p?.additionalProperty)}'`,
+  minLength: (p, _err, fullPath) => `'${fullPath}' length must be >= ${String(p?.limit)}`,
+  maxLength: (p, _err, fullPath) => `'${fullPath}' length must be <= ${String(p?.limit)}`,
+  enum: (p, err, fullPath) => `'${fullPath}' must be one of [${Array.isArray(p?.allowedValues) ? p.allowedValues.join(', ') : ''}], received '${String(err.data)}'`,
+  uniqueItems: (_p, _err, fullPath) => `'${fullPath}' contains duplicate items (must have unique items)`,
+  pattern: (p, err, fullPath) => `'${fullPath}' value '${String(err.data)}' does not match pattern ${String(p?.pattern)}`,
+};
+
+function formatKeywordMessage(err: ErrorObject, fullPath: string): string {
+  const p = err.params as Record<string, unknown>;
+  const formatter = KEYWORD_FORMATTERS[err.keyword];
+  return formatter ? formatter(p, err, fullPath) : `'${fullPath}' ${err.message || 'validation failed'}`;
+}
+
+function formatAjvError(err: ErrorObject, propPath: string): string {
+  const fullPath = formatFieldPath(err, propPath);
+  return formatKeywordMessage(err, fullPath);
+}
 import { STARTER_SCHEMAS_MAP } from '../init/starter-schemas.js';
 
 export const TYPE_TO_SCHEMA_MAP: Record<string, string> = {
@@ -207,166 +246,18 @@ export interface JsonSchemaRule {
   [key: string]: unknown;
 }
 
-/**
- * Deterministic JSON Schema validator matching Draft 2020-12 core specifications
- */
-function validateConst(value: unknown, schema: JsonSchemaRule, currentProp: string): string[] {
-  if (schema.const !== undefined && value !== schema.const) {
-    return [`'${currentProp}' must equal '${schema.const}', received '${String(value)}'`];
+function getOrCompileSchema(schema: JsonSchemaRule): ValidateFunction {
+  const schemaObj = schema as Record<string, unknown>;
+  if (typeof schemaObj.$id === 'string') {
+    const existing = ajvInstance.getSchema(schemaObj.$id);
+    if (existing) return existing;
+    return ajvInstance.compile(schema as object);
   }
-  return [];
-}
-
-function validateEnum(value: unknown, schema: JsonSchemaRule, currentProp: string): string[] {
-  if (schema.enum !== undefined && !schema.enum.includes(value)) {
-    return [`'${currentProp}' must be one of [${schema.enum.join(', ')}], received '${String(value)}'`];
-  }
-  return [];
-}
-
-function validateCombinators(value: unknown, schema: JsonSchemaRule, propPath: string, currentProp: string): string[] {
-  if (schema.oneOf) {
-    const matchCount = schema.oneOf.filter((sub) => validateAgainstSchema(value, sub, propPath).length === 0).length;
-    if (matchCount !== 1) {
-      return [`'${currentProp}' must match exactly one sub-schema in oneOf`];
-    }
-  }
-  if (schema.anyOf) {
-    const anyMatched = schema.anyOf.some((sub) => validateAgainstSchema(value, sub, propPath).length === 0);
-    if (!anyMatched) {
-      return [`'${currentProp}' did not match any allowed alternative in anyOf`];
-    }
-  }
-  return [];
-}
-
-function getActualJsonType(value: unknown): string {
-  if (value === null) return 'null';
-  if (Array.isArray(value)) return 'array';
-  const t = typeof value;
-  if (t === 'number' && Number.isInteger(value)) return 'integer';
-  return t;
-}
-
-function validateType(value: unknown, schema: JsonSchemaRule, currentProp: string): string[] {
-  if (schema.type === undefined) return [];
-  const allowed = Array.isArray(schema.type) ? schema.type : [schema.type];
-  const actual = getActualJsonType(value);
-  const matches = allowed.some((t) => t === actual || (t === 'number' && actual === 'integer'));
-  if (!matches) {
-    return [`'${currentProp}' expected type [${allowed.join('|')}], received '${actual}'`];
-  }
-  return [];
-}
-
-function validateString(value: string, schema: JsonSchemaRule, currentProp: string): string[] {
-  const errors: string[] = [];
-  if (schema.minLength !== undefined && value.length < schema.minLength) {
-    errors.push(`'${currentProp}' length must be >= ${schema.minLength}`);
-  }
-  if (schema.maxLength !== undefined && value.length > schema.maxLength) {
-    errors.push(`'${currentProp}' length must be <= ${schema.maxLength}`);
-  }
-  if (schema.pattern !== undefined && !new RegExp(schema.pattern).test(value)) {
-    errors.push(`'${currentProp}' value '${value}' does not match pattern ${schema.pattern}`);
-  }
-  if (schema.format === 'date') {
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(value) || isNaN(Date.parse(value))) {
-      errors.push(`'${currentProp}' must be a valid ISO-8601 date string (YYYY-MM-DD)`);
-    }
-  }
-  return errors;
-}
-
-function validateNumber(value: number, schema: JsonSchemaRule, currentProp: string): string[] {
-  const errors: string[] = [];
-  if (schema.minimum !== undefined && value < schema.minimum) {
-    errors.push(`'${currentProp}' must be >= ${schema.minimum}`);
-  }
-  if (schema.maximum !== undefined && value > schema.maximum) {
-    errors.push(`'${currentProp}' must be <= ${schema.maximum}`);
-  }
-  return errors;
-}
-
-function validateArray(value: unknown[], schema: JsonSchemaRule, currentProp: string): string[] {
-  const errors: string[] = [];
-  if (schema.minItems !== undefined && value.length < schema.minItems) {
-    errors.push(`'${currentProp}' items count must be >= ${schema.minItems}`);
-  }
-  if (schema.maxItems !== undefined && value.length > schema.maxItems) {
-    errors.push(`'${currentProp}' items count must be <= ${schema.maxItems}`);
-  }
-  if (schema.items) {
-    value.forEach((item, idx) => {
-      errors.push(...validateAgainstSchema(item, schema.items!, `${currentProp}[${idx}]`));
-    });
-  }
-  return errors;
-}
-
-function checkRequiredProperties(
-  record: Record<string, unknown>,
-  required: string[] | undefined,
-  currentProp: string
-): string[] {
-  if (!required) return [];
-  const errors: string[] = [];
-  for (const reqKey of required) {
-    if (!(reqKey in record) || record[reqKey] === undefined) {
-      errors.push(`'${currentProp}' missing required field '${reqKey}'`);
-    }
-  }
-  return errors;
-}
-
-function checkObjectProperties(
-  record: Record<string, unknown>,
-  schema: JsonSchemaRule,
-  propPath: string,
-  currentProp: string
-): string[] {
-  const errors: string[] = [];
-  const properties = schema.properties || {};
-  for (const [key, propVal] of Object.entries(record)) {
-    const subPath = propPath ? `${propPath}.${key}` : key;
-    if (key in properties) {
-      errors.push(...validateAgainstSchema(propVal, properties[key], subPath));
-    } else if (schema.additionalProperties === false) {
-      errors.push(`'${currentProp}' contains disallowed extra property '${key}'`);
-    } else if (typeof schema.additionalProperties === 'object') {
-      errors.push(...validateAgainstSchema(propVal, schema.additionalProperties as JsonSchemaRule, subPath));
-    }
-  }
-  return errors;
-}
-
-function validateObject(
-  record: Record<string, unknown>,
-  schema: JsonSchemaRule,
-  propPath: string,
-  currentProp: string
-): string[] {
-  return [
-    ...checkRequiredProperties(record, schema.required, currentProp),
-    ...checkObjectProperties(record, schema, propPath, currentProp),
-  ];
-}
-
-function validateTypeSpecificRules(
-  value: unknown,
-  schema: JsonSchemaRule,
-  propPath: string,
-  currentProp: string
-): string[] {
-  if (typeof value === 'string') return validateString(value, schema, currentProp);
-  if (typeof value === 'number') return validateNumber(value, schema, currentProp);
-  if (Array.isArray(value)) return validateArray(value, schema, currentProp);
-  if (typeof value === 'object' && value !== null) {
-    return validateObject(value as Record<string, unknown>, schema, propPath, currentProp);
-  }
-  return [];
+  const cached = compiledSchemaCache.get(schema);
+  if (cached) return cached;
+  const compiled = ajvInstance.compile(schema as object);
+  compiledSchemaCache.set(schema, compiled);
+  return compiled;
 }
 
 export function validateAgainstSchema(
@@ -374,20 +265,15 @@ export function validateAgainstSchema(
   schema: JsonSchemaRule,
   propPath = ''
 ): string[] {
-  const currentProp = propPath || 'root';
-  const constErr = validateConst(value, schema, currentProp);
-  if (constErr.length > 0) return constErr;
-
-  const enumErr = validateEnum(value, schema, currentProp);
-  if (enumErr.length > 0) return enumErr;
-
-  const combErr = validateCombinators(value, schema, propPath, currentProp);
-  if (combErr.length > 0) return combErr;
-
-  const typeErr = validateType(value, schema, currentProp);
-  if (typeErr.length > 0) return typeErr;
-
-  return validateTypeSpecificRules(value, schema, propPath, currentProp);
+  if (!schema || typeof schema !== 'object') return [];
+  try {
+    const validate = getOrCompileSchema(schema);
+    const valid = validate(value);
+    if (valid || !validate.errors) return [];
+    return validate.errors.map((err) => formatAjvError(err, propPath));
+  } catch (err: unknown) {
+    return [`Schema error: ${err instanceof Error ? err.message : String(err)}`];
+  }
 }
 
 function findSchemaFile(relSchemaPath: string, rootDir: string): string | null {

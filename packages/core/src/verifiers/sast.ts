@@ -10,6 +10,8 @@
  */
 
 import { execFileSync } from 'child_process';
+import { canonicalSort } from '../utils/fs.js';
+import { resolveDeterministicDate } from '../utils/time.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
@@ -192,7 +194,7 @@ export function walkSourceFiles(
   const files: string[] = [];
 
   try {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const entries = fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => canonicalSort(a.name, b.name));
 
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
@@ -342,7 +344,7 @@ function buildSastHeader(isOk: boolean, violationsCount: number, totalFilesScann
   return [
     `# 🛡️ Shift-Left SAST Audit (Static Application Security Testing)`,
     ``,
-    `> **Evaluation Date:** ${new Date().toISOString()}`,
+    `> **Evaluation Date:** ${resolveDeterministicDate().toISOString()}`,
     `> **Verdict:** ${verdict}`,
     `> **Audited Code Files:** ${totalFilesScanned} | **SAST Violations:** ${violationsCount}`,
     ``,

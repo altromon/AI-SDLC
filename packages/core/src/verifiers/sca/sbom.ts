@@ -4,7 +4,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import * as crypto from 'crypto';
+import { resolveDeterministicDate, generateDeterministicUuidV5 } from '../../utils/time.js';
+import { canonicalSort } from '../../utils/fs.js';
 import {
   CycloneDxBom,
   CycloneDxComponent,
@@ -114,9 +115,9 @@ function resolveProjectIdentity(options: SbomGenerateOptions): { name: string; v
   return { name, version };
 }
 
-function buildBomMetadata(name: string, version: string): CycloneDxBom['metadata'] {
+function buildBomMetadata(name: string, version: string, rootDir?: string): CycloneDxBom['metadata'] {
   return {
-    timestamp: new Date().toISOString(),
+    timestamp: resolveDeterministicDate(rootDir).toISOString(),
     tools: [{ vendor: 'AI-SDLC', name: '@aisdlc/core', version: '2.4.0' }],
     component: { type: 'application', name, version },
   };
@@ -132,8 +133,8 @@ export function generateCycloneDxSbom(
     bomFormat: 'CycloneDX',
     specVersion: '1.5',
     version: 1,
-    serialNumber: `urn:uuid:${crypto.randomUUID()}`,
-    metadata: buildBomMetadata(name, version),
+    serialNumber: `urn:uuid:${generateDeterministicUuidV5(`${name}@${version}|${dependencies.map((d) => `${d.name}@${d.version}:${d.purl || ''}`).sort(canonicalSort).join(';')}`)}`,
+    metadata: buildBomMetadata(name, version, options.rootDir),
     components: dependencies.map(buildCycloneDxComponent),
     ...(cdxVulns.length > 0 ? { vulnerabilities: cdxVulns } : {}),
   };
@@ -189,7 +190,7 @@ function buildThirdPartyHeader(projectName: string, count: number): string[] {
     `# 📜 Third-Party Software Notices and Information`,
     ``,
     `> **Proyecto:** ${projectName}`,
-    `> **Fecha:** ${new Date().toISOString().split('T')[0]}`,
+    `> **Fecha:** ${resolveDeterministicDate().toISOString().split('T')[0]}`,
     `> **Total Componentes:** ${count}`,
     ``,
     `Este documento contiene los avisos de copyright y términos de licencia aplicables a los componentes de terceros utilizados en este proyecto.`,
@@ -245,12 +246,12 @@ export function generateThirdPartyNotices(
     '',
     '---',
     '',
-    '## Textos de Licencia y Atribuciones',
+    '## 2. Atribuciones y Términos de Licencia Individuales',
     '',
     ...attributions,
   ].join('\n');
 }
 
-export function writeThirdPartyNotices(content: string, outputPath: string): void {
-  safeWriteFileSync(outputPath, content);
+export function writeThirdPartyNotices(noticesContent: string, outputPath: string): void {
+  safeWriteFileSync(outputPath, noticesContent);
 }

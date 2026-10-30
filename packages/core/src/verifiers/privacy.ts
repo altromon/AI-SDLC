@@ -119,7 +119,20 @@ export const PII_SAST_RULES: readonly PiiSastRule[] = [
   },
 ];
 
-export function loadPrivacyPolicy(rootDir: string, policyPath?: string): PrivacyPolicy {
+function parsePrivacyDoc(raw: string, candidate: string): Partial<PrivacyPolicy> {
+  let parsed: unknown;
+  try {
+    parsed = yaml.load(raw);
+  } catch (err: unknown) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid YAML in privacy-policy '${candidate}': ${err instanceof Error ? err.message : String(err)}`);
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid privacy policy structure in '${candidate}': root must be a YAML mapping`);
+  }
+  return parsed as Partial<PrivacyPolicy>;
+}
+
+export function loadPrivacyPolicy(rootDir: string = process.cwd(), policyPath?: string): PrivacyPolicy {
   const candidate = policyPath
     ? path.isAbsolute(policyPath)
       ? policyPath
@@ -127,19 +140,17 @@ export function loadPrivacyPolicy(rootDir: string, policyPath?: string): Privacy
     : path.join(rootDir, 'privacy-policy.yaml');
 
   if (!fs.existsSync(candidate)) return DEFAULT_PRIVACY_POLICY;
-  try {
-    const parsed = yaml.load(fs.readFileSync(candidate, 'utf-8')) as Partial<PrivacyPolicy>;
-    if (!parsed || typeof parsed !== 'object') return DEFAULT_PRIVACY_POLICY;
-    return {
-      ...DEFAULT_PRIVACY_POLICY,
-      ...parsed,
-      classifications: { ...DEFAULT_PRIVACY_POLICY.classifications, ...(parsed.classifications || {}) },
-      agent_guardrails: { ...DEFAULT_PRIVACY_POLICY.agent_guardrails, ...(parsed.agent_guardrails || {}) },
-      ci_gates: { ...DEFAULT_PRIVACY_POLICY.ci_gates, ...(parsed.ci_gates || {}) },
-    };
-  } catch {
-    return DEFAULT_PRIVACY_POLICY;
-  }
+  const raw = fs.readFileSync(candidate, 'utf-8');
+  if (!raw || !raw.trim()) return DEFAULT_PRIVACY_POLICY;
+  const parsed = parsePrivacyDoc(raw, candidate);
+
+  return {
+    ...DEFAULT_PRIVACY_POLICY,
+    ...parsed,
+    classifications: { ...DEFAULT_PRIVACY_POLICY.classifications, ...(parsed.classifications || {}) },
+    agent_guardrails: { ...DEFAULT_PRIVACY_POLICY.agent_guardrails, ...(parsed.agent_guardrails || {}) },
+    ci_gates: { ...DEFAULT_PRIVACY_POLICY.ci_gates, ...(parsed.ci_gates || {}) },
+  };
 }
 
 function isLineExemptFromPrivacyScan(line: string): boolean {

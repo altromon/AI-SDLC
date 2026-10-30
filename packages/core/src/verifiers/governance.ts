@@ -5,6 +5,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
+import { canonicalSort } from '../utils/fs.js';
+import { resolveDeterministicDate } from '../utils/time.js';
 import {
   AutonomyMode,
   GovernanceOptions,
@@ -94,7 +96,7 @@ export function walkTaskFiles(
 ): string[] {
   try {
     if (!fs.existsSync(dir)) return fileList;
-    const files = fs.readdirSync(dir);
+    const files = fs.readdirSync(dir).sort(canonicalSort);
     for (const file of files) {
       const fullPath = path.join(dir, file);
       try {
@@ -175,7 +177,7 @@ export function generateGovernanceReportMarkdown(
 
   const rows = summaries.map(formatTaskSummaryRow);
   const sections = [
-    `# 📋 Task Governance and Human Autonomy Classification Report\n\n> **Audit Date:** ${new Date().toISOString()}\n> **Overall Verdict:** ${verdict}\n\n---`,
+    `# 📋 Task Governance and Human Autonomy Classification Report\n\n> **Audit Date:** ${resolveDeterministicDate().toISOString()}\n> **Overall Verdict:** ${verdict}\n\n---`,
     `## 1. Project Autonomy Modes Distribution\n\n${buildAutonomyTable(modeCounts, totalTasks).join('\n')}\n\n---`,
     `## 2. Verifiable Tasks Detail and Acceptance Criteria\n\n${[...GOVERNANCE_TABLE_HEADER, ...rows].join('\n')}\n\n---`,
     GOVERNANCE_GUIDELINES_MD,

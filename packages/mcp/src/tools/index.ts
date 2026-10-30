@@ -39,6 +39,7 @@ import {
   verifyTestingCoverage,
   verifyTraceability,
   writeReleaseKpiReport,
+  resolveDeterministicDate,
   type SastSeverity,
 } from '@aisdlc/core';
 
@@ -468,14 +469,14 @@ const SDD_DEPOSIT_SCHEMA = {
   root: z.string().optional(),
 };
 
-function buildDepositHandoff(change: string, title?: string, reqs?: string[], ucs?: string[]): ProductHandoff {
+function buildDepositHandoff(change: string, title?: string, reqs?: string[], ucs?: string[], rootDir?: string): ProductHandoff {
   return {
     id: `HOF-${change.toUpperCase()}`,
     type: 'handoff',
     title: title || `PDaC Handoff for ${change}`,
     changeId: change,
     version: '1.0.0',
-    createdAt: new Date().toISOString(),
+    createdAt: resolveDeterministicDate(rootDir).toISOString(),
     subgraph: {
       requirements: reqs || ['FR-001'],
       useCases: ucs || ['UC-001'],
@@ -487,7 +488,7 @@ function registerSddDepositTool(server: McpServer, options: RegisterToolsOptions
   server.tool('sdd_deposit', 'Deposits or regenerates handoff.yaml sidecar.', SDD_DEPOSIT_SCHEMA, async (params) => {
     return executeSecuredTool('sdd_deposit', params, options, (root) => {
       assertWithinRoot(path.join('specs', 'changes', 'active', params.change), root, 'change');
-      const handoff = buildDepositHandoff(params.change, params.title, params.requirements, params.useCases);
+      const handoff = buildDepositHandoff(params.change, params.title, params.requirements, params.useCases, root);
       const depositedPath = depositProductHandoffSidecar({
         rootDir: root,
         changeId: params.change,

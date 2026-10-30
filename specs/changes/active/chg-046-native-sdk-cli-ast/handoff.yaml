@@ -1,0 +1,15 @@
+id: HOF-CHG-046-NATIVE-SDK-CLI-AST
+type: handoff
+title: Handoff Canónico de Producto para native-sdk-cli-ast
+changeId: CHG-046-NATIVE-SDK-CLI-AST
+version: 1.0.0
+createdAt: '2026-10-30T14:30:55.725Z'
+subgraph:
+  requirements:
+    - FR-046-NATIVE-SDK-CLI-AST-001
+  useCases:
+    - UC-046-NATIVE-SDK-CLI-AST
+citations:
+  - id: FR-046-NATIVE-SDK-CLI-AST-001
+    digest: sha256:4bddacde65efcf2126d441bc96be886588007d0bcbe3dfa2a98ea22e81bb2f7a
+    comment: Requerimiento funcional canónico asociado (Génesis CHG-046-NATIVE-SDK-CLI-AST)

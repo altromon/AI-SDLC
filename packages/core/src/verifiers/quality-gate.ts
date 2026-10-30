@@ -7,6 +7,8 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
+import { canonicalSort } from '../utils/fs.js';
+import { resolveDeterministicDate } from '../utils/time.js';
 import {
   AnalysisResult,
   CodeCoverageSummary,
@@ -19,7 +21,7 @@ import {
   QualityThresholds,
   UntestedFunctionItem,
 } from '../types/index.js';
-import { extractFunctionsTypeScriptAst } from './ast/typescript-ast.js';
+import { orchestrateNativeAstAnalysis } from './ast/native-ast-orchestrator.js';
 import { extractFunctionsPolyglot } from './ast/polyglot-scanner.js';
 import { scanAllTestArtifacts } from './testing-coverage.js';
 
@@ -54,7 +56,6 @@ export const DEFAULT_EXCLUDES: readonly string[] = [
   'fixtures',
 ];
 
-const TS_JS_EXTENSIONS: readonly string[] = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
 
 export function createDefaultQualityPolicy(): QualityPolicy {
   return {
@@ -147,31 +148,40 @@ function applyOptionOverrides(policy: QualityPolicy, overrides?: QualityThreshol
   if (overrides.enforce_mode !== undefined) policy.enforce_mode = overrides.enforce_mode;
 }
 
+function parsePolicyYaml(content: string): Record<string, unknown> {
+  let doc: unknown;
+  try {
+    doc = yaml.load(content);
+  } catch (err: unknown) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid YAML in quality-policy: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  if (!doc || typeof doc !== 'object' || Array.isArray(doc)) {
+    throw new Error(`[AI-SDLC Fail-Closed] Invalid quality policy structure: root must be a YAML mapping`);
+  }
+  return doc as Record<string, unknown>;
+}
+
 export function parseQualityPolicy(content: string, overrides?: QualityThresholds): QualityPolicy {
   const policy = createDefaultQualityPolicy();
-  try {
-    const doc = yaml.load(content);
-    if (doc && typeof doc === 'object') {
-      const record = doc as Record<string, unknown>;
-      applyDocScope(policy, record);
-      applyDocThresholds(policy, record);
-      if (record.max_per_function !== undefined) policy.max_cyclomatic = Number(record.max_per_function);
-      if (record.min_acceptable_score !== undefined) policy.min_maintainability = Number(record.min_acceptable_score);
-      if (record.max_function_lines !== undefined) policy.max_function_lines = Number(record.max_function_lines);
-    }
-  } catch {
-    // Keep defaults on YAML error
+  if (!content || !content.trim()) {
+    applyEnvThresholds(policy);
+    applyOptionOverrides(policy, overrides);
+    return policy;
   }
+  const record = parsePolicyYaml(content);
+  applyDocScope(policy, record);
+  applyDocThresholds(policy, record);
+  if (record.max_per_function !== undefined) policy.max_cyclomatic = Number(record.max_per_function);
+  if (record.min_acceptable_score !== undefined) policy.min_maintainability = Number(record.min_acceptable_score);
+  if (record.max_function_lines !== undefined) policy.max_function_lines = Number(record.max_function_lines);
   applyEnvThresholds(policy);
   applyOptionOverrides(policy, overrides);
   return policy;
 }
 
 export function extractFunctions(content: string, filePath: string): FunctionMetrics[] {
-  const ext = path.extname(filePath).toLowerCase();
-  return TS_JS_EXTENSIONS.includes(ext)
-    ? extractFunctionsTypeScriptAst(content, filePath)
-    : extractFunctionsPolyglot(content, filePath);
+  const report = orchestrateNativeAstAnalysis(content, filePath);
+  return report.functions;
 }
 
 export function extractFunctionsBraceLanguages(content: string, filePath: string): FunctionMetrics[] {
@@ -216,7 +226,7 @@ export function walkDir(
 ): string[] {
   if (!fs.existsSync(dir)) return [];
   const results: string[] = [];
-  for (const file of fs.readdirSync(dir)) {
+  for (const file of fs.readdirSync(dir).sort(canonicalSort)) {
     const fullPath = path.join(dir, file);
     const normalized = fullPath.replace(/\\/g, '/');
     if (isExcludedFile(file, normalized, excludePatterns)) continue;
@@ -306,6 +316,8 @@ function scanDirectTarget(rootDir: string, targetDir: string, policy: QualityPol
   }
 }
 
+export const UNIT_TEST_SUFFIXES = ['.spec.ts', '.test.ts', '.spec.js', '.test.js', '_test.py', '_test.go'];
+
 function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
   const files = new Set<string>();
   const monorepoContainers = ['packages', 'apps', 'libs', 'modules', 'services'];
@@ -317,7 +329,7 @@ function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
     }
   }
 
-  return Array.from(files);
+  return Array.from(files).filter((f) => !UNIT_TEST_SUFFIXES.some((s) => f.endsWith(s)));
 }
 
 function evaluateViolations(fn: FunctionMetrics, policy: QualityPolicy): string[] {
@@ -354,8 +366,6 @@ function evaluateFileQuality(file: string, rootDir: string, policy: QualityPolic
   });
 }
 
-const UNIT_TEST_SUFFIXES = ['.spec.ts', '.test.ts', '.spec.js', '.test.js', '_test.py', '_test.go'];
-
 function collectUnitTestCorpus(rootDir: string): string {
   const allCodeFiles = walkDir(rootDir, DEFAULT_EXTENSIONS, DEFAULT_EXCLUDES);
   const chunks: string[] = [];
@@ -370,13 +380,51 @@ function collectUnitTestCorpus(rootDir: string): string {
   return chunks.join('\n');
 }
 
+export function sanitizeTestCorpus(corpus: string, fnName: string): string {
+  // Strip block comments /* ... */
+  let cleaned = corpus.replace(/\/\*[\s\S]*?\*\//g, ' ');
+  // Strip line comments // ... and # ...
+  cleaned = cleaned.replace(/(?:\/\/|#)[^\r\n]*/g, ' ');
+
+  // Replace string literals that are not an exact reference to fnName
+  cleaned = cleaned.replace(/(['"`])((?:\\.|(?!\1)[^\\])*)\1/g, (match, quote, inner) => {
+    const trimmed = inner.trim();
+    if (trimmed === fnName || trimmed === `#${fnName}` || trimmed === `.${fnName}` || trimmed === `${fnName}()`) {
+      return match;
+    }
+    return `${quote}${quote}`;
+  });
+
+  return cleaned;
+}
+
+function buildTestReferencePatterns(escaped: string): RegExp[] {
+  return [
+    new RegExp(`(?:\\.|\\b)${escaped}\\s*\\(`, 'm'),
+    new RegExp(`\\b(?:import|require)\\b[^;\\n]*\\b${escaped}\\b`, 'm'),
+    new RegExp(`(?:\\bexpect|\\bassert|\\bshould)\\s*\\([^;\\n]*\\b${escaped}\\b`, 'm'),
+    new RegExp('(?:\\bspyOn|\\bmock)\\s*\\([^;\\n]*[\'"`]' + escaped + '[\'"`]', 'm'),
+    new RegExp(`\\b${escaped}\\s*\\.`, 'm'),
+    new RegExp('\\b(?:describe|it|test|context)\\s*\\(\\s*[\'"`](?:#|\\.)?' + escaped + '[\'"`]', 'm'),
+    new RegExp(`\\btest_?${escaped}\\b`, 'im'),
+  ];
+}
+
+export function isFunctionReferencedInTests(fnName: string, rawCorpus: string): boolean {
+  if (!fnName || fnName === 'anonymous' || fnName === 'constructor') return true;
+  const corpus = sanitizeTestCorpus(rawCorpus, fnName);
+  const escaped = fnName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const patterns = buildTestReferencePatterns(escaped);
+  return patterns.some((p) => p.test(corpus));
+}
+
 function auditUnitTestsPerFunction(results: AnalysisResult[], rootDir: string): UntestedFunctionItem[] {
   const corpus = collectUnitTestCorpus(rootDir);
   const untested: UntestedFunctionItem[] = [];
   for (const r of results) {
     const fnName = r.functionName.includes('.') ? r.functionName.split('.').pop()! : r.functionName;
     if (!fnName || fnName === 'anonymous' || fnName === 'constructor') continue;
-    if (!corpus.includes(fnName)) {
+    if (!isFunctionReferencedInTests(fnName, corpus)) {
       untested.push({ file: r.relPath, functionName: r.functionName });
       r.violations.push(`Missing unit test for function '${r.functionName}'`);
       r.status = 'FAIL';
@@ -493,7 +541,7 @@ export function writeQualityBaseline(
 ): QualityBaseline {
   const baseline: QualityBaseline = {
     version: "1.0",
-    generatedAt: new Date().toISOString(),
+    generatedAt: resolveDeterministicDate(path.dirname(baselineFile)).toISOString(),
     totalViolations: entries.length,
     violations: entries,
   };

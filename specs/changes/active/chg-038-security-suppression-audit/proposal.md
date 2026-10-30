@@ -9,7 +9,7 @@ citations:
     digest: sha256:4bfdc0357beb279b2c3bc2c5002c8b2ccb585cb0a7ca4c61bb874abf6f6a5fd8
     comment: Citación de use-case (Supresiones Auditadas con Caducidad e Inventario de Excepciones de Seguridad)
   - id: FR-038-SECURITY-SUPPRESSION-AUDIT-001
-    digest: sha256:0723aa1776e8816f5841912cc7f3d6c9c2e2b6dd7238ff3d790c92ba0e8f5492
+    digest: sha256:8f206bf10f28b7e1d0343e47efd957d0ef30bf1e528befbfe18f64f81876c907
     comment: Citación de requirement (Validación de Supresiones Auditadas con Expiración y Generación de SUPPRESSIONS_AUDIT.md)
 ---
 

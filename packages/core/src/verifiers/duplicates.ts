@@ -1,3 +1,4 @@
+import { resolveDeterministicDate } from '../utils/time.js';
 /**
  * AI-SDLC: Deterministic Duplicate Requirements Verifier (Shift-Left Pre-Implementation Gate)
  *
@@ -361,7 +362,7 @@ function buildDuplicatesHeader(result: DuplicateVerifierResult): string[] {
   return [
     `# 🛡️ Duplicate Requirements and Redundancy Audit (Shift-Left Pre-Flight)`,
     ``,
-    `> **Evaluation Date:** ${new Date().toISOString()}`,
+    `> **Evaluation Date:** ${resolveDeterministicDate().toISOString()}`,
     `> **Verdict:** ${isOk ? '✅ COMPLIANT (No blocking duplicates)' : `❌ BLOCKED (${result.errorCount} duplicate errors detected)`}`,
     `> **Audited Requirements:** ${result.totalRequirements} | **Errors:** ${result.errorCount} | **Warnings:** ${result.warningCount}`,
     ``,
