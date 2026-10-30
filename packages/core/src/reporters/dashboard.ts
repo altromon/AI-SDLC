@@ -23,6 +23,8 @@ import { CommitKpiRecord } from '../git/trailers.js';
 import { readCodeCoverageSummary } from './quality-report.js';
 import { buildGraphElements } from './dashboard-graph.js';
 import { renderDashboardHtml } from './dashboard-html.js';
+import { writeReportFileIfChanged } from '../utils/fs.js';
+import { resolveDeterministicDate } from '../utils/time.js';
 
 export { GraphElementsResult, buildGraphElements } from './dashboard-graph.js';
 export { renderDashboardHtml, renderAutonomyModeSection, renderManualsTab } from './dashboard-html.js';
@@ -346,13 +348,8 @@ export function generateDashboardReport(options: DashboardOptions = {}): Dashboa
 
   const graphData = buildGraphElements(rootDir);
   const metricsData = collectDashboardMetrics(rootDir);
-  const html = renderDashboardHtml(graphData, metricsData, options.title);
-
-  const outDir = path.dirname(outputPath);
-  if (!fs.existsSync(outDir)) {
-    fs.mkdirSync(outDir, { recursive: true });
-  }
-  fs.writeFileSync(outputPath, html, 'utf-8');
+  const html = renderDashboardHtml(graphData, metricsData, options.title, resolveDeterministicDate(rootDir).toISOString());
+  writeReportFileIfChanged(outputPath, html);
 
   const { bddCoverageRatio, traceabilityRatio } = computeSummaryRatios(metricsData);
   const { avgMi, avgCc } = computeGateAverages(metricsData.gate.results);

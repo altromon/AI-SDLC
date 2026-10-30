@@ -9,6 +9,9 @@ import {
   canonicalSort,
   walkMdFiles,
   walkDir,
+  stripVolatileReportMetadata,
+  isReportContentSemanticallyEqual,
+  writeReportFileIfChanged,
 } from '../src/index.js';
 import { ScannedDependency } from '../src/types/index.js';
 
@@ -122,6 +125,141 @@ describe('Deterministic Reproducibility & Canonical Ordering Engine (ENT-01)', (
       const files = walkDir(tempDir, ['.ts']);
       const baseNames = files.map((f) => path.basename(f));
       expect(baseNames).toEqual(['M.ts', 'a.ts', 'z.ts']);
+    });
+  });
+
+  describe('Semantic Report Equality & Idempotent Writer (PR Anti-Conflict)', () => {
+    it('should strip volatile dates from markdown and html reports correctly', () => {
+      const mdReport = [
+        '# Quality Report',
+        '',
+        '> **Generation Date:** 2026-10-30T17:46:21.000Z',
+        '> **Release Gate Verdict:** PASS',
+        '',
+        '| Metric | Value |',
+        '| :--- | :--- |',
+        '| LOC | 1000 |',
+      ].join('\n');
+
+      const stripped = stripVolatileReportMetadata(mdReport);
+      expect(stripped).not.toContain('2026-10-30T17:46:21.000Z');
+      expect(stripped).toContain('> **Release Gate Verdict:** PASS');
+      expect(stripped).toContain('| LOC | 1000 |');
+
+      const htmlDashboard = '<div>Generated: <span>2026-10-30 17:47:48</span></div><p>Content</p>';
+      const strippedHtml = stripVolatileReportMetadata(htmlDashboard);
+      expect(strippedHtml).toBe('<div>Generated: <span>[STRIPPED]</span></div><p>Content</p>');
+    });
+
+    it('should detect semantic equality in Markdown when only date changes', () => {
+      const docA = [
+        '# Quality Report',
+        '> **Generation Date:** 2026-10-30T17:46:21.000Z',
+        '> **Release Gate Verdict:** PASS',
+        '## Metrics',
+        'Maintainability: 85',
+      ].join('\n');
+
+      const docB = [
+        '# Quality Report',
+        '> **Generation Date:** 2026-10-30T18:11:10.000Z',
+        '> **Release Gate Verdict:** PASS',
+        '## Metrics',
+        'Maintainability: 85',
+      ].join('\n');
+
+      const docC = [
+        '# Quality Report',
+        '> **Generation Date:** 2026-10-30T18:11:10.000Z',
+        '> **Release Gate Verdict:** PASS',
+        '## Metrics',
+        'Maintainability: 70',
+      ].join('\n');
+
+      expect(isReportContentSemanticallyEqual(docA, docB, 'reports/QUALITY_REPORT.md')).toBe(true);
+      expect(isReportContentSemanticallyEqual(docA, docC, 'reports/QUALITY_REPORT.md')).toBe(false);
+    });
+
+    it('should detect semantic equality in CycloneDX SBOM when only timestamp changes', () => {
+      const sbomA = JSON.stringify({
+        bomFormat: 'CycloneDX',
+        specVersion: '1.5',
+        version: 1,
+        serialNumber: 'urn:uuid:test-1234',
+        metadata: { timestamp: '2026-10-30T17:00:00.000Z' },
+        components: [{ name: 'pkg-a', version: '1.0.0' }],
+      });
+
+      const sbomB = JSON.stringify({
+        bomFormat: 'CycloneDX',
+        specVersion: '1.5',
+        version: 1,
+        serialNumber: 'urn:uuid:test-1234',
+        metadata: { timestamp: '2026-10-30T18:00:00.000Z' },
+        components: [{ name: 'pkg-a', version: '1.0.0' }],
+      });
+
+      const sbomC = JSON.stringify({
+        bomFormat: 'CycloneDX',
+        specVersion: '1.5',
+        version: 1,
+        serialNumber: 'urn:uuid:test-different',
+        metadata: { timestamp: '2026-10-30T18:00:00.000Z' },
+        components: [{ name: 'pkg-a', version: '2.0.0' }],
+      });
+
+      expect(isReportContentSemanticallyEqual(sbomA, sbomB, 'reports/sbom.cdx.json')).toBe(true);
+      expect(isReportContentSemanticallyEqual(sbomA, sbomC, 'reports/sbom.cdx.json')).toBe(false);
+    });
+
+    it('should not overwrite report on disk when semantic content is identical', () => {
+      const targetFile = path.join(tempDir, 'reports', 'QUALITY_REPORT.md');
+
+      const initialContent = [
+        '# Quality Report',
+        '> **Generation Date:** 2026-10-30T17:46:21.000Z',
+        '> **Release Gate Verdict:** PASS',
+        'Metrics: 100',
+      ].join('\n');
+
+      // 1. Initial write
+      const wroteFirst = writeReportFileIfChanged(targetFile, initialContent);
+      expect(wroteFirst).toBe(true);
+      expect(fs.existsSync(targetFile)).toBe(true);
+
+      const statBefore = fs.statSync(targetFile);
+
+      // 2. Second write with different timestamp only
+      const updatedTimestampContent = [
+        '# Quality Report',
+        '> **Generation Date:** 2026-10-30T18:11:10.000Z',
+        '> **Release Gate Verdict:** PASS',
+        'Metrics: 100',
+      ].join('\n');
+
+      const wroteSecond = writeReportFileIfChanged(targetFile, updatedTimestampContent);
+      expect(wroteSecond).toBe(false); // Skipped write!
+
+      const statAfter = fs.statSync(targetFile);
+      expect(statAfter.mtimeMs).toBe(statBefore.mtimeMs);
+
+      // Verify file content still preserves original timestamp on disk
+      const diskContent = fs.readFileSync(targetFile, 'utf-8');
+      expect(diskContent).toContain('2026-10-30T17:46:21.000Z');
+
+      // 3. Third write with modified metric
+      const modifiedContent = [
+        '# Quality Report',
+        '> **Generation Date:** 2026-10-30T18:11:10.000Z',
+        '> **Release Gate Verdict:** PASS',
+        'Metrics: 95',
+      ].join('\n');
+
+      const wroteThird = writeReportFileIfChanged(targetFile, modifiedContent);
+      expect(wroteThird).toBe(true); // Content changed, wrote!
+      const finalDiskContent = fs.readFileSync(targetFile, 'utf-8');
+      expect(finalDiskContent).toContain('Metrics: 95');
+      expect(finalDiskContent).toContain('2026-10-30T18:11:10.000Z');
     });
   });
 });
