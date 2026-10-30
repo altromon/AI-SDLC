@@ -1,3 +1,4 @@
+import { resolveDeterministicDate } from '../utils/time.js';
 import type { SecuritySuppression } from '../types/index.js';
 
 const SUPPRESSION_TRIGGER_REGEX =
@@ -112,7 +113,7 @@ function buildAuditHeader(total: number, active: number, expired: number, invali
   return [
     '# 📋 Security Suppressions and Audit Exceptions Inventory',
     '',
-    `> **Generated at:** ${new Date().toISOString()}`,
+    `> **Generated at:** ${resolveDeterministicDate().toISOString()}`,
     `> **Total Audited Suppressions:** ${total} | **Active:** ${active} | **Expired:** ${expired} | **Invalid:** ${invalid}`,
     '',
     '## 1. Executive Summary',

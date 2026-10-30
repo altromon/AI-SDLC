@@ -428,7 +428,7 @@ Este documento contiene los avisos de copyright y términos de licencia aplicabl
 
 ---
 
-## Textos de Licencia y Atribuciones
+## 2. Atribuciones y Términos de Licencia Individuales
 
 ### @ampproject/remapping@2.3.0
 - **Licencia:** `Apache-2.0`

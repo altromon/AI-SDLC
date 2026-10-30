@@ -1,3 +1,4 @@
+import { resolveDeterministicDate } from '../utils/time.js';
 /**
  * AI-SDLC: Open Source License Compliance & Governance Verifier
  * Supports dynamic Software Composition Analysis (SCA) with CycloneDX SBOM generation.
@@ -282,7 +283,7 @@ function buildReportHeader(isOk: boolean, depCount: number, violationCount: numb
   return [
     `# 📜 Open Source License Compliance Audit (Dynamic SCA)`,
     ``,
-    `> **Verification Date:** ${new Date().toISOString()}`,
+    `> **Verification Date:** ${resolveDeterministicDate().toISOString()}`,
     `> **Status:** ${statusStr}`,
     `> **Total Audited Dependencies:** ${depCount}`,
     sbomPath ? `> **Generated CycloneDX SBOM:** \`${sbomPath}\`` : '',

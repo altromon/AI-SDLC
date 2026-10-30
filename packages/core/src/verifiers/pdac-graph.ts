@@ -1,3 +1,4 @@
+import { resolveDeterministicDate } from '../utils/time.js';
 /**
  * AI-SDLC: Product Definition as Code (PDaC) Graph & Cryptographic Drift Verifier
  */
@@ -160,7 +161,7 @@ function buildPdacReportHeader(isOk: boolean, driftsCount: number, nodesCount: n
   return [
     `# 🔒 PDaC Cryptographic Matrix and Drift Detection (Anti-Drift)`,
     ``,
-    `> **Evaluation Date:** ${new Date().toISOString()}`,
+    `> **Evaluation Date:** ${resolveDeterministicDate().toISOString()}`,
     `> **Verdict:** ${verdict}`,
     ``,
     `---`,
