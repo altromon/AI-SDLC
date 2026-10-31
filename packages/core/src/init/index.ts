@@ -734,6 +734,7 @@ export interface InitProjectOptions {
   agents?: string | boolean | string[];
   architecture?: ArchitectureGranularity | string;
   dryRun?: boolean;
+  force?: boolean;
 }
 
 export interface InitProjectResult {
@@ -741,6 +742,7 @@ export interface InitProjectResult {
   targetDir: string;
   directoriesCreated: string[];
   filesCreated: string[];
+  filesUpdated: string[];
   ciProvider?: SupportedCiProvider;
   agentsConfigured: string[];
   architectureGranularity?: ArchitectureGranularity;
@@ -861,28 +863,44 @@ export function collectAgentFiles(targets: Set<string>): {
   return { dirs, files };
 }
 
+function writeSingleFile(
+  fullFilePath: string,
+  content: string,
+  relPath: string,
+  opts: { dryRun?: boolean; force?: boolean },
+  results: { filesCreated: string[]; filesUpdated: string[] }
+): void {
+  const exists = fs.existsSync(fullFilePath);
+  if (opts.dryRun) {
+    if (exists && opts.force) results.filesUpdated.push(relPath);
+    else if (!exists) results.filesCreated.push(relPath);
+    return;
+  }
+  const parentDir = path.dirname(fullFilePath);
+  if (!fs.existsSync(parentDir)) {
+    fs.mkdirSync(parentDir, { recursive: true });
+  }
+  if (!exists) {
+    fs.writeFileSync(fullFilePath, content, 'utf-8');
+    results.filesCreated.push(relPath);
+  } else if (opts.force) {
+    fs.writeFileSync(fullFilePath, content, 'utf-8');
+    results.filesUpdated.push(relPath);
+  }
+}
+
 function writeProjectFiles(
   destDir: string,
   files: { relPath: string; content: string }[],
-  dryRun?: boolean
-): string[] {
-  const filesCreated: string[] = [];
+  dryRun?: boolean,
+  force?: boolean
+): { filesCreated: string[]; filesUpdated: string[] } {
+  const results = { filesCreated: [] as string[], filesUpdated: [] as string[] };
   for (const f of files) {
     const fullFilePath = path.join(destDir, f.relPath);
-    const parentDir = path.dirname(fullFilePath);
-    if (!dryRun) {
-      if (!fs.existsSync(parentDir)) {
-        fs.mkdirSync(parentDir, { recursive: true });
-      }
-      if (!fs.existsSync(fullFilePath)) {
-        fs.writeFileSync(fullFilePath, f.content, 'utf-8');
-        filesCreated.push(f.relPath);
-      }
-    } else {
-      filesCreated.push(f.relPath);
-    }
+    writeSingleFile(fullFilePath, f.content, f.relPath, { dryRun, force }, results);
   }
-  return filesCreated;
+  return results;
 }
 
 function validateCiProvider(ci?: string): { valid: boolean; provider?: SupportedCiProvider; error?: string } {
@@ -1057,6 +1075,7 @@ function buildInitError(targetDir: string, error?: string): InitProjectResult {
     targetDir,
     directoriesCreated: [],
     filesCreated: [],
+    filesUpdated: [],
     agentsConfigured: [],
     gitHookInstalled: false,
     error,
@@ -1075,6 +1094,7 @@ function buildInitSuccessResult(
   destDir: string,
   directoriesCreated: string[],
   filesCreated: string[],
+  filesUpdated: string[],
   ciProvider: SupportedCiProvider | undefined,
   agentsConfigured: string[],
   architectureGranularity: ArchitectureGranularity,
@@ -1085,6 +1105,7 @@ function buildInitSuccessResult(
     targetDir: destDir,
     directoriesCreated,
     filesCreated,
+    filesUpdated,
     ciProvider,
     agentsConfigured,
     architectureGranularity,
@@ -1105,20 +1126,35 @@ function validateInitOptions(options: InitProjectOptions): {
   return { valid: true, ciProvider: ciRes.provider, archGranularity: archRes.granularity };
 }
 
-export function initProject(options: InitProjectOptions = {}): InitProjectResult {
-  const baseDir = options.rootDir || process.cwd();
-  const destDir = path.resolve(baseDir, options.targetDir || '.');
+function assembleScaffoldingPlan(
+  ciProvider: SupportedCiProvider | undefined,
+  agents: string | boolean | string[] | undefined,
+  archGranularity: ArchitectureGranularity
+): {
+  agentTargets: Set<string>;
+  directories: string[];
+  starterFiles: { relPath: string; content: string }[];
+} {
+  const agentTargets = resolveAgentTargets(agents);
+  const { dirs: agentDirs, files: agentFiles } = collectAgentFiles(agentTargets);
+  const directories = mergeDirectories(getBaseDirectories(ciProvider), agentDirs);
+  const starterFiles = collectStarterFiles(ciProvider, agentFiles, archGranularity);
+  return { agentTargets, directories, starterFiles };
+}
 
+export function initProject(options: InitProjectOptions = {}): InitProjectResult {
+  const destDir = path.resolve(options.rootDir || process.cwd(), options.targetDir || '.');
   const validated = validateInitOptions(options);
   if (!validated.valid) return buildInitError(destDir, validated.error);
 
-  const agentTargets = resolveAgentTargets(options.agents);
-  const { dirs: agentDirs, files: agentFiles } = collectAgentFiles(agentTargets);
-  const directories = mergeDirectories(getBaseDirectories(validated.ciProvider), agentDirs);
+  const { agentTargets, directories, starterFiles } = assembleScaffoldingPlan(
+    validated.ciProvider,
+    options.agents,
+    validated.archGranularity
+  );
 
-  const directoriesCreated = createDirectoriesOnDisk(destDir, directories, options.dryRun);
-  const starterFiles = collectStarterFiles(validated.ciProvider, agentFiles, validated.archGranularity);
-  const filesCreated = writeProjectFiles(destDir, starterFiles, options.dryRun);
+  const dirsCreated = createDirectoriesOnDisk(destDir, directories, options.dryRun);
+  const { filesCreated, filesUpdated } = writeProjectFiles(destDir, starterFiles, options.dryRun, options.force);
 
   if (updateConsumerPackageJson(destDir, options.dryRun)) {
     filesCreated.push('package.json');
@@ -1126,8 +1162,9 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
 
   return buildInitSuccessResult(
     destDir,
-    directoriesCreated,
+    dirsCreated,
     filesCreated,
+    filesUpdated,
     validated.ciProvider,
     formatAgentsConfigured(agentTargets),
     validated.archGranularity,

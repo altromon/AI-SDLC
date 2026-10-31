@@ -42,7 +42,7 @@ const program = new Command();
 program
   .name('aisdlc')
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
-  .version('2.5.0');
+  .version('2.5.1');
 
 // --- check command (unified pre-flight with auto-fix) ---
 program
@@ -658,6 +658,7 @@ program
   .command('init [directory]')
   .description('Initialize a new repository with AI-SDLC guidelines, schemas, and policies')
   .option('-d, --dry-run', 'Simulate file and directory creation without writing to disk')
+  .option('-f, --force', 'Force overwrite existing agent, rule, and policy configurations with canonical templates')
   .option('--ci <provider>', 'CI/CD provider for pipeline generation (github, gitlab, azure, bitbucket)')
   .option('--agents [targets]', 'AI agent environments to configure (all, cursor, claude, antigravity, copilot, mcp, or comma-separated combination)')
   .option('--arch, --architecture <granularity>', 'Architecture templates granularity level (minimal, full, complete, none)')
@@ -679,9 +680,31 @@ program
     }
     const passed = runInit(directory, {
       dryRun: opts.dryRun,
+      force: opts.force,
       ci,
       agents,
       architecture: arch,
+      json: opts.json,
+      format: opts.format,
+    });
+    process.exit(passed ? 0 : 1);
+  });
+
+// --- sync command (alias for refreshing agent configurations) ---
+program
+  .command('sync [directory]')
+  .description('Synchronize and refresh AI agent configurations, skills, and rules from canonical templates')
+  .option('-d, --dry-run', 'Simulate file updates without writing to disk')
+  .option('--agents [targets]', 'AI agent environments to configure (all, cursor, claude, antigravity, copilot, mcp, or comma-separated combination)')
+  .option('--json', 'Structured JSON format output')
+  .option('-F, --format <format>', 'Output format: text or json')
+  .action((directory, opts) => {
+    const passed = runInit(directory, {
+      dryRun: opts.dryRun,
+      force: true,
+      agents: opts.agents || 'all',
+      ci: 'none',
+      architecture: 'none',
       json: opts.json,
       format: opts.format,
     });

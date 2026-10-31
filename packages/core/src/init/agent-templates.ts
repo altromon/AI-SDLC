@@ -103,6 +103,7 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
 - Document critical technological decisions using immutable \`ADR-*\` records conforming to \`schemas/architecture/adr.schema.json\`.
 - Validate that architectural choices comply with legal constraints in \`license-policy.yaml\` and data protection constraints in \`privacy-policy.yaml\`.
 - **Technical Security & Privacy Feedback Loop**: If architectural decisions (databases, queues, distributed caching, third-party APIs, LLM providers, authentication schemes) introduce new attack vectors or PII data flows, emit a return handoff to \`agent-threat-modeler\` (which chains to \`agent-privacy-officer\`) for technical modeling prior to the testing phase.
+- **Mandatory Observability Component (\`CMP-OBSERVABILITY\`)**: In every system architecture modeled under arc42/NAF v4, the system architect MUST define an explicit building block \`CMP-OBSERVABILITY\` (Level 2/3) in Section 5 alongside Section 8 Cross-Cutting Concepts (\`ARCH-CROSS-*\`) and an immutable ADR for Runtime Observability, standardizing on: (1) Structured JSON logging with configurable granularity (\`LOG_LEVEL\`), (2) Distributed tracing via OpenTelemetry with W3C Trace Context (\`traceparent\`), and (3) Operational metrics (RED: Rate, Errors, Duration) in Prometheus / OpenMetrics format for Grafana scraping, satisfying \`QR-OBS-*\`.
 - If autonomy is $\\ge$ \`HUMAN_REVIEW_PLAN\`, conclude by emitting the Workflow Handoff block (\`templates/workflow/agent-handoff.template.md\`) suggesting \`agent-qa-engineer\` (or \`agent-threat-modeler\` if technical security/privacy loop is required) and opening the Human Action Window. In \`AUTONOMOUS\` mode, omit interactive handoff.`,
   },
   {
@@ -164,9 +165,12 @@ Execute every implementation task following this strict sequential order:
 - **Zero Fake-Wiring Guardrail**: Strictly forbidden from marking a task \`COMPLETED\` with hardcoded \`mockData\` arrays in production views, \`setTimeout\` simulating network calls, or empty UI event handlers (\`onClick={() => {}}\`, \`onSubmit={() => {}}\`). Frontend components must wire directly to the shared contract and real Backend endpoints.
 - **Mandatory 4 UI States Matrix**: Every data-driven UI component or screen must explicitly implement all 4 usability states: \`Loading\` (spinner/skeleton + disabled submit), \`Empty\` (clear message + CTA), \`Error\` (visible error recovery banner, never silent failure), and \`Nominal/Success\` (accessible semantic DOM + keyboard navigation).
 - **Live Runtime Smoke Verification**: For tasks touching UI or UI-to-Backend integration, unit tests alone are insufficient. Before emitting handoff, boot the real Backend and Frontend servers and verify (via Playwright E2E or Chrome DevTools MCP) that browser \`console.error\` and \`pageerror\` counts are \`0\` and API calls return real \`2xx\` responses without CORS or schema mismatches.
+- **Mandatory Structured Logging & Observability**: Never emit unstructured console logs (\`console.log\`) in production code (\`no_console_logs_in_prod\`). Integrate the structured logger (\`ILogger\`) with configurable \`LOG_LEVEL\`, propagate W3C distributed trace context (\`trace_id\`), and record RED operational metrics compatible with Prometheus and Grafana.
 - Before adding any external dependency, verify its SPDX license is permitted in \`license-policy.yaml\`.
 - Respect non-negotiable \`quality-policy.yaml\` thresholds: Cyclomatic Complexity $\\le 10$, Cognitive Complexity $\\le 15$, Maintainability Index $\\ge 50$, Function Length $\\le 40$ lines.
 - Run unified pre-flight with auto-fix (\`pnpm run check:fix\`) and full verification (\`pnpm run verify:all\`).
+- **Mandatory Regression Verification**: Never declare build, typecheck, or bug fixes complete without executing the relevant automated test suite (\`pnpm test\`, \`dotnet test\`) and confirming zero regressions.
+- **Global Styles Protection**: When touching or refactoring frontend views, verify that global stylesheet/asset imports remain intact and that layouts suffer no visual disruption.
 - Upon completing green implementation, suggest handoff to \`agent-expert-user\` for Post-Development Functional Validation prior to security and privacy audit.`,
   },
   {
@@ -540,7 +544,7 @@ This file defines the operational rules and specialized role mappings for Google
   - FORBIDDEN to include production code or anticipate implementations.
   - **Agreed Project Technology**: Always use the testing frameworks, E2E/UI runners, and technology stack agreed upon for the project (if any), without requiring the user to specify it in the prompt.
   - **Mandatory E2E & UI Testing**: Never forget or omit End-to-End (E2E) and User Interface (UI) tests.
-  - **Per-Interactive-Element Coverage**: Create specific tests for every UI element the user can interact with, covering Happy Path, Sad Path, and Boundary Values for each one.
+  - **Per-Interactive-Element Coverage**: Create specific tests for every UI element the user can interact with, using external tools such as Playwright or FlatUI (or the agreed project testing technology), covering Happy Path, Sad Path, and Boundary Values for each one.
   - Every \`FR-*\` must have at least nominal + boundary + out-of-range scenarios; missing these blocks handoff to \`agent-developer\`.
   - Mandatory tags: \`@<FR-ID> @automated @regression\`.
   - Run \`pnpm run verify:testing\` before emitting handoff.
@@ -553,6 +557,8 @@ This file defines the operational rules and specialized role mappings for Google
   - Make tests delivered by \`agent-qa-engineer\` pass green without altering them to accommodate code.
   - Respect \`quality-policy.yaml\` thresholds: CC $\\le 10$, Cognitive $\\le 15$, MI $\\ge 50$, LOC $\\le 40$.
   - Run pre-flight with auto-fix: \`pnpm run check:fix\` and full verification: \`pnpm run verify:all\`.
+  - **Mandatory Regression Verification**: Never declare build, typecheck, or bug fixes complete without executing the relevant automated test suite (\`pnpm test\`, \`dotnet test\`) and confirming zero regressions.
+  - **Global Styles Protection**: When touching or refactoring frontend views, verify that global stylesheet/asset imports remain intact and that layouts suffer no visual disruption.
   - Upon completing green implementation, suggest handoff to \`agent-expert-user\` for post-development functional validation prior to security and privacy audit.
 
 ### 7. \`agent-security-auditor\` (Adversarial Code Auditor)
@@ -728,6 +734,8 @@ Canonical Reference: [\`process/09_agent_protocols.md\`](process/09_agent_protoc
 - Apply Test-Driven Development: generate unit tests before or alongside component logic.
 - Tag tests linked to requirements with header comments citing the ID (\`FR-*\`, \`SEC-REQ-*\`, or \`PRIV-REQ-*\`) to enable reverse traceability.
 - Suppressing types (\`any\`), linter rules (\`eslint-disable\`), or unit tests to force pipeline passage is prohibited.
+- **Mandatory Regression Verification**: Never declare build, typecheck, or bug fixes complete without executing the relevant automated test suite (\`pnpm test\`, \`dotnet test\`) and confirming zero regressions.
+- **Global Styles Protection**: When touching or refactoring frontend views, verify that global stylesheet/asset imports remain intact and that layouts suffer no visual disruption.
 
 ## 3. Open Source License Policy (\`license-policy.yaml\`)
 - Before adding any dependency to \`package.json\`, verify its SPDX identifier.
@@ -803,11 +811,11 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ### 5. \`agent-qa-engineer\` (QA Engineer and SDET)
 - **Mission**: Translate approved requirements (\`FR-*\`, \`SEC-REQ-*\`, \`PRIV-REQ-*\`, \`QR-*\`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before \`agent-developer\` writes production code.
-- **Guardrails**: Always use the agreed project technology/testing stack (if any). Never omit End-to-End (E2E) and UI tests. Create specific tests for every interactive UI element covering Happy Path, Sad Path, and Boundary Values. FORBIDDEN to include production code. Mandatory tags: \`@<FR-ID> @automated @regression\`.
+- **Guardrails**: Always use the agreed project technology/testing stack (if any). Never omit End-to-End (E2E) and UI tests. Create specific tests for every interactive UI element using external tools such as Playwright or FlatUI (or the agreed project testing technology), covering Happy Path, Sad Path, and Boundary Values. FORBIDDEN to include production code. Mandatory tags: \`@<FR-ID> @automated @regression\`.
 
 ### 6. \`agent-developer\` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (\`tasks.md\`) with clean, strictly typed code and thorough tests.
-- **Directives**: Execute the mandatory 4-step order: (1) Modular & Hexagonal Architecture (Ports & Adapters) definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by \`agent-qa-engineer\` pass green. Run \`pnpm run check:fix\` and \`pnpm run verify:all\`.
+- **Directives**: Execute the mandatory 4-step order: (1) Modular & Hexagonal Architecture (Ports & Adapters) definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by \`agent-qa-engineer\` pass green. Run \`pnpm run check:fix\` and \`pnpm run verify:all\`. Enforce Mandatory Regression Verification (\`pnpm test\`) with zero regressions before declaring completion, and enforce Global Styles Protection on frontend views.
 
 ### 7. \`agent-security-auditor\` (Adversarial Code Auditor)
 - **Mission**: Examine Pull Requests for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws as part of the Pre-Merge Audit Triad.

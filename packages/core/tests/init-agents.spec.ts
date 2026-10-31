@@ -183,10 +183,26 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
 
     // CLAUDE.md was not in filesCreated because it already existed
     expect(result.filesCreated).not.toContain('CLAUDE.md');
+    expect(result.filesUpdated).toEqual([]);
 
     // Content remains completely unchanged
     const afterContent = fs.readFileSync(claudeFile, 'utf-8');
     expect(afterContent).toBe(customContent);
+  });
+
+  it('overwrites existing files and records updated files when force is true', () => {
+    const customContent = '# My Custom Claude Instructions\nDo not overwrite me!';
+    const claudeFile = path.join(tempDir, 'CLAUDE.md');
+    fs.writeFileSync(claudeFile, customContent, 'utf-8');
+
+    const result = initProject({ targetDir: tempDir, agents: 'all', force: true });
+    expect(result.success).toBe(true);
+    expect(result.filesUpdated).toContain('CLAUDE.md');
+
+    // Content should now be overwritten with canonical template
+    const afterContent = fs.readFileSync(claudeFile, 'utf-8');
+    expect(afterContent).not.toBe(customContent);
+    expect(afterContent).toContain('AUTO-APPROVE');
   });
 
   it('supports dry-run without writing files to disk', () => {
@@ -197,5 +213,18 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
     // No files should be written on disk
     expect(fs.existsSync(path.join(tempDir, 'quality-policy.yaml'))).toBe(false);
     expect(fs.existsSync(path.join(tempDir, 'CLAUDE.md'))).toBe(false);
+  });
+
+  it('reports updated files in dry-run when force is true without mutating disk', () => {
+    const customContent = '# Stale Content';
+    const claudeFile = path.join(tempDir, 'CLAUDE.md');
+    fs.writeFileSync(claudeFile, customContent, 'utf-8');
+
+    const result = initProject({ targetDir: tempDir, agents: 'all', dryRun: true, force: true });
+    expect(result.success).toBe(true);
+    expect(result.filesUpdated).toContain('CLAUDE.md');
+
+    // On disk, custom content remains because dryRun was active
+    expect(fs.readFileSync(claudeFile, 'utf-8')).toBe(customContent);
   });
 });

@@ -59,15 +59,15 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ### 4. `agent-system-architect` (System Architect)
 - **Mission**: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4 (`CMP-*`, Mermaid diagrams, `ADR-*`).
-- **Guardrails**: Declare `satisfies-requirements` on every `CMP-*` (including `PRIV-REQ-*`), structure components following **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports), and trigger the technical security/privacy feedback loop toward `agent-threat-modeler` ➔ `agent-privacy-officer` when infrastructure decisions introduce new attack vectors or PII flows.
+- **Guardrails**: Declare `satisfies-requirements` on every `CMP-*` (including `PRIV-REQ-*`), structure components following **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports), instantiate mandatory building block `CMP-OBSERVABILITY` (Level 2/3) alongside Section 8 and an ADR for runtime telemetry, and trigger the technical security/privacy feedback loop toward `agent-threat-modeler` ➔ `agent-privacy-officer` when infrastructure decisions introduce new attack vectors or PII flows.
 
 ### 5. `agent-qa-engineer` (QA Engineer and SDET)
 - **Mission**: Translate approved requirements (`FR-*`, `SEC-REQ-*`, `PRIV-REQ-*`, `QR-*`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before `agent-developer` writes production code.
-- **Guardrails**: Always use the agreed project technology/testing stack (if any). Never omit End-to-End (E2E) and UI tests. Create specific tests for every interactive UI element using external tools like Playwright or FlatUI, covering Happy Path, Sad Path, and Boundary Values. FORBIDDEN to include production code. Mandatory tags: `@<FR-ID> @automated @regression`.
+- **Guardrails**: Always use the agreed project technology/testing stack (if any). Never omit End-to-End (E2E) and UI tests. Create specific tests for every interactive UI element using external tools such as Playwright or FlatUI (or the agreed project testing technology), covering Happy Path, Sad Path, and Boundary Values. FORBIDDEN to include production code. Mandatory tags: `@<FR-ID> @automated @regression`.
 
 ### 6. `agent-developer` (Software Developer)
 - **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) with clean, strictly typed code and thorough tests.
-- **Directives**: Execute the mandatory 4-step order: (1) Modular & Hexagonal Architecture (Ports & Adapters) definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by `agent-qa-engineer` pass green. Run `pnpm run check:fix` and `pnpm run verify:all`. Enforce Mandatory Regression Verification (never declare complete without automated tests) and Global Styles Protection (preserve assets/styles without layout breakage).
+- **Directives**: Execute the mandatory 4-step order: (1) Modular & Hexagonal Architecture (Ports & Adapters) definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by `agent-qa-engineer` pass green. Run `pnpm run check:fix` and `pnpm run verify:all`. Enforce Mandatory Regression Verification (`pnpm test`) with zero regressions before declaring completion, and enforce Global Styles Protection on frontend views.
 
 ### 7. `agent-security-auditor` (Adversarial Code Auditor)
 - **Mission**: Examine Pull Requests for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws as part of the Pre-Merge Audit Triad.
@@ -86,7 +86,7 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ### 11. `agent-devops` (Automation and Infrastructure Engineer)
 - **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts.
-- **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying application source code (`src/`, `packages/*/src/`). Enforce Cross-Workflow Audit across `.github/workflows/*.yml` and Remote Verification of PR checks (`gh pr checks`).
+- **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying application source code (`src/`, `packages/*/src/`).
 
 ---
 
