@@ -361,6 +361,53 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       );
     }
   });
+
+  it('verifies all 11 specialized agent skills and agent definitions exist in .agent, .cursor, and .github without drift', async () => {
+    const {
+      SPECIALIZED_AGENT_TEMPLATES,
+      renderAntigravityAgentFile,
+      renderCursorAgentFile,
+      renderCopilotAgentFile,
+      renderClaudeAgentFile,
+    } = await import('../src/init/index.js');
+
+    for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
+      // Antigravity skills
+      const agSkillPath = path.join(rootDir, `.agent/skills/${agent.id}/SKILL.md`);
+      expect(fs.existsSync(agSkillPath), `Antigravity agent skill ${agent.id} must exist at ${agSkillPath}`).toBe(true);
+      expect(fs.readFileSync(agSkillPath, 'utf-8').replace(/\r\n/g, '\n')).toBe(
+        renderAntigravityAgentFile(agent).replace(/\r\n/g, '\n')
+      );
+
+      // Antigravity agents
+      const agAgentPath = path.join(rootDir, `.agent/agents/${agent.id}.md`);
+      expect(fs.existsSync(agAgentPath), `Antigravity agent ${agent.id} must exist at ${agAgentPath}`).toBe(true);
+      expect(fs.readFileSync(agAgentPath, 'utf-8').replace(/\r\n/g, '\n')).toBe(
+        renderAntigravityAgentFile(agent).replace(/\r\n/g, '\n')
+      );
+
+      // Cursor rules
+      const cursorRulePath = path.join(rootDir, `.cursor/rules/${agent.id}.mdc`);
+      expect(fs.existsSync(cursorRulePath), `Cursor agent rule ${agent.id} must exist at ${cursorRulePath}`).toBe(true);
+      expect(fs.readFileSync(cursorRulePath, 'utf-8').replace(/\r\n/g, '\n')).toBe(
+        renderCursorAgentFile(agent).replace(/\r\n/g, '\n')
+      );
+
+      // Claude agents
+      const claudeAgentPath = path.join(rootDir, `.claude/agents/${agent.id}.md`);
+      expect(fs.existsSync(claudeAgentPath), `Claude agent ${agent.id} must exist at ${claudeAgentPath}`).toBe(true);
+      expect(fs.readFileSync(claudeAgentPath, 'utf-8').replace(/\r\n/g, '\n')).toBe(
+        renderClaudeAgentFile(agent).replace(/\r\n/g, '\n')
+      );
+
+      // GitHub Copilot agents
+      const copilotAgentPath = path.join(rootDir, `.github/agents/${agent.id}.agent.md`);
+      expect(fs.existsSync(copilotAgentPath), `Copilot agent ${agent.id} must exist at ${copilotAgentPath}`).toBe(true);
+      expect(fs.readFileSync(copilotAgentPath, 'utf-8').replace(/\r\n/g, '\n')).toBe(
+        renderCopilotAgentFile(agent).replace(/\r\n/g, '\n')
+      );
+    }
+  });
 });
 
 

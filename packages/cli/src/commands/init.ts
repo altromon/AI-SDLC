@@ -11,6 +11,7 @@ export interface InitCliOptions {
   silent?: boolean;
   json?: boolean;
   format?: string;
+  force?: boolean;
 }
 
 const CI_MENU = [
@@ -119,6 +120,7 @@ function emitInitJson(result: InitProjectResult, isSuccess: boolean, dryRun: boo
     targetDir: result.targetDir,
     directoriesCreated: result.directoriesCreated,
     filesCreated: result.filesCreated,
+    filesUpdated: result.filesUpdated || [],
     ciProvider: result.ciProvider,
     agentsConfigured: result.agentsConfigured,
     architectureGranularity: result.architectureGranularity,
@@ -146,10 +148,13 @@ function printGitHookStatus(dryRun: boolean, installed?: boolean): void {
   }
 }
 
-function printCreatedItems(items: string[], type: 'directory' | 'file', dryRun: boolean): void {
+function printCreatedItems(items: string[], type: 'directory' | 'file' | 'updated-file', dryRun: boolean): void {
   const isDir = type === 'directory';
+  const isUpdated = type === 'updated-file';
   for (const item of items) {
-    const prefix = dryRun ? pc.blue('DRY-RUN') + ` ${isDir ? 'Create directory:' : 'Create file:'}` : pc.green('✔') + ` ${isDir ? 'Directory created:' : 'File generated:'}`;
+    const actionLabel = isDir ? 'Create directory:' : isUpdated ? 'Update file:' : 'Create file:';
+    const doneLabel = isDir ? 'Directory created:' : isUpdated ? 'File updated:' : 'File generated:';
+    const prefix = dryRun ? pc.blue('DRY-RUN') + ` ${actionLabel}` : pc.green('✔') + ` ${doneLabel}`;
     console.log(`  ${prefix} ${item}`);
   }
 }
@@ -158,6 +163,9 @@ function printInitSuccess(result: InitProjectResult, dryRun: boolean): void {
   console.log(pc.bold(pc.cyan(`\n🚀 [AI-SDLC] Initializing governance structure in: ${result.targetDir}\n`)));
   printCreatedItems(result.directoriesCreated, 'directory', dryRun);
   printCreatedItems(result.filesCreated, 'file', dryRun);
+  if (result.filesUpdated && result.filesUpdated.length > 0) {
+    printCreatedItems(result.filesUpdated, 'updated-file', dryRun);
+  }
 
   if (result.ciProvider) {
     console.log(pc.cyan(`\n  ✔ CI/CD configuration generated for provider: ${pc.bold(result.ciProvider)}`));
@@ -213,6 +221,7 @@ export function runInit(
     agents: options.agents === 'none' ? false : options.agents,
     architecture: options.architecture,
     dryRun,
+    force: Boolean(options.force),
   });
 
   return handleInitResult(result, { isSilent, useJson, dryRun });

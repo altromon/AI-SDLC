@@ -1,6 +1,6 @@
 {
   "name": "ai-sdlc-monorepo",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "Deterministic, spec-driven development and governance framework for AI-assisted engineering",
   "license": "MIT",
   "private": true,
@@ -12,6 +12,7 @@
     "test:all": "vitest run",
     "test:coverage": "vitest run packages --coverage",
     "typecheck": "pnpm --filter \"@aisdlc/*\" typecheck",
+    "sync:agents": "tsx packages/cli/src/index.ts sync",
     "extract:gherkin": "tsx packages/cli/src/index.ts gherkin extract",
     "extract:gherkin:all": "tsx packages/cli/src/index.ts gherkin extract --all",
     "git:validate": "tsx packages/cli/src/index.ts git validate",
