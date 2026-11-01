@@ -779,11 +779,7 @@ function appendAntigravityFiles(dirs: string[], files: { relPath: string; conten
   files.push({ relPath: '.agent/rules/ai-sdlc.md', content: STARTER_ANTIGRAVITY_RULES });
   for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
     const content = renderAntigravityAgentFile(agent);
-    dirs.push(`.agent/skills/${agent.id}`);
-    files.push(
-      { relPath: `.agent/agents/${agent.id}.md`, content },
-      { relPath: `.agent/skills/${agent.id}/SKILL.md`, content }
-    );
+    files.push({ relPath: `.agent/agents/${agent.id}.md`, content });
   }
   for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
     dirs.push(`.agent/skills/${skill.id}`);
