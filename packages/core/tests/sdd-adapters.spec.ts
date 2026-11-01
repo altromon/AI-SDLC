@@ -308,6 +308,246 @@ satisfies-requirements: []
     fs.rmSync(tmpIntegrationDir, { recursive: true, force: true });
   });
 
+  it('should integrate implemented use cases into architecture components and promote use cases during integrateSddChange', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-test-integrate-uc-'));
+    const changeDir = path.join(tmpDir, 'specs', 'changes', 'active', 'chg-uc-test');
+    const productDir = path.join(tmpDir, 'product');
+    const archDir = path.join(tmpDir, 'architecture', 'components');
+
+    fs.mkdirSync(changeDir, { recursive: true });
+    fs.mkdirSync(productDir, { recursive: true });
+    fs.mkdirSync(archDir, { recursive: true });
+
+    // Create tasks.md
+    fs.writeFileSync(
+      path.join(changeDir, 'tasks.md'),
+      `---
+tasks:
+  - id: TSK-001
+    status: COMPLETED
+---
+`
+    );
+
+    // Create proposal.md
+    fs.writeFileSync(
+      path.join(changeDir, 'proposal.md'),
+      `---
+id: CHG-UC-TEST
+type: spec-change-proposal
+status: approved
+---
+# Proposal
+`
+    );
+
+    // Create handoff.yaml with both requirements and useCases
+    fs.writeFileSync(
+      path.join(changeDir, 'handoff.yaml'),
+      `id: HOF-TEST-UC
+type: handoff
+changeId: chg-uc-test
+subgraph:
+  requirements:
+    - FR-UC-TEST-001
+  useCases:
+    - UC-INT-001
+citations:
+  - id: CMP-INT-001
+`
+    );
+
+    // Create canonical product requirement
+    fs.writeFileSync(
+      path.join(productDir, 'FR-UC-TEST-001.md'),
+      `---
+id: FR-UC-TEST-001
+type: requirement
+status: draft
+version: "1.0.0"
+---
+# Requirement FR-UC-TEST-001
+`
+    );
+
+    // Create canonical product use case (draft)
+    fs.writeFileSync(
+      path.join(productDir, 'UC-INT-001.md'),
+      `---
+id: UC-INT-001
+type: use-case
+status: draft
+version: "1.0.0"
+primary-actor: ACT-HUMAN-ENGINEER
+---
+# Use Case UC-INT-001
+`
+    );
+
+    // Create canonical architecture component with existing UC and FR
+    fs.writeFileSync(
+      path.join(archDir, 'CMP-INT-001.md'),
+      `---
+id: CMP-INT-001
+type: component
+level: 1
+implementation-type: service
+implements-use-cases:
+  - UC-EXISTING-001
+satisfies-requirements:
+  - FR-EXISTING-001
+---
+# Component CMP-INT-001
+`
+    );
+
+    const res = integrateSddChange({
+      rootDir: tmpDir,
+      changeId: 'chg-uc-test',
+      author: 'IntegrationBot',
+    });
+
+    expect(res.success).toBe(true);
+    expect(res.updatedProductArtifacts).toContain('FR-UC-TEST-001');
+    expect(res.updatedProductArtifacts).toContain('UC-INT-001');
+    expect(res.updatedArchitectureArtifacts).toContain('CMP-INT-001');
+
+    // Verify canonical use case updated to active
+    const updatedUc = fs.readFileSync(path.join(productDir, 'UC-INT-001.md'), 'utf-8');
+    expect(updatedUc).toContain('status: active');
+    expect(updatedUc).toContain('chg-uc-test');
+
+    // Verify architecture component updated with both satisfies-requirements and implements-use-cases
+    const updatedCmp = fs.readFileSync(path.join(archDir, 'CMP-INT-001.md'), 'utf-8');
+    expect(updatedCmp).toContain('FR-EXISTING-001');
+    expect(updatedCmp).toContain('FR-UC-TEST-001');
+    expect(updatedCmp).toContain('UC-EXISTING-001');
+    expect(updatedCmp).toContain('UC-INT-001');
+    expect(updatedCmp).toContain('chg-uc-test');
+
+    // Clean up
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('should detect architecture components from design.md and integrate UC and FR correctly', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-test-integrate-design-'));
+    const changeDir = path.join(tmpDir, 'specs', 'changes', 'active', 'chg-design-test');
+    const productDir = path.join(tmpDir, 'product');
+    const archDir = path.join(tmpDir, 'architecture', 'components');
+
+    fs.mkdirSync(changeDir, { recursive: true });
+    fs.mkdirSync(productDir, { recursive: true });
+    fs.mkdirSync(archDir, { recursive: true });
+
+    // Create tasks.md
+    fs.writeFileSync(
+      path.join(changeDir, 'tasks.md'),
+      `---
+tasks:
+  - id: TSK-001
+    status: COMPLETED
+---
+`
+    );
+
+    // Create proposal.md
+    fs.writeFileSync(
+      path.join(changeDir, 'proposal.md'),
+      `---
+id: CHG-DESIGN-TEST
+type: spec-change-proposal
+status: approved
+---
+# Proposal
+`
+    );
+
+    // Create design.md with architecture-component
+    fs.writeFileSync(
+      path.join(changeDir, 'design.md'),
+      `---
+id: DSG-CHG-DESIGN-TEST
+type: spec-design
+architecture-component: CMP-DESIGN-001
+---
+# Design
+`
+    );
+
+    // Create handoff.yaml without CMP citation, only subgraph
+    fs.writeFileSync(
+      path.join(changeDir, 'handoff.yaml'),
+      `id: HOF-TEST-DESIGN
+type: handoff
+changeId: chg-design-test
+subgraph:
+  requirements:
+    - FR-DSG-001
+  useCases:
+    - UC-DSG-001
+`
+    );
+
+    // Create canonical product requirement
+    fs.writeFileSync(
+      path.join(productDir, 'FR-DSG-001.md'),
+      `---
+id: FR-DSG-001
+type: requirement
+status: draft
+version: "1.0.0"
+---
+# Requirement FR-DSG-001
+`
+    );
+
+    // Create canonical product use case (draft)
+    fs.writeFileSync(
+      path.join(productDir, 'UC-DSG-001.md'),
+      `---
+id: UC-DSG-001
+type: use-case
+status: draft
+version: "1.0.0"
+primary-actor: ACT-HUMAN-ENGINEER
+---
+# Use Case UC-DSG-001
+`
+    );
+
+    // Create canonical architecture component
+    fs.writeFileSync(
+      path.join(archDir, 'CMP-DESIGN-001.md'),
+      `---
+id: CMP-DESIGN-001
+type: component
+level: 1
+implementation-type: service
+implements-use-cases: []
+satisfies-requirements: []
+---
+# Component CMP-DESIGN-001
+`
+    );
+
+    const res = integrateSddChange({
+      rootDir: tmpDir,
+      changeId: 'chg-design-test',
+      author: 'IntegrationBot',
+    });
+
+    expect(res.success).toBe(true);
+    expect(res.updatedProductArtifacts).toContain('FR-DSG-001');
+    expect(res.updatedProductArtifacts).toContain('UC-DSG-001');
+    expect(res.updatedArchitectureArtifacts).toContain('CMP-DESIGN-001');
+
+    const updatedCmp = fs.readFileSync(path.join(archDir, 'CMP-DESIGN-001.md'), 'utf-8');
+    expect(updatedCmp).toContain('FR-DSG-001');
+    expect(updatedCmp).toContain('UC-DSG-001');
+
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
   it('should verify SDD canonical integration status', () => {
     const auditRes = verifySddIntegration({ rootDir: process.cwd() });
     expect(auditRes.audits.length).toBeGreaterThanOrEqual(1);

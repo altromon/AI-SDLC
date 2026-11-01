@@ -256,11 +256,13 @@ function isProposalRequirementId(id: string): boolean {
 
 function buildSubgraphFromProposalIds(ids: string[]): ProductHandoff['subgraph'] {
   const reqs = ids.filter(isProposalRequirementId);
+  const ucs = ids.filter((id) => id.startsWith('UC-'));
   const privReqs = ids.filter((id) => id.startsWith('PRIV-REQ-'));
   const dataAssets = ids.filter((id) => id.startsWith('DATA-ASSET-'));
   const ropaEntries = ids.filter((id) => id.startsWith('PRIV-ROPA-'));
   return {
     requirements: reqs,
+    ...(ucs.length > 0 ? { useCases: ucs } : {}),
     ...(privReqs.length > 0 ? { privacyRequirements: privReqs } : {}),
     ...(dataAssets.length > 0 ? { dataAssets } : {}),
     ...(ropaEntries.length > 0 ? { ropaEntries } : {}),
@@ -410,21 +412,51 @@ function collectCitedComponents(citations?: ProductHandoff['citations']): string
   return cited;
 }
 
-function collectSatisfyingComponents(canonicalArtifacts: CanonicalMap, targetReqs: string[], cited: string[]): void {
+function collectDesignComponents(changeDir: string): string[] {
+  const designFile = path.join(changeDir, 'design.md');
+  if (!fs.existsSync(designFile)) return [];
+  try {
+    const { frontmatter } = parseFrontmatter(fs.readFileSync(designFile, 'utf-8'));
+    const single = typeof frontmatter['architecture-component'] === 'string' ? [frontmatter['architecture-component']] : [];
+    const multi = Array.isArray(frontmatter['architecture-components']) ? frontmatter['architecture-components'].map(String) : [];
+    return [...single, ...multi].filter(isArchitectureComponentId);
+  } catch {
+    return [];
+  }
+}
+
+function matchesComponentScope(fm: Record<string, unknown>, targetReqs: string[], targetUcs: string[]): boolean {
+  const satisfies = Array.isArray(fm['satisfies-requirements']) ? (fm['satisfies-requirements'] as string[]) : [];
+  const implementsUcs = Array.isArray(fm['implements-use-cases']) ? (fm['implements-use-cases'] as string[]) : [];
+  return targetReqs.some((r) => satisfies.includes(r)) || targetUcs.some((u) => implementsUcs.includes(u));
+}
+
+function collectSatisfyingComponents(
+  canonicalArtifacts: CanonicalMap,
+  targetReqs: string[],
+  targetUcs: string[],
+  cited: string[]
+): void {
   for (const [artId, art] of canonicalArtifacts.entries()) {
     if (!artId.startsWith('CMP-') || !art.frontmatter) continue;
-    const satisfies = Array.isArray(art.frontmatter['satisfies-requirements'])
-      ? (art.frontmatter['satisfies-requirements'] as string[])
-      : [];
-    if (targetReqs.some((r) => satisfies.includes(r)) && !cited.includes(artId)) {
+    if (matchesComponentScope(art.frontmatter, targetReqs, targetUcs) && !cited.includes(artId)) {
       cited.push(artId);
     }
   }
 }
 
-function collectArchitectureComponents(handoff: ProductHandoff, canonicalArtifacts: CanonicalMap, targetReqs: string[]): string[] {
+function collectArchitectureComponents(
+  handoff: ProductHandoff,
+  canonicalArtifacts: CanonicalMap,
+  targetReqs: string[],
+  targetUcs: string[],
+  changeDir: string
+): string[] {
   const cited = collectCitedComponents(handoff.citations);
-  collectSatisfyingComponents(canonicalArtifacts, targetReqs, cited);
+  for (const comp of collectDesignComponents(changeDir)) {
+    if (!cited.includes(comp)) cited.push(comp);
+  }
+  collectSatisfyingComponents(canonicalArtifacts, targetReqs, targetUcs, cited);
   return cited;
 }
 
@@ -436,6 +468,10 @@ function isSatisfiableRequirementId(id: string): boolean {
     id.startsWith('SEC-REQ-') ||
     id.startsWith('PRIV-REQ-')
   );
+}
+
+function isImplementableUseCaseId(id: string): boolean {
+  return id.startsWith('UC-');
 }
 
 function mergeSatisfiesRequirements(fm: Record<string, unknown>, targetReqs: string[]): boolean {
@@ -452,16 +488,37 @@ function mergeSatisfiesRequirements(fm: Record<string, unknown>, targetReqs: str
   return modified;
 }
 
+function mergeImplementsUseCases(fm: Record<string, unknown>, targetUcs: string[]): boolean {
+  const existing = Array.isArray(fm['implements-use-cases']) ? [...fm['implements-use-cases']] : [];
+  let modified = false;
+  for (const uc of targetUcs) {
+    if (!isImplementableUseCaseId(uc)) continue;
+    if (!existing.includes(uc)) {
+      existing.push(uc);
+      modified = true;
+    }
+  }
+  fm['implements-use-cases'] = existing;
+  return modified;
+}
+
+function syncComponentRelations(fm: Record<string, unknown>, targetReqs: string[], targetUcs: string[]): boolean {
+  const reqMod = mergeSatisfiesRequirements(fm, targetReqs);
+  const ucMod = mergeImplementsUseCases(fm, targetUcs);
+  return reqMod || ucMod;
+}
+
 function updateSingleArchitectureComponent(
   canonical: { file: string; frontmatter: Record<string, unknown>; body: string },
   cmpId: string,
   targetReqs: string[],
+  targetUcs: string[],
   changeId: string,
   date: string,
   author: string
 ): boolean {
   const fm = canonical.frontmatter;
-  const modified = cmpId.startsWith('CMP-') ? mergeSatisfiesRequirements(fm, targetReqs) : false;
+  const modified = cmpId.startsWith('CMP-') ? syncComponentRelations(fm, targetReqs, targetUcs) : false;
   const updatedBody = appendRevisionHistoryRow(canonical.body, {
     version: String(fm.version || '1.0.0'),
     date,
@@ -480,6 +537,7 @@ function updateArchitectureComponents(
   citedComponents: string[],
   canonicalArtifacts: CanonicalMap,
   targetReqs: string[],
+  targetUcs: string[],
   changeId: string,
   date: string,
   author: string,
@@ -490,7 +548,7 @@ function updateArchitectureComponents(
     const canonical = canonicalArtifacts.get(cmpId);
     if (!canonical) continue;
     try {
-      if (updateSingleArchitectureComponent(canonical, cmpId, targetReqs, changeId, date, author)) {
+      if (updateSingleArchitectureComponent(canonical, cmpId, targetReqs, targetUcs, changeId, date, author)) {
         updated.push(cmpId);
       }
     } catch (err: unknown) {
@@ -644,6 +702,41 @@ function resolveTargetRequirements(handoff: ProductHandoff, changeDir: string): 
   );
 }
 
+function collectSpecUseCases(changeDir: string): string[] {
+  const specFile = path.join(changeDir, 'spec.md');
+  if (!fs.existsSync(specFile)) return [];
+  try {
+    const { affectedItems, newItems } = parseSpecCatalogScope(fs.readFileSync(specFile, 'utf-8'));
+    return [...affectedItems, ...newItems]
+      .map((i) => i.id)
+      .filter((id) => id && id.startsWith('UC-'));
+  } catch {
+    return [];
+  }
+}
+
+function collectTargetUseCases(handoff: ProductHandoff, changeDir: string): string[] {
+  const subUcs = (handoff.subgraph?.useCases || []).filter((uc) => uc.startsWith('UC-'));
+  const citeUcs = (handoff.citations || [])
+    .map((c) => c.targetId || c.id)
+    .filter((id): id is string => typeof id === 'string' && id.startsWith('UC-'));
+  const specUcs = collectSpecUseCases(changeDir);
+  return Array.from(new Set([...subUcs, ...citeUcs, ...specUcs]));
+}
+
+function syncArchitectureArtifacts(
+  handoff: ProductHandoff,
+  canonicalArtifacts: CanonicalMap,
+  targetReqs: string[],
+  targetUcs: string[],
+  changeDir: string,
+  ctx: ExecutionContext,
+  errors: string[]
+): string[] {
+  const cited = collectArchitectureComponents(handoff, canonicalArtifacts, targetReqs, targetUcs, changeDir);
+  return updateArchitectureComponents(cited, canonicalArtifacts, targetReqs, targetUcs, ctx.changeId, ctx.date, ctx.author, errors);
+}
+
 function applyArtifactUpdates(
   ctx: ExecutionContext,
   changeDir: string,
@@ -657,12 +750,13 @@ function applyArtifactUpdates(
   createdArtifacts: string[];
 } {
   const targetReqs = resolveTargetRequirements(handoff, changeDir);
+  const targetUcs = collectTargetUseCases(handoff, changeDir);
   const createdArtifacts = materializeNewCatalogArtifacts(changeDir, ctx.rootDir, ctx.changeId, ctx.author, ctx.date, errors);
   const canonicalArtifacts = loadCanonicalArtifacts(ctx.rootDir);
 
-  const updatedProduct = updateRequirementsArtifacts(targetReqs, createdArtifacts, canonicalArtifacts, completedTasks, ctx.changeId, ctx.date, ctx.author, errors);
-  const citedComponents = collectArchitectureComponents(handoff, canonicalArtifacts, targetReqs);
-  const updatedArch = updateArchitectureComponents(citedComponents, canonicalArtifacts, targetReqs, ctx.changeId, ctx.date, ctx.author, errors);
+  const productIds = Array.from(new Set([...targetReqs, ...targetUcs]));
+  const updatedProduct = updateRequirementsArtifacts(productIds, createdArtifacts, canonicalArtifacts, completedTasks, ctx.changeId, ctx.date, ctx.author, errors);
+  const updatedArch = syncArchitectureArtifacts(handoff, canonicalArtifacts, targetReqs, targetUcs, changeDir, ctx, errors);
 
   return { targetReqs, updatedProduct, updatedArch, createdArtifacts };
 }
