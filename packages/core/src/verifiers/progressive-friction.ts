@@ -58,7 +58,7 @@ export function isPathProtectedFromPatch(filePath: string): boolean {
   return PROTECTED_BYPASS_PATTERNS.some((pattern) => pattern.test(normalized));
 }
 
-function detectBranchChangeMatch(rootDir: string, dirs: string[]): string | undefined {
+function detectCurrentBranch(rootDir: string): string {
   let branch = '';
   if (fs.existsSync(path.join(rootDir, '.git'))) {
     try {
@@ -71,12 +71,11 @@ function detectBranchChangeMatch(rootDir: string, dirs: string[]): string | unde
       // ignore git failure
     }
   }
-  if (!branch) {
+  if (!branch && path.resolve(rootDir) === path.resolve(process.cwd())) {
     const ciBranch = (process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || process.env.CI_COMMIT_REF_NAME || process.env.BRANCH_NAME || '').toLowerCase();
     branch = ciBranch;
   }
-  if (!branch) return undefined;
-  return dirs.find((d) => branch.includes(path.basename(d).toLowerCase()));
+  return branch;
 }
 
 function resolveActiveChangeDir(rootDir: string): string | undefined {
@@ -88,8 +87,14 @@ function resolveActiveChangeDir(rootDir: string): string | undefined {
       .filter((d) => d.isDirectory())
       .map((d) => path.join(activeRoot, d.name))
       .sort((a, b) => canonicalSort(a, b));
-    const branchMatch = detectBranchChangeMatch(rootDir, dirs);
-    if (branchMatch) return branchMatch;
+    const branch = detectCurrentBranch(rootDir);
+    if (branch) {
+      const branchMatch = dirs.find((d) => branch.includes(path.basename(d).toLowerCase()));
+      if (branchMatch) return branchMatch;
+      if (!branch.startsWith('patch')) {
+        return undefined;
+      }
+    }
     return dirs.find((d) => detectProfileFromChange(d) === 'patch') || dirs[0];
   } catch {
     return undefined;

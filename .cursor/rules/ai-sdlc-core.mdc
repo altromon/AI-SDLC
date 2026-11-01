@@ -10,7 +10,7 @@ Canonical Reference: [`process/09_agent_protocols.md`](process/09_agent_protocol
 
 ## 1. The 5 Unbreakable Commandments of Agents | Los 5 Mandamientos Inquebrantables de los Agentes
 Every agent operating in this repository must strictly observe the following guardrails:
-1. **FORBIDDEN TO AUTO-APPROVE OR AUTO-MERGE | PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: Do not approve PRs or execute direct merges to protected branches (`main`, `release/*`). Approval is exclusively reserved for human reviewers.
+1. **FORBIDDEN TO DIRECTLY MODIFY, COMMIT, OR AUTO-MERGE ON PROTECTED BRANCHES (`main`, `master`, `release/*`) | PROHIBIDO TRABAJAR DIRECTAMENTE EN RAMAS PROTEGIDAS**: Do not edit files, commit, or execute direct merges to protected branches. When starting a change in any conversation, create/checkout a dedicated working branch (`feat/...` or `task/...`) first. Approval and merge are exclusively human prerogatives. Universal hooks actively block direct commits or file modifications.
 2. **FORBIDDEN TO INVENT PRODUCT OR ARCHITECTURE DECISIONS**: When facing ambiguity, formulate open questions (`open-questions`). Never assume undocumented requirements.
 3. **FORBIDDEN TO INTRODUCE DEPENDENCIES WITHOUT LICENSE INSPECTION**: Always verify `license-policy.yaml`. Viral dependencies (GPL/AGPL) or commercial paid dependencies (BSL/SSPL) are strictly forbidden without explicit human approval.
 4. **FORBIDDEN TO IGNORE CYBERSECURITY & PRIVACY (SECURITY-BY-DEFAULT & PRIVACY-BY-DEFAULT)**: Validate inputs, apply least privilege, protect PII according to `privacy-policy.yaml`, and accompany every change with security and privacy tests (`SEC-TEST-*`, `@privacy`). Suppressing linters or tests to force a green pipeline is prohibited.

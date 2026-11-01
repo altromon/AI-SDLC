@@ -52,7 +52,7 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
     expect(SPECIALIZED_AGENT_TEMPLATES).toHaveLength(11);
     for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
       expect(fs.existsSync(path.join(tempDir, `.agent/agents/${agent.id}.md`))).toBe(true);
-      expect(fs.existsSync(path.join(tempDir, `.agent/skills/${agent.id}/SKILL.md`))).toBe(true);
+      expect(fs.existsSync(path.join(tempDir, `.agent/skills/${agent.id}`))).toBe(false);
       expect(fs.existsSync(path.join(tempDir, `.cursor/rules/${agent.id}.mdc`))).toBe(true);
       expect(fs.existsSync(path.join(tempDir, `.claude/agents/${agent.id}.md`))).toBe(true);
       expect(fs.existsSync(path.join(tempDir, `.claude/skills/${agent.id}/SKILL.md`))).toBe(true);

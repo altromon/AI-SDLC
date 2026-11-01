@@ -104,11 +104,15 @@ export function runGitCheckout(taskId: string, options: { root?: string; silent?
 
 export function runGitHookInstall(options: { root?: string } = {}): boolean {
   const rootDir = options.root || process.cwd();
-  console.log(pc.cyan(`\n🔧 [AI-SDLC Git] Installing deterministic hook for commit trailers...`));
+  console.log(pc.cyan(`\n🔧 [AI-SDLC Git] Installing deterministic Git hooks (pre-commit & prepare-commit-msg)...`));
   const result = installGitHooks(rootDir);
   if (result.success) {
-    console.log(pc.green(`✔ [COMPLIANT] Git Hook successfully installed at:`));
-    console.log(`  👉 ${pc.bold(result.hookPath || '.git/hooks/prepare-commit-msg')}\n`);
+    console.log(pc.green(`✔ [COMPLIANT] Git Hooks successfully installed:`));
+    const hooks = result.installedHooks || [result.hookPath || '.git/hooks/prepare-commit-msg'];
+    for (const h of hooks) {
+      console.log(`  👉 ${pc.bold(h)}`);
+    }
+    console.log();
     return true;
   } else {
     console.error(pc.red(`\n✖ [ERROR] ${result.error}\n`));

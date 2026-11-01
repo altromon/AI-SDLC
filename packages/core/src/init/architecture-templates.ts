@@ -410,8 +410,8 @@ cites-product-actors:
 cites-quality-goals:
   - QR-LATENCY-001
   - QR-AVAILABILITY-001
-cites-use-cases:
-  - UC-MAIN-001
+cites-journeys:
+  - JRN-MAIN-001
 supersedes: null
 superseded-by: null
 ---

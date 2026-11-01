@@ -1376,3 +1376,34 @@ export interface BddFeatureExecutionReport {
   scenarios: BddScenarioExecution[];
   passed: boolean;
 }
+
+// --- Element Inspector Types ---
+export interface InspectRelation {
+  id: string;
+  type: string;
+  direction: 'upstream' | 'downstream' | 'bidirectional';
+  relation: string;
+  title?: string;
+  filePath?: string;
+}
+
+export interface InspectResult {
+  found: boolean;
+  query: string;
+  id?: string;
+  title?: string;
+  type?: string;
+  layer?: string;
+  filePath?: string;
+  status?: string;
+  summary: string;
+  upstream: InspectRelation[];
+  downstream: InspectRelation[];
+  relatedItems: InspectRelation[];
+  metrics?: Record<string, unknown>;
+  contentPreview?: string;
+}
+
+export interface InspectOptions {
+  rootDir?: string;
+}

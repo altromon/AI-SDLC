@@ -1,6 +1,6 @@
 {
   "name": "ai-sdlc-monorepo",
-  "version": "2.5.1",
+  "version": "3.0.0",
   "description": "Deterministic, spec-driven development and governance framework for AI-assisted engineering",
   "license": "MIT",
   "private": true,
@@ -19,6 +19,7 @@
     "git:plan": "tsx packages/cli/src/index.ts git plan",
     "git:checkout": "tsx packages/cli/src/index.ts git checkout",
     "git:hook:install": "tsx packages/cli/src/index.ts git hook install",
+    "prepare": "node scripts/install-hooks.cjs",
     "kpi:pr": "tsx packages/cli/src/index.ts kpi pr",
     "kpi:release": "tsx packages/cli/src/index.ts kpi release",
     "verify:governance": "tsx packages/cli/src/index.ts verify governance",
@@ -57,7 +58,7 @@
     "vitest": "^2.1.8"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "repository": {
     "type": "git",

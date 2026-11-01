@@ -61,6 +61,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       expect(toolNames).toContain('verify_friction');
       expect(toolNames).toContain('verify_pdac');
       expect(toolNames).toContain('verify_privacy');
+      expect(toolNames).toContain('inspect_element');
 
       expect(response.tools.length).toBeGreaterThanOrEqual(22);
     });
@@ -245,6 +246,22 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       expect(content.success).toBe(true);
       expect(content.totalNodes).toBeGreaterThan(0);
       expect(content.drifts).toHaveLength(0);
+    });
+
+    it('should execute "inspect_element" and return technical summary with graph relations', async () => {
+      const result = await client.callTool({
+        name: 'inspect_element',
+        arguments: {
+          query: 'CMP-CORE',
+        },
+      });
+
+      expect(result.isError).toBeFalsy();
+      const content = JSON.parse((result.content[0] as any).text);
+      expect(content.found).toBe(true);
+      expect(content.id).toBe('CMP-CORE');
+      expect(content.relatedItems.length).toBeGreaterThan(0);
+      expect(content.markdown).toContain('CMP-CORE');
     });
 
     it('should execute "kpi_release" and aggregate release metrics', async () => {

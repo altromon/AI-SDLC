@@ -606,7 +606,7 @@ unknown-extra-property: "disallowed"
       version: '1.0.0',
       'cites-product-actors': ['ACT-USER-001'],
       'cites-quality-goals': ['QR-PERF-001'],
-      'cites-use-cases': ['UC-AUTH-001'],
+      'cites-journeys': ['JRN-AUTH-001'],
     };
     const archIntroResValid = validateArtifactSchema(validArchIntro, 'architecture-introduction', repoRoot);
     expect(archIntroResValid.valid).toBe(true);
@@ -623,7 +623,7 @@ unknown-extra-property: "disallowed"
       version: '1.0',
       'cites-product-actors': [],
       'cites-quality-goals': [],
-      'cites-use-cases': [],
+      'cites-journeys': [],
     };
     const archIntroResInvalid = validateArtifactSchema(invalidArchIntro, 'architecture-introduction', repoRoot);
     expect(archIntroResInvalid.valid).toBe(false);

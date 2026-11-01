@@ -394,7 +394,7 @@ function connectIntroRelationships(
 ): void {
   const fm = art.frontmatter;
   connectTargets(art.id, fm['cites-product-actors'], 'identifies', nodeMap, addEdge, 'actor', 'product');
-  connectTargets(art.id, fm['cites-use-cases'], 'envisions', nodeMap, addEdge, 'use-case', 'product');
+  connectTargets(art.id, fm['cites-journeys'], 'envisions', nodeMap, addEdge, 'journey', 'product');
   const citedGoals = fm['cites-quality-goals'];
   const list = Array.isArray(citedGoals) ? citedGoals : [];
   for (const qrId of list) {

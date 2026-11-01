@@ -227,28 +227,27 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(canonicalContent).toMatch(/Loading.*Empty.*Error/is);
     expect(canonicalContent).toMatch(/console\.error/);
 
-    const devSkill = fs.readFileSync(path.join(rootDir, '.agent/skills/agent-developer/SKILL.md'), 'utf-8');
-    expect(devSkill).toMatch(/Fake-Wiring/i);
-    expect(devSkill).toMatch(/Loading.*Empty.*Error/is);
-    expect(devSkill).toMatch(/console\.error/);
+    const devAgent = fs.readFileSync(path.join(rootDir, '.agent/agents/agent-developer.md'), 'utf-8');
+    expect(devAgent).toMatch(/Fake-Wiring/i);
+    expect(devAgent).toMatch(/Loading.*Empty.*Error/is);
+    expect(devAgent).toMatch(/console\.error/);
 
-    const archSkill = fs.readFileSync(path.join(rootDir, '.agent/skills/agent-system-architect/SKILL.md'), 'utf-8');
-    expect(archSkill).toMatch(/Contract-First/i);
+    const archAgent = fs.readFileSync(path.join(rootDir, '.agent/agents/agent-system-architect.md'), 'utf-8');
+    expect(archAgent).toMatch(/Contract-First/i);
 
-    const qaSkill = fs.readFileSync(path.join(rootDir, '.agent/skills/agent-qa-engineer/SKILL.md'), 'utf-8');
-    expect(qaSkill).toMatch(/Zero-Mock/i);
+    const qaAgent = fs.readFileSync(path.join(rootDir, '.agent/agents/agent-qa-engineer.md'), 'utf-8');
+    expect(qaAgent).toMatch(/Zero-Mock/i);
 
-    const expertSkill = fs.readFileSync(path.join(rootDir, '.agent/skills/agent-expert-user/SKILL.md'), 'utf-8');
-    expect(expertSkill).toMatch(/Loading.*Empty.*Error/is);
+    const expertAgent = fs.readFileSync(path.join(rootDir, '.agent/agents/agent-expert-user.md'), 'utf-8');
+    expect(expertAgent).toMatch(/Loading.*Empty.*Error/is);
 
-    const reviewerSkill = fs.readFileSync(path.join(rootDir, '.agent/skills/agent-code-reviewer/SKILL.md'), 'utf-8');
-    expect(reviewerSkill).toMatch(/Fake-Wiring/i);
+    const reviewerAgent = fs.readFileSync(path.join(rootDir, '.agent/agents/agent-code-reviewer.md'), 'utf-8');
+    expect(reviewerAgent).toMatch(/Fake-Wiring/i);
   });
 
   it('verifies agent-system-architect and agent-developer enforce Modular & Hexagonal Architecture (Ports & Adapters) & exhaustive unit testing order across protocols and agent configs', () => {
     const filesToCheck = [
       canonicalProtocolPath,
-      path.join(rootDir, '.agent/skills/agent-developer/SKILL.md'),
       path.join(rootDir, '.agent/agents/agent-developer.md'),
       path.join(rootDir, '.claude/agents/agent-developer.md'),
       path.join(rootDir, '.cursor/rules/agent-developer.mdc'),
@@ -270,7 +269,6 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       expect(content, `${filePath} must enforce Global Styles Protection`).toMatch(/Global Styles Protection|GLOBAL STYLES/i);
     }
     const archFiles = [
-      path.join(rootDir, '.agent/skills/agent-system-architect/SKILL.md'),
       path.join(rootDir, '.agent/agents/agent-system-architect.md'),
       path.join(rootDir, '.claude/agents/agent-system-architect.md'),
       path.join(rootDir, '.cursor/rules/agent-system-architect.mdc'),
@@ -285,7 +283,6 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
   it('verifies agent-qa-engineer enforces E2E/UI testing, agreed project technology, and per-interactive-element Happy Path, Sad Path, and Boundary Values coverage (#130)', () => {
     const qaFiles = [
       canonicalProtocolPath,
-      path.join(rootDir, '.agent/skills/agent-qa-engineer/SKILL.md'),
       path.join(rootDir, '.agent/agents/agent-qa-engineer.md'),
       path.join(rootDir, '.claude/agents/agent-qa-engineer.md'),
       path.join(rootDir, '.cursor/rules/agent-qa-engineer.mdc'),
@@ -362,7 +359,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     }
   });
 
-  it('verifies all 11 specialized agent skills and agent definitions exist in .agent, .cursor, and .github without drift', async () => {
+  it('verifies all 11 specialized agent definitions exist in .agent, .cursor, and .github without drift', async () => {
     const {
       SPECIALIZED_AGENT_TEMPLATES,
       renderAntigravityAgentFile,
@@ -372,12 +369,9 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     } = await import('../src/init/index.js');
 
     for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
-      // Antigravity skills
-      const agSkillPath = path.join(rootDir, `.agent/skills/${agent.id}/SKILL.md`);
-      expect(fs.existsSync(agSkillPath), `Antigravity agent skill ${agent.id} must exist at ${agSkillPath}`).toBe(true);
-      expect(fs.readFileSync(agSkillPath, 'utf-8').replace(/\r\n/g, '\n')).toBe(
-        renderAntigravityAgentFile(agent).replace(/\r\n/g, '\n')
-      );
+      // Antigravity specialized agents reside in .agent/agents, not duplicated in .agent/skills
+      const agSkillPath = path.join(rootDir, `.agent/skills/${agent.id}`);
+      expect(fs.existsSync(agSkillPath), `Antigravity agent ${agent.id} must not be duplicated under .agent/skills`).toBe(false);
 
       // Antigravity agents
       const agAgentPath = path.join(rootDir, `.agent/agents/${agent.id}.md`);
