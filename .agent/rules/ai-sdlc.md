@@ -8,7 +8,7 @@ This file defines the operational rules and specialized role mappings for Google
 
 ## 1. The 5 Unbreakable Commandments of Agents | Los 5 Mandamientos Inquebrantables de los Agentes
 
-1. **FORBIDDEN TO AUTO-APPROVE OR AUTO-MERGE | PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: No agent may auto-approve PRs or perform direct merges to protected branches (`main`, `release/*`). Only a human engineer may approve or merge.
+1. **FORBIDDEN TO DIRECTLY MODIFY, COMMIT, OR AUTO-MERGE ON PROTECTED BRANCHES (`main`, `master`, `release/*`) | PROHIBIDO TRABAJAR DIRECTAMENTE EN RAMAS PROTEGIDAS**: No agent may modify files, commit, or merge directly on protected branches. Whenever proceeding with a change from any conversation, the agent MUST verify the active branch and create/checkout a dedicated working branch (`feat/...` or `task/...`) before touching files. Only a human engineer may approve or merge PRs. Pre-tool and pre-commit hooks actively block any direct edits.
 2. **FORBIDDEN TO INVENT PRODUCT OR ARCHITECTURE DECISIONS**: When facing ambiguous requirements, formulate clarifying questions (`open-questions`). Never assume unspecified intentions.
 3. **FORBIDDEN TO INTRODUCE DEPENDENCIES WITHOUT LICENSE INSPECTION**: Always consult `license-policy.yaml`. Dependencies with viral licenses (`GPL`/`AGPL`) or commercial paid licenses (`BSL`/`SSPL`) are strictly forbidden without authorization.
 4. **FORBIDDEN TO IGNORE CYBERSECURITY & PRIVACY (SECURITY-BY-DEFAULT & PRIVACY-BY-DEFAULT)**: Validate inputs, sanitize data, protect PII according to `privacy-policy.yaml`, and add mitigation tests (`SEC-TEST-*`, `@privacy`). Disabling linters or suppressing typing errors is prohibited.
@@ -119,6 +119,7 @@ This file defines the operational rules and specialized role mappings for Google
 
 ## 3. Git 4-Tier Hierarchy and Commit Conventions
 - `task/<PARENT-ID>/<TSK-ID>-<slug>` $\rightarrow$ `feat/<FEAT-ID>-<slug>` $\rightarrow$ `release/vX.Y.Z` $\rightarrow$ `main`.
+- **Mandatory Branch-Before-Change Protocol**: When starting work in any conversation or session, verify the active branch. Operating or modifying files on `main`, `master`, or `release/*` is strictly forbidden. Create a dedicated branch with `git checkout -b feat/<CHG-ID>-<slug>` (Tier 3) or `git checkout -b task/<PARENT-ID>/<TSK-ID>-<slug>` (Tier 4) before creating or editing files.
 - Mandatory commit trailers injection:
   ```text
   Author-Type: agent

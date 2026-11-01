@@ -21,15 +21,44 @@ describe('@aisdlc/cli KPI & Git Hook Commands', () => {
     }
   });
 
-  it('installs prepare-commit-msg hook in a git repository', () => {
+  it('installs prepare-commit-msg and pre-commit hooks in a git repository', () => {
     execFileSync('git', ['init'], { cwd: tmpDir, stdio: 'pipe' });
     const success = runGitHookInstall({ root: tmpDir });
 
     expect(success).toBe(true);
-    const hookPath = path.join(tmpDir, '.git', 'hooks', 'prepare-commit-msg');
-    expect(fs.existsSync(hookPath)).toBe(true);
-    const content = fs.readFileSync(hookPath, 'utf-8');
-    expect(content).toContain('AI-SDLC: Automated Commit Trailers Injection Hook');
+    const trailerHook = path.join(tmpDir, '.git', 'hooks', 'prepare-commit-msg');
+    expect(fs.existsSync(trailerHook)).toBe(true);
+    expect(fs.readFileSync(trailerHook, 'utf-8')).toContain('AI-SDLC: Automated Commit Trailers Injection Hook');
+
+    const preCommitHook = path.join(tmpDir, '.git', 'hooks', 'pre-commit');
+    expect(fs.existsSync(preCommitHook)).toBe(true);
+    expect(fs.readFileSync(preCommitHook, 'utf-8')).toContain('AI-SDLC: Universal Protected Branches Guard (pre-commit)');
+  });
+
+  it('pre-commit hook blocks direct commits on protected branches', () => {
+    execFileSync('git', ['init'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.name', 'Tester'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.email', 'test@ai-sdlc.org'], { cwd: tmpDir, stdio: 'pipe' });
+    runGitHookInstall({ root: tmpDir });
+
+    execFileSync('git', ['checkout', '-b', 'main'], { cwd: tmpDir, stdio: 'pipe' });
+    fs.writeFileSync(path.join(tmpDir, 'test.txt'), 'hello');
+    execFileSync('git', ['add', '.'], { cwd: tmpDir, stdio: 'pipe' });
+
+    // Attempting commit on main must fail due to pre-commit hook
+    let failed = false;
+    try {
+      execFileSync('git', ['commit', '-m', 'commit on main'], { cwd: tmpDir, stdio: 'pipe' });
+    } catch {
+      failed = true;
+    }
+    expect(failed).toBe(true);
+
+    // Switching to a working branch feat/* must allow committing
+    execFileSync('git', ['checkout', '-b', 'feat/test-branch'], { cwd: tmpDir, stdio: 'pipe' });
+    expect(() => {
+      execFileSync('git', ['commit', '-m', 'feat: working branch commit'], { cwd: tmpDir, stdio: 'pipe' });
+    }).not.toThrow();
   });
 
   it('fails gracefully when installing hook outside git repo', () => {

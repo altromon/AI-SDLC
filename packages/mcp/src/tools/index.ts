@@ -38,6 +38,8 @@ import {
   verifyTasksGovernance,
   verifyTestingCoverage,
   verifyTraceability,
+  inspectElement,
+  formatInspectResultMarkdown,
   writeReleaseKpiReport,
   resolveDeterministicDate,
   type SastSeverity,
@@ -632,6 +634,24 @@ function registerVerifySecurityTool(server: McpServer, options: RegisterToolsOpt
   });
 }
 
+function registerInspectElementTool(server: McpServer, options: RegisterToolsOptions): void {
+  server.tool(
+    'inspect_element',
+    'Inspects any AI-SDLC artifact, code file, task, or test to retrieve technical summary, upstream/downstream traceability, and related items.',
+    {
+      query: z.string().describe('Artifact ID (e.g. FR-001, CMP-002, UC-01, TSK-001) or file path (e.g. src/auth.ts)'),
+      root: z.string().optional().describe('Project root directory'),
+    },
+    async (params) => {
+      return executeSecuredTool('inspect_element', params, options, (root) => {
+        const result = inspectElement(params.query, { rootDir: root });
+        const markdown = formatInspectResultMarkdown(result);
+        return { data: { ...result, markdown }, isError: !result.found, root };
+      });
+    }
+  );
+}
+
 function registerVerifyTraceabilityTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('verify_traceability', 'Audits the 360° inverted traceability matrix.', { root: z.string().optional() }, async (params) => {
     return executeSecuredTool('verify_traceability', params, options, (root) => {
@@ -838,6 +858,7 @@ function registerLifecycleAndSddTools(server: McpServer, options: RegisterToolsO
 }
 
 function registerVerificationTools(server: McpServer, options: RegisterToolsOptions): void {
+  registerInspectElementTool(server, options);
   registerVerifyQualityTool(server, options);
   registerVerifySchemasTool(server, options);
   registerVerifySecurityTool(server, options);

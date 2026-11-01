@@ -18,6 +18,7 @@ import { promptForAgents, promptForArchitecture, promptForCi, runInit } from './
 import { runKpiPr, runKpiRelease } from './commands/kpi.js';
 import { runMcpServer } from './commands/mcp.js';
 import { runReportDashboard, runReportQuality } from './commands/report.js';
+import { runInspect } from './commands/inspect.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
   runVerifyAll,
@@ -647,6 +648,22 @@ sddCommand
       prBody: opts.prBody,
       author: opts.author,
       autoArchive: opts.archive !== false,
+      json: opts.json,
+      format: opts.format,
+    });
+    process.exit(passed ? 0 : 1);
+  });
+
+// --- inspect command ---
+program
+  .command('inspect <element>')
+  .description('Inspect an element (FR, UC, CMP, task, or source file) to display technical summary and relationships')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--json', 'Structured JSON format output')
+  .option('-F, --format <format>', 'Output format: text or json')
+  .action((element, opts) => {
+    const passed = runInspect(element, {
+      root: opts.root,
       json: opts.json,
       format: opts.format,
     });

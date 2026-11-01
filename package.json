@@ -19,6 +19,7 @@
     "git:plan": "tsx packages/cli/src/index.ts git plan",
     "git:checkout": "tsx packages/cli/src/index.ts git checkout",
     "git:hook:install": "tsx packages/cli/src/index.ts git hook install",
+    "prepare": "pnpm run git:hook:install",
     "kpi:pr": "tsx packages/cli/src/index.ts kpi pr",
     "kpi:release": "tsx packages/cli/src/index.ts kpi release",
     "verify:governance": "tsx packages/cli/src/index.ts verify governance",

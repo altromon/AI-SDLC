@@ -8,7 +8,7 @@ This repository implements the **AI-SDLC** framework (Spec-Driven Development, d
 
 ## 1. The 5 Unbreakable Commandments of Agents | Los 5 Mandamientos Inquebrantables de los Agentes
 
-1. **FORBIDDEN TO AUTO-APPROVE OR AUTO-MERGE | PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: Never approve PRs or merge directly to `main` or protected branches. Approval is exclusively a human prerogative.
+1. **FORBIDDEN TO DIRECTLY MODIFY, COMMIT, OR AUTO-MERGE ON PROTECTED BRANCHES (`main`, `master`, `release/*`) | PROHIBIDO TRABAJAR DIRECTAMENTE EN RAMAS PROTEGIDAS**: Never edit files, commit, or merge directly on protected branches. Whenever starting a change from any conversation or session, always verify the branch and create/checkout a working branch (`feat/...` or `task/...`). Approval and merge are exclusively human prerogatives. Universal hooks actively block any direct commit or file modification.
 2. **FORBIDDEN TO INVENT PRODUCT OR ARCHITECTURE DECISIONS**: When facing ambiguous requirements, formulate open questions (`open-questions`). Never assume undocumented behaviors.
 3. **FORBIDDEN TO INTRODUCE DEPENDENCIES WITHOUT LICENSE INSPECTION**: Always validate the SPDX identifier against `license-policy.yaml`. Viral libraries (`GPL`/`AGPL`) or paid commercial libraries (`BSL`/`SSPL`) are strictly forbidden without formal human approval.
 4. **FORBIDDEN TO IGNORE CYBERSECURITY & PRIVACY (SECURITY-BY-DEFAULT & PRIVACY-BY-DEFAULT)**: Validate inputs, sanitize data, protect PII according to `privacy-policy.yaml`, and include mitigation tests (`SEC-TEST-*`, `@privacy`). Disabling linters or suppressing typing errors (`any`, `@ts-ignore`) is prohibited.

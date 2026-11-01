@@ -1,5 +1,5 @@
 /**
- * AI-SDLC: Automated Git Hook Installer for Commit Trailers
+ * AI-SDLC: Automated Git Hook Installer for Commit Trailers and Branch Guard
  */
 
 import * as fs from 'fs';
@@ -8,8 +8,39 @@ import * as path from 'path';
 export interface HookInstallResult {
   success: boolean;
   hookPath?: string;
+  installedHooks?: string[];
   error?: string;
 }
+
+export const PRE_COMMIT_SCRIPT = `#!/usr/bin/env bash
+# ==============================================================================
+# AI-SDLC: Universal Protected Branches Guard (pre-commit)
+# ==============================================================================
+
+CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+
+if [ -z "$CURRENT_BRANCH" ] || [ "$CURRENT_BRANCH" = "HEAD" ]; then
+  exit 0
+fi
+
+# Protected branches regex: main, master, release/*, release/v*
+if echo "$CURRENT_BRANCH" | grep -qE "^(main|master|release/.*)$"; then
+  echo "" >&2
+  echo "❌ [AI-SDLC Security Guard] BLOCKED: Direct commits to protected branch '$CURRENT_BRANCH' are forbidden!" >&2
+  echo "--------------------------------------------------------------------------------" >&2
+  echo "Direct commits on protected branches violate the AI-SDLC 4-Tier Branching Policy." >&2
+  echo "You must create and switch to a dedicated working branch before committing:" >&2
+  echo "" >&2
+  echo "   git checkout -b feat/<CHG-ID>-<slug>" >&2
+  echo "   or" >&2
+  echo "   git checkout -b task/<PARENT-ID>/<TSK-ID>-<slug>" >&2
+  echo "--------------------------------------------------------------------------------" >&2
+  echo "" >&2
+  exit 1
+fi
+
+exit 0
+`;
 
 export const PREPARE_COMMIT_MSG_SCRIPT = `#!/usr/bin/env bash
 # ==============================================================================
@@ -24,7 +55,7 @@ if [ "$COMMIT_SOURCE" = "merge" ]; then
   exit 0
 fi
 
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
 if [ -z "$CURRENT_BRANCH" ]; then
   exit 0
 fi
@@ -108,7 +139,7 @@ fi
 `;
 
 /**
- * Installs the AI-SDLC prepare-commit-msg hook in .git/hooks.
+ * Installs the AI-SDLC Git hooks (pre-commit & prepare-commit-msg) in .git/hooks.
  */
 export function installGitHooks(rootDir: string = process.cwd()): HookInstallResult {
   const gitDir = path.join(rootDir, '.git');
@@ -124,18 +155,22 @@ export function installGitHooks(rootDir: string = process.cwd()): HookInstallRes
     fs.mkdirSync(hooksDir, { recursive: true });
   }
 
-  const hookPath = path.join(hooksDir, 'prepare-commit-msg');
+  const prepareCommitMsgPath = path.join(hooksDir, 'prepare-commit-msg');
+  const preCommitPath = path.join(hooksDir, 'pre-commit');
+
   try {
-    fs.writeFileSync(hookPath, PREPARE_COMMIT_MSG_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
+    fs.writeFileSync(prepareCommitMsgPath, PREPARE_COMMIT_MSG_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
+    fs.writeFileSync(preCommitPath, PRE_COMMIT_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
     return {
       success: true,
-      hookPath,
+      hookPath: prepareCommitMsgPath,
+      installedHooks: [prepareCommitMsgPath, preCommitPath],
     };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     return {
       success: false,
-      error: `Error al escribir el hook en '${hookPath}': ${msg}`,
+      error: `Error al escribir hooks en '${hooksDir}': ${msg}`,
     };
   }
 }
