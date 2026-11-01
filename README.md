@@ -154,7 +154,7 @@ AI-SDLC/
 This accelerated flow demonstrates how to create, implement, verify, and integrate a new feature from scratch using the **simplified CLI commands** (`aisdlc` or `pnpm` scripts).
 
 ### 1. Prerequisites
-- **Node.js** (v18.0 or higher): `node -v`
+- **Node.js** (v20.0 or higher): `node -v`
 - **pnpm** (v9 or v10+): `pnpm -v`
 - **Git** (v2.30 or higher): `git --version`
 

@@ -1,0 +1,18 @@
+id: HOF-CHG-049-NODE-LTS-RUNTIME-AND-CI
+type: handoff
+title: Handoff Canónico de Producto para Node LTS Runtime and CI Alignment
+changeId: CHG-049-NODE-LTS-RUNTIME-AND-CI
+version: 1.0.0
+createdAt: '2026-11-01T19:32:59.306Z'
+subgraph:
+  requirements:
+    - FR-030-INIT-AGENT-SCAFFOLDING-001
+  useCases:
+    - UC-030-INIT-AGENT-SCAFFOLDING
+citations:
+  - id: UC-030-INIT-AGENT-SCAFFOLDING
+    digest: sha256:cab2aae26204d8a004f782c6a83535806d6cd9ca9aa8dc44152f136999d47f54
+    comment: Citación de use-case (Scaffolding de Reglas de Agente en Inicialización de Proyecto)
+  - id: FR-030-INIT-AGENT-SCAFFOLDING-001
+    digest: sha256:cc12da31168cd033ac7d4752a8eecef01736190a9a12ae600d0775169fd1f88c
+    comment: Requerimiento derivado de UC-030-INIT-AGENT-SCAFFOLDING
