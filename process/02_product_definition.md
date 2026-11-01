@@ -96,8 +96,8 @@ When starting a new product from scratch (or when adopting AI-SDLC in a Brownfie
    - Top 3–5 priority quality goals (`QR-*`) and constraints (`CON-*`).
 2. **Enterprise & Capability Vision (`ARCH-INTRO-001`)**: Instantiates `templates/architecture/introduction-and-goals.template.md` (`naf-perspective: "Enterprise & Capability"`, `status: draft`).
 3. **Initial ProductShape Baseline Derivation (Greenfield) or Retro-Inception Linking (Brownfield)**:
-   - **Greenfield**: Derives draft `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` artifacts (`status: draft`) linked to `ARCH-INTRO-001` for human review and approval.
-   - **Brownfield (Retro-Inception)**: Synthesizes `ARCH-INTRO-001` from existing product/architecture artifacts and source code, linking directly to existing `cites-product-actors` (`ACT-*`), `cites-use-cases` (`UC-*`), and `cites-quality-goals` (`QR-*`) so the PDaC graph and Interactive Dashboard (`aisdlc report dashboard`) immediately reflect the root product vision.
+   - **Greenfield**: Derives draft `ACT-*`, `JRN-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` artifacts (`status: draft`) linked to `ARCH-INTRO-001` for human review and approval.
+   - **Brownfield (Retro-Inception)**: Synthesizes `ARCH-INTRO-001` from existing product/architecture artifacts and source code, linking directly to existing `cites-product-actors` (`ACT-*`), `cites-journeys` (`JRN-*`), and `cites-quality-goals` (`QR-*`) so the PDaC graph and Interactive Dashboard (`aisdlc report dashboard`) immediately reflect the root product vision.
 
 ### B. Continuous Product Evolution Cycle
 

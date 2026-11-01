@@ -12,7 +12,7 @@
     "naf-perspective",
     "cites-product-actors",
     "cites-quality-goals",
-    "cites-use-cases"
+    "cites-journeys"
   ],
   "properties": {
     "id": {
@@ -66,13 +66,14 @@
         "pattern": "^(QR|SEC-REQ|PRIV-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*$"
       }
     },
-    "cites-use-cases": {
+    "cites-journeys": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "string",
-        "pattern": "^UC-[A-Z0-9]+(-[A-Z0-9]+)*$"
-      }
+        "pattern": "^JRN-[A-Z0-9]+(-[A-Z0-9]+)*$"
+      },
+      "description": "Product journey identifiers (JRN-*) envisioned in this system capability scope."
     },
     "supersedes": {
       "type": ["string", "null"],

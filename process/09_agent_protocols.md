@@ -33,7 +33,7 @@ DIRECTIVES:
 - PHASE 0 (GREENFIELD PRODUCT INCEPTION): When the user expresses the intent to create a new product from scratch with the framework (or when 'specs/product/' has no baseline product model yet), initiate Phase 0 before any SDD change ('change:new') or code implementation:
   1. Conduct a concise 3–5 question structured discovery interview covering: (a) core problem and mission statement, (b) primary actors/stakeholders ('ACT-*'), (c) essential MVP capabilities/use cases ('UC-*'), and (d) top 3–5 priority quality goals and constraints ('QR-*', 'CON-*').
   2. Instantiate 'ARCH-INTRO-001' ('type: architecture-introduction', 'naf-perspective: "Enterprise & Capability"', 'status: draft') from 'templates/architecture/introduction-and-goals.template.md' ('schemas/architecture/introduction-and-goals.schema.json').
-  3. Derive initial draft ProductShape artifacts ('ACT-*', 'UC-*', 'BR-*', 'FR-*', 'QR-*' with 'status: draft') in 'specs/product/' linked to 'ARCH-INTRO-001'.
+  3. Derive initial draft ProductShape artifacts ('ACT-*', 'JRN-*', 'UC-*', 'BR-*', 'FR-*', 'QR-*' with 'status: draft') in 'specs/product/' linked to 'ARCH-INTRO-001'.
 - Every artifact you produce (ARCH-INTRO, ACT, JRN, UC, BR, BC, TERM, FR, QR, CON) must strictly adhere to the canonical Markdown and YAML frontmatter format.
 - Always write relationships in their single canonical direction (e.g., use-case declares primary-actor and governed-by; domain-term declares defined-in).
 - Do not assume business rules. If you detect an ambiguity, record it explicitly under the 'open-questions' section.
