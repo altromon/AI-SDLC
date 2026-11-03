@@ -108,14 +108,27 @@ categories:
       - "Unlicense"
       - "CC0-1.0"
       - "0BSD"
+      - "Python-2.0"
+      - "BlueOak-1.0.0"
+      - "Zlib"
+      - "CC-BY-3.0"
+      - "CC-BY-4.0"
+      - "MS-PL"
 
   weak_copyleft_conditional:
     action: "REVIEW_REQUIRED"
     description: "Allowed only as dynamically linked decoupled libraries."
     spdx_identifiers:
       - "LGPL-2.1-only"
+      - "LGPL-2.1-or-later"
       - "LGPL-3.0-only"
+      - "LGPL-3.0-or-later"
       - "MPL-2.0"
+      - "EPL-2.0"
+      - "CDDL-1.0"
+      - "MS-RL"
+      - "MS-LPL"
+      - "MS-LRL"
 
   strong_copyleft_viral:
     action: "DENY"

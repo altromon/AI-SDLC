@@ -1,5 +1,19 @@
 # @aisdlc/mcp
 
+## 3.1.0
+
+### Minor Changes
+
+- feat(mcp): activación de RBAC dinámico con parámetro `role` en herramientas de mutación y starter templates para IDEs con `AISDLC_MCP_ROLE` (#176).
+- Updated dependencies
+  - @aisdlc/core@3.1.0
+
+## 3.0.0
+
+### Major Changes
+
+- feat(mcp)!: bump monorepo version to v3.0.0.
+
 ## 2.4.0
 
 ### Minor Changes

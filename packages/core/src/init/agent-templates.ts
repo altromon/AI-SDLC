@@ -7,6 +7,8 @@ export interface SpecializedAgentTemplate {
   title: string;
   description: string;
   globs: string;
+  claudeTools?: readonly string[];
+  antigravityTools?: readonly string[];
   body: string;
 }
 
@@ -17,6 +19,8 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
     description:
       'Assist the human Product Owner in exploring, modeling, and refining product definition using NAF v4 Enterprise & Capability Vision (ARCH-INTRO-*) and ProductShape (ACT-*, UC-*, FR-*, QR-*, BR-*).',
     globs: 'product/**, specs/product/**, templates/product/**, templates/architecture/introduction-and-goals.template.md',
+    claudeTools: ['View', 'Edit', 'Replace', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'edit_file', 'write_file', 'run_command', 'call_mcp_tool', 'ask_question'],
     body: `## Role & Mission
 - **Role**: Product Analyst Agent (\`agent-product-analyst\`) and Technical Scribe (AI as Scribe) of the AI-SDLC framework.
 - **Mission**: Capture new product intent via NAF v4 Enterprise & Capability Vision (\`ARCH-INTRO-*\`) and transform natural language business intent into canonical ProductShape artifacts (\`ACT-*\`, \`JRN-*\`, \`UC-*\`, \`BR-*\`, \`TERM-*\`, \`FR-*\`, \`QR-*\`) 100% compliant with JSON schemas.
@@ -43,6 +47,8 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
     description:
       'Analyze business use cases and architecture artifacts to proactively model STRIDE adversaries, abuse cases, and OWASP ASVS security requirements.',
     globs: 'security/**, specs/security/**, architecture/**',
+    claudeTools: ['View', 'Edit', 'Replace', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'edit_file', 'write_file', 'run_command', 'call_mcp_tool'],
     body: `## Role & Mission
 - **Role**: Threat Modeling and Shift-Left Cybersecurity Specialist Agent (\`agent-threat-modeler\`).
 - **Mission**: Analyze business use cases and architecture artifacts to proactively model adversaries, STRIDE attack vectors, and OWASP ASVS mitigation requirements.
@@ -65,6 +71,8 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
     description:
       'Model personal data assets (DATA-ASSET-*), GDPR Art. 30 records of processing (PRIV-ROPA-*), and LINDDUN/ISO 27701 privacy requirements (PRIV-REQ-*) on handoff from cybersecurity, and audit code diffs against privacy-policy.yaml.',
     globs: 'privacy/**, specs/privacy/**, privacy-policy.yaml, templates/privacy/**, schemas/privacy/**',
+    claudeTools: ['View', 'Edit', 'Replace', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'edit_file', 'write_file', 'run_command', 'call_mcp_tool'],
     body: `## Role & Mission
 - **Role**: Data Protection & Privacy-by-Design Specialist Agent (\`agent-privacy-officer\`).
 - **Mission**: Receive the handoff from \`agent-threat-modeler\` to model personal data assets (\`DATA-ASSET-*\`), GDPR Art. 30 records of processing (\`PRIV-ROPA-*\`), and LINDDUN / GDPR Art. 25 / ISO 27701 privacy requirements (\`PRIV-REQ-*\`), and audit code changes in Pre-Merge against \`privacy-policy.yaml\`.
@@ -91,6 +99,8 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
     description:
       'Translate approved product and security definitions into modular technical architecture based on arc42 enriched with NAF v4 (CMP-*, ADR-*).',
     globs: 'architecture/**, specs/changes/**/design.md, templates/architecture/**',
+    claudeTools: ['View', 'Edit', 'Replace', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'edit_file', 'write_file', 'run_command', 'call_mcp_tool'],
     body: `## Role & Mission
 - **Role**: System Architect Agent (\`agent-system-architect\`) of the AI-SDLC framework.
 - **Mission**: Translate approved product definition into a modular technical architecture based on arc42 enriched with NAF v4.
@@ -112,6 +122,8 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
     description:
       'Translate approved requirements (FR-*, SEC-REQ-*, PRIV-REQ-*, QR-*) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites before production code is written.',
     globs: 'tests/**, specs/changes/**/spec.md',
+    claudeTools: ['View', 'Edit', 'Replace', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'edit_file', 'write_file', 'run_command', 'call_mcp_tool'],
     body: `## Role & Mission
 - **Role**: QA Engineer and SDET (Software Development Engineer in Test) Agent (\`agent-qa-engineer\`).
 - **Mission**: Translate approved requirements (\`FR-*\`, \`SEC-REQ-*\`, \`PRIV-REQ-*\`, \`QR-*\`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites before \`agent-developer\` writes a single line of production code.
@@ -142,6 +154,8 @@ export const SPECIALIZED_AGENT_TEMPLATES: readonly SpecializedAgentTemplate[] = 
     description:
       'Implement atomic tasks from SDD specifications (tasks.md) delivering clean, strictly typed, and tested code satisfying quality-policy.yaml thresholds.',
     globs: 'src/**, packages/**, tests/**, specs/changes/**',
+    claudeTools: ['View', 'Edit', 'Replace', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'edit_file', 'write_file', 'run_command', 'call_mcp_tool'],
     body: `## Role & Mission
 - **Role**: High-Precision Software Developer / Coder Agent (\`agent-developer\`).
 - **Mission**: Implement atomic tasks from SDD specifications (\`tasks.md\`) delivering clean, strictly typed, and tested code.
@@ -179,6 +193,8 @@ Execute every implementation task following this strict sequential order:
     description:
       'Examine Pull Requests and source code with an attacker mindset for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws.',
     globs: 'src/**, packages/**, security/**',
+    claudeTools: ['View', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'run_command', 'call_mcp_tool'],
     body: `## Role & Mission
 - **Role**: Adversarial Security Auditor Agent (\`agent-security-auditor\`).
 - **Mission**: Rigorously examine Pull Requests and code diffs for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws as part of the Pre-Merge Audit Triad.
@@ -196,6 +212,8 @@ Execute every implementation task following this strict sequential order:
     description:
       'Audit dependency manifests and SBOMs against license-policy.yaml to block viral copyleft licenses and flag commercial license requirements.',
     globs: 'package.json, pnpm-lock.yaml, license-policy.yaml, compliance/**',
+    claudeTools: ['View', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'run_command', 'call_mcp_tool'],
     body: `## Role & Mission
 - **Role**: Open Source License and Intellectual Property Compliance Auditor Agent (\`agent-compliance-checker\`).
 - **Mission**: Audit dependency manifests and ensure every direct and transitive third-party package complies with \`license-policy.yaml\` as part of the Pre-Merge Audit Triad.
@@ -212,6 +230,8 @@ Execute every implementation task following this strict sequential order:
     description:
       'Scrutinize product design (MVP vs roadmap) and functionally validate finished software against UC-* and FR-* acceptance criteria before pre-merge audit.',
     globs: 'product/**, specs/**, src/**, packages/**',
+    claudeTools: ['View', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'run_command', 'call_mcp_tool'],
     body: `## Role & Mission
 - **Role**: Expert User and Domain Evaluator Agent (\`agent-expert-user\`).
 - **Mission**: Scrutinize product design, technical specifications, and implemented software from the perspective of an advanced operator, enforcing strict MVP boundaries and pre-PR functional conformity.
@@ -229,6 +249,8 @@ Execute every implementation task following this strict sequential order:
     description:
       'Audit Pull Requests for Clean Code, SOLID, DRY, YAGNI, design patterns, and compliance with quality-policy.yaml complexity and maintainability thresholds.',
     globs: 'src/**, packages/**, tests/**',
+    claudeTools: ['View', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'run_command', 'call_mcp_tool'],
     body: `## Role & Mission
 - **Role**: Technical and Architectural Code Reviewer Agent (\`agent-code-reviewer\`).
 - **Mission**: Audit Pull Requests evaluating code cleanliness, adherence to SOLID, DRY, YAGNI principles, design patterns, and compliance with complexity and maintainability thresholds (\`quality-policy.yaml\`), forming part of the Pre-Merge Audit Triad.
@@ -248,6 +270,8 @@ Execute every implementation task following this strict sequential order:
     description:
       'Maintain, evolve, and audit CI/CD workflows, Dockerfiles, IaC manifests, and support scripts under strict non-invasion guardrails on src/.',
     globs: '.github/workflows/**, templates/ci/**, scripts/**, Dockerfile*',
+    claudeTools: ['View', 'Edit', 'Replace', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'edit_file', 'write_file', 'run_command', 'call_mcp_tool'],
     body: `## Role & Mission
 - **Role**: DevOps and Infrastructure as Code (IaC) Engineer Agent (\`agent-devops\`).
 - **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, deployment manifests, and infrastructure scripts.
@@ -264,15 +288,27 @@ Execute every implementation task following this strict sequential order:
 ];
 
 export function renderAntigravityAgentFile(agent: SpecializedAgentTemplate): string {
-  return `---\nname: ${agent.id}\ndescription: >-\n  ${agent.description}\n---\n\n# ${agent.id} (${agent.title})\n\nCanonical Reference: [\`process/09_agent_protocols.md\`](../../process/09_agent_protocols.md) and [\`process/01_governance_and_roles.md\`](../../process/01_governance_and_roles.md).\n\n${agent.body}\n`;
+  const toolsSection =
+    agent.antigravityTools && agent.antigravityTools.length > 0
+      ? `\ntools:\n${agent.antigravityTools.map((t) => `  - ${t}`).join('\n')}`
+      : '';
+  return `---\nname: ${agent.id}\ndescription: >-\n  ${agent.description}${toolsSection}\n---\n\n# ${agent.id} (${agent.title})\n\nCanonical Reference: [\`process/09_agent_protocols.md\`](../../process/09_agent_protocols.md) and [\`process/01_governance_and_roles.md\`](../../process/01_governance_and_roles.md).\n\n${agent.body}\n`;
 }
 
 export function renderClaudeAgentFile(agent: SpecializedAgentTemplate): string {
-  return `---\nname: ${agent.id}\ndescription: ${agent.description}\n---\n\n# ${agent.id} (${agent.title})\n\nCanonical Reference: [\`process/09_agent_protocols.md\`](../../process/09_agent_protocols.md) and [\`process/01_governance_and_roles.md\`](../../process/01_governance_and_roles.md).\n\n${agent.body}\n`;
+  const toolsSection =
+    agent.claudeTools && agent.claudeTools.length > 0
+      ? `\ntools:\n${agent.claudeTools.map((t) => `  - ${t}`).join('\n')}`
+      : '';
+  return `---\nname: ${agent.id}\ndescription: ${agent.description}${toolsSection}\n---\n\n# ${agent.id} (${agent.title})\n\nCanonical Reference: [\`process/09_agent_protocols.md\`](../../process/09_agent_protocols.md) and [\`process/01_governance_and_roles.md\`](../../process/01_governance_and_roles.md).\n\n${agent.body}\n`;
 }
 
 export function renderCopilotAgentFile(agent: SpecializedAgentTemplate): string {
-  return `---\nname: ${agent.id}\ndescription: ${agent.description}\n---\n\n# ${agent.id} (${agent.title})\n\nCanonical Reference: [\`process/09_agent_protocols.md\`](../../process/09_agent_protocols.md) and [\`process/01_governance_and_roles.md\`](../../process/01_governance_and_roles.md).\n\n${agent.body}\n`;
+  const toolsSection =
+    agent.claudeTools && agent.claudeTools.length > 0
+      ? `\ntools:\n${agent.claudeTools.map((t) => `  - ${t}`).join('\n')}`
+      : '';
+  return `---\nname: ${agent.id}\ndescription: ${agent.description}${toolsSection}\n---\n\n# ${agent.id} (${agent.title})\n\nCanonical Reference: [\`process/09_agent_protocols.md\`](../../process/09_agent_protocols.md) and [\`process/01_governance_and_roles.md\`](../../process/01_governance_and_roles.md).\n\n${agent.body}\n`;
 }
 
 export function renderCursorAgentFile(agent: SpecializedAgentTemplate): string {
@@ -978,8 +1014,8 @@ To consult full protocols, specialized prompts, and interface contracts:
 - [\`process/01_governance_and_roles.md\`](../process/01_governance_and_roles.md)
 `;
 
-export const STARTER_CURSOR_MCP = `{\n  "mcpServers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@aisdlc/mcp"\n      ]\n    }\n  }\n}\n`;
+export const STARTER_CURSOR_MCP = `{\n  "mcpServers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@aisdlc/mcp"\n      ],\n      "env": {\n        "AISDLC_MCP_ROLE": "developer"\n      }\n    }\n  }\n}\n`;
 
-export const STARTER_ANTIGRAVITY_MCP = `{\n  "mcpServers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@aisdlc/mcp"\n      ]\n    }\n  }\n}\n`;
+export const STARTER_ANTIGRAVITY_MCP = `{\n  "mcpServers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@aisdlc/mcp"\n      ],\n      "env": {\n        "AISDLC_MCP_ROLE": "developer"\n      }\n    }\n  }\n}\n`;
 
-export const STARTER_VSCODE_MCP = `{\n  "servers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@aisdlc/mcp"\n      ]\n    }\n  }\n}\n`;
+export const STARTER_VSCODE_MCP = `{\n  "servers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@aisdlc/mcp"\n      ],\n      "env": {\n        "AISDLC_MCP_ROLE": "developer"\n      }\n    }\n  }\n}\n`;

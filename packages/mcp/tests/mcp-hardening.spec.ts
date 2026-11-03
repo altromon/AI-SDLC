@@ -1,6 +1,6 @@
 /**
  * Tests for MCP Server Hardening: Confinement, Universal DLP, RBAC & Audit Trail
- * Cites: FR-047-MCP-SERVER-HARDENING-DLP-001, UC-047-MCP-SERVER-HARDENING-DLP
+ * Cites: FR-047-MCP-SERVER-HARDENING-DLP-001, UC-047-MCP-SERVER-HARDENING-DLP, FR-050-IDE-AGENT-TOOLS-MCP-001
  */
 
 import * as fs from 'fs';
@@ -199,6 +199,18 @@ rules:
       expect(result.isError).toBe(true);
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain('not authorized to invoke mutation tool');
+    });
+
+    it('should block mutation when dynamic role is passed as readonly role on dev client', async () => {
+      const result = await devClient.callTool({
+        name: 'sdd_change_new',
+        arguments: { name: 'test-change-blocked', role: 'agent-security-auditor' },
+      });
+
+      expect(result.isError).toBe(true);
+      const text = (result.content[0] as { text: string }).text;
+      expect(text).toContain("Role 'agent-security-auditor' is not authorized to invoke mutation tool");
+      expect(text).toContain('RBAC blocked');
     });
   });
 

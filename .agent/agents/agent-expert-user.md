@@ -2,6 +2,10 @@
 name: agent-expert-user
 description: >-
   Scrutinize product design (MVP vs roadmap) and functionally validate finished software against UC-* and FR-* acceptance criteria before pre-merge audit.
+tools:
+  - read_file
+  - run_command
+  - call_mcp_tool
 ---
 
 # agent-expert-user (Expert User and Domain Evaluator)

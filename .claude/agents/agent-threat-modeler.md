@@ -1,6 +1,14 @@
 ---
 name: agent-threat-modeler
 description: Analyze business use cases and architecture artifacts to proactively model STRIDE adversaries, abuse cases, and OWASP ASVS security requirements.
+tools:
+  - View
+  - Edit
+  - Replace
+  - GlobTool
+  - GrepTool
+  - LS
+  - Bash
 ---
 
 # agent-threat-modeler (Threat Modeler and Security Specialist)

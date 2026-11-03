@@ -2,6 +2,10 @@
 name: agent-security-auditor
 description: >-
   Examine Pull Requests and source code with an attacker mindset for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws.
+tools:
+  - read_file
+  - run_command
+  - call_mcp_tool
 ---
 
 # agent-security-auditor (Adversarial Code Auditor)

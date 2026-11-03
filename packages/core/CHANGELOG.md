@@ -1,5 +1,17 @@
 # @aisdlc/core
 
+## 3.1.0
+
+### Minor Changes
+
+- feat(agents): directivas MCP-tooling-first en agentes especializados, declaración formal de permisos de herramientas (`tools:`) en frontmatter de Claude Code y Antigravity, y soporte de configuración RBAC en MCP starters (#176).
+
+## 3.0.0
+
+### Major Changes
+
+- feat(architecture)!: associate ARCH-INTRO with journeys and bump to v3.0.0 (#175).
+
 ## 2.4.0
 
 ### Minor Changes

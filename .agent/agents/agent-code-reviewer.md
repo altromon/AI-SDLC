@@ -2,6 +2,10 @@
 name: agent-code-reviewer
 description: >-
   Audit Pull Requests for Clean Code, SOLID, DRY, YAGNI, design patterns, and compliance with quality-policy.yaml complexity and maintainability thresholds.
+tools:
+  - read_file
+  - run_command
+  - call_mcp_tool
 ---
 
 # agent-code-reviewer (Technical and Architectural Code Reviewer)

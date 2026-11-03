@@ -1,5 +1,20 @@
 # @aisdlc/cli
 
+## 3.1.0
+
+### Minor Changes
+
+- feat(cli): soporte de sincronización de agentes con directivas MCP-tooling-first y permisos declarativos de tools en `aisdlc sync` (#176).
+- Updated dependencies
+  - @aisdlc/core@3.1.0
+  - @aisdlc/mcp@3.1.0
+
+## 3.0.0
+
+### Major Changes
+
+- feat(cli)!: bump monorepo version to v3.0.0.
+
 ## 2.4.0
 
 ### Minor Changes

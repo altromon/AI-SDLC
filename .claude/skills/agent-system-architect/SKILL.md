@@ -1,6 +1,14 @@
 ---
 name: agent-system-architect
 description: Translate approved product and security definitions into modular technical architecture based on arc42 enriched with NAF v4 (CMP-*, ADR-*).
+tools:
+  - View
+  - Edit
+  - Replace
+  - GlobTool
+  - GrepTool
+  - LS
+  - Bash
 ---
 
 # agent-system-architect (System Architect)

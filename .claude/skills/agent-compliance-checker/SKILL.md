@@ -1,6 +1,12 @@
 ---
 name: agent-compliance-checker
 description: Audit dependency manifests and SBOMs against license-policy.yaml to block viral copyleft licenses and flag commercial license requirements.
+tools:
+  - View
+  - GlobTool
+  - GrepTool
+  - LS
+  - Bash
 ---
 
 # agent-compliance-checker (Open Source License Compliance Auditor)
