@@ -166,8 +166,9 @@ function formatCatchError(err: unknown, rootDir?: string) {
 }
 
 function resolveEffectiveRole(optionsRole?: string, paramsRole?: unknown): string {
-  if (optionsRole) return optionsRole;
+  if (optionsRole && READONLY_ROLES.has(optionsRole.toLowerCase())) return optionsRole;
   if (typeof paramsRole === 'string' && paramsRole) return paramsRole;
+  if (optionsRole) return optionsRole;
   return process.env.AISDLC_MCP_ROLE || 'developer';
 }
 
@@ -343,6 +344,7 @@ const NEW_TOOL_SCHEMA = {
   dryRun: z.boolean().optional(),
   agents: z.string().optional(),
   architecture: z.enum(['minimal', 'full', 'complete', 'none']).optional(),
+  role: z.string().optional(),
 };
 
 function registerNewTool(server: McpServer, options: RegisterToolsOptions): void {
@@ -418,6 +420,7 @@ const SDD_CHANGE_NEW_SCHEMA = {
   author: z.string().optional(),
   from: z.array(z.string()).optional(),
   root: z.string().optional(),
+  role: z.string().optional(),
 };
 
 function registerSddChangeNewTool(server: McpServer, options: RegisterToolsOptions): void {
@@ -438,7 +441,7 @@ function registerSddChangeNewTool(server: McpServer, options: RegisterToolsOptio
 }
 
 function registerSddCheckFixTool(server: McpServer, options: RegisterToolsOptions): void {
-  server.tool('sdd_check_fix', 'Synchronizes Gherkin features and PDaC digests.', { root: z.string().optional() }, async (params) => {
+  server.tool('sdd_check_fix', 'Synchronizes Gherkin features and PDaC digests.', { root: z.string().optional(), role: z.string().optional() }, async (params) => {
     return executeSecuredTool('sdd_check_fix', params, options, (root) => {
       const gherkinRes = extractGherkinFeatures({ rootDir: root });
       const pdacRes = syncPdacDigests({ rootDir: root });
@@ -469,6 +472,7 @@ const SDD_DEPOSIT_SCHEMA = {
   requirements: z.array(z.string()).optional(),
   useCases: z.array(z.string()).optional(),
   root: z.string().optional(),
+  role: z.string().optional(),
 };
 
 function buildDepositHandoff(change: string, title?: string, reqs?: string[], ucs?: string[], rootDir?: string): ProductHandoff {
@@ -507,6 +511,7 @@ const SDD_INTEGRATE_SCHEMA = {
   auto: z.boolean().optional(),
   author: z.string().optional(),
   root: z.string().optional(),
+  role: z.string().optional(),
 };
 
 function registerSddIntegrateTool(server: McpServer, options: RegisterToolsOptions): void {

@@ -457,9 +457,9 @@ To ensure any AI agent operating in the repository automatically loads canonical
 | Agent Environment | Configuration File | Activation Scope | Injection Mechanism and Core Directives |
 | :--- | :--- | :--- | :--- |
 | **Cursor** | `.cursor/rules/ai-sdlc-core.mdc`<br>`.cursor/rules/ai-sdlc-product.mdc`<br>`.cursor/rules/ai-sdlc-quality.mdc`<br>`.cursor/rules/*.mdc` | Modular (`alwaysApply` for core, `specs/**` for product, `src/**`/`packages/**` for code) | Automatic context injection into Cursor Agent / Composer. Loads the 5 commandments, ProductShape taxonomy (`ACT-*`, `UC-*`, `FR-*`), JSON schemas, complexity thresholds (CC $\le 10$, MI $\ge 50$), specialized role rules, and lifecycle playbooks (`aisdlc-greenfield`, `aisdlc-increment`, `aisdlc-legacy-onboarding`). |
-| **Claude Code** | `CLAUDE.md`<br>`.claude/agents/*.md`<br>`.claude/skills/*/SKILL.md` | Repository Root & `.claude/` | Unified CLI command guide, specialized subagents, and native Claude Code skills for all 11 roles and 3 lifecycle playbooks. |
+| **Claude Code** | `CLAUDE.md`<br>`.claude/agents/*.md`<br>`.claude/skills/*/SKILL.md` | Repository Root & `.claude/` | Unified CLI command guide, specialized subagents with declarative tool permissions (`tools:`), and native Claude Code skills for all 11 roles and 3 lifecycle playbooks. |
 | **GitHub Copilot** | `.github/copilot-instructions.md`<br>`.github/agents/*.agent.md` | Global & `.github/agents/` | Automatic injection into every Copilot prompt. Context on SDD lifecycle, Git 4-tier branch structure, license policy, specialized agents, and lifecycle playbooks. |
-| **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md`<br>`.agent/agents/*.md`<br>`.agent/skills/*/SKILL.md` | Workspace Global | Deterministic mapping of specialized roles, guardrails, and lifecycle playbooks (`aisdlc-greenfield`, `aisdlc-increment`, `aisdlc-legacy-onboarding`). |
+| **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md`<br>`.agent/agents/*.md`<br>`.agent/skills/*/SKILL.md` | Workspace Global | Deterministic mapping of specialized roles with declarative tools (`tools:`), PreToolUse hooks (`hooks.json`), and lifecycle playbooks. |
 | **Model Context Protocol (MCP)** | `.cursor/mcp.json`<br>`antigravity.mcp.json`<br>`.vscode/mcp.json` | IDE / Workspace | MCP server declarations for direct IDE access to AI-SDLC deterministic tools. |
 
 ### Automated Agent Scaffolding (`aisdlc init --agents`)
@@ -561,7 +561,10 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
   "mcpServers": {
     "ai-sdlc": {
       "command": "npx",
-      "args": ["@ai-sdlc/mcp"]
+      "args": ["@ai-sdlc/mcp"],
+      "env": {
+        "AISDLC_MCP_ROLE": "developer"
+      }
     }
   }
 }
@@ -584,8 +587,11 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
 {
   "mcpServers": {
     "ai-sdlc": {
-      "command": "aisdlc",
-      "args": ["mcp"]
+      "command": "npx",
+      "args": ["@aisdlc/mcp"],
+      "env": {
+        "AISDLC_MCP_ROLE": "developer"
+      }
     }
   }
 }
@@ -597,11 +603,26 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
   "servers": {
     "ai-sdlc": {
       "command": "npx",
-      "args": ["@ai-sdlc/mcp"]
+      "args": ["@ai-sdlc/mcp"],
+      "env": {
+        "AISDLC_MCP_ROLE": "developer"
+      }
     }
   }
 }
 ```
+
+---
+
+
+### 5. Role-Based Access Control (RBAC) & Dynamic Role Enforcement
+The MCP server enforces deterministic RBAC:
+- **Readonly Roles**: `auditor`, `reviewer`, `readonly`, `agent-code-reviewer`, `agent-security-auditor`, `agent-compliance-checker`, and `agent-privacy-officer` (in pre-merge audit).
+- **Mutation Tools Blocked**: Mutation tools (`new`, `sdd_change_new`, `sdd_check_fix`, `sdd_deposit`, `sdd_integrate`) return a security violation when invoked by a readonly role.
+- **Role Configuration**:
+  1. **Static via IDE Config**: Set `"env": { "AISDLC_MCP_ROLE": "<role>" }` in `.cursor/mcp.json`, `antigravity.mcp.json`, or `.vscode/mcp.json`.
+  2. **Static via CLI**: Pass `--role <role>` to `aisdlc mcp --role auditor`.
+  3. **Dynamic via Tool Parameters**: When invoking mutation tools, subagents may declare their role directly (e.g. `{ role: "agent-security-auditor" }`), enabling fail-closed validation even within a shared developer connection.
 
 ---
 

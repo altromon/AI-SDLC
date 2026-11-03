@@ -2,6 +2,12 @@
 name: agent-devops
 description: >-
   Maintain, evolve, and audit CI/CD workflows, Dockerfiles, IaC manifests, and support scripts under strict non-invasion guardrails on src/.
+tools:
+  - read_file
+  - edit_file
+  - write_file
+  - run_command
+  - call_mcp_tool
 ---
 
 # agent-devops (Automation and Infrastructure Engineer)

@@ -2,6 +2,13 @@
 name: agent-product-analyst
 description: >-
   Assist the human Product Owner in exploring, modeling, and refining product definition using NAF v4 Enterprise & Capability Vision (ARCH-INTRO-*) and ProductShape (ACT-*, UC-*, FR-*, QR-*, BR-*).
+tools:
+  - read_file
+  - edit_file
+  - write_file
+  - run_command
+  - call_mcp_tool
+  - ask_question
 ---
 
 # agent-product-analyst (Product Analyst / Scribe)

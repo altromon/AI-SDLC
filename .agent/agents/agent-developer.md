@@ -2,6 +2,12 @@
 name: agent-developer
 description: >-
   Implement atomic tasks from SDD specifications (tasks.md) delivering clean, strictly typed, and tested code satisfying quality-policy.yaml thresholds.
+tools:
+  - read_file
+  - edit_file
+  - write_file
+  - run_command
+  - call_mcp_tool
 ---
 
 # agent-developer (Software Developer)

@@ -2,6 +2,12 @@
 name: agent-qa-engineer
 description: >-
   Translate approved requirements (FR-*, SEC-REQ-*, PRIV-REQ-*, QR-*) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites before production code is written.
+tools:
+  - read_file
+  - edit_file
+  - write_file
+  - run_command
+  - call_mcp_tool
 ---
 
 # agent-qa-engineer (QA Engineer and SDET)

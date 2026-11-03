@@ -1,6 +1,12 @@
 ---
 name: agent-security-auditor
 description: Examine Pull Requests and source code with an attacker mindset for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws.
+tools:
+  - View
+  - GlobTool
+  - GrepTool
+  - LS
+  - Bash
 ---
 
 # agent-security-auditor (Adversarial Code Auditor)

@@ -4,7 +4,10 @@
       "command": "npx",
       "args": [
         "@aisdlc/mcp"
-      ]
+      ],
+      "env": {
+        "AISDLC_MCP_ROLE": "developer"
+      }
     }
   }
 }

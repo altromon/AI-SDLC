@@ -1,6 +1,14 @@
 ---
 name: agent-developer
 description: Implement atomic tasks from SDD specifications (tasks.md) delivering clean, strictly typed, and tested code satisfying quality-policy.yaml thresholds.
+tools:
+  - View
+  - Edit
+  - Replace
+  - GlobTool
+  - GrepTool
+  - LS
+  - Bash
 ---
 
 # agent-developer (Software Developer)

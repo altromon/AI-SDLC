@@ -1,0 +1,15 @@
+id: HOF-CHG-050-IDE-AGENT-TOOLS-MCP
+type: handoff
+title: Handoff Canónico de Producto para ide-agent-tools-mcp
+changeId: CHG-050-IDE-AGENT-TOOLS-MCP
+version: 1.0.0
+createdAt: '2026-11-03T09:41:18.342Z'
+subgraph:
+  requirements:
+    - FR-050-IDE-AGENT-TOOLS-MCP-001
+  useCases:
+    - UC-050-IDE-AGENT-TOOLS-MCP
+citations:
+  - id: FR-050-IDE-AGENT-TOOLS-MCP-001
+    digest: sha256:3a27646e4a338ccc7da3f5766e9f818bf2262637634d930f6bb07e97d368f4c6
+    comment: Requerimiento funcional canónico asociado (Génesis CHG-050-IDE-AGENT-TOOLS-MCP)

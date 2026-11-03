@@ -13,6 +13,7 @@ implements-use-cases:
   - UC-028-NATIVE-MCP-SERVER
 satisfies-requirements:
   - FR-028-NATIVE-MCP-SERVER-001
+  - FR-050-IDE-AGENT-TOOLS-MCP-001
 interfaces:
   - name: Stdio MCP Protocol Interface
     protocol: IPC
