@@ -1,5 +1,17 @@
 # @aisdlc/cli
 
+## 3.2.0
+
+### Minor Changes
+
+- 352a1a5: feat(agents): MCP-tooling-first directives, tool permission declarations in agent frontmatter, and IDE MCP RBAC role enforcement.
+
+### Patch Changes
+
+- Updated dependencies [352a1a5]
+  - @aisdlc/core@3.2.0
+  - @aisdlc/mcp@3.2.0
+
 ## 3.1.0
 
 ### Minor Changes
@@ -75,7 +87,6 @@
 
 - chore(release): bump minor version to 2.2.0
 
-
 ## 2.1.0
 
 ### Minor Changes
@@ -90,6 +101,7 @@
 - Updated dependencies
   - @aisdlc/core@2.0.2
   - @aisdlc/mcp@2.0.2
+
 ## 1.4.1
 
 ### Patch Changes
@@ -189,4 +201,3 @@
 - Updated dependencies [198897c]
   - @aisdlc/core@1.1.0
   - @aisdlc/mcp@1.1.0
-

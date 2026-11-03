@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 3.2.0
+
+### Minor Changes
+
+- 352a1a5: feat(agents): MCP-tooling-first directives, tool permission declarations in agent frontmatter, and IDE MCP RBAC role enforcement.
+
 ## 3.1.0
 
 ### Minor Changes
@@ -57,7 +63,6 @@
 
 - chore(release): bump minor version to 2.2.0
 
-
 ## 2.1.0
 
 ### Minor Changes
@@ -69,6 +74,7 @@
 ### Patch Changes
 
 - fix(ci): synchronize starter-templates and CI workflows with base ref concurrency serialization and exponential backoff on push (#68)
+
 ## 1.4.1
 
 ### Patch Changes
@@ -131,4 +137,3 @@
 - fda9561: feat(mcp): servidor Model Context Protocol (MCP) nativo con 20 herramientas tipadas (incluyendo new, verify y report) y 5 recursos canónicos (#44)
 - eb184e7: feat(security): añadir gate de detección determinista de secretos (Gitleaks) y SAST shift-left (#34)
 - 198897c: feat(agents): protocolo y plantilla canónica de workflow handoff con activación condicional por autonomía (#51)
-
