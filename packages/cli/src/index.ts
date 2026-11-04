@@ -679,6 +679,7 @@ program
   .option('--ci <provider>', 'CI/CD provider for pipeline generation (github, gitlab, azure, bitbucket)')
   .option('--agents [targets]', 'AI agent environments to configure (all, cursor, claude, antigravity, copilot, mcp, or comma-separated combination)')
   .option('--arch, --architecture <granularity>', 'Architecture templates granularity level (minimal, full, complete, none)')
+  .option('-s, --stack <stacks>', 'Technology stacks to deploy coding rules for (dotnet, typescript, javascript, angular, java, kotlin, rust, go, c, cpp, all, none)')
   .option('--json', 'Structured JSON format output')
   .option('-F, --format <format>', 'Output format: text or json')
   .action(async (directory, opts) => {
@@ -701,6 +702,7 @@ program
       ci,
       agents,
       architecture: arch,
+      stack: opts.stack,
       json: opts.json,
       format: opts.format,
     });
@@ -722,6 +724,7 @@ program
       agents: opts.agents || 'all',
       ci: 'none',
       architecture: 'none',
+      stack: 'none',
       json: opts.json,
       format: opts.format,
     });

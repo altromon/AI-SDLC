@@ -344,6 +344,7 @@ const NEW_TOOL_SCHEMA = {
   dryRun: z.boolean().optional(),
   agents: z.string().optional(),
   architecture: z.enum(['minimal', 'full', 'complete', 'none']).optional(),
+  stack: z.string().optional(),
   role: z.string().optional(),
 };
 
@@ -360,6 +361,7 @@ function registerNewTool(server: McpServer, options: RegisterToolsOptions): void
         ci: params.ci,
         agents: params.agents,
         architecture: params.architecture,
+        stack: params.stack,
         dryRun: params.dryRun,
       });
       return { data: result, isError: !result.success, root: baseRoot };

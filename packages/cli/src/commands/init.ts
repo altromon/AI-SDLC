@@ -8,6 +8,7 @@ export interface InitCliOptions {
   ci?: string;
   agents?: string | boolean;
   architecture?: string;
+  stack?: string;
   silent?: boolean;
   json?: boolean;
   format?: string;
@@ -124,6 +125,7 @@ function emitInitJson(result: InitProjectResult, isSuccess: boolean, dryRun: boo
     ciProvider: result.ciProvider,
     agentsConfigured: result.agentsConfigured,
     architectureGranularity: result.architectureGranularity,
+    stacksConfigured: result.stacksConfigured || [],
     gitHookInstalled: result.gitHookInstalled,
     dryRun,
     ...(isSuccess ? {} : { error: result.error || 'Error initializing project.' }),
@@ -220,6 +222,7 @@ export function runInit(
     ci: options.ci,
     agents: options.agents === 'none' ? false : options.agents,
     architecture: options.architecture,
+    stack: options.stack,
     dryRun,
     force: Boolean(options.force),
   });
