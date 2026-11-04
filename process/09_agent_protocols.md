@@ -644,7 +644,11 @@ Every formal handoff adopts the structure in [`templates/workflow/agent-handoff.
 2. **Produced Deliverables**: File paths and IDs of Markdown artifacts, reports, or specifications.
 3. **Recommended Next Role(s)**: Contextual proposal according to AI-SDLC phase.
 4. **Suggested Invocation Prompt**: Copy-paste ready prompt activating the next specialist.
-5. **Human Action Window (Human-in-the-Loop)**: Explicit options to review, edit directly, pause/reroute, or delegate continuity.
+5. **Clean Context Window Isolation (Cross-IDE)**:
+   - **Never share context windows across specialist roles** (e.g., `agent-qa-engineer` and `agent-developer` must never execute in the same conversation history).
+   - **Subagent-Capable IDEs (Antigravity, Claude Code, GitHub Copilot)**: Orchestrators MUST spawn each specialist in an isolated subagent context (`invoke_subagent`, Claude `Task` subagent, or `@agent-*` participant) that hydrates state exclusively from on-disk artifacts (`specs/`, `handoff.yaml`, MCP `get_active_handoff`).
+   - **Single-Session / Rule-Based IDEs (Cursor, Windsurf, Aider)**: The active agent persists all artifacts to disk, emits the Workflow Handoff block, and halts so the user opens a **New Chat** (or `/clear`) before pasting the Suggested Invocation Prompt.
+6. **Human Action Window (Human-in-the-Loop)**: Explicit options to review, edit directly, pause/reroute, or delegate continuity.
 
 ### 4. Canonical Lifecycle Transition Chain
 ```text

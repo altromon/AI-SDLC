@@ -380,6 +380,7 @@ Use this skill when starting a **brand-new software project from scratch (Greenf
 3. **Release Consolidation (\`release/v1.0.0\` ➔ \`main\`)**: Once all MVP \`CHG-*\` increments are integrated (\`sdd_integrate\`), run \`verify\` (\`npx aisdlc verify all\`), generate SBOM (\`npx aisdlc verify licenses --sbom reports/sbom.cdx.json --notices THIRD_PARTY_NOTICES.md\`), compute release KPIs (\`kpi_release\`), and open the Release PR into \`main\` for human Product Owner & Release Manager sign-off.
 
 ## Non-Negotiable Guardrails
+- **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles in the same conversation context window. In subagent-capable IDEs (Antigravity \`invoke_subagent\`, Claude Code \`Task\` / \`.claude/agents/\`, GitHub Copilot \`@agent-*\`), always spawn each specialist in a fresh isolated subagent context that reads state strictly from disk (\`specs/\`, \`handoff.yaml\`, \`get_active_handoff\`). In chat-based IDEs (Cursor, Windsurf, Aider), persist all artifacts to disk, emit the Workflow Handoff block, and instruct the user to open a **New Chat** (or \`/clear\`) before running the next specialist.
 - **FORBIDDEN Greenfield Monolith (\`1 UC-* = 1 CHG-*\`)**: Never bundle the entire product or multiple \`UC-*\` into a single SDD change (\`CHG-001\`). Deterministic Gate 3 (\`verify_governance\`) blocks any \`handoff.yaml\` containing $> 1$ Use Case (\`Greenfield monolith detected\`). Parallelism is achieved by running **multiple bounded \`CHG-*\` concurrently** on separate branches/worktrees, never by stuffing multiple \`UC-*\` into one \`CHG-*\`.
 - Never invoke \`sdd_change_new\` or write application code in \`src/\` on a Greenfield project before \`ARCH-INTRO-001\`, \`agent-expert-user\` MVP validation, and at least one \`UC-*\` and \`FR-*\` exist.
 - All newly drafted specifications must start with \`status: draft\`.
@@ -425,6 +426,7 @@ Instead of attempting to document 100% of a legacy monolith upfront, apply **bou
 Once the target domain's baseline artifacts (\`ARCH-INTRO-*\`, \`UC-*\`, \`FR-*\`, \`CMP-*\`) are in place, execute all new features, refactorings, or bugfixes via [\`aisdlc-increment\`](../aisdlc-increment/SKILL.md).
 
 ## Non-Negotiable Guardrails
+- **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles in the same conversation context window. In subagent-capable IDEs (Antigravity \`invoke_subagent\`, Claude Code \`Task\` / \`.claude/agents/\`, GitHub Copilot \`@agent-*\`), always spawn each specialist in a fresh isolated subagent context that reads state strictly from disk (\`specs/\`, \`handoff.yaml\`, \`get_active_handoff\`). In chat-based IDEs (Cursor, Windsurf, Aider), persist all artifacts to disk, emit the Workflow Handoff block, and instruct the user to open a **New Chat** (or \`/clear\`) before running the next specialist.
 - **Zero Drive-By Rewrites**: Never mass-refactor untouched legacy modules during onboarding. Apply the Strangler / Boy Scout rule: bring touched functions into compliance with \`quality-policy.yaml\` incrementally via governed SDD tasks (\`TSK-*\`).
 - **Characterization First**: Never alter legacy business logic without first capturing its current behavior in an \`FR-*\` Gherkin specification and a verifiable test suite (\`agent-qa-engineer\`).
 - **Immediate Secret Remediation**: If Step 2 (\`verify_security\`) uncovers leaked credentials (exit code 4), halt feature work and remediate/rotate secrets immediately.`,
@@ -495,6 +497,7 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
    - Open the Release PR from \`release/vX.Y.Z\` to \`main\` for final human Product Owner and Release Manager approval and semantic Git tagging (\`vX.Y.Z\`).
 
 ## Non-Negotiable Guardrails
+- **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles (e.g., \`agent-qa-engineer\` and \`agent-developer\`, or \`agent-developer\` and \`agent-security-auditor\`) in the same conversation context window. In subagent-capable IDEs (Antigravity \`invoke_subagent\`, Claude Code \`Task\` / \`.claude/agents/\`, GitHub Copilot \`@agent-*\`), always spawn each specialist in a fresh isolated subagent context that reads state strictly from disk (\`specs/\`, \`handoff.yaml\`, \`get_active_handoff\`). In chat-based IDEs (Cursor, Windsurf, Aider), persist all artifacts to disk, emit the Workflow Handoff block, and instruct the user to open a **New Chat** (or \`/clear\`) before running the next specialist.
 - **Single-Use-Case Scope (\`1 UC-* = 1 CHG-*\`)**: Each SDD change (\`CHG-*\`) must deliver at most 1 Use Case (\`UC-*\`). Bundling multiple \`UC-*\` into one \`handoff.yaml\` is blocked by \`verify_governance\` (\`Greenfield monolith detected\`). Scale throughput via parallel \`CHG-*\` branches/worktrees, not monolithic changes.
 - **100% Design & Handoff Coverage in \`tasks.md\`**: Every \`CMP-*\`, \`FR-*\`, \`SEC-REQ-*\`, and \`PRIV-REQ-*\` declared in \`design.md\` and \`handoff.yaml\` must be explicitly assigned to at least one \`TSK-*\` in \`tasks.md\`.`,
   },
@@ -649,6 +652,7 @@ This file defines the operational rules and specialized role mappings for Google
 ---
 
 ## 4. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
+- **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles in the same conversation context window. In subagent-capable IDEs (Antigravity \`invoke_subagent\`, Claude Code \`Task\` / \`.claude/agents/\`, GitHub Copilot \`@agent-*\`), always delegate each specialist phase to a fresh isolated subagent context that hydrates state strictly from disk (\`specs/\`, \`handoff.yaml\`, \`get_active_handoff\`). In chat-based IDEs (Cursor, Windsurf, Aider), persist all artifacts to disk, emit the Workflow Handoff block, and instruct the user to open a **New Chat** (or \`/clear\`) before running the next specialist.
 - **Conditional Activation Rule by Autonomy**:
   - 🟢 **\`AUTONOMOUS\`** (or exclusive final supervision in PR/CI): **OMITTED**. Do not request or emit interactive handoff to avoid interrupting unattended execution.
   - 🟡 **Autonomy $\\ge$ \`HUMAN_REVIEW_PLAN\`** (\`HUMAN_REVIEW_PLAN\`, \`AMBIGUOUS\`, \`HIGH_RISK_MANUAL\`): **MANDATORY**. Emit the Workflow Handoff block compliant with [\`templates/workflow/agent-handoff.template.md\`](../../templates/workflow/agent-handoff.template.md) and **STOP**.
@@ -708,6 +712,7 @@ Before finalizing changes or proposing commits:
 - 🔴 **\`HIGH_RISK_MANUAL\`**: Critical risk. Human-only execution.
 
 ## 6. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
+- **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles in the same conversation context window. In subagent-capable IDEs (Antigravity \`invoke_subagent\`, Claude Code \`Task\` / \`.claude/agents/\`, GitHub Copilot \`@agent-*\`), always delegate each specialist phase to a fresh isolated subagent context that hydrates state strictly from disk (\`specs/\`, \`handoff.yaml\`, \`get_active_handoff\`). In chat-based IDEs (Cursor, Windsurf, Aider), persist all artifacts to disk, emit the Workflow Handoff block, and instruct the user to open a **New Chat** (or \`/clear\`) before running the next specialist.
 - **Conditional Activation**:
   * 🟢 **\`AUTONOMOUS\`** (or PR/CI supervision): **OMITTED**. Do not request or emit interactive handoff.
   * 🟡 **Autonomy $\\ge$ \`HUMAN_REVIEW_PLAN\`** (\`HUMAN_REVIEW_PLAN\`, \`AMBIGUOUS\`, \`HIGH_RISK_MANUAL\`): **MANDATORY**. Emit Workflow Handoff block compliant with [\`templates/workflow/agent-handoff.template.md\`](templates/workflow/agent-handoff.template.md) and **STOP**.
@@ -915,6 +920,7 @@ Change-ID: CHG-026-AGENT-NATIVE-CONFIGS
 ---
 
 ## 7. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
+- **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles in the same conversation context window. In subagent-capable IDEs (Antigravity \`invoke_subagent\`, Claude Code \`Task\` / \`.claude/agents/\`, GitHub Copilot \`@agent-*\`), always delegate each specialist phase to a fresh isolated subagent context that hydrates state strictly from disk (\`specs/\`, \`handoff.yaml\`, \`get_active_handoff\`). In chat-based IDEs (Cursor, Windsurf, Aider), persist all artifacts to disk, emit the Workflow Handoff block, and instruct the user to open a **New Chat** (or \`/clear\`) before running the next specialist.
 - **Conditional Activation**:
   - 🟢 **\`AUTONOMOUS\`** (or PR/CI final supervision): **OMITTED**. Uninterrupted continuous execution.
   - 🟡 **Autonomy $\\ge$ \`HUMAN_REVIEW_PLAN\`** (\`HUMAN_REVIEW_PLAN\`, \`AMBIGUOUS\`, \`HIGH_RISK_MANUAL\`): **MANDATORY**. Emit Workflow Handoff block ([\`templates/workflow/agent-handoff.template.md\`](templates/workflow/agent-handoff.template.md)) and **STOP**.
@@ -983,6 +989,7 @@ Non-Negotiable Quality Thresholds (\`quality-policy.yaml\`):
 ---
 
 ## 5. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
+- **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles in the same conversation context window. In subagent-capable IDEs (Antigravity \`invoke_subagent\`, Claude Code \`Task\` / \`.claude/agents/\`, GitHub Copilot \`@agent-*\`), always delegate each specialist phase to a fresh isolated subagent context that hydrates state strictly from disk (\`specs/\`, \`handoff.yaml\`, \`get_active_handoff\`). In chat-based IDEs (Cursor, Windsurf, Aider), persist all artifacts to disk, emit the Workflow Handoff block, and instruct the user to open a **New Chat** (or \`/clear\`) before running the next specialist.
 - **Conditional Activation**:
   * 🟢 **\`AUTONOMOUS\` Mode** (or PR/CI final supervision): **OMITTED**. Do not interrupt unattended execution.
   * 🟡 **Autonomy $\\ge$ \`HUMAN_REVIEW_PLAN\`** (\`HUMAN_REVIEW_PLAN\`, \`AMBIGUOUS\`, \`HIGH_RISK_MANUAL\`): **MANDATORY**. Emit Workflow Handoff block compliant with [\`templates/workflow/agent-handoff.template.md\`](../templates/workflow/agent-handoff.template.md) and **STOP**.

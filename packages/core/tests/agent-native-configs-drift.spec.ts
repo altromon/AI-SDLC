@@ -170,6 +170,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       expect(content).toContain('HUMAN_REVIEW_PLAN');
       expect(content).toContain('agent-handoff.template.md');
       expect(content).toMatch(/Human Action Window|Ventana de Acci[oó]n Humana/i);
+      expect(content).toMatch(/Clean Context Window Isolation/i);
     }
   });
 

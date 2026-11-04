@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 3.2.0
+
+### Minor Changes
+
+- feat(cli): export Clean Context Window Isolation directives and updated Workflow Handoff template across all IDE targets via `aisdlc init` and `aisdlc sync`.
+- Updated dependencies
+  - @aisdlc/core@3.2.0
+  - @aisdlc/mcp@3.2.0
+
 ## 3.1.0
 
 ### Minor Changes

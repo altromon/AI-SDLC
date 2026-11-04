@@ -39,6 +39,7 @@ Instead of attempting to document 100% of a legacy monolith upfront, apply **bou
 Once the target domain's baseline artifacts (`ARCH-INTRO-*`, `UC-*`, `FR-*`, `CMP-*`) are in place, execute all new features, refactorings, or bugfixes via [`aisdlc-increment`](../aisdlc-increment/SKILL.md).
 
 ## Non-Negotiable Guardrails
+- **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles in the same conversation context window. In subagent-capable IDEs (Antigravity `invoke_subagent`, Claude Code `Task` / `.claude/agents/`, GitHub Copilot `@agent-*`), always spawn each specialist in a fresh isolated subagent context that reads state strictly from disk (`specs/`, `handoff.yaml`, `get_active_handoff`). In chat-based IDEs (Cursor, Windsurf, Aider), persist all artifacts to disk, emit the Workflow Handoff block, and instruct the user to open a **New Chat** (or `/clear`) before running the next specialist.
 - **Zero Drive-By Rewrites**: Never mass-refactor untouched legacy modules during onboarding. Apply the Strangler / Boy Scout rule: bring touched functions into compliance with `quality-policy.yaml` incrementally via governed SDD tasks (`TSK-*`).
 - **Characterization First**: Never alter legacy business logic without first capturing its current behavior in an `FR-*` Gherkin specification and a verifiable test suite (`agent-qa-engineer`).
 - **Immediate Secret Remediation**: If Step 2 (`verify_security`) uncovers leaked credentials (exit code 4), halt feature work and remediate/rotate secrets immediately.

@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 3.2.0
+
+### Minor Changes
+
+- feat(agents): enforce Clean Context Window Isolation per specialist agent across all IDE configurations (`Antigravity`, `Claude Code`, `GitHub Copilot`, `Cursor`), lifecycle skills (`aisdlc-greenfield`, `aisdlc-legacy-onboarding`, `aisdlc-increment`), and Workflow Handoff templates.
+
 ## 3.1.0
 
 ### Minor Changes
