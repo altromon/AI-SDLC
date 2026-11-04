@@ -130,6 +130,7 @@ This file defines the operational rules and specialized role mappings for Google
 ---
 
 ## 4. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
+- **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles in the same conversation context window. In subagent-capable IDEs (Antigravity `invoke_subagent`, Claude Code `Task` / `.claude/agents/`, GitHub Copilot `@agent-*`), always delegate each specialist phase to a fresh isolated subagent context that hydrates state strictly from disk (`specs/`, `handoff.yaml`, `get_active_handoff`). In chat-based IDEs (Cursor, Windsurf, Aider), persist all artifacts to disk, emit the Workflow Handoff block, and instruct the user to open a **New Chat** (or `/clear`) before running the next specialist.
 - **Conditional Activation Rule by Autonomy**:
   - 🟢 **`AUTONOMOUS`** (or exclusive final supervision in PR/CI): **OMITTED**. Do not request or emit interactive handoff to avoid interrupting unattended execution.
   - 🟡 **Autonomy $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **MANDATORY**. Emit the Workflow Handoff block compliant with [`templates/workflow/agent-handoff.template.md`](../../templates/workflow/agent-handoff.template.md) and **STOP**.

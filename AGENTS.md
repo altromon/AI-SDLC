@@ -21,6 +21,10 @@ This file provides universal instructions and guardrails for all AI pair program
    - Sanitize inputs, enforce Zero Trust enclaves, prevent PII leaks in logs/prompts (`privacy-policy.yaml`), and provide mitigation tests (`@security`, `@privacy`).
 5. **MANDATORY CRYPTOGRAPHIC CITATION**:
    - Every spec, task, or sidecar must cite upstream artifacts using canonical IDs and Unix LF-normalized SHA-256 hashes.
+6. **MANDATORY CLEAN CONTEXT WINDOW ISOLATION PER SPECIALIST AGENT**:
+   - Never execute two distinct specialist roles (e.g., `agent-qa-engineer` and `agent-developer`, or `agent-developer` and `agent-security-auditor`) inside the same conversation context window.
+   - **Subagent-Capable IDEs (Antigravity, Claude Code, GitHub Copilot)**: Always delegate each phase to a dedicated subagent (`invoke_subagent`, `Task` / `.claude/agents/`, or `@agent-*`) so every specialist runs in a fresh, isolated context window reading state strictly from disk (`specs/`, `handoff.yaml`, `get_active_handoff`).
+   - **Single-Thread / Rule-Based IDEs (Cursor, Windsurf, Aider)**: Persist all phase artifacts to disk, emit the canonical Workflow Handoff block (`templates/workflow/agent-handoff.template.md`), and instruct the human user to open a **New Chat / Clean Context** (or `/clear` / `/compact`) before invoking the next role prompt.
 
 ---
 

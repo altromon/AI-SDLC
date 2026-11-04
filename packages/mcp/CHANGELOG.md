@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 3.2.0
+
+### Minor Changes
+
+- feat(mcp): propagate Clean Context Window Isolation directives in MCP `new` scaffolding tool and bump server version to `3.2.0`.
+- Updated dependencies
+  - @aisdlc/core@3.2.0
+
 ## 3.1.0
 
 ### Minor Changes

@@ -23,6 +23,9 @@
 
 - **Suggested Invocation Prompt**:
   > "Act as `[next-role]` and proceed with the `[next phase]` phase on the generated deliverables: `[key artifacts]`."
+- **Clean Context Window Execution (Cross-IDE)**:
+  - 🧹 **Subagent-Capable IDEs (Antigravity / Claude Code / Copilot)**: Delegate automatically via subagent tool (`invoke_subagent` / `Task` / `@agent-*`) to launch a fresh context window.
+  - 🆕 **Chat-Based IDEs (Cursor / Windsurf / Aider)**: Open a **New Chat (`Cmd/Ctrl + N`)** or run `/clear` before pasting the Suggested Invocation Prompt so the next specialist starts with zero context pollution and hydrates state exclusively from `handoff.yaml` / `get_active_handoff`.
 
 - **Human Action Window (User Sovereignty and Priority)**:
   - ✋ **Review and Validate**: Inspect generated artifacts and validate alignment with project vision before proceeding.
