@@ -37,6 +37,16 @@ import {
   STARTER__GITHUB_PULL_REQUEST_TEMPLATE_MD,
 } from './starter-templates.js';
 import { STARTER_SCHEMAS } from './starter-schemas.js';
+import {
+  CodingRuleStack,
+  getCodingRulesFilesForStacks,
+  getReferenceCodingRulesTemplates,
+  PROTECTED_CODING_RULES_FILES,
+  resolveCodingRuleStacks,
+  STARTER_AGENT_GUARD_WRAPPER_CJS,
+  STARTER_ANTIGRAVITY_HOOKS_JSON,
+  STARTER_GUARD_BRANCH_CJS,
+} from './coding-rules-templates.js';
 
 export const VALID_CI_PROVIDERS = ['github', 'gitlab', 'azure', 'bitbucket'] as const;
 export type SupportedCiProvider = (typeof VALID_CI_PROVIDERS)[number];
@@ -739,6 +749,7 @@ export const STARTER_PULL_REQUEST_TEMPLATE = STARTER_TEMPLATES_SDD_PULL_REQUEST_
 export const STARTER_GITHUB_PULL_REQUEST_TEMPLATE = STARTER__GITHUB_PULL_REQUEST_TEMPLATE_MD;
 export * from './agent-templates.js';
 export * from './architecture-templates.js';
+export * from './coding-rules-templates.js';
 
 export const VALID_AGENT_TARGETS = ['cursor', 'claude', 'antigravity', 'copilot', 'mcp', 'all'] as const;
 export type AgentTarget = (typeof VALID_AGENT_TARGETS)[number];
@@ -749,6 +760,7 @@ export interface InitProjectOptions {
   ci?: string;
   agents?: string | boolean | string[];
   architecture?: ArchitectureGranularity | string;
+  stack?: string | string[];
   dryRun?: boolean;
   force?: boolean;
 }
@@ -762,6 +774,7 @@ export interface InitProjectResult {
   ciProvider?: SupportedCiProvider;
   agentsConfigured: string[];
   architectureGranularity?: ArchitectureGranularity;
+  stacksConfigured?: CodingRuleStack[];
   gitHookInstalled: boolean;
   error?: string;
 }
@@ -792,7 +805,12 @@ export function resolveAgentTargets(agents?: string | boolean | string[]): Set<s
 
 function appendAntigravityFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
   dirs.push('.agent/rules', '.agent/agents', '.agent/skills');
-  files.push({ relPath: '.agent/rules/ai-sdlc.md', content: STARTER_ANTIGRAVITY_RULES });
+  files.push(
+    { relPath: '.agent/rules/ai-sdlc.md', content: STARTER_ANTIGRAVITY_RULES },
+    { relPath: '.agent/hooks.json', content: STARTER_ANTIGRAVITY_HOOKS_JSON },
+    { relPath: '.agent/scripts/guard-branch.cjs', content: STARTER_AGENT_GUARD_WRAPPER_CJS },
+    { relPath: 'scripts/guard-branch.cjs', content: STARTER_GUARD_BRANCH_CJS }
+  );
   for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
     const content = renderAntigravityAgentFile(agent);
     files.push({ relPath: `.agent/agents/${agent.id}.md`, content });
@@ -875,6 +893,19 @@ export function collectAgentFiles(targets: Set<string>): {
   return { dirs, files };
 }
 
+function recordDryRunFile(exists: boolean, canOverwrite: boolean, relPath: string, results: { filesCreated: string[]; filesUpdated: string[] }): void {
+  if (exists && canOverwrite) results.filesUpdated.push(relPath);
+  else if (!exists) results.filesCreated.push(relPath);
+}
+
+function persistFileToDisk(fullFilePath: string, content: string, exists: boolean, relPath: string, results: { filesCreated: string[]; filesUpdated: string[] }): void {
+  const parentDir = path.dirname(fullFilePath);
+  if (!fs.existsSync(parentDir)) fs.mkdirSync(parentDir, { recursive: true });
+  fs.writeFileSync(fullFilePath, content, 'utf-8');
+  if (exists) results.filesUpdated.push(relPath);
+  else results.filesCreated.push(relPath);
+}
+
 function writeSingleFile(
   fullFilePath: string,
   content: string,
@@ -883,22 +914,12 @@ function writeSingleFile(
   results: { filesCreated: string[]; filesUpdated: string[] }
 ): void {
   const exists = fs.existsSync(fullFilePath);
+  const canOverwrite = Boolean(opts.force && !PROTECTED_CODING_RULES_FILES.includes(relPath));
   if (opts.dryRun) {
-    if (exists && opts.force) results.filesUpdated.push(relPath);
-    else if (!exists) results.filesCreated.push(relPath);
+    recordDryRunFile(exists, canOverwrite, relPath, results);
     return;
   }
-  const parentDir = path.dirname(fullFilePath);
-  if (!fs.existsSync(parentDir)) {
-    fs.mkdirSync(parentDir, { recursive: true });
-  }
-  if (!exists) {
-    fs.writeFileSync(fullFilePath, content, 'utf-8');
-    results.filesCreated.push(relPath);
-  } else if (opts.force) {
-    fs.writeFileSync(fullFilePath, content, 'utf-8');
-    results.filesUpdated.push(relPath);
-  }
+  if (!exists || canOverwrite) persistFileToDisk(fullFilePath, content, exists, relPath, results);
 }
 
 function writeProjectFiles(
@@ -963,6 +984,7 @@ const BASE_DIRECTORIES: readonly string[] = [
   'templates/sdd',
   'templates/manuals',
   'templates/ci',
+  'templates/coding-rules',
   'templates/workflow',
   'specs',
   'reports',
@@ -1001,32 +1023,41 @@ function createDirectoriesOnDisk(destDir: string, directories: string[], dryRun?
   return created;
 }
 
-function collectStarterFiles(
-  ciProvider?: SupportedCiProvider,
-  agentFiles: { relPath: string; content: string }[] = [],
-  archGranularity: ArchitectureGranularity = 'minimal'
-): { relPath: string; content: string }[] {
-  const files: { relPath: string; content: string }[] = [
+function collectPolicyAndSchemaFiles(): { relPath: string; content: string }[] {
+  return [
     { relPath: 'quality-policy.yaml', content: STARTER_QUALITY_POLICY },
     { relPath: 'license-policy.yaml', content: STARTER_LICENSE_POLICY },
     { relPath: 'privacy-policy.yaml', content: STARTER_PRIVACY_POLICY },
     ...STARTER_BASE_TEMPLATES,
     ...STARTER_SCHEMAS.map((s) => ({ relPath: s.relPath, content: s.content })),
+    ...getReferenceCodingRulesTemplates(),
+  ];
+}
+
+function collectArchitectureTemplateFiles(archGranularity: ArchitectureGranularity): { relPath: string; content: string }[] {
+  return getArchitectureTemplates(archGranularity).map((t) => ({
+    relPath: path.join('templates', 'architecture', t.filename).replace(/\\/g, '/'),
+    content: t.content,
+  }));
+}
+
+function collectStarterFiles(
+  ciProvider?: SupportedCiProvider,
+  agentFiles: { relPath: string; content: string }[] = [],
+  archGranularity: ArchitectureGranularity = 'minimal',
+  stacks: readonly CodingRuleStack[] = []
+): { relPath: string; content: string }[] {
+  const files: { relPath: string; content: string }[] = [
+    ...collectPolicyAndSchemaFiles(),
+    ...getCodingRulesFilesForStacks(stacks),
     ...getCiWorkflowFiles(ciProvider),
     ...agentFiles,
-    ...getArchitectureTemplates(archGranularity).map((t) => ({
-      relPath: path.join('templates', 'architecture', t.filename).replace(/\\/g, '/'),
-      content: t.content,
-    })),
+    ...collectArchitectureTemplateFiles(archGranularity),
   ];
 
   if (ciProvider === 'github' || !ciProvider) {
-    files.push({
-      relPath: '.github/PULL_REQUEST_TEMPLATE.md',
-      content: STARTER_GITHUB_PULL_REQUEST_TEMPLATE,
-    });
+    files.push({ relPath: '.github/PULL_REQUEST_TEMPLATE.md', content: STARTER_GITHUB_PULL_REQUEST_TEMPLATE });
   }
-
   return files;
 }
 
@@ -1110,6 +1141,7 @@ function buildInitSuccessResult(
   ciProvider: SupportedCiProvider | undefined,
   agentsConfigured: string[],
   architectureGranularity: ArchitectureGranularity,
+  stacksConfigured: CodingRuleStack[],
   gitHookInstalled: boolean
 ): InitProjectResult {
   return {
@@ -1121,6 +1153,7 @@ function buildInitSuccessResult(
     ciProvider,
     agentsConfigured,
     architectureGranularity,
+    stacksConfigured,
     gitHookInstalled,
   };
 }
@@ -1141,7 +1174,8 @@ function validateInitOptions(options: InitProjectOptions): {
 function assembleScaffoldingPlan(
   ciProvider: SupportedCiProvider | undefined,
   agents: string | boolean | string[] | undefined,
-  archGranularity: ArchitectureGranularity
+  archGranularity: ArchitectureGranularity,
+  stacks: readonly CodingRuleStack[] = []
 ): {
   agentTargets: Set<string>;
   directories: string[];
@@ -1150,36 +1184,40 @@ function assembleScaffoldingPlan(
   const agentTargets = resolveAgentTargets(agents);
   const { dirs: agentDirs, files: agentFiles } = collectAgentFiles(agentTargets);
   const directories = mergeDirectories(getBaseDirectories(ciProvider), agentDirs);
-  const starterFiles = collectStarterFiles(ciProvider, agentFiles, archGranularity);
+  const starterFiles = collectStarterFiles(ciProvider, agentFiles, archGranularity, stacks);
   return { agentTargets, directories, starterFiles };
 }
 
-export function initProject(options: InitProjectOptions = {}): InitProjectResult {
-  const destDir = path.resolve(options.rootDir || process.cwd(), options.targetDir || '.');
-  const validated = validateInitOptions(options);
-  if (!validated.valid) return buildInitError(destDir, validated.error);
-
-  const { agentTargets, directories, starterFiles } = assembleScaffoldingPlan(
-    validated.ciProvider,
-    options.agents,
-    validated.archGranularity
-  );
-
+function executeScaffoldingOnDisk(
+  destDir: string,
+  options: InitProjectOptions,
+  ciProvider: SupportedCiProvider | undefined,
+  archGranularity: ArchitectureGranularity,
+  stacks: CodingRuleStack[]
+): InitProjectResult {
+  const { agentTargets, directories, starterFiles } = assembleScaffoldingPlan(ciProvider, options.agents, archGranularity, stacks);
   const dirsCreated = createDirectoriesOnDisk(destDir, directories, options.dryRun);
   const { filesCreated, filesUpdated } = writeProjectFiles(destDir, starterFiles, options.dryRun, options.force);
-
-  if (updateConsumerPackageJson(destDir, options.dryRun)) {
-    filesCreated.push('package.json');
-  }
+  if (updateConsumerPackageJson(destDir, options.dryRun)) filesCreated.push('package.json');
 
   return buildInitSuccessResult(
     destDir,
     dirsCreated,
     filesCreated,
     filesUpdated,
-    validated.ciProvider,
+    ciProvider,
     formatAgentsConfigured(agentTargets),
-    validated.archGranularity,
+    archGranularity,
+    stacks,
     tryInstallGitHook(destDir, options.dryRun)
   );
+}
+
+export function initProject(options: InitProjectOptions = {}): InitProjectResult {
+  const destDir = path.resolve(options.rootDir || process.cwd(), options.targetDir || '.');
+  const validated = validateInitOptions(options);
+  if (!validated.valid) return buildInitError(destDir, validated.error);
+  const stackRes = resolveCodingRuleStacks(options.stack, destDir);
+  if (!stackRes.valid) return buildInitError(destDir, stackRes.error);
+  return executeScaffoldingOnDisk(destDir, options, validated.ciProvider, validated.archGranularity, stackRes.stacks);
 }
