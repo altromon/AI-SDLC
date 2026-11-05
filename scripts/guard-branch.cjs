@@ -53,29 +53,29 @@ function isProtectedCodingRulesTarget(targetPath, cwd) {
   const rel = path.relative(cwd, resolved).replace(/\\/g, '/');
   return PROTECTED_CODING_RULES_FILES.some(
     (ruleFile) => rel === ruleFile || norm.endsWith('/' + ruleFile)
-  );
+  ) || rel.startsWith('templates/coding-rules/');
 }
 
 function evaluateGuardDecision(payload) {
   const targetPath = payload.toolCall?.args?.Path || '';
   const workspacePaths = payload.workspacePaths || [];
   const cwd = workspacePaths[0] || process.cwd();
-  const normPath = targetPath.replace(/\\/g, '/');
+  const resolvedPath = targetPath ? path.resolve(cwd, targetPath) : '';
+  const normPath = resolvedPath.replace(/\\/g, '/');
 
-  if (
-    normPath.includes('.gemini') ||
-    normPath.includes('/brain/') ||
-    normPath.includes('/scratch/') ||
-    normPath.includes('/.git/')
-  ) {
-    return { decision: 'allow' };
-  }
-
-  if (isProtectedCodingRulesTarget(targetPath, cwd)) {
+  if (isProtectedCodingRulesTarget(resolvedPath, cwd)) {
     return {
       decision: 'deny',
       reason: `❌ [AI-SDLC Immutable Coding Rules Guard] BLOCKED: AI agents are forbidden from modifying protected coding rules file '${path.basename(targetPath)}'. Fix the source or test code to satisfy the compiler/linter rules instead of altering the rule configuration.`,
     };
+  }
+
+  if (
+    normPath.includes('/.gemini/') ||
+    normPath.includes('/brain/') ||
+    normPath.includes('/scratch/')
+  ) {
+    return { decision: 'allow' };
   }
 
   const branch = getWorkingBranch(cwd);
