@@ -39,17 +39,17 @@ if echo "$CURRENT_BRANCH" | grep -qE "^(main|master|release/.*)$"; then
   exit 1
 fi
 
-# Immutable Coding Rules Guard: block AI agents from modifying or deleting existing coding rules files
+# Immutable Coding Rules Guard: block AI agents from adding, modifying or deleting coding rules files
 IS_AGENT=0
 if [ -n "$AI_MODEL" ] || [ -n "$AI_AGENT_NAME" ] || [ -n "$ANTIGRAVITY_AGENT" ] || [ -n "$ANTIGRAVITY_AGENT_ID" ] || [ -n "$ANTIGRAVITY_CONVERSATION_ID" ] || [ -n "$CLAUDE_CODE" ] || [ -n "$CURSOR_AGENT" ] || [ -n "$WINDSURF_AGENT" ] || [ -n "$AIDER_MODEL" ] || [ -f ".ai-sdlc/session-telemetry.json" ]; then
   IS_AGENT=1
 fi
 
 if [ "$IS_AGENT" = "1" ]; then
-  TAMPERED_RULES=$(git diff --cached --diff-filter=MDR --name-only 2>/dev/null | grep -E "(^|/)(Directory\\.Build\\.props|tsconfig\\.strict\\.json|eslint\\.config\\.mjs|gradle/init\\.d/aisdlc-strict\\.init\\.gradle\\.kts|config/pmd/aisdlc-ruleset\\.xml|config/detekt/detekt\\.yml|\\.cargo/config\\.toml|\\.clippy\\.toml|\\.golangci\\.yml|\\.clang-tidy|cmake/AisdlcStrictCompiler\\.cmake|templates/coding-rules/.+)$" || echo "")
+  TAMPERED_RULES=$(git diff --cached --diff-filter=AMDR --name-only 2>/dev/null | grep -E "(^|/)(Directory\\.Build\\.props|tsconfig\\.strict\\.json|eslint\\.config\\.mjs|gradle/init\\.d/aisdlc-strict\\.init\\.gradle\\.kts|config/pmd/aisdlc-ruleset\\.xml|config/detekt/detekt\\.yml|\\.cargo/config\\.toml|\\.clippy\\.toml|\\.golangci\\.yml|\\.clang-tidy|cmake/AisdlcStrictCompiler\\.cmake|templates/coding-rules/.+)$" || echo "")
   if [ -n "$TAMPERED_RULES" ]; then
     echo "" >&2
-    echo "❌ [AI-SDLC Immutable Coding Rules Guard] BLOCKED: AI agents are forbidden from modifying or deleting coding rules files:" >&2
+    echo "❌ [AI-SDLC Immutable Coding Rules Guard] BLOCKED: AI agents are forbidden from adding, modifying or deleting coding rules files:" >&2
     echo "$TAMPERED_RULES" >&2
     echo "Fix the source or test code to comply with the compiler/linter rules instead of altering the rule configuration." >&2
     echo "" >&2

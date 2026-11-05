@@ -141,6 +141,6 @@ describe('Polyglot Immutable Coding Rules & Agent Guardrails Suite', () => {
   it('includes agent coding rules immutability guard in PRE_COMMIT_SCRIPT', () => {
     expect(PRE_COMMIT_SCRIPT).toContain('Immutable Coding Rules Guard');
     expect(PRE_COMMIT_SCRIPT).toContain('Directory\\.Build\\.props');
-    expect(PRE_COMMIT_SCRIPT).toContain('--diff-filter=MDR');
+    expect(PRE_COMMIT_SCRIPT).toContain('--diff-filter=AMDR');
   });
 });
