@@ -4,6 +4,7 @@
 
 import { canonicalSort } from '../utils/fs.js';
 import { resolveDeterministicDate } from '../utils/time.js';
+import { collectCodingRulesBypassViolations } from './coding-rules-bypass.js';
 import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -204,7 +205,10 @@ export function verifyProgressiveFriction(
     options.modifiedFiles ||
     (profile === 'patch' ? detectGitDiffFiles(rootDir) : []);
 
-  const violations = profile === 'patch' ? collectPatchViolations(rootDir, modifiedFiles) : [];
+  const violations = [
+    ...(profile === 'patch' ? collectPatchViolations(rootDir, modifiedFiles) : []),
+    ...collectCodingRulesBypassViolations(rootDir),
+  ];
   const bypassed = violations.length > 0;
   const success = !bypassed;
 
