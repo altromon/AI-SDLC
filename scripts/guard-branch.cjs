@@ -20,6 +20,7 @@ const PROTECTED_CODING_RULES_FILES = [
   '.golangci.yml',
   '.clang-tidy',
   'cmake/AisdlcStrictCompiler.cmake',
+  '.github/CODEOWNERS',
 ];
 
 function getWorkingBranch(cwd) {

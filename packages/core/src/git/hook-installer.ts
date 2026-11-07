@@ -46,7 +46,7 @@ if [ -n "$AI_MODEL" ] || [ -n "$AI_AGENT_NAME" ] || [ -n "$ANTIGRAVITY_AGENT" ] 
 fi
 
 if [ "$IS_AGENT" = "1" ]; then
-  TAMPERED_RULES=$(git diff --cached --diff-filter=AMDR --name-only 2>/dev/null | grep -E "(^|/)(Directory\\.Build\\.props|tsconfig\\.strict\\.json|eslint\\.config\\.mjs|gradle/init\\.d/aisdlc-strict\\.init\\.gradle\\.kts|config/pmd/aisdlc-ruleset\\.xml|config/detekt/detekt\\.yml|\\.cargo/config\\.toml|\\.clippy\\.toml|\\.golangci\\.yml|\\.clang-tidy|cmake/AisdlcStrictCompiler\\.cmake|templates/coding-rules/.+)$" || echo "")
+  TAMPERED_RULES=$(git diff --cached --diff-filter=AMDR --name-only 2>/dev/null | grep -E "(^|/)(Directory\\.Build\\.props|tsconfig\\.strict\\.json|eslint\\.config\\.mjs|gradle/init\\.d/aisdlc-strict\\.init\\.gradle\\.kts|config/pmd/aisdlc-ruleset\\.xml|config/detekt/detekt\\.yml|\\.cargo/config\\.toml|\\.clippy\\.toml|\\.golangci\\.yml|\\.clang-tidy|cmake/AisdlcStrictCompiler\\.cmake|\\.github/CODEOWNERS|templates/coding-rules/.+)$" || echo "")
   if [ -n "$TAMPERED_RULES" ]; then
     echo "" >&2
     echo "❌ [AI-SDLC Immutable Coding Rules Guard] BLOCKED: AI agents are forbidden from adding, modifying or deleting coding rules files:" >&2

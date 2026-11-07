@@ -26,6 +26,7 @@ export const PROTECTED_BYPASS_PATTERNS: RegExp[] = [
   /08_security_concept\.md$/i,
   /09_decisions[\\/]/i,
   /migrations?[\\/]/i,
+  /^\.github[\\/]CODEOWNERS$/i,
 ];
 
 export function detectProfileFromChange(changeDir: string): ChangeProfile {

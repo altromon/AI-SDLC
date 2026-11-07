@@ -34,6 +34,7 @@ export const PROTECTED_CODING_RULES_FILES: readonly string[] = [
   '.golangci.yml',
   '.clang-tidy',
   'cmake/AisdlcStrictCompiler.cmake',
+  '.github/CODEOWNERS',
 ];
 
 export const DOTNET_DIRECTORY_BUILD_PROPS = `<Project>
@@ -297,6 +298,7 @@ const PROTECTED_CODING_RULES_FILES = [
   '.golangci.yml',
   '.clang-tidy',
   'cmake/AisdlcStrictCompiler.cmake',
+  '.github/CODEOWNERS',
 ];
 
 function getWorkingBranch(cwd) {

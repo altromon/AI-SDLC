@@ -56,7 +56,8 @@ describe('Polyglot Immutable Coding Rules & Agent Guardrails Suite', () => {
       expect.arrayContaining(['dotnet', 'angular', 'rust', 'go', 'java', 'kotlin', 'cpp'])
     );
 
-    for (const relPath of PROTECTED_CODING_RULES_FILES) {
+    const expectedFiles = PROTECTED_CODING_RULES_FILES.filter((f) => f !== '.github/CODEOWNERS');
+    for (const relPath of expectedFiles) {
       expect(fs.existsSync(path.join(tempDir, relPath)), `Missing ${relPath}`).toBe(true);
     }
 
@@ -142,5 +143,6 @@ describe('Polyglot Immutable Coding Rules & Agent Guardrails Suite', () => {
     expect(PRE_COMMIT_SCRIPT).toContain('Immutable Coding Rules Guard');
     expect(PRE_COMMIT_SCRIPT).toContain('Directory\\.Build\\.props');
     expect(PRE_COMMIT_SCRIPT).toContain('--diff-filter=AMDR');
+    expect(PRE_COMMIT_SCRIPT).toContain('\\.github/CODEOWNERS');
   });
 });

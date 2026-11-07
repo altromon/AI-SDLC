@@ -18,6 +18,7 @@ describe('generated guard-branch.cjs template', () => {
     fs.writeFileSync(guard, STARTER_GUARD_BRANCH_CJS);
     try {
       expect(decide(cwd, guard, path.join(cwd, 'Directory.Build.props'))).toBe('deny');
+      expect(decide(cwd, guard, path.join(cwd, '.github', 'CODEOWNERS'))).toBe('deny');
       expect(decide(cwd, guard, path.join(cwd, 'src', 'Api', 'Directory.Build.props'))).toBe('deny');
       expect(decide(cwd, guard, path.join(cwd, '.gemini', '..', 'tsconfig.strict.json'))).toBe('deny');
       expect(decide(cwd, guard, path.join(cwd, 'src', 'scratch', '..', '..', '.golangci.yml'))).toBe('deny');
