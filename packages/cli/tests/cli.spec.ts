@@ -72,6 +72,45 @@ describe('@aisdlc/cli Command Suite', () => {
     }
   });
 
+  it('should install agent-auditor and agent-adversary across all IDE environments during init', () => {
+    const tempInitDir = fs.mkdtempSync(path.join(os.tmpdir(), 'temp-init-auditor-adversary-'));
+    try {
+      expect(runInit(tempInitDir, { agents: 'all', silent: true })).toBe(true);
+
+      // Antigravity agents
+      expect(fs.existsSync(path.join(tempInitDir, '.agent', 'agents', 'agent-auditor.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tempInitDir, '.agent', 'agents', 'agent-adversary.md'))).toBe(true);
+      const agRules = fs.readFileSync(path.join(tempInitDir, '.agent', 'rules', 'ai-sdlc.md'), 'utf-8');
+      expect(agRules).toContain('agent-auditor');
+      expect(agRules).toContain('agent-adversary');
+
+      // Cursor rules
+      expect(fs.existsSync(path.join(tempInitDir, '.cursor', 'rules', 'agent-auditor.mdc'))).toBe(true);
+      expect(fs.existsSync(path.join(tempInitDir, '.cursor', 'rules', 'agent-adversary.mdc'))).toBe(true);
+      const cursorCore = fs.readFileSync(path.join(tempInitDir, '.cursor', 'rules', 'ai-sdlc-core.mdc'), 'utf-8');
+      expect(cursorCore).toContain('agent-auditor');
+      expect(cursorCore).toContain('agent-adversary');
+
+      // Claude Code agents and skills
+      expect(fs.existsSync(path.join(tempInitDir, '.claude', 'agents', 'agent-auditor.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tempInitDir, '.claude', 'skills', 'agent-auditor', 'SKILL.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tempInitDir, '.claude', 'agents', 'agent-adversary.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tempInitDir, '.claude', 'skills', 'agent-adversary', 'SKILL.md'))).toBe(true);
+      const claudeRules = fs.readFileSync(path.join(tempInitDir, 'CLAUDE.md'), 'utf-8');
+      expect(claudeRules).toContain('agent-auditor');
+      expect(claudeRules).toContain('agent-adversary');
+
+      // Copilot agents
+      expect(fs.existsSync(path.join(tempInitDir, '.github', 'agents', 'agent-auditor.agent.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tempInitDir, '.github', 'agents', 'agent-adversary.agent.md'))).toBe(true);
+      const copilotRules = fs.readFileSync(path.join(tempInitDir, '.github', 'copilot-instructions.md'), 'utf-8');
+      expect(copilotRules).toContain('agent-auditor');
+      expect(copilotRules).toContain('agent-adversary');
+    } finally {
+      fs.rmSync(tempInitDir, { recursive: true, force: true });
+    }
+  });
+
   it('should deposit expected CI configuration files upon real init execution', () => {
     const tempInitDir = fs.mkdtempSync(path.join(os.tmpdir(), 'temp-init-test-'));
     try {

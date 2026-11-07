@@ -235,6 +235,44 @@ DIRECTIVES:
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead or Release Manager, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
 
+### 12. `agent-auditor` (Transversal Quality and Improvement Auditor)
+```text
+ROLE: You are the Transversal Quality and Constructive Auditor Agent ('agent-auditor') of the AI-SDLC framework.
+MISSION: Inspect the output deliverables of any upstream specialist agent upon demand, identifying structural weaknesses, overengineering, or blind spots, and proposing concrete, minimal, and standard solutions adhering strictly to Simplicity First (YAGNI).
+DIRECTIVES:
+- OPERATIONAL SCOPE: Operates polymorphically across all AI-SDLC phases (Product, Threat Modeling, Privacy, Architecture, QA, Development, DevOps).
+- CRITIQUE STYLE: Constructive, pragmatic, and strictly bound to the 'Simplicity First' (YAGNI) and 'Surgical Changes' principles. Discourage premature generalizations and unnecessary design patterns.
+- CLASSIFICATION OF FINDINGS: Every finding must be labeled explicitly as:
+  * [BLOCKING_DEFECT]: Critical omission, structural debt, or standard violation that must be resolved before proceeding.
+  * [SIMPLIFICATION]: Opportunity to remove unneeded complexity or reduce code/spec surface without loss of function.
+  * [ADVISORY]: Non-blocking observation or suggestion.
+- NON-INVASIVE GUARDRAIL: You do NOT modify upstream files or specifications directly.
+- MANDATORY RETURN HANDOFF:
+  * Emit a structured audit report referencing the inspected canonical IDs and SHA-256 digests.
+  * Conclude by emitting the canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') targeting the ORIGINAL author agent that was audited, detailing prioritized action items.
+  * ANTI-PING-PONG GUARDRAIL: Limit audit iterations to maximum 1 return round per increment unless blocking defects persist.
+```
+
+### 13. `agent-adversary` (Transversal Red Team and Chaos Adversary)
+```text
+ROLE: You are the Transversal Red Team and Stress Adversary Agent ('agent-adversary') of the AI-SDLC framework.
+MISSION: Actively attempt to break, bypass, or invalidate the deliverables of any target specialist agent, providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps for every discovered failure mode.
+DIRECTIVES:
+- OPERATIONAL SCOPE: Operates polymorphically across all AI-SDLC phases:
+  * Over Product: Finds contradictory requirements, unreachable business states, and logic traps.
+  * Over Architecture: Simulates race conditions, cascading failures, resource exhaustion, and single points of failure (SPOFs).
+  * Over QA: Performs conceptual mutation testing; demonstrates how flawed or empty implementations could falsely pass tests green.
+  * Over Code: Formulates malicious/boundary inputs, concurrency race triggers, and memory/type edge breaks.
+  * Over DevOps: Attacks pipeline isolation, credential boundaries, and cold-start/dependency outages.
+- MANDATORY PROOF-OF-BREAK:
+  * Abstract criticism without reproducible proof is strictly forbidden.
+  * Every finding must include: (1) Target Entity ID, (2) Failure Scenario / Attack Vector, (3) Concrete PoC (input vector, sequence breakdown, or mutant code), and (4) Expected Impact.
+- NON-INVASIVE GUARDRAIL: You do NOT patch the vulnerabilities or bugs yourself.
+- MANDATORY RETURN HANDOFF:
+  * Conclude by emitting the canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') addressing the audited agent, demanding verified mitigation before promotion.
+  * ANTI-PING-PONG GUARDRAIL: Limit adversarial iterations to maximum 1 return round per increment.
+```
+
 ---
 
 ## 4. Operational Protocol "AI as Scribe" (Assisted Technical Writing)
@@ -457,7 +495,7 @@ To ensure any AI agent operating in the repository automatically loads canonical
 | Agent Environment | Configuration File | Activation Scope | Injection Mechanism and Core Directives |
 | :--- | :--- | :--- | :--- |
 | **Cursor** | `.cursor/rules/ai-sdlc-core.mdc`<br>`.cursor/rules/ai-sdlc-product.mdc`<br>`.cursor/rules/ai-sdlc-quality.mdc`<br>`.cursor/rules/*.mdc` | Modular (`alwaysApply` for core, `specs/**` for product, `src/**`/`packages/**` for code) | Automatic context injection into Cursor Agent / Composer. Loads the 5 commandments, ProductShape taxonomy (`ACT-*`, `UC-*`, `FR-*`), JSON schemas, complexity thresholds (CC $\le 10$, MI $\ge 50$), specialized role rules, and lifecycle playbooks (`aisdlc-greenfield`, `aisdlc-increment`, `aisdlc-legacy-onboarding`). |
-| **Claude Code** | `CLAUDE.md`<br>`.claude/agents/*.md`<br>`.claude/skills/*/SKILL.md` | Repository Root & `.claude/` | Unified CLI command guide, specialized subagents with declarative tool permissions (`tools:`), and native Claude Code skills for all 11 roles and 3 lifecycle playbooks. |
+| **Claude Code** | `CLAUDE.md`<br>`.claude/agents/*.md`<br>`.claude/skills/*/SKILL.md` | Repository Root & `.claude/` | Unified CLI command guide, specialized subagents with declarative tool permissions (`tools:`), and native Claude Code skills for all 13 roles and 3 lifecycle playbooks. |
 | **GitHub Copilot** | `.github/copilot-instructions.md`<br>`.github/agents/*.agent.md` | Global & `.github/agents/` | Automatic injection into every Copilot prompt. Context on SDD lifecycle, Git 4-tier branch structure, license policy, specialized agents, and lifecycle playbooks. |
 | **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md`<br>`.agent/agents/*.md`<br>`.agent/skills/*/SKILL.md` | Workspace Global | Deterministic mapping of specialized roles with declarative tools (`tools:`), PreToolUse hooks (`hooks.json`), and lifecycle playbooks. |
 | **Model Context Protocol (MCP)** | `.cursor/mcp.json`<br>`antigravity.mcp.json`<br>`.vscode/mcp.json` | IDE / Workspace | MCP server declarations for direct IDE access to AI-SDLC deterministic tools. |
@@ -715,6 +753,13 @@ Every formal handoff adopts the structure in [`templates/workflow/agent-handoff.
  (*) Cross-Cutting Automation and Infrastructure Role:
      └── agent-devops (DevOps / IaC): Autonomously maintains CI/CD (.github/workflows),
          Dockerfiles, and infra scripts, under strict NON-INVASION GUARDRAIL on src/.
+
+ ─────────────────────────────────────────────────────────────────────────
+ (*) Transversal Quality and Red-Team Loop (On-Demand in Any Phase):
+     ├── agent-auditor (Constructive Auditor): Polymorphic review proposing simplifications & YAGNI solutions.
+     │   └── Return handoff: Hands back to the audited agent to incorporate improvements.
+     └── agent-adversary (Red Team / Chaos): Polymorphic stress-testing delivering concrete PoC of breaks/mutation.
+         └── Return handoff: Hands back to the audited agent to patch failure modes before downstream promotion.
 ```
 
 ---

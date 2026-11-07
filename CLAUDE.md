@@ -88,6 +88,14 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 - **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts.
 - **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying application source code (`src/`, `packages/*/src/`).
 
+### 12. `agent-auditor` (Transversal Quality and Improvement Auditor)
+- **Mission**: Polymorphically inspect deliverables from any specialist agent on demand, identifying structural weaknesses, overengineering, or blind spots, and proposing minimal solutions adhering strictly to YAGNI.
+- **Directives**: Constructive critique; classify findings into `[BLOCKING_DEFECT]`, `[SIMPLIFICATION]`, and `[ADVISORY]`; non-invasive (never edit files directly); always return handoff to the audited agent (max 1 return round).
+
+### 13. `agent-adversary` (Transversal Red Team and Chaos Adversary)
+- **Mission**: Actively attempt to break, bypass, or invalidate deliverables from any target specialist agent, providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps.
+- **Directives**: Expose failure modes across Product (logic traps), Architecture (SPOF/races), QA (mutation testing/false greens), Code (boundary/concurrency), and DevOps (pipeline escape); mandatory proof-of-break; non-invasive; always return handoff to the audited agent (max 1 return round).
+
 ---
 
 ## 4. Task Autonomy Modes (`tasks.md`)

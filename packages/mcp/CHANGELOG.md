@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 3.3.0
+
+### Minor Changes
+
+- feat(mcp): support transversal review and adversarial testing workflows, bump server version to `3.3.0`.
+- Updated dependencies
+  - @aisdlc/core@3.3.0
+
 ## 3.2.0
 
 ### Minor Changes

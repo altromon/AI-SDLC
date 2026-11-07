@@ -83,6 +83,8 @@ Non-Negotiable Quality Thresholds (`quality-policy.yaml`):
 | `agent-expert-user` | Bimodal MVP evaluation (design) and functional validation against `UC-*` and `FR-*` (pre-PR). |
 | `agent-code-reviewer` | PR audit (SOLID, DRY, YAGNI): `[BLOCKING]` / `[CLEAN_CODE_SUGGESTION]` / `[COMPLIANT]`. |
 | `agent-devops` | CI/CD, Docker, IaC only — **FORBIDDEN** to touch `src/` or `packages/*/src/`. |
+| `agent-auditor` | Transversal on-demand constructive auditor; identifies overengineering, blind spots & YAGNI simplifications; returns handoff to audited agent. |
+| `agent-adversary` | Transversal on-demand Red Team adversary; breaks deliverables with reproducible PoC & mutation tests; returns handoff to audited agent. |
 
 ---
 
