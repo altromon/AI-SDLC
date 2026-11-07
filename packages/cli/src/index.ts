@@ -18,6 +18,7 @@ import { promptForAgents, promptForArchitecture, promptForCi, runInit } from './
 import { runKpiPr, runKpiRelease } from './commands/kpi.js';
 import { runMcpServer } from './commands/mcp.js';
 import { runReportDashboard, runReportQuality } from './commands/report.js';
+import { runReviewSubmit } from './commands/review.js';
 import { runInspect } from './commands/inspect.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
@@ -739,6 +740,34 @@ program
   .option('--role <role>', 'Role context for MCP server authorization')
   .action(async (opts) => {
     await runMcpServer({ root: opts.root, role: opts.role });
+  });
+
+// --- review commands (reviewer write channel) ---
+const reviewCmd = program
+  .command('review')
+  .description('Review commands: sanitized write channel for reviewer roles (agent-code-reviewer, etc.)');
+
+reviewCmd
+  .command('submit')
+  .description('Persist a formal review report for an active change')
+  .requiredOption('-c, --change <id>', 'Active change identifier (e.g. chg-054-foo)')
+  .requiredOption('--reviewer <role>', 'Reviewer role (e.g. agent-code-reviewer, agent-security-auditor)')
+  .requiredOption('--verdict <verdict>', 'Review verdict (COMPLIANT, SUGGESTIONS, BLOCKING)')
+  .requiredOption('--body <body>', 'Review findings and content in markdown')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--silent', 'Suppress console output')
+  .option('--json', 'Output report details as JSON')
+  .action((opts) => {
+    const ok = runReviewSubmit({
+      root: opts.root,
+      change: opts.change,
+      reviewer: opts.reviewer,
+      verdict: opts.verdict,
+      body: opts.body,
+      silent: opts.silent,
+      json: opts.json,
+    });
+    if (!ok) process.exit(1);
   });
 
 // Handle unknown commands gracefully
