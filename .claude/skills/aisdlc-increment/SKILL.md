@@ -1,6 +1,6 @@
 ---
 name: aisdlc-increment
-description: Orchestrate the complete Spec-Driven Development (SDD) lifecycle for bounded feature increments, enhancements, and bugfixes (CHG-* / TSK-*), from upstream requirement derivation and 4-tier Git branching through Red-Green-Refactor TDD, Pre-Merge Audit Triad, all 11 Quality Gates, and canonical baseline integration.
+description: Orchestrate the complete Spec-Driven Development (SDD) lifecycle for bounded feature increments, enhancements, and bugfixes (CHG-* / TSK-*), from upstream requirement derivation and 4-tier Git branching through Red-Green-Refactor TDD, transversal auditor/adversary verification loops, Pre-Merge Audit Triad, all 11 Quality Gates, and canonical baseline integration.
 ---
 
 # aisdlc-increment (Bounded SDD Feature & Bugfix Delivery Playbook)
@@ -16,9 +16,12 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 1. Inspect active changes via MCP tool `get_active_handoff` and verify whether the target Use Case (`UC-*`) or Requirement (`FR-*`) already exists in `specs/product/`.
 2. If the increment introduces new behavior or modifies business rules:
    - Use [`agent-product-analyst`](../agent-product-analyst/SKILL.md) to create or update the `UC-*`, `BR-*`, and `FR-*` (with `@nominal`, `@boundary`, `@invalid` Gherkin scenarios).
+   - **Transversal Loop (`agent-product-analyst`)**: Concurrently invoke `agent-auditor` and `agent-adversary` over updated specs. Consolidate findings and return handoff to `agent-product-analyst` to re-execute and remediate (max 2 correction rounds).
    - Run MCP tool `verify_duplicates` (`npx aisdlc verify duplicates`) to block lexical or functional collisions early.
    - Use [`agent-threat-modeler`](../agent-threat-modeler/SKILL.md) to model any new `ABUSE-*` and `SEC-REQ-*` mitigations.
+   - **Transversal Loop (`agent-threat-modeler`)**: Concurrently invoke `agent-auditor` and `agent-adversary` over security models. Consolidate findings and return handoff to `agent-threat-modeler` to re-execute and remediate (max 2 correction rounds).
    - Hand off to [`agent-privacy-officer`](../agent-privacy-officer/SKILL.md) to model any personal data assets (`DATA-ASSET-*`), GDPR Art. 30 processing activities (`PRIV-ROPA-*`), and privacy requirements (`PRIV-REQ-*`).
+   - **Transversal Loop (`agent-privacy-officer`)**: Concurrently invoke `agent-auditor` and `agent-adversary` over privacy models. Consolidate findings and return handoff to `agent-privacy-officer` to re-execute and remediate (max 2 correction rounds).
 3. Run `sdd_check_fix` (`npx aisdlc check --fix`) to sync Gherkin `.feature` files and validate schemas.
 
 ### Step 2: SDD Change Scaffolding & Architectural Design (`agent-system-architect`)
@@ -26,7 +29,10 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 2. Use [`agent-system-architect`](../agent-system-architect/SKILL.md) to complete `specs/changes/active/<chg-id>/design.md` and `specs/architecture/CMP-*.md`:
    - Structure `CMP-*` and `design.md` around **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports) and define **Contract-First** shared interfaces/DTOs/schemas when spanning Frontend and Backend.
    - Map 100% of `handoff.yaml` requirements and components to atomic tasks (`TSK-*`) in `tasks.md` with explicit `autonomy-mode` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `HIGH_RISK_MANUAL`, `AMBIGUOUS`).
-3. Run `verify_governance` and `verify_friction` to validate task governance, 100% design/handoff scope coverage, and anti-monolith limits (`maxUseCasesPerChange = 1`).
+3. **Transversal Loop (`agent-system-architect`)**:
+   - Concurrently invoke `agent-auditor` (evaluating YAGNI, interface bloat, task completeness) and `agent-adversary` (probing race conditions, contract drift, SPOFs) in isolated context windows.
+   - Consolidate findings and return handoff to `agent-system-architect` to re-execute and remediate (max 2 correction rounds).
+4. Run `verify_governance` and `verify_friction` to validate task governance, 100% design/handoff scope coverage, and anti-monolith limits (`maxUseCasesPerChange = 1`).
 
 ### Step 3: 4-Tier Git Branch Navigation & Multi-Agent Parallelism
 1. Navigate to the task branch using `npx aisdlc git checkout <TSK-ID>` (`pnpm run git:checkout <TSK-ID>`), which cascade-creates:
@@ -39,7 +45,10 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 ### Step 4: Red Phase — Failing Test Suites (`agent-qa-engineer`)
 1. Delegate to or adopt [`agent-qa-engineer`](../agent-qa-engineer/SKILL.md).
 2. Author FAILING (red) BDD/Gherkin step definitions, integration/contract tests, and mandatory E2E/UI tests (evaluating Happy Path, Sad Path, and Boundary Values for every interactive UI element, plus `UC-*` alternative/exception flows) in `tests/`.
-3. Run `verify_testing` (`npx aisdlc verify testing`) to confirm requirement test coverage before writing production code.
+3. **Transversal Loop (`agent-qa-engineer`)**:
+   - Concurrently invoke `agent-auditor` (checking test overengineering, brittle assertions) and `agent-adversary` (running conceptual mutation testing to prove whether trivial or empty implementations could falsely pass tests green) in isolated context windows.
+   - Consolidate findings and return handoff to `agent-qa-engineer` to re-execute and harden test suites (max 2 correction rounds).
+4. Run `verify_testing` (`npx aisdlc verify testing`) to confirm requirement test coverage before writing production code.
 
 ### Step 5: Green & Refactor Phase — Surgical Implementation (`agent-developer`)
 1. Delegate to or adopt [`agent-developer`](../agent-developer/SKILL.md).
@@ -47,15 +56,19 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
    - (1) Modular & Hexagonal Architecture (Ports & Adapters) boundaries, (2) Inter-module interfaces/ports first, (3) Concrete component implementation (zero fake-wiring; all 4 UI states `Loading`, `Empty`, `Error`, `Nominal`), (4) Exhaustive per-function unit tests in `tests/unit/` (Happy Path, Sad Path, Boundary, Null/Empty).
 3. Verify any new dependency against `license-policy.yaml` via `verify_licenses` and PII handling against `privacy-policy.yaml` via `verify_privacy`.
 4. Run `sdd_check_fix` (`npx aisdlc check --fix`) and `verify_quality` (`npx aisdlc verify quality`) until Cyclomatic Complexity $\le 10$, Cognitive $\le 15$, Maintainability $\ge 50$, and Function Length $\le 40$ lines pass with zero violations.
+5. **Transversal Loop (`agent-developer`)**:
+   - Concurrently invoke `agent-auditor` (detecting overengineering, speculative parameters, AST complexity) and `agent-adversary` (attacking boundary inputs, concurrency races, type edge breaks with concrete PoCs) in isolated context windows.
+   - Consolidate findings and return handoff to `agent-developer` to re-execute and remediate (max 2 correction rounds).
 
-### Transversal Feedback: Constructive Audit & Adversarial Testing (`agent-auditor` & `agent-adversary`)
-- **On-Demand Quality & Stress Testing in Any Step**:
-  * Invoke [`agent-auditor`](../agent-auditor/SKILL.md) to detect structural debt, premature generalizations, or unneeded complexity (YAGNI) across specifications, architecture, test suites, or code diffs.
-  * Invoke [`agent-adversary`](../agent-adversary/SKILL.md) to actively stress-test deliverables: uncover requirement contradictions, simulate architectural race conditions/SPOFs, conduct conceptual mutation testing on QA test suites, or craft breaking boundary payloads for code.
-- **Mandatory Return Handoff & Anti-Ping-Pong Protocol**:
-  * Both agents operate under non-invasive guardrails (never edit files directly).
-  * Deliver findings via structured report and emit return handoff to the AUDITED agent for resolution before downstream promotion.
-  * Limit return cycles to maximum 1 iteration per increment unless blocking defects persist.
+### Mandatory Transversal Quality & Adversarial Protocol
+- **Systematic Post-Agent Execution**: Immediately following the execution of any authoring agent (`agent-product-analyst`, `agent-threat-modeler`, `agent-privacy-officer`, `agent-system-architect`, `agent-qa-engineer`, `agent-developer`, `agent-devops`), invoke `agent-auditor` and `agent-adversary` concurrently in clean, isolated context windows over that agent's deliverables.
+- **Concurrent Inspection**:
+  * [`agent-auditor`](../agent-auditor/SKILL.md) inspects deliverables for structural debt, premature generalizations, or unneeded complexity (YAGNI).
+  * [`agent-adversary`](../agent-adversary/SKILL.md) actively stress-tests deliverables: uncovers requirement contradictions, simulates architectural race conditions/SPOFs, conducts conceptual mutation testing on QA suites, or crafts breaking boundary payloads for code with mandatory proof-of-break.
+- **Non-Invasive Guardrail**: Neither auditor nor adversary edits files directly. Both emit structured findings citing canonical IDs and SHA-256 hashes.
+- **Consolidated Handoff & Remediation Re-Execution**: Consolidate findings and emit the Workflow Handoff back to the audited authoring agent, who is re-executed to resolve the findings.
+- **Anti-Ping-Pong Guardrail (Max 2 Rounds)**: Enforce a strict boundary of maximum **2 correction rounds** per phase/deliverable. If non-blocking advisories remain after round 2, proceed downstream; if blocking defects persist after round 2, escalate to the Human Tech Lead.
+- **Exclusion of Downstream Review & Validation Roles**: Pre-merge review agents (`agent-code-reviewer`, `agent-security-auditor`, `agent-compliance-checker`) and validation agents (`agent-expert-user`) evaluate finished deliverables and are excluded from being audited by this loop.
 
 ### Step 6: Post-Development Functional Validation & Pre-Merge Audit Triad
 1. **Functional Validation (`agent-expert-user`)**: Validate live runtime behavior against `UC-*` and `FR-*` criteria (including `0` browser `console.error`/`pageerror` on UI changes).
@@ -75,5 +88,6 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 
 ## Non-Negotiable Guardrails
 - **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles (e.g., `agent-qa-engineer` and `agent-developer`, or `agent-developer` and `agent-security-auditor`) in the same conversation context window. In subagent-capable IDEs (Antigravity `invoke_subagent`, Claude Code `Task` / `.claude/agents/`, GitHub Copilot `@agent-*`), always spawn each specialist in a fresh isolated subagent context that reads state strictly from disk (`specs/`, `handoff.yaml`, `get_active_handoff`). In chat-based IDEs (Cursor, Windsurf, Aider), persist all artifacts to disk, emit the Workflow Handoff block, and instruct the user to open a **New Chat** (or `/clear`) before running the next specialist.
+- **Mandatory Transversal Quality & Adversarial Loop**: Every authoring agent deliverable must undergo concurrent inspection by `agent-auditor` and `agent-adversary` in isolated context windows, followed by a re-execution of the authoring agent to remediate findings. To prevent infinite cycles, enforce the **Anti-Ping-Pong Guardrail**: maximum 2 correction rounds per phase; if unresolved blocking defects persist after round 2, escalate to the Human Tech Lead.
 - **Single-Use-Case Scope (`1 UC-* = 1 CHG-*`)**: Each SDD change (`CHG-*`) must deliver at most 1 Use Case (`UC-*`). Bundling multiple `UC-*` into one `handoff.yaml` is blocked by `verify_governance` (`Greenfield monolith detected`). Scale throughput via parallel `CHG-*` branches/worktrees, not monolithic changes.
 - **100% Design & Handoff Coverage in `tasks.md`**: Every `CMP-*`, `FR-*`, `SEC-REQ-*`, and `PRIV-REQ-*` declared in `design.md` and `handoff.yaml` must be explicitly assigned to at least one `TSK-*` in `tasks.md`.

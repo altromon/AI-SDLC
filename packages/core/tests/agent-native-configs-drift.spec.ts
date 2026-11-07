@@ -405,6 +405,12 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       );
     }
   });
+  it('verifies all 3 lifecycle skills document the mandatory transversal loop with agent-auditor and agent-adversary and max 2 correction rounds', async () => {
+    const { LIFECYCLE_SKILL_TEMPLATES } = await import('../src/init/index.js');
+    for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
+      expect(skill.body).toMatch(/agent-auditor/);
+      expect(skill.body).toMatch(/agent-adversary/);
+      expect(skill.body).toMatch(/2 correction rounds/i);
+    }
+  });
 });
-
-
