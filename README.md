@@ -87,7 +87,7 @@ AI-SDLC/
 │   └── cli/                                  # @aisdlc/cli: Binary CLI executable (npx aisdlc)
 │
 ├── process/                                  # Normative Process Specification
-│   ├── README.md                             # Process index, 11 agents workflow, and 12 Quality Gates
+│   ├── README.md                             # Process index, 13 agents workflow, and 12 Quality Gates
 │   ├── 00_principles_and_manifesto.md        # Manifesto and core principles
 │   ├── 01_governance_and_roles.md            # Human-Agent RACI matrix and authorization levels
 │   ├── 02_product_definition.md              # ProductShape guide (Actors, Use Cases, Requirements)
@@ -98,7 +98,7 @@ AI-SDLC/
 │   ├── 06_spec_driven_development.md         # SDD delivery lifecycle citing Product and Architecture
 │   ├── 07_security_and_license_validation.md # CI/CD Gates (12 Gates): SAST, Secrets, Privacy PII-SAST, SBOM, and Licenses
 │   ├── 08_citation_contract_and_drift.md     # Anti-drift cryptographic citation protocol
-│   ├── 09_agent_protocols.md                 # Prompts, skill contracts, and guardrails for LLMs (11 Agents)
+│   ├── 09_agent_protocols.md                 # Prompts, skill contracts, and guardrails for LLMs (13 Agents)
 │   ├── 10_quality_management_and_release_gates.md # Coding rules, Cyclomatic Complexity, and Release Gates
 │   └── 11_git_branching_and_lifecycle.md     # 4-tier Git branching model (main, release, feat/bug, task)
 │
@@ -202,7 +202,7 @@ npx aisdlc sdd integrate --auto
 
 | CLI Tool / Command | Equivalent pnpm Command | Lifecycle Phase | Output / Action Performed |
 |---|---|---|---|
-| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository with all 34 JSON schemas (Draft 2020-12), 38 canonical starter templates, Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`), and AI agent rules (11 specialized agents). Unconditionally generates universal MCP configs (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Injects standard npm scripts into consumer `package.json`. Interactive TTY wizard prompts for CI/CD provider, Architecture granularity, and AI Agents. Supports `--dry-run`, `--json`, and `-F, --format <format>` |
+| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository with all 34 JSON schemas (Draft 2020-12), 38 canonical starter templates, Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`), and AI agent rules (13 specialized agents). Unconditionally generates universal MCP configs (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Injects standard npm scripts into consumer `package.json`. Interactive TTY wizard prompts for CI/CD provider, Architecture granularity, and AI Agents. Supports `--dry-run`, `--json`, and `-F, --format <format>` |
 | `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry Setup** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
 | `npx aisdlc mcp` / `npx @aisdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 24 typed tools (including `new`, `verify`, `verify_privacy`, `report`) and 6 canonical resources |
 | `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | **SDD Scaffolding** | Generates `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` sidecar (`HOF-*`) with SHA-256 digests |
@@ -852,9 +852,9 @@ AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@aisdlc/
 4. **Architectural Instantiation**: Copy templates from `templates/architecture/` to `docs/architecture/` (or design in `specs/changes/active/.../design.md`). Fill YAML frontmatter and validate via `npx aisdlc verify schemas` and `npx aisdlc verify traceability`.
 5. **Deterministic Validation & Zero Auto-Approval**: Run pre-flight commands (`pnpm run check:fix` and `pnpm run verify:all`). Never attempt to auto-approve or merge a PR: merging is strictly a human prerogative.
 
-### 2. Canonical Specialized Agents (11 Roles)
+### 2. Canonical Specialized Agents (13 Roles)
 
-AI-SDLC defines 11 specialized roles with bounded responsibilities and deterministic gates (see details in [process/09_agent_protocols.md](process/09_agent_protocols.md) and [process/01_governance_and_roles.md](process/01_governance_and_roles.md)):
+AI-SDLC defines 13 specialized roles with bounded responsibilities and deterministic gates (see details in [process/09_agent_protocols.md](process/09_agent_protocols.md) and [process/01_governance_and_roles.md](process/01_governance_and_roles.md)):
 
 | Agent Role | Specialty / Mission | Core Deliverables | Critical Guardrails |
 | :--- | :--- | :--- | :--- |
@@ -869,6 +869,8 @@ AI-SDLC defines 11 specialized roles with bounded responsibilities and determini
 | **`agent-compliance-checker`** | License & IP Compliance Auditor | Legal dependency compatibility verdict | SPDX audit against `license-policy.yaml`; blocks viral/commercial. |
 | **`agent-code-reviewer`** | Technical & Architecture Reviewer (Pre-Merge) | Clean Code, SOLID, DRY, YAGNI, AST audit | CC $\le 10$, MI $\ge 50$; categorizes `[BLOCKING]` vs `[SUGGESTION]`. |
 | **`agent-devops`** | Automation & Infrastructure Engineer | `.github/workflows/`, Dockerfiles, IaC, scripts | **NON-INVASION**: Strictly forbidden from touching application code in `src/`. |
+| **`agent-auditor`** | Transversal Quality & Improvement Auditor | Structured audit reports, YAGNI simplifications, defect classification (`[BLOCKING]`, `[SIMPLIFICATION]`, `[ADVISORY]`) | Polymorphic on demand; non-invasive; returns handoff to audited agent (max 1 return round). |
+| **`agent-adversary`** | Transversal Red Team & Chaos Adversary | Proof-of-break reports, reproducible PoCs, mutation tests, break vectors | Mandatory PoC evidence; non-invasive; returns handoff to audited agent (max 1 return round). |
 
 ### 3. Pre-Merge Audit Triad (and Privacy Audit)
 Before a PR reaches human Tech Lead review, specialized auditors inspect the diff concurrently:
@@ -881,6 +883,12 @@ Before a PR reaches human Tech Lead review, specialized auditors inspect the dif
 The `agent-devops` agent maintains CI/CD pipelines, container images, and infrastructure scripts under a **strict non-invasion guardrail**:
 - **Permitted scope**: `.github/workflows/`, `Dockerfile*`, `docker-compose*.yml`, IaC manifests, and `scripts/`.
 - **Prohibited scope**: Modifying application source code files (`src/`, `packages/*/src/app/`) is strictly forbidden. Business logic belongs exclusively to `agent-developer`.
+
+### 5. Transversal Quality & Red-Team Feedback Loop (`agent-auditor` & `agent-adversary`)
+Beyond linear phase progression, the framework introduces two **on-demand transversal meta-agents** that can be invoked during any stage of development (Product, Security/Privacy, Architecture, QA Red Phase, Developer Green Phase, or DevOps):
+- **`agent-auditor` (Constructive Critic)**: Polymorphically inspects deliverables to identify premature abstractions, overengineering, or structural debt, suggesting minimal, standard YAGNI improvements.
+- **`agent-adversary` (Destructive Red Team)**: Actively attempts to break or invalidate deliverables, delivering concrete proofs-of-concept (PoC) such as logic traps in product rules, race conditions in architecture diagrams, mutant code that bypasses QA tests, or boundary payloads that crash implementation code.
+- **Mandatory Return Handoff & Anti-Ping-Pong Protocol**: Both agents operate under strict non-invasion rules (they inspect without altering files directly) and emit their canonical Workflow Handoff back to the **audited specialist agent** to resolve findings. To eliminate infinite review cycles, the loop is limited to **maximum 1 return round** per increment before escalation.
 
 ### Native Integration by AI Environment
 

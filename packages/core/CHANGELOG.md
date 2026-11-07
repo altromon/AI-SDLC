@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 3.3.0
+
+### Minor Changes
+
+- feat(agents): add transversal `agent-auditor` and `agent-adversary` specialist roles with structured critique, proof-of-concept breaking, and upstream return handoffs across all IDE scaffolding and lifecycle skills.
+
 ## 3.2.0
 
 ### Minor Changes

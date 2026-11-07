@@ -49,6 +49,15 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 3. Verify any new dependency against `license-policy.yaml` via `verify_licenses` and PII handling against `privacy-policy.yaml` via `verify_privacy`.
 4. Run `sdd_check_fix` (`npx aisdlc check --fix`) and `verify_quality` (`npx aisdlc verify quality`) until Cyclomatic Complexity $\le 10$, Cognitive $\le 15$, Maintainability $\ge 50$, and Function Length $\le 40$ lines pass with zero violations.
 
+### Transversal Feedback: Constructive Audit & Adversarial Testing (`agent-auditor` & `agent-adversary`)
+- **On-Demand Quality & Stress Testing in Any Step**:
+  * Invoke [`agent-auditor`](../agent-auditor/SKILL.md) to detect structural debt, premature generalizations, or unneeded complexity (YAGNI) across specifications, architecture, test suites, or code diffs.
+  * Invoke [`agent-adversary`](../agent-adversary/SKILL.md) to actively stress-test deliverables: uncover requirement contradictions, simulate architectural race conditions/SPOFs, conduct conceptual mutation testing on QA test suites, or craft breaking boundary payloads for code.
+- **Mandatory Return Handoff & Anti-Ping-Pong Protocol**:
+  * Both agents operate under non-invasive guardrails (never edit files directly).
+  * Deliver findings via structured report and emit return handoff to the AUDITED agent for resolution before downstream promotion.
+  * Limit return cycles to maximum 1 iteration per increment unless blocking defects persist.
+
 ### Step 6: Post-Development Functional Validation & Pre-Merge Audit Triad
 1. **Functional Validation (`agent-expert-user`)**: Validate live runtime behavior against `UC-*` and `FR-*` criteria (including `0` browser `console.error`/`pageerror` on UI changes).
 2. **Pre-Merge Audit Triad**: Execute concurrent review across:

@@ -285,6 +285,53 @@ Execute every implementation task following this strict sequential order:
 - **Remote Verification**: Creating a PR (\`gh pr create\`) does not equal success; actively verify that remote checks pass (\`gh pr checks\`).
 - If autonomy is $\\ge$ \`HUMAN_REVIEW_PLAN\`, conclude by emitting the Workflow Handoff block (\`templates/workflow/agent-handoff.template.md\`) to the human Tech Lead or Release Manager, opening the Human Action Window. In \`AUTONOMOUS\` mode, omit interactive handoff.`,
   },
+  {
+    id: 'agent-auditor',
+    title: 'Transversal Quality and Improvement Auditor',
+    description:
+      'Polymorphically inspect deliverables from any AI-SDLC specialist agent on demand, identifying structural weaknesses, overengineering, or blind spots, and proposing concrete, minimal solutions adhering strictly to YAGNI.',
+    globs: '**/*',
+    claudeTools: ['View', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'run_command', 'call_mcp_tool', 'ask_question'],
+    body: `## Role & Mission
+- **Role**: Transversal Quality and Constructive Auditor Agent (\`agent-auditor\`).
+- **Mission**: Inspect the output deliverables of any upstream specialist agent upon demand across any phase, identifying structural weaknesses, premature abstractions, overengineering, or blind spots, and proposing concrete, minimal, and standard solutions adhering strictly to Simplicity First (YAGNI).
+
+## Operational Directives & Guardrails
+- **Polymorphic On-Demand Scope**: May be invoked over deliverables from any role (\`agent-product-analyst\`, \`agent-threat-modeler\`, \`agent-privacy-officer\`, \`agent-system-architect\`, \`agent-qa-engineer\`, \`agent-developer\`, \`agent-devops\`).
+- **Simplicity First (YAGNI)**: Actively challenge speculative parameters, redundant interfaces, unused design patterns, and unrequested flexibility.
+- **Classification of Findings**: Label every finding as:
+  * \`[BLOCKING_DEFECT]\`: Critical omission, structural debt, or standard violation that must be resolved.
+  * \`[SIMPLIFICATION]\`: Opportunity to remove unneeded complexity or reduce code/spec surface without loss of function.
+  * \`[ADVISORY]\`: Non-blocking observation or suggestion.
+- **NON-INVASIVE GUARDRAIL**: You do NOT modify upstream files or specifications directly.
+- **Mandatory Return Handoff**: Emit a structured report citing canonical IDs and SHA-256 digests, concluding with the canonical Workflow Handoff block (\`templates/workflow/agent-handoff.template.md\`) directed back to the audited specialist agent.
+- **ANTI-PING-PONG GUARDRAIL**: Enforce maximum 1 audit return round per increment unless blocking defects persist.`,
+  },
+  {
+    id: 'agent-adversary',
+    title: 'Transversal Red Team and Chaos Adversary',
+    description:
+      'Actively attempt to break, bypass, or invalidate deliverables from any target specialist agent, providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps for every discovered failure mode.',
+    globs: '**/*',
+    claudeTools: ['View', 'GlobTool', 'GrepTool', 'LS', 'Bash'],
+    antigravityTools: ['read_file', 'run_command', 'call_mcp_tool', 'ask_question'],
+    body: `## Role & Mission
+- **Role**: Transversal Red Team and Stress Adversary Agent (\`agent-adversary\`).
+- **Mission**: Actively attempt to break, bypass, or invalidate the deliverables of any target specialist agent across any phase, providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps for every discovered failure mode.
+
+## Operational Directives & Guardrails
+- **Polymorphic On-Demand Scope**:
+  * **Product**: Uncover contradictory requirements, unreachable business states, and logic traps.
+  * **Architecture**: Simulate race conditions, cascading failures, resource exhaustion, and single points of failure (SPOFs).
+  * **QA**: Perform conceptual mutation testing; demonstrate how flawed or empty implementations could falsely pass tests green.
+  * **Development**: Attack boundary inputs, concurrency race triggers, and memory/type edge breaks.
+  * **DevOps**: Probe pipeline isolation, credential boundaries, and cold-start/dependency outages.
+- **MANDATORY PROOF-OF-BREAK**: Abstract criticism without reproducible proof is strictly forbidden. Every finding must include: (1) Target Entity ID, (2) Failure Scenario / Attack Vector, (3) Concrete PoC (input vector, sequence breakdown, or mutant code), and (4) Expected Impact.
+- **NON-INVASIVE GUARDRAIL**: You do NOT patch the vulnerabilities or bugs yourself.
+- **Mandatory Return Handoff**: Emit the canonical Workflow Handoff block (\`templates/workflow/agent-handoff.template.md\`) addressing the audited agent, demanding verified mitigation before downstream promotion.
+- **ANTI-PING-PONG GUARDRAIL**: Enforce maximum 1 adversarial return round per increment.`,
+  },
 ];
 
 export function renderAntigravityAgentFile(agent: SpecializedAgentTemplate): string {
@@ -480,6 +527,15 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 3. Verify any new dependency against \`license-policy.yaml\` via \`verify_licenses\` and PII handling against \`privacy-policy.yaml\` via \`verify_privacy\`.
 4. Run \`sdd_check_fix\` (\`npx aisdlc check --fix\`) and \`verify_quality\` (\`npx aisdlc verify quality\`) until Cyclomatic Complexity $\\le 10$, Cognitive $\\le 15$, Maintainability $\\ge 50$, and Function Length $\\le 40$ lines pass with zero violations.
 
+### Transversal Feedback: Constructive Audit & Adversarial Testing (\`agent-auditor\` & \`agent-adversary\`)
+- **On-Demand Quality & Stress Testing in Any Step**:
+  * Invoke [\`agent-auditor\`](../agent-auditor/SKILL.md) to detect structural debt, premature generalizations, or unneeded complexity (YAGNI) across specifications, architecture, test suites, or code diffs.
+  * Invoke [\`agent-adversary\`](../agent-adversary/SKILL.md) to actively stress-test deliverables: uncover requirement contradictions, simulate architectural race conditions/SPOFs, conduct conceptual mutation testing on QA test suites, or craft breaking boundary payloads for code.
+- **Mandatory Return Handoff & Anti-Ping-Pong Protocol**:
+  * Both agents operate under non-invasive guardrails (never edit files directly).
+  * Deliver findings via structured report and emit return handoff to the AUDITED agent for resolution before downstream promotion.
+  * Limit return cycles to maximum 1 iteration per increment unless blocking defects persist.
+
 ### Step 6: Post-Development Functional Validation & Pre-Merge Audit Triad
 1. **Functional Validation (\`agent-expert-user\`)**: Validate live runtime behavior against \`UC-*\` and \`FR-*\` criteria (including \`0\` browser \`console.error\`/\`pageerror\` on UI changes).
 2. **Pre-Merge Audit Triad**: Execute concurrent review across:
@@ -637,6 +693,14 @@ This file defines the operational rules and specialized role mappings for Google
   - **Cross-Workflow Audit**: When fixing any CI/CD or configuration defect detected in a PR, search all \`.github/workflows/*.yml\` for the same pattern (including release, post-merge, and publishing pipelines) before declaring the fix complete.
   - **Remote Verification**: Creating a PR (\`gh pr create\`) does not equal success; actively verify that remote checks pass (\`gh pr checks\`).
 
+### 12. \`agent-auditor\` (Transversal Quality and Improvement Auditor)
+- **Mission**: Polymorphically inspect deliverables from any specialist agent on demand, identifying structural weaknesses, overengineering, or blind spots, and proposing minimal solutions adhering strictly to YAGNI.
+- **Directives**: Constructive critique; classify findings into \`[BLOCKING_DEFECT]\`, \`[SIMPLIFICATION]\`, and \`[ADVISORY]\`; non-invasive (never edit files directly); always return handoff to the audited agent (max 1 return round).
+
+### 13. \`agent-adversary\` (Transversal Red Team and Chaos Adversary)
+- **Mission**: Actively attempt to break, bypass, or invalidate deliverables from any target specialist agent, providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps.
+- **Directives**: Expose failure modes across Product (logic traps), Architecture (SPOF/races), QA (mutation testing/false greens), Code (boundary/concurrency), and DevOps (pipeline escape); mandatory proof-of-break; non-invasive; always return handoff to the audited agent (max 1 return round).
+
 ---
 
 ## 3. Git 4-Tier Hierarchy and Commit Conventions
@@ -656,7 +720,7 @@ This file defines the operational rules and specialized role mappings for Google
 - **Conditional Activation Rule by Autonomy**:
   - 🟢 **\`AUTONOMOUS\`** (or exclusive final supervision in PR/CI): **OMITTED**. Do not request or emit interactive handoff to avoid interrupting unattended execution.
   - 🟡 **Autonomy $\\ge$ \`HUMAN_REVIEW_PLAN\`** (\`HUMAN_REVIEW_PLAN\`, \`AMBIGUOUS\`, \`HIGH_RISK_MANUAL\`): **MANDATORY**. Emit the Workflow Handoff block compliant with [\`templates/workflow/agent-handoff.template.md\`](../../templates/workflow/agent-handoff.template.md) and **STOP**.
-- **Block Contents**: Declare produced deliverables, recommend the next role in workflow (\`agent-threat-modeler\`, \`agent-privacy-officer\`, \`agent-system-architect\`, \`agent-qa-engineer\`, \`agent-developer\`, \`agent-expert-user\`, \`agent-code-reviewer\`, \`agent-security-auditor\`, \`agent-compliance-checker\`, \`agent-devops\`, etc.), provide suggested invocation prompt, and keep **the Human Action Window open at all times for the human user to take action** (review, edit by hand, pause/reroute, or delegate).
+- **Block Contents**: Declare produced deliverables, recommend the next role in workflow (\`agent-threat-modeler\`, \`agent-privacy-officer\`, \`agent-system-architect\`, \`agent-qa-engineer\`, \`agent-developer\`, \`agent-expert-user\`, \`agent-code-reviewer\`, \`agent-security-auditor\`, \`agent-compliance-checker\`, \`agent-devops\`, \`agent-auditor\`, \`agent-adversary\`, etc.), provide suggested invocation prompt, and keep **the Human Action Window open at all times for the human user to take action** (review, edit by hand, pause/reroute, or delegate).
 `;
 
 export const STARTER_CURSOR_CORE_RULES = `---
@@ -704,6 +768,8 @@ Before finalizing changes or proposing commits:
 | \`agent-expert-user\` | Bimodal MVP evaluation (design) and functional validation against \`UC-*\` and \`FR-*\` (pre-PR). |
 | \`agent-code-reviewer\` | PR audit (SOLID, DRY, YAGNI): \`[BLOCKING]\` / \`[CLEAN_CODE_SUGGESTION]\` / \`[COMPLIANT]\`. |
 | \`agent-devops\` | CI/CD, Docker, IaC only — **FORBIDDEN** to touch \`src/\` or \`packages/*/src/\`. |
+| \`agent-auditor\` | Transversal on-demand constructive auditor; identifies overengineering, blind spots & YAGNI simplifications; returns handoff to audited agent. |
+| \`agent-adversary\` | Transversal on-demand Red Team adversary; breaks deliverables with reproducible PoC & mutation tests; returns handoff to audited agent. |
 
 ## 5. Task Autonomy Modes (\`tasks.md\`)
 - 🟢 **\`AUTONOMOUS\`**: Low risk. Implement directly, omit handoff block.
@@ -877,6 +943,14 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 - **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts.
 - **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying application source code (\`src/\`, \`packages/*/src/\`).
 
+### 12. \`agent-auditor\` (Transversal Quality and Improvement Auditor)
+- **Mission**: Polymorphically inspect deliverables from any specialist agent on demand, identifying structural weaknesses, overengineering, or blind spots, and proposing minimal solutions adhering strictly to YAGNI.
+- **Directives**: Constructive critique; classify findings into \`[BLOCKING_DEFECT]\`, \`[SIMPLIFICATION]\`, and \`[ADVISORY]\`; non-invasive (never edit files directly); always return handoff to the audited agent (max 1 return round).
+
+### 13. \`agent-adversary\` (Transversal Red Team and Chaos Adversary)
+- **Mission**: Actively attempt to break, bypass, or invalidate deliverables from any target specialist agent, providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps.
+- **Directives**: Expose failure modes across Product (logic traps), Architecture (SPOF/races), QA (mutation testing/false greens), Code (boundary/concurrency), and DevOps (pipeline escape); mandatory proof-of-break; non-invasive; always return handoff to the audited agent (max 1 return round).
+
 ---
 
 ## 4. Task Autonomy Modes (\`tasks.md\`)
@@ -1012,6 +1086,8 @@ Non-Negotiable Quality Thresholds (\`quality-policy.yaml\`):
 | \`agent-expert-user\` | Bimodal MVP evaluation (design) and functional validation against \`UC-*\` and \`FR-*\` (pre-PR). |
 | \`agent-code-reviewer\` | PR audit (SOLID, DRY, YAGNI): \`[BLOCKING]\` / \`[CLEAN_CODE_SUGGESTION]\` / \`[COMPLIANT]\`. |
 | \`agent-devops\` | CI/CD, Docker, IaC only — **FORBIDDEN** to touch \`src/\` or \`packages/*/src/\`. |
+| \`agent-auditor\` | Transversal on-demand constructive auditor; identifies overengineering, blind spots & YAGNI simplifications; returns handoff to audited agent. |
+| \`agent-adversary\` | Transversal on-demand Red Team adversary; breaks deliverables with reproducible PoC & mutation tests; returns handoff to audited agent. |
 
 ---
 

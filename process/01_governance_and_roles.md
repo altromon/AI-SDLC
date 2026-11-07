@@ -51,6 +51,10 @@ The AI-SDLC framework organizes humans and AI agents into a clear, balanced gove
     - Audits Pull Requests evaluating readability, SOLID/DRY adherence, absence of code smells, and cyclomatic/cognitive complexity limits, completing the Pre-Merge Audit Triad (alongside `agent-security-auditor`, `agent-compliance-checker`, and `agent-privacy-officer`).
 11. **DevOps and Infrastructure Engineer Agent (`agent-devops`)**:
     - Maintains and evolves automated infrastructure: CI/CD workflows, Dockerfiles, IaC manifests, and support scripts, under the strict non-invasion guardrail protecting application source code (`src/`).
+12. **Transversal Quality and Improvement Auditor Agent (`agent-auditor`)**:
+    - Operates polymorphically on demand across any development phase (Product, Threat Modeling, Privacy, Architecture, QA, Development, DevOps). Inspects deliverables for structural weaknesses, blind spots, or overengineering, proposing concrete, minimal solutions adhering strictly to YAGNI and returning handoff directly to the audited agent.
+13. **Transversal Red Team and Chaos Adversary Agent (`agent-adversary`)**:
+    - Operates polymorphically on demand across any development phase. Actively attempts to break, bypass, or invalidate deliverables by formulating reproducible proofs-of-concept (PoC), counterexamples, test mutations, or boundary failure vectors, returning handoff directly to the audited agent for mitigation before promotion.
 
 ---
 
@@ -83,6 +87,8 @@ The AI-SDLC framework organizes humans and AI agents into a clear, balanced gove
 | **Vulnerability Audit and SAST** | I | I | A | I | C | R (Security Auditor) | Deterministic SAST + Adversarial Agent |
 | **Privacy & PII-SAST Pre-Merge Audit** | I | I | C | **A** | C | R (Privacy Officer) | Deterministic `verify privacy` (`PRIV-001`–`PRIV-008`) + RoPA check |
 | **Infrastructure as Code & CI/CD** | I | C | C | I | **A** | R (DevOps) | Exclusive modification of .github/, Dockerfiles, scripts (forbidden on src/) |
+| **Transversal Constructive Audit** | C | C | C | C | **A** | R (Auditor Agent) | Polymorphic review on demand; proposes YAGNI simplifications; returns to author agent (max 1 round) |
+| **Transversal Red-Team Adversary** | C | C | C | C | **A** | R (Adversary Agent) | Polymorphic stress testing; mandatory PoC evidence; returns to author agent (max 1 round) |
 | **SDD Canonical Integration** | C | C | I | I | **A** | R (Developer / CLI) | All tasks in `tasks.md` must be `COMPLETED` |
 | **PR Review and Plan Balance (`X`/`O`)** | I | C | C | I | **A (Guarantor & Approver)** | R (Declares matrix, weak points, and assumptions) | Mandatory inclusion of each and every item; justification for any `[O]` |
 | **Pull Request Merge** | I | I | I | I | **A** | - | **AI auto-merge forbidden (Blocked by CI)** |
@@ -143,7 +149,12 @@ To prevent context loss or invalid assumptions:
      * 🟢 **`AUTONOMOUS` Mode** (or tasks where humans supervise solely final PR execution or CI pipelines): **This interactive handoff is NOT emitted**, allowing unattended, frictionless agent execution.
      * 🟡 **Autonomy Level $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **Emitting the Workflow Handoff block and HALTING is MANDATORY**, exposing completed deliverables, suggesting next roles, and **preserving an open window for human action** (review, edit, pause, divert, or delegate).
    - **Canonical Lifecycle Transition Chain**:
-     $$\text{Human PO} \rightarrow \text{agent-product-analyst} \rightarrow \text{agent-expert-user} \rightarrow \text{agent-threat-modeler} \rightarrow \text{agent-privacy-officer} \rightarrow \text{agent-system-architect} \rightarrow \text{agent-developer} \rightarrow \text{agent-test-engineer} \rightarrow \text{agent-security-auditor} \rightarrow \text{agent-compliance-checker} \rightarrow \text{agent-privacy-officer} \rightarrow \text{Human Tech Lead}$$
+     $\text{Human PO} \rightarrow \text{agent-product-analyst} \rightarrow \text{agent-expert-user} \rightarrow \text{agent-threat-modeler} \rightarrow \text{agent-privacy-officer} \rightarrow \text{agent-system-architect} \rightarrow \text{agent-developer} \rightarrow \text{agent-test-engineer} \rightarrow \text{agent-security-auditor} \rightarrow \text{agent-compliance-checker} \rightarrow \text{agent-privacy-officer} \rightarrow \text{Human Tech Lead}$
+
+   - **Transversal Feedback & Return Loop Protocol (`agent-auditor` & `agent-adversary`)**:
+     * In addition to the sequential chain, any active specialist agent's deliverable may be routed on-demand to **`agent-auditor`** (constructive review for YAGNI, simplifications, and completeness) or **`agent-adversary`** (destructive red-team testing requiring reproducible PoC breaks or test mutations).
+     * **Mandatory Return Handoff**: The auditor/adversary operates under non-invasion rules (no direct file editing) and emits its Workflow Handoff directly back to the **audited author agent** so that agent repairs the findings in its own isolated context before downstream promotion.
+     * **Anti-Ping-Pong Boundary**: Return rounds are bounded to a maximum of **1 iteration** per task increment to avoid infinite critique cycles; unresolved items are escalated to the Human Tech Lead.
 
 ---
 

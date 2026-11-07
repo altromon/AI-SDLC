@@ -100,7 +100,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     }
   });
 
-  it('verifies all core IDE rules map all 11 specialized roles directly', () => {
+  it('verifies all core IDE rules map all 13 specialized roles directly', () => {
     const expectedRoles = [
       'agent-product-analyst',
       'agent-threat-modeler',
@@ -113,6 +113,8 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       'agent-expert-user',
       'agent-code-reviewer',
       'agent-devops',
+      'agent-auditor',
+      'agent-adversary',
     ];
     const roleMappedConfigs = [
       configFiles.antigravity,
@@ -349,7 +351,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     }
   });
 
-  it('verifies all 11 specialized agent skills exist in .claude/skills without drift', async () => {
+  it('verifies all 13 specialized agent skills exist in .claude/skills without drift', async () => {
     const { SPECIALIZED_AGENT_TEMPLATES, renderClaudeAgentFile } = await import('../src/init/index.js');
     for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
       const claudeSkillPath = path.join(rootDir, `.claude/skills/${agent.id}/SKILL.md`);
@@ -360,7 +362,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     }
   });
 
-  it('verifies all 11 specialized agent definitions exist in .agent, .cursor, and .github without drift', async () => {
+  it('verifies all 13 specialized agent definitions exist in .agent, .cursor, and .github without drift', async () => {
     const {
       SPECIALIZED_AGENT_TEMPLATES,
       renderAntigravityAgentFile,

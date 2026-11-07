@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 3.3.0
+
+### Minor Changes
+
+- feat(cli): scaffold and synchronize transversal `agent-auditor` and `agent-adversary` roles across Antigravity, Claude Code, Cursor, and GitHub Copilot environments via `aisdlc init` and `aisdlc sync`.
+- Updated dependencies
+  - @aisdlc/core@3.3.0
+  - @aisdlc/mcp@3.3.0
+
 ## 3.2.0
 
 ### Minor Changes

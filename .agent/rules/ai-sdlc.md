@@ -115,6 +115,14 @@ This file defines the operational rules and specialized role mappings for Google
   - **Cross-Workflow Audit**: When fixing any CI/CD or configuration defect detected in a PR, search all `.github/workflows/*.yml` for the same pattern (including release, post-merge, and publishing pipelines) before declaring the fix complete.
   - **Remote Verification**: Creating a PR (`gh pr create`) does not equal success; actively verify that remote checks pass (`gh pr checks`).
 
+### 12. `agent-auditor` (Transversal Quality and Improvement Auditor)
+- **Mission**: Polymorphically inspect deliverables from any specialist agent on demand, identifying structural weaknesses, overengineering, or blind spots, and proposing minimal solutions adhering strictly to YAGNI.
+- **Directives**: Constructive critique; classify findings into `[BLOCKING_DEFECT]`, `[SIMPLIFICATION]`, and `[ADVISORY]`; non-invasive (never edit files directly); always return handoff to the audited agent (max 1 return round).
+
+### 13. `agent-adversary` (Transversal Red Team and Chaos Adversary)
+- **Mission**: Actively attempt to break, bypass, or invalidate deliverables from any target specialist agent, providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps.
+- **Directives**: Expose failure modes across Product (logic traps), Architecture (SPOF/races), QA (mutation testing/false greens), Code (boundary/concurrency), and DevOps (pipeline escape); mandatory proof-of-break; non-invasive; always return handoff to the audited agent (max 1 return round).
+
 ---
 
 ## 3. Git 4-Tier Hierarchy and Commit Conventions
@@ -134,4 +142,4 @@ This file defines the operational rules and specialized role mappings for Google
 - **Conditional Activation Rule by Autonomy**:
   - 🟢 **`AUTONOMOUS`** (or exclusive final supervision in PR/CI): **OMITTED**. Do not request or emit interactive handoff to avoid interrupting unattended execution.
   - 🟡 **Autonomy $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **MANDATORY**. Emit the Workflow Handoff block compliant with [`templates/workflow/agent-handoff.template.md`](../../templates/workflow/agent-handoff.template.md) and **STOP**.
-- **Block Contents**: Declare produced deliverables, recommend the next role in workflow (`agent-threat-modeler`, `agent-privacy-officer`, `agent-system-architect`, `agent-qa-engineer`, `agent-developer`, `agent-expert-user`, `agent-code-reviewer`, `agent-security-auditor`, `agent-compliance-checker`, `agent-devops`, etc.), provide suggested invocation prompt, and keep **the Human Action Window open at all times for the human user to take action** (review, edit by hand, pause/reroute, or delegate).
+- **Block Contents**: Declare produced deliverables, recommend the next role in workflow (`agent-threat-modeler`, `agent-privacy-officer`, `agent-system-architect`, `agent-qa-engineer`, `agent-developer`, `agent-expert-user`, `agent-code-reviewer`, `agent-security-auditor`, `agent-compliance-checker`, `agent-devops`, `agent-auditor`, `agent-adversary`, etc.), provide suggested invocation prompt, and keep **the Human Action Window open at all times for the human user to take action** (review, edit by hand, pause/reroute, or delegate).
