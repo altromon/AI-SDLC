@@ -6,7 +6,6 @@
  */
 
 const { execSync } = require('child_process');
-const fs = require('fs');
 const path = require('path');
 
 const PROTECTED_CODING_RULES_FILES = [
@@ -21,6 +20,7 @@ const PROTECTED_CODING_RULES_FILES = [
   '.golangci.yml',
   '.clang-tidy',
   'cmake/AisdlcStrictCompiler.cmake',
+  '.github/CODEOWNERS',
 ];
 
 function getWorkingBranch(cwd) {
@@ -47,7 +47,6 @@ function getWorkingBranch(cwd) {
 function isProtectedCodingRulesTarget(targetPath, cwd) {
   if (!targetPath) return false;
   const resolved = path.isAbsolute(targetPath) ? targetPath : path.resolve(cwd, targetPath);
-  if (!fs.existsSync(resolved)) return false;
 
   const norm = resolved.replace(/\\/g, '/');
   const rel = path.relative(cwd, resolved).replace(/\\/g, '/');

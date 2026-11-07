@@ -4,6 +4,7 @@
 
 import { canonicalSort } from '../utils/fs.js';
 import { resolveDeterministicDate } from '../utils/time.js';
+import { collectCodingRulesBypassViolations } from './coding-rules-bypass.js';
 import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -25,6 +26,7 @@ export const PROTECTED_BYPASS_PATTERNS: RegExp[] = [
   /08_security_concept\.md$/i,
   /09_decisions[\\/]/i,
   /migrations?[\\/]/i,
+  /^\.github[\\/]CODEOWNERS$/i,
 ];
 
 export function detectProfileFromChange(changeDir: string): ChangeProfile {
@@ -204,7 +206,10 @@ export function verifyProgressiveFriction(
     options.modifiedFiles ||
     (profile === 'patch' ? detectGitDiffFiles(rootDir) : []);
 
-  const violations = profile === 'patch' ? collectPatchViolations(rootDir, modifiedFiles) : [];
+  const violations = [
+    ...(profile === 'patch' ? collectPatchViolations(rootDir, modifiedFiles) : []),
+    ...collectCodingRulesBypassViolations(rootDir),
+  ];
   const bypassed = violations.length > 0;
   const success = !bypassed;
 

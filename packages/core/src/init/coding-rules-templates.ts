@@ -34,6 +34,7 @@ export const PROTECTED_CODING_RULES_FILES: readonly string[] = [
   '.golangci.yml',
   '.clang-tidy',
   'cmake/AisdlcStrictCompiler.cmake',
+  '.github/CODEOWNERS',
 ];
 
 export const DOTNET_DIRECTORY_BUILD_PROPS = `<Project>
@@ -283,7 +284,6 @@ export const STARTER_GUARD_BRANCH_CJS = `#!/usr/bin/env node
  */
 
 const { execSync } = require('child_process');
-const fs = require('fs');
 const path = require('path');
 
 const PROTECTED_CODING_RULES_FILES = [
@@ -298,6 +298,7 @@ const PROTECTED_CODING_RULES_FILES = [
   '.golangci.yml',
   '.clang-tidy',
   'cmake/AisdlcStrictCompiler.cmake',
+  '.github/CODEOWNERS',
 ];
 
 function getWorkingBranch(cwd) {
@@ -323,36 +324,35 @@ function getWorkingBranch(cwd) {
 
 function isProtectedCodingRulesTarget(targetPath, cwd) {
   if (!targetPath) return false;
-  const resolved = path.isAbsolute(targetPath) ? targetPath : path.resolve(cwd, targetPath);
-  if (!fs.existsSync(resolved)) return false;
+  const resolved = path.resolve(cwd, targetPath);
 
   const norm = resolved.replace(/\\\\/g, '/');
   const rel = path.relative(cwd, resolved).replace(/\\\\/g, '/');
   return PROTECTED_CODING_RULES_FILES.some(
     (ruleFile) => rel === ruleFile || norm.endsWith('/' + ruleFile)
-  );
+  ) || rel.startsWith('templates/coding-rules/');
 }
 
 function evaluateGuardDecision(payload) {
   const targetPath = payload.toolCall?.args?.Path || '';
   const workspacePaths = payload.workspacePaths || [];
   const cwd = workspacePaths[0] || process.cwd();
-  const normPath = targetPath.replace(/\\\\/g, '/');
+  const resolvedPath = targetPath ? path.resolve(cwd, targetPath) : '';
+  const normPath = resolvedPath.replace(/\\\\/g, '/');
 
-  if (
-    normPath.includes('.gemini') ||
-    normPath.includes('/brain/') ||
-    normPath.includes('/scratch/') ||
-    normPath.includes('/.git/')
-  ) {
-    return { decision: 'allow' };
-  }
-
-  if (isProtectedCodingRulesTarget(targetPath, cwd)) {
+  if (isProtectedCodingRulesTarget(resolvedPath, cwd)) {
     return {
       decision: 'deny',
       reason: \`❌ [AI-SDLC Immutable Coding Rules Guard] BLOCKED: AI agents are forbidden from modifying protected coding rules file '\${path.basename(targetPath)}'. Fix the source or test code to satisfy the compiler/linter rules instead of altering the rule configuration.\`,
     };
+  }
+
+  if (
+    normPath.includes('/.gemini/') ||
+    normPath.includes('/brain/') ||
+    normPath.includes('/scratch/')
+  ) {
+    return { decision: 'allow' };
   }
 
   const branch = getWorkingBranch(cwd);
