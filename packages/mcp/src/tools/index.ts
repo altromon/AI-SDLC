@@ -43,6 +43,8 @@ import {
   writeReleaseKpiReport,
   resolveDeterministicDate,
   type SastSeverity,
+  submitReviewReport,
+  isReviewerRole,
 } from '@aisdlc/core';
 
 export type McpRole =
@@ -80,6 +82,9 @@ export const MUTATION_TOOLS = new Set([
   'sdd_check_fix',
   'sdd_deposit',
   'sdd_integrate',
+  'report',
+  'report_dashboard',
+  'report_quality',
 ]);
 
 export const READONLY_ROLES = new Set([
@@ -90,7 +95,10 @@ export const READONLY_ROLES = new Set([
   'agent-security-auditor',
   'agent-compliance-checker',
   'agent-privacy-officer',
+  'agent-expert-user',
 ]);
+
+export const REVIEWER_ONLY_TOOLS = new Set(['review_submit']);
 
 export function hashParams(params: unknown): string {
   try {
@@ -167,14 +175,37 @@ function formatCatchError(err: unknown, rootDir?: string) {
 
 function resolveEffectiveRole(optionsRole?: string, paramsRole?: unknown): string {
   if (optionsRole && READONLY_ROLES.has(optionsRole.toLowerCase())) return optionsRole;
+  const envRole = process.env.AISDLC_MCP_ROLE;
+  if (envRole && READONLY_ROLES.has(envRole.toLowerCase())) return envRole;
   if (typeof paramsRole === 'string' && paramsRole) return paramsRole;
   if (optionsRole) return optionsRole;
-  return process.env.AISDLC_MCP_ROLE || 'developer';
+  return envRole || 'developer';
 }
 
-function isRoleAuthorized(tool: string, role: string): boolean {
-  if (!MUTATION_TOOLS.has(tool)) return true;
-  return !READONLY_ROLES.has(role.toLowerCase());
+const WRITE_FLAG_CHECKERS: Record<string, (p: Record<string, unknown>) => boolean> = {
+  verify_quality: (p) => Boolean(p.updateBaseline),
+  verify_pdac: (p) => Boolean(p.autoSync),
+  verify_privacy: (p) => Boolean(p.generateRopa || p.ropaOutputPath || p.reportOutputPath),
+  kpi_release: (p) => Boolean(p.writeReports || p.outputDir),
+};
+
+function hasWriteFlags(tool: string, params: Record<string, unknown>): boolean {
+  const check = WRITE_FLAG_CHECKERS[tool];
+  return check ? check(params) : false;
+}
+
+function isRoleAuthorized(tool: string, role: string, params: Record<string, unknown> = {}): boolean {
+  const norm = role.toLowerCase();
+  if (REVIEWER_ONLY_TOOLS.has(tool)) {
+    return isReviewerRole(norm);
+  }
+  if (MUTATION_TOOLS.has(tool)) {
+    return !READONLY_ROLES.has(norm);
+  }
+  if (READONLY_ROLES.has(norm) && hasWriteFlags(tool, params)) {
+    return false;
+  }
+  return true;
 }
 
 function recordToolAudit(
@@ -246,7 +277,7 @@ async function executeSecuredTool<T extends Record<string, unknown>>(
   const hash = hashParams(params);
   const baseRoot = options.rootDir || process.cwd();
 
-  if (!isRoleAuthorized(toolName, role)) {
+  if (!isRoleAuthorized(toolName, role, params)) {
     return handleUnauthRole(options, toolName, role, hash, start, baseRoot);
   }
 
@@ -570,6 +601,35 @@ function registerGetActiveHandoffTool(server: McpServer, options: RegisterToolsO
   });
 }
 
+const REVIEW_SUBMIT_SCHEMA = {
+  change: z.string().describe('ID of the active change (e.g. chg-054-foo)'),
+  verdict: z.enum(['COMPLIANT', 'SUGGESTIONS', 'BLOCKING']).describe('Review verdict'),
+  body: z.string().describe('Review report findings and markdown body'),
+  root: z.string().optional().describe('Optional workspace root directory'),
+  role: z.string().optional().describe('Reviewer role (e.g. agent-code-reviewer)'),
+};
+
+function registerReviewSubmitTool(server: McpServer, options: RegisterToolsOptions): void {
+  server.tool(
+    'review_submit',
+    'Persists a formal reviewer evaluation report under specs/changes/active/<change>/reviews/<reviewer>.md. The only sanctioned write channel for reviewer roles.',
+    REVIEW_SUBMIT_SCHEMA,
+    async (params) => {
+      return executeSecuredTool('review_submit', params, options, (root) => {
+        const effectiveRole = resolveEffectiveRole(options.role, params.role);
+        const result = submitReviewReport({
+          rootDir: root,
+          changeId: params.change,
+          reviewer: effectiveRole,
+          verdict: params.verdict,
+          body: params.body,
+        });
+        return { data: result, isError: !result.success, root };
+      });
+    }
+  );
+}
+
 const VERIFY_QUALITY_SCHEMA = {
   root: z.string().optional(),
   maxCyclomatic: z.number().optional(),
@@ -862,6 +922,7 @@ function registerLifecycleAndSddTools(server: McpServer, options: RegisterToolsO
   registerSddDepositTool(server, options);
   registerSddIntegrateTool(server, options);
   registerGetActiveHandoffTool(server, options);
+  registerReviewSubmitTool(server, options);
 }
 
 function registerVerificationTools(server: McpServer, options: RegisterToolsOptions): void {
