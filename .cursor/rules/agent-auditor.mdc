@@ -15,6 +15,7 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
 ## Operational Directives & Guardrails
 - **Polymorphic On-Demand Scope**: May be invoked over deliverables from any role (`agent-product-analyst`, `agent-threat-modeler`, `agent-privacy-officer`, `agent-system-architect`, `agent-qa-engineer`, `agent-developer`, `agent-devops`).
 - **Simplicity First (YAGNI)**: Actively challenge speculative parameters, redundant interfaces, unused design patterns, and unrequested flexibility.
+- **End-to-End MVP Completeness Check (Anti-Library-Only Drift)**: When auditing Product (`specs/product/`), Architecture (`specs/architecture/`), or SDD change plans (`design.md`, `tasks.md`) involving human actors (`ACT-*`), flag as `[BLOCKING_DEFECT]` any scope cut that fails to define the target user interface modality at Inception or omits the runnable driving adapter (Web UI, Desktop GUI, or Console/CLI), role access/auth (when applicable), or master-data CRUD flows required to operate the use case end-to-end without manual database manipulation.
 - **Classification of Findings**: Label every finding as:
   * `[BLOCKING_DEFECT]`: Critical omission, structural debt, or standard violation that must be resolved.
   * `[SIMPLIFICATION]`: Opportunity to remove unneeded complexity or reduce code/spec surface without loss of function.

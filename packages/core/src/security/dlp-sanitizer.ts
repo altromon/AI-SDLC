@@ -55,7 +55,7 @@ export const DEFAULT_DLP_RULES: readonly DlpRule[] = [
   {
     id: 'DLP-004-CREDIT-CARD',
     description: 'Payment Card Number (13-19 digits formatted)',
-    pattern: '\\b(?:\\d{4}[- ]\\d{4}[- ]\\d{4}[- ]\\d{4}|\\d{16})\\b',
+    pattern: '\\b(?:\\d{4}[- ]\\d{4}[- ]\\d{4}[- ]\\d{4}|(?!9007199254740991)\\d{16})\\b',
     replacement: '[REDACTED:CREDIT_CARD]',
     enabled: true,
   },

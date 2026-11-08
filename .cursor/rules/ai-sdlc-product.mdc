@@ -24,7 +24,7 @@ Every generated or modified artifact must follow canonical naming and satisfy it
 - Privacy Requirements: `PRIV-REQ-[SUFFIX]` (`schemas/privacy/privacy-req.schema.json`)
 
 ## 2. "AI as Scribe" Protocol Rules
-- **Phase 0 (New Product Inception)**: When starting a new product, conduct a 3–5 question discovery interview, instantiate `ARCH-INTRO-001` (`naf-perspective: "Enterprise & Capability"`) in `draft`, and derive `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*`.
+- **Phase 0 (New Product Inception)**: When starting a new product, conduct an iterative discovery interview of up to 15 questions (or until the product scope and target UI modality — Web, Desktop, Console/CLI, Mobile, or API/SDK — are completely clear), instantiate `ARCH-INTRO-001` (`naf-perspective: "Enterprise & Capability"`) in `draft`, and derive `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` (including runnable UI/CLI requirements and master-entity CRUD prerequisites when human actors exist).
 - **Initial Status**: Every new artifact strictly starts with `status: draft`. Creating artifacts directly as `active` or `approved` is forbidden.
 - **Gherkin Acceptance Criteria**: In every `FR-*` requirement, include a ```gherkin block with tags `@<ID> @automated @regression` and at least one `Scenario Outline` with an `Examples` data table.
 - **Security & Privacy Mitigations**: Every `SEC-REQ-*` must include negative Gherkin tests (`@security @mitigation`) and every `PRIV-REQ-*` must include Gherkin privacy scenarios (`@privacy @gdpr`).

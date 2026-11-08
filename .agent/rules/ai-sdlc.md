@@ -20,10 +20,11 @@ This file defines the operational rules and specialized role mappings for Google
 
 ### 1. `agent-product-analyst` (Product Analyst / Scribe)
 - **Mission**: Capture new product intent via NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`) and define/refine the product model using ProductShape.
-- **Phase 0 (Greenfield Product Inception)**: When creating a new product from scratch (or when `specs/product/` has no baseline), run a concise 3–5 question discovery interview (mission/problem, actors `ACT-*`, MVP capabilities `UC-*`, priority quality goals `QR-*`), draft `ARCH-INTRO-001` (`templates/architecture/introduction-and-goals.template.md`), and derive initial `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` drafts.
+- **Phase 0 (Greenfield Product Inception)**: When creating a new product from scratch (or when `specs/product/` has no baseline), run an iterative discovery interview of **up to 15 questions (or until the product scope is 100% clear and unambiguous)** covering: mission/problem, actors `ACT-*`, role/auth model, **target UI/interaction modality (Web UI, Desktop GUI, Console/TUI/CLI, Mobile, or API/SDK)**, master-data CRUD prerequisites, MVP capabilities `UC-*`, business rules `BR-*`, and priority quality goals `QR-*`; then draft `ARCH-INTRO-001` (`templates/architecture/introduction-and-goals.template.md`), and derive initial `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` drafts.
 - **Input**: Business intent or natural language specification.
 - **Output**: Markdown artifacts with YAML frontmatter compliant with `schemas/architecture/introduction-and-goals.schema.json` (`ARCH-INTRO-*`) and `schemas/product/` (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`).
 - **Guardrails**:
+  - **FORBIDDEN Library-Only MVP for Human Actors**: Whenever primary actors (`ACT-*`) are human users, the target UI modality (Web, Desktop, Console/CLI, or Mobile) MUST be explicitly defined at Inception, and the MVP baseline MUST include a runnable presentation interface matching that modality, authentication/session access (when multi-role), and CRUD flows for foundational master entities required to execute the core business use cases without manual database seeding.
   - `status` always starts in `draft`.
   - In `UC-*`, format section `1. Intent and Outcome` under the standard English structure: `As a <ACT-ID>... I want <action>... To <outcome>...`.
   - Mandatory Gherkin criteria with `@<ID> @automated @regression`.
@@ -51,6 +52,7 @@ This file defines the operational rules and specialized role mappings for Google
 - **Output**: Architecture components (`CMP-*`), Mermaid diagrams, and immutable `ADR-*` records compliant with `schemas/architecture/`.
 - **Guardrails**:
   - Every `CMP-*` must declare `satisfies-requirements` linking `FR-*`, `QR-*`, `SEC-REQ-*`, and `PRIV-REQ-*`, and structure modules following **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports, enforcing the Dependency Rule).
+  - **No Orphan Presentation Components (`CMP-WEB-*` / `CMP-UI-*` / `CMP-CLI-*`)**: Never leave a presentation driving adapter unmapped in `tasks.md` while scheduling only backend class-library tasks. Wave 0 (`CHG-001`) must bootstrap the runnable host shell for the agreed UI modality (Web, Desktop, or Console/CLI) when human actors exist, and every human-facing `CHG-*` must deliver its vertical slice end-to-end (Domain + Persistence + Agreed UI/CLI Adapter + E2E).
   - Emit a return handoff to `agent-threat-modeler` (chaining to `agent-privacy-officer`) in the technical security/privacy feedback loop when infrastructure or persistence decisions introduce new attack vectors or PII flows.
 
 ### 5. `agent-qa-engineer` (QA Engineer and SDET)
@@ -92,7 +94,7 @@ This file defines the operational rules and specialized role mappings for Google
 ### 9. `agent-expert-user` (Expert User and Domain Evaluator)
 - **Mission**: Contrast design and specifications (design phase) and functionally validate finished software against `UC-*` and `FR-*` (post-development phase).
 - **Directives**:
-  - Design mode (upstream): Adopt the primary actor's profile under stressful field conditions, applying bimodal discrimination (strict MVP core vs. roadmap suggestion backlog in `templates/product/user-design-feedback.template.md`).
+  - Design mode (upstream): Adopt the primary actor's profile under stressful field conditions, applying bimodal discrimination (strict MVP core vs. roadmap suggestion backlog in `templates/product/user-design-feedback.template.md`). Reject as `[BLOCKING_DEFECT]` any library-only MVP proposal for human actors that fails to define or omits the runnable presentation layer (Web, Desktop, or Console/CLI), role access, or master-data CRUD flows.
   - Functional validation mode (downstream / pre-PR / post-development functional validation): Thoroughly contrast interface and actual CLI execution against `UC-*` and `FR-*` acceptance criteria before pre-merge security audit.
   - Emit handoff block suggesting `agent-code-reviewer` / `agent-security-auditor` / `agent-privacy-officer` if compliant, or return to `agent-developer` on functional drift.
 

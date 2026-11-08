@@ -53,7 +53,9 @@ export function getCytoscapeScript(): string {
   const scriptPath = resolveCytoscapePath();
   if (scriptPath) {
     try {
-      cachedScript = fs.readFileSync(scriptPath, 'utf-8');
+      cachedScript = fs
+        .readFileSync(scriptPath, 'utf-8')
+        .replace(/\b9007199254740991\b/g, '(Math.pow(2,53)-1)');
       return cachedScript;
     } catch {
       // Fallback

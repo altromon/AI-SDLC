@@ -454,7 +454,7 @@ export const DASHBOARD_CLIENT_SCRIPT = `
           container: document.getElementById('cy'),
           elements: safeElements,
         boxSelectionEnabled: false,
-        autoungrabify: true,
+        autoungrabify: false,
         style: [
           {
             selector: 'node',
@@ -743,6 +743,9 @@ export const DASHBOARD_CLIENT_SCRIPT = `
           spacingFactor: 1.25
         }
       });
+
+      setTimeout(function() { if (cy) { cy.resize(); cy.fit(30); } }, 150);
+      window.addEventListener('resize', function() { if (cy) { cy.resize(); } });
 
       cy.on('tap', 'node', function(evt) {
         var node = evt.target;

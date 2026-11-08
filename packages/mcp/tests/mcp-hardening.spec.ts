@@ -10,7 +10,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createMcpServer } from '../src/server.js';
-import type { McpAuditLogEntry } from '../src/tools/index.js';
+import { resolveRoot, type McpAuditLogEntry } from '../src/tools/index.js';
 
 describe('MCP Server Hardening Suite (ENT-04 / CHG-047)', () => {
   let tmpDir: string;
@@ -106,6 +106,43 @@ rules:
       });
 
       expect(result.isError).toBeFalsy();
+    });
+
+    it('should allow external absolute workspace root when allowExternalRoots is enabled', () => {
+      const externalTmp = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-ext-'));
+      try {
+        const resolved = resolveRoot(externalTmp, tmpDir, { allowExternalRoots: true });
+        expect(resolved).toBe(path.resolve(externalTmp));
+      } finally {
+        fs.rmSync(externalTmp, { recursive: true, force: true });
+      }
+    });
+
+    it('should reject external root when allowExternalRoots is explicitly false', () => {
+      const externalTmp = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-ext-'));
+      try {
+        expect(() => {
+          resolveRoot(externalTmp, tmpDir, { allowExternalRoots: false });
+        }).toThrow(/escapes workspace root/);
+      } finally {
+        fs.rmSync(externalTmp, { recursive: true, force: true });
+      }
+    });
+
+    it('should enforce allowedRoots boundary when configured', () => {
+      const externalAllowed = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-allowed-'));
+      const externalForbidden = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-forbidden-'));
+      try {
+        const resolved = resolveRoot(externalAllowed, tmpDir, { allowedRoots: [externalAllowed] });
+        expect(resolved).toBe(path.resolve(externalAllowed));
+
+        expect(() => {
+          resolveRoot(externalForbidden, tmpDir, { allowedRoots: [externalAllowed] });
+        }).toThrow(/escapes workspace root and allowed roots/);
+      } finally {
+        fs.rmSync(externalAllowed, { recursive: true, force: true });
+        fs.rmSync(externalForbidden, { recursive: true, force: true });
+      }
     });
   });
 

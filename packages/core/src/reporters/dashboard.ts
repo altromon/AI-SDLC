@@ -19,7 +19,7 @@ import { verifyTestingCoverage } from '../verifiers/testing-coverage.js';
 import { verifyTraceability } from '../verifiers/traceability.js';
 import { verifyManuals } from '../verifiers/manuals.js';
 import { aggregateCommitKpiRecords, aggregatePrKpis, PrKpiAggregation } from './pr-kpis.js';
-import { CommitKpiRecord } from '../git/trailers.js';
+import { CommitKpiRecord, extractAllRepoCommitKpis } from '../git/trailers.js';
 import { readCodeCoverageSummary } from './quality-report.js';
 import { buildGraphElements } from './dashboard-graph.js';
 import { renderDashboardHtml } from './dashboard-html.js';
@@ -205,7 +205,36 @@ function collectGitPrefixedBranches(rootDir: string): string[] {
   }
 }
 
-function resolveCandidateBranches(rootDir: string, activeBranch: string, history: DashboardHistoricalKpi[]): string[] {
+function addDefaultGitBranches(rootDir: string, branchSet: Set<string>): void {
+  for (const def of ['main', 'master']) {
+    try {
+      execFileSync('git', ['rev-parse', '--verify', '--quiet', def], {
+        cwd: rootDir,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      branchSet.add(def);
+    } catch {
+      // not found
+    }
+  }
+}
+
+function addCommitTrailerBranches(allRepoCommits: CommitKpiRecord[] | undefined, branchSet: Set<string>): void {
+  if (!allRepoCommits) return;
+  for (const c of allRepoCommits) {
+    const pRef = c.trailers?.parentRef;
+    if (pRef && /^(feat|bug|task|release)\//i.test(pRef)) {
+      branchSet.add(pRef);
+    }
+  }
+}
+
+function resolveCandidateBranches(
+  rootDir: string,
+  activeBranch: string,
+  history: DashboardHistoricalKpi[],
+  allRepoCommits?: CommitKpiRecord[]
+): string[] {
   const branchSet = new Set<string>();
   if (activeBranch && activeBranch !== 'HEAD') {
     branchSet.add(activeBranch);
@@ -215,15 +244,58 @@ function resolveCandidateBranches(rootDir: string, activeBranch: string, history
   }
   for (const b of collectGitUnmergedBranches(rootDir)) branchSet.add(b);
   for (const b of collectGitPrefixedBranches(rootDir)) branchSet.add(b);
+  addDefaultGitBranches(rootDir, branchSet);
+  addCommitTrailerBranches(allRepoCommits, branchSet);
   return Array.from(branchSet);
 }
 
-function fetchBranchKpi(rootDir: string, branch: string): PrKpiAggregation | null {
+function fetchDefaultBranchKpi(
+  rootDir: string,
+  branch: string,
+  allRepoCommits?: CommitKpiRecord[]
+): PrKpiAggregation | null {
+  if (allRepoCommits && allRepoCommits.length > 0) {
+    return aggregateCommitKpiRecords(allRepoCommits, branch, branch);
+  }
+  const base = resolveDefaultBranchBase(rootDir, branch);
+  const kpi = aggregatePrKpis(base, branch, { cwd: rootDir });
+  return kpi && kpi.totalCommits > 0 ? kpi : null;
+}
+
+function isCommitMatchingBranch(c: CommitKpiRecord, branch: string, branchBase: string): boolean {
+  const pRef = (c.trailers?.parentRef || '').toLowerCase();
+  const bLower = branch.toLowerCase();
+  const baseLower = branchBase.toLowerCase();
+  return (
+    pRef === bLower ||
+    pRef === baseLower ||
+    (pRef.length > 0 && bLower.includes(pRef)) ||
+    c.subject.toLowerCase().includes('(' + baseLower + ')')
+  );
+}
+
+function fetchMergedBranchKpi(
+  branch: string,
+  allRepoCommits?: CommitKpiRecord[]
+): PrKpiAggregation | null {
+  if (!allRepoCommits || allRepoCommits.length === 0) return null;
+  const branchBase = branch.replace(/^(feat|bug|task|release)\//i, '');
+  const matched = allRepoCommits.filter((c) => isCommitMatchingBranch(c, branch, branchBase));
+  return matched.length > 0 ? aggregateCommitKpiRecords(matched, 'main', branch) : null;
+}
+
+function fetchBranchKpi(
+  rootDir: string,
+  branch: string,
+  allRepoCommits?: CommitKpiRecord[]
+): PrKpiAggregation | null {
   try {
-    const isDefault = branch === 'main' || branch === 'master';
-    const base = isDefault ? resolveDefaultBranchBase(rootDir, branch) : 'main';
-    const kpi = aggregatePrKpis(base, branch, { cwd: rootDir });
-    return kpi && kpi.totalCommits > 0 ? kpi : null;
+    if (branch === 'main' || branch === 'master') {
+      return fetchDefaultBranchKpi(rootDir, branch, allRepoCommits);
+    }
+    const kpi = aggregatePrKpis('main', branch, { cwd: rootDir });
+    if (kpi && kpi.totalCommits > 0) return kpi;
+    return fetchMergedBranchKpi(branch, allRepoCommits);
   } catch {
     return null;
   }
@@ -243,11 +315,12 @@ function populateCandidateTelemetries(
   rootDir: string,
   candidateBranches: string[],
   telemetries: Record<string, PrKpiAggregation>,
-  commitMap: Map<string, CommitKpiRecord>
+  commitMap: Map<string, CommitKpiRecord>,
+  allRepoCommits?: CommitKpiRecord[]
 ): void {
   for (const branch of candidateBranches) {
     if (telemetries[branch]) continue;
-    const kpi = fetchBranchKpi(rootDir, branch);
+    const kpi = fetchBranchKpi(rootDir, branch, allRepoCommits);
     if (kpi) recordBranchKpi(telemetries, commitMap, branch, kpi);
   }
 }
@@ -271,12 +344,17 @@ function collectAllBranchTelemetries(
   const branchTelemetries: Record<string, NonNullable<typeof activePrKpi>> = {};
   const uniqueCommits = new Map<string, CommitKpiRecord>();
 
+  const allRepoCommits = extractAllRepoCommitKpis({ cwd: rootDir });
+  for (const c of allRepoCommits) {
+    uniqueCommits.set(c.sha, c);
+  }
+
   if (activePrKpi && activeBranch && activeBranch !== 'HEAD') {
     recordBranchKpi(branchTelemetries, uniqueCommits, activeBranch, activePrKpi);
   }
 
-  const candidateBranches = resolveCandidateBranches(rootDir, activeBranch, history);
-  populateCandidateTelemetries(rootDir, candidateBranches, branchTelemetries, uniqueCommits);
+  const candidateBranches = resolveCandidateBranches(rootDir, activeBranch, history, allRepoCommits);
+  populateCandidateTelemetries(rootDir, candidateBranches, branchTelemetries, uniqueCommits, allRepoCommits);
 
   const totalTelemetry = computeConsolidatedTelemetry(Array.from(uniqueCommits.values()), activePrKpi);
   return { branchTelemetries, totalTelemetry };

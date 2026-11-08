@@ -74,6 +74,8 @@ export interface RegisterToolsOptions {
   auditLogPath?: string;
   enableAuditLog?: boolean;
   onAuditLog?: (entry: McpAuditLogEntry) => void;
+  allowExternalRoots?: boolean;
+  allowedRoots?: string[];
 }
 
 export const MUTATION_TOOLS = new Set([
@@ -126,10 +128,47 @@ export function assertWithinRoot(targetPath: string, rootDir: string, paramName 
   return resolvedTarget;
 }
 
-function resolveRoot(customRoot: string | undefined, defaultRoot: string): string {
+function checkAllowedRoots(resolved: string, base: string, allowedRoots?: string[]): boolean {
+  if (!allowedRoots || allowedRoots.length === 0) return true;
+  return [base, ...allowedRoots].some((allowed) => {
+    const rel = path.relative(path.resolve(allowed), resolved);
+    return !rel.startsWith('..') && !path.isAbsolute(rel);
+  });
+}
+
+function resolveExternalRoot(
+  customRoot: string,
+  base: string,
+  options?: RegisterToolsOptions,
+  paramName = 'root'
+): string {
+  const resolved = path.resolve(customRoot);
+  if (!checkAllowedRoots(resolved, base, options?.allowedRoots)) {
+    throw new Error(
+      `Security violation: ${paramName} '${customRoot}' escapes workspace root and allowed roots (Path Traversal blocked).`
+    );
+  }
+  return resolved;
+}
+
+export function resolveRoot(
+  customRoot: string | undefined,
+  defaultRoot: string,
+  options?: RegisterToolsOptions,
+  paramName = 'root'
+): string {
   const base = defaultRoot || process.cwd();
   if (!customRoot) return path.resolve(base);
-  return assertWithinRoot(customRoot, base, 'root');
+
+  const allowExternal =
+    options?.allowExternalRoots !== false &&
+    process.env.AISDLC_MCP_ALLOW_EXTERNAL_ROOTS !== 'false';
+
+  if (path.isAbsolute(customRoot) && allowExternal) {
+    return resolveExternalRoot(customRoot, base, options, paramName);
+  }
+
+  return assertWithinRoot(customRoot, base, paramName);
 }
 
 export function recordAuditLog(options: RegisterToolsOptions, entry: McpAuditLogEntry): void {
@@ -282,7 +321,7 @@ async function executeSecuredTool<T extends Record<string, unknown>>(
   }
 
   try {
-    const targetRoot = resolveRoot(params.root as string | undefined, baseRoot);
+    const targetRoot = resolveRoot(params.root as string | undefined, baseRoot, options);
     const res = await runToolExecutor(executor, targetRoot);
     recordToolAudit(options, toolName, role, hash, start, !res.isError);
     return formatResponse(res.data, res.isError, res.root);
@@ -384,7 +423,7 @@ function registerNewTool(server: McpServer, options: RegisterToolsOptions): void
   server.tool('new', 'Initializes a new project or configures AI-SDLC governance.', NEW_TOOL_SCHEMA, async (params) => {
     return executeSecuredTool('new', params, options, () => {
       if (params.targetDir) {
-        assertWithinRoot(params.targetDir, baseRoot, 'targetDir');
+        resolveRoot(params.targetDir, baseRoot, options, 'targetDir');
       }
       const result = initProject({
         rootDir: baseRoot,

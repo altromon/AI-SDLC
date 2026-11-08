@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 3.4.0
+
+### Minor Changes
+
+- fix(mcp): support multi-workspace external root resolution when `allowExternalRoots` or `allowedRoots` is configured while preserving relative path-traversal confinement, and bump MCP server version to `3.4.0`.
+- Updated dependencies
+  - @aisdlc/core@3.4.0
+
 ## 3.3.0
 
 ### Minor Changes

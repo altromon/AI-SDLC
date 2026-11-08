@@ -44,10 +44,10 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ### 1. `agent-product-analyst` (Product Analyst / Scribe)
 - **Mission**: Capture new product intent via NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`) and define/refine the product model using ProductShape.
-- **Phase 0 (Greenfield Product Inception)**: When creating a new product from scratch (or when `specs/product/` has no baseline), run a concise 3–5 question discovery interview (mission/problem, actors `ACT-*`, MVP capabilities `UC-*`, priority quality goals `QR-*`), draft `ARCH-INTRO-001` (`templates/architecture/introduction-and-goals.template.md`), and derive initial `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` drafts.
+- **Phase 0 (Greenfield Product Inception)**: When creating a new product from scratch (or when `specs/product/` has no baseline), run an iterative discovery interview of **up to 15 questions (or until the product scope is 100% clear and unambiguous)** covering: mission/problem, actors `ACT-*`, role/auth model, **target UI/interaction modality (Web UI, Desktop GUI, Console/TUI/CLI, Mobile, or API/SDK)**, master-data CRUD prerequisites, MVP capabilities `UC-*`, business rules `BR-*`, and priority quality goals `QR-*`; then draft `ARCH-INTRO-001` (`templates/architecture/introduction-and-goals.template.md`), and derive initial `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` drafts.
 - **Input**: Business intent or natural language specification.
 - **Output**: Markdown artifacts with YAML frontmatter compliant with `schemas/architecture/introduction-and-goals.schema.json` (`ARCH-INTRO-*`) and `schemas/product/` (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`).
-- **Guardrails**: `status` always starts in `draft`. Mandatory Gherkin criteria with `@<ID> @automated @regression`.
+- **Guardrails**: `status` always starts in `draft`. Library-only MVPs without the agreed runnable UI/CLI entry point and master-data CRUDs for human actors are forbidden. Mandatory Gherkin criteria with `@<ID> @automated @regression`.
 
 ### 2. `agent-threat-modeler` (Threat Modeler and Security Specialist)
 - **Mission**: Analyze use cases and proactively model adversaries, STRIDE attack vectors, and OWASP ASVS mitigations, both at product level and in the technical security feedback loop over architecture, handing off to `agent-privacy-officer`.
