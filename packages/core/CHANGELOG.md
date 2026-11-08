@@ -1,5 +1,12 @@
 # @aisdlc/core
 
+## 3.4.0
+
+### Minor Changes
+
+- feat(agents): expand Phase 0 Greenfield Discovery Interview up to 15 iterative questions, require explicit interaction/presentation modality (`Web UI`, `Desktop GUI`, `Console/TUI/CLI`, `Mobile`, or `Headless API/SDK`), and enforce `FORBIDDEN Library-Only MVP for Human-Facing Products` across all IDE configurations and lifecycle skills.
+- fix(dashboard,dlp): extract full repository commit history (`extractAllRepoCommitKpis`), attribute merged branches via `Parent-Ref` trailers, and prevent `DLP-004-CREDIT-CARD` collision with `Number.MAX_SAFE_INTEGER` in the embedded Cytoscape bundle while enabling interactive node dragging (`autoungrabify: false`).
+
 ## 3.3.0
 
 ### Minor Changes

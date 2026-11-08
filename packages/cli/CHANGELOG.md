@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 3.4.0
+
+### Minor Changes
+
+- feat(cli): propagate iterative 15-question Phase 0 discovery and UI modality / anti-library-only MVP guardrails across all IDE targets via `aisdlc init` and `aisdlc sync`, and bump CLI version to `3.4.0`.
+- Updated dependencies
+  - @aisdlc/core@3.4.0
+  - @aisdlc/mcp@3.4.0
+
 ## 3.3.0
 
 ### Minor Changes
