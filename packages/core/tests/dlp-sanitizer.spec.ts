@@ -74,4 +74,12 @@ describe('Deterministic DLP Pre-Prompt Sanitizer (#74)', () => {
     expect(res.redactionCount).toBe(0);
     expect(res.sanitizedText).toBe('Contact: ceo@company.com');
   });
+
+  it('should not redact JavaScript Number.MAX_SAFE_INTEGER (9007199254740991) as credit card', () => {
+    const policy = createDefaultDlpPolicy();
+    const jsSnippet = 'const max = 9007199254740991;';
+    const res = sanitizeDlpText(jsSnippet, policy);
+    expect(res.sanitizedText).toBe('const max = 9007199254740991;');
+    expect(res.redactionCount).toBe(0);
+  });
 });

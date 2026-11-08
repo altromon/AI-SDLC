@@ -278,3 +278,30 @@ export function extractCommitKpisFromRange(
   }
   return records;
 }
+
+/**
+ * Extracts all commit records and their KPIs across the entire repository (git log --all).
+ */
+export function extractAllRepoCommitKpis(options: { cwd?: string } = {}): CommitKpiRecord[] {
+  const cwd = options.cwd || process.cwd();
+  const format = '---AI_SDLC_COMMIT---%n%H%x1f%an%x1f%ae%x1f%aI%x1f%s%n%B%n---AI_SDLC_BODY_END---';
+  let rawOutput = '';
+  try {
+    rawOutput = execFileSync('git', ['log', '--all', `--format=${format}`, '--numstat'], {
+      cwd,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+  } catch {
+    return [];
+  }
+  if (!rawOutput) return [];
+
+  const chunks = parseRawLogChunks(rawOutput);
+  const records: CommitKpiRecord[] = [];
+  for (const chunk of chunks) {
+    const rec = buildCommitKpiRecord(chunk);
+    if (rec) records.push(rec);
+  }
+  return records;
+}

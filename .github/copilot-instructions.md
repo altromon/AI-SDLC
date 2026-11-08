@@ -72,7 +72,7 @@ Non-Negotiable Quality Thresholds (`quality-policy.yaml`):
 
 | Role | Mission (summary) |
 | :--- | :--- |
-| `agent-product-analyst` | Phase 0 NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`, 3–5 question interview) + ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); `status` starts `draft`. |
+| `agent-product-analyst` | Phase 0 NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`, up to 15-question discovery interview defining UI modality & CRUD prerequisites) + ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); `status` starts `draft`. |
 | `agent-threat-modeler` | STRIDE/OWASP threat triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`); hands off to `agent-privacy-officer`. |
 | `agent-privacy-officer` | LINDDUN & GDPR/LOPDGDD privacy triad (`DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*`) + Pre-Merge `verify:privacy`. |
 | `agent-system-architect` | Modular arc42 + NAF v4 architecture (`CMP-*`, Mermaid diagrams, `ADR-*`). |

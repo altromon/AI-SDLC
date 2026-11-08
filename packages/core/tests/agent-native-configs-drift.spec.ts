@@ -413,4 +413,18 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       expect(skill.body).toMatch(/2 correction rounds/i);
     }
   });
+
+  it('verifies greenfield inception enforces iterative discovery up to 15 questions, explicit UI/interaction modality, and forbids library-only MVPs for human-facing products', async () => {
+    const { LIFECYCLE_SKILL_TEMPLATES, SPECIALIZED_AGENT_TEMPLATES } = await import('../src/init/index.js');
+    const greenfield = LIFECYCLE_SKILL_TEMPLATES.find((s) => s.id === 'aisdlc-greenfield');
+    expect(greenfield).toBeDefined();
+    expect(greenfield!.body).toMatch(/15 questions/i);
+    expect(greenfield!.body).toMatch(/FORBIDDEN Library-Only MVP for Human-Facing Products/);
+    expect(greenfield!.body).toMatch(/Web UI.*Desktop GUI.*Console/is);
+
+    const productAnalyst = SPECIALIZED_AGENT_TEMPLATES.find((a) => a.id === 'agent-product-analyst');
+    expect(productAnalyst).toBeDefined();
+    expect(productAnalyst!.body).toMatch(/15 questions/i);
+    expect(productAnalyst!.body).toMatch(/ANTI-LIBRARY-ONLY MVP/i);
+  });
 });

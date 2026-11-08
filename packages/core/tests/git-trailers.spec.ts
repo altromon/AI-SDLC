@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   parseCommitTrailers,
   formatCommitTrailers,
+  extractAllRepoCommitKpis,
 } from '../src/git/trailers.js';
 
 describe('Git Commit Trailers Engine', () => {
@@ -82,5 +83,14 @@ AI-Model: gpt-4o
     expect(formatted).toContain('Prompt-Tokens: 5000');
     expect(formatted).toContain('Completion-Tokens: 800');
     expect(formatted).toContain('Active-Time-Seconds: 120');
+  });
+
+  it('extracts all repo commits and trailers across entire history', () => {
+    const records = extractAllRepoCommitKpis({ cwd: process.cwd() });
+    expect(Array.isArray(records)).toBe(true);
+    expect(records.length).toBeGreaterThan(0);
+    const first = records[0];
+    expect(first.sha).toBeDefined();
+    expect(first.trailers).toBeDefined();
   });
 });

@@ -89,14 +89,15 @@ To prevent inconsistencies and broken reciprocal links:
 
 ### A. Phase 0: Greenfield & Brownfield Product Inception (`ARCH-INTRO-*`)
 When starting a new product from scratch (or when adopting AI-SDLC in a Brownfield repository without an `ARCH-INTRO-*` root vision artifact), `agent-product-analyst` executes a structured inception flow before any feature change (`change:new`) or code is written:
-1. **Structured Discovery Interview (3–5 Questions)**: The agent interviews the human Product Owner on:
+1. **Iterative Discovery Interview (Up to 15 Questions or Until Product Scope is 100% Clear)**: The agent interviews the human Product Owner in rounds of 3–5 questions (up to **15 questions maximum**, stopping earlier as soon as the product is clear) on:
    - Core problem, mission statement, and value proposition.
    - Primary stakeholders and actors (`ACT-*`).
-   - Essential MVP capabilities (`UC-*`) vs. future roadmap.
+   - **Target Interaction & Presentation Modality (`CON-*` / `ARCH-INTRO-001`)**: Explicitly define how human actors interact with the MVP (Web UI, Desktop GUI, Interactive Console/TUI/CLI, Mobile App, or Headless API/SDK if exclusively system-to-system). Never default to headless class libraries when human actors exist.
+   - Essential MVP capabilities (`UC-*`) vs. future roadmap, including foundational master-data / entity CRUD prerequisites.
    - Top 3–5 priority quality goals (`QR-*`) and constraints (`CON-*`).
-2. **Enterprise & Capability Vision (`ARCH-INTRO-001`)**: Instantiates `templates/architecture/introduction-and-goals.template.md` (`naf-perspective: "Enterprise & Capability"`, `status: draft`).
+2. **Enterprise & Capability Vision (`ARCH-INTRO-001`)**: Instantiates `templates/architecture/introduction-and-goals.template.md` (`naf-perspective: "Enterprise & Capability"`, `status: draft`), explicitly recording the agreed UI/interaction modality.
 3. **Initial ProductShape Baseline Derivation (Greenfield) or Retro-Inception Linking (Brownfield)**:
-   - **Greenfield**: Derives draft `ACT-*`, `JRN-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` artifacts (`status: draft`) linked to `ARCH-INTRO-001` for human review and approval.
+   - **Greenfield**: Derives draft `ACT-*`, `JRN-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` artifacts (`status: draft`) linked to `ARCH-INTRO-001` for human review and approval, ensuring every human `UC-*` defines a complete vertical slice through the agreed presentation modality.
    - **Brownfield (Retro-Inception)**: Synthesizes `ARCH-INTRO-001` from existing product/architecture artifacts and source code, linking directly to existing `cites-product-actors` (`ACT-*`), `cites-journeys` (`JRN-*`), and `cites-quality-goals` (`QR-*`) so the PDaC graph and Interactive Dashboard (`aisdlc report dashboard`) immediately reflect the root product vision.
 
 ### B. Continuous Product Evolution Cycle
@@ -105,8 +106,8 @@ When starting a new product from scratch (or when adopting AI-SDLC in a Brownfie
   Idea / Need (or Phase 0 New Product Intent)
       │
       ▼
-  ps:explore ────────────► agent-product-analyst conducts 3-5 question
-      │                   discovery (if new product -> ARCH-INTRO-001) or
+  ps:explore ────────────► agent-product-analyst conducts iterative discovery
+      │                   (up to 15 questions until clear -> ARCH-INTRO-001) or
       │                   reasons over existing graph to identify gaps
       ▼
 Product Change ─────────► changes/active/<chg-id>/: semantic delta with
