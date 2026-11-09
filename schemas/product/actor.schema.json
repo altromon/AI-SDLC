@@ -3,7 +3,14 @@
   "$id": "https://ai-sdlc.org/schemas/product/actor.schema.json",
   "title": "ProductShape Actor Schema (Versionable)",
   "type": "object",
-  "required": ["id", "type", "title", "status", "version", "role-type"],
+  "required": [
+    "id",
+    "type",
+    "title",
+    "status",
+    "version",
+    "role-type"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -28,22 +35,38 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "role-type": {
       "type": "string",
-      "enum": ["human-user", "ai-agent", "external-system", "sensor-iot"]
+      "enum": [
+        "human-user",
+        "ai-agent",
+        "external-system",
+        "sensor-iot"
+      ]
     },
     "description": {
       "type": "string"
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^ACT-[A-Z0-9]+(-[A-Z0-9]+)*$",
       "description": "Identifier of the actor superseded by this version or artifact."
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^ACT-[A-Z0-9]+(-[A-Z0-9]+)*$",
       "description": "Identifier of the new actor superseding this one upon deprecation/retirement."
     }

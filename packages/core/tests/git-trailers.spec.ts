@@ -85,6 +85,27 @@ AI-Model: gpt-4o
     expect(formatted).toContain('Active-Time-Seconds: 120');
   });
 
+  it('extracts taskId and parentRef from conventional commit subject when trailers are omitted', () => {
+    const message = 'feat(TSK-042): implement mTLS gateway for CHG-003';
+    const trailers = parseCommitTrailers(message);
+
+    expect(trailers.taskId).toBe('TSK-042');
+    expect(trailers.parentRef).toBe('CHG-003');
+    expect(trailers.authorType).toBe('human');
+  });
+
+  it('prefers explicit trailers over subject scope when both are present', () => {
+    const message = `feat(TSK-001): fix gateway
+
+Task-ID: TSK-999
+Parent-Ref: CHG-888
+`;
+    const trailers = parseCommitTrailers(message);
+
+    expect(trailers.taskId).toBe('TSK-999');
+    expect(trailers.parentRef).toBe('CHG-888');
+  });
+
   it('extracts all repo commits and trailers across entire history', () => {
     const records = extractAllRepoCommitKpis({ cwd: process.cwd() });
     expect(Array.isArray(records)).toBe(true);

@@ -20,7 +20,9 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["command"],
+        "required": [
+          "command"
+        ],
         "properties": {
           "command": {
             "type": "string",
@@ -53,7 +55,9 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["command"],
+        "required": [
+          "command"
+        ],
         "properties": {
           "command": {
             "type": "string",

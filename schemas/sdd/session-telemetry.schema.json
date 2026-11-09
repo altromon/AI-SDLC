@@ -44,7 +44,10 @@
     },
     "authorType": {
       "type": "string",
-      "enum": ["agent", "human"]
+      "enum": [
+        "agent",
+        "human"
+      ]
     },
     "sessionId": {
       "type": "string"
@@ -57,7 +60,11 @@
     },
     "confidence": {
       "type": "string",
-      "enum": ["HIGH", "MEDIUM", "LOW"]
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ]
     },
     "source": {
       "type": "string"

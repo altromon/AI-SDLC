@@ -38,11 +38,20 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "domain-type": {
       "type": "string",
-      "enum": ["core", "supporting", "generic"],
+      "enum": [
+        "core",
+        "supporting",
+        "generic"
+      ],
       "description": "DDD subdomain classification: core differentiator, supporting capability, or generic commodity."
     },
     "strategic-classification": {
@@ -50,11 +59,20 @@
       "properties": {
         "evolutionary-stage": {
           "type": "string",
-          "enum": ["genesis", "custom-built", "product-rental", "commodity"]
+          "enum": [
+            "genesis",
+            "custom-built",
+            "product-rental",
+            "commodity"
+          ]
         },
         "business-model-role": {
           "type": "string",
-          "enum": ["differentiator", "operational", "enabler"]
+          "enum": [
+            "differentiator",
+            "operational",
+            "enabler"
+          ]
         }
       },
       "additionalProperties": false
@@ -118,11 +136,17 @@
       "description": "Architecture components (CMP-*) implementing this bounded context."
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^BC-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^BC-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

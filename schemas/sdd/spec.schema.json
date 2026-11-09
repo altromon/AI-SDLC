@@ -3,7 +3,11 @@
   "$id": "https://ai-sdlc.org/schemas/sdd/spec.schema.json",
   "title": "Spec-Driven Development Delivery Specification Schema (SPEC-*)",
   "type": "object",
-  "required": ["id", "type", "change-id"],
+  "required": [
+    "id",
+    "type",
+    "change-id"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -12,7 +16,10 @@
     },
     "type": {
       "type": "string",
-      "enum": ["delivery-spec", "spec"]
+      "enum": [
+        "delivery-spec",
+        "spec"
+      ]
     },
     "change-id": {
       "type": "string",
@@ -21,7 +28,11 @@
     },
     "profile": {
       "type": "string",
-      "enum": ["patch", "standard", "critical"],
+      "enum": [
+        "patch",
+        "standard",
+        "critical"
+      ],
       "description": "Risk and governance profile of the change."
     },
     "title": {
@@ -71,19 +82,31 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "digest": { "type": "string" },
-          "comment": { "type": "string" },
-          "anchor": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "digest": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "anchor": {
+            "type": "string"
+          }
         },
         "additionalProperties": false
       }
     },
     "acceptance-format": {
       "type": "string",
-      "enum": ["gherkin"],
+      "enum": [
+        "gherkin"
+      ],
       "description": "Formato de aceptación BDD obligatorio para especificaciones de entrega SDD."
     },
     "cucumber-tags": {

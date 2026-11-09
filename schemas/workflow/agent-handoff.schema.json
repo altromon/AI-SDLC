@@ -36,7 +36,12 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "completed", "transferred"]
+      "enum": [
+        "draft",
+        "active",
+        "completed",
+        "transferred"
+      ]
     },
     "completed-phase": {
       "type": "string",
@@ -66,7 +71,12 @@
     },
     "autonomy-mode": {
       "type": "string",
-      "enum": ["AUTONOMOUS", "HUMAN_REVIEW_PLAN", "AMBIGUOUS", "HIGH_RISK_MANUAL"],
+      "enum": [
+        "AUTONOMOUS",
+        "HUMAN_REVIEW_PLAN",
+        "AMBIGUOUS",
+        "HIGH_RISK_MANUAL"
+      ],
       "description": "Autonomy level under which the task was executed."
     },
     "deliverables": {
@@ -81,7 +91,10 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["role", "rationale"],
+        "required": [
+          "role",
+          "rationale"
+        ],
         "properties": {
           "role": {
             "type": "string"

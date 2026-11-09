@@ -39,7 +39,12 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "applies-to-version": {
       "type": "string",
@@ -78,11 +83,17 @@
       "description": "Use case identifiers (UC-*) implemented across journeys."
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^MAN-USER-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^MAN-USER-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

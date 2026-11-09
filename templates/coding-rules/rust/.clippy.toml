@@ -1,0 +1,2 @@
+# AI-SDLC: Clippy configuration
+allow-unwrap-in-tests = true

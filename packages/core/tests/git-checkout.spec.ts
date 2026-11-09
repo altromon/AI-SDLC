@@ -189,4 +189,47 @@ tasks:
     }).trim();
     expect(currentBranch3).toBe(res1.taskBranch);
   });
+
+  it('checks out feature branch directly without creating task branch when streamlined is enabled', () => {
+    // 1. Initialize Git repository
+    execFileSync('git', ['init', '-b', 'main'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.name', 'AI-SDLC Test'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.email', 'test@ai-sdlc.dev'], { cwd: tmpDir, stdio: 'pipe' });
+
+    fs.writeFileSync(path.join(tmpDir, 'README.md'), '# Test Project');
+    execFileSync('git', ['add', '.'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['commit', '-m', 'chore: initial commit'], { cwd: tmpDir, stdio: 'pipe' });
+
+    // 2. Create active SDD change with tasks.md
+    const activeDir = path.join(tmpDir, 'specs', 'changes', 'active', 'chg-042-auth-gateway');
+    fs.mkdirSync(activeDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(activeDir, 'tasks.md'),
+      `---
+id: TSK-PLAN-CHG-042
+change-id: CHG-042-AUTH-GATEWAY
+version: 2.0.0
+tasks:
+  - id: TSK-001
+    title: Gateway Interfaces & DTO
+---
+# Tasks
+`
+    );
+    execFileSync('git', ['add', '.'], { cwd: tmpDir, stdio: 'pipe' });
+    execFileSync('git', ['commit', '-m', 'chore: add SDD change specs'], { cwd: tmpDir, stdio: 'pipe' });
+
+    // Checkout with streamlined: true
+    const res = checkoutTaskBranch('TSK-001', { rootDir: tmpDir, streamlined: true });
+    expect(res.success).toBe(true);
+    expect(res.featureBranch).toBe('feat/CHG-042-auth-gateway');
+    expect(res.taskBranch).toBeUndefined();
+
+    // Verify current branch in git is feature branch, not task branch
+    const currentBranch = execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
+      cwd: tmpDir,
+      encoding: 'utf-8',
+    }).trim();
+    expect(currentBranch).toBe('feat/CHG-042-auth-gateway');
+  });
 });

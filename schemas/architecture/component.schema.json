@@ -36,7 +36,12 @@
     },
     "status": {
       "type": "string",
-      "enum": ["proposed", "accepted", "deprecated", "retired"]
+      "enum": [
+        "proposed",
+        "accepted",
+        "deprecated",
+        "retired"
+      ]
     },
     "level": {
       "type": "integer",
@@ -48,13 +53,21 @@
       "description": "Domain-Driven Design (DDD) Bounded Context name this component belongs to."
     },
     "parent-component": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$",
       "description": "Parent component identifier (null if Level 1)."
     },
     "implementation-type": {
       "type": "string",
-      "enum": ["service", "dll", "function", "composite"],
+      "enum": [
+        "service",
+        "dll",
+        "function",
+        "composite"
+      ],
       "description": "Technical implementation paradigm: distributed service (service), dynamic/native library (dll), in-process module/function (function), or logical aggregator/Bounded Context (composite)."
     },
     "implements-use-cases": {
@@ -81,9 +94,14 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "protocol"],
+        "required": [
+          "name",
+          "protocol"
+        ],
         "properties": {
-          "name": { "type": "string" },
+          "name": {
+            "type": "string"
+          },
           "protocol": {
             "type": "string",
             "enum": [
@@ -102,16 +120,24 @@
               "IPC"
             ]
           },
-          "contract-spec": { "type": "string" }
+          "contract-spec": {
+            "type": "string"
+          }
         }
       }
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^CMP-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

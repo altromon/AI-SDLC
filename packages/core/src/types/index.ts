@@ -831,6 +831,24 @@ export interface ActiveTaskMatch {
 
 export interface GitCheckoutTaskOptions {
   rootDir?: string;
+  parallel?: boolean;
+  streamlined?: boolean;
+}
+
+export interface TaskKpiSummary {
+  taskId: string;
+  commits: number;
+  fixCommits: number;
+  linesAdded: number;
+  linesDeleted: number;
+  codeChurnPercent: number;
+  totalTokens: number;
+  activeTimeSeconds: number;
+  reworkTokens: number;
+  reworkTokensPercent: number;
+  reworkTimeSeconds: number;
+  reworkTimePercent: number;
+  isFirstTimeRight: boolean;
 }
 
 export interface GitCheckoutTaskResult {

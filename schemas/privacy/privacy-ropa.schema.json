@@ -39,7 +39,12 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "lawful-basis": {
       "type": "string",
@@ -54,7 +59,10 @@
       "description": "Lawful basis for processing under GDPR Art. 6.1."
     },
     "special-category-condition": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "enum": [
         null,
         "explicit-consent",
@@ -104,8 +112,17 @@
       "type": "boolean"
     },
     "transfer-safeguards": {
-      "type": ["string", "null"],
-      "enum": [null, "adequacy-decision", "scc", "bcr", "derogation"]
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "adequacy-decision",
+        "scc",
+        "bcr",
+        "derogation"
+      ]
     },
     "subprocessors": {
       "type": "array",
@@ -117,7 +134,10 @@
       "type": "boolean"
     },
     "dpia-reference": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^DPIA-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "mitigated-by": {
@@ -129,11 +149,17 @@
       "description": "Privacy requirements (PRIV-REQ-*) governing and enforcing this processing activity."
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^PRIV-ROPA-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^PRIV-ROPA-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

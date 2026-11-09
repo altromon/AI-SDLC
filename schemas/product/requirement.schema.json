@@ -3,7 +3,16 @@
   "$id": "https://ai-sdlc.org/schemas/product/requirement.schema.json",
   "title": "ProductShape Requirement Schema (Strict Test Validation Enforced)",
   "type": "object",
-  "required": ["id", "type", "title", "status", "version", "category", "derives-from", "verifiable-by"],
+  "required": [
+    "id",
+    "type",
+    "title",
+    "status",
+    "version",
+    "category",
+    "derives-from",
+    "verifiable-by"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -27,11 +36,20 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "category": {
       "type": "string",
-      "enum": ["functional", "quality", "constraint"]
+      "enum": [
+        "functional",
+        "quality",
+        "constraint"
+      ]
     },
     "derives-from": {
       "type": "array",
@@ -44,12 +62,22 @@
     },
     "verifiable-by": {
       "type": "string",
-      "enum": ["cucumber-bdd", "automated-unit-test", "integration-test", "performance-benchmark", "security-audit", "inspection"],
+      "enum": [
+        "cucumber-bdd",
+        "automated-unit-test",
+        "integration-test",
+        "performance-benchmark",
+        "security-audit",
+        "inspection"
+      ],
       "description": "Mandatory formal verification method."
     },
     "acceptance-format": {
       "type": "string",
-      "enum": ["gherkin", "declarative-prose"],
+      "enum": [
+        "gherkin",
+        "declarative-prose"
+      ],
       "description": "Acceptance criteria format."
     },
     "cucumber-tags": {
@@ -65,11 +93,17 @@
       "description": "When true, enforces all 3 BDD scenario categories (@nominal, @boundary, @invalid)."
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^(FR|QR|CON)-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^(FR|QR|CON)-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

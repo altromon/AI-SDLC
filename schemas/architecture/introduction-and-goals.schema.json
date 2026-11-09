@@ -37,7 +37,14 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "proposed", "accepted", "approved", "deprecated", "superseded"]
+      "enum": [
+        "draft",
+        "proposed",
+        "accepted",
+        "approved",
+        "deprecated",
+        "superseded"
+      ]
     },
     "owner": {
       "type": "string"
@@ -76,11 +83,17 @@
       "description": "Product journey identifiers (JRN-*) envisioned in this system capability scope."
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^ARCH-INTRO-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^ARCH-INTRO-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

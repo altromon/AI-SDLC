@@ -1,0 +1,13 @@
+# AI-SDLC: Immutable Rust Compiler & Clippy Guardrails
+[build]
+rustflags = [
+  "-D", "warnings",
+  "-D", "unused-must-use",
+  "-D", "dead-code",
+  "-D", "clippy::all",
+  "-D", "clippy::unwrap_used",
+  "-D", "clippy::todo",
+  "-D", "clippy::unimplemented",
+  "-D", "clippy::ignore_without_reason",
+  "-D", "clippy::assertions_on_constants"
+]

@@ -38,7 +38,12 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "applies-to-version": {
       "type": "string",
@@ -69,11 +74,17 @@
       "description": "Security enclaves (SEC-ENC-*) in which deployment executes."
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^MAN-PROD-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^MAN-PROD-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

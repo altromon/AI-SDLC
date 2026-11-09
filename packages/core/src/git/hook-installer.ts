@@ -81,7 +81,17 @@ fi
 # Extract Task-ID and Parent-Ref from 4-tier branch hierarchy
 # Patterns: task/<PARENT-ID>/<TSK-ID>-slug | feat/<FEAT-ID>-slug | bug/<BUG-ID>-slug
 TASK_ID=$(echo "$CURRENT_BRANCH" | grep -oE "TSK-[0-9A-Za-z-]+" || echo "")
+if [ -z "$TASK_ID" ]; then
+  TASK_ID=$(head -n 1 "$COMMIT_MSG_FILE" 2>/dev/null | grep -oE "TSK-[0-9A-Za-z_-]+" | head -n 1 || echo "")
+fi
+if [ -z "$TASK_ID" ] && [ -f "$TELEMETRY_FILE" ]; then
+  TASK_ID=$(grep -oE '"taskId"\s*:\s*"[^"]+"' "$TELEMETRY_FILE" 2>/dev/null | sed -E 's/.*"taskId"\s*:\s*"([^"]+)".*/\\1/' || echo "")
+fi
+
 PARENT_REF=$(echo "$CURRENT_BRANCH" | grep -oE "(CHG|FEAT|BUG|FIX|PATCH)-[0-9A-Za-z-]+" | head -n 1 || echo "")
+if [ -z "$PARENT_REF" ]; then
+  PARENT_REF=$(head -n 1 "$COMMIT_MSG_FILE" 2>/dev/null | grep -oE "(CHG|FEAT|BUG|FIX|PATCH)-[0-9A-Za-z_-]+" | head -n 1 || echo "")
+fi
 
 TELEMETRY_FILE=".ai-sdlc/session-telemetry.json"
 AUTHOR_TYPE="human"

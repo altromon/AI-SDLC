@@ -1,0 +1,11 @@
+# AI-SDLC: Immutable C/C++ Clang-Tidy Guardrails
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  readability-*
+WarningsAsErrors: '*'

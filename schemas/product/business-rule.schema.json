@@ -3,7 +3,14 @@
   "$id": "https://ai-sdlc.org/schemas/product/business-rule.schema.json",
   "title": "ProductShape Business Rule Schema (Versionable)",
   "type": "object",
-  "required": ["id", "type", "title", "status", "version", "enforcement-level"],
+  "required": [
+    "id",
+    "type",
+    "title",
+    "status",
+    "version",
+    "enforcement-level"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -27,11 +34,20 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "enforcement-level": {
       "type": "string",
-      "enum": ["strict-invariant", "override-with-approval", "guideline"]
+      "enum": [
+        "strict-invariant",
+        "override-with-approval",
+        "guideline"
+      ]
     },
     "defined-in": {
       "type": "string",
@@ -45,11 +61,17 @@
       }
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^BR-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^BR-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

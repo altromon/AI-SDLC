@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   formatPrKpiMarkdown,
   injectKpisIntoPrBody,
+  aggregateCommitKpiRecords,
   PrKpiAggregation,
   KPI_SUMMARY_START_TAG,
   KPI_SUMMARY_END_TAG,
@@ -74,5 +75,101 @@ describe('Pull Request KPI Aggregator and Formatter', () => {
     expect(updated).toContain('## 2. Checklist');
     expect(updated).not.toContain('Tabla vieja');
     expect(updated).toContain('28,000 tokens');
+  });
+
+  it('formats task rework breakdown table when byTask aggregation is present', () => {
+    const aggWithTask: PrKpiAggregation = {
+      ...sampleAggregation,
+      byTask: {
+        'TSK-001': {
+          taskId: 'TSK-001',
+          commits: 3,
+          fixCommits: 1,
+          linesAdded: 100,
+          linesDeleted: 15,
+          activeTimeSeconds: 600,
+          totalTokens: 9000,
+          reworkTokens: 3000,
+          reworkTimeSeconds: 100,
+          codeChurnPercent: 15,
+          reworkTokensPercent: 33.3,
+          reworkTimePercent: 16.7,
+          isFirstTimeRight: false,
+        },
+        'TSK-002': {
+          taskId: 'TSK-002',
+          commits: 4,
+          fixCommits: 0,
+          linesAdded: 50,
+          linesDeleted: 5,
+          activeTimeSeconds: 1200,
+          totalTokens: 17000,
+          reworkTokens: 0,
+          reworkTimeSeconds: 0,
+          codeChurnPercent: 10,
+          reworkTokensPercent: 0,
+          reworkTimePercent: 0,
+          isFirstTimeRight: true,
+        },
+      },
+    };
+
+    const md = formatPrKpiMarkdown(aggWithTask);
+    expect(md).toContain('#### 📋 Task-Level Rework & Code Churn Breakdown');
+    expect(md).toContain('| `TSK-001` | 3 (1 fix) | +100 / -15 | 15% | 33.3% | 16.7% | ⚠ 1 rework commit |');
+    expect(md).toContain('| `TSK-002` | 4 (0 fix) | +50 / -5 | 10% | 0% | 0% | ✔ First-Time-Right |');
+  });
+
+  it('aggregates commit records and computes byTask rework stats', () => {
+    const records = [
+      {
+        sha: 'abc111',
+        authorName: 'Developer',
+        authorEmail: 'dev@example.com',
+        date: '2026-11-09T10:00:00Z',
+        subject: 'feat(TSK-001): initial implementation',
+        linesAdded: 100,
+        linesDeleted: 0,
+        isBugFix: false,
+        trailers: {
+          taskId: 'TSK-001',
+          authorType: 'agent' as const,
+          aiModel: 'claude-3-7-sonnet',
+          promptTokens: 5000,
+          completionTokens: 500,
+          activeTimeSeconds: 300,
+        },
+      },
+      {
+        sha: 'abc222',
+        authorName: 'Developer',
+        authorEmail: 'dev@example.com',
+        date: '2026-11-09T11:00:00Z',
+        subject: 'fix(TSK-001): patch boundary check defect',
+        linesAdded: 10,
+        linesDeleted: 5,
+        isBugFix: true,
+        trailers: {
+          taskId: 'TSK-001',
+          authorType: 'agent' as const,
+          aiModel: 'claude-3-7-sonnet',
+          promptTokens: 2000,
+          completionTokens: 200,
+          activeTimeSeconds: 150,
+        },
+      },
+    ];
+
+    const result = aggregateCommitKpiRecords(records, 'main', 'feat/CHG-001');
+    expect(result.byTask).toBeDefined();
+    expect(result.byTask!['TSK-001']).toBeDefined();
+
+    const tsk = result.byTask!['TSK-001'];
+    expect(tsk.commits).toBe(2);
+    expect(tsk.fixCommits).toBe(1);
+    expect(tsk.linesAdded).toBe(110);
+    expect(tsk.linesDeleted).toBe(5);
+    expect(tsk.codeChurnPercent).toBeCloseTo(4.5, 1);
+    expect(tsk.isFirstTimeRight).toBe(false);
   });
 });

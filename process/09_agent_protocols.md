@@ -690,78 +690,75 @@ Every formal handoff adopts the structure in [`templates/workflow/agent-handoff.
    - **Single-Session / Rule-Based IDEs (Cursor, Windsurf, Aider)**: The active agent persists all artifacts to disk, emits the Workflow Handoff block, and halts so the user opens a **New Chat** (or `/clear`) before pasting the Suggested Invocation Prompt.
 6. **Human Action Window (Human-in-the-Loop)**: Explicit options to review, edit directly, pause/reroute, or delegate continuity.
 
-### 4. Canonical Lifecycle Transition Chain
+### 4. Canonical Lifecycle Transition Chain (Streamlined 2-Checkpoint Architecture)
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    AI-SDLC WORKFLOW TRANSITION CHAIN                    │
+│         AI-SDLC STREAMLINED LIFECYCLE & 2-CHECKPOINT CHAIN             │
 └─────────────────────────────────────────────────────────────────────────┘
 
- 1. Product Owner (Human)
-    └── Defines business intent or operational problem
-         │
-         ▼
- 2. agent-product-analyst (Scribe)
-    ├── Generates ProductShape (ACT, UC, FR, QR, BR) with status: draft
-    └── Suggested handoff: agent-expert-user (UX) or agent-threat-modeler
-         │
-         ▼
- 3. agent-expert-user (UX Evaluator / MVP vs Roadmap) [Optional / Upstream]
-    ├── Contrasts design, defines strict MVP scope and backlog recommendations
-    └── Suggested handoff: Human PO / agent-product-analyst
-         │
-         ▼
- 4. agent-threat-modeler (Shift-Left Cybersecurity)
-    ├── Models STRIDE adversaries and OWASP ASVS controls (ACT-THREAT, ABUSE, SEC-REQ)
-    └── Suggested handoff: agent-privacy-officer
-         │
-         ▼
- 4b. agent-privacy-officer (Shift-Left Data Protection & Privacy-by-Design)
-    ├── Models LINDDUN threats, DATA-ASSET-*, PRIV-ROPA-* (GDPR Art. 30), PRIV-REQ-*, DPIA-*
-    └── Suggested handoff: agent-system-architect
-         │         ▲
-         │         │ (Technical Security & Privacy Feedback Loop on Infra/Architecture)
-         ▼         │
- 5. agent-system-architect (Modular Architecture)
-    ├── Defines arc42 blocks (CMP), Mermaid diagrams, and ADR records
-    ├── Return handoff (conditional): agent-threat-modeler -> agent-privacy-officer
-    └── Suggested handoff: agent-qa-engineer
-         │
-         ▼
- 6. agent-qa-engineer (QA / SDET — Failing Tests in Red)
-    ├── Translates FR-*, SEC-REQ-*, PRIV-REQ-*, and QR-* into failing BDD/Gherkin suites (red)
-    ├── Mandatory coverage: nominal + boundary + out of range
-    ├── Conditional coverage: security, privacy, performance, idempotency, postconditions, contract
-    └── Suggested handoff: agent-developer
-         │
-         ▼
- 7. agent-developer (Coder / SDD Implementation)
-    ├── Implements tasks.md making test suites pass green (CC <= 10, MI >= 50)
-    └── Suggested handoff: agent-expert-user (Post-Development Functional Validation)
-         │
-         ▼
- 8. agent-expert-user (Post-Development Functional Validation) [Downstream / Pre-PR]
-    ├── Contrasts real system behavior, UI, and CLI against PO use cases (UC-*) and FR-*
-    └── Suggested handoff: Pre-Merge Audit Triad (agent-code-reviewer, agent-security-auditor, agent-compliance-checker, agent-privacy-officer)
-         │
-         ▼
- 9. Pre-Merge Audit Triad (Code Review, Security, Licenses, and Privacy)
-    ├── agent-code-reviewer: Clean Code, SOLID, DRY, code smells, and maintainability (CC <= 10, MI >= 50)
-    ├── agent-security-auditor: Adversarial audit, SAST, CVSS, and vulnerability detection
-    ├── agent-compliance-checker: SPDX dependency audit against license-policy.yaml
-    ├── agent-privacy-officer: PII-SAST audit (PRIV-001..PRIV-008) & RoPA check against privacy-policy.yaml
-    └── Suggested handoff: Tech Lead / Human Reviewer (Exclusive approval and merge)
+ [PHASE 1: UPSTREAM SPECIFICATION & ARCHITECTURAL DESIGN]
+  1. Product Owner (Human)
+     └── Defines business intent or operational problem
+          │
+          ▼
+  2. agent-product-analyst (Product Scribe)
+     ├── Generates ProductShape (ACT, UC, FR, QR, BR) with status: draft
+     └── Suggested handoff: agent-threat-modeler (or agent-expert-user for UX evaluation)
+          │
+          ▼
+  3. Shift-Left Trust Design (Cybersecurity & Privacy)
+     ├── agent-threat-modeler: Models STRIDE adversaries and OWASP ASVS controls (ACT-THREAT, ABUSE, SEC-REQ)
+     └── agent-privacy-officer: Models LINDDUN threats, DATA-ASSET-*, PRIV-ROPA-*, PRIV-REQ-*, DPIA-*
+          │
+          ▼
+  4. agent-system-architect (Modular Architecture)
+     ├── Defines arc42 blocks (CMP), Mermaid diagrams, shared typed contracts, and ADR records
+     └── Scaffolds tasks.md and emits handoff to Checkpoint 1
+          │
+          ▼
+ ═════════════════════════════════════════════════════════════════════════
+  CHECKPOINT 1: SPECIFICATION & DESIGN CHECKPOINT (Transversal Review)
+   ├── agent-auditor: Audits for YAGNI, overengineering, interface bloat, task coverage.
+   ├── agent-adversary: Probes contradictions, edge states, architecture SPOFs, and race conditions.
+   └── Remediation: Consolidated handoff to authoring agents (max 1 correction round).
+ ═════════════════════════════════════════════════════════════════════════
+          │
+          ▼
+  [HUMAN APPROVAL GATE 1: PLAN & DESIGN SIGN-OFF]
+  Tech Lead / PO reviews and approves upstream specifications and tasks.md.
+          │
+          ▼
+ [PHASE 2: TDD IMPLEMENTATION & CODE QUALITY]
+  5. agent-qa-engineer (QA / SDET — Failing Tests in Red)
+     ├── Translates FR-*, SEC-REQ-*, PRIV-REQ-*, and QR-* into failing BDD/Gherkin and E2E/UI suites (red)
+     └── Suggested handoff: agent-developer
+          │
+          ▼
+  6. agent-developer (Coder / SDD Implementation)
+     ├── Executes 4-step implementation (Ports/Adapters -> Interfaces -> Components -> Unit Tests)
+     └── Produces green builds satisfying complexity thresholds (CC <= 10, MI >= 50)
+          │
+          ▼
+  7. Deterministic Pre-Flight Gate (CLI)
+     └── Runs 'aisdlc verify all' confirming 100% pass across all 12 Quality Gates.
+          │
+          ▼
+ ═════════════════════════════════════════════════════════════════════════
+  CHECKPOINT 2: IMPLEMENTATION & PRE-PR CHECKPOINT (Transversal & Mutation)
+   ├── agent-expert-user: Functional validation of live runtime behavior against UC-* / FR-*.
+   ├── agent-auditor: Clean Code, SOLID, DRY, AST complexity, replacing redundant code reviews.
+   ├── agent-adversary: Conceptual test mutation (proves tests catch defects) + boundary break PoCs.
+   └── Remediation: Consolidated handoff to agent-developer (max 1 correction round).
+ ═════════════════════════════════════════════════════════════════════════
+          │
+          ▼
+  [HUMAN APPROVAL GATE 2: PR APPROVAL & MERGE]
+  Tech Lead reviews PR summary, KPI reports (including Task-ID rework metrics), and merges to main.
 
  ─────────────────────────────────────────────────────────────────────────
  (*) Cross-Cutting Automation and Infrastructure Role:
      └── agent-devops (DevOps / IaC): Autonomously maintains CI/CD (.github/workflows),
          Dockerfiles, and infra scripts, under strict NON-INVASION GUARDRAIL on src/.
-
- ─────────────────────────────────────────────────────────────────────────
- (*) Transversal Quality and Red-Team Loop (On-Demand in Any Phase):
-     ├── agent-auditor (Constructive Auditor): Polymorphic review proposing simplifications & YAGNI solutions.
-     │   └── Return handoff: Hands back to the audited agent to incorporate improvements.
-     └── agent-adversary (Red Team / Chaos): Polymorphic stress-testing delivering concrete PoC of breaks/mutation.
-         └── Return handoff: Hands back to the audited agent to patch failure modes before downstream promotion.
 ```
 
 ---

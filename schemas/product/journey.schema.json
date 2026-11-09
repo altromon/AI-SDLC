@@ -36,7 +36,12 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "persona": {
       "type": "string",
@@ -75,10 +80,16 @@
       "description": "Frictions or issues detected along the user journey."
     },
     "supersedes": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "superseded-by": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     }
   },
   "additionalProperties": false

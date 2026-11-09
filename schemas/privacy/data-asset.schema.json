@@ -38,7 +38,12 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "classification": {
       "type": "string",
@@ -81,7 +86,11 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "sensitivity", "masking-strategy"],
+        "required": [
+          "name",
+          "sensitivity",
+          "masking-strategy"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -89,7 +98,12 @@
           },
           "sensitivity": {
             "type": "string",
-            "enum": ["public", "internal", "pii", "special-category"]
+            "enum": [
+              "public",
+              "internal",
+              "pii",
+              "special-category"
+            ]
           },
           "masking-strategy": {
             "type": "string",
@@ -124,11 +138,17 @@
       "pattern": "^(BC|CMP)-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^DATA-ASSET-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^DATA-ASSET-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

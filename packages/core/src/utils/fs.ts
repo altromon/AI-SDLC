@@ -15,34 +15,36 @@ export function normalizePath(p: string): string {
   return p.normalize('NFC').replace(/\\/g, '/');
 }
 
+export const DEFAULT_EXCLUDE_DIRS: readonly string[] = [
+  'node_modules',
+  '.git',
+  'dist',
+  'bin',
+  'obj',
+  'build',
+  'out',
+  'target',
+  'coverage',
+  '.changeset',
+  'scratch',
+  'test-scaffold',
+  'fixtures',
+  'templates',
+  'examples',
+  '.agent',
+  '.agents',
+  '.claude',
+  '.cursor',
+  '.github',
+  '.vscode',
+  '.vs',
+  '.idea',
+];
+
 export function walkMdFiles(
   dir: string,
   fileList: string[] = [],
-  excludeDirs: string[] = [
-    'node_modules',
-    '.git',
-    'dist',
-    'bin',
-    'obj',
-    'build',
-    'out',
-    'target',
-    'coverage',
-    '.changeset',
-    'scratch',
-    'test-scaffold',
-    'fixtures',
-    'templates',
-    'examples',
-    '.agent',
-    '.agents',
-    '.claude',
-    '.cursor',
-    '.github',
-    '.vscode',
-    '.vs',
-    '.idea',
-  ]
+  excludeDirs: readonly string[] = DEFAULT_EXCLUDE_DIRS
 ): string[] {
   try {
     if (!fs.existsSync(dir)) return fileList;

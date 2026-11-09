@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 4.0.0
+
+### Major Changes
+
+- feat(topology)!: streamline default Git topology to 2 tiers (`main` ➔ `feat/<CHG-ID>-<slug>`) with task tracking via commit trailers (`Task-ID: TSK-*`) and conventional scopes, while preserving SemVer and optional release/parallel worktree branches.
+- feat(lifecycle)!: concentrate transversal quality and red-team audits into a 2-Checkpoint Architecture (`agent-auditor` ∥ `agent-adversary`: Checkpoint 1 on Design/Specification, Checkpoint 2 on Implementation/Pre-PR) reducing subagent token overhead by 70%.
+- feat(kpis): deterministic per-task rework and code churn analytics (`byTask` aggregation in PR and Release KPI reports), tracking First-Time-Right (FTR) status, fix commits, and rework tokens/time.
+
 ## 3.4.0
 
 ### Minor Changes

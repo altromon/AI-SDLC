@@ -36,7 +36,12 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "privacy-principle": {
       "type": "string",
@@ -92,7 +97,10 @@
     },
     "acceptance-format": {
       "type": "string",
-      "enum": ["gherkin", "declarative-prose"]
+      "enum": [
+        "gherkin",
+        "declarative-prose"
+      ]
     },
     "cucumber-tags": {
       "type": "array",
@@ -102,11 +110,17 @@
       }
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^PRIV-REQ-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^PRIV-REQ-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

@@ -279,6 +279,80 @@ function ensureBranchInCascade(branch: string, parentBranch: string, rootDir: st
  * Creates missing branches in cascade (Tier 1 -> Tier 2 -> Tier 3 -> Tier 4)
  * and switches to the Tier 4 task branch automatically.
  */
+function switchBranch(branch: string, rootDir: string): void {
+  execFileSync('git', ['checkout', branch], { cwd: rootDir, stdio: ['pipe', 'pipe', 'pipe'] });
+}
+
+function cascadeBranchCheckout(
+  hierarchy: { baseBranch: string; releaseBranch: string; featureBranch: string; taskBranch: string },
+  rootDir: string,
+  created: string[],
+  streamlined?: boolean
+): string {
+  if (streamlined) {
+    if (ensureBranchInCascade(hierarchy.featureBranch, hierarchy.baseBranch, rootDir)) created.push(hierarchy.featureBranch);
+    switchBranch(hierarchy.featureBranch, rootDir);
+    return hierarchy.featureBranch;
+  }
+  if (ensureBranchInCascade(hierarchy.releaseBranch, hierarchy.baseBranch, rootDir)) created.push(hierarchy.releaseBranch);
+  if (ensureBranchInCascade(hierarchy.featureBranch, hierarchy.releaseBranch, rootDir)) created.push(hierarchy.featureBranch);
+  if (ensureBranchInCascade(hierarchy.taskBranch, hierarchy.featureBranch, rootDir)) created.push(hierarchy.taskBranch);
+  switchBranch(hierarchy.taskBranch, rootDir);
+  return hierarchy.taskBranch;
+}
+
+/**
+ * Creates missing branches in cascade (Tier 1 -> Tier 2 -> Tier 3 -> Tier 4)
+ * and switches to the Tier 4 task branch (or Tier 3 feature branch if streamlined).
+ */
+function buildCheckoutErrorResult(
+  match: ActiveTaskMatch,
+  hierarchy: { releaseBranch: string; featureBranch: string; taskBranch: string },
+  created: string[],
+  err: unknown
+): GitCheckoutTaskResult {
+  const message = err instanceof Error ? err.message : String(err);
+  return {
+    success: false,
+    taskId: match.taskId,
+    changeId: match.changeId,
+    releaseBranch: hierarchy.releaseBranch,
+    featureBranch: hierarchy.featureBranch,
+    taskBranch: hierarchy.taskBranch,
+    createdBranches: created,
+    error: `Error durante la creación o checkout de ramas Git: ${message}`,
+  };
+}
+
+function buildLocateFailureResult(taskId: string, locateRes: TaskLocateResult): GitCheckoutTaskResult {
+  return {
+    success: false,
+    taskId,
+    createdBranches: [],
+    error: locateRes.error,
+    availableTasks: locateRes.availableTasks,
+  };
+}
+
+function buildCheckoutSuccessResult(
+  match: ActiveTaskMatch,
+  hierarchy: { releaseBranch: string; featureBranch: string; taskBranch: string },
+  created: string[],
+  switchedBranch: string,
+  streamlined?: boolean
+): GitCheckoutTaskResult {
+  return {
+    success: true,
+    taskId: match.taskId,
+    changeId: match.changeId,
+    releaseBranch: hierarchy.releaseBranch,
+    featureBranch: hierarchy.featureBranch,
+    taskBranch: streamlined ? undefined : hierarchy.taskBranch,
+    createdBranches: created,
+    switchedBranch,
+  };
+}
+
 export function checkoutTaskBranch(
   taskId: string,
   options: GitCheckoutTaskOptions = {}
@@ -286,47 +360,17 @@ export function checkoutTaskBranch(
   const rootDir = options.rootDir || process.cwd();
   const locateRes = locateTaskInActiveChanges(taskId, rootDir);
   if (!locateRes.found || !locateRes.match) {
-    return {
-      success: false,
-      taskId,
-      createdBranches: [],
-      error: locateRes.error,
-      availableTasks: locateRes.availableTasks,
-    };
+    return buildLocateFailureResult(taskId, locateRes);
   }
 
   const match = locateRes.match;
-  const { baseBranch, releaseBranch, featureBranch, taskBranch } = resolveBranchHierarchy(match, rootDir);
-  const createdBranches: string[] = [];
+  const hierarchy = resolveBranchHierarchy(match, rootDir);
+  const created: string[] = [];
 
   try {
-    if (ensureBranchInCascade(releaseBranch, baseBranch, rootDir)) createdBranches.push(releaseBranch);
-    if (ensureBranchInCascade(featureBranch, releaseBranch, rootDir)) createdBranches.push(featureBranch);
-    if (ensureBranchInCascade(taskBranch, featureBranch, rootDir)) createdBranches.push(taskBranch);
-
-    execFileSync('git', ['checkout', taskBranch], { cwd: rootDir, stdio: ['pipe', 'pipe', 'pipe'] });
-
-    return {
-      success: true,
-      taskId: match.taskId,
-      changeId: match.changeId,
-      releaseBranch,
-      featureBranch,
-      taskBranch,
-      createdBranches,
-      switchedBranch: taskBranch,
-    };
+    const switched = cascadeBranchCheckout(hierarchy, rootDir, created, options.streamlined);
+    return buildCheckoutSuccessResult(match, hierarchy, created, switched, options.streamlined);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    return {
-      success: false,
-      taskId: match.taskId,
-      changeId: match.changeId,
-      releaseBranch,
-      featureBranch,
-      taskBranch,
-      createdBranches,
-      error: `Error durante la creación o checkout de ramas Git: ${message}`,
-    };
+    return buildCheckoutErrorResult(match, hierarchy, created, err);
   }
 }

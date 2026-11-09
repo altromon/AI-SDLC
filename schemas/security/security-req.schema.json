@@ -3,7 +3,15 @@
   "$id": "https://ai-sdlc.org/schemas/security/security-req.schema.json",
   "title": "Security Requirement Schema (Strict Test Validation Enforced)",
   "type": "object",
-  "required": ["id", "type", "title", "status", "version", "security-domain", "mitigates-abuse-case"],
+  "required": [
+    "id",
+    "type",
+    "title",
+    "status",
+    "version",
+    "security-domain",
+    "mitigates-abuse-case"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -27,11 +35,24 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "security-domain": {
       "type": "string",
-      "enum": ["authentication", "authorization", "cryptography", "input-validation", "audit-logging", "communication-security", "data-protection"]
+      "enum": [
+        "authentication",
+        "authorization",
+        "cryptography",
+        "input-validation",
+        "audit-logging",
+        "communication-security",
+        "data-protection"
+      ]
     },
     "mitigates-abuse-case": {
       "type": "array",
@@ -55,7 +76,10 @@
     },
     "acceptance-format": {
       "type": "string",
-      "enum": ["gherkin", "declarative-prose"],
+      "enum": [
+        "gherkin",
+        "declarative-prose"
+      ],
       "description": "Mitigation criteria format."
     },
     "cucumber-tags": {
@@ -66,11 +90,17 @@
       }
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^SEC-REQ-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^SEC-REQ-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },
