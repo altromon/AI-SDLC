@@ -1,5 +1,13 @@
 # @aisdlc/mcp
 
+## 3.4.1
+
+### Patch Changes
+
+- chore(mcp): bump MCP server version to `3.4.1` and align with `@aisdlc/core@3.4.1` Plain-Language Journey Elicitation (`JRN-*`) templates.
+- Updated dependencies
+  - @aisdlc/core@3.4.1
+
 ## 3.4.0
 
 ### Minor Changes

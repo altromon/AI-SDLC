@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 3.4.1
+
+### Patch Changes
+
+- feat(agents): add Plain-Language Journey Elicitation (`JRN-*`) directives to `agent-product-analyst` and `aisdlc-greenfield` across all IDE targets, instructing the agent to ask in everyday business language which journeys to generate and specify the 5 required fields (`persona`, `stages`, `touchpoints`, `pain-points`, `related-use-cases`).
+
 ## 3.4.0
 
 ### Minor Changes
