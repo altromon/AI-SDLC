@@ -250,6 +250,28 @@ export interface SddIntegrationOptions {
   author?: string;
   date?: string;
   autoArchive?: boolean;
+  syncContent?: boolean;
+}
+
+export interface SddIntegrateAllOptions {
+  rootDir?: string;
+  author?: string;
+  date?: string;
+  autoArchive?: boolean;
+  includeCompleted?: boolean;
+  syncContent?: boolean;
+}
+
+export interface SddIntegrateAllResult {
+  success: boolean;
+  processedChanges: string[];
+  skippedChanges: Array<{ changeId: string; reason: string }>;
+  results: SddIntegrationResult[];
+  updatedProductArtifacts: string[];
+  updatedArchitectureArtifacts: string[];
+  createdCanonicalArtifacts: string[];
+  syncedDigestsCount: number;
+  errors: string[];
 }
 
 export interface SddIntegrationResult {
@@ -261,6 +283,8 @@ export interface SddIntegrationResult {
   updatedProductArtifacts: string[];
   updatedArchitectureArtifacts: string[];
   createdCanonicalArtifacts?: string[];
+  syncedContentArtifacts?: string[];
+  syncedDigestsCount?: number;
   archived: boolean;
   archivedPath?: string;
   errors: string[];

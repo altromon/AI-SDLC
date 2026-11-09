@@ -8,6 +8,13 @@
 - feat(lifecycle)!: concentrate transversal quality and red-team audits into a 2-Checkpoint Architecture (`agent-auditor` ∥ `agent-adversary`: Checkpoint 1 on Design/Specification, Checkpoint 2 on Implementation/Pre-PR) reducing subagent token overhead by 70%.
 - feat(kpis): deterministic per-task rework and code churn analytics (`byTask` aggregation in PR and Release KPI reports), tracking First-Time-Right (FTR) status, fix commits, and rework tokens/time.
 
+## 3.4.1
+
+### Patch Changes
+
+- feat(agents): add Plain-Language Journey Elicitation (`JRN-*`) directives to `agent-product-analyst` and `aisdlc-greenfield` across all IDE targets, instructing the agent to ask in everyday business language which journeys to generate and specify the 5 required fields (`persona`, `stages`, `touchpoints`, `pain-points`, `related-use-cases`).
+- feat(sdd,inspector): synchronize normative statements, evolutionary increments (`### Incremento (CHG-*)`), and BDD Gherkin scenarios into canonical `FR-*` / `UC-*` / `SEC-REQ-*` / `PRIV-REQ-*` artifacts during `integrateSddChange` (with SemVer minor bump and automatic PDaC SHA-256 digest resync), add `integrateAllSddChanges` (`--all`) for historical batch consolidation, and include incremental statements in `inspectElement`.
+
 ## 3.4.0
 
 ### Minor Changes

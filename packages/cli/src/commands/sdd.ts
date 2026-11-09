@@ -9,6 +9,7 @@ import {
   ChangeProfile,
   depositProductHandoffSidecar,
   detectActiveChangeForIntegration,
+  integrateAllSddChanges,
   integrateSddChange,
   ProductHandoff,
   scaffoldSddChange,
@@ -270,6 +271,7 @@ export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
 export interface SddIntegrateCliOptions {
   root?: string;
   change?: string;
+  all?: boolean;
   auto?: boolean;
   headRef?: string;
   prTitle?: string;
@@ -384,10 +386,53 @@ function emitIntegrateJson(changeId: string, result: ReturnType<typeof integrate
   console.log(JSON.stringify(payload, null, 2));
 }
 
+function printBatchIntegrationResult(result: ReturnType<typeof integrateAllSddChanges>): void {
+  console.log(`  ${pc.green('✔')} Processed changes:           ${pc.bold(String(result.processedChanges.length))} (${result.processedChanges.join(', ') || 'None'})`);
+  console.log(`  ${pc.yellow('ℹ')} Skipped changes:             ${pc.bold(String(result.skippedChanges.length))}`);
+  console.log(`  ${pc.green('✔')} Updated product artifacts:   ${pc.green(result.updatedProductArtifacts.join(', ') || 'None')}`);
+  console.log(`  ${pc.green('✔')} Updated arc42 architecture:  ${pc.green(result.updatedArchitectureArtifacts.join(', ') || 'None')}`);
+  console.log(`  ${pc.green('✔')} Synced PDaC SHA-256 digests: ${pc.cyan(String(result.syncedDigestsCount))}`);
+  if (result.success) {
+    console.log(pc.green('\n✔ Batch canonical specification integration COMPLETED (EXIT 0)\n'));
+  } else {
+    for (const err of result.errors) console.log(`    ${pc.red('✖')} ${err}`);
+    console.log(pc.red('\n✖ Batch integration finished with errors (EXIT 1)\n'));
+  }
+}
+
+function emitBatchIntegrateJson(result: ReturnType<typeof integrateAllSddChanges>): void {
+  const payload = {
+    command: 'sdd:integrate:all',
+    success: result.success,
+    exitCode: result.success ? 0 : 1,
+    processedChanges: result.processedChanges,
+    skippedChanges: result.skippedChanges,
+    updatedProductArtifacts: result.updatedProductArtifacts,
+    updatedArchitectureArtifacts: result.updatedArchitectureArtifacts,
+    createdCanonicalArtifacts: result.createdCanonicalArtifacts,
+    syncedDigestsCount: result.syncedDigestsCount,
+    errors: result.errors,
+  };
+  console.log(JSON.stringify(payload, null, 2));
+}
+
+function runBatchSddIntegrate(options: SddIntegrateCliOptions, rootDir: string, isSilent: boolean, useJson: boolean): boolean {
+  if (!isSilent) {
+    console.log(pc.bold(pc.cyan('\n🔄 [AI-SDLC SDD] Consolidating all completed SDD changes into canonical specifications...')));
+  }
+  const result = integrateAllSddChanges({ rootDir, author: options.author, autoArchive: options.autoArchive });
+  if (!isSilent) printBatchIntegrationResult(result);
+  if (useJson) emitBatchIntegrateJson(result);
+  return result.success;
+}
+
 export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
   const rootDir = options.root || process.cwd();
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
+  if (options.all) {
+    return runBatchSddIntegrate(options, rootDir, isSilent, useJson);
+  }
   const changeId = resolveIntegrationChangeId(options, rootDir, isSilent, useJson);
   if (!changeId) return false;
 

@@ -8,6 +8,15 @@
 - feat(lifecycle)!: concentrate transversal quality and red-team audits into a 2-Checkpoint Architecture (`agent-auditor` ∥ `agent-adversary`: Checkpoint 1 on Design/Specification, Checkpoint 2 on Implementation/Pre-PR) reducing subagent token overhead by 70%.
 - feat(kpis): deterministic per-task rework and code churn analytics (`byTask` aggregation in PR and Release KPI reports), tracking First-Time-Right (FTR) status, fix commits, and rework tokens/time.
 
+## 3.4.1
+
+### Patch Changes
+
+- feat(cli): propagate Plain-Language Journey Elicitation (`JRN-*`) directives in `agent-product-analyst` and `aisdlc-greenfield` across all IDE targets via `aisdlc init` and `aisdlc sync`, add `--all` batch consolidation flag to `aisdlc sdd integrate`, and bump CLI version to `3.4.1`.
+- Updated dependencies
+  - @aisdlc/core@3.4.1
+  - @aisdlc/mcp@3.4.1
+
 ## 3.4.0
 
 ### Minor Changes

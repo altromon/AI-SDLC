@@ -93,6 +93,7 @@ When starting a new product from scratch (or when adopting AI-SDLC in a Brownfie
    - Core problem, mission statement, and value proposition.
    - Primary stakeholders and actors (`ACT-*`).
    - **Target Interaction & Presentation Modality (`CON-*` / `ARCH-INTRO-001`)**: Explicitly define how human actors interact with the MVP (Web UI, Desktop GUI, Interactive Console/TUI/CLI, Mobile App, or Headless API/SDK if exclusively system-to-system). Never default to headless class libraries when human actors exist.
+   - **User Journeys (`JRN-*`) to Generate (Plain-Language Elicitation)**: Ask in simple, non-technical language which end-to-end user journeys to model, explicitly guiding the Product Owner on the 5 pieces of information required to build each journey properly: (1) protagonist user (`persona` / `ACT-*`) and their main goal, (2) sequential stages from start to finish (`stages`), (3) interaction channels/screens at each stage (`touchpoints`), (4) current obstacles or frustrations (`pain-points`), and (5) concrete system actions/use cases (`related-use-cases` / `UC-*`).
    - Essential MVP capabilities (`UC-*`) vs. future roadmap, including foundational master-data / entity CRUD prerequisites.
    - Top 3–5 priority quality goals (`QR-*`) and constraints (`CON-*`).
 2. **Enterprise & Capability Vision (`ARCH-INTRO-001`)**: Instantiates `templates/architecture/introduction-and-goals.template.md` (`naf-perspective: "Enterprise & Capability"`, `status: draft`), explicitly recording the agreed UI/interaction modality.
