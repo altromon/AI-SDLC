@@ -20,6 +20,7 @@ import {
   generateDashboardReport,
   generateQualityReport,
   initProject,
+  integrateAllSddChanges,
   integrateSddChange,
   loadDlpPolicy,
   ProductHandoff,
@@ -580,6 +581,7 @@ function registerSddDepositTool(server: McpServer, options: RegisterToolsOptions
 
 const SDD_INTEGRATE_SCHEMA = {
   change: z.string().optional(),
+  all: z.boolean().optional(),
   auto: z.boolean().optional(),
   author: z.string().optional(),
   root: z.string().optional(),
@@ -587,8 +589,12 @@ const SDD_INTEGRATE_SCHEMA = {
 };
 
 function registerSddIntegrateTool(server: McpServer, options: RegisterToolsOptions): void {
-  server.tool('sdd_integrate', 'Integrates and promotes a completed SDD change.', SDD_INTEGRATE_SCHEMA, async (params) => {
+  server.tool('sdd_integrate', 'Integrates and promotes a completed SDD change (or all completed changes when all=true).', SDD_INTEGRATE_SCHEMA, async (params) => {
     return executeSecuredTool('sdd_integrate', params, options, (root) => {
+      if (params.all) {
+        const batchResult = integrateAllSddChanges({ rootDir: root, author: params.author, autoArchive: true });
+        return { data: batchResult, isError: !batchResult.success, root };
+      }
       if (params.change) {
         assertWithinRoot(path.join('specs', 'changes', 'active', params.change), root, 'change');
       }

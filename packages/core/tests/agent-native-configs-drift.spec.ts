@@ -426,5 +426,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(productAnalyst).toBeDefined();
     expect(productAnalyst!.body).toMatch(/15 questions/i);
     expect(productAnalyst!.body).toMatch(/ANTI-LIBRARY-ONLY MVP/i);
+    expect(productAnalyst!.body).toMatch(/Plain-Language Journey Elicitation/i);
+    expect(productAnalyst!.body).toMatch(/persona.*stages.*touchpoints.*pain-points.*related-use-cases/is);
   });
 });

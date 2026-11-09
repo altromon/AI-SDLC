@@ -44,7 +44,7 @@ const program = new Command();
 program
   .name('aisdlc')
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
-  .version('3.4.0');
+  .version('3.4.1');
 
 // --- check command (unified pre-flight with auto-fix) ---
 program
@@ -630,6 +630,7 @@ sddCommand
   .command('integrate')
   .description('Integrate and synchronize implemented SDD changes into canonical specification (product, requirements, and architecture)')
   .option('-c, --change <id>', 'Change identifier (e.g. chg-001-telemetry)')
+  .option('--all', 'Consolidate and integrate all completed SDD changes across active and completed workspaces')
   .option('--auto', 'Automatically detect active change to integrate based on branch, PR, or diff')
   .option('--head-ref <ref>', 'Source branch for automatic resolution')
   .option('--pr-title <title>', 'Pull Request title for automatic resolution')
@@ -643,6 +644,7 @@ sddCommand
     const passed = runSddIntegrate({
       root: opts.root,
       change: opts.change,
+      all: opts.all,
       auto: opts.auto,
       headRef: opts.headRef,
       prTitle: opts.prTitle,

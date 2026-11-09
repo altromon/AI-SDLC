@@ -489,16 +489,38 @@ export function updateCitationsInContent(
   return { updatedContent: newLines.join(eol), changed: anyChanged };
 }
 
+function collectHandoffYamlFiles(rootDir: string): string[] {
+  const handoffCandidates: string[] = [];
+  const searchParents = [
+    path.join(rootDir, 'specs', 'changes', 'active'),
+    path.join(rootDir, 'specs', 'changes', 'completed'),
+  ];
+  for (const sub of searchParents) {
+    if (!fs.existsSync(sub)) continue;
+    for (const entry of fs.readdirSync(sub, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        const hf = path.join(sub, entry.name, 'handoff.yaml');
+        if (fs.existsSync(hf)) handoffCandidates.push(hf);
+      }
+    }
+  }
+  return handoffCandidates;
+}
+
 function collectCandidateFilesForSync(rootDir: string, targetPath?: string): string[] {
   if (targetPath) {
     const fullTarget = path.isAbsolute(targetPath) ? targetPath : path.join(rootDir, targetPath);
     if (!fs.existsSync(fullTarget)) return [];
-    return fs.statSync(fullTarget).isDirectory() ? walkMdFiles(fullTarget) : [fullTarget];
+    if (!fs.statSync(fullTarget).isDirectory()) return [fullTarget];
+    const mdFiles = walkMdFiles(fullTarget);
+    const handoffFile = path.join(fullTarget, 'handoff.yaml');
+    return fs.existsSync(handoffFile) ? [...mdFiles, handoffFile] : mdFiles;
   }
-  return walkMdFiles(rootDir).filter((f) => {
+  const mdCandidates = walkMdFiles(rootDir).filter((f) => {
     const relFile = path.relative(rootDir, f).replace(/\\/g, '/');
     return isPdacDeliveryDoc(relFile);
   });
+  return [...mdCandidates, ...collectHandoffYamlFiles(rootDir)];
 }
 
 function syncSingleFile(
