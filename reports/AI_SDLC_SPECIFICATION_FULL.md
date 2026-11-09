@@ -2,7 +2,7 @@
 
 > **Dossier y Documento Maestro Consolidado de AI-SDLC**  
 > Framework de Desarrollo Híbrido para Personas y Agentes de IA  
-> *Fecha de Compilación:* `2026-11-01 15:08:04 UTC` | *Módulos Integrados:* `15`  
+> *Fecha de Compilación:* `2026-11-09 18:08:22 UTC` | *Módulos Integrados:* `15`  
 
 ---
 
@@ -23,7 +23,7 @@
     - [Phase 2: Shift-Left Cybersecurity and Threat Modeling](#doc-readme-phase-2-shift-left-cybersecurity-and-threat-modeling)
     - [Phase 3: Open Source License Governance (IP & Legal as Code)](#doc-readme-phase-3-open-source-license-governance-ip-legal-as-code)
     - [Phase 4: SDD Delivery Scaffolding and Autonomy Governance](#doc-readme-phase-4-sdd-delivery-scaffolding-and-autonomy-governance)
-    - [Phase 5: Automated Git Branch Management (4-Tier Model)](#doc-readme-phase-5-automated-git-branch-management-4-tier-model)
+    - [Phase 5: Automated Git Branch Management (Streamlined 2-Tier & 4-Tier Models)](#doc-readme-phase-5-automated-git-branch-management-streamlined-2-tier-4-tier-models)
     - [Phase 6: Implementation with TDD and Test Audit](#doc-readme-phase-6-implementation-with-tdd-and-test-audit)
     - [Phase 7: Polyglot Quality Release Gate and Pre-Flight](#doc-readme-phase-7-polyglot-quality-release-gate-and-pre-flight)
     - [Phase 8: Automated 360° Traceability Matrix and Pull Request](#doc-readme-phase-8-automated-360-traceability-matrix-and-pull-request)
@@ -51,9 +51,10 @@
   - [🚀 Quick Guide for Human Teams](#doc-readme-quick-guide-for-human-teams)
   - [🤖 Operational Guide for AI Agents](#doc-readme-operational-guide-for-ai-agents)
     - [1. Non-Negotiable Principles and Guardrails](#doc-readme-1-non-negotiable-principles-and-guardrails)
-    - [2. Canonical Specialized Agents (11 Roles)](#doc-readme-2-canonical-specialized-agents-11-roles)
+    - [2. Canonical Specialized Agents (13 Roles)](#doc-readme-2-canonical-specialized-agents-13-roles)
     - [3. Pre-Merge Audit Triad (and Privacy Audit)](#doc-readme-3-pre-merge-audit-triad-and-privacy-audit)
     - [4. Automation & Infrastructure: `agent-devops` and Non-Invasion Guardrail](#doc-readme-4-automation-infrastructure-agent-devops-and-non-invasion-guardrail)
+    - [5. Transversal Quality & Red-Team Feedback Loop (`agent-auditor` & `agent-adversary`)](#doc-readme-5-transversal-quality-red-team-feedback-loop-agent-auditor-agent-adversary)
     - [Native Integration by AI Environment](#doc-readme-native-integration-by-ai-environment)
   - [📜 License](#doc-readme-license)
 
@@ -206,6 +207,8 @@
     - [9. `agent-expert-user` (Expert User and Domain Evaluator)](#cap-09-agent-protocols-9-agent-expert-user-expert-user-and-domain-evaluator)
     - [10. `agent-code-reviewer` (Technical and Architectural Code Reviewer)](#cap-09-agent-protocols-10-agent-code-reviewer-technical-and-architectural-code-reviewer)
     - [11. `agent-devops` (Automation and Infrastructure Engineer)](#cap-09-agent-protocols-11-agent-devops-automation-and-infrastructure-engineer)
+    - [12. `agent-auditor` (Transversal Quality and Improvement Auditor)](#cap-09-agent-protocols-12-agent-auditor-transversal-quality-and-improvement-auditor)
+    - [13. `agent-adversary` (Transversal Red Team and Chaos Adversary)](#cap-09-agent-protocols-13-agent-adversary-transversal-red-team-and-chaos-adversary)
   - [4. Operational Protocol "AI as Scribe" (Assisted Technical Writing)](#cap-09-agent-protocols-4-operational-protocol-ai-as-scribe-assisted-technical-writing)
     - [1. Purpose and Philosophy](#cap-09-agent-protocols-1-purpose-and-philosophy)
     - [2. Input / Output Contract (I/O Contract)](#cap-09-agent-protocols-2-input-output-contract-io-contract)
@@ -223,11 +226,12 @@
     - [2. Exposed MCP Tools Catalog (24 Tools)](#cap-09-agent-protocols-2-exposed-mcp-tools-catalog-24-tools)
     - [3. Canonical Resources (`aisdlc://`)](#cap-09-agent-protocols-3-canonical-resources-aisdlc)
     - [4. Setup Guides for IDEs and Agent Environments](#cap-09-agent-protocols-4-setup-guides-for-ides-and-agent-environments)
+    - [5. Role-Based Access Control (RBAC) & Dynamic Role Enforcement](#cap-09-agent-protocols-5-role-based-access-control-rbac-dynamic-role-enforcement)
   - [8. Canonical Workflow Handoff Protocol between Agents and Human Action Window](#cap-09-agent-protocols-8-canonical-workflow-handoff-protocol-between-agents-and-human-action-window)
     - [1. Purpose and Governance Principles](#cap-09-agent-protocols-1-purpose-and-governance-principles)
     - [2. Autonomy Level Conditional Activation Rule](#cap-09-agent-protocols-2-autonomy-level-conditional-activation-rule)
     - [3. Canonical Template](#cap-09-agent-protocols-3-canonical-template)
-    - [4. Canonical Lifecycle Transition Chain](#cap-09-agent-protocols-4-canonical-lifecycle-transition-chain)
+    - [4. Canonical Lifecycle Transition Chain (Streamlined 2-Checkpoint Architecture)](#cap-09-agent-protocols-4-canonical-lifecycle-transition-chain-streamlined-2-checkpoint-architecture)
   - [9. Deterministic Pre-Prompt Data Loss Prevention (DLP) & Zero Data Retention (ZDR)](#cap-09-agent-protocols-9-deterministic-pre-prompt-data-loss-prevention-dlp-zero-data-retention-zdr)
     - [1. Mandatory Pre-Prompt DLP Filtering](#cap-09-agent-protocols-1-mandatory-pre-prompt-dlp-filtering)
     - [2. Zero Data Retention (ZDR) Governance](#cap-09-agent-protocols-2-zero-data-retention-zdr-governance)
@@ -259,14 +263,16 @@
   - [9. Interactive Web Dashboard and PDaC / RTM Graph Visualizer (Cytoscape.js)](#cap-10-quality-management-and-release-gates-9-interactive-web-dashboard-and-pdac-rtm-graph-visualizer-cytoscapejs)
     - [Key Dashboard Features:](#cap-10-quality-management-and-release-gates-key-dashboard-features)
 
-- [**11. Hierarchical Git Branching Model (4-Tier Git Branching Model)**](#cap-11-git-branching-and-lifecycle) *(Fuente: `process/11_git_branching_and_lifecycle.md`)*
+- [**11. Git Branching Model & Lifecycle (Streamlined 2-Tier & Hierarchical Extensions)**](#cap-11-git-branching-and-lifecycle) *(Fuente: `process/11_git_branching_and_lifecycle.md`)*
   - [1. Principles of the Branching Model](#cap-11-git-branching-and-lifecycle-1-principles-of-the-branching-model)
-  - [2. Anatomy of the Four Branch Tiers](#cap-11-git-branching-and-lifecycle-2-anatomy-of-the-four-branch-tiers)
+  - [2. Anatomy of the Branch Tiers](#cap-11-git-branching-and-lifecycle-2-anatomy-of-the-branch-tiers)
     - [Tier 1: `main` Branch (Stable Baseline)](#cap-11-git-branching-and-lifecycle-tier-1-main-branch-stable-baseline)
-    - [Tier 2: Open Version Branch (`release/vX.Y.Z` or `version/vX.Y.Z`)](#cap-11-git-branching-and-lifecycle-tier-2-open-version-branch-releasevxyz-or-versionvxyz)
-    - [Tier 3: Feature, Bug, or Patch Branch (`feat/...`, `bug/...`, `patch/...`, `fix/...`)](#cap-11-git-branching-and-lifecycle-tier-3-feature-bug-or-patch-branch-feat-bug-patch-fix)
-    - [Tier 4: Atomic Task Branch (`task/...`)](#cap-11-git-branching-and-lifecycle-tier-4-atomic-task-branch-task)
-  - [3. Branch and Merge Flow Diagram](#cap-11-git-branching-and-lifecycle-3-branch-and-merge-flow-diagram)
+    - [Tier 2 (Default): Working Feature / Fix Branch (`feat/...`, `fix/...`, `bug/...`)](#cap-11-git-branching-and-lifecycle-tier-2-default-working-feature-fix-branch-feat-fix-bug)
+    - [Optional Milestone Tier: Open Version Branch (`release/vX.Y.Z`)](#cap-11-git-branching-and-lifecycle-optional-milestone-tier-open-version-branch-releasevxyz)
+    - [Optional Concurrency Tier: Atomic Task Worktrees (`task/...`)](#cap-11-git-branching-and-lifecycle-optional-concurrency-tier-atomic-task-worktrees-task)
+  - [3. Branch and Merge Flow Diagrams](#cap-11-git-branching-and-lifecycle-3-branch-and-merge-flow-diagrams)
+    - [Streamlined Flow (Default — 1 Feature PR with SemVer Bump)](#cap-11-git-branching-and-lifecycle-streamlined-flow-default-1-feature-pr-with-semver-bump)
+    - [Milestone Flow (Optional — Batched Release)](#cap-11-git-branching-and-lifecycle-milestone-flow-optional-batched-release)
   - [4. Quality Gates and Merge Criteria by Tier (PR Gates)](#cap-11-git-branching-and-lifecycle-4-quality-gates-and-merge-criteria-by-tier-pr-gates)
   - [5. Guardrails and Rules for AI Agents](#cap-11-git-branching-and-lifecycle-5-guardrails-and-rules-for-ai-agents)
   - [6. Branch Automation with the CLI (`aisdlc git checkout`)](#cap-11-git-branching-and-lifecycle-6-branch-automation-with-the-cli-aisdlc-git-checkout)
@@ -275,10 +281,13 @@
     - [Supported Providers and Canonical Environment Variables](#cap-11-git-branching-and-lifecycle-supported-providers-and-canonical-environment-variables)
     - [Pipeline Execution Flow](#cap-11-git-branching-and-lifecycle-pipeline-execution-flow)
 
-- [**AI-SDLC Process Documentation (`process/`)**](#cap-README) *(Fuente: `process/README.md`)*
-  - [1. Document Index](#cap-README-1-document-index)
-  - [2. Canonical Agent Workflow & Shift-Left Handoff Chain](#cap-README-2-canonical-agent-workflow-shift-left-handoff-chain)
-  - [3. The 12 Deterministic Quality Gates (`aisdlc verify all`)](#cap-README-3-the-12-deterministic-quality-gates-aisdlc-verify-all)
+- [**AI-SDLC: Process & Governance Framework**](#cap-README) *(Fuente: `process/README.md`)*
+  - [🏛️ Directory of Canonical Process Specifications](#cap-README-directory-of-canonical-process-specifications)
+  - [⚡ Core Operational Principles (AI-SDLC v4.0.0)](#cap-README-core-operational-principles-ai-sdlc-v400)
+    - [1. Streamlined 2-Tier Git Topology (Default & Agile)](#cap-README-1-streamlined-2-tier-git-topology-default-agile)
+    - [2. Streamlined 2-Checkpoint Transversal Architecture](#cap-README-2-streamlined-2-checkpoint-transversal-architecture)
+    - [3. Deterministic Task-Level Rework Analytics (`TSK-*`)](#cap-README-3-deterministic-task-level-rework-analytics-tsk-)
+  - [🛡️ The 12 Deterministic Quality Gates](#cap-README-the-12-deterministic-quality-gates)
 
 ---
 
@@ -381,7 +390,7 @@ AI-SDLC/
 │   └── cli/                                  # @aisdlc/cli: Binary CLI executable (npx aisdlc)
 │
 ├── process/                                  # Normative Process Specification
-│   ├── README.md                             # Process index, 11 agents workflow, and 12 Quality Gates
+│   ├── README.md                             # Process index, 13 agents workflow, and 12 Quality Gates
 │   ├── 00_principles_and_manifesto.md        # Manifesto and core principles
 │   ├── 01_governance_and_roles.md            # Human-Agent RACI matrix and authorization levels
 │   ├── 02_product_definition.md              # ProductShape guide (Actors, Use Cases, Requirements)
@@ -392,9 +401,9 @@ AI-SDLC/
 │   ├── 06_spec_driven_development.md         # SDD delivery lifecycle citing Product and Architecture
 │   ├── 07_security_and_license_validation.md # CI/CD Gates (12 Gates): SAST, Secrets, Privacy PII-SAST, SBOM, and Licenses
 │   ├── 08_citation_contract_and_drift.md     # Anti-drift cryptographic citation protocol
-│   ├── 09_agent_protocols.md                 # Prompts, skill contracts, and guardrails for LLMs (11 Agents)
+│   ├── 09_agent_protocols.md                 # Prompts, skill contracts, and guardrails for LLMs (13 Agents)
 │   ├── 10_quality_management_and_release_gates.md # Coding rules, Cyclomatic Complexity, and Release Gates
-│   └── 11_git_branching_and_lifecycle.md     # 4-tier Git branching model (main, release, feat/bug, task)
+│   └── 11_git_branching_and_lifecycle.md     # Streamlined 2-tier Git branching model (main ➔ feat/bug), task tracking via trailers, and optional 4-tier release extension
 │
 ├── schemas/                                  # JSON Schemas (34 Deterministic Schemas - Draft 2020-12)
 │   ├── product/                              # Schemas: actor, use-case, requirement, business-rule, bounded-context
@@ -452,7 +461,7 @@ This accelerated flow demonstrates how to create, implement, verify, and integra
 <a id="doc-readme-1-prerequisites"></a>
 
 ### 1. Prerequisites
-- **Node.js** (v18.0 or higher): `node -v`
+- **Node.js** (v20.0 or higher): `node -v`
 - **pnpm** (v9 or v10+): `pnpm -v`
 - **Git** (v2.30 or higher): `git --version`
 
@@ -474,9 +483,9 @@ pnpm run check:fix
 pnpm run change:new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
 # or via npx: npx aisdlc change new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
 
-# 3. Automatically navigate and cascade-create the task branch in Git 4-tier hierarchy
-pnpm run git:checkout TSK-001
-# or via npx: npx aisdlc git checkout TSK-001
+# 3. Automatically navigate and create/switch to the feature branch in Git (streamlined 2-tier)
+pnpm run git:checkout TSK-001 --streamlined
+# or via npx: npx aisdlc git checkout TSK-001 --streamlined
 
 # 4. Implement feature and tests (TDD) in src/ and tests/
 #    (Developer or agent writes logic and unit/BDD tests)
@@ -504,14 +513,14 @@ npx aisdlc sdd integrate --auto
 
 | CLI Tool / Command | Equivalent pnpm Command | Lifecycle Phase | Output / Action Performed |
 |---|---|---|---|
-| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository with all 34 JSON schemas (Draft 2020-12), 38 canonical starter templates, Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`), and AI agent rules (11 specialized agents). Unconditionally generates universal MCP configs (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Injects standard npm scripts into consumer `package.json`. Interactive TTY wizard prompts for CI/CD provider, Architecture granularity, and AI Agents. Supports `--dry-run`, `--json`, and `-F, --format <format>` |
+| `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository with all 34 JSON schemas (Draft 2020-12), 38 canonical starter templates, Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`), and AI agent rules (13 specialized agents). Unconditionally generates universal MCP configs (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Injects standard npm scripts into consumer `package.json`. Interactive TTY wizard prompts for CI/CD provider, Architecture granularity, and AI Agents. Supports `--dry-run`, `--json`, and `-F, --format <format>` |
 | `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry Setup** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
 | `npx aisdlc mcp` / `npx @aisdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 24 typed tools (including `new`, `verify`, `verify_privacy`, `report`) and 6 canonical resources |
 | `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | **SDD Scaffolding** | Generates `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` sidecar (`HOF-*`) with SHA-256 digests |
 | `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancy** | Audits lexical collisions and requirement overlaps before coding (`--json`) |
 | `npx aisdlc verify friction [change]` | - | **Progressive Friction** | Validates Anti-Bypass rules and thresholds according to risk profile (`patch`/`standard`/`critical`, `--json`) |
 | `npx aisdlc git plan` | `pnpm run git:plan` | **Git Planning** | Renders visual branch hierarchy tree before starting work |
-| `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Git 4-Tier Branching** | Resolves version and cascade-creates: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
+| `npx aisdlc git checkout <TSK-ID> [--streamlined]` | `pnpm run git:checkout <TSK-ID>` | **Git Branching** | Resolves version and switches to feature branch (`feat/CHG-*`) by default, or cascade-creates 4-tier hierarchy |
 | `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | **Git Governance** | Validates strict naming rules for any branch according to its Tier (1 to 4) |
 | `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Unified Pre-Flight** | Syncs Gherkin to `.feature`, updates PDaC SHA-256 digests, audits security & privacy, and checks all 12 Quality Gates |
 | `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Structural Compliance** | Validates Markdown artifacts and `handoff.yaml` sidecars against canonical JSON schemas (Draft 2020-12, `--json`) |
@@ -528,9 +537,9 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc verify licenses [options]` | `pnpm run verify:licenses` | **IP / OSS Governance & SCA** | Dynamic dependency scan, CycloneDX 1.5 SBOM, vulnerability threshold audit (`--vuln`), and legal attribution against `license-policy.yaml` (`--json`) |
 | `npx aisdlc sdd verify` | - | **SDD Compliance** | Audits active changes for specification compliance and valid sidecars |
 | `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 12 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
-| `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship) for PRs (supports `--json`) |
+| `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship, and task-level rework & churn breakdown) for PRs (supports `--json`) |
 | `npx aisdlc sdd integrate [--auto]` | - | **Baseline Promotion** | Promotes requirements to `active`, links architecture, marks proposal `applied`, and archives change |
-| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Release Summary** | Computes DIR per model/human, defect density, and rework costs (`RELEASE_KPIS_<release>.md`, supports `--json`) |
+| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Release Summary** | Computes DIR per model/human, defect density, rework costs, and granular task rework stats (`RELEASE_KPIS_<release>.md`, supports `--json`) |
 | `npx aisdlc report quality` | `pnpm run report:quality` | **Formal Reporting** | Generates detailed metrics report in `reports/QUALITY_REPORT.md` |
 | `npx aisdlc report dashboard` | `pnpm run report:dashboard` | **Interactive Dashboard** | Generates self-contained HTML dashboard and PDaC/RTM visual graph (supports `--open`, `--output`) |
 | `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Product Catalog** | Generates consolidated requirement catalog in `reports/ACTIVE_REQUIREMENTS.md` |
@@ -752,28 +761,34 @@ Generate the SDD delivery package in a single automated step:
 
 ---
 
-<a id="doc-readme-phase-5-automated-git-branch-management-4-tier-model"></a>
+<a id="doc-readme-phase-5-automated-git-branch-management-streamlined-2-tier-4-tier-models"></a>
 
-### Phase 5: Automated Git Branch Management (4-Tier Model)
+### Phase 5: Automated Git Branch Management (Streamlined 2-Tier & 4-Tier Models)
 
-1. **Cascade Navigation and Creation per Task (Recommended)**:
+1. **Streamlined 2-Tier Model (Default & Agile)**:
    ```bash
-   pnpm run git:checkout TSK-001
-   # or: npx aisdlc git checkout TSK-001
+   pnpm run git:checkout TSK-001 --streamlined
+   # or: npx aisdlc git checkout TSK-001 --streamlined
    ```
    *Under the Hood*:
    - Locates `TSK-001` in `specs/changes/active/*/tasks.md`.
-   - Resolves associated release version and builds strict 4-tier hierarchy:
-     `Tier 1: main` ➔ `Tier 2: release/vX.Y.Z` ➔ `Tier 3: feat/CHG-XXX` ➔ `Tier 4: task/CHG-XXX/TSK-001-...`
-   - Cascade-creates missing intermediate branches and checks out task branch directly.
+   - Checks out `feat/<CHG-ID>-<slug>` directly from `main`.
+   - **Task Tracking via Commit Trailers**: Work on individual tasks (`TSK-*`) is tracked through standardized commit trailers (`Task-ID: TSK-XXX`, `Parent-Ref: CHG-XXX`) or conventional scopes (`feat(TSK-001): ...`), eliminating branch proliferation and merge overhead while maintaining 100% cryptographic traceability.
 
-2. **Branch Planning and Validation Tools**:
+2. **Enterprise 4-Tier Model (Optional Extension)**:
+   ```bash
+   pnpm run git:checkout TSK-001
+   ```
+   - For formal release tracks or isolated worktrees, automatically resolves the version and builds the 4-tier cascade:
+     `Tier 1: main` ➔ `Tier 2: release/vX.Y.Z` ➔ `Tier 3: feat/CHG-XXX` ➔ `Tier 4: task/CHG-XXX/TSK-001-...`
+
+3. **Branch Planning and Validation Tools**:
    ```bash
    # Visualize branch hierarchy before starting
-   pnpm run git:plan                             # or: npx aisdlc git plan --release v1.2.0 --feature CHG-002-alerting --tasks TSK-001,TSK-002
+   pnpm run git:plan
 
    # Validate branch naming rules
-   pnpm run git:validate task/CHG-002/TSK-001-alert-dto # or: npx aisdlc git validate <branch>
+   pnpm run git:validate feat/CHG-002-alerting
    ```
 
 ---
@@ -792,6 +807,11 @@ Generate the SDD delivery package in a single automated step:
    # or: npx aisdlc verify testing
    ```
    *Output*: Generates `reports/TEST_VERIFICATION_AUDIT.md`. Blocks delivery if any requirement or task lacks verifiable tests on disk.
+
+4. **Checkpoint 2: Implementation & Pre-PR Checkpoint (`agent-auditor` ∥ `agent-adversary`)**:
+   Following functional validation with `agent-expert-user` against `UC-*` and `FR-*` criteria (including 0 console errors):
+   - Concurrently invoke `agent-auditor` (verifying Clean Code, SOLID, DRY, and AST complexity thresholds) and `agent-adversary` (performing conceptual test mutation to ensure QA tests catch defects, and attacking boundary values with concrete break PoCs).
+   - Remediate findings in `agent-developer` (max 2 rounds) before opening the PR.
 
 ---
 
@@ -1220,11 +1240,11 @@ AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@aisdlc/
 4. **Architectural Instantiation**: Copy templates from `templates/architecture/` to `docs/architecture/` (or design in `specs/changes/active/.../design.md`). Fill YAML frontmatter and validate via `npx aisdlc verify schemas` and `npx aisdlc verify traceability`.
 5. **Deterministic Validation & Zero Auto-Approval**: Run pre-flight commands (`pnpm run check:fix` and `pnpm run verify:all`). Never attempt to auto-approve or merge a PR: merging is strictly a human prerogative.
 
-<a id="doc-readme-2-canonical-specialized-agents-11-roles"></a>
+<a id="doc-readme-2-canonical-specialized-agents-13-roles"></a>
 
-### 2. Canonical Specialized Agents (11 Roles)
+### 2. Canonical Specialized Agents (13 Roles)
 
-AI-SDLC defines 11 specialized roles with bounded responsibilities and deterministic gates (see details in [process/09_agent_protocols.md](process/09_agent_protocols.md) and [process/01_governance_and_roles.md](process/01_governance_and_roles.md)):
+AI-SDLC defines 13 specialized roles with bounded responsibilities and deterministic gates (see details in [process/09_agent_protocols.md](process/09_agent_protocols.md) and [process/01_governance_and_roles.md](process/01_governance_and_roles.md)):
 
 | Agent Role | Specialty / Mission | Core Deliverables | Critical Guardrails |
 | :--- | :--- | :--- | :--- |
@@ -1239,6 +1259,8 @@ AI-SDLC defines 11 specialized roles with bounded responsibilities and determini
 | **`agent-compliance-checker`** | License & IP Compliance Auditor | Legal dependency compatibility verdict | SPDX audit against `license-policy.yaml`; blocks viral/commercial. |
 | **`agent-code-reviewer`** | Technical & Architecture Reviewer (Pre-Merge) | Clean Code, SOLID, DRY, YAGNI, AST audit | CC $\le 10$, MI $\ge 50$; categorizes `[BLOCKING]` vs `[SUGGESTION]`. |
 | **`agent-devops`** | Automation & Infrastructure Engineer | `.github/workflows/`, Dockerfiles, IaC, scripts | **NON-INVASION**: Strictly forbidden from touching application code in `src/`. |
+| **`agent-auditor`** | Transversal Quality & Improvement Auditor | Structured audit reports, YAGNI simplifications, defect classification (`[BLOCKING]`, `[SIMPLIFICATION]`, `[ADVISORY]`) | Polymorphic on demand; non-invasive; returns handoff to audited agent (max 1 return round). |
+| **`agent-adversary`** | Transversal Red Team & Chaos Adversary | Proof-of-break reports, reproducible PoCs, mutation tests, break vectors | Mandatory PoC evidence; non-invasive; returns handoff to audited agent (max 1 return round). |
 
 <a id="doc-readme-3-pre-merge-audit-triad-and-privacy-audit"></a>
 
@@ -1255,6 +1277,14 @@ Before a PR reaches human Tech Lead review, specialized auditors inspect the dif
 The `agent-devops` agent maintains CI/CD pipelines, container images, and infrastructure scripts under a **strict non-invasion guardrail**:
 - **Permitted scope**: `.github/workflows/`, `Dockerfile*`, `docker-compose*.yml`, IaC manifests, and `scripts/`.
 - **Prohibited scope**: Modifying application source code files (`src/`, `packages/*/src/app/`) is strictly forbidden. Business logic belongs exclusively to `agent-developer`.
+
+<a id="doc-readme-5-transversal-quality-red-team-feedback-loop-agent-auditor-agent-adversary"></a>
+
+### 5. Transversal Quality & Red-Team Feedback Loop (`agent-auditor` & `agent-adversary`)
+Beyond linear phase progression, the framework introduces two **on-demand transversal meta-agents** that can be invoked during any stage of development (Product, Security/Privacy, Architecture, QA Red Phase, Developer Green Phase, or DevOps):
+- **`agent-auditor` (Constructive Critic)**: Polymorphically inspects deliverables to identify premature abstractions, overengineering, or structural debt, suggesting minimal, standard YAGNI improvements.
+- **`agent-adversary` (Destructive Red Team)**: Actively attempts to break or invalidate deliverables, delivering concrete proofs-of-concept (PoC) such as logic traps in product rules, race conditions in architecture diagrams, mutant code that bypasses QA tests, or boundary payloads that crash implementation code.
+- **Mandatory Return Handoff & Anti-Ping-Pong Protocol**: Both agents operate under strict non-invasion rules (they inspect without altering files directly) and emit their canonical Workflow Handoff back to the **audited specialist agent** to resolve findings. To eliminate infinite review cycles, the loop is limited to **maximum 1 return round** per increment before escalation.
 
 <a id="doc-readme-native-integration-by-ai-environment"></a>
 
@@ -1411,6 +1441,10 @@ The AI-SDLC framework organizes humans and AI agents into a clear, balanced gove
     - Audits Pull Requests evaluating readability, SOLID/DRY adherence, absence of code smells, and cyclomatic/cognitive complexity limits, completing the Pre-Merge Audit Triad (alongside `agent-security-auditor`, `agent-compliance-checker`, and `agent-privacy-officer`).
 11. **DevOps and Infrastructure Engineer Agent (`agent-devops`)**:
     - Maintains and evolves automated infrastructure: CI/CD workflows, Dockerfiles, IaC manifests, and support scripts, under the strict non-invasion guardrail protecting application source code (`src/`).
+12. **Transversal Quality and Improvement Auditor Agent (`agent-auditor`)**:
+    - Operates polymorphically on demand across any development phase (Product, Threat Modeling, Privacy, Architecture, QA, Development, DevOps). Inspects deliverables for structural weaknesses, blind spots, or overengineering, proposing concrete, minimal solutions adhering strictly to YAGNI and returning handoff directly to the audited agent.
+13. **Transversal Red Team and Chaos Adversary Agent (`agent-adversary`)**:
+    - Operates polymorphically on demand across any development phase. Actively attempts to break, bypass, or invalidate deliverables by formulating reproducible proofs-of-concept (PoC), counterexamples, test mutations, or boundary failure vectors, returning handoff directly to the audited agent for mitigation before promotion.
 
 ---
 
@@ -1445,6 +1479,8 @@ The AI-SDLC framework organizes humans and AI agents into a clear, balanced gove
 | **Vulnerability Audit and SAST** | I | I | A | I | C | R (Security Auditor) | Deterministic SAST + Adversarial Agent |
 | **Privacy & PII-SAST Pre-Merge Audit** | I | I | C | **A** | C | R (Privacy Officer) | Deterministic `verify privacy` (`PRIV-001`–`PRIV-008`) + RoPA check |
 | **Infrastructure as Code & CI/CD** | I | C | C | I | **A** | R (DevOps) | Exclusive modification of .github/, Dockerfiles, scripts (forbidden on src/) |
+| **Transversal Constructive Audit** | C | C | C | C | **A** | R (Auditor Agent) | Polymorphic review on demand; proposes YAGNI simplifications; returns to author agent (max 1 round) |
+| **Transversal Red-Team Adversary** | C | C | C | C | **A** | R (Adversary Agent) | Polymorphic stress testing; mandatory PoC evidence; returns to author agent (max 1 round) |
 | **SDD Canonical Integration** | C | C | I | I | **A** | R (Developer / CLI) | All tasks in `tasks.md` must be `COMPLETED` |
 | **PR Review and Plan Balance (`X`/`O`)** | I | C | C | I | **A (Guarantor & Approver)** | R (Declares matrix, weak points, and assumptions) | Mandatory inclusion of each and every item; justification for any `[O]` |
 | **Pull Request Merge** | I | I | I | I | **A** | - | **AI auto-merge forbidden (Blocked by CI)** |
@@ -1513,7 +1549,12 @@ To prevent context loss or invalid assumptions:
      * 🟢 **`AUTONOMOUS` Mode** (or tasks where humans supervise solely final PR execution or CI pipelines): **This interactive handoff is NOT emitted**, allowing unattended, frictionless agent execution.
      * 🟡 **Autonomy Level $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **Emitting the Workflow Handoff block and HALTING is MANDATORY**, exposing completed deliverables, suggesting next roles, and **preserving an open window for human action** (review, edit, pause, divert, or delegate).
    - **Canonical Lifecycle Transition Chain**:
-     $$\text{Human PO} \rightarrow \text{agent-product-analyst} \rightarrow \text{agent-expert-user} \rightarrow \text{agent-threat-modeler} \rightarrow \text{agent-privacy-officer} \rightarrow \text{agent-system-architect} \rightarrow \text{agent-developer} \rightarrow \text{agent-test-engineer} \rightarrow \text{agent-security-auditor} \rightarrow \text{agent-compliance-checker} \rightarrow \text{agent-privacy-officer} \rightarrow \text{Human Tech Lead}$$
+     $\text{Human PO} \rightarrow \text{agent-product-analyst} \rightarrow \text{agent-expert-user} \rightarrow \text{agent-threat-modeler} \rightarrow \text{agent-privacy-officer} \rightarrow \text{agent-system-architect} \rightarrow \text{agent-developer} \rightarrow \text{agent-test-engineer} \rightarrow \text{agent-security-auditor} \rightarrow \text{agent-compliance-checker} \rightarrow \text{agent-privacy-officer} \rightarrow \text{Human Tech Lead}$
+
+   - **Transversal Feedback & Return Loop Protocol (`agent-auditor` & `agent-adversary`)**:
+     * In addition to the sequential chain, any active specialist agent's deliverable may be routed on-demand to **`agent-auditor`** (constructive review for YAGNI, simplifications, and completeness) or **`agent-adversary`** (destructive red-team testing requiring reproducible PoC breaks or test mutations).
+     * **Mandatory Return Handoff**: The auditor/adversary operates under non-invasion rules (no direct file editing) and emits its Workflow Handoff directly back to the **audited author agent** so that agent repairs the findings in its own isolated context before downstream promotion.
+     * **Anti-Ping-Pong Boundary**: Return rounds are bounded to a maximum of **1 iteration** per task increment to avoid infinite critique cycles; unresolved items are escalated to the Human Tech Lead.
 
 ---
 
@@ -1578,8 +1619,8 @@ Ceremony depth, formal security modeling, and Git branching dynamically adapt ba
 | Profile | Typical Risk Level | Minimum Required Artifacts | STRIDE / Security Modeling | Permitted Git Hierarchy | Required Human Approval |
 | :--- | :---: | :--- | :--- | :--- | :--- |
 | **`patch`** (Low Friction) | `LOW` | Concise `spec.md` with `verification` block only | **Exempt** if not altering `SEC-ENC-*` or external interfaces | Direct branch `fix/<slug>` or `patch/<slug>` (No Tier 4 `task/*`) | Single Tech Lead (PR review and green tests) |
-| **`standard`** (Nominal Friction) | `MEDIUM` / `HIGH` | Full SDD scaffolding (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.yaml`) | Required for new endpoints or business logic | Standard 4-tier model (`main` $\rightarrow$ `release` $\rightarrow$ `feat/bug` $\rightarrow$ `task`) | Formal Tech Lead |
-| **`critical`** (High Friction) | `CRITICAL` | Full SDD scaffolding + Architecture `ADR-*` + Zero Trust Checklist | **Mandatory and unavoidable** (Threats, abuse vectors, mitigation) | Strict 4-tier model with maximum protection | **Dual human approval**: Tech Lead + Lead Architect / SecOps |
+| **`standard`** (Nominal Friction) | `MEDIUM` / `HIGH` | Full SDD scaffolding (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.yaml`) | Required for new endpoints or business logic | Streamlined 2-tier model by default (`main` $\rightarrow$ `feat/bug`) with task trailers, or 4-tier cascade | Formal Tech Lead |
+| **`critical`** (High Friction) | `CRITICAL` | Full SDD scaffolding + Architecture `ADR-*` + Zero Trust Checklist | **Mandatory and unavoidable** (Threats, abuse vectors, mitigation) | Strict 4-tier model or isolated worktree with maximum protection | **Dual human approval**: Tech Lead + Lead Architect / SecOps |
 
 <a id="cap-01-governance-and-roles-b-canonical-source-of-truth-in-frontmatter"></a>
 
@@ -1764,14 +1805,15 @@ To prevent inconsistencies and broken reciprocal links:
 
 ### A. Phase 0: Greenfield & Brownfield Product Inception (`ARCH-INTRO-*`)
 When starting a new product from scratch (or when adopting AI-SDLC in a Brownfield repository without an `ARCH-INTRO-*` root vision artifact), `agent-product-analyst` executes a structured inception flow before any feature change (`change:new`) or code is written:
-1. **Structured Discovery Interview (3–5 Questions)**: The agent interviews the human Product Owner on:
+1. **Iterative Discovery Interview (Up to 15 Questions or Until Product Scope is 100% Clear)**: The agent interviews the human Product Owner in rounds of 3–5 questions (up to **15 questions maximum**, stopping earlier as soon as the product is clear) on:
    - Core problem, mission statement, and value proposition.
    - Primary stakeholders and actors (`ACT-*`).
-   - Essential MVP capabilities (`UC-*`) vs. future roadmap.
+   - **Target Interaction & Presentation Modality (`CON-*` / `ARCH-INTRO-001`)**: Explicitly define how human actors interact with the MVP (Web UI, Desktop GUI, Interactive Console/TUI/CLI, Mobile App, or Headless API/SDK if exclusively system-to-system). Never default to headless class libraries when human actors exist.
+   - Essential MVP capabilities (`UC-*`) vs. future roadmap, including foundational master-data / entity CRUD prerequisites.
    - Top 3–5 priority quality goals (`QR-*`) and constraints (`CON-*`).
-2. **Enterprise & Capability Vision (`ARCH-INTRO-001`)**: Instantiates `templates/architecture/introduction-and-goals.template.md` (`naf-perspective: "Enterprise & Capability"`, `status: draft`).
+2. **Enterprise & Capability Vision (`ARCH-INTRO-001`)**: Instantiates `templates/architecture/introduction-and-goals.template.md` (`naf-perspective: "Enterprise & Capability"`, `status: draft`), explicitly recording the agreed UI/interaction modality.
 3. **Initial ProductShape Baseline Derivation (Greenfield) or Retro-Inception Linking (Brownfield)**:
-   - **Greenfield**: Derives draft `ACT-*`, `JRN-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` artifacts (`status: draft`) linked to `ARCH-INTRO-001` for human review and approval.
+   - **Greenfield**: Derives draft `ACT-*`, `JRN-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` artifacts (`status: draft`) linked to `ARCH-INTRO-001` for human review and approval, ensuring every human `UC-*` defines a complete vertical slice through the agreed presentation modality.
    - **Brownfield (Retro-Inception)**: Synthesizes `ARCH-INTRO-001` from existing product/architecture artifacts and source code, linking directly to existing `cites-product-actors` (`ACT-*`), `cites-journeys` (`JRN-*`), and `cites-quality-goals` (`QR-*`) so the PDaC graph and Interactive Dashboard (`aisdlc report dashboard`) immediately reflect the root product vision.
 
 <a id="cap-02-product-definition-b-continuous-product-evolution-cycle"></a>
@@ -1782,8 +1824,8 @@ When starting a new product from scratch (or when adopting AI-SDLC in a Brownfie
   Idea / Need (or Phase 0 New Product Intent)
       │
       ▼
-  ps:explore ────────────► agent-product-analyst conducts 3-5 question
-      │                   discovery (if new product -> ARCH-INTRO-001) or
+  ps:explore ────────────► agent-product-analyst conducts iterative discovery
+      │                   (up to 15 questions until clear -> ARCH-INTRO-001) or
       │                   reasons over existing graph to identify gaps
       ▼
 Product Change ─────────► changes/active/<chg-id>/: semantic delta with
@@ -3200,9 +3242,10 @@ ROLE: You are the Product Analyst Agent of the AI-SDLC framework.
 MISSION: Capture new product intent via NAF v4 Enterprise & Capability Vision ('ARCH-INTRO-*') and assist the human Product Owner in exploring, modeling, and refining product definition using ProductShape.
 DIRECTIVES:
 - PHASE 0 (GREENFIELD PRODUCT INCEPTION): When the user expresses the intent to create a new product from scratch with the framework (or when 'specs/product/' has no baseline product model yet), initiate Phase 0 before any SDD change ('change:new') or code implementation:
-  1. Conduct a concise 3–5 question structured discovery interview covering: (a) core problem and mission statement, (b) primary actors/stakeholders ('ACT-*'), (c) essential MVP capabilities/use cases ('UC-*'), and (d) top 3–5 priority quality goals and constraints ('QR-*', 'CON-*').
-  2. Instantiate 'ARCH-INTRO-001' ('type: architecture-introduction', 'naf-perspective: "Enterprise & Capability"', 'status: draft') from 'templates/architecture/introduction-and-goals.template.md' ('schemas/architecture/introduction-and-goals.schema.json').
+  1. Conduct an iterative structured discovery interview of up to 15 questions (in batches of 3–5 questions, stopping earlier once the product scope is 100% clear) covering: (a) core problem and mission statement, (b) primary actors/stakeholders ('ACT-*'), (c) target interaction & presentation modality ('CON-*' / 'ARCH-INTRO-001': Web UI, Desktop GUI, Interactive Console/TUI/CLI, Mobile App, or Headless API/SDK if exclusively system-to-system), (d) essential MVP capabilities/use cases ('UC-*') including foundational master-data CRUD prerequisites, and (e) top 3–5 priority quality goals and constraints ('QR-*', 'CON-*').
+  2. Instantiate 'ARCH-INTRO-001' ('type: architecture-introduction', 'naf-perspective: "Enterprise & Capability"', 'status: draft') from 'templates/architecture/introduction-and-goals.template.md' ('schemas/architecture/introduction-and-goals.schema.json'), explicitly recording the agreed presentation modality.
   3. Derive initial draft ProductShape artifacts ('ACT-*', 'JRN-*', 'UC-*', 'BR-*', 'FR-*', 'QR-*' with 'status: draft') in 'specs/product/' linked to 'ARCH-INTRO-001'.
+  4. ANTI-LIBRARY-ONLY MVP & VERTICAL SLICE COMPLETENESS GUARDRAIL: Whenever human actors ('ACT-*') exist, never scope the MVP ('release/v1.0.0') as headless class libraries or internal service calls without an executable presentation host. Every human-facing 'UC-*' must specify observable interaction through the agreed presentation modality and persistent state.
 - Every artifact you produce (ARCH-INTRO, ACT, JRN, UC, BR, BC, TERM, FR, QR, CON) must strictly adhere to the canonical Markdown and YAML frontmatter format.
 - Always write relationships in their single canonical direction (e.g., use-case declares primary-actor and governed-by; domain-term declares defined-in).
 - Do not assume business rules. If you detect an ambiguity, record it explicitly under the 'open-questions' section.
@@ -3256,6 +3299,7 @@ DIRECTIVES:
 - Decompose the system into building blocks 'CMP-*' ensuring each service declares which use cases 'UC-*' it implements and which requirements ('FR-*', 'QR-*', 'SEC-REQ-*', 'PRIV-REQ-*') it fulfills under 'satisfies-requirements'.
 - MODULAR & HEXAGONAL ARCHITECTURE (PORTS & ADAPTERS): Structure building blocks ('CMP-*', Level 2/3 of arc42) around Bounded Contexts ('BC-*') and Vertical Slices ('UC-*') following Hexagonal Architecture (Ports & Adapters). Explicitly separate the pure Domain/Application Core from Inbound/Driving Ports (API, CLI, UI handlers) and Outbound/Driven Ports (persistence, queues, external SDKs/LLMs), enforcing the Dependency Rule (dependencies point strictly inward toward the Core). Avoid speculative empty pass-through layers on trivial changes (YAGNI) and respect consolidated architectures documented in 'ADR-*' on brownfield repositories.
 - ANTI-MONOLITH INCREMENTAL SDD DECOMPOSITION: For greenfield products, never bundle the entire product into a single SDD change ('CHG-001'). Decompose delivery into incremental SDD changes scoped per Use Case ('UC-*') or Bounded Context ('BC-*') so downstream QA and Developer agents execute with 100% coverage per increment.
+- MANDATORY EXECUTABLE PRESENTATION HOST FOR HUMAN-FACING PRODUCTS: Whenever 'specs/product/actors/' defines human actors ('ACT-*') and an interaction modality has been established in 'ARCH-INTRO-001' / 'CON-*' (Web UI, Desktop GUI, Console/TUI/CLI, or Mobile), the MVP architecture must include an explicit runnable presentation/inbound host component ('CMP-WEB-*', 'CMP-DESKTOP-*', 'CMP-CLI-*') and persistent storage adapter—never design a library-only architecture for a user-facing product. Ensure Wave 0 ('CHG-001') scaffolds the runnable application entrypoint/shell.
 - CONTRACT-FIRST FULL-STACK INTEGRATION & EXPLICIT CONTRACT CHECKLIST: Whenever a feature or change spans Frontend (UI) and Backend (API/services), define an explicit shared typed contract (Zod schemas, shared TypeScript DTOs, or OpenAPI specification) in 'design.md' BEFORE code implementation so both layers compile against a single source of truth. Declare explicit 'contracts' (component, interface, and method names) in the YAML frontmatter of 'design.md' so 'aisdlc verify traceability' deterministically verifies their implementation in 'src/' and unit test coverage in 'tests/'.
 - Generate interaction and sequence diagrams in native Mermaid syntax.
 - Document critical technological decisions using immutable ADR records under docs/architecture/09_decisions/.
@@ -3386,7 +3430,7 @@ ROLE: You are the Expert User and Domain Evaluator Agent (`agent-expert-user`).
 MISSION: Scrutinize product design, technical specifications, and implemented software from the perspective of an advanced end operator, enforcing strict MVP boundaries and pre-PR functional conformity.
 DIRECTIVES:
 - Operate under bimodal discipline depending on the development lifecycle phase:
-  1. DESIGN MODE (Upstream): Adopt the primary actor's operational profile under real-world conditions (stress, latency, constrained viewports, high data volume). Define the strict Minimum Viable Product (MVP) without superfluous features (YAGNI), structuring feedback according to 'templates/product/user-design-feedback.template.md' suggesting 'agent-product-analyst' or human PO.
+  1. DESIGN MODE (Upstream): Adopt the primary actor's operational profile under real-world conditions (stress, latency, constrained viewports, high data volume). Define the strict Minimum Viable Product (MVP) without superfluous features (YAGNI), structuring feedback according to 'templates/product/user-design-feedback.template.md' suggesting 'agent-product-analyst' or human PO. Reject any MVP proposal that leaves human actors ('ACT-*') without an executable presentation interface (Web UI, Desktop GUI, or Console/TUI/CLI as agreed in 'ARCH-INTRO-001') or omits foundational master-data CRUD workflows required before executing domain transactions.
   2. FUNCTIONAL VALIDATION MODE (Downstream / Pre-PR / Post-Development Functional Validation): Inspect 'agent-developer' deliverables once unit tests pass green by executing the real application (via Playwright or Chrome DevTools MCP when UI is present). Thoroughly contrast system UI, CLI, or API behavior against use cases ('UC-*') and functional criteria ('FR-*') approved by the PO, verifying real Backend connectivity, the 4 UI usability states (Loading, Empty, Error, Nominal), keyboard/ARIA accessibility, and 0 browser 'console.error' / network failures. If functional drift, fake-wiring, or UX gaps are found, emit return handoff to 'agent-developer'; if fully compliant, emit handoff suggesting 'agent-security-auditor' to begin pre-merge audit.
 - Formulate decisive questions under 'open-questions' for the human Product Owner to prioritize backlog candidates.
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') recommending the next specialist according to active mode, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
@@ -3422,6 +3466,48 @@ DIRECTIVES:
 - CROSS-WORKFLOW AUDIT: When resolving CI/CD or configuration defects detected in a PR, search all '.github/workflows/*.yml' for the same pattern (including deploy, post-merge, and release pipelines) before declaring resolution.
 - REMOTE VERIFICATION: Creating a PR ('gh pr create') does not constitute completion; actively verify that remote pipeline checks pass ('gh pr checks <pr-number>').
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead or Release Manager, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
+```
+
+<a id="cap-09-agent-protocols-12-agent-auditor-transversal-quality-and-improvement-auditor"></a>
+
+### 12. `agent-auditor` (Transversal Quality and Improvement Auditor)
+```text
+ROLE: You are the Transversal Quality and Constructive Auditor Agent ('agent-auditor') of the AI-SDLC framework.
+MISSION: Inspect the output deliverables of any upstream specialist agent upon demand, identifying structural weaknesses, overengineering, or blind spots, and proposing concrete, minimal, and standard solutions adhering strictly to Simplicity First (YAGNI).
+DIRECTIVES:
+- OPERATIONAL SCOPE: Operates polymorphically across all AI-SDLC phases (Product, Threat Modeling, Privacy, Architecture, QA, Development, DevOps).
+- CRITIQUE STYLE: Constructive, pragmatic, and strictly bound to the 'Simplicity First' (YAGNI) and 'Surgical Changes' principles. Discourage premature generalizations and unnecessary design patterns.
+- CLASSIFICATION OF FINDINGS: Every finding must be labeled explicitly as:
+  * [BLOCKING_DEFECT]: Critical omission, structural debt, or standard violation that must be resolved before proceeding (including any headless/library-only MVP when human actors 'ACT-*' exist without an executable presentation host or missing master-data CRUD prerequisites).
+  * [SIMPLIFICATION]: Opportunity to remove unneeded complexity or reduce code/spec surface without loss of function.
+  * [ADVISORY]: Non-blocking observation or suggestion.
+- NON-INVASIVE GUARDRAIL: You do NOT modify upstream files or specifications directly.
+- MANDATORY RETURN HANDOFF:
+  * Emit a structured audit report referencing the inspected canonical IDs and SHA-256 digests.
+  * Conclude by emitting the canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') targeting the ORIGINAL author agent that was audited, detailing prioritized action items.
+  * ANTI-PING-PONG GUARDRAIL: Limit audit iterations to maximum 1 return round per increment unless blocking defects persist.
+```
+
+<a id="cap-09-agent-protocols-13-agent-adversary-transversal-red-team-and-chaos-adversary"></a>
+
+### 13. `agent-adversary` (Transversal Red Team and Chaos Adversary)
+```text
+ROLE: You are the Transversal Red Team and Stress Adversary Agent ('agent-adversary') of the AI-SDLC framework.
+MISSION: Actively attempt to break, bypass, or invalidate the deliverables of any target specialist agent, providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps for every discovered failure mode.
+DIRECTIVES:
+- OPERATIONAL SCOPE: Operates polymorphically across all AI-SDLC phases:
+  * Over Product: Finds contradictory requirements, unreachable business states, and logic traps.
+  * Over Architecture: Simulates race conditions, cascading failures, resource exhaustion, and single points of failure (SPOFs).
+  * Over QA: Performs conceptual mutation testing; demonstrates how flawed or empty implementations could falsely pass tests green.
+  * Over Code: Formulates malicious/boundary inputs, concurrency race triggers, and memory/type edge breaks.
+  * Over DevOps: Attacks pipeline isolation, credential boundaries, and cold-start/dependency outages.
+- MANDATORY PROOF-OF-BREAK:
+  * Abstract criticism without reproducible proof is strictly forbidden.
+  * Every finding must include: (1) Target Entity ID, (2) Failure Scenario / Attack Vector, (3) Concrete PoC (input vector, sequence breakdown, or mutant code), and (4) Expected Impact.
+- NON-INVASIVE GUARDRAIL: You do NOT patch the vulnerabilities or bugs yourself.
+- MANDATORY RETURN HANDOFF:
+  * Conclude by emitting the canonical Workflow Handoff block ('templates/workflow/agent-handoff.template.md') addressing the audited agent, demanding verified mitigation before promotion.
+  * ANTI-PING-PONG GUARDRAIL: Limit adversarial iterations to maximum 1 return round per increment.
 ```
 
 ---
@@ -3666,9 +3752,9 @@ To ensure any AI agent operating in the repository automatically loads canonical
 | Agent Environment | Configuration File | Activation Scope | Injection Mechanism and Core Directives |
 | :--- | :--- | :--- | :--- |
 | **Cursor** | `.cursor/rules/ai-sdlc-core.mdc`<br>`.cursor/rules/ai-sdlc-product.mdc`<br>`.cursor/rules/ai-sdlc-quality.mdc`<br>`.cursor/rules/*.mdc` | Modular (`alwaysApply` for core, `specs/**` for product, `src/**`/`packages/**` for code) | Automatic context injection into Cursor Agent / Composer. Loads the 5 commandments, ProductShape taxonomy (`ACT-*`, `UC-*`, `FR-*`), JSON schemas, complexity thresholds (CC $\le 10$, MI $\ge 50$), specialized role rules, and lifecycle playbooks (`aisdlc-greenfield`, `aisdlc-increment`, `aisdlc-legacy-onboarding`). |
-| **Claude Code** | `CLAUDE.md`<br>`.claude/agents/*.md`<br>`.claude/skills/*/SKILL.md` | Repository Root & `.claude/` | Unified CLI command guide, specialized subagents, and native Claude Code skills for all 11 roles and 3 lifecycle playbooks. |
+| **Claude Code** | `CLAUDE.md`<br>`.claude/agents/*.md`<br>`.claude/skills/*/SKILL.md` | Repository Root & `.claude/` | Unified CLI command guide, specialized subagents with declarative tool permissions (`tools:`), and native Claude Code skills for all 13 roles and 3 lifecycle playbooks. |
 | **GitHub Copilot** | `.github/copilot-instructions.md`<br>`.github/agents/*.agent.md` | Global & `.github/agents/` | Automatic injection into every Copilot prompt. Context on SDD lifecycle, Git 4-tier branch structure, license policy, specialized agents, and lifecycle playbooks. |
-| **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md`<br>`.agent/agents/*.md`<br>`.agent/skills/*/SKILL.md` | Workspace Global | Deterministic mapping of specialized roles, guardrails, and lifecycle playbooks (`aisdlc-greenfield`, `aisdlc-increment`, `aisdlc-legacy-onboarding`). |
+| **Google Antigravity / Gemini CLI** | `.agent/rules/ai-sdlc.md`<br>`.agent/agents/*.md`<br>`.agent/skills/*/SKILL.md` | Workspace Global | Deterministic mapping of specialized roles with declarative tools (`tools:`), PreToolUse hooks (`hooks.json`), and lifecycle playbooks. |
 | **Model Context Protocol (MCP)** | `.cursor/mcp.json`<br>`antigravity.mcp.json`<br>`.vscode/mcp.json` | IDE / Workspace | MCP server declarations for direct IDE access to AI-SDLC deterministic tools. |
 
 <a id="cap-09-agent-protocols-automated-agent-scaffolding-aisdlc-init---agents"></a>
@@ -3784,7 +3870,10 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
   "mcpServers": {
     "ai-sdlc": {
       "command": "npx",
-      "args": ["@ai-sdlc/mcp"]
+      "args": ["@ai-sdlc/mcp"],
+      "env": {
+        "AISDLC_MCP_ROLE": "developer"
+      }
     }
   }
 }
@@ -3807,8 +3896,11 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
 {
   "mcpServers": {
     "ai-sdlc": {
-      "command": "aisdlc",
-      "args": ["mcp"]
+      "command": "npx",
+      "args": ["@aisdlc/mcp"],
+      "env": {
+        "AISDLC_MCP_ROLE": "developer"
+      }
     }
   }
 }
@@ -3820,11 +3912,28 @@ To allow human engineers and AI agents to orchestrate the AI-SDLC lifecycle dire
   "servers": {
     "ai-sdlc": {
       "command": "npx",
-      "args": ["@ai-sdlc/mcp"]
+      "args": ["@ai-sdlc/mcp"],
+      "env": {
+        "AISDLC_MCP_ROLE": "developer"
+      }
     }
   }
 }
 ```
+
+---
+
+
+<a id="cap-09-agent-protocols-5-role-based-access-control-rbac-dynamic-role-enforcement"></a>
+
+### 5. Role-Based Access Control (RBAC) & Dynamic Role Enforcement
+The MCP server enforces deterministic RBAC:
+- **Readonly Roles**: `auditor`, `reviewer`, `readonly`, `agent-code-reviewer`, `agent-security-auditor`, `agent-compliance-checker`, and `agent-privacy-officer` (in pre-merge audit).
+- **Mutation Tools Blocked**: Mutation tools (`new`, `sdd_change_new`, `sdd_check_fix`, `sdd_deposit`, `sdd_integrate`) return a security violation when invoked by a readonly role.
+- **Role Configuration**:
+  1. **Static via IDE Config**: Set `"env": { "AISDLC_MCP_ROLE": "<role>" }` in `.cursor/mcp.json`, `antigravity.mcp.json`, or `.vscode/mcp.json`.
+  2. **Static via CLI**: Pass `--role <role>` to `aisdlc mcp --role auditor`.
+  3. **Dynamic via Tool Parameters**: When invoking mutation tools, subagents may declare their role directly (e.g. `{ role: "agent-security-auditor" }`), enabling fail-closed validation even within a shared developer connection.
 
 ---
 
@@ -3854,70 +3963,78 @@ Every formal handoff adopts the structure in [`templates/workflow/agent-handoff.
 2. **Produced Deliverables**: File paths and IDs of Markdown artifacts, reports, or specifications.
 3. **Recommended Next Role(s)**: Contextual proposal according to AI-SDLC phase.
 4. **Suggested Invocation Prompt**: Copy-paste ready prompt activating the next specialist.
-5. **Human Action Window (Human-in-the-Loop)**: Explicit options to review, edit directly, pause/reroute, or delegate continuity.
+5. **Clean Context Window Isolation (Cross-IDE)**:
+   - **Never share context windows across specialist roles** (e.g., `agent-qa-engineer` and `agent-developer` must never execute in the same conversation history).
+   - **Subagent-Capable IDEs (Antigravity, Claude Code, GitHub Copilot)**: Orchestrators MUST spawn each specialist in an isolated subagent context (`invoke_subagent`, Claude `Task` subagent, or `@agent-*` participant) that hydrates state exclusively from on-disk artifacts (`specs/`, `handoff.yaml`, MCP `get_active_handoff`).
+   - **Single-Session / Rule-Based IDEs (Cursor, Windsurf, Aider)**: The active agent persists all artifacts to disk, emits the Workflow Handoff block, and halts so the user opens a **New Chat** (or `/clear`) before pasting the Suggested Invocation Prompt.
+6. **Human Action Window (Human-in-the-Loop)**: Explicit options to review, edit directly, pause/reroute, or delegate continuity.
 
-<a id="cap-09-agent-protocols-4-canonical-lifecycle-transition-chain"></a>
+<a id="cap-09-agent-protocols-4-canonical-lifecycle-transition-chain-streamlined-2-checkpoint-architecture"></a>
 
-### 4. Canonical Lifecycle Transition Chain
+### 4. Canonical Lifecycle Transition Chain (Streamlined 2-Checkpoint Architecture)
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    AI-SDLC WORKFLOW TRANSITION CHAIN                    │
+│         AI-SDLC STREAMLINED LIFECYCLE & 2-CHECKPOINT CHAIN             │
 └─────────────────────────────────────────────────────────────────────────┘
 
- 1. Product Owner (Human)
-    └── Defines business intent or operational problem
-         │
-         ▼
- 2. agent-product-analyst (Scribe)
-    ├── Generates ProductShape (ACT, UC, FR, QR, BR) with status: draft
-    └── Suggested handoff: agent-expert-user (UX) or agent-threat-modeler
-         │
-         ▼
- 3. agent-expert-user (UX Evaluator / MVP vs Roadmap) [Optional / Upstream]
-    ├── Contrasts design, defines strict MVP scope and backlog recommendations
-    └── Suggested handoff: Human PO / agent-product-analyst
-         │
-         ▼
- 4. agent-threat-modeler (Shift-Left Cybersecurity)
-    ├── Models STRIDE adversaries and OWASP ASVS controls (ACT-THREAT, ABUSE, SEC-REQ)
-    └── Suggested handoff: agent-privacy-officer
-         │
-         ▼
- 4b. agent-privacy-officer (Shift-Left Data Protection & Privacy-by-Design)
-    ├── Models LINDDUN threats, DATA-ASSET-*, PRIV-ROPA-* (GDPR Art. 30), PRIV-REQ-*, DPIA-*
-    └── Suggested handoff: agent-system-architect
-         │         ▲
-         │         │ (Technical Security & Privacy Feedback Loop on Infra/Architecture)
-         ▼         │
- 5. agent-system-architect (Modular Architecture)
-    ├── Defines arc42 blocks (CMP), Mermaid diagrams, and ADR records
-    ├── Return handoff (conditional): agent-threat-modeler -> agent-privacy-officer
-    └── Suggested handoff: agent-qa-engineer
-         │
-         ▼
- 6. agent-qa-engineer (QA / SDET — Failing Tests in Red)
-    ├── Translates FR-*, SEC-REQ-*, PRIV-REQ-*, and QR-* into failing BDD/Gherkin suites (red)
-    ├── Mandatory coverage: nominal + boundary + out of range
-    ├── Conditional coverage: security, privacy, performance, idempotency, postconditions, contract
-    └── Suggested handoff: agent-developer
-         │
-         ▼
- 7. agent-developer (Coder / SDD Implementation)
-    ├── Implements tasks.md making test suites pass green (CC <= 10, MI >= 50)
-    └── Suggested handoff: agent-expert-user (Post-Development Functional Validation)
-         │
-         ▼
- 8. agent-expert-user (Post-Development Functional Validation) [Downstream / Pre-PR]
-    ├── Contrasts real system behavior, UI, and CLI against PO use cases (UC-*) and FR-*
-    └── Suggested handoff: Pre-Merge Audit Triad (agent-code-reviewer, agent-security-auditor, agent-compliance-checker, agent-privacy-officer)
-         │
-         ▼
- 9. Pre-Merge Audit Triad (Code Review, Security, Licenses, and Privacy)
-    ├── agent-code-reviewer: Clean Code, SOLID, DRY, code smells, and maintainability (CC <= 10, MI >= 50)
-    ├── agent-security-auditor: Adversarial audit, SAST, CVSS, and vulnerability detection
-    ├── agent-compliance-checker: SPDX dependency audit against license-policy.yaml
-    ├── agent-privacy-officer: PII-SAST audit (PRIV-001..PRIV-008) & RoPA check against privacy-policy.yaml
-    └── Suggested handoff: Tech Lead / Human Reviewer (Exclusive approval and merge)
+ [PHASE 1: UPSTREAM SPECIFICATION & ARCHITECTURAL DESIGN]
+  1. Product Owner (Human)
+     └── Defines business intent or operational problem
+          │
+          ▼
+  2. agent-product-analyst (Product Scribe)
+     ├── Generates ProductShape (ACT, UC, FR, QR, BR) with status: draft
+     └── Suggested handoff: agent-threat-modeler (or agent-expert-user for UX evaluation)
+          │
+          ▼
+  3. Shift-Left Trust Design (Cybersecurity & Privacy)
+     ├── agent-threat-modeler: Models STRIDE adversaries and OWASP ASVS controls (ACT-THREAT, ABUSE, SEC-REQ)
+     └── agent-privacy-officer: Models LINDDUN threats, DATA-ASSET-*, PRIV-ROPA-*, PRIV-REQ-*, DPIA-*
+          │
+          ▼
+  4. agent-system-architect (Modular Architecture)
+     ├── Defines arc42 blocks (CMP), Mermaid diagrams, shared typed contracts, and ADR records
+     └── Scaffolds tasks.md and emits handoff to Checkpoint 1
+          │
+          ▼
+ ═════════════════════════════════════════════════════════════════════════
+  CHECKPOINT 1: SPECIFICATION & DESIGN CHECKPOINT (Transversal Review)
+   ├── agent-auditor: Audits for YAGNI, overengineering, interface bloat, task coverage.
+   ├── agent-adversary: Probes contradictions, edge states, architecture SPOFs, and race conditions.
+   └── Remediation: Consolidated handoff to authoring agents (max 1 correction round).
+ ═════════════════════════════════════════════════════════════════════════
+          │
+          ▼
+  [HUMAN APPROVAL GATE 1: PLAN & DESIGN SIGN-OFF]
+  Tech Lead / PO reviews and approves upstream specifications and tasks.md.
+          │
+          ▼
+ [PHASE 2: TDD IMPLEMENTATION & CODE QUALITY]
+  5. agent-qa-engineer (QA / SDET — Failing Tests in Red)
+     ├── Translates FR-*, SEC-REQ-*, PRIV-REQ-*, and QR-* into failing BDD/Gherkin and E2E/UI suites (red)
+     └── Suggested handoff: agent-developer
+          │
+          ▼
+  6. agent-developer (Coder / SDD Implementation)
+     ├── Executes 4-step implementation (Ports/Adapters -> Interfaces -> Components -> Unit Tests)
+     └── Produces green builds satisfying complexity thresholds (CC <= 10, MI >= 50)
+          │
+          ▼
+  7. Deterministic Pre-Flight Gate (CLI)
+     └── Runs 'aisdlc verify all' confirming 100% pass across all 12 Quality Gates.
+          │
+          ▼
+ ═════════════════════════════════════════════════════════════════════════
+  CHECKPOINT 2: IMPLEMENTATION & PRE-PR CHECKPOINT (Transversal & Mutation)
+   ├── agent-expert-user: Functional validation of live runtime behavior against UC-* / FR-*.
+   ├── agent-auditor: Clean Code, SOLID, DRY, AST complexity, replacing redundant code reviews.
+   ├── agent-adversary: Conceptual test mutation (proves tests catch defects) + boundary break PoCs.
+   └── Remediation: Consolidated handoff to agent-developer (max 1 correction round).
+ ═════════════════════════════════════════════════════════════════════════
+          │
+          ▼
+  [HUMAN APPROVAL GATE 2: PR APPROVAL & MERGE]
+  Tech Lead reviews PR summary, KPI reports (including Task-ID rework metrics), and merges to main.
 
  ─────────────────────────────────────────────────────────────────────────
  (*) Cross-Cutting Automation and Infrastructure Role:
@@ -4458,123 +4575,124 @@ npx aisdlc report dashboard --output dist/governance.html --title "SentinelCore 
 
 > 📂 **Módulo 14 de 15 [Parte II: Especificación Normativa del Framework]:** `process/11_git_branching_and_lifecycle.md`
 
-# 11. Hierarchical Git Branching Model (4-Tier Git Branching Model)
+# 11. Git Branching Model & Lifecycle (Streamlined 2-Tier & Hierarchical Extensions)
 
 <a id="cap-11-git-branching-and-lifecycle-1-principles-of-the-branching-model"></a>
 
 ## 1. Principles of the Branching Model
 
-To govern collaborative development between humans and AI agents with maximum stability and traceability, the AI-SDLC framework implements a **strict hierarchical 4-tier Git branching model**:
+To govern collaborative development between humans and AI agents with maximum stability, traceability, and minimal friction, the AI-SDLC framework implements a **Streamlined 2-Tier Git branching model by default**, with optional extensions for release milestones and parallel worktrees:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│               GIT BRANCH HIERARCHY IN AI-SDLC (4 TIERS)                │
+│               GIT BRANCH HIERARCHY IN AI-SDLC                          │
 └────────────────────────────────────────────────────────────────────────┘
 
- TIER 1: main (Latest stable production release)
-   │
-   └── TIER 2: release/vX.Y.Z (Open version branch)
-         │
-         └── TIER 3: feat/<FEAT-ID>-<slug> | bug/<BUG-ID>-<slug> (Feature or Bug)
-               │
-               └── TIER 4: task/<PARENT-ID>/<TSK-ID>-<slug> (Atomic task)
+ [DEFAULT STREAMLINED 2-TIER MODEL]
+  TIER 1: main (Latest stable production release — Protected)
+    │
+    └── TIER 2: feat/<CHG-ID>-<slug> | fix/<CHG-ID>-<slug> (Working branch)
+          ├── commit: test(TSK-001): red test suites [Task-ID: TSK-001]
+          ├── commit: feat(TSK-001): green implementation [Task-ID: TSK-001]
+          └── commit: fix(TSK-001): rework remediation [Task-ID: TSK-001]
+
+ [OPTIONAL ADVANCED EXTENSIONS]
+  • Release Milestone Tier: release/vX.Y.Z (when batching multiple CHG-* into a release candidate)
+  • Parallel Task Worktrees: task/<PARENT-ID>/<TSK-ID>-<slug> (when running concurrent agents in worktrees)
 ```
 
 ---
 
-<a id="cap-11-git-branching-and-lifecycle-2-anatomy-of-the-four-branch-tiers"></a>
+<a id="cap-11-git-branching-and-lifecycle-2-anatomy-of-the-branch-tiers"></a>
 
-## 2. Anatomy of the Four Branch Tiers
+## 2. Anatomy of the Branch Tiers
 
 <a id="cap-11-git-branching-and-lifecycle-tier-1-main-branch-stable-baseline"></a>
 
 ### Tier 1: `main` Branch (Stable Baseline)
 - **Purpose**: Exclusively contains code in its latest stable release deployed or ready for production.
 - **Access Rules**:
-  - **Protected Branch**: Direct `push` is strictly forbidden.
-  - Accepts code solely via **Pull Request** merged from an open version branch (`release/vX.Y.Z`).
-  - Every merge into `main` is tagged with an immutable semantic version Git tag (e.g. `v1.0.0`, `v1.1.0`).
+  - **Protected Branch**: Direct `push` or agent commits are strictly forbidden (`pre-commit` hook enforced).
+  - Accepts code solely via **Pull Request** merged from a verified working branch (`feat/<CHG-ID>-*` or `release/vX.Y.Z`).
+  - Every merge into `main` is tagged with an immutable semantic version Git tag (e.g. `v1.0.0`, `v1.1.0`, `v1.1.1`) conforming to SemVer.
 
 ---
 
-<a id="cap-11-git-branching-and-lifecycle-tier-2-open-version-branch-releasevxyz-or-versionvxyz"></a>
+<a id="cap-11-git-branching-and-lifecycle-tier-2-default-working-feature-fix-branch-feat-fix-bug"></a>
 
-### Tier 2: Open Version Branch (`release/vX.Y.Z` or `version/vX.Y.Z`)
-- **Purpose**: Aggregates all features, improvements, and bug fixes scheduled for a specific version milestone.
-- **Origin**: Forked directly from `main`.
-- **Standard Naming**: `release/v<MAJOR>.<MINOR>.<PATCH>` (e.g. `release/v1.1.0`).
-- **Lifecycle**:
-  - Remains open throughout the version's active development cycle.
-  - Receives merges from feature and bug branches assigned to the release.
-  - Once the **Release Gate** and final audits pass, it merges into `main` and is archived or deleted.
-
----
-
-<a id="cap-11-git-branching-and-lifecycle-tier-3-feature-bug-or-patch-branch-feat-bug-patch-fix"></a>
-
-### Tier 3: Feature, Bug, or Patch Branch (`feat/...`, `bug/...`, `patch/...`, `fix/...`)
-- **Purpose**: Develops a functionality (`feature`), resolves a defect (`bug`), or applies a minor patch (`patch`/`fix`).
-- **Origin**: Forked from the open version branch (`release/vX.Y.Z`) or directly from the corresponding base branch.
+### Tier 2 (Default): Working Feature / Fix Branch (`feat/...`, `fix/...`, `bug/...`)
+- **Purpose**: Develops a bounded SDD change (`1 UC-* = 1 CHG-*`), bug fix, or patch.
+- **Origin**: Forked directly from `main` (or from an active `release/vX.Y.Z` if a milestone batch is open).
 - **Standard Naming**:
-  - Features: `feat/<VERSION>/<FEAT-ID>-<slug>` or `feat/<FEAT-ID>-<slug>`
-    - Examples: `feat/CHG-001-telemetry-ingestion`, `feat/v1.1.0/FEAT-002-collision-detector`
-  - Bugs / Patches: `bug/<BUG-ID>-<slug>`, `fix/<BUG-ID>-<slug>`, or `patch/<PATCH-ID>-<slug>`
-    - Examples: `bug/BUG-042-timestamp-drift`, `patch/PATCH-002-linter-fix`, `fix/CHG-003-typo`
-- **Lifecycle and Progressive Friction**:
-  - **Standard / Critical Profile**: Contains full SDD scaffolding (`proposal.md`, `spec.md`, `design.md`, `tasks.md`). Receives merges from Tier 4 (`task/*`) branches and merges into the version branch with full Quality Gate verification.
-  - **Patch Profile (Streamlined Flow)**: Contains only concise `spec.md`. **Exempt from Tier 4 (`task/*`) branches**: engineers and AI agents work directly on `patch/*` or `fix/*` branches and open direct Pull Requests.
+  - Features: `feat/<CHG-ID>-<slug>` (e.g. `feat/CHG-001-telemetry-ingestion`)
+  - Fixes / Bugs: `fix/<CHG-ID>-<slug>` or `bug/<BUG-ID>-<slug>` (e.g. `fix/CHG-003-clock-sync`)
+- **Task Traceability without Branch Explosion**:
+  - In the streamlined model, `agent-qa-engineer` and `agent-developer` operate directly on the `feat/<CHG-ID>-*` branch.
+  - Granular traceability across tasks (`TSK-*`) declared in `tasks.md` is preserved at the **commit level** via Git trailers (`Task-ID: TSK-YYY`, `Parent-Ref: CHG-XXX`) and conventional commit scopes (`feat(TSK-001): ...`).
+  - This eliminates intermediate task-level merges, reduces PR friction, and powers deterministic per-task rework KPIs.
 
 ---
 
-<a id="cap-11-git-branching-and-lifecycle-tier-4-atomic-task-branch-task"></a>
+<a id="cap-11-git-branching-and-lifecycle-optional-milestone-tier-open-version-branch-releasevxyz"></a>
 
-### Tier 4: Atomic Task Branch (`task/...`)
-- **Purpose**: Minimal executable unit of work for a developer or AI agent (`agent-developer`).
-- **Origin**: Forked **mandatorily from the corresponding feature or bug branch**.
+### Optional Milestone Tier: Open Version Branch (`release/vX.Y.Z`)
+- **Purpose**: Aggregates multiple feature increments scheduled for a single major/minor milestone before promotion to `main`.
+- **Usage**: Recommended for regulated environments or scheduled release cycles. In continuous delivery environments, features merge directly into `main` via PR and trigger automated SemVer tag bumps.
+
+---
+
+<a id="cap-11-git-branching-and-lifecycle-optional-concurrency-tier-atomic-task-worktrees-task"></a>
+
+### Optional Concurrency Tier: Atomic Task Worktrees (`task/...`)
+- **Purpose**: Isolated worktree for concurrent multi-agent execution (`--parallel`).
 - **Standard Naming**: `task/<PARENT-ID>/<TSK-ID>-<slug>`
-  - Examples:
-    - `task/CHG-001/TSK-001-dto-interfaces`
-    - `task/CHG-001/TSK-002-wss-mtls-gateway`
-    - `task/BUG-042/TSK-001-fix-clock-sync`
-- **Lifecycle**:
-  - Developer or agent implements code and specific tests for that task.
-  - Locally validated by running the verification command declared in `tasks.md`.
-  - Merged into the feature branch via atomic PR.
+- **Usage**: Created automatically only when intra-feature parallelism is active (e.g., simultaneous Frontend and Backend tasks running concurrently via `git worktree`).
 
 ---
 
-<a id="cap-11-git-branching-and-lifecycle-3-branch-and-merge-flow-diagram"></a>
+<a id="cap-11-git-branching-and-lifecycle-3-branch-and-merge-flow-diagrams"></a>
 
-## 3. Branch and Merge Flow Diagram
+## 3. Branch and Merge Flow Diagrams
 
+<a id="cap-11-git-branching-and-lifecycle-streamlined-flow-default-1-feature-pr-with-semver-bump"></a>
+
+### Streamlined Flow (Default — 1 Feature PR with SemVer Bump)
 ```mermaid
 gitGraph
-    commit id: "v1.0.0 (Stable Baseline)"
-    branch release/v1.1.0 order: 1
-    checkout release/v1.1.0
-    commit id: "Init v1.1.0 Scope"
-
-    branch feat/CHG-001-telemetry order: 2
+    commit id: "v1.0.0 (main)"
+    branch feat/CHG-001-telemetry
     checkout feat/CHG-001-telemetry
-    commit id: "SDD Specs & Tasks"
-
-    branch task/CHG-001/TSK-001-dto order: 3
-    checkout task/CHG-001/TSK-001-dto
-    commit id: "Implement DTOs"
-    checkout feat/CHG-001-telemetry
-    merge task/CHG-001/TSK-001-dto id: "PR: TSK-001 (Verified)"
-
-    branch task/CHG-001/TSK-002-gateway order: 3
-    checkout task/CHG-001/TSK-002-gateway
-    commit id: "Implement Gateway"
-    checkout feat/CHG-001-telemetry
-    merge task/CHG-001/TSK-002-gateway id: "PR: TSK-002 (Verified)"
-
-    checkout release/v1.1.0
-    merge feat/CHG-001-telemetry id: "PR: Feature CHG-001 (Quality Gate OK)"
-
+    commit id: "spec & design [Checkpoint 1 OK]"
+    commit id: "test(TSK-001): Red BDD/E2E"
+    commit id: "feat(TSK-001): Green impl"
+    commit id: "test(TSK-002): Red adapter"
+    commit id: "feat(TSK-002): Green adapter"
+    commit id: "verify all + Checkpoint 2 OK"
     checkout main
-    merge release/v1.1.0 id: "Release PR: v1.1.0 (Audit Passed)"
+    merge feat/CHG-001-telemetry id: "PR: CHG-001 (12 Gates Green)"
+    commit id: "Tag v1.1.0"
+```
+
+<a id="cap-11-git-branching-and-lifecycle-milestone-flow-optional-batched-release"></a>
+
+### Milestone Flow (Optional — Batched Release)
+```mermaid
+gitGraph
+    commit id: "v1.0.0 (main)"
+    branch release/v1.1.0
+    checkout release/v1.1.0
+    branch feat/CHG-001-telemetry
+    checkout feat/CHG-001-telemetry
+    commit id: "CHG-001 TDD Green"
+    checkout release/v1.1.0
+    merge feat/CHG-001-telemetry id: "PR: CHG-001"
+    branch feat/CHG-002-collision
+    checkout feat/CHG-002-collision
+    commit id: "CHG-002 TDD Green"
+    checkout release/v1.1.0
+    merge feat/CHG-002-collision id: "PR: CHG-002"
+    checkout main
+    merge release/v1.1.0 id: "Release PR: v1.1.0"
     commit id: "Tag v1.1.0"
 ```
 
@@ -4584,13 +4702,10 @@ gitGraph
 
 ## 4. Quality Gates and Merge Criteria by Tier (PR Gates)
 
-Each integration level carries progressively rigorous validation criteria:
-
 | Merge Level | Source ➔ Destination | Mandatory Merge Authorization Requirements |
 | :--- | :--- | :--- |
-| **Step 1 (Task)** | `task/*` ➔ `feat/*` / `bug/*` | 1. Verification command declared in `tasks.md` passes.<br>2. Unit tests for task 100% passing.<br>3. Zero syntax or linter errors (`pnpm run typecheck`).<br>4. Pull Request documented using `.github/PULL_REQUEST_TEMPLATE.md`. |
-| **Step 2 (Feature)** | `feat/*` / `bug/*` ➔ `release/*` | 1. Institutional template `.github/PULL_REQUEST_TEMPLATE.md` exhaustively completed.<br>2. Plan Execution Matrix (`X` vs `O`) approved by Tech Lead (all items included; zero unjustified `[O]`).<br>3. All tasks in `tasks.md` in `COMPLETED` state.<br>4. Successful execution of Cucumber BDD scenarios (`.feature`).<br>5. Quality Gate passed (`verify:quality`): CC $\le 10$, MI $\ge 50$.<br>6. License audit approved (`verify:licenses`).<br>7. Mandatory human review and approval from Tech Lead. |
-| **Step 3 (Release)** | `release/*` ➔ `main` | 1. Institutional Pull Request `.github/PULL_REQUEST_TEMPLATE.md` with 100% verified pre-flight checklist.<br>2. 360° Traceability matrix at 100% (`verify:traceability`).<br>3. Consolidated quality report generated (`report:quality`).<br>4. CycloneDX/SPDX SBOM generated and cryptographically signed.<br>5. Formal final approval from Product Owner and Release Manager. |
+| **Streamlined PR (Default)** | `feat/*` / `fix/*` ➔ `main` | 1. Verification of all 12 Quality Gates (`npx aisdlc verify all`).<br>2. Transversal Checkpoints 1 & 2 passed with 0 blocking defects.<br>3. Plan Execution Matrix (`[X]` vs `[O]`) completed in PR body.<br>4. Unit, BDD, and E2E test suites 100% green.<br>5. License and privacy policies compliant (`verify:licenses`, `verify:privacy`).<br>6. Mandatory human Tech Lead sign-off (no auto-merge).<br>7. SemVer tag bump (`patch` for fixes, `minor` for new features, `major` for breaking changes). |
+| **Milestone PR (Optional)** | `release/*` ➔ `main` | 1. 360° Traceability matrix at 100% across all batched increments.<br>2. Consolidated release quality report (`report:quality`).<br>3. CycloneDX/SPDX SBOM generated and cryptographically signed.<br>4. Release KPI report generated (`kpi:release`).<br>5. Formal approval from Product Owner and Release Manager. |
 
 ---
 
@@ -4599,14 +4714,14 @@ Each integration level carries progressively rigorous validation criteria:
 ## 5. Guardrails and Rules for AI Agents
 
 1. **Strict Branch Isolation**:
-   - In `standard` and `critical` changes, coding agents (`agent-developer`) **may only operate and commit inside `task/*` branches**.
-   - In changes with `profile: patch` (streamlined flow), the agent is formally authorized to operate and commit directly on `patch/*` or `fix/*` branches, exempt from creating Tier 4 branches.
-   - Committing directly to `release/*` or `main` is strictly blocked for agents.
-2. **Automatic Creation and Base Verification**:
-   - Before creating a task branch, the agent must verify the base branch is the corresponding feature branch.
-   - Before creating a feature branch, it must validate it derives from the active release branch.
-3. **Respecting Autonomy Modes**:
-   - If a task is `HUMAN_REVIEW_PLAN`, the agent may only create the task branch **after** a human approves the plan in the feature issue or PR.
+   - Direct commits to `main`, `master`, and `release/*` are strictly forbidden for AI agents across all IDEs and tools.
+   - Agents operate directly on `feat/<CHG-ID>-*` / `fix/<CHG-ID>-*` working branches.
+   - Task-level branches (`task/*`) are utilized only when concurrent `--parallel` subagent execution is explicitly configured.
+2. **Commit Trailer & Scope Discipline**:
+   - Every commit produced by an agent must include the `Task-ID: TSK-YYY` trailer (or declare it in the commit subject `feat(TSK-YYY): ...`).
+   - The git hook `prepare-commit-msg` automatically parses the task ID and injects author metadata and token telemetry.
+3. **Mandatory Checkpoint Completion**:
+   - An agent cannot open or present a PR until Checkpoint 1 (Design), TDD Red-Green implementation, and Checkpoint 2 (Pre-PR Quality & Mutation) are completed.
 
 ---
 
@@ -4614,7 +4729,7 @@ Each integration level carries progressively rigorous validation criteria:
 
 ## 6. Branch Automation with the CLI (`aisdlc git checkout`)
 
-To eliminate operational friction and prevent typographical errors across the 4 tiers, the framework provides automatic navigation and branching:
+To eliminate operational friction and navigate directly to the appropriate working branch, the framework provides automatic navigation:
 
 ```bash
 npx aisdlc git checkout <task-id>
@@ -4624,13 +4739,9 @@ npx aisdlc git checkout <task-id>
 
 ### Deterministic Behavior and Guarantees:
 1. **Task Resolution**: Scans active changes in `specs/changes/active/*/tasks.md` identifying the active change (`CHG-*`) containing the specified task.
-2. **Version Detection**: Resolves the associated semantic version or active `release/vX.Y.Z` branch.
-3. **Cascading Branching**:
-   - If `release/vX.Y.Z` (Tier 2) does not exist locally or on remote origin, it is created from `main` (Tier 1).
-   - If feature branch `feat/CHG-*` (Tier 3) does not exist, it is created from the version branch (Tier 2).
-   - If atomic task branch `task/<PARENT-ID>/<TSK-ID>-<slug>` (Tier 4) does not exist, it is created from the feature branch (Tier 3).
-4. **Immediate Checkout**: Executes automatic branch switch (`git checkout`), placing developer or AI agent directly on Tier 4 atomic task branch.
-5. **Error Handling**: If task is not found in active changes, outputs clear diagnosis listing available tasks with active change IDs.
+2. **Default Streamlined Mode**: Switches developer or AI agent directly to the working branch `feat/<CHG-ID>-<slug>` (created from `main` if it does not yet exist).
+3. **Parallel Concurrency Mode (`--parallel`)**: If `--parallel` is specified, creates the dedicated atomic worktree `task/<PARENT-ID>/<TSK-ID>-<slug>` for multi-agent concurrency.
+4. **Error Handling**: If task is not found in active changes, outputs clear diagnosis listing available tasks with active change IDs.
 
 ---
 
@@ -4681,87 +4792,82 @@ The AI-SDLC framework is CI/CD provider-agnostic, guaranteeing strict parity for
 
 > 📂 **Módulo 15 de 15 [Parte II: Especificación Normativa del Framework]:** `process/README.md`
 
-# AI-SDLC Process Documentation (`process/`)
+# AI-SDLC: Process & Governance Framework
 
-This directory contains the canonical institutional process documentation for the **AI-SDLC** framework. It defines the governance model, human-agent collaboration protocols, Shift-Left disciplines (ProductShape, Cybersecurity, Data Protection & Privacy, and OSS License Governance), Spec-Driven Development (SDD) execution, and the 12 deterministic CI/CD Quality Gates.
-
----
-
-<a id="cap-README-1-document-index"></a>
-
-## 1. Document Index
-
-| Document | Title & Scope |
-| :--- | :--- |
-| [**`00_vision_and_principles.md`**](./00_vision_and_principles.md) | Vision, core philosophy, PDaC (*Product-Definition-as-Code*), SDD (*Spec-Driven Development*), and deterministic verification principles. |
-| [**`01_governance_and_roles.md`**](./01_governance_and_roles.md) | Dual-Citizen Human-Agent governance, RACI matrix, the 11 specialized AI agents, Human Autonomy Matrix, Progressive Friction model, and PR governance. |
-| [**`02_product_definition_as_code.md`**](./02_product_definition_as_code.md) | Phase 0 Enterprise & Capability Vision (`ARCH-INTRO-*`) and ProductShape specification (`ACT-*`, `JRN-*`, `UC-*`, `BR-*`, `BC-*`, `TERM-*`, `FR-*`, `QR-*`, `CON-*`). |
-| [**`03_security_by_design.md`**](./03_security_by_design.md) | Shift-Left Cybersecurity: STRIDE threat modeling, OWASP ASVS controls (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`), and Zero Trust Secure Enclaves (`SEC-ENC-*`). |
-| [**`04_open_source_license_compliance.md`**](./04_open_source_license_compliance.md) | Continuous Open Source License Governance (`license-policy.yaml`), SPDX auditing, CycloneDX 1.5 SBOM generation, and commercial acquisition requests (`LIC-REQ-*`). |
-| [**`04b_data_protection_and_privacy.md`**](./04b_data_protection_and_privacy.md) | **Privacy-by-Design as Code**: LINDDUN privacy threat modeling, GDPR / LOPDGDD / ISO 27701 compliance (`privacy-policy.yaml`), Personal Data Asset classification (`DATA-ASSET-*`), RoPA Art. 30 records (`PRIV-ROPA-*`), Privacy Requirements (`PRIV-REQ-*`), DPIA workflow (`DPIA-*`), and PII-SAST scanning (`PRIV-001`–`PRIV-008`). |
-| [**`05_architecture_and_design.md`**](./05_architecture_and_design.md) | Modular technical architecture using arc42 enriched with NAF v4 (`CMP-*`, `ADR-*`), contract-first design, and the Technical Security & Privacy Feedback Loop. |
-| [**`06_spec_driven_development.md`**](./06_spec_driven_development.md) | Spec-Driven Development (SDD) lifecycle: PDaC Handoff sidecars (`HOF-*` / `handoff.yaml`), `proposal.md`, `spec.md`, `design.md`, `tasks.md`, TDD Red-Green-Refactor, and canonical integration. |
-| [**`07_security_and_license_validation.md`**](./07_security_and_license_validation.md) | The **12 Deterministic CI/CD Quality Gates**, Shift-Left Secrets & SAST (`aisdlc verify security`), Privacy & PII-SAST (`aisdlc verify privacy`), and standardized exit codes (`0`–`5`). |
-| [**`08_git_workflow_and_traceability.md`**](./08_git_workflow_and_traceability.md) | 4-Tier Git branching hierarchy (`main` $\rightarrow$ `release/*` $\rightarrow$ `feat/*` $\rightarrow$ `task/*`), commit trailers, and 360° Requirements Traceability Matrix (RTM). |
-| [**`09_agent_protocols.md`**](./09_agent_protocols.md) | The 5 Unbreakable Commandments, system prompts for all **11 specialized AI agents**, "AI as Scribe" protocol, `--json` CLI contract, MCP server (`@aisdlc/mcp`), and Workflow Handoff protocol. |
-| [**`10_metrics_and_kpis.md`**](./10_metrics_and_kpis.md) | Engineering KPIs, Defect Injection Rate (DIR), human vs. agent authorship attribution, and release reporting (`aisdlc kpi`). |
-| [**`11_greenfield_and_brownfield_adoption.md`**](./11_greenfield_and_brownfield_adoption.md) | Step-by-step playbooks for Greenfield project inception (`aisdlc-greenfield`) and Brownfield progressive onboarding (`aisdlc-legacy-onboarding`). |
+This directory hosts the deterministic governance, verification gates, agent protocols, and lifecycle specifications for the AI-assisted Software Development Lifecycle (**AI-SDLC**).
 
 ---
 
-<a id="cap-README-2-canonical-agent-workflow-shift-left-handoff-chain"></a>
+<a id="cap-README-directory-of-canonical-process-specifications"></a>
 
-## 2. Canonical Agent Workflow & Shift-Left Handoff Chain
+## 🏛️ Directory of Canonical Process Specifications
 
-```text
-Human PO ──► agent-product-analyst ──► agent-expert-user (Design MVP)
-                                              │
-                                              ▼
-                                    agent-threat-modeler (STRIDE / ASVS: ACT-THREAT-*, ABUSE-*, SEC-REQ-*)
-                                              │
-                                              ▼
-                                    agent-privacy-officer (LINDDUN / GDPR: DATA-ASSET-*, PRIV-ROPA-*, PRIV-REQ-*)
-                                              │         ▲
-                                              ▼         │ (Technical Security & Privacy Feedback Loop)
-                                    agent-system-architect (arc42 / NAF v4 + Hexagonal Ports & Adapters: CMP-*, ADR-*, design.md)
-                                              │
-                                              ▼
-                                     agent-qa-engineer (Failing BDD / E2E / Unit Tests in RED)
-                                              │
-                                              ▼
-                                      agent-developer (Modular & Hexagonal Ports & Adapters + TDD GREEN)
-                                              │
-                                              ▼
-                                    agent-expert-user (Post-Development Functional Validation)
-                                              │
-                                              ▼
-                   Pre-Merge Audit (agent-code-reviewer + agent-security-auditor +
-                                    agent-compliance-checker + agent-privacy-officer)
-                                              │
-                                              ▼
-                                    Human Tech Lead / DPO (Final Review & Merge)
-```
+| Specification | Focus & Domain | Canonical Artifacts & Gate Verifiers |
+| :--- | :--- | :--- |
+| [`01_governance_and_roles.md`](01_governance_and_roles.md) | **Adaptive Friction & RACI Governance** | Autonomy modes (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`), change profiles (`patch`, `standard`, `critical`), and role boundaries. |
+| [`02_product_definition.md`](02_product_definition.md) | **ProductShape & Enterprise Vision** | NAF v4 Vision (`ARCH-INTRO-*`), Actors (`ACT-*`), User Journeys (`JRN-*`), Use Cases (`UC-*`), Business Rules (`BR-*`), and Requirements (`FR-*`, `QR-*`). |
+| [`03_threat_modeling.md`](03_threat_modeling.md) | **STRIDE Threat Modeling** | Threat Actors (`ACT-THREAT-*`), Abuse Cases (`ABUSE-*`), and Security Reqs (`SEC-REQ-*`). |
+| [`04_owasp_asvs.md`](04_owasp_asvs.md) | **Application Security Verification Standard** | OWASP ASVS v4.0.3 compliance checklist and security verification levels (L1, L2, L3). |
+| [`04b_data_protection_and_privacy.md`](04b_data_protection_and_privacy.md) | **Privacy-by-Design & Data Protection** | Personal Data Assets (`DATA-ASSET-*`), GDPR Art. 30 RoPA records (`PRIV-ROPA-*`), Privacy Requirements (`PRIV-REQ-*`), and PII-SAST rules. |
+| [`05_architecture_arc42_nafv4.md`](05_architecture_arc42_nafv4.md) | **System Architecture (arc42 + NAF v4)** | Component specifications (`CMP-*`), Architecture Decisions (`ADR-*`), and cross-cutting architectural concerns. |
+| [`06_spec_driven_development.md`](06_spec_driven_development.md) | **Spec-Driven Delivery (SDD)** | Change workspaces in `specs/changes/active/<id>/`: `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` (`HOF-*`). |
+| [`07_quality_policy.md`](07_quality_policy.md) | **Quality Policy & Ratchet Standards** | Deterministic AST thresholds: Cyclomatic Complexity $\le 10$, Cognitive $\le 15$, Maintainability $\ge 50$, Function Lines $\le 40$. |
+| [`08_open_source_governance.md`](08_open_source_governance.md) | **Open Source Governance & SCA** | Dynamic SBOM (CycloneDX 1.5), dual-level copyleft license audit (`license-policy.yaml`), and commercial license request tracking. |
+| [`09_agent_protocols.md`](09_agent_protocols.md) | **Agent Interaction & 2-Checkpoint Protocol** | Clean Context Window Isolation, specialized agent roles, and the Streamlined 2-Checkpoint transversal review chain. |
+| [`10_friction_and_guardrails.md`](10_friction_and_guardrails.md) | **Anti-Bypass Guardrails & Protected Branches** | Branch-before-change protocol, immutable coding rules protection, and multi-IDE hook enforcement. |
+| [`11_git_branching_and_lifecycle.md`](11_git_branching_and_lifecycle.md) | **Streamlined Git Branching & Rework KPIs** | Default 2-tier topology (`main` ➔ `feat/*`), task trailers (`Task-ID: TSK-*`), per-task rework analytics, and SemVer release promotion. |
 
 ---
 
-<a id="cap-README-3-the-12-deterministic-quality-gates-aisdlc-verify-all"></a>
+<a id="cap-README-core-operational-principles-ai-sdlc-v400"></a>
 
-## 3. The 12 Deterministic Quality Gates (`aisdlc verify all`)
+## ⚡ Core Operational Principles (AI-SDLC v4.0.0)
 
-| Gate | CLI Command | MCP Tool | Policy / Schema Source | Exit Code on Failure |
-| :---: | :--- | :--- | :--- | :---: |
-| **1** | `aisdlc verify quality` | `verify_quality` | `quality-policy.yaml` (CC $\le 10$, CogC $\le 15$, MI $\ge 50$, LOC $\le 40$) | `1` |
-| **2** | `aisdlc verify traceability` | `verify_traceability` | 360° RTM (`FR-*`, `SEC-REQ-*`, `PRIV-REQ-*`, `SAF-REQ-*` $\leftrightarrow$ `CMP-*` $\leftrightarrow$ Tests) | `1` |
-| **3** | `aisdlc verify governance` | `verify_governance` | `tasks.md` autonomy classification & verification blocks | `1` |
-| **4** | `aisdlc verify testing` | `verify_testing` | Reverse test coverage lookup & per-function unit test enforcement | `1` |
-| **5** | `aisdlc verify gherkin` | `verify_gherkin` | BDD `.feature` scenario SHA-256 synchronization | `1` |
-| **6** | `aisdlc verify licenses` | `verify_licenses` | `license-policy.yaml` + CycloneDX 1.5 SBOM | `3` |
-| **7** | `aisdlc verify pdac` | `verify_pdac` | Cryptographic SHA-256 integrity of `handoff.yaml` (`HOF-*`) | `2` |
-| **8** | `aisdlc verify schemas` | `verify_schemas` | 33 JSON Schemas (Draft 2020-12) across `schemas/` | `1` |
-| **9** | `aisdlc verify duplicates` | `verify_duplicates` | Lexical & ID collision pre-flight across requirements | `1` |
-| **10** | `aisdlc verify friction` | `verify_friction` | Progressive friction (`patch`, `standard`, `critical`) anti-bypass | `1` |
-| **11** | `aisdlc verify security` | `verify_security` | Gitleaks secret scanner + multilingual OWASP SAST (`SAST-001`–`SAST-007`) | `4` (secrets) / `1` (SAST) |
-| **12** | `aisdlc verify privacy` | `verify_privacy` | `privacy-policy.yaml` + RoPA Art. 30 + PII-SAST (`PRIV-001`–`PRIV-008`) | `5` |
+<a id="cap-README-1-streamlined-2-tier-git-topology-default-agile"></a>
+
+### 1. Streamlined 2-Tier Git Topology (Default & Agile)
+To maximize flow while preserving complete traceability and semantic versioning:
+- **Default Flow**: Feature branches branch directly from `main` (`feat/<CHG-ID>-<slug>`).
+- **Task Granularity via Commit Trailers**: Individual tasks (`TSK-*`) are developed within the feature branch and tracked deterministically through Git trailers (`Task-ID: TSK-XXX`) or conventional commit scopes (`feat(TSK-001): ...`).
+- **Optional Enterprise 4-Tier Extension**: When strict formal stabilization tracks or isolated worktrees are required, the framework supports the classical 4-tier cascade:
+  $$\text{Tier 1: } \texttt{main} \longrightarrow \text{Tier 2: } \texttt{release/vX.Y.Z} \longrightarrow \text{Tier 3: } \texttt{feat/CHG-*} \longrightarrow \text{Tier 4: } \texttt{task/CHG-*/TSK-*}$$
+
+<a id="cap-README-2-streamlined-2-checkpoint-transversal-architecture"></a>
+
+### 2. Streamlined 2-Checkpoint Transversal Architecture
+Instead of invoking review agents after each single authoring microstep (which multiplies token consumption and cognitive context overhead), quality and adversarial stress-testing are concentrated into two concurrent checkpoints:
+1. **Checkpoint 1 (Specification & Design)**: Concurrently invoke `agent-auditor` (evaluating YAGNI, structural debt, and overengineering) and `agent-adversary` (stress-testing logic traps, SPOFs, attack vectors, and boundary inversions) on `spec.md`, `design.md`, and `tasks.md`.
+2. **Checkpoint 2 (Implementation & Pre-PR)**: Following functional validation with `agent-expert-user`, concurrently invoke `agent-auditor` (Clean Code, SOLID, DRY, AST thresholds) and `agent-adversary` (conceptual test mutation and adversarial boundary attacks) before human PR submission.
+
+<a id="cap-README-3-deterministic-task-level-rework-analytics-tsk-"></a>
+
+### 3. Deterministic Task-Level Rework Analytics (`TSK-*`)
+Every Pull Request and release cycle computes deterministic rework metrics aggregated per task:
+- **Code Churn %**: $\min\left(100, \frac{\text{linesDeleted}}{\text{linesAdded}} \times 100\right)$
+- **Rework Tokens %**: Percentage of AI tokens consumed during fix/remediation commits vs. nominal feature commits.
+- **Rework Time %**: Percentage of engineering time spent addressing defects.
+- **First-Time-Right (FTR)**: Classification marking whether a task required zero remediation commits and had $< 25\%$ code churn.
+
+---
+
+<a id="cap-README-the-12-deterministic-quality-gates"></a>
+
+## 🛡️ The 12 Deterministic Quality Gates
+
+Every increment is governed by 12 automated verification gates executable via CLI and native MCP tools:
+
+1. **Quality Gate (AST & Complexity)**: `npx aisdlc verify quality` (CC $\le 10$, Cognitive $\le 15$, MI $\ge 50$, Lines $\le 40$)
+2. **360° Traceability (Reverse RTM)**: `npx aisdlc verify traceability`
+3. **Tasks Governance & Autonomy**: `npx aisdlc verify governance`
+4. **Test Coverage (Requirements & Tasks)**: `npx aisdlc verify testing`
+5. **BDD Synchronization (Gherkin ➔ .feature)**: `npx aisdlc check --fix`
+6. **Open Source License Governance (SCA)**: `npx aisdlc verify licenses`
+7. **PDaC Cryptographic Integrity (SHA-256)**: `npx aisdlc verify pdac`
+8. **JSON Schemas Compliance (Draft 2020-12)**: `npx aisdlc verify schemas`
+9. **Duplicate Requirements Detection**: `npx aisdlc verify duplicates`
+10. **Progressive Friction & Anti-Bypass**: `npx aisdlc verify friction`
+11. **Shift-Left Security (Secrets & SAST)**: `npx aisdlc verify security`
+12. **Data Protection & Privacy-by-Design**: `npx aisdlc verify privacy`
 
 ---
 

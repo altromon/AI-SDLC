@@ -211,8 +211,8 @@ Ceremony depth, formal security modeling, and Git branching dynamically adapt ba
 | Profile | Typical Risk Level | Minimum Required Artifacts | STRIDE / Security Modeling | Permitted Git Hierarchy | Required Human Approval |
 | :--- | :---: | :--- | :--- | :--- | :--- |
 | **`patch`** (Low Friction) | `LOW` | Concise `spec.md` with `verification` block only | **Exempt** if not altering `SEC-ENC-*` or external interfaces | Direct branch `fix/<slug>` or `patch/<slug>` (No Tier 4 `task/*`) | Single Tech Lead (PR review and green tests) |
-| **`standard`** (Nominal Friction) | `MEDIUM` / `HIGH` | Full SDD scaffolding (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.yaml`) | Required for new endpoints or business logic | Standard 4-tier model (`main` $\rightarrow$ `release` $\rightarrow$ `feat/bug` $\rightarrow$ `task`) | Formal Tech Lead |
-| **`critical`** (High Friction) | `CRITICAL` | Full SDD scaffolding + Architecture `ADR-*` + Zero Trust Checklist | **Mandatory and unavoidable** (Threats, abuse vectors, mitigation) | Strict 4-tier model with maximum protection | **Dual human approval**: Tech Lead + Lead Architect / SecOps |
+| **`standard`** (Nominal Friction) | `MEDIUM` / `HIGH` | Full SDD scaffolding (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.yaml`) | Required for new endpoints or business logic | Streamlined 2-tier model by default (`main` $\rightarrow$ `feat/bug`) with task trailers, or 4-tier cascade | Formal Tech Lead |
+| **`critical`** (High Friction) | `CRITICAL` | Full SDD scaffolding + Architecture `ADR-*` + Zero Trust Checklist | **Mandatory and unavoidable** (Threats, abuse vectors, mitigation) | Strict 4-tier model or isolated worktree with maximum protection | **Dual human approval**: Tech Lead + Lead Architect / SecOps |
 
 ### B. Canonical Source of Truth in Frontmatter
 
