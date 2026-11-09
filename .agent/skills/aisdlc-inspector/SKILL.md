@@ -51,7 +51,7 @@ Execute the inspection via MCP or CLI:
 The rendered response MUST contain:
 1. **Header:** Artifact ID, Title, Type (`requirement`, `component`, `source-file`, `task`), Layer (`product`, `architecture`, `code`, `test`, `governance`), and Status (`COMPLIANT`, `ORPHAN`, `DRIFT`).
 2. **File Location:** Clickable markdown link to the file.
-3. **Technical Summary:** Concise explanation (2–4 sentences) of what the element does, its responsibilities, and key interfaces.
+3. **Technical Summary:** Concise explanation (2–4 sentences) of what the element does, its responsibilities, key interfaces, and consolidated evolutionary increments (`### Incremento (CHG-*)`). If a canonical requirement still shows boilerplate text despite completed changes in `specs/changes/`, run `sdd_integrate` with `all: true` (`npx aisdlc sdd integrate --all`) first so canonical requirements reflect the consolidated specification.
 4. **Upstream Relations (Derives from / Mitigates / Governed by):**
    - ↗️ List all parent requirements, use cases, business rules, or decisions that justify this element.
 5. **Downstream Relations (Satisfied by / Implemented in / Verified by):**

@@ -11,11 +11,15 @@ import {
   ChangeDetectionOptions,
   ChangeDetectionResult,
   ProductHandoff,
+  SddIntegrateAllOptions,
+  SddIntegrateAllResult,
   SddIntegrationAudit,
   SddIntegrationOptions,
   SddIntegrationResult,
 } from '../../types/index.js';
-import { walkMdFiles } from '../../utils/fs.js';
+import { canonicalSort, walkMdFiles } from '../../utils/fs.js';
+import { extractGherkinBlock } from '../../verifiers/gherkin.js';
+import { syncPdacDigests } from '../../verifiers/pdac-graph.js';
 import { parseFrontmatter } from '../../verifiers/traceability.js';
 import { loadProductHandoffSidecar } from './index.js';
 
@@ -331,49 +335,250 @@ function writeUpdatedArtifact(file: string, frontmatter: Record<string, unknown>
   fs.writeFileSync(file, yamlHeader + body, 'utf-8');
 }
 
+interface ChangeSpecContent {
+  specBody: string;
+  proposalScope: string;
+  gherkinBlocks: string[];
+}
+
+function readChangeSpecContent(changeDir: string): ChangeSpecContent {
+  const specFile = path.join(changeDir, 'spec.md');
+  const propFile = path.join(changeDir, 'proposal.md');
+  const specBody = fs.existsSync(specFile) ? parseFrontmatter(fs.readFileSync(specFile, 'utf-8')).body : '';
+  const propBody = fs.existsSync(propFile) ? parseFrontmatter(fs.readFileSync(propFile, 'utf-8')).body : '';
+  const scopeMatch = propBody.match(/##\s+1\.\s+(?:Motivaci[oó]n|Motivation)[^\n]*\r?\n([\s\S]*?)(?=\r?\n##\s+2\.|\r?\n---|\s*$)/i);
+  const proposalScope = scopeMatch ? scopeMatch[1].trim() : '';
+  return { specBody, proposalScope, gherkinBlocks: extractGherkinBlock(specBody) };
+}
+
+function isBoilerplateNormativeStatement(text: string): boolean {
+  const norm = text.trim();
+  if (!norm || norm.length < 15) return true;
+  return (
+    /^El sistema DEBE implementar y soportar la capacidad de [^\n.]+\.?$/i.test(norm) ||
+    /^Definici[oó]n de artefacto citado en [^\n.]+\.?$/i.test(norm) ||
+    /^The system MUST \[unambiguous/i.test(norm)
+  );
+}
+
+function isBoilerplateGherkin(block: string): boolean {
+  return (
+    block.includes('When the operation for "') &&
+    (block.includes('Given the system is in an operational state') ||
+      block.includes('Given the system is in a nominal operational state')) &&
+    (block.includes('min_bound') || block.includes('| min   | accepted |') || block.includes('| min   | 200    |'))
+  ) || (
+    block.includes('Given an unauthenticated actor or invalid credentials') &&
+    block.includes('When the request reaches protected enclaves')
+  ) || (
+    block.includes('Given the system exhibits the defect identified in "') &&
+    block.includes('When the patch fix is applied')
+  );
+}
+
+function extractTargetedSpecDelta(specBody: string, reqId: string): string | null {
+  const escaped = reqId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const deltaRegex = new RegExp(`###\\s+\\[?[^\\]\\n]*\\b${escaped}\\b[^\\]\\n]*\\]?[^\\n]*\\r?\\n([\\s\\S]*?)(?=\\r?\\n###\\s|\\r?\\n---\\s*\\r?\\n|\\r?\\n##\\s|$)`, 'i');
+  const match = specBody.match(deltaRegex);
+  if (!match) return null;
+  const sectionText = match[1].trim();
+  const afterMatch = sectionText.match(/\*\*(?:Target Delta \(After\)|Delta Objetivo|Comportamiento Esperado):\*\*\s*([^\n]+(?:\r?\n(?!\s*\*\s*\*\*)[^\n]+)*)/i);
+  if (afterMatch) return afterMatch[1].trim();
+  return sectionText.length > 15 ? sectionText : null;
+}
+
+function extractBestNormativeDelta(specContent: ChangeSpecContent, reqId: string): string | null {
+  const targeted = extractTargetedSpecDelta(specContent.specBody, reqId);
+  if (targeted) return targeted;
+  if (specContent.proposalScope.length > 40 && !/^[a-z0-9-]+$/i.test(specContent.proposalScope)) {
+    return specContent.proposalScope;
+  }
+  return null;
+}
+
+function findDomainSpecificGherkin(nonBoilerplate: string[], reqId: string): string | undefined {
+  if (reqId.startsWith('SEC-REQ-')) {
+    return nonBoilerplate.find((b) => b.includes('@security') || b.includes('@mitigation'));
+  }
+  if (reqId.startsWith('PRIV-REQ-')) {
+    return nonBoilerplate.find((b) => b.includes('@privacy'));
+  }
+  return undefined;
+}
+
+function selectRelevantGherkinForArtifact(
+  gherkinBlocks: string[],
+  reqId: string,
+  totalReqsInChange: number
+): string | null {
+  const nonBoilerplate = gherkinBlocks.filter((b) => !isBoilerplateGherkin(b));
+  if (nonBoilerplate.length === 0) return null;
+
+  const matched = nonBoilerplate.find((b) => b.includes(`@${reqId}`)) || findDomainSpecificGherkin(nonBoilerplate, reqId);
+  if (matched) return ensureBlockHasReqTag(matched, reqId);
+
+  if (totalReqsInChange === 1 && !reqId.startsWith('SEC-REQ-') && !reqId.startsWith('PRIV-REQ-')) {
+    const funcBlock = nonBoilerplate.find((b) => !b.includes('@security') && !b.includes('@privacy')) || nonBoilerplate[0];
+    return ensureBlockHasReqTag(funcBlock, reqId);
+  }
+  return null;
+}
+
+function ensureBlockHasReqTag(block: string, reqId: string): string {
+  const lines = block.trim().split(/\r?\n/);
+  if (lines[0] && lines[0].trim().startsWith('@')) {
+    const cleanedTags = lines[0]
+      .trim()
+      .split(/\s+/)
+      .filter((t) => !/^@(?:CHG|PATCH)-/i.test(t));
+    if (!cleanedTags.includes(`@${reqId}`)) {
+      cleanedTags.unshift(`@${reqId}`);
+    }
+    lines[0] = cleanedTags.join(' ');
+    return lines.join('\n');
+  }
+  return `@${reqId} @automated\n${block.trim()}`;
+}
+
+function replaceNormativeSectionIfBoilerplate(body: string, newStatement: string, changeId: string): { body: string; changed: boolean } {
+  const secRegex = /(##\s+1\.\s+(?:Enunciado(?:\s+Normativo)?|Normative\s+Statement|Intenci[oó]n\s+y\s+Resultado|Intention\s+and\s+Outcome[^\n]*)\r?\n)([\s\S]*?)(?=\r?\n---|\r?\n##\s|$)/i;
+  const match = body.match(secRegex);
+  if (!match) return { body, changed: false };
+
+  const currentText = match[2].trim();
+  if (isBoilerplateNormativeStatement(currentText)) {
+    const updated = body.replace(secRegex, `$1${newStatement}\n`);
+    return { body: updated, changed: updated !== body };
+  }
+  if (!currentText.includes(newStatement) && !currentText.includes(changeId)) {
+    const updated = body.replace(secRegex, `$1${currentText}\n\n### Incremento (${changeId})\n${newStatement}\n`);
+    return { body: updated, changed: updated !== body };
+  }
+  return { body, changed: false };
+}
+
+function replaceGherkinBlockIfApplicable(body: string, newGherkin: string): { body: string; changed: boolean } {
+  const gherkinRegex = /```gherkin\r?\n([\s\S]*?)\r?\n```/;
+  const match = body.match(gherkinRegex);
+  if (!match) return { body, changed: false };
+
+  const currentBlock = match[1].trim();
+  if (currentBlock === newGherkin.trim()) return { body, changed: false };
+
+  if (isBoilerplateGherkin(currentBlock) || currentBlock !== newGherkin.trim()) {
+    const updated = body.replace(gherkinRegex, `\`\`\`gherkin\n${newGherkin.trim()}\n\`\`\``);
+    return { body: updated, changed: updated !== body };
+  }
+  return { body, changed: false };
+}
+
+function bumpMinorSemver(versionStr: string): string {
+  const match = String(versionStr || '1.0.0').trim().match(/^(\d+)\.(\d+)\.(\d+)(.*)$/);
+  if (!match) return '1.1.0';
+  const major = parseInt(match[1], 10);
+  const minor = parseInt(match[2], 10) + 1;
+  return `${major}.${minor}.0`;
+}
+
+function syncBodyFromSpecContent(
+  body: string,
+  reqId: string,
+  changeId: string,
+  specContent: ChangeSpecContent | undefined,
+  totalReqsInChange: number
+): { body: string; contentSynced: boolean } {
+  if (!specContent) return { body, contentSynced: false };
+  let updatedBody = body;
+  let contentSynced = false;
+
+  const deltaText = extractBestNormativeDelta(specContent, reqId);
+  if (deltaText) {
+    const normRes = replaceNormativeSectionIfBoilerplate(updatedBody, deltaText, changeId);
+    updatedBody = normRes.body;
+    if (normRes.changed) contentSynced = true;
+  }
+
+  const gherkinBlock = selectRelevantGherkinForArtifact(specContent.gherkinBlocks, reqId, totalReqsInChange);
+  if (gherkinBlock) {
+    const gherkinRes = replaceGherkinBlockIfApplicable(updatedBody, gherkinBlock);
+    updatedBody = gherkinRes.body;
+    if (gherkinRes.changed) contentSynced = true;
+  }
+
+  return { body: updatedBody, contentSynced };
+}
+
+interface ReqUpdateParams {
+  reqId: string;
+  completedTasks: string[];
+  changeId: string;
+  date: string;
+  author: string;
+  specContent?: ChangeSpecContent;
+  totalReqsInChange: number;
+}
+
+function formatTaskHistoryDescription(completedTasks: string[]): string {
+  return completedTasks.length > 0
+    ? `Implementación verificada (${completedTasks.join(', ')})`
+    : 'Integración de especificación';
+}
+
+function promoteRequirementMetadata(
+  fm: Record<string, unknown>,
+  contentSynced: boolean
+): boolean {
+  const wasActive = fm.status === 'active';
+  if (!wasActive) fm.status = 'active';
+  if (contentSynced && wasActive) {
+    fm.version = bumpMinorSemver(String(fm.version || '1.0.0'));
+  }
+  return !wasActive;
+}
+
 function updateSingleCanonicalRequirement(
   canonical: { file: string; frontmatter: Record<string, unknown>; body: string },
-  completedTasks: string[],
-  changeId: string,
-  date: string,
-  author: string
-): boolean {
+  params: ReqUpdateParams
+): { updated: boolean; contentSynced: boolean } {
   const fm = canonical.frontmatter;
-  const isPending = fm.status !== 'active';
-  if (isPending) fm.status = 'active';
-
-  const taskDesc = completedTasks.length > 0 ? `Implementación verificada (${completedTasks.join(', ')})` : `Integración de especificación`;
-  const updatedBody = appendRevisionHistoryRow(canonical.body, {
+  const syncRes = syncBodyFromSpecContent(canonical.body, params.reqId, params.changeId, params.specContent, params.totalReqsInChange);
+  const statusPromoted = promoteRequirementMetadata(fm, syncRes.contentSynced);
+  const updatedBody = appendRevisionHistoryRow(syncRes.body, {
     version: String(fm.version || '1.0.0'),
-    date,
-    author,
-    description: taskDesc,
-    reference: changeId,
+    date: params.date,
+    author: params.author,
+    description: formatTaskHistoryDescription(params.completedTasks),
+    reference: params.changeId,
   });
-
-  if (updatedBody !== canonical.body || isPending) {
-    writeUpdatedArtifact(canonical.file, fm, updatedBody);
-    return true;
+  if (updatedBody === canonical.body && !statusPromoted && !syncRes.contentSynced) {
+    return { updated: false, contentSynced: false };
   }
-  return false;
+  writeUpdatedArtifact(canonical.file, fm, updatedBody);
+  return { updated: true, contentSynced: syncRes.contentSynced };
 }
 
 function tryUpdateCanonicalRequirement(
   canonical: { file: string; frontmatter: Record<string, unknown>; body: string },
-  reqId: string,
-  completedTasks: string[],
-  changeId: string,
-  date: string,
-  author: string,
+  params: ReqUpdateParams,
   errors: string[]
-): boolean {
+): { updated: boolean; contentSynced: boolean } {
   try {
-    return updateSingleCanonicalRequirement(canonical, completedTasks, changeId, date, author);
+    return updateSingleCanonicalRequirement(canonical, params);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    errors.push(`Error actualizando artefacto canónico '${reqId}': ${msg}`);
-    return false;
+    errors.push(`Error actualizando artefacto canónico '${params.reqId}': ${msg}`);
+    return { updated: false, contentSynced: false };
   }
+}
+
+function buildReqUpdateParams(
+  reqId: string,
+  completedTasks: string[],
+  ctx: ExecutionContext,
+  totalReqsInChange: number,
+  specContent?: ChangeSpecContent
+): ReqUpdateParams {
+  return { reqId, completedTasks, changeId: ctx.changeId, date: ctx.date, author: ctx.author, specContent, totalReqsInChange };
 }
 
 function updateRequirementsArtifacts(
@@ -381,20 +586,22 @@ function updateRequirementsArtifacts(
   createdArtifacts: string[],
   canonicalArtifacts: CanonicalMap,
   completedTasks: string[],
-  changeId: string,
-  date: string,
-  author: string,
-  errors: string[]
-): string[] {
+  ctx: ExecutionContext,
+  errors: string[],
+  specContent?: ChangeSpecContent
+): { updated: string[]; syncedContent: string[] } {
   const updated: string[] = [];
+  const syncedContent: string[] = [];
+  const totalReqs = targetReqs.filter((id) => !id.startsWith('UC-')).length || 1;
+
   for (const reqId of targetReqs) {
-    if (createdArtifacts.includes(reqId)) continue;
-    const canonical = canonicalArtifacts.get(reqId);
-    if (canonical && tryUpdateCanonicalRequirement(canonical, reqId, completedTasks, changeId, date, author, errors)) {
-      updated.push(reqId);
-    }
+    const canonical = !createdArtifacts.includes(reqId) ? canonicalArtifacts.get(reqId) : undefined;
+    if (!canonical) continue;
+    const res = tryUpdateCanonicalRequirement(canonical, buildReqUpdateParams(reqId, completedTasks, ctx, totalReqs, specContent), errors);
+    if (res.updated) updated.push(reqId);
+    if (res.contentSynced) syncedContent.push(reqId);
   }
-  return updated;
+  return { updated, syncedContent };
 }
 
 function isArchitectureComponentId(id?: string): boolean {
@@ -630,11 +837,15 @@ function validateChangeWorkspace(rootDir: string, changeId: string) {
 function buildIntegrationSuccessPayload(
   changeId: string,
   tasksRes: { completedTasks: string[]; pendingTasks: string[] },
-  targetReqs: string[],
-  updatedProduct: string[],
-  updatedArch: string[],
-  createdArtifacts: string[],
+  updates: {
+    targetReqs: string[];
+    updatedProduct: string[];
+    updatedArch: string[];
+    createdArtifacts: string[];
+    syncedContent: string[];
+  },
   archiveRes: { archived: boolean; archivedPath?: string },
+  syncedDigestsCount: number,
   errors: string[]
 ): SddIntegrationResult {
   return {
@@ -642,10 +853,12 @@ function buildIntegrationSuccessPayload(
     changeId,
     completedTasks: tasksRes.completedTasks,
     pendingTasks: tasksRes.pendingTasks,
-    integratedRequirements: targetReqs,
-    updatedProductArtifacts: updatedProduct,
-    updatedArchitectureArtifacts: updatedArch,
-    createdCanonicalArtifacts: createdArtifacts,
+    integratedRequirements: updates.targetReqs,
+    updatedProductArtifacts: updates.updatedProduct,
+    updatedArchitectureArtifacts: updates.updatedArch,
+    createdCanonicalArtifacts: updates.createdArtifacts,
+    syncedContentArtifacts: updates.syncedContent,
+    syncedDigestsCount,
     archived: archiveRes.archived,
     archivedPath: archiveRes.archivedPath,
     errors,
@@ -682,6 +895,7 @@ interface ExecutionContext {
   changeId: string;
   author: string;
   date: string;
+  syncContent: boolean;
 }
 
 function resolveIntegrationOptions(options: SddIntegrationOptions): ExecutionContext {
@@ -690,6 +904,7 @@ function resolveIntegrationOptions(options: SddIntegrationOptions): ExecutionCon
     changeId: options.changeId,
     author: options.author || 'AI-SDLC Integration Engine',
     date: options.date || new Date().toISOString().split('T')[0],
+    syncContent: options.syncContent !== false,
   };
 }
 
@@ -737,28 +952,30 @@ function syncArchitectureArtifacts(
   return updateArchitectureComponents(cited, canonicalArtifacts, targetReqs, targetUcs, ctx.changeId, ctx.date, ctx.author, errors);
 }
 
+interface ArtifactUpdateSummary {
+  targetReqs: string[];
+  updatedProduct: string[];
+  updatedArch: string[];
+  createdArtifacts: string[];
+  syncedContent: string[];
+}
+
 function applyArtifactUpdates(
   ctx: ExecutionContext,
   changeDir: string,
   handoff: ProductHandoff,
   completedTasks: string[],
   errors: string[]
-): {
-  targetReqs: string[];
-  updatedProduct: string[];
-  updatedArch: string[];
-  createdArtifacts: string[];
-} {
+): ArtifactUpdateSummary {
   const targetReqs = resolveTargetRequirements(handoff, changeDir);
   const targetUcs = collectTargetUseCases(handoff, changeDir);
   const createdArtifacts = materializeNewCatalogArtifacts(changeDir, ctx.rootDir, ctx.changeId, ctx.author, ctx.date, errors);
   const canonicalArtifacts = loadCanonicalArtifacts(ctx.rootDir);
-
+  const specContent = ctx.syncContent ? readChangeSpecContent(changeDir) : undefined;
   const productIds = Array.from(new Set([...targetReqs, ...targetUcs]));
-  const updatedProduct = updateRequirementsArtifacts(productIds, createdArtifacts, canonicalArtifacts, completedTasks, ctx.changeId, ctx.date, ctx.author, errors);
+  const reqRes = updateRequirementsArtifacts(productIds, createdArtifacts, canonicalArtifacts, completedTasks, ctx, errors, specContent);
   const updatedArch = syncArchitectureArtifacts(handoff, canonicalArtifacts, targetReqs, targetUcs, changeDir, ctx, errors);
-
-  return { targetReqs, updatedProduct, updatedArch, createdArtifacts };
+  return { targetReqs, updatedProduct: reqRes.updated, updatedArch, createdArtifacts, syncedContent: reqRes.syncedContent };
 }
 
 export function integrateSddChange(options: SddIntegrationOptions): SddIntegrationResult {
@@ -771,17 +988,138 @@ export function integrateSddChange(options: SddIntegrationOptions): SddIntegrati
   const updates = applyArtifactUpdates(ctx, changeDir!, handoff!, tasksRes!.completedTasks, errors);
   const completedAll = tasksRes!.completedTasks.length > 0 && tasksRes!.pendingTasks.length === 0;
   const archiveRes = archiveChangeWorkspace(changeDir!, ctx.changeId, ctx.rootDir, options.autoArchive !== false, completedAll);
+  const syncRes = syncPdacDigests({ rootDir: ctx.rootDir });
 
   return buildIntegrationSuccessPayload(
     ctx.changeId,
     tasksRes!,
-    updates.targetReqs,
-    updates.updatedProduct,
-    updates.updatedArch,
-    updates.createdArtifacts,
+    updates,
     archiveRes,
+    syncRes.syncedCount,
     errors
   );
+}
+
+function listDirectorySubfolders(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+    .sort(canonicalSort);
+}
+
+function collectBatchCandidateChanges(
+  rootDir: string,
+  includeCompleted: boolean
+): Array<{ changeId: string; dir: string; isCompletedDir: boolean }> {
+  const candidates: Array<{ changeId: string; dir: string; isCompletedDir: boolean }> = [];
+  if (includeCompleted) {
+    const compParent = path.join(rootDir, 'specs', 'changes', 'completed');
+    for (const name of listDirectorySubfolders(compParent)) {
+      candidates.push({ changeId: name, dir: path.join(compParent, name), isCompletedDir: true });
+    }
+  }
+  const activeParent = path.join(rootDir, 'specs', 'changes', 'active');
+  for (const name of listDirectorySubfolders(activeParent)) {
+    candidates.push({ changeId: name, dir: path.join(activeParent, name), isCompletedDir: false });
+  }
+  return candidates;
+}
+
+function shouldSkipBatchCandidate(
+  candidate: { changeId: string; dir: string; isCompletedDir: boolean }
+): string | null {
+  const handoff = resolveChangeHandoff(candidate.dir, candidate.changeId);
+  if (!handoff || !handoff.subgraph) {
+    return 'Sin sidecar handoff.yaml ni citaciones en proposal.md';
+  }
+  const tasksCheck = checkTasksExecution(candidate.dir, candidate.changeId);
+  if (!tasksCheck.ok) {
+    return `Tareas pendientes (${tasksCheck.pendingTasks.join(', ')})`;
+  }
+  return null;
+}
+
+interface BatchAccumulator {
+  processedChanges: string[];
+  skippedChanges: Array<{ changeId: string; reason: string }>;
+  results: SddIntegrationResult[];
+  updatedProduct: Set<string>;
+  updatedArch: Set<string>;
+  createdCanonical: Set<string>;
+  errors: string[];
+}
+
+function recordBatchResult(acc: BatchAccumulator, changeId: string, res: SddIntegrationResult): void {
+  acc.results.push(res);
+  if (!res.success) {
+    acc.errors.push(...res.errors);
+    return;
+  }
+  acc.processedChanges.push(changeId);
+  for (const p of res.updatedProductArtifacts) acc.updatedProduct.add(p);
+  for (const a of res.updatedArchitectureArtifacts) acc.updatedArch.add(a);
+  for (const c of res.createdCanonicalArtifacts || []) acc.createdCanonical.add(c);
+}
+
+function createBatchAccumulator(): BatchAccumulator {
+  return {
+    processedChanges: [],
+    skippedChanges: [],
+    results: [],
+    updatedProduct: new Set(),
+    updatedArch: new Set(),
+    createdCanonical: new Set(),
+    errors: [],
+  };
+}
+
+function processSingleBatchCandidate(
+  cand: { changeId: string; dir: string; isCompletedDir: boolean },
+  rootDir: string,
+  options: SddIntegrateAllOptions,
+  acc: BatchAccumulator
+): void {
+  const skipReason = shouldSkipBatchCandidate(cand);
+  if (skipReason) {
+    acc.skippedChanges.push({ changeId: cand.changeId, reason: skipReason });
+    return;
+  }
+  const res = integrateSddChange({
+    rootDir,
+    changeId: cand.changeId,
+    author: options.author,
+    date: options.date,
+    autoArchive: cand.isCompletedDir ? false : options.autoArchive,
+    syncContent: options.syncContent,
+  });
+  recordBatchResult(acc, cand.changeId, res);
+}
+
+function finalizeBatchResult(acc: BatchAccumulator, syncedDigestsCount: number): SddIntegrateAllResult {
+  return {
+    success: acc.errors.length === 0,
+    processedChanges: acc.processedChanges,
+    skippedChanges: acc.skippedChanges,
+    results: acc.results,
+    updatedProductArtifacts: Array.from(acc.updatedProduct),
+    updatedArchitectureArtifacts: Array.from(acc.updatedArch),
+    createdCanonicalArtifacts: Array.from(acc.createdCanonical),
+    syncedDigestsCount,
+    errors: acc.errors,
+  };
+}
+
+export function integrateAllSddChanges(options: SddIntegrateAllOptions = {}): SddIntegrateAllResult {
+  const rootDir = options.rootDir || process.cwd();
+  const candidates = collectBatchCandidateChanges(rootDir, options.includeCompleted !== false);
+  const acc = createBatchAccumulator();
+  for (const cand of candidates) {
+    processSingleBatchCandidate(cand, rootDir, options, acc);
+  }
+  const finalSync = syncPdacDigests({ rootDir });
+  return finalizeBatchResult(acc, finalSync.syncedCount);
 }
 
 function auditChangeRequirements(targetReqs: string[], canonicalMap: CanonicalMap): { integrated: string[]; missing: string[]; gaps: string[] } {

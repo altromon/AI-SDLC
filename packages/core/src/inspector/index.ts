@@ -109,10 +109,24 @@ function collectTextParagraphs(body: string): string[] {
   return paragraphs;
 }
 
+function extractNormativeWithIncrements(body: string): string | null {
+  const secRegex = /##\s+1\.\s+(?:Enunciado(?:\s+Normativo)?|Normative\s+Statement|Intenci[oó]n\s+y\s+Resultado|Intention\s+and\s+Outcome[^\n]*)\r?\n([\s\S]*?)(?=\r?\n---|\r?\n##\s|$)/i;
+  const match = body.match(secRegex);
+  if (!match) return null;
+  const paras = collectTextParagraphs(match[1]);
+  const valid = paras.filter((p) => p.length > 15 && !p.startsWith('>'));
+  if (valid.length === 0) return null;
+  const combined = valid.join(' ');
+  return combined.length > 500 ? combined.substring(0, 497) + '...' : combined;
+}
+
 function extractTechnicalSummary(body: string, fallbackTitle?: string): string {
   if (!body || !body.trim()) {
     return fallbackTitle ? `Elemento ${fallbackTitle}.` : 'Sin descripción detallada.';
   }
+
+  const normative = extractNormativeWithIncrements(body);
+  if (normative) return normative;
 
   const paras = collectTextParagraphs(body);
   const firstGood = paras.find((p) => p.length > 20 && !p.startsWith('>'));

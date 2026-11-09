@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- feat(cli): propagate Plain-Language Journey Elicitation (`JRN-*`) directives in `agent-product-analyst` and `aisdlc-greenfield` across all IDE targets via `aisdlc init` and `aisdlc sync`, and bump CLI version to `3.4.1`.
+- feat(cli): propagate Plain-Language Journey Elicitation (`JRN-*`) directives in `agent-product-analyst` and `aisdlc-greenfield` across all IDE targets via `aisdlc init` and `aisdlc sync`, add `--all` batch consolidation flag to `aisdlc sdd integrate`, and bump CLI version to `3.4.1`.
 - Updated dependencies
   - @aisdlc/core@3.4.1
   - @aisdlc/mcp@3.4.1

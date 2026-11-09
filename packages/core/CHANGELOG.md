@@ -5,6 +5,7 @@
 ### Patch Changes
 
 - feat(agents): add Plain-Language Journey Elicitation (`JRN-*`) directives to `agent-product-analyst` and `aisdlc-greenfield` across all IDE targets, instructing the agent to ask in everyday business language which journeys to generate and specify the 5 required fields (`persona`, `stages`, `touchpoints`, `pain-points`, `related-use-cases`).
+- feat(sdd,inspector): synchronize normative statements, evolutionary increments (`### Incremento (CHG-*)`), and BDD Gherkin scenarios into canonical `FR-*` / `UC-*` / `SEC-REQ-*` / `PRIV-REQ-*` artifacts during `integrateSddChange` (with SemVer minor bump and automatic PDaC SHA-256 digest resync), add `integrateAllSddChanges` (`--all`) for historical batch consolidation, and include incremental statements in `inspectElement`.
 
 ## 3.4.0
 

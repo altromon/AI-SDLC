@@ -6,6 +6,7 @@ import {
   depositProductHandoffSidecar,
   getNextCorrelativeNumber,
   getSddAdapter,
+  integrateAllSddChanges,
   integrateSddChange,
   loadProductHandoffSidecar,
   OpenSpecAdapter,
@@ -991,6 +992,213 @@ title: User Data Export Right
       expect(tasksContent).toContain('PRIV-REQ-EXPORT-001');
     } finally {
       fs.rmSync(tmpScaffoldDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('SDD Content Consolidation & Batch Integration (--all)', () => {
+  it('should sync normative delta and Gherkin scenarios from spec.md into canonical FR and bump SemVer', () => {
+    const tmpSyncDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test-sdd-content-sync-'));
+    const changeDir = path.join(tmpSyncDir, 'specs', 'changes', 'active', 'chg-099-login-lockout');
+    const productDir = path.join(tmpSyncDir, 'specs', 'product');
+    fs.mkdirSync(changeDir, { recursive: true });
+    fs.mkdirSync(productDir, { recursive: true });
+
+    try {
+      // 1. Canonical FR with initial boilerplate content (active v1.0.0)
+      const frPath = path.join(productDir, 'FR-099-LOGIN-001.md');
+      fs.writeFileSync(
+        frPath,
+        `---
+id: FR-099-LOGIN-001
+type: requirement
+title: "login-lockout"
+status: active
+version: "1.0.0"
+---
+
+# FR-099-LOGIN-001: login-lockout
+
+## 1. Enunciado Normativo
+El sistema DEBE implementar y soportar la capacidad de login-lockout.
+
+---
+
+## 2. Criterios de Aceptación en Formato Gherkin (Cucumber)
+
+\`\`\`gherkin
+@FR-099-LOGIN-001 @automated @regression
+Feature: login-lockout
+  @nominal
+  Scenario: Nominal successful flow
+    Given the system is in an operational state
+    When the operation for "login-lockout" is executed
+    Then the operation completes successfully
+\`\`\`
+
+---
+
+## 3. Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-10-01 | Analyst | Definición inicial | CHG-000 |
+`
+      );
+
+      // 2. Active change with rich spec.md and completed tasks
+      fs.writeFileSync(
+        path.join(changeDir, 'tasks.md'),
+        `---
+tasks:
+  - id: TSK-001
+    status: COMPLETED
+---
+`
+      );
+
+      fs.writeFileSync(
+        path.join(changeDir, 'spec.md'),
+        `---
+id: SPEC-CHG-099-LOGIN-LOCKOUT
+type: delivery-spec
+change-id: CHG-099-LOGIN-LOCKOUT
+---
+
+# Delivery Specification: CHG-099-LOGIN-LOCKOUT
+
+## 2. Requirement Deltas and Formal Contracts
+
+### [FR-099-LOGIN-001]: Account Lockout Policy
+* **Operation:** \`MODIFIED\`
+* **Behavioral Contract (Delta Specification):**
+  * **Baseline (Before):** Basic password check.
+  * **Target Delta (After):** El sistema DEBE bloquear la cuenta durante 15 minutos tras 3 intentos fallidos consecutivos.
+
+## 3. Functional Behavior Scenarios (BDD Gherkin)
+
+\`\`\`gherkin
+@CHG-099-LOGIN-LOCKOUT @functional @automated
+Feature: Bloqueo de cuenta tras intentos fallidos
+  Scenario: Cuenta bloqueada al tercer intento fallido
+    Given un usuario con 2 intentos fallidos previos
+    When introduce una contraseña incorrecta por tercera vez
+    Then la cuenta queda bloqueada durante 15 minutos
+\`\`\`
+`
+      );
+
+      fs.writeFileSync(
+        path.join(changeDir, 'handoff.yaml'),
+        `id: HOF-CHG-099-LOGIN-LOCKOUT
+type: handoff
+changeId: chg-099-login-lockout
+subgraph:
+  requirements:
+    - FR-099-LOGIN-001
+citations:
+  - id: FR-099-LOGIN-001
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+`
+      );
+
+      const res = integrateSddChange({
+        rootDir: tmpSyncDir,
+        changeId: 'chg-099-login-lockout',
+        author: 'TestIntegrator',
+      });
+
+      expect(res.success).toBe(true);
+      expect(res.syncedContentArtifacts).toContain('FR-099-LOGIN-001');
+
+      const updatedFr = fs.readFileSync(frPath, 'utf-8');
+      // Normative statement replaced boilerplate
+      expect(updatedFr).toContain('El sistema DEBE bloquear la cuenta durante 15 minutos tras 3 intentos fallidos consecutivos.');
+      // Gherkin scenarios synced with @FR-099-LOGIN-001 tag and without @CHG-* tag
+      expect(updatedFr).toContain('Cuenta bloqueada al tercer intento fallido');
+      expect(updatedFr).toContain('@FR-099-LOGIN-001');
+      expect(updatedFr).not.toContain('@CHG-099-LOGIN-LOCKOUT');
+      // SemVer bumped from 1.0.0 to 1.1.0 because it was already active
+      expect(updatedFr).toContain('version: 1.1.0');
+
+      // Handoff digest in archived change was automatically resynced
+      const archivedHandoff = fs.readFileSync(
+        path.join(tmpSyncDir, 'specs', 'changes', 'completed', 'chg-099-login-lockout', 'handoff.yaml'),
+        'utf-8'
+      );
+      expect(archivedHandoff).not.toContain('00000000000000000000000000000000');
+    } finally {
+      fs.rmSync(tmpSyncDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should batch integrate all completed changes across completed and active folders via integrateAllSddChanges', () => {
+    const tmpBatchDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test-sdd-batch-integrate-'));
+    const completedDir = path.join(tmpBatchDir, 'specs', 'changes', 'completed', 'chg-001-past');
+    const activeDoneDir = path.join(tmpBatchDir, 'specs', 'changes', 'active', 'chg-002-ready');
+    const activePendingDir = path.join(tmpBatchDir, 'specs', 'changes', 'active', 'chg-003-wip');
+    const productDir = path.join(tmpBatchDir, 'specs', 'product');
+
+    fs.mkdirSync(completedDir, { recursive: true });
+    fs.mkdirSync(activeDoneDir, { recursive: true });
+    fs.mkdirSync(activePendingDir, { recursive: true });
+    fs.mkdirSync(productDir, { recursive: true });
+
+    try {
+      // FR-001 & FR-002
+      fs.writeFileSync(
+        path.join(productDir, 'FR-001.md'),
+        `---\nid: FR-001\ntype: requirement\nstatus: draft\nversion: "1.0.0"\n---\n# FR-001\n\n## 1. Enunciado Normativo\nEl sistema DEBE implementar y soportar la capacidad de fr-001.\n`
+      );
+      fs.writeFileSync(
+        path.join(productDir, 'FR-002.md'),
+        `---\nid: FR-002\ntype: requirement\nstatus: draft\nversion: "1.0.0"\n---\n# FR-002\n\n## 1. Enunciado Normativo\nEl sistema DEBE implementar y soportar la capacidad de fr-002.\n`
+      );
+
+      // chg-001-past (already in completed/)
+      fs.writeFileSync(path.join(completedDir, 'tasks.md'), `---\ntasks:\n  - id: TSK-1\n    status: COMPLETED\n---\n`);
+      fs.writeFileSync(
+        path.join(completedDir, 'proposal.md'),
+        `---\nid: CHG-001\n---\n# Propuesta\n\n## 1. Motivación y Alcance\nSoporte de exportación criptográfica firmada en formato JSON.\n`
+      );
+      fs.writeFileSync(
+        path.join(completedDir, 'handoff.yaml'),
+        `id: HOF-CHG-001\ntype: handoff\nchangeId: chg-001-past\nsubgraph:\n  requirements:\n    - FR-001\n`
+      );
+
+      // chg-002-ready (in active/ with all tasks completed)
+      fs.writeFileSync(path.join(activeDoneDir, 'tasks.md'), `---\ntasks:\n  - id: TSK-2\n    status: COMPLETED\n---\n`);
+      fs.writeFileSync(
+        path.join(activeDoneDir, 'proposal.md'),
+        `---\nid: CHG-002\n---\n# Propuesta\n\n## 1. Motivación y Alcance\nValidación determinista de esquemas de telemetría en tiempo real.\n`
+      );
+      fs.writeFileSync(
+        path.join(activeDoneDir, 'handoff.yaml'),
+        `id: HOF-CHG-002\ntype: handoff\nchangeId: chg-002-ready\nsubgraph:\n  requirements:\n    - FR-002\n`
+      );
+
+      // chg-003-wip (in active/ with pending task -> should be skipped)
+      fs.writeFileSync(path.join(activePendingDir, 'tasks.md'), `---\ntasks:\n  - id: TSK-3\n    status: PENDING\n---\n`);
+      fs.writeFileSync(
+        path.join(activePendingDir, 'handoff.yaml'),
+        `id: HOF-CHG-003\ntype: handoff\nchangeId: chg-003-wip\nsubgraph:\n  requirements:\n    - FR-002\n`
+      );
+
+      const batchRes = integrateAllSddChanges({ rootDir: tmpBatchDir, author: 'BatchBot' });
+      expect(batchRes.success).toBe(true);
+      expect(batchRes.processedChanges).toEqual(['chg-001-past', 'chg-002-ready']);
+      expect(batchRes.skippedChanges).toHaveLength(1);
+      expect(batchRes.skippedChanges[0].changeId).toBe('chg-003-wip');
+
+      const fr1 = fs.readFileSync(path.join(productDir, 'FR-001.md'), 'utf-8');
+      expect(fr1).toContain('status: active');
+      expect(fr1).toContain('Soporte de exportación criptográfica firmada en formato JSON.');
+
+      const fr2 = fs.readFileSync(path.join(productDir, 'FR-002.md'), 'utf-8');
+      expect(fr2).toContain('status: active');
+      expect(fr2).toContain('Validación determinista de esquemas de telemetría en tiempo real.');
+    } finally {
+      fs.rmSync(tmpBatchDir, { recursive: true, force: true });
     }
   });
 });
