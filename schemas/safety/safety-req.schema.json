@@ -37,7 +37,12 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "safety-domain": {
       "type": "string",
@@ -75,7 +80,10 @@
     },
     "acceptance-format": {
       "type": "string",
-      "enum": ["gherkin", "declarative-prose"]
+      "enum": [
+        "gherkin",
+        "declarative-prose"
+      ]
     },
     "cucumber-tags": {
       "type": "array",
@@ -84,10 +92,16 @@
       }
     },
     "supersedes": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "superseded-by": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     }
   },
   "additionalProperties": false

@@ -11,8 +11,8 @@ subgraph:
     - UC-040-RELEASE-SUPPLY-CHAIN-PROVENANCE
 citations:
   - id: UC-040-RELEASE-SUPPLY-CHAIN-PROVENANCE
-    digest: sha256:PLACEHOLDER
+    digest: sha256:a1fc62e93e16fa9fd45cfd09ee70faeef0ca1864f9ebfb6e5b2789c476724f11
     comment: Citación de use-case
   - id: FR-040-RELEASE-SUPPLY-CHAIN-PROVENANCE-001
-    digest: sha256:PLACEHOLDER
+    digest: sha256:35af146dc483e76559bdba42db0de10b84c475f72df0de17d9900408e9a5544e
     comment: Citación de requirement

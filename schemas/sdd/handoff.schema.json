@@ -3,7 +3,12 @@
   "$id": "https://ai-sdlc.org/schemas/sdd/handoff.schema.json",
   "title": "PDaC Product Handoff Sidecar Schema (HOF-*)",
   "type": "object",
-  "required": ["id", "type", "changeId", "subgraph"],
+  "required": [
+    "id",
+    "type",
+    "changeId",
+    "subgraph"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -12,7 +17,10 @@
     },
     "type": {
       "type": "string",
-      "enum": ["handoff", "product-handoff"]
+      "enum": [
+        "handoff",
+        "product-handoff"
+      ]
     },
     "title": {
       "type": "string",
@@ -31,44 +39,64 @@
     },
     "subgraph": {
       "type": "object",
-      "required": ["requirements"],
+      "required": [
+        "requirements"
+      ],
       "properties": {
         "requirements": {
           "type": "array",
           "minItems": 1,
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "useCases": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "businessRules": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "securityRequirements": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "abuseCases": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "privacyRequirements": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "dataAssets": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "privacyRopa": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "actors": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": true
@@ -77,12 +105,22 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "digest": { "type": "string" },
-          "anchor": { "type": "string" },
-          "comment": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "digest": {
+            "type": "string"
+          },
+          "anchor": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          }
         }
       }
     }

@@ -166,7 +166,13 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["sha", "subject", "author", "timeSeconds", "tokens"],
+        "required": [
+          "sha",
+          "subject",
+          "author",
+          "timeSeconds",
+          "tokens"
+        ],
         "properties": {
           "sha": {
             "type": "string"

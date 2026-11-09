@@ -3,7 +3,15 @@
   "$id": "https://ai-sdlc.org/schemas/security/threat-actor.schema.json",
   "title": "Threat Actor Schema (Versionable)",
   "type": "object",
-  "required": ["id", "type", "title", "status", "version", "threat-capability", "motivation"],
+  "required": [
+    "id",
+    "type",
+    "title",
+    "status",
+    "version",
+    "threat-capability",
+    "motivation"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -27,15 +35,32 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "threat-capability": {
       "type": "string",
-      "enum": ["script-kiddie", "advanced-persistent-threat", "insider-threat", "automated-botnet", "supply-chain-attacker"]
+      "enum": [
+        "script-kiddie",
+        "advanced-persistent-threat",
+        "insider-threat",
+        "automated-botnet",
+        "supply-chain-attacker"
+      ]
     },
     "motivation": {
       "type": "string",
-      "enum": ["financial-gain", "espionage", "sabotage", "data-theft", "reputational-damage"]
+      "enum": [
+        "financial-gain",
+        "espionage",
+        "sabotage",
+        "data-theft",
+        "reputational-damage"
+      ]
     },
     "attack-surfaces": {
       "type": "array",
@@ -44,11 +69,17 @@
       }
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^ACT-THREAT-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^ACT-THREAT-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

@@ -3,7 +3,11 @@
   "$id": "https://ai-sdlc.org/schemas/sdd/design.schema.json",
   "title": "Spec-Driven Development Technical Design Schema (DSG-*)",
   "type": "object",
-  "required": ["id", "type", "title"],
+  "required": [
+    "id",
+    "type",
+    "title"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -12,7 +16,11 @@
     },
     "type": {
       "type": "string",
-      "enum": ["spec-design", "spec-change-design", "design"]
+      "enum": [
+        "spec-design",
+        "spec-change-design",
+        "design"
+      ]
     },
     "change-id": {
       "type": "string",
@@ -77,17 +85,29 @@
       "description": "Explicit contract interfaces and methods designed for implementation and unit testing.",
       "items": {
         "oneOf": [
-          { "type": "string", "minLength": 1 },
+          {
+            "type": "string",
+            "minLength": 1
+          },
           {
             "type": "object",
-            "required": ["methods"],
+            "required": [
+              "methods"
+            ],
             "properties": {
-              "component": { "type": "string" },
-              "interface": { "type": "string" },
+              "component": {
+                "type": "string"
+              },
+              "interface": {
+                "type": "string"
+              },
               "methods": {
                 "type": "array",
                 "minItems": 1,
-                "items": { "type": "string", "minLength": 1 }
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
               }
             },
             "additionalProperties": false
@@ -99,12 +119,22 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "digest": { "type": "string" },
-          "comment": { "type": "string" },
-          "anchor": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "digest": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "anchor": {
+            "type": "string"
+          }
         },
         "additionalProperties": false
       }

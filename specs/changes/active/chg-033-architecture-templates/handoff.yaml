@@ -11,5 +11,5 @@ subgraph:
     - UC-033-ARCHITECTURE-TEMPLATES
 citations:
   - id: FR-033-ARCHITECTURE-TEMPLATES-001
-    digest: sha256:a3e55ba3c916876fad86254326df37f2e36a67bb3103d9a299fee450d2906aa4
+    digest: sha256:6c3bd29d58191c964c84f10f2af7723e901acad6d2720877e52fc552a6c40f80
     comment: Requerimiento funcional canónico asociado (Génesis CHG-033-ARCHITECTURE-TEMPLATES)

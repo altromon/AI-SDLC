@@ -3,7 +3,17 @@
   "$id": "https://ai-sdlc.org/schemas/security/abuse-case.schema.json",
   "title": "Abuse Case Schema (Versionable)",
   "type": "object",
-  "required": ["id", "type", "title", "status", "version", "primary-threat-actor", "targets-use-case", "stride-category", "mitigated-by"],
+  "required": [
+    "id",
+    "type",
+    "title",
+    "status",
+    "version",
+    "primary-threat-actor",
+    "targets-use-case",
+    "stride-category",
+    "mitigated-by"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -27,7 +37,12 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "primary-threat-actor": {
       "type": "string",
@@ -39,7 +54,14 @@
     },
     "stride-category": {
       "type": "string",
-      "enum": ["spoofing", "tampering", "repudiation", "information-disclosure", "denial-of-service", "elevation-of-privilege"]
+      "enum": [
+        "spoofing",
+        "tampering",
+        "repudiation",
+        "information-disclosure",
+        "denial-of-service",
+        "elevation-of-privilege"
+      ]
     },
     "mitigated-by": {
       "type": "array",
@@ -56,11 +78,17 @@
       }
     },
     "supersedes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^ABUSE-[A-Z0-9]+(-[A-Z0-9]+)*$"
     },
     "superseded-by": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^ABUSE-[A-Z0-9]+(-[A-Z0-9]+)*$"
     }
   },

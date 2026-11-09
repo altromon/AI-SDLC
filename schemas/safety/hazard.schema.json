@@ -37,16 +37,34 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "severity": {
       "type": "string",
-      "enum": ["catastrophic", "critical", "major", "minor", "negligible"],
+      "enum": [
+        "catastrophic",
+        "critical",
+        "major",
+        "minor",
+        "negligible"
+      ],
       "description": "Hazard severity per functional safety classification (DO-178C / ISO 26262)."
     },
     "probability": {
       "type": "string",
-      "enum": ["frequent", "probable", "occasional", "remote", "improbable", "extremely-improbable"],
+      "enum": [
+        "frequent",
+        "probable",
+        "occasional",
+        "remote",
+        "improbable",
+        "extremely-improbable"
+      ],
       "description": "Probability of operational hazard occurrence."
     },
     "fault-tolerance-time-ms": {
@@ -72,10 +90,16 @@
       "description": "Potential effect on people, aircraft, or environment if hazard materializes."
     },
     "supersedes": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "superseded-by": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     }
   },
   "additionalProperties": false

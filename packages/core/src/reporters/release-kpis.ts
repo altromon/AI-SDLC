@@ -1,11 +1,13 @@
+import * as fs from 'fs';
+import * as path from 'path';
 /**
  * AI-SDLC: Release Consolidated KPIs & Defect Attribution Engine
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
 import { execFileSync } from 'child_process';
 import { CommitKpiRecord, extractCommitKpisFromRange, resolveGitRef } from '../git/trailers.js';
+import { TaskKpiSummary } from '../types/index.js';
+import { accumulateTaskSummaries } from './pr-kpis.js';
 
 export interface ModelDefectStats {
   authorOrModel: string;
@@ -51,6 +53,7 @@ export interface ReleaseKpiReport {
   reworkCostPercent: number;
   authorStats: ModelDefectStats[];
   bugList: BugRecordSummary[];
+  taskReworkStats?: TaskKpiSummary[];
 }
 
 function calculateCost(prompt: number, completion: number): number {
@@ -212,6 +215,40 @@ export function resolveReleaseBaseBranch(
 /**
  * Aggregates all commits in a release branch relative to base (e.g. main..release/vX.Y.Z).
  */
+function assembleReleaseReport(
+  refs: { release: string; base: string; commitCount: number },
+  totals: CommitTotals,
+  costs: { totalCost: number; reworkCost: number; ratios: ReturnType<typeof computeReworkRatios> },
+  stats: { authorStats: ModelDefectStats[]; bugList: BugRecordSummary[]; taskMap: Record<string, TaskKpiSummary>; totalKloc: number; globalDefectDensity: number }
+): ReleaseKpiReport {
+  return {
+    releaseBranch: refs.release,
+    baseBranch: refs.base,
+    generatedAt: new Date().toISOString(),
+    totalCommits: refs.commitCount,
+    totalLinesAdded: totals.linesAdded,
+    totalLinesDeleted: totals.linesDeleted,
+    totalKloc: stats.totalKloc,
+    totalBugs: stats.bugList.length,
+    globalDefectDensity: stats.globalDefectDensity,
+    totalTimeSeconds: totals.time,
+    totalTokens: totals.tokens,
+    totalCostUsd: costs.totalCost,
+    reworkTimeSeconds: totals.reworkTime,
+    reworkTokens: totals.reworkTokens,
+    reworkCostUsd: costs.reworkCost,
+    reworkTimePercent: costs.ratios.timePercent,
+    reworkTokensPercent: costs.ratios.tokensPercent,
+    reworkCostPercent: costs.ratios.costPercent,
+    authorStats: stats.authorStats,
+    bugList: stats.bugList,
+    taskReworkStats: Object.values(stats.taskMap),
+  };
+}
+
+/**
+ * Aggregates all commits in a release branch relative to base (e.g. main..release/vX.Y.Z).
+ */
 export function aggregateReleaseKpis(
   releaseBranch: string,
   baseBranch?: string,
@@ -232,39 +269,57 @@ export function aggregateReleaseKpis(
 
   const authorStats = finalizeAuthorStats(statsMap);
   const totalKloc = Math.round(((totals.linesAdded + totals.linesDeleted) / 1000) * 100) / 100;
-  const totalBugs = bugList.length;
-  const globalDefectDensity = totalKloc > 0 ? Math.round((totalBugs / totalKloc) * 100) / 100 : totalBugs;
-  const totalCostUsd = calculateCost(totals.tokens * 0.8, totals.tokens * 0.2);
-  const reworkCostUsd = calculateCost(totals.reworkTokens * 0.8, totals.reworkTokens * 0.2);
-  const ratios = computeReworkRatios(totals.time, totals.tokens, totalCostUsd, totals.reworkTime, totals.reworkTokens, reworkCostUsd);
+  const globalDefectDensity = totalKloc > 0 ? Math.round((bugList.length / totalKloc) * 100) / 100 : bugList.length;
+  const totalCost = calculateCost(totals.tokens * 0.8, totals.tokens * 0.2);
+  const reworkCost = calculateCost(totals.reworkTokens * 0.8, totals.reworkTokens * 0.2);
+  const ratios = computeReworkRatios(totals.time, totals.tokens, totalCost, totals.reworkTime, totals.reworkTokens, reworkCost);
+  const taskMap = accumulateTaskSummaries(records);
 
-  return {
-    releaseBranch: resolvedRelease,
-    baseBranch: resolvedBase,
-    generatedAt: new Date().toISOString(),
-    totalCommits: records.length,
-    totalLinesAdded: totals.linesAdded,
-    totalLinesDeleted: totals.linesDeleted,
-    totalKloc,
-    totalBugs,
-    globalDefectDensity,
-    totalTimeSeconds: totals.time,
-    totalTokens: totals.tokens,
-    totalCostUsd,
-    reworkTimeSeconds: totals.reworkTime,
-    reworkTokens: totals.reworkTokens,
-    reworkCostUsd,
-    reworkTimePercent: ratios.timePercent,
-    reworkTokensPercent: ratios.tokensPercent,
-    reworkCostPercent: ratios.costPercent,
-    authorStats,
-    bugList,
-  };
+  return assembleReleaseReport(
+    { release: resolvedRelease, base: resolvedBase, commitCount: records.length },
+    totals,
+    { totalCost, reworkCost, ratios },
+    { authorStats, bugList, taskMap, totalKloc, globalDefectDensity }
+  );
 }
 
 function formatHours(seconds: number): string {
   const hours = (seconds / 3600).toFixed(1);
   return `${hours}h (${Math.round(seconds / 60)} min)`;
+}
+
+/**
+ * Formats the Release KPI Report into standardized Markdown documentation.
+ */
+function buildTaskReworkSection(taskReworkStats?: TaskKpiSummary[]): string[] {
+  if (!taskReworkStats || taskReworkStats.length === 0) return [];
+  const rows = taskReworkStats.map((t) => {
+    const status = t.isFirstTimeRight
+      ? '✔ First-Time-Right'
+      : `⚠ ${t.fixCommits} fix commit${t.fixCommits === 1 ? '' : 's'}`;
+    return `| \`${t.taskId}\` | ${t.commits} (${t.fixCommits} fix) | +${t.linesAdded} / -${t.linesDeleted} | ${t.codeChurnPercent}% | ${t.reworkTokensPercent}% | ${t.reworkTimePercent}% | ${status} |`;
+  });
+
+  return [
+    '',
+    '## 4. Granular Rework & Code Churn Breakdown per Task (TSK-*)',
+    '',
+    '| Task ID | Commits (Total / Fix) | Lines (+ / -) | Code Churn % | Rework Tokens % | Rework Time % | Status |',
+    '| :--- | :---: | :---: | :---: | :---: | :---: | :---: |',
+    ...rows,
+  ];
+}
+
+function buildReworkMetricsSection(report: ReleaseKpiReport): string[] {
+  return [
+    '## 3. Rework Metrics & Cost of Defect Remediation',
+    '',
+    '| Rework Dimension | Absolute Rework | Total Release Value | Rework Ratio (%) |',
+    '| :--- | :---: | :---: | :---: |',
+    `| **Rework Engineering Time** | ${formatHours(report.reworkTimeSeconds)} | ${formatHours(report.totalTimeSeconds)} | **${report.reworkTimePercent}%** |`,
+    `| **Rework Token Consumption** | ${report.reworkTokens.toLocaleString('en-US')} tokens | ${report.totalTokens.toLocaleString('en-US')} tokens | **${report.reworkTokensPercent}%** |`,
+    `| **Estimated Rework Cost (USD)** | $${report.reworkCostUsd.toFixed(2)} | $${report.totalCostUsd.toFixed(2)} | **${report.reworkCostPercent}%** |`,
+  ];
 }
 
 /**
@@ -296,23 +351,17 @@ export function formatReleaseKpiMarkdown(report: ReleaseKpiReport): string {
     ...authorRows,
     `| **TOTAL RELEASE** | **${report.totalCommits}** | **${report.totalKloc}** | **${report.totalBugs}** | **${report.globalDefectDensity}** | **${formatHours(report.totalTimeSeconds)}** | **${report.totalTokens.toLocaleString('en-US')}** | **$${report.totalCostUsd.toFixed(2)} USD** |`,
     '',
-    '---',
+    '## 2. Injected Defects Catalog & Root Cause Traceability',
     '',
-    '## 2. Bug Rework Cost vs. Total Release Cost',
-    '',
-    '| Cost Dimension | Total Release Investment | Invested in Bug Fixes | Rework Cost Ratio | Observational Status |',
-    '| :--- | :---: | :---: | :---: | :---: |',
-    `| **Cycle Time** | ${formatHours(report.totalTimeSeconds)} | ${formatHours(report.reworkTimeSeconds)} | **${report.reworkTimePercent}%** | ${report.reworkTimePercent <= 10 ? '🟢 OPTIMAL (≤10%)' : '🟡 ALERT (>10%)'} |`,
-    `| **AI Tokens** | ${report.totalTokens.toLocaleString('en-US')} tokens | ${report.reworkTokens.toLocaleString('en-US')} tokens | **${report.reworkTokensPercent}%** | ${report.reworkTokensPercent <= 10 ? '🟢 OPTIMAL (≤10%)' : '🟡 ALERT (>10%)'} |`,
-    `| **Computational Cost ($)** | $${report.totalCostUsd.toFixed(2)} USD | $${report.reworkCostUsd.toFixed(2)} USD | **${report.reworkCostPercent}%** | ${report.reworkCostPercent <= 10 ? '🟢 OPTIMAL (≤10%)' : '🟡 ALERT (>10%)'} |`,
-    '',
-    '---',
-    '',
-    '## 3. Defects and Fix Commits Breakdown',
-    '',
-    '| Commit SHA | Description | Attribution | Reference | Fix Time | Fix Tokens |',
-    '| :--- | :--- | :--- | :--- | :---: | :---: |',
+    '| Commit SHA | Defect Subject / Description | Injected By | Parent Feature | Remediation Time | Rework Tokens |',
+    '| :--- | :--- | :---: | :---: | :---: | :---: |',
     ...bugRows,
+    '',
+    ...buildReworkMetricsSection(report),
+    ...buildTaskReworkSection(report.taskReworkStats),
+    '',
+    '---',
+    '*Report dynamically generated by AI-SDLC KPI & Release Governance Engine.*',
   ].join('\n');
 }
 

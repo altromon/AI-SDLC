@@ -1,32 +1,31 @@
 ---
-description: aisdlc-legacy-onboarding (Legacy / Brownfield Retro-Inception Playbook) - Orchestrate progressive AI-SDLC adoption and Brownfield retro-inception on existing or legacy repositories without breaking production code, reverse-engineering architecture (ARCH-INTRO-*, CMP-*), transversal auditor/adversary verification loops, and establishing baseline quality, security, and license audits before new SDD increments.
+description: aisdlc-legacy-onboarding (Legacy / Brownfield Retro-Inception Playbook) - Orchestrate progressive AI-SDLC adoption and Brownfield retro-inception on existing or legacy repositories without breaking production code, reverse-engineering architecture (ARCH-INTRO-*, CMP-*), 2-checkpoint auditor/adversary verification, and establishing baseline quality, security, and license audits before new SDD increments.
 globs: architecture/**, specs/**, src/**, packages/**
 alwaysApply: false
 ---
 
 # aisdlc-legacy-onboarding (Legacy / Brownfield Retro-Inception Playbook)
 
-Canonical Reference: [`process/02_product_definition.md`](../../process/02_product_definition.md), [`process/04_open_source_license_compliance.md`](../../process/04_open_source_license_compliance.md), [`process/04b_data_protection_and_privacy.md`](../../process/04b_data_protection_and_privacy.md), [`process/05_architecture_arc42_nafv4.md`](../../process/05_architecture_arc42_nafv4.md), [`process/10_quality_management_and_release_gates.md`](../../process/10_quality_management_and_release_gates.md), and [`process/09_agent_protocols.md`](../../process/09_agent_protocols.md).
+Canonical Reference: [`process/02_product_definition.md`](../../process/02_product_definition.md), [`process/05_architecture_arc42_nafv4.md`](../../process/05_architecture_arc42_nafv4.md), [`process/06_spec_driven_development.md`](../../process/06_spec_driven_development.md), [`process/10_quality_management_and_release_gates.md`](../../process/10_quality_management_and_release_gates.md), and [`process/09_agent_protocols.md`](../../process/09_agent_protocols.md).
 
 ## Purpose & Trigger
-Use this skill when **adopting AI-SDLC in an existing or legacy codebase (Brownfield)** that already has production source code (`src/`, `packages/`, etc.) but lacks canonical PDaC specifications, arc42 architecture views, or deterministic quality/license/privacy gates.
+Use this skill when onboarding an **existing codebase (Brownfield / Legacy)** that was not built with AI-SDLC. It establishes non-disruptive governance, maps existing code into canonical specifications, inventories debt across all 12 Quality Gates, and creates baseline specifications (`specs/product/`, `specs/architecture/`) before new features or refactorings are introduced.
 
-## Mandatory Transversal Quality & Adversarial Protocol
-Every authoring agent deliverable during Brownfield retro-inception undergoes mandatory quality auditing and adversarial stress-testing before downstream progression:
-- **Concurrent Inspection**: Immediately following the execution of any authoring agent (`agent-product-analyst`, `agent-system-architect`, `agent-threat-modeler`, `agent-privacy-officer`), invoke [`agent-auditor`](../agent-auditor/SKILL.md) (evaluating YAGNI, over-specification, and structural clarity) and [`agent-adversary`](../agent-adversary/SKILL.md) (uncovering hidden assumptions, boundary breaks, and contradictory legacy rules) **concurrently** in clean, isolated context windows.
+## Retro-Inception Quality & Adversarial Checkpoint
+Across Brownfield retro-inception, quality auditing and adversarial stress-testing are concentrated at the completion of retro-inception mapping:
+- **Concurrent Inspection**: Concurrently invoke [`agent-auditor`](../agent-auditor/SKILL.md) (evaluating YAGNI, over-modeling, and debt priorities) and [`agent-adversary`](../agent-adversary/SKILL.md) (uncovering undocumented invariants, hidden failure modes, and security gaps) in clean, isolated context windows.
 - **Non-Invasive Review**: Neither auditor nor adversary modifies deliverables directly; both deliver structured reports citing canonical IDs and SHA-256 digests.
-- **Consolidated Remediation Re-Execution**: Consolidate findings and emit the Workflow Handoff back to the authoring agent, who is re-executed to resolve blocking defects and apply simplifications.
-- **Anti-Ping-Pong Guardrail (Max 2 Rounds)**: Bounded strictly to a maximum of **2 correction rounds** per phase/deliverable. If non-blocking advisories remain after round 2, proceed to the downstream phase; if blocking defects persist after round 2, escalate immediately to the Human Tech Lead.
-- **Exclusion of Diagnostic/Review Roles**: Read-only baseline verifiers and diagnostic review roles (`agent-compliance-checker`, `agent-security-auditor`, `agent-code-reviewer`) assess pre-existing code and are excluded from being audited by this loop.
+- **Consolidated Remediation**: Consolidate findings and emit the Workflow Handoff back to authoring agents to resolve blocking defects and apply simplifications (max 2 correction rounds).
+- **Anti-Ping-Pong Guardrail**: Bounded strictly to maximum **1 correction round**. If non-blocking advisories remain, proceed to characterization; if blocking defects persist, escalate to the Human Tech Lead.
 
 ## End-to-End Execution Playbook
 
-### Step 1: Non-Destructive Framework Scaffolding
-1. Run MCP tool `new` (or CLI `npx @aisdlc/cli init`) on the existing repository.
-   - AI-SDLC enforces strict **no-clobber protection**: existing `package.json`, `CLAUDE.md`, or CI pipelines are preserved while injecting missing schemas (`schemas/`), templates (`templates/`), policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`), and MCP configs.
-2. Install the Git commit trailer hook via `npx aisdlc git hook install`.
+### Step 1: Turnkey Repository Scaffolding (Non-Destructive)
+1. Initialize AI-SDLC configuration without overwriting existing application files using `npx @aisdlc/cli init` (or MCP tool `new`).
+2. Install the Git telemetry hook via `npx aisdlc git hook install` (`pnpm run git:hook:install`).
+3. Commit initial AI-SDLC schemas and policies (`.github/`, `schemas/`, `templates/`, `*-policy.yaml`).
 
-### Step 2: Baseline Diagnostic Audit (Read-Only Assessment)
+### Step 2: Automated Baseline Audit & Debt Inventory (Read-Only)
 Before modifying any code or creating SDD changes, run diagnostic verifiers to quantify existing technical, legal, privacy, and security debt:
 1. **License & Dependency Audit (`agent-compliance-checker`)**: Run MCP tool `verify_licenses` (`npx aisdlc verify licenses`). Identify any viral (`GPL`/`AGPL`) or commercial (`BSL`/`SSPL`) dependencies already present in the lockfile and document exceptions or remediation plans.
 2. **Shift-Left Security Scan (`agent-security-auditor`)**: Run MCP tool `verify_security` (`npx aisdlc verify security`) to detect hardcoded secrets (Gate 11) or OWASP SAST vulnerabilities in legacy files.
@@ -36,13 +35,10 @@ Before modifying any code or creating SDD changes, run diagnostic verifiers to q
 ### Step 3: Brownfield Retro-Inception (`agent-system-architect` & `agent-product-analyst`)
 Instead of attempting to document 100% of a legacy monolith upfront, apply **bounded retro-inception** focused on the system boundary and the domain areas under active evolution:
 1. **System Vision & Context (`ARCH-INTRO-001`)**: Use [`agent-product-analyst`](../agent-product-analyst/SKILL.md) to document the current system's mission, primary actors (`ACT-*`), and top quality goals (`QR-*`) in `specs/architecture/ARCH-INTRO-001.md`.
-   - **Transversal Loop**: Concurrently invoke `agent-auditor` and `agent-adversary` over `ARCH-INTRO-001`. Consolidate findings and return handoff to `agent-product-analyst` to re-execute and remediate (max 2 correction rounds).
 2. **As-Is Component Mapping (`CMP-*` & `ADR-*`)**: Use [`agent-system-architect`](../agent-system-architect/SKILL.md) to map existing core modules/services into `specs/architecture/CMP-*.md` and capture historical architectural constraints (`CON-*`, `ADR-*`).
-   - **Transversal Loop**: Concurrently invoke `agent-auditor` and `agent-adversary` over component models. Consolidate findings and return handoff to `agent-system-architect` to re-execute and remediate (max 2 correction rounds).
 3. **Core Use Cases Extraction (`UC-*`, `FR-*`)**: Extract canonical `UC-*` and `FR-*` artifacts in `specs/product/` for the specific bounded context or module that will be modified or extended next, including Gherkin acceptance scenarios reflecting current expected behavior (characterization specs).
-   - **Transversal Loop**: Concurrently invoke `agent-auditor` and `agent-adversary` over extracted `UC-*`/`FR-*`. Consolidate findings and return handoff to `agent-product-analyst` to re-execute and remediate (max 2 correction rounds).
 4. **Threat & Privacy Boundary Mapping (`agent-threat-modeler` ➔ `agent-privacy-officer`)**: Map existing trust zones (`SEC-ENC-*`), active threat vectors (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`), and personal data inventories (`DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*`) on the target module.
-   - **Transversal Loop**: Concurrently invoke `agent-auditor` and `agent-adversary` over threat and privacy models. Consolidate findings and return handoff to `agent-threat-modeler` and `agent-privacy-officer` to re-execute and remediate (max 2 correction rounds).
+5. **Retro-Inception Checkpoint (`agent-auditor` $\parallel$ `agent-adversary`)**: Concurrently inspect reverse-engineered artifacts, evaluate fidelity vs. unnecessary modeling overhead, and consolidate fixes.
 
 ### Step 4: Characterization Testing & Synchronization
 1. Run MCP tool `sdd_check_fix` (`npx aisdlc check --fix`) to extract `.feature` files and compute canonical SHA-256 digests.
@@ -52,8 +48,8 @@ Instead of attempting to document 100% of a legacy monolith upfront, apply **bou
 Once the target domain's baseline artifacts (`ARCH-INTRO-*`, `UC-*`, `FR-*`, `CMP-*`) are in place, execute all new features, refactorings, or bugfixes via [`aisdlc-increment`](../aisdlc-increment/SKILL.md).
 
 ## Non-Negotiable Guardrails
-- **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles in the same conversation context window. In subagent-capable IDEs (Antigravity `invoke_subagent`, Claude Code `Task` / `.claude/agents/`, GitHub Copilot `@agent-*`), always spawn each specialist in a fresh isolated subagent context that reads state strictly from disk (`specs/`, `handoff.yaml`, `get_active_handoff`). In chat-based IDEs (Cursor, Windsurf, Aider), persist all artifacts to disk, emit the Workflow Handoff block, and instruct the user to open a **New Chat** (or `/clear`) before running the next specialist.
-- **Mandatory Transversal Quality & Adversarial Loop**: Every authoring agent deliverable must undergo concurrent inspection by `agent-auditor` and `agent-adversary` in isolated context windows, followed by a re-execution of the authoring agent to remediate findings. To prevent infinite cycles, enforce the **Anti-Ping-Pong Guardrail**: maximum 2 correction rounds per phase; if unresolved blocking defects persist after round 2, escalate to the Human Tech Lead.
+- **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles in the same conversation context window. Always spawn each specialist in a fresh isolated subagent context that reads state strictly from disk.
+- **2-Checkpoint Quality & Adversarial Protocol**: Concentrated review at the retro-inception boundary and before PR delivery prevents process friction while maintaining rigorous defect interception.
 - **Zero Drive-By Rewrites**: Never mass-refactor untouched legacy modules during onboarding. Apply the Strangler / Boy Scout rule: bring touched functions into compliance with `quality-policy.yaml` incrementally via governed SDD tasks (`TSK-*`).
 - **Characterization First**: Never alter legacy business logic without first capturing its current behavior in an `FR-*` Gherkin specification and a verifiable test suite (`agent-qa-engineer`).
 - **Immediate Secret Remediation**: If Step 2 (`verify_security`) uncovers leaked credentials (exit code 4), halt feature work and remediate/rotate secrets immediately.

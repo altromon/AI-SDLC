@@ -46,7 +46,7 @@ function getWorkingBranch(cwd) {
 
 function isProtectedCodingRulesTarget(targetPath, cwd) {
   if (!targetPath) return false;
-  const resolved = path.isAbsolute(targetPath) ? targetPath : path.resolve(cwd, targetPath);
+  const resolved = path.resolve(cwd, targetPath);
 
   const norm = resolved.replace(/\\/g, '/');
   const rel = path.relative(cwd, resolved).replace(/\\/g, '/');

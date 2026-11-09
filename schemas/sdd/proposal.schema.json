@@ -3,7 +3,12 @@
   "$id": "https://ai-sdlc.org/schemas/sdd/proposal.schema.json",
   "title": "Spec-Driven Development Change Proposal Schema (CHG-*)",
   "type": "object",
-  "required": ["id", "type", "title", "status"],
+  "required": [
+    "id",
+    "type",
+    "title",
+    "status"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -12,7 +17,10 @@
     },
     "type": {
       "type": "string",
-      "enum": ["spec-change-proposal", "proposal"]
+      "enum": [
+        "spec-change-proposal",
+        "proposal"
+      ]
     },
     "title": {
       "type": "string",
@@ -60,12 +68,22 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "digest": { "type": "string" },
-          "comment": { "type": "string" },
-          "anchor": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "digest": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "anchor": {
+            "type": "string"
+          }
         },
         "additionalProperties": false
       }

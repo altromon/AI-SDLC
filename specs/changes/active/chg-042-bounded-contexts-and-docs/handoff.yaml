@@ -11,8 +11,8 @@ subgraph:
     - UC-042-BOUNDED-CONTEXTS-AND-DOCS
 citations:
   - id: UC-042-BOUNDED-CONTEXTS-AND-DOCS
-    digest: sha256:PLACEHOLDER
+    digest: sha256:1f0ced71673f14590344d893121454fb448dd9f97fad0a61be60eebe3755e3ab
     comment: Citación de use-case
   - id: FR-042-BOUNDED-CONTEXTS-AND-DOCS-001
-    digest: sha256:PLACEHOLDER
+    digest: sha256:9e6ab1adb4febad292593cbc98d7f5fc1ede0a81c3eadf0eb180d694f6e6638d
     comment: Citación de requirement

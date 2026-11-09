@@ -100,7 +100,7 @@ AI-SDLC/
 │   ├── 08_citation_contract_and_drift.md     # Anti-drift cryptographic citation protocol
 │   ├── 09_agent_protocols.md                 # Prompts, skill contracts, and guardrails for LLMs (13 Agents)
 │   ├── 10_quality_management_and_release_gates.md # Coding rules, Cyclomatic Complexity, and Release Gates
-│   └── 11_git_branching_and_lifecycle.md     # 4-tier Git branching model (main, release, feat/bug, task)
+│   └── 11_git_branching_and_lifecycle.md     # Streamlined 2-tier Git branching model (main ➔ feat/bug), task tracking via trailers, and optional 4-tier release extension
 │
 ├── schemas/                                  # JSON Schemas (34 Deterministic Schemas - Draft 2020-12)
 │   ├── product/                              # Schemas: actor, use-case, requirement, business-rule, bounded-context
@@ -174,9 +174,9 @@ pnpm run check:fix
 pnpm run change:new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
 # or via npx: npx aisdlc change new "Real-Time Alert Notifications" --from UC-STREAM-TELEMETRY
 
-# 3. Automatically navigate and cascade-create the task branch in Git 4-tier hierarchy
-pnpm run git:checkout TSK-001
-# or via npx: npx aisdlc git checkout TSK-001
+# 3. Automatically navigate and create/switch to the feature branch in Git (streamlined 2-tier)
+pnpm run git:checkout TSK-001 --streamlined
+# or via npx: npx aisdlc git checkout TSK-001 --streamlined
 
 # 4. Implement feature and tests (TDD) in src/ and tests/
 #    (Developer or agent writes logic and unit/BDD tests)
@@ -209,7 +209,7 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancy** | Audits lexical collisions and requirement overlaps before coding (`--json`) |
 | `npx aisdlc verify friction [change]` | - | **Progressive Friction** | Validates Anti-Bypass rules and thresholds according to risk profile (`patch`/`standard`/`critical`, `--json`) |
 | `npx aisdlc git plan` | `pnpm run git:plan` | **Git Planning** | Renders visual branch hierarchy tree before starting work |
-| `npx aisdlc git checkout <TSK-ID>` | `pnpm run git:checkout <TSK-ID>` | **Git 4-Tier Branching** | Resolves version and cascade-creates: `main` ➔ `release/vX.Y.Z` ➔ `feat/CHG-*` ➔ `task/CHG-*/TSK-*` |
+| `npx aisdlc git checkout <TSK-ID> [--streamlined]` | `pnpm run git:checkout <TSK-ID>` | **Git Branching** | Resolves version and switches to feature branch (`feat/CHG-*`) by default, or cascade-creates 4-tier hierarchy |
 | `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | **Git Governance** | Validates strict naming rules for any branch according to its Tier (1 to 4) |
 | `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Unified Pre-Flight** | Syncs Gherkin to `.feature`, updates PDaC SHA-256 digests, audits security & privacy, and checks all 12 Quality Gates |
 | `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Structural Compliance** | Validates Markdown artifacts and `handoff.yaml` sidecars against canonical JSON schemas (Draft 2020-12, `--json`) |
@@ -226,9 +226,9 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc verify licenses [options]` | `pnpm run verify:licenses` | **IP / OSS Governance & SCA** | Dynamic dependency scan, CycloneDX 1.5 SBOM, vulnerability threshold audit (`--vuln`), and legal attribution against `license-policy.yaml` (`--json`) |
 | `npx aisdlc sdd verify` | - | **SDD Compliance** | Audits active changes for specification compliance and valid sidecars |
 | `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 12 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
-| `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship) for PRs (supports `--json`) |
+| `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship, and task-level rework & churn breakdown) for PRs (supports `--json`) |
 | `npx aisdlc sdd integrate [--auto]` | - | **Baseline Promotion** | Promotes requirements to `active`, links architecture, marks proposal `applied`, and archives change |
-| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Release Summary** | Computes DIR per model/human, defect density, and rework costs (`RELEASE_KPIS_<release>.md`, supports `--json`) |
+| `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Release Summary** | Computes DIR per model/human, defect density, rework costs, and granular task rework stats (`RELEASE_KPIS_<release>.md`, supports `--json`) |
 | `npx aisdlc report quality` | `pnpm run report:quality` | **Formal Reporting** | Generates detailed metrics report in `reports/QUALITY_REPORT.md` |
 | `npx aisdlc report dashboard` | `pnpm run report:dashboard` | **Interactive Dashboard** | Generates self-contained HTML dashboard and PDaC/RTM visual graph (supports `--open`, `--output`) |
 | `npx tsx scripts/export-active-requirements.ts` | `pnpm run report:requirements` | **Product Catalog** | Generates consolidated requirement catalog in `reports/ACTIVE_REQUIREMENTS.md` |
@@ -440,26 +440,32 @@ Generate the SDD delivery package in a single automated step:
 
 ---
 
-### Phase 5: Automated Git Branch Management (4-Tier Model)
+### Phase 5: Automated Git Branch Management (Streamlined 2-Tier & 4-Tier Models)
 
-1. **Cascade Navigation and Creation per Task (Recommended)**:
+1. **Streamlined 2-Tier Model (Default & Agile)**:
    ```bash
-   pnpm run git:checkout TSK-001
-   # or: npx aisdlc git checkout TSK-001
+   pnpm run git:checkout TSK-001 --streamlined
+   # or: npx aisdlc git checkout TSK-001 --streamlined
    ```
    *Under the Hood*:
    - Locates `TSK-001` in `specs/changes/active/*/tasks.md`.
-   - Resolves associated release version and builds strict 4-tier hierarchy:
-     `Tier 1: main` ➔ `Tier 2: release/vX.Y.Z` ➔ `Tier 3: feat/CHG-XXX` ➔ `Tier 4: task/CHG-XXX/TSK-001-...`
-   - Cascade-creates missing intermediate branches and checks out task branch directly.
+   - Checks out `feat/<CHG-ID>-<slug>` directly from `main`.
+   - **Task Tracking via Commit Trailers**: Work on individual tasks (`TSK-*`) is tracked through standardized commit trailers (`Task-ID: TSK-XXX`, `Parent-Ref: CHG-XXX`) or conventional scopes (`feat(TSK-001): ...`), eliminating branch proliferation and merge overhead while maintaining 100% cryptographic traceability.
 
-2. **Branch Planning and Validation Tools**:
+2. **Enterprise 4-Tier Model (Optional Extension)**:
+   ```bash
+   pnpm run git:checkout TSK-001
+   ```
+   - For formal release tracks or isolated worktrees, automatically resolves the version and builds the 4-tier cascade:
+     `Tier 1: main` ➔ `Tier 2: release/vX.Y.Z` ➔ `Tier 3: feat/CHG-XXX` ➔ `Tier 4: task/CHG-XXX/TSK-001-...`
+
+3. **Branch Planning and Validation Tools**:
    ```bash
    # Visualize branch hierarchy before starting
-   pnpm run git:plan                             # or: npx aisdlc git plan --release v1.2.0 --feature CHG-002-alerting --tasks TSK-001,TSK-002
+   pnpm run git:plan
 
    # Validate branch naming rules
-   pnpm run git:validate task/CHG-002/TSK-001-alert-dto # or: npx aisdlc git validate <branch>
+   pnpm run git:validate feat/CHG-002-alerting
    ```
 
 ---
@@ -476,6 +482,11 @@ Generate the SDD delivery package in a single automated step:
    # or: npx aisdlc verify testing
    ```
    *Output*: Generates `reports/TEST_VERIFICATION_AUDIT.md`. Blocks delivery if any requirement or task lacks verifiable tests on disk.
+
+4. **Checkpoint 2: Implementation & Pre-PR Checkpoint (`agent-auditor` ∥ `agent-adversary`)**:
+   Following functional validation with `agent-expert-user` against `UC-*` and `FR-*` criteria (including 0 console errors):
+   - Concurrently invoke `agent-auditor` (verifying Clean Code, SOLID, DRY, and AST complexity thresholds) and `agent-adversary` (performing conceptual test mutation to ensure QA tests catch defects, and attacking boundary values with concrete break PoCs).
+   - Remediate findings in `agent-developer` (max 2 rounds) before opening the PR.
 
 ---
 

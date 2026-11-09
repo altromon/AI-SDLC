@@ -58,20 +58,26 @@ function resolveAuthorType(
 /**
  * Parses structured AI-SDLC git trailers from a commit message.
  */
+function resolveTrailerOrScope(match: RegExpMatchArray | null, text: string, fallbackRegex: RegExp): string | undefined {
+  if (match) return match[1].trim();
+  const subMatch = text.match(fallbackRegex);
+  return subMatch ? subMatch[1].toUpperCase() : undefined;
+}
+
+/**
+ * Parses structured AI-SDLC git trailers from a commit message.
+ */
 export function parseCommitTrailers(rawMessage: string): CommitTrailers {
   const text = rawMessage || '';
-  const taskIdMatch = text.match(TRAILER_REGEXES.taskId);
-  const parentRefMatch = text.match(TRAILER_REGEXES.parentRef);
   const authorTypeMatch = text.match(TRAILER_REGEXES.authorType);
   const aiModelMatch = text.match(TRAILER_REGEXES.aiModel);
-
   const authorType = resolveAuthorType(authorTypeMatch, aiModelMatch);
   const rawModel = aiModelMatch ? aiModelMatch[1].trim() : undefined;
   const aiModel = rawModel && rawModel !== 'n/a' ? rawModel : undefined;
 
   return {
-    taskId: taskIdMatch ? taskIdMatch[1].trim() : undefined,
-    parentRef: parentRefMatch ? parentRefMatch[1].trim() : undefined,
+    taskId: resolveTrailerOrScope(text.match(TRAILER_REGEXES.taskId), text, /\b(TSK-[0-9A-Za-z_-]+)\b/i),
+    parentRef: resolveTrailerOrScope(text.match(TRAILER_REGEXES.parentRef), text, /\b((?:CHG|FEAT|BUG|FIX|PATCH)-[0-9A-Za-z_-]+)\b/i),
     authorType,
     aiModel,
     promptTokens: parseTrailerInt(text.match(TRAILER_REGEXES.promptTokens)),

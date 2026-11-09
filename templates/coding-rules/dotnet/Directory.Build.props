@@ -1,0 +1,24 @@
+<Project>
+  <!-- 1. Global strict compiler and analyzer rules for all projects (src and tests) -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <!-- 2. Strict unit/E2E test guardrails (xUnit, MSTest, NUnit) -->
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true' or $(MSBuildProjectName.EndsWith('Tests')) or $(MSBuildProjectName.EndsWith('Test'))">
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);CA1707;CA2007</NoWarn>
+    <MSTestAnalysisMode>Recommended</MSTestAnalysisMode>
+    <WarningsAsErrors>$(WarningsAsErrors);S2699;S1607;MSTEST0006;MSTEST0014;MSTEST0015;MSTEST0017;MSTEST0032;xUnit1026;xUnit1013</WarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' or $(MSBuildProjectName.EndsWith('Tests')) or $(MSBuildProjectName.EndsWith('Test'))">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>

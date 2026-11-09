@@ -11,8 +11,8 @@ subgraph:
     - UC-041-BOUNDED-CONTEXT-TEMPLATE
 citations:
   - id: UC-041-BOUNDED-CONTEXT-TEMPLATE
-    digest: sha256:PLACEHOLDER
+    digest: sha256:ae7526948971e898420b197767b868f781b804cf001cf2c9e801062281102e5f
     comment: Citación de use-case
   - id: FR-041-BOUNDED-CONTEXT-TEMPLATE-001
-    digest: sha256:PLACEHOLDER
+    digest: sha256:85a834c380bc19f42022c2f29d57c9f07a75a8e247fdf98398c385b7f90951d4
     comment: Citación de requirement

@@ -37,11 +37,23 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"]
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
     },
     "trust-zone": {
       "type": "string",
-      "enum": ["untrusted", "semi-trusted", "trusted", "highly-trusted", "dmz", "zero-trust-boundary"],
+      "enum": [
+        "untrusted",
+        "semi-trusted",
+        "trusted",
+        "highly-trusted",
+        "dmz",
+        "zero-trust-boundary"
+      ],
       "description": "Zero Trust confidence zone assigned to enclave."
     },
     "trust-level": {
@@ -86,14 +98,26 @@
     },
     "authentication-mechanism": {
       "type": "string",
-      "enum": ["mtls", "jwt", "api-key", "oauth2", "none"],
+      "enum": [
+        "mtls",
+        "jwt",
+        "api-key",
+        "oauth2",
+        "none"
+      ],
       "description": "Authentication mechanism required at enclave perimeter."
     },
     "supersedes": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "superseded-by": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     }
   },
   "additionalProperties": false

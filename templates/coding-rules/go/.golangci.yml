@@ -1,0 +1,27 @@
+# AI-SDLC: Immutable Go & Testing Linter Guardrails
+run:
+  tests: true
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+    - ineffassign
+    - testifylint
+    - thelper
+    - forbidigo
+
+linters-settings:
+  testifylint:
+    enable-all: true
+  forbidigo:
+    analyze-types: true
+    forbid:
+      - p: ^testing\.T\.Skip.*$
+        msg: "Skipping unit tests with t.Skip() is forbidden by AI-SDLC."

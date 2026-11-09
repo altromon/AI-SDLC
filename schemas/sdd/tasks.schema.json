@@ -3,7 +3,13 @@
   "$id": "https://ai-sdlc.org/schemas/sdd/tasks.schema.json",
   "title": "Verifiable Tasks & Human Autonomy Governance Schema",
   "type": "object",
-  "required": ["id", "type", "change-id", "version", "tasks"],
+  "required": [
+    "id",
+    "type",
+    "change-id",
+    "version",
+    "tasks"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -30,15 +36,33 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "approved", "in-progress", "completed", "blocked"]
+      "enum": [
+        "draft",
+        "approved",
+        "in-progress",
+        "completed",
+        "blocked"
+      ]
     },
     "governance-summary": {
       "type": "object",
       "properties": {
-        "autonomous-tasks-count": { "type": "integer", "minimum": 0 },
-        "human-review-plan-count": { "type": "integer", "minimum": 0 },
-        "ambiguous-count": { "type": "integer", "minimum": 0 },
-        "high-risk-manual-count": { "type": "integer", "minimum": 0 }
+        "autonomous-tasks-count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "human-review-plan-count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ambiguous-count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "high-risk-manual-count": {
+          "type": "integer",
+          "minimum": 0
+        }
       }
     },
     "tasks": {
@@ -46,7 +70,16 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "title", "complexity", "risk-level", "autonomy-mode", "verification", "assigned-to", "status"],
+        "required": [
+          "id",
+          "title",
+          "complexity",
+          "risk-level",
+          "autonomy-mode",
+          "verification",
+          "assigned-to",
+          "status"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -58,11 +91,20 @@
           },
           "complexity": {
             "type": "string",
-            "enum": ["LOW", "MEDIUM", "HIGH"]
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ]
           },
           "risk-level": {
             "type": "string",
-            "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "CRITICAL"
+            ]
           },
           "autonomy-mode": {
             "type": "string",
@@ -76,11 +118,23 @@
           },
           "verification": {
             "type": "object",
-            "required": ["method", "command-or-criteria"],
+            "required": [
+              "method",
+              "command-or-criteria"
+            ],
             "properties": {
               "method": {
                 "type": "string",
-                "enum": ["automated-unit-test", "cucumber-bdd", "quality-gate", "license-audit", "sast-scan", "privacy-audit", "manual-inspection", "smoke-test"]
+                "enum": [
+                  "automated-unit-test",
+                  "cucumber-bdd",
+                  "quality-gate",
+                  "license-audit",
+                  "sast-scan",
+                  "privacy-audit",
+                  "manual-inspection",
+                  "smoke-test"
+                ]
               },
               "command-or-criteria": {
                 "type": "string",
@@ -103,7 +157,12 @@
           },
           "status": {
             "type": "string",
-            "enum": ["PENDING", "IN_PROGRESS", "COMPLETED", "BLOCKED"]
+            "enum": [
+              "PENDING",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "BLOCKED"
+            ]
           },
           "blocking-reason": {
             "type": "string"
@@ -136,8 +195,18 @@
         "additionalProperties": false
       }
     },
-    "supersedes": { "type": ["string", "null"] },
-    "superseded-by": { "type": ["string", "null"] }
+    "supersedes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "superseded-by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
   },
   "additionalProperties": false
 }

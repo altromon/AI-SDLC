@@ -3,7 +3,9 @@
   "$id": "https://ai-sdlc.org/schemas/compliance/license-manifest.schema.json",
   "title": "Static Dependencies License Manifest Schema",
   "type": "object",
-  "required": ["evaluated_dependencies"],
+  "required": [
+    "evaluated_dependencies"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -33,7 +35,12 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["package", "version", "spdx_license", "status"],
+        "required": [
+          "package",
+          "version",
+          "spdx_license",
+          "status"
+        ],
         "properties": {
           "package": {
             "type": "string",

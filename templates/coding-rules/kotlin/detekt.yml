@@ -1,0 +1,26 @@
+# AI-SDLC: Immutable Detekt Rules for Kotlin & Unit Tests
+build:
+  maxIssues: 0
+
+potential-bugs:
+  active: true
+  IgnoredReturnValue:
+    active: true
+  UnreachableCode:
+    active: true
+
+exceptions:
+  active: true
+  SwallowedException:
+    active: true
+  EmptyCatchBlock:
+    active: true
+
+style:
+  active: true
+  ForbiddenAnnotation:
+    active: true
+    annotations:
+      - 'org.junit.jupiter.api.Disabled'
+      - 'org.junit.Ignore'
+      - 'kotlin.test.Ignore'
