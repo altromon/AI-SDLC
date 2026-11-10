@@ -1,5 +1,11 @@
 # @aisdlc/cli
 
+## 4.1.0
+
+### Minor Changes
+
+- feat(cli): add `aisdlc gherkin scaffold <feature-file> --lang <langs...>` command supporting single and comma-separated/multi-language scaffolding, interactive installation consent, and structured JSON output for agent delegation.
+
 ## 4.0.0
 
 ### Major Changes
