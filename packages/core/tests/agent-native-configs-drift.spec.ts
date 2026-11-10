@@ -428,5 +428,20 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(productAnalyst!.body).toMatch(/ANTI-LIBRARY-ONLY MVP/i);
     expect(productAnalyst!.body).toMatch(/Plain-Language Journey Elicitation/i);
     expect(productAnalyst!.body).toMatch(/persona.*stages.*touchpoints.*pain-points.*related-use-cases/is);
+    expect(productAnalyst!.body).toMatch(/Bootstrap 5.*Fluent.*ANSI/is);
+  });
+
+  it('verifies agent-developer and code-reviewer enforce modern visual aesthetics and skills-first implementation', async () => {
+    const { SPECIALIZED_AGENT_TEMPLATES } = await import('../src/init/index.js');
+    const developer = SPECIALIZED_AGENT_TEMPLATES.find((a) => a.id === 'agent-developer');
+    expect(developer).toBeDefined();
+    expect(developer!.body).toMatch(/Skills-First Implementation Directive/i);
+    expect(developer!.body).toMatch(/Modern Visual Aesthetics & Design Standards/i);
+    expect(developer!.body).toMatch(/Bootstrap 5/);
+    expect(developer!.body).toMatch(/Spectre\.Console|Rich|Ink|Chalk/);
+
+    const reviewer = SPECIALIZED_AGENT_TEMPLATES.find((a) => a.id === 'agent-code-reviewer');
+    expect(reviewer).toBeDefined();
+    expect(reviewer!.body).toMatch(/Block Unstyled & Non-Compliant Interfaces/i);
   });
 });
