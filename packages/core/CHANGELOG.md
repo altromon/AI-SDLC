@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 4.1.0
+
+### Minor Changes
+
+- feat(gherkin): add polyglot deterministic Gherkin step scaffolding engine (`scaffoldGherkinSteps`) supporting native generators (`@cucumber/cucumber`, `pytest-bdd`, `godog`, `cargo test --test cucumber`, `Reqnroll`) and deterministic failing RED fallback templates across TypeScript, Python, Go, Rust, and C#, with multi-language parameter support (`--lang ts,py`) and shell-free execution.
+
 ## 4.0.0
 
 ### Major Changes
