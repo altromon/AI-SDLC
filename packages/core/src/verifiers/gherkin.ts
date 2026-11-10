@@ -205,3 +205,6 @@ export function checkGherkinInSync(
     totalFeatures,
   };
 }
+
+export * from './gherkin-scaffold.js';
+
