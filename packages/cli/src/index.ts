@@ -20,6 +20,7 @@ import { runMcpServer } from './commands/mcp.js';
 import { runReportCompliance, runReportDashboard, runReportQuality } from './commands/report.js';
 import { runReviewSubmit } from './commands/review.js';
 import { runInspect } from './commands/inspect.js';
+import { runDoctor } from './commands/doctor.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
   runVerifyAll,
@@ -45,6 +46,28 @@ program
   .name('aisdlc')
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
   .version('4.0.0');
+
+// --- check command (unified pre-flight with auto-fix) ---
+program
+  .command('doctor')
+  .description('Comprehensive environment, toolchain, git-hooks, and security health diagnostics')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--fix', 'Automatically repair broken or missing git hooks with backup')
+  .option('--json', 'Emit diagnostics report in structured JSON format')
+  .option('--strict', 'Fail with non-zero exit code on warnings as well as critical failures')
+  .option('--offline', 'Skip remote external network probes (e.g. for air-gapped environments)')
+  .option('--timeout <ms>', 'Maximum timeout in milliseconds for subprocess execution', parseInt)
+  .action(async (opts) => {
+    const exitCode = await runDoctor({
+      rootDir: opts.root,
+      fix: opts.fix,
+      json: opts.json,
+      strict: opts.strict,
+      offline: opts.offline,
+      timeout: opts.timeout,
+    });
+    process.exit(exitCode);
+  });
 
 // --- check command (unified pre-flight with auto-fix) ---
 program

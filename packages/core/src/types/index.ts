@@ -1451,4 +1451,5 @@ export interface InspectOptions {
 }
 
 export * from './regulatory-compliance.js';
+export * from './doctor.js';
 

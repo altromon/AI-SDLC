@@ -46,6 +46,8 @@ import {
   type SastSeverity,
   submitReviewReport,
   isReviewerRole,
+  DoctorService,
+  DoctorOptions,
 } from '@aisdlc/core';
 
 export type McpRole =
@@ -958,6 +960,34 @@ function registerGitDetectAuthorTool(server: McpServer, options: RegisterToolsOp
   });
 }
 
+function registerDoctorTool(server: McpServer, options: RegisterToolsOptions): void {
+  server.tool(
+    'doctor',
+    'Comprehensive environment, toolchain, git-hooks, and security health diagnostics.',
+    {
+      root: z.string().optional(),
+      fix: z.boolean().optional(),
+      strict: z.boolean().optional(),
+      offline: z.boolean().optional(),
+      timeout: z.number().optional(),
+    },
+    async (params) => {
+      return executeSecuredTool('doctor', params, options, async (root) => {
+        const service = new DoctorService();
+        const doctorOpts: DoctorOptions = {
+          rootDir: root,
+          fix: params.fix,
+          strict: params.strict,
+          offline: params.offline,
+          timeout: params.timeout,
+        };
+        const report = await service.diagnose(doctorOpts);
+        return { data: report, root };
+      });
+    }
+  );
+}
+
 function registerLifecycleAndSddTools(server: McpServer, options: RegisterToolsOptions): void {
   registerNewTool(server, options);
   registerVerifyTool(server, options);
@@ -991,6 +1021,7 @@ function registerReportingAndKpiTools(server: McpServer, options: RegisterToolsO
   registerKpiPrTool(server, options);
   registerKpiReleaseTool(server, options);
   registerGitDetectAuthorTool(server, options);
+  registerDoctorTool(server, options);
 }
 
 export function registerAllTools(server: McpServer, options: RegisterToolsOptions = {}): void {

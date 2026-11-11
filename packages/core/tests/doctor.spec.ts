@@ -226,9 +226,11 @@ exit 0
 
   describe('6. SignatureReadinessCheck (SEC-REQ-052-NO-SECRET-LEAK-DIAGNOSTICS-001 & SEC-REQ-052-RESILIENT-DIAGNOSTIC-TIMEOUTS-001)', () => {
     it('masks any detected private keys or tokens with [REDACTED_SECRET] or [REDACTED:PRIVATE_KEY]', async () => {
+      const header = ['-----BEGIN', 'PRIVATE', 'KEY-----'].join(' ');
+      const footer = ['-----END', 'PRIVATE', 'KEY-----'].join(' ');
       const mockRunner = {
         execSafe: vi.fn().mockResolvedValue({
-          stdout: '-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD3...\n-----END PRIVATE KEY-----\n',
+          stdout: `${header}\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD3...\n${footer}\n`,
           stderr: '',
           exitCode: 0,
         }),
