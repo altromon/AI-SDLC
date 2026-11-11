@@ -308,9 +308,11 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(governsEdge).toBeDefined();
     expect(governsEdge.source).toBe('BR-SPEC-TRACEABILITY-INVARIANT');
 
-    const mitigatedEdge = edges.find((e) => e.relation === 'mitigated-by');
+    const mitigatedEdge = edges.find(
+      (e) => e.relation === 'mitigated-by' && e.source === 'ABUSE-UNVERIFIED-SPEC-BYPASS'
+    );
     expect(mitigatedEdge).toBeDefined();
-    expect(mitigatedEdge.source).toBe('ABUSE-UNVERIFIED-SPEC-BYPASS');
+    expect(mitigatedEdge?.source).toBe('ABUSE-UNVERIFIED-SPEC-BYPASS');
 
     // Verify node classes contain type-*
     const nodeElements = result.elements.filter((e) => e.group === 'nodes');
@@ -626,6 +628,20 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(edges.some((e) => e.source === 'BR-MARGIN-01' && e.target === 'UC-RECIPE-01' && e.relation === 'governs')).toBe(true);
     expect(edges.some((e) => e.source === 'ABUSE-TAMPER-01' && e.target === 'UC-RECIPE-01' && e.relation === 'targets')).toBe(true);
     expect(edges.some((e) => e.source === 'ADR-001' && e.target === 'CMP-COST-ENGINE' && e.relation === 'governs')).toBe(true);
+  });
+
+  it('should include regulatory compliance evidence bundle in dashboard metrics and render in manuals tab', () => {
+    const rootDir = process.cwd();
+    const metrics = collectDashboardMetrics(rootDir);
+    expect(metrics.complianceBundle).toBeDefined();
+
+    const report = generateDashboardReport({ rootDir });
+    expect(report.html).toContain('Marco Regulatorio &amp; Evidencia de Auditoría (EU AI Act, ISO 42001, NIST SSDF)');
+    expect(report.html).toContain('Veredicto in-toto &amp; Provenance');
+    expect(report.html).toContain('EU AI Act (2024/1689)');
+    expect(report.html).toContain('ISO/IEC 42001:2023');
+    expect(report.html).toContain('NIST SSDF SP 800-218');
+    expect(report.html).toContain('Mapeo de Cobertura de los 12 Quality Gates');
   });
 });
 

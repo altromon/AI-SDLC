@@ -1512,3 +1512,6 @@ export interface InspectResult {
 export interface InspectOptions {
   rootDir?: string;
 }
+
+export * from './regulatory-compliance.js';
+

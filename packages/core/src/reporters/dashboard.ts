@@ -12,6 +12,7 @@ import {
   DashboardOptions,
   DashboardResult,
 } from '../types/index.js';
+import { ComplianceBundlePayload } from '../types/regulatory-compliance.js';
 import { ReleaseKpiReport } from './release-kpis.js';
 import { verifyQualityGate } from '../verifiers/quality-gate.js';
 import { verifyTasksGovernance } from '../verifiers/governance.js';
@@ -360,6 +361,19 @@ function collectAllBranchTelemetries(
   return { branchTelemetries, totalTelemetry };
 }
 
+function loadComplianceBundleSafely(rootDir: string): ComplianceBundlePayload | null {
+  const bundlePath = path.join(rootDir, 'reports', 'audit-evidence-bundle.json');
+  if (!fs.existsSync(bundlePath)) {
+    return null;
+  }
+  try {
+    const raw = fs.readFileSync(bundlePath, 'utf-8');
+    return JSON.parse(raw) as ComplianceBundlePayload;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Collects complete project metrics for dashboard tabs.
  */
@@ -373,6 +387,7 @@ export function collectDashboardMetrics(rootDir: string) {
   const activeBranch = resolveActiveBranch(rootDir);
   const activePrKpi = resolveActivePrKpi(rootDir, activeBranch);
   const codeCoverage = readCodeCoverageSummary(rootDir);
+  const complianceBundle = loadComplianceBundleSafely(rootDir);
   const { branchTelemetries, totalTelemetry } = collectAllBranchTelemetries(
     rootDir,
     activeBranch,
@@ -392,6 +407,7 @@ export function collectDashboardMetrics(rootDir: string) {
     activeBranch,
     branchTelemetries,
     totalTelemetry,
+    complianceBundle,
   };
 }
 

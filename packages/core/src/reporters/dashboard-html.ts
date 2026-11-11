@@ -18,6 +18,7 @@ import {
   TraceabilityRow,
 } from '../types/index.js';
 import { AuthorKpiSummary, PrKpiAggregation } from './pr-kpis.js';
+import { ComplianceBundlePayload, RegulatoryGateMapping } from '../types/regulatory-compliance.js';
 import { GraphElementsResult } from './dashboard-graph.js';
 import { getCytoscapeScript } from './cytoscape-bundle.js';
 import { DASHBOARD_CSS, DASHBOARD_CLIENT_SCRIPT } from './dashboard-template.js';
@@ -34,6 +35,7 @@ export interface DashboardMetricsData {
   activeBranch: string;
   branchTelemetries?: Record<string, PrKpiAggregation>;
   totalTelemetry?: PrKpiAggregation | null;
+  complianceBundle?: ComplianceBundlePayload | null;
 }
 
 const GRAPH_LEGEND_HTML = `
@@ -358,6 +360,78 @@ function renderManualRow(m: ManualDocumentItem): string {
   ].join('');
 }
 
+function renderIntotoCard(complianceBundle: ComplianceBundlePayload): string {
+  const verdict = complianceBundle.inTotoAttestation?.predicate?.verdict === 'PASS' ? 'PASS' : 'FAIL';
+  const badgeClass = verdict === 'PASS' ? 'badge-green' : 'badge-rose';
+  const rawSha = String(complianceBundle.inTotoAttestation?.predicate?.commitSha || 'unknown');
+  const shortSha = rawSha.slice(0, 7);
+  return `<div class="metric-card"><span class="title">Veredicto in-toto &amp; Provenance</span><span class="value"><span class="badge ${badgeClass}" style="font-size: 1.2rem; padding: 4px 10px;">${verdict}</span></span><span class="subtitle">Commit: <code>${escapeHtml(shortSha)}</code> &middot; in-toto v1</span></div>`;
+}
+
+function renderRegulatoryFrameworkCards(complianceBundle: ComplianceBundlePayload): string {
+  const matrix = complianceBundle.regulatoryMatrix;
+  const euCount = matrix?.euAiActCoverage?.length || 0;
+  const isoCount = matrix?.iso42001Coverage?.length || 0;
+  const nistCount = matrix?.nistSsdfCoverage?.length || 0;
+  return [
+    `<div class="metric-card"><span class="title">EU AI Act (2024/1689)</span><span class="value">${euCount} Artículos</span><span class="subtitle">Artículos 9 a 15 (Alto Riesgo)</span></div>`,
+    `<div class="metric-card"><span class="title">ISO/IEC 42001:2023</span><span class="value">${isoCount} Cláusulas</span><span class="subtitle">Cláusulas A.5 &ndash; A.10 verificadas</span></div>`,
+    `<div class="metric-card"><span class="title">NIST SSDF SP 800-218</span><span class="value">${nistCount} Prácticas</span><span class="subtitle">Grupos PO, PS, PW y RV</span></div>`,
+  ].join('');
+}
+
+function renderComplianceCards(complianceBundle: ComplianceBundlePayload): string {
+  const intoto = renderIntotoCard(complianceBundle);
+  const fw = renderRegulatoryFrameworkCards(complianceBundle);
+  return `<div class="grid-cards">${intoto}${fw}</div>`;
+}
+
+function renderComplianceGateRow(gateId: string, mapping: RegulatoryGateMapping | undefined): string {
+  return [
+    `<tr>`,
+    `  <td><strong><code>${escapeHtml(gateId)}</code></strong></td>`,
+    `  <td>${escapeHtml(mapping?.euAiAct || '—')}</td>`,
+    `  <td>${escapeHtml(mapping?.iso42001 || '—')}</td>`,
+    `  <td>${escapeHtml(mapping?.nistSsdf || '—')}</td>`,
+    `  <td style="color: var(--text-muted); font-size: 0.8rem;">${escapeHtml(mapping?.description || '—')}</td>`,
+    `</tr>`,
+  ].join('');
+}
+
+function renderComplianceTable(mappings: Record<string, RegulatoryGateMapping>): string {
+  const gateIds = Object.keys(mappings || {});
+  if (gateIds.length === 0) {
+    return '<p style="color: var(--text-muted); font-size: 0.85rem;">No hay mapeos de controles regulatorios disponibles.</p>';
+  }
+  const rows = gateIds.map((id) => renderComplianceGateRow(id, mappings[id])).join('\n');
+  return [
+    `<table class="data-table">`,
+    `  <thead><tr><th>Quality Gate</th><th>EU AI Act</th><th>ISO/IEC 42001</th><th>NIST SSDF</th><th>Descripción y Control</th></tr></thead>`,
+    `  <tbody>${rows}</tbody>`,
+    `</table>`,
+  ].join('\n');
+}
+
+function renderComplianceSectionHtml(complianceBundle: ComplianceBundlePayload): string {
+  const cardsHtml = renderComplianceCards(complianceBundle);
+  const tableHtml = renderComplianceTable(complianceBundle.regulatoryMatrix?.gateMappings || {});
+
+  return [
+    `<div class="compliance-section" style="margin-bottom: 24px;">`,
+    `  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">`,
+    `    <h3 style="color: var(--accent-cyan); font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">⚖️ Marco Regulatorio &amp; Evidencia de Auditoría (EU AI Act, ISO 42001, NIST SSDF)</h3>`,
+    `    <span class="badge badge-blue">OSCAL &amp; in-toto Attested</span>`,
+    `  </div>`,
+    `  <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">Trazabilidad regulatoria formal y bundle criptográfico verificable para auditorías de conformidad según el Reglamento Europeo de IA, ISO/IEC 42001 y NIST SP 800-218.</p>`,
+    cardsHtml,
+    `  <div class="chart-container" style="margin-top: 16px;">`,
+    `    <h4>Mapeo de Cobertura de los 12 Quality Gates</h4>`,
+    tableHtml,
+    `  </div>`,
+    `</div>`,
+  ].join('\n');
+}
+
 function renderManualCardsHtml(coverage: ManualsCoverageSummary, allCount: number, userCount: number, prodCount: number): string {
   return [
     `<div class="grid-cards">`,
@@ -373,23 +447,41 @@ function renderManualsDesc(manuals: ManualsVerificationResult): string {
   return `Modo de cumplimiento: <span class="badge ${badgeClass}">${manuals.status}</span> <code>${manuals.enforcementMode}</code> &middot; rama <code>${escapeHtml(manuals.branch)}</code> &middot; perfil <code>${manuals.profile}</code>.`;
 }
 
-export function renderManualsTab(manuals: ManualsVerificationResult): string {
-  const findings = [...manuals.violations, ...manuals.warnings];
-  const allManuals = [...manuals.userManuals, ...manuals.productionManuals];
-  const findingsHtml = renderManualFindingsHtml(findings);
-  const rowsHtml = allManuals.length === 0
-    ? '<tr><td colspan="6" style="color: var(--text-muted);">No hay manuales MAN-USER-* / MAN-PROD-* en <code>manuals/</code>.</td></tr>'
-    : allManuals.map(renderManualRow).join('');
-  const cardsHtml = renderManualCardsHtml(manuals.coverage, allManuals.length, manuals.userManuals.length, manuals.productionManuals.length);
-
+function renderManualsHeader(manuals: ManualsVerificationResult): string {
   return [
     `<h2>Operational Manuals (User &amp; Production)</h2>`,
     `<p style="font-size: 0.8rem; color: var(--text-muted);">${renderManualsDesc(manuals)}</p>`,
+  ].join('\n');
+}
+
+function renderManualsTable(allManuals: ManualDocumentItem[]): string {
+  if (allManuals.length === 0) {
+    return '<table class="data-table"><thead><tr><th>ID</th><th>Tipo</th><th>Título</th><th>Aplica a</th><th>Estado</th><th>Fichero</th></tr></thead><tbody><tr><td colspan="6" style="color: var(--text-muted);">No hay manuales MAN-USER-* / MAN-PROD-* en <code>manuals/</code>.</td></tr></tbody></table>';
+  }
+  const rows = allManuals.map(renderManualRow).join('');
+  return `<table class="data-table"><thead><tr><th>ID</th><th>Tipo</th><th>Título</th><th>Aplica a</th><th>Estado</th><th>Fichero</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+export function renderManualsTab(
+  manuals: ManualsVerificationResult,
+  complianceBundle?: ComplianceBundlePayload | null
+): string {
+  const complianceHtml = complianceBundle ? renderComplianceSectionHtml(complianceBundle) : '';
+  const findings = [...manuals.violations, ...manuals.warnings];
+  const allManuals = [...manuals.userManuals, ...manuals.productionManuals];
+  const findingsHtml = renderManualFindingsHtml(findings);
+  const cardsHtml = renderManualCardsHtml(manuals.coverage, allManuals.length, manuals.userManuals.length, manuals.productionManuals.length);
+  const headerHtml = renderManualsHeader(manuals);
+  const tableHtml = renderManualsTable(allManuals);
+
+  return [
+    complianceHtml,
+    headerHtml,
     cardsHtml,
     `<div class="chart-container"><h3>Hallazgos de Cobertura</h3>${findingsHtml}</div>`,
-    `<table class="data-table"><thead><tr><th>ID</th><th>Tipo</th><th>Título</th><th>Aplica a</th><th>Estado</th><th>Fichero</th></tr></thead><tbody>${rowsHtml}</tbody></table>`,
+    tableHtml,
     `<div class="chart-container" id="manual-viewer-container" style="display: none;"><h3 id="manual-viewer-title"></h3><div id="manual-viewer" style="font-size: 0.82rem; line-height: 1.5; color: #cbd5e1;"></div></div>`,
-  ].join('\n');
+  ].filter(Boolean).join('\n');
 }
 
 function renderBranchOption(b: string, activeBranch: string): string {
@@ -594,7 +686,7 @@ function renderDashboardMain(metricsData: DashboardMetricsData): string {
   const graphTab = renderGraphTabHtml();
   const rtmTab = renderRtmTabHtml(metricsData.trace.rows);
   const qualityTab = renderQualityTabHtml(metricsData);
-  const manualsTab = `<div id="tab-manuals" class="tab-panel"><div class="content-container">${renderManualsTab(metricsData.manuals)}</div></div>`;
+  const manualsTab = `<div id="tab-manuals" class="tab-panel"><div class="content-container">${renderManualsTab(metricsData.manuals, metricsData.complianceBundle)}</div></div>`;
   const kpisTab = renderKpisTabHtml(metricsData);
   return `  <main>\n${graphTab}\n${rtmTab}\n${qualityTab}\n${manualsTab}\n${kpisTab}\n  </main>`;
 }
