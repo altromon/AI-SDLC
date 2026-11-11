@@ -24,16 +24,16 @@ citations:
     digest: sha256:b255452ecd24cfbf54f231c7c4dee4810683f9b650ba02cefa96aa5d3e0199d0
     comment: Citación de requirement (cli-migrate-lifecycle-sync)
   - id: SEC-REQ-053-PATH-TRAVERSAL-DEFENSE-001
-    digest: sha256:f0bbfa6fd526feeb35f9e45fec9aecaebe9fabdef6d1334405e82fb287e48c50
+    digest: sha256:d7bc0cb42a514b8f646ace49def3def63528715454d2929b481e5698ceb03533
     comment: Citación de security-requirement (Validación Estricta de Rutas y Confinamiento en Raíz de Repositorio (Path Traversal Defense))
   - id: SEC-REQ-053-NON-DESTRUCTIVE-BACKUP-001
-    digest: sha256:acfd60af7b099634bbd21681d39fc37768ce44b65ccf56735f03c9613b4e2a78
+    digest: sha256:eeb37a47e790381ce3ae7a6d6c44e7ae061f1c72ed4702a364f3a98483cd6d1a
     comment: Citación de security-requirement (Respaldo Preventivo Criptográficamente Verificado y No Destructivo)
   - id: SEC-REQ-053-ATOMIC-ROLLBACK-001
-    digest: sha256:2c56f67498bc0a0d8086708b063cbc4bbe748a0a61da4710deda54e5561aeaf2
+    digest: sha256:d3ce357ea527368e89b50c4eeec564e70fe1efc065b8faea8c56a70a27b3730d
     comment: Citación de security-requirement (Transaccionalidad de Migración y Rollback Automático ante Errores de Ejecución)
   - id: SEC-REQ-053-POLICY-RATCHET-PRESERVATION-001
-    digest: sha256:c49ecb45ebeee3e8a15df82ec1785b2b783b58e5233468f80f2a54108579b05e
+    digest: sha256:b769f5bb81667469b18edb46809276cfa724b0b3b74822c0341cdf946ef00d54
     comment: Citación de security-requirement (Invariante Ratchet de No Degradación en Sincronización de Políticas de Seguridad)
 ---
 

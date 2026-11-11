@@ -13,6 +13,7 @@ implements-use-cases:
   - UC-028-NATIVE-MCP-SERVER
   - UC-051-REGULATORY-COMPLIANCE-BUNDLE
   - UC-052-CLI-DOCTOR
+  - UC-053-CLI-MIGRATE
 satisfies-requirements:
   - FR-028-NATIVE-MCP-SERVER-001
   - FR-050-IDE-AGENT-TOOLS-MCP-001
@@ -25,12 +26,18 @@ satisfies-requirements:
   - SEC-REQ-052-SAFE-TOOLCHAIN-PROBE-001
   - SEC-REQ-052-NO-SECRET-LEAK-DIAGNOSTICS-001
   - SEC-REQ-052-RESILIENT-DIAGNOSTIC-TIMEOUTS-001
+  - FR-053-CLI-MIGRATE-001
+  - SEC-REQ-053-PATH-TRAVERSAL-DEFENSE-001
+  - SEC-REQ-053-NON-DESTRUCTIVE-BACKUP-001
+  - SEC-REQ-053-ATOMIC-ROLLBACK-001
+  - SEC-REQ-053-POLICY-RATCHET-PRESERVATION-001
 interfaces:
   - name: Stdio MCP Protocol Interface
     protocol: IPC
 supersedes: null
 superseded-by: null
 ---
+
 
 
 
@@ -54,5 +61,6 @@ graph LR
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-11 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-053-cli-migrate | chg-053-cli-migrate |
 | **1.0.0** | 2026-11-11 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-052-cli-doctor | chg-052-cli-doctor |
 | **1.0.0** | 2026-11-11 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-051-regulatory-compliance-bundle | chg-051-regulatory-compliance-bundle |
