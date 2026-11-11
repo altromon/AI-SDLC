@@ -3,8 +3,8 @@ id: UC-051-REGULATORY-COMPLIANCE-BUNDLE
 type: use-case
 title: Generación del paquete de evidencia de cumplimiento normativo (EU AI Act, ISO/IEC 42001, NIST SSDF)
 status: active
-version: "1.0.0"
-schema-version: "1.0"
+version: 1.0.0
+schema-version: '1.0'
 primary-actor: ACT-DEVSECOPS-ENGINEER
 supporting-actors:
   - ACT-AI-AGENT
@@ -14,6 +14,7 @@ governed-by:
 supersedes: null
 superseded-by: null
 ---
+
 
 # UC-051-REGULATORY-COMPLIANCE-BUNDLE: Generación del paquete de evidencia de cumplimiento normativo
 
@@ -82,3 +83,10 @@ Feature: Generación del paquete de evidencia de cumplimiento normativo
       | flag_desconocida_--foo   | unknown option '--foo'         |
       | strict_con_gates_faltantes | ERR_MISSING_REQUIRED_EVIDENCE |
 ```
+
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-11 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004, TSK-005) | chg-051-regulatory-compliance-bundle |

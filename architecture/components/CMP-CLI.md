@@ -1,8 +1,8 @@
 ---
 id: CMP-CLI
 type: component
-version: "1.0.0"
-schema-version: "1.0"
+version: 1.0.0
+schema-version: '1.0'
 title: Interfaz de Línea de Comandos AI-SDLC (@ai-sdlc/cli)
 status: accepted
 level: 2
@@ -17,6 +17,7 @@ implements-use-cases:
   - UC-038-SECURITY-SUPPRESSION-AUDIT
   - UC-039-SCA-VULNERABILITY-DETECTION
   - UC-043-SARIF-SECURITY-REPORTING
+  - UC-051-REGULATORY-COMPLIANCE-BUNDLE
 satisfies-requirements:
   - FR-025-STRUCTURED-JSON-VERIFY-001
   - FR-027-ENV-OUTPUT-JSON-001
@@ -25,12 +26,17 @@ satisfies-requirements:
   - FR-038-SECURITY-SUPPRESSION-AUDIT-001
   - FR-039-SCA-VULNERABILITY-DETECTION-001
   - FR-043-SARIF-SECURITY-REPORTING-001
+  - FR-051-REGULATORY-COMPLIANCE-BUNDLE-001
+  - SEC-REQ-051-TAMPER-RESISTANT-ATTESTATION-001
+  - SEC-REQ-051-SENSITIVE-DATA-FILTER-001
+  - SEC-REQ-051-KEYLESS-IDENTITY-VERIFICATION-001
 interfaces:
   - name: CLI Command Line Interface
     protocol: CLI
 supersedes: null
 superseded-by: null
 ---
+
 
 # CMP-CLI: Interfaz de Línea de Comandos AI-SDLC
 
@@ -44,3 +50,10 @@ graph LR
     Agent[ACT-AI-AGENT] -->|Comandos CLI con --json| CLI
     CLI --> CORE[CMP-CORE]
 ```
+
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-11 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-051-regulatory-compliance-bundle | chg-051-regulatory-compliance-bundle |

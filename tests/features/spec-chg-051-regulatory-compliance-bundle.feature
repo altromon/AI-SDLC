@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-051-regulatory-compliance-bundle/spec.md
+# Origen: specs/changes/completed/chg-051-regulatory-compliance-bundle/spec.md
 # ID Requerimiento: SPEC-CHG-051-REGULATORY-COMPLIANCE-BUNDLE
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

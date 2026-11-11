@@ -1,10 +1,10 @@
 ---
 id: FR-051-REGULATORY-COMPLIANCE-BUNDLE-001
 type: requirement
-title: "regulatory-compliance-evidence-bundle"
-status: draft
-version: "1.0.0"
-schema-version: "1.0"
+title: regulatory-compliance-evidence-bundle
+status: active
+version: 1.0.0
+schema-version: '1.0'
 category: functional
 derives-from:
   - UC-051-REGULATORY-COMPLIANCE-BUNDLE
@@ -12,12 +12,13 @@ verifiable-by: cucumber-bdd
 acceptance-format: gherkin
 enforce-bdd-variants: true
 cucumber-tags:
-  - "@FR-051-REGULATORY-COMPLIANCE-BUNDLE-001"
-  - "@automated"
-  - "@compliance"
+  - '@FR-051-REGULATORY-COMPLIANCE-BUNDLE-001'
+  - '@automated'
+  - '@compliance'
 supersedes: null
 superseded-by: null
 ---
+
 
 # FR-051-REGULATORY-COMPLIANCE-BUNDLE-001: regulatory-compliance-evidence-bundle
 
@@ -69,4 +70,5 @@ Feature: regulatory-compliance-evidence-bundle
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-11 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004, TSK-005) | chg-051-regulatory-compliance-bundle |
 | **1.0.0** | 2026-11-10 | agent-product-analyst | Definición de requerimiento funcional para paquete de evidencia de cumplimiento normativo (EU AI Act, ISO/IEC 42001, NIST SSDF) (#168) | CHG-051-REGULATORY-COMPLIANCE-BUNDLE |

@@ -18,19 +18,19 @@ date: "2026-11-10"
 contracts: []
 citations:
   - id: UC-051-REGULATORY-COMPLIANCE-BUNDLE
-    digest: sha256:4627b59e9597d2b5d538ca5f5a5321f610b153d42c49c2f1e326bc9b8fa37ef4
+    digest: sha256:fc70f5619e2906962b2e7ff4a40b55d9450ab7794da051e588ff943147351ad5
     comment: Artefacto citado en CHG-051-REGULATORY-COMPLIANCE-BUNDLE
   - id: FR-051-REGULATORY-COMPLIANCE-BUNDLE-001
-    digest: sha256:ecc9d7e20e55b715a078012e5e95d2b6d3c6afc9aedb55dce73d1282434a5abc
+    digest: sha256:99c549b04c0b428343e827d812fe3f27464533b7b7a3456f43cf3c52fb695010
     comment: Citación de requirement (regulatory-compliance-evidence-bundle)
   - id: SEC-REQ-051-TAMPER-RESISTANT-ATTESTATION-001
-    digest: sha256:0aa5ab6a0fb693bd43ce577997fd2d6d5e1f4396d88bd8d2dd1aa2e21a67e3de
+    digest: sha256:b2c487fe0a1772b355764c433c32c35eb3545d35dbf783f55ea796478a8b904b
     comment: Citación de security-requirement (Atestación de Cumplimiento Normativo Inmutable y Protección Criptográfica contra Alteraciones)
   - id: SEC-REQ-051-SENSITIVE-DATA-FILTER-001
-    digest: sha256:ccd28de31d1221bbd68730d1dbeb00be6d35a8cff0ec2909feb0125d191bacf4
+    digest: sha256:8792fb4f7328a49dc3b959c99516bfb73d474e4cce32c9cd57dc5e0c700cce5b
     comment: Citación de security-requirement (Sanitización DLP y Filtrado Estricto de Secretos, PII y Código en Evidencias de Auditoría)
   - id: SEC-REQ-051-KEYLESS-IDENTITY-VERIFICATION-001
-    digest: sha256:f278e0c4f051a5dec02a516d295e43ef52dc8d6e69748a2d7f8d21c82ed622b2
+    digest: sha256:8d822f7326d9dff4e0cc58ce6678afbb6e67befafab9fd5812966ad171ce185c
     comment: Citación de security-requirement (Validación Estricta de Identidad OIDC y Transparencia de Firmas Keyless)
 ---
 
