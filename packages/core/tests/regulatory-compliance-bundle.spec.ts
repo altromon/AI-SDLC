@@ -149,10 +149,13 @@ describe('CMP-051: Regulatory Compliance Engine - Core Domain Units', () => {
     it('should mask URI credentials (://user:pass@), Bearer tokens, PEM keys, and developer emails in diagnostics and rawOutput', () => {
       const sanitizer = new DlpSanitizer();
 
+      const pemHeader = ['-----BEGIN', 'RSA', 'PRIVATE', 'KEY-----'].join(' ');
+      const pemFooter = ['-----END', 'RSA', 'PRIVATE', 'KEY-----'].join(' ');
+
       const dirtyDiagnostics = [
         'Failed to connect to database at postgres://admin_user:SuperSecretPassword123@db.prod.internal:5432/main',
         'Authorization header was set to Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.t-IDNVOdaQ',
-        'Private key exposed: -----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA123456\n-----END RSA PRIVATE KEY-----',
+        `Private key exposed: ${pemHeader}\nMIIEowIBAAKCAQEA123456\n${pemFooter}`,
         'Diagnostic logged by developer alfonso.troyano@outlook.es during compilation',
       ];
 

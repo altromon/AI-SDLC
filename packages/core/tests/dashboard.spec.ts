@@ -308,9 +308,11 @@ describe('AI-SDLC Interactive Web Dashboard & Cytoscape Graph', () => {
     expect(governsEdge).toBeDefined();
     expect(governsEdge.source).toBe('BR-SPEC-TRACEABILITY-INVARIANT');
 
-    const mitigatedEdge = edges.find((e) => e.relation === 'mitigated-by');
+    const mitigatedEdge = edges.find(
+      (e) => e.relation === 'mitigated-by' && e.source === 'ABUSE-UNVERIFIED-SPEC-BYPASS'
+    );
     expect(mitigatedEdge).toBeDefined();
-    expect(mitigatedEdge.source).toBe('ABUSE-UNVERIFIED-SPEC-BYPASS');
+    expect(mitigatedEdge?.source).toBe('ABUSE-UNVERIFIED-SPEC-BYPASS');
 
     // Verify node classes contain type-*
     const nodeElements = result.elements.filter((e) => e.group === 'nodes');

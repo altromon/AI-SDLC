@@ -5,7 +5,11 @@
 import * as path from 'path';
 import { spawn } from 'child_process';
 import pc from 'picocolors';
-import { generateDashboardReport, generateQualityReport } from '@aisdlc/core';
+import {
+  generateComplianceEvidenceBundleSync,
+  generateDashboardReport,
+  generateQualityReport,
+} from '@aisdlc/core';
 
 function openInBrowser(filePath: string): void {
   const resolved = path.resolve(filePath);
@@ -114,4 +118,70 @@ export function runReportQuality(options: {
 
   return result.verdict === 'PASS';
 }
+
+const ALLOWED_COMPLIANCE_OPTIONS = new Set([
+  'root',
+  'output',
+  'keyless',
+  'strict',
+  'offline',
+  'dryRun',
+]);
+
+// Validate user options against permitted whitelist
+function validateComplianceOptions(options: Record<string, unknown>): boolean {
+  // Check every key provided by the caller
+  for (const key of Object.keys(options)) {
+    if (!ALLOWED_COMPLIANCE_OPTIONS.has(key)) {
+      // Print error message when unrecognized option is encountered
+      console.error(pc.red(`\n✖ [ERROR] Unknown option provided: --${key}\n`));
+      return false;
+    }
+  }
+  return true;
+}
+
+// Execute report compliance command handler
+export function runReportCompliance(
+  options: {
+    root?: string;
+    output?: string;
+    keyless?: boolean;
+    strict?: boolean;
+    offline?: boolean;
+    dryRun?: boolean;
+    [key: string]: unknown;
+  } = {}
+): boolean {
+  // Validate CLI arguments
+  if (!validateComplianceOptions(options)) {
+    return false;
+  }
+  // Resolve base directory
+  const rootDir = options.root || process.cwd();
+  console.log(pc.bold(pc.cyan('\n📜 [AI-SDLC] Generating Regulatory Compliance Evidence Bundle...')));
+
+  // Trigger bundle generation
+  try {
+    const res = generateComplianceEvidenceBundleSync({
+      rootDir,
+      outputPath: options.output,
+      keyless: options.keyless,
+      strict: options.strict,
+      offline: options.offline,
+      dryRun: options.dryRun,
+    });
+    // Print success feedback
+    console.log(pc.green(`✔ Compliance evidence bundle generated successfully. Digest: ${res.bundleDigest}\n`));
+    return res.success;
+  } catch (err: unknown) {
+    // Print error message on failure
+    console.error(pc.red(`\n✖ [ERROR] ${err instanceof Error ? err.message : String(err)}\n`));
+    return false;
+  }
+}
+
+
+
+
 

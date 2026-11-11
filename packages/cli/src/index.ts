@@ -17,7 +17,7 @@ import {
 import { promptForAgents, promptForArchitecture, promptForCi, runInit } from './commands/init.js';
 import { runKpiPr, runKpiRelease } from './commands/kpi.js';
 import { runMcpServer } from './commands/mcp.js';
-import { runReportDashboard, runReportQuality } from './commands/report.js';
+import { runReportCompliance, runReportDashboard, runReportQuality } from './commands/report.js';
 import { runReviewSubmit } from './commands/review.js';
 import { runInspect } from './commands/inspect.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
@@ -398,6 +398,28 @@ reportCommand
     });
     process.exit(passed ? 0 : 1);
   });
+
+reportCommand
+  .command('compliance')
+  .description('Generate Regulatory Compliance Evidence Bundle (EU AI Act, ISO 42001, NIST SSDF)')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-o, --output <path>', 'Output JSON file path (default: reports/audit-evidence-bundle.json)')
+  .option('--offline', 'Offline execution: prohibit external network calls')
+  .option('--strict', 'Strict mode: fail closed if any of 12 Quality Gates is missing or stale')
+  .option('--keyless', 'Enable keyless OIDC attestation claims')
+  .option('--dry-run', 'Dry run without writing to disk')
+  .action((opts) => {
+    const passed = runReportCompliance({
+      root: opts.root,
+      output: opts.output,
+      offline: opts.offline,
+      strict: opts.strict,
+      keyless: opts.keyless,
+      dryRun: opts.dryRun,
+    });
+    process.exit(passed ? 0 : 1);
+  });
+
 
 // --- gherkin command suite ---
 const gherkinCommand = program
