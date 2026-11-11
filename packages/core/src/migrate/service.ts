@@ -178,7 +178,20 @@ export class MigrationService implements IMigrationService {
     return this.executeMigration({ ...options, dryRun: options.dryRun ?? false });
   }
 
-  private async detectBranch(repoRoot: string): Promise<string | null> {
+  private isInsideGitRepository(repoRoot: string): boolean {
+    try {
+      const out = child_process.execSync('git rev-parse --is-inside-work-tree', {
+        cwd: repoRoot,
+        stdio: ['ignore', 'pipe', 'ignore'],
+        encoding: 'utf-8',
+      }).trim();
+      return out === 'true';
+    } catch {
+      return false;
+    }
+  }
+
+  private queryGitBranch(repoRoot: string): string | null {
     try {
       const out = child_process.execSync('git symbolic-ref --short HEAD', { cwd: repoRoot, stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf-8' }).trim();
       if (out) return out;
@@ -189,15 +202,18 @@ export class MigrationService implements IMigrationService {
       if (out && out !== 'HEAD') return out;
     } catch { /* fallback */ }
 
-    const ciRef = process.env.GITHUB_REF_NAME || process.env.CI_COMMIT_REF_NAME;
-    if (ciRef) return ciRef;
-
-    try {
-      const cwdOut = child_process.execSync('git symbolic-ref --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf-8' }).trim();
-      if (cwdOut) return cwdOut;
-    } catch { /* fallback */ }
-
     return null;
+  }
+
+  private async detectBranch(repoRoot: string): Promise<string | null> {
+    if (!this.isInsideGitRepository(repoRoot)) {
+      return 'non-git-workspace';
+    }
+
+    const localBranch = this.queryGitBranch(repoRoot);
+    if (localBranch) return localBranch;
+
+    return process.env.GITHUB_REF_NAME || process.env.CI_COMMIT_REF_NAME || null;
   }
 
   private isProtectedBranch(branch: string): boolean {
