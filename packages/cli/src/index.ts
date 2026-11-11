@@ -6,7 +6,7 @@
 import { Command } from 'commander';
 import pc from 'picocolors';
 import { runCheck } from './commands/check.js';
-import { runGherkinExtract } from './commands/gherkin.js';
+import { runGherkinExtract, runGherkinScaffold } from './commands/gherkin.js';
 import {
   runGitCheckout,
   runGitDetectAuthor,
@@ -46,7 +46,7 @@ const program = new Command();
 program
   .name('aisdlc')
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
-  .version('4.0.0');
+  .version('4.1.0');
 
 // --- check command (unified pre-flight with auto-fix) ---
 program
@@ -463,6 +463,29 @@ gherkinCommand
       root: opts.root,
       path: opts.path,
       all: opts.all,
+      json: opts.json,
+      format: opts.format,
+    });
+    process.exit(passed ? 0 : 1);
+  });
+
+gherkinCommand
+  .command('scaffold <feature-file>')
+  .description('Scaffold failing RED BDD step definitions across target languages (ts, py, go, rs, cs)')
+  .requiredOption('--lang <langs...>', 'Target language(s): ts, py, go, rs, cs (comma-separated or multiple)')
+  .option('-o, --output <path>', 'Explicit output file path for generated step definitions')
+  .option('--install', 'Automatically install missing native BDD generator')
+  .option('--fallback', 'Use deterministic RED fallback template if native generator is missing')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--json', 'Structured JSON format output')
+  .option('-F, --format <format>', 'Output format: text or json')
+  .action(async (featureFile, opts) => {
+    const passed = await runGherkinScaffold(featureFile, {
+      root: opts.root,
+      lang: opts.lang,
+      output: opts.output,
+      install: opts.install,
+      fallback: opts.fallback,
       json: opts.json,
       format: opts.format,
     });

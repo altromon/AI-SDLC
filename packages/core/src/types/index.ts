@@ -517,6 +517,69 @@ export interface GherkinSyncCheckResult {
   totalFeatures: number;
 }
 
+export type GherkinScaffoldLanguage = 'ts' | 'py' | 'go' | 'rs' | 'cs';
+
+export interface GherkinGeneratorSpec {
+  lang: GherkinScaffoldLanguage;
+  generatorBin: string;
+  versionArgs: string[];
+  scaffoldArgs: (featurePath: string) => string[];
+  installCommand: string;
+  installCmd: string;
+  installArgs: string[];
+  license: string;
+  resolveOutputPath: (rootDir: string, featurePath: string) => string;
+}
+
+export interface GherkinScaffoldExecResult {
+  status: number | null;
+  stdout: string;
+  stderr: string;
+  error?: Error;
+}
+
+export type GherkinScaffoldExecFn = (
+  cmd: string,
+  args: string[]
+) => GherkinScaffoldExecResult;
+
+export interface GherkinScaffoldOptions {
+  rootDir?: string;
+  featurePath: string;
+  lang: string | string[];
+  outputPath?: string;
+  installMissing?: boolean;
+  allowFallback?: boolean;
+  execFn?: GherkinScaffoldExecFn;
+}
+
+export type GherkinScaffoldStatus =
+  | 'GENERATED_NATIVE'
+  | 'GENERATOR_MISSING'
+  | 'GENERATED_FALLBACK'
+  | 'ERROR';
+
+export interface GherkinScaffoldResult {
+  success: boolean;
+  status: GherkinScaffoldStatus;
+  errorCode?: 'ERR_FEATURE_NOT_FOUND' | 'ERR_UNSUPPORTED_LANGUAGE' | 'ERR_INSTALL_FAILED';
+  lang: string;
+  langs?: GherkinScaffoldLanguage[];
+  featureFile: string;
+  outputFile?: string;
+  outputFiles?: string[];
+  generatorBin?: string;
+  nativeCommand?: string;
+  installCommand?: string;
+  license?: string;
+  fallbackReason?: string;
+  content?: string;
+  scenariosCount: number;
+  stepsCount: number;
+  results?: GherkinScaffoldResult[];
+}
+
+
 // --- License Compliance Types ---
 export type VexAnalysisState = 'not_affected' | 'affected' | 'fixed' | 'in_triage';
 

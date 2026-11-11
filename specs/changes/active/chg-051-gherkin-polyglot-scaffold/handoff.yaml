@@ -1,0 +1,15 @@
+id: HOF-CHG-051-GHERKIN-POLYGLOT-SCAFFOLD
+type: handoff
+title: Handoff Canónico de Producto para gherkin-polyglot-scaffold
+changeId: CHG-051-GHERKIN-POLYGLOT-SCAFFOLD
+version: 1.0.0
+createdAt: "2026-11-10T09:38:55.725Z"
+subgraph:
+  requirements:
+    - FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001
+  useCases:
+    - UC-051-GHERKIN-POLYGLOT-SCAFFOLD
+citations:
+  - id: FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001
+    digest: sha256:a4701a3efdc59d67f2970945db8969727a3f6c1969d08663518d46bc962b38a5
+    comment: Requerimiento funcional canónico asociado (Génesis CHG-051-GHERKIN-POLYGLOT-SCAFFOLD)
