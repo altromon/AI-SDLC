@@ -21,6 +21,7 @@ import { runReportCompliance, runReportDashboard, runReportQuality } from './com
 import { runReviewSubmit } from './commands/review.js';
 import { runInspect } from './commands/inspect.js';
 import { runDoctor } from './commands/doctor.js';
+import { runMigrate } from './commands/migrate.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
   runVerifyAll,
@@ -836,6 +837,30 @@ reviewCmd
       json: opts.json,
     });
     if (!ok) process.exit(1);
+  });
+
+// --- migrate command (sync schemas, templates, and policies) ---
+program
+  .command('migrate')
+  .description('Synchronize schemas, templates, and policies with upstream canonical versions')
+  .option('-r, --root <path>', 'Repository root directory')
+  .option('--dry-run', 'Preview changes without mutating filesystem')
+  .option('--no-backup', 'Disable pre-migration backup')
+  .option('-f, --force', 'Overwrite local customizations with canonical versions')
+  .option('--allow-policy-downgrade', 'Permit relaxing stricter quality or security thresholds')
+  .option('--json', 'Output migration report as JSON')
+  .option('-v, --verbose', 'Enable verbose logging')
+  .action(async (opts) => {
+    const exitCode = await runMigrate({
+      root: opts.root,
+      dryRun: opts.dryRun,
+      backup: opts.backup,
+      force: opts.force,
+      allowPolicyDowngrade: opts.allowPolicyDowngrade,
+      json: opts.json,
+      verbose: opts.verbose,
+    });
+    process.exit(exitCode);
   });
 
 // Handle unknown commands gracefully

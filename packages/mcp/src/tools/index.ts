@@ -48,6 +48,8 @@ import {
   isReviewerRole,
   DoctorService,
   DoctorOptions,
+  MigrationService,
+  MigrationOptions,
 } from '@aisdlc/core';
 
 export type McpRole =
@@ -87,6 +89,7 @@ export const MUTATION_TOOLS = new Set([
   'sdd_check_fix',
   'sdd_deposit',
   'sdd_integrate',
+  'migrate',
   'report',
   'report_dashboard',
   'report_quality',
@@ -440,6 +443,39 @@ function registerNewTool(server: McpServer, options: RegisterToolsOptions): void
       return { data: result, isError: !result.success, root: baseRoot };
     });
   });
+}
+
+const MIGRATE_TOOL_SCHEMA = {
+  root: z.string().optional(),
+  dryRun: z.boolean().optional(),
+  backup: z.boolean().optional(),
+  force: z.boolean().optional(),
+  allowPolicyDowngrade: z.boolean().optional(),
+  verbose: z.boolean().optional(),
+  role: z.string().optional(),
+};
+
+function registerMigrateTool(server: McpServer, options: RegisterToolsOptions): void {
+  server.tool(
+    'migrate',
+    'Synchronizes schemas, templates, and policies with upstream canonical versions.',
+    MIGRATE_TOOL_SCHEMA,
+    async (params) => {
+      return executeSecuredTool('migrate', params, options, async (root) => {
+        const service = new MigrationService();
+        const migrationOptions: MigrationOptions = {
+          root,
+          dryRun: params.dryRun,
+          backup: params.backup,
+          force: params.force,
+          allowPolicyDowngrade: params.allowPolicyDowngrade,
+          verbose: params.verbose,
+        };
+        const result = await service.migrate(migrationOptions);
+        return { data: result, isError: !result.success, root };
+      });
+    }
+  );
 }
 
 function registerVerifyTool(server: McpServer, options: RegisterToolsOptions): void {
@@ -990,6 +1026,7 @@ function registerDoctorTool(server: McpServer, options: RegisterToolsOptions): v
 
 function registerLifecycleAndSddTools(server: McpServer, options: RegisterToolsOptions): void {
   registerNewTool(server, options);
+  registerMigrateTool(server, options);
   registerVerifyTool(server, options);
   registerReportTool(server, options);
   registerSddChangeNewTool(server, options);
