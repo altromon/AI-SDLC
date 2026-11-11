@@ -3,7 +3,7 @@ id: FR-052-CLI-DOCTOR-001
 type: requirement
 title: cli-doctor-health-check
 status: active
-version: 1.0.0
+version: 1.1.0
 schema-version: '1.0'
 category: functional
 derives-from:
@@ -19,10 +19,14 @@ supersedes: null
 superseded-by: null
 ---
 
+
 # FR-052-CLI-DOCTOR-001: cli-doctor-health-check
 
 ## 1. Enunciado Normativo
 El sistema DEBE proveer el comando CLI `aisdlc doctor` y la herramienta MCP `doctor` para ejecutar un diagnóstico determinista de salud del entorno de desarrollo y del repositorio. El diagnóstico DEBE comprobar cinco categorías críticas: (1) instalación e integridad de hooks Git (`.git/hooks/pre-commit` y `prepare-commit-msg`), (2) salvaguarda de rama protegida prohibiendo operar directamente sobre `main`, `master` o `release/*`, (3) sincronización e integridad de esquemas JSON y PDaC, (4) presencia de runtime y toolchain (Node.js LTS, pnpm, Git CLI), y (5) preparación para firma criptográfica y atestaciones (claves Ed25519/GPG o OIDC keyless). El comando DEBE retornar código de salida `0` cuando todas las comprobaciones sean saludables, `1` ante advertencias no bloqueantes, y `2` ante defectos críticos bloqueantes.
+
+### Incremento (chg-052-cli-doctor)
+CLI Doctor Environment Health Diagnostics (`aisdlc doctor` y MCP `doctor`) para evaluación determinista y antimanipulación de la salud del entorno de trabajo, hooks de Git, seguridad de ramas, esquemas JSON y preparación para firma criptográfica.
 
 ---
 

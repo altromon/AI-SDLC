@@ -3,7 +3,7 @@ id: UC-052-CLI-DOCTOR
 type: use-case
 title: Diagnóstico determinista de entorno, herramientas y estado del repositorio (aisdlc doctor)
 status: active
-version: 1.0.0
+version: 1.1.0
 schema-version: '1.0'
 primary-actor: ACT-DEVSECOPS-ENGINEER
 supporting-actors:
@@ -14,6 +14,7 @@ governed-by:
 supersedes: null
 superseded-by: null
 ---
+
 
 # UC-052-CLI-DOCTOR: Diagnóstico determinista de entorno, herramientas y estado del repositorio
 
@@ -29,6 +30,9 @@ El comando reporta los hallazgos con códigos de salida deterministas:
 - `0`: Entorno y repositorio completamente saludables.
 - `1`: Advertencias no bloqueantes detectadas (ej. clave de firma opcional ausente en entorno local).
 - `2`: Defectos críticos bloqueantes detectados (ej. hooks ausentes, rama protegida activa, esquemas corruptos).
+
+### Incremento (chg-052-cli-doctor)
+CLI Doctor Environment Health Diagnostics (`aisdlc doctor` y MCP `doctor`) para evaluación determinista y antimanipulación de la salud del entorno de trabajo, hooks de Git, seguridad de ramas, esquemas JSON y preparación para firma criptográfica.
 
 ## 2. Precondiciones
 - El repositorio está inicializado con Git (`.git` presente).

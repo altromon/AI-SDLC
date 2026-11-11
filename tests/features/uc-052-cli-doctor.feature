@@ -2,7 +2,7 @@
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
 # Origen: specs/product/UC-052-CLI-DOCTOR.md
 # ID Requerimiento: UC-052-CLI-DOCTOR
-# Versión: 1.0.0
+# Versión: 1.1.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.
 # ==============================================================================
 

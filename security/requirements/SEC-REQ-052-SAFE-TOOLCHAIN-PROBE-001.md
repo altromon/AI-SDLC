@@ -23,6 +23,7 @@ supersedes: null
 superseded-by: null
 ---
 
+
 # SEC-REQ-052-SAFE-TOOLCHAIN-PROBE-001: Invocación Segura de Procesos de Sondeo sin Shell Intermedio
 
 ## 1. Enunciado del Control Técnico
@@ -80,4 +81,5 @@ Feature: Invocación Segura de Sondeo de Herramientas sin Shell Intermedio
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-11 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004, TSK-005, TSK-006) | chg-052-cli-doctor |
 | **1.0.0** | 2026-11-11 | agent-threat-modeler | Especificación de control de prevención de inyección de comandos en sondeos | CHG-052-CLI-DOCTOR |

@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-052-cli-doctor/spec.md
+# Origen: specs/changes/completed/chg-052-cli-doctor/spec.md
 # ID Requerimiento: SPEC-CHG-052-CLI-DOCTOR
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.
