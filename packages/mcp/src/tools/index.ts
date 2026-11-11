@@ -46,6 +46,10 @@ import {
   type SastSeverity,
   submitReviewReport,
   isReviewerRole,
+  DoctorService,
+  DoctorOptions,
+  MigrationService,
+  MigrationOptions,
 } from '@aisdlc/core';
 
 export type McpRole =
@@ -85,6 +89,7 @@ export const MUTATION_TOOLS = new Set([
   'sdd_check_fix',
   'sdd_deposit',
   'sdd_integrate',
+  'migrate',
   'report',
   'report_dashboard',
   'report_quality',
@@ -438,6 +443,39 @@ function registerNewTool(server: McpServer, options: RegisterToolsOptions): void
       return { data: result, isError: !result.success, root: baseRoot };
     });
   });
+}
+
+const MIGRATE_TOOL_SCHEMA = {
+  root: z.string().optional(),
+  dryRun: z.boolean().optional(),
+  backup: z.boolean().optional(),
+  force: z.boolean().optional(),
+  allowPolicyDowngrade: z.boolean().optional(),
+  verbose: z.boolean().optional(),
+  role: z.string().optional(),
+};
+
+function registerMigrateTool(server: McpServer, options: RegisterToolsOptions): void {
+  server.tool(
+    'migrate',
+    'Synchronizes schemas, templates, and policies with upstream canonical versions.',
+    MIGRATE_TOOL_SCHEMA,
+    async (params) => {
+      return executeSecuredTool('migrate', params, options, async (root) => {
+        const service = new MigrationService();
+        const migrationOptions: MigrationOptions = {
+          root,
+          dryRun: params.dryRun,
+          backup: params.backup,
+          force: params.force,
+          allowPolicyDowngrade: params.allowPolicyDowngrade,
+          verbose: params.verbose,
+        };
+        const result = await service.migrate(migrationOptions);
+        return { data: result, isError: !result.success, root };
+      });
+    }
+  );
 }
 
 function registerVerifyTool(server: McpServer, options: RegisterToolsOptions): void {
@@ -958,8 +996,37 @@ function registerGitDetectAuthorTool(server: McpServer, options: RegisterToolsOp
   });
 }
 
+function registerDoctorTool(server: McpServer, options: RegisterToolsOptions): void {
+  server.tool(
+    'doctor',
+    'Comprehensive environment, toolchain, git-hooks, and security health diagnostics.',
+    {
+      root: z.string().optional(),
+      fix: z.boolean().optional(),
+      strict: z.boolean().optional(),
+      offline: z.boolean().optional(),
+      timeout: z.number().optional(),
+    },
+    async (params) => {
+      return executeSecuredTool('doctor', params, options, async (root) => {
+        const service = new DoctorService();
+        const doctorOpts: DoctorOptions = {
+          rootDir: root,
+          fix: params.fix,
+          strict: params.strict,
+          offline: params.offline,
+          timeout: params.timeout,
+        };
+        const report = await service.diagnose(doctorOpts);
+        return { data: report, root };
+      });
+    }
+  );
+}
+
 function registerLifecycleAndSddTools(server: McpServer, options: RegisterToolsOptions): void {
   registerNewTool(server, options);
+  registerMigrateTool(server, options);
   registerVerifyTool(server, options);
   registerReportTool(server, options);
   registerSddChangeNewTool(server, options);
@@ -991,6 +1058,7 @@ function registerReportingAndKpiTools(server: McpServer, options: RegisterToolsO
   registerKpiPrTool(server, options);
   registerKpiReleaseTool(server, options);
   registerGitDetectAuthorTool(server, options);
+  registerDoctorTool(server, options);
 }
 
 export function registerAllTools(server: McpServer, options: RegisterToolsOptions = {}): void {

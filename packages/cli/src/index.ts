@@ -20,6 +20,8 @@ import { runMcpServer } from './commands/mcp.js';
 import { runReportCompliance, runReportDashboard, runReportQuality } from './commands/report.js';
 import { runReviewSubmit } from './commands/review.js';
 import { runInspect } from './commands/inspect.js';
+import { runDoctor } from './commands/doctor.js';
+import { runMigrate } from './commands/migrate.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
   runVerifyAll,
@@ -45,6 +47,28 @@ program
   .name('aisdlc')
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
   .version('4.1.0');
+
+// --- check command (unified pre-flight with auto-fix) ---
+program
+  .command('doctor')
+  .description('Comprehensive environment, toolchain, git-hooks, and security health diagnostics')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('--fix', 'Automatically repair broken or missing git hooks with backup')
+  .option('--json', 'Emit diagnostics report in structured JSON format')
+  .option('--strict', 'Fail with non-zero exit code on warnings as well as critical failures')
+  .option('--offline', 'Skip remote external network probes (e.g. for air-gapped environments)')
+  .option('--timeout <ms>', 'Maximum timeout in milliseconds for subprocess execution', parseInt)
+  .action(async (opts) => {
+    const exitCode = await runDoctor({
+      rootDir: opts.root,
+      fix: opts.fix,
+      json: opts.json,
+      strict: opts.strict,
+      offline: opts.offline,
+      timeout: opts.timeout,
+    });
+    process.exit(exitCode);
+  });
 
 // --- check command (unified pre-flight with auto-fix) ---
 program
@@ -813,6 +837,30 @@ reviewCmd
       json: opts.json,
     });
     if (!ok) process.exit(1);
+  });
+
+// --- migrate command (sync schemas, templates, and policies) ---
+program
+  .command('migrate')
+  .description('Synchronize schemas, templates, and policies with upstream canonical versions')
+  .option('-r, --root <path>', 'Repository root directory')
+  .option('--dry-run', 'Preview changes without mutating filesystem')
+  .option('--no-backup', 'Disable pre-migration backup')
+  .option('-f, --force', 'Overwrite local customizations with canonical versions')
+  .option('--allow-policy-downgrade', 'Permit relaxing stricter quality or security thresholds')
+  .option('--json', 'Output migration report as JSON')
+  .option('-v, --verbose', 'Enable verbose logging')
+  .action(async (opts) => {
+    const exitCode = await runMigrate({
+      root: opts.root,
+      dryRun: opts.dryRun,
+      backup: opts.backup,
+      force: opts.force,
+      allowPolicyDowngrade: opts.allowPolicyDowngrade,
+      json: opts.json,
+      verbose: opts.verbose,
+    });
+    process.exit(exitCode);
   });
 
 // Handle unknown commands gracefully

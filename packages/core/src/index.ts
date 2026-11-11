@@ -46,3 +46,5 @@ export { resolveDeterministicDate, generateDeterministicUuidV5 } from './utils/t
 export { canonicalSort, normalizePath } from './utils/fs.js';
 export * from './inspector/index.js';
 export * from './compliance/index.js';
+export * from './doctor/index.js';
+export * from './migrate/index.js';
