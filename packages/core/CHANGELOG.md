@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 4.2.0
+
+### Minor Changes
+
+- feat(doctor): implement deterministic environment health diagnostics engine (`aisdlc doctor`), validating Git topology safety, hook integrity, multi-agent configuration drift, and toolchain security with zero secret leakage.
+
 ## 4.1.0
 
 ### Minor Changes
