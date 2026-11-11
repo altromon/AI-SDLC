@@ -1,5 +1,11 @@
 # @aisdlc/cli
 
+## 4.2.0
+
+### Minor Changes
+
+- feat(doctor): add `aisdlc doctor` CLI command with interactive diagnostics, category filtering (`--category`), repair recommendations, and structured JSON output (`--json`).
+
 ## 4.1.0
 
 ### Minor Changes
