@@ -356,11 +356,12 @@
     .dashboard-preview .m-item b { display: block; font-size: 1.3rem; color: var(--text); }
 
     /* ---------- Quickstart ---------- */
-    .steps { counter-reset: s; display: grid; gap: 1rem; margin-top: 3rem; }
-    .qs { display: grid; grid-template-columns: 52px 1fr; gap: 1.2rem; align-items: start; padding: 1.2rem 1.4rem; border-radius: 14px; border: 1px solid var(--border); background: var(--card); }
+    .steps { counter-reset: s; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: 3rem; }
+    .qs { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 1.2rem; align-items: start; padding: 1.2rem 1.4rem; min-width: 0; border-radius: 14px; border: 1px solid var(--border); background: var(--card); }
     .qs::before { counter-increment: s; content: counter(s); width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font: 700 1rem var(--mono); background: var(--grad); color: #05060a; }
+    .qs > div { min-width: 0; }
     .qs h4 { margin: 0 0 .3rem; }
-    .qs code { display: block; font-size: .85rem; color: var(--cyan); background: #0a0c14; padding: .55rem .8rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; white-space: nowrap; }
+    .qs code { display: block; font-size: .85rem; color: var(--cyan); background: #0a0c14; padding: .55rem .8rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; white-space: pre; max-width: 100%; }
     .qs p { margin: .5rem 0 0; color: var(--muted); font-size: .9rem; }
 
     /* ---------- CTA / Footer ---------- */
