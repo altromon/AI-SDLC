@@ -1,0 +1,23 @@
+id: HOF-CHG-056-SCA-SBOM-INGESTION
+type: handoff
+title: Handoff de Arquitectura para SCA SBOM ingestion
+changeId: CHG-056-SCA-SBOM-INGESTION
+version: 1.0.0
+createdAt: '2026-11-12T07:40:00.000Z'
+subgraph:
+  requirements:
+    - FR-056-SCA-SBOM-INGESTION-001
+  useCases:
+    - UC-056-SCA-SBOM-INGESTION
+  components:
+    - CMP-054-SCA-LICENSE-RESOLUTION
+  businessRules:
+    - BR-SCA-LICENSE-ATTRIBUTION-INTEGRITY
+citations:
+  - id: UC-056-SCA-SBOM-INGESTION
+    digest: sha256:aba45db23f408c3fc783b46bd10571b318d1d115098402667483b3cbaf17e985
+    comment: Citación upstream
+  - id: FR-056-SCA-SBOM-INGESTION-001
+    digest: sha256:833be4b494db8570d4c388f0a97e15c94a16d19c1b90849d1ad0cb2bae8f3a44
+    comment: Citación upstream
+

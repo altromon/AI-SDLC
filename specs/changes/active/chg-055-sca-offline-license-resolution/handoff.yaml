@@ -1,0 +1,24 @@
+id: HOF-CHG-055-SCA-OFFLINE-LICENSE-RESOLUTION
+type: handoff
+title: Handoff de Arquitectura para SCA offline license resolution
+changeId: CHG-055-SCA-OFFLINE-LICENSE-RESOLUTION
+version: 1.0.0
+createdAt: '2026-11-12T07:40:00.000Z'
+subgraph:
+  requirements:
+    - FR-055-SCA-OFFLINE-LICENSE-RESOLUTION-001
+  useCases:
+    - UC-055-SCA-OFFLINE-LICENSE-RESOLUTION
+  components:
+    - CMP-054-SCA-LICENSE-RESOLUTION
+  businessRules:
+    - BR-SCA-LICENSE-ATTRIBUTION-INTEGRITY
+    - BR-SCA-EXTERNAL-CLI-SAFE-EXECUTION
+citations:
+  - id: UC-055-SCA-OFFLINE-LICENSE-RESOLUTION
+    digest: sha256:06dab455adef09a426584b0ad0ea4be2b473e0a5884459ebe661f3373e837475
+    comment: Citación upstream
+  - id: FR-055-SCA-OFFLINE-LICENSE-RESOLUTION-001
+    digest: sha256:e30758a662030166efe15f86abbf0cb35a9bfccb77c36f5fc7f86fbe83d34fb9
+    comment: Citación upstream
+
