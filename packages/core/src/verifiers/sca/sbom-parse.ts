@@ -97,7 +97,7 @@ function isCdxRootMatch(comp: Record<string, unknown>, rootComp?: Record<string,
   if (!rootComp) return false;
   if (typeof comp['bom-ref'] === 'string' && comp['bom-ref'] === rootComp['bom-ref']) return true;
   if (typeof comp.purl === 'string' && comp.purl === rootComp.purl) return true;
-  return comp.name === rootComp.name && comp.version === rootComp.version;
+  return typeof comp.name === 'string' && comp.name === rootComp.name && comp.version === rootComp.version;
 }
 
 function buildComponentFromFields(
