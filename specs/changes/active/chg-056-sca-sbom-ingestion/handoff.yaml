@@ -2,8 +2,8 @@ id: HOF-CHG-056-SCA-SBOM-INGESTION
 type: handoff
 title: Handoff de Arquitectura para SCA SBOM ingestion
 changeId: CHG-056-SCA-SBOM-INGESTION
-version: 1.0.0
-createdAt: '2026-11-12T07:40:00.000Z'
+version: 1.1.0
+createdAt: '2026-11-13T07:00:00.000Z'
 subgraph:
   requirements:
     - FR-056-SCA-SBOM-INGESTION-001
@@ -13,11 +13,19 @@ subgraph:
     - CMP-054-SCA-LICENSE-RESOLUTION
   businessRules:
     - BR-SCA-LICENSE-ATTRIBUTION-INTEGRITY
+  securityRequirements:
+    - SEC-REQ-055-SBOM-INGESTION-SAFETY-001
+    - SEC-REQ-055-OUTPUT-SANITIZATION-INTEGRITY-001
 citations:
   - id: UC-056-SCA-SBOM-INGESTION
-    digest: sha256:aba45db23f408c3fc783b46bd10571b318d1d115098402667483b3cbaf17e985
+    digest: sha256:55a3930202cf6a2b189d314ece3855bcf9dce4dd747894482ee0f917b128a63f
     comment: Citación upstream
   - id: FR-056-SCA-SBOM-INGESTION-001
-    digest: sha256:833be4b494db8570d4c388f0a97e15c94a16d19c1b90849d1ad0cb2bae8f3a44
+    digest: sha256:798419682a1d8b413f2c8e3d72fd16f4905b74832abcdceb2eb1d7a51b2dfc4a
     comment: Citación upstream
-
+  - id: BR-SCA-LICENSE-ATTRIBUTION-INTEGRITY
+    digest: sha256:b967c3e510f66024ee48be54ae3c0175a02055fa7a4a5dd265e313e3672f4a94
+    comment: Citación upstream
+  - id: CMP-054-SCA-LICENSE-RESOLUTION
+    digest: sha256:6415b7c4495732b493b658c9046e4a579564a708b99e7edd9bd65283d97a7996
+    comment: Citación upstream

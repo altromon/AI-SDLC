@@ -24,7 +24,7 @@ To auditar proyectos reales sin dependencias falsamente `UNKNOWN`.
 
 Contexto: issue #161, cambio (B). Los lockfiles (`poetry.lock`, `uv.lock`, `go.mod`, `Cargo.lock`) no contienen licencias. Fuera de alcance: OSV offline (#194); ingesta de SBOM (UC-056).
 
-Orden de resolución por dependencia: (1) metadatos locales, (2) CLI oficial local, (3) `UNRESOLVED` explícito.
+Orden de resolución por dependencia: (1) parseo de archivos locales, (2) CLI oficial local endurecido (decisión PO: se mantienen todos los CLIs, con medidas de bloqueo de BR-SCA-EXTERNAL-CLI-SAFE-EXECUTION), (3) `UNRESOLVED` explícito (≡ `UNKNOWN` para Gate 6).
 
 | Ecosistema | 1. Metadatos locales | 2. CLI local |
 | :--- | :--- | :--- |
@@ -46,6 +46,7 @@ Orden de resolución por dependencia: (1) metadatos locales, (2) CLI oficial loc
 5. Gate 6 evalúa contra `license-policy.yaml`.
 
 ## 4. Flujos Alternativos y de Excepción
+- **D (Repositorio con archivos bloqueantes, p. ej. `.mvn/extensions.xml`, `Directory.Build.props`, `.pnpmfile.cjs`, `.cargo/config.toml`)**: el CLI se rechaza; fallback a parseo de archivos o `UNRESOLVED` (`blocked_by_repo_config`).
 - **A (CLI ausente)**: se omite ese paso, la dependencia queda `UNRESOLVED` con diagnóstico (no fatal).
 - **B (Timeout/salida excesiva)**: proceso abortado, `UNRESOLVED`.
 - **C (Cache ausente)**: `UNRESOLVED` indicando que debe instalarse/cachearse la dependencia; nunca descarga de red.
@@ -106,3 +107,5 @@ Feature: Resolución offline de licencias por ecosistema
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
 | **0.1.0** | 2026-11-12 | agent-product-analyst | Definición inicial (issue #161, cambio B) | CHG-055-SCA-OFFLINE-LICENSE-RESOLUTION |
+
+

@@ -30,7 +30,7 @@ Contexto: issue #161, cambio (A). Defectos actuales: `scanner.ts` (parseo de `po
 1. El usuario ejecuta la auditoría SCA sobre un proyecto Maven.
 2. El escáner extrae las dependencias y NO usa el bloque `<licenses>` del proyecto raíz para ellas.
 3. Cada dependencia obtiene licencia solo de una fuente propia; si no existe, `UNKNOWN`.
-4. Al generar el SBOM, cada `vulnerabilities[].affects[].ref` coincide con el PURL (`pkg:maven/…`, `pkg:pypi/…`, `pkg:cargo/…`, `pkg:golang/…`, `pkg:npm/…`) del componente afectado.
+4. Al generar el SBOM, cada `vulnerabilities[].affects[].ref` coincide con el PURL (`pkg:maven/…`, `pkg:pypi/…`, `pkg:cargo/…`, `pkg:golang/…`, `pkg:npm/…`) del componente afectado; ecosistema desconocido → `pkg:generic` con aviso (nunca `pkg:npm`).
 
 ## 4. Flujos Alternativos y de Excepción
 - **A (Dependencia sin PURL propio)**: se construye el PURL desde el ecosistema de la dependencia, nunca con `npm` por defecto para ecosistemas conocidos.
@@ -81,3 +81,4 @@ Feature: Corrección de herencia de licencia Maven y PURL por ecosistema
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
 | **0.1.0** | 2026-11-12 | agent-product-analyst | Definición inicial (issue #161, cambio A) | CHG-054-SCA-MAVEN-LICENSE-PURL-FIX |
+

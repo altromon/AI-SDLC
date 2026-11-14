@@ -2,8 +2,8 @@ id: HOF-CHG-055-SCA-OFFLINE-LICENSE-RESOLUTION
 type: handoff
 title: Handoff de Arquitectura para SCA offline license resolution
 changeId: CHG-055-SCA-OFFLINE-LICENSE-RESOLUTION
-version: 1.0.0
-createdAt: '2026-11-12T07:40:00.000Z'
+version: 1.1.0
+createdAt: '2026-11-13T07:00:00.000Z'
 subgraph:
   requirements:
     - FR-055-SCA-OFFLINE-LICENSE-RESOLUTION-001
@@ -14,11 +14,25 @@ subgraph:
   businessRules:
     - BR-SCA-LICENSE-ATTRIBUTION-INTEGRITY
     - BR-SCA-EXTERNAL-CLI-SAFE-EXECUTION
+  securityRequirements:
+    - SEC-REQ-055-SAFE-EXEC-HARDENING-001
+    - SEC-REQ-055-CLI-HIJACK-RESISTANCE-001
+    - SEC-REQ-055-OUTPUT-SANITIZATION-INTEGRITY-001
+blockedBy:
+  - CHG-054-SCA-MAVEN-LICENSE-AND-PURL-FIX
 citations:
   - id: UC-055-SCA-OFFLINE-LICENSE-RESOLUTION
-    digest: sha256:06dab455adef09a426584b0ad0ea4be2b473e0a5884459ebe661f3373e837475
+    digest: sha256:38d5b5d3b076f939ac06ff8b7c9970f46cfea53e343282b37da8783978dfc5e9
     comment: Citación upstream
   - id: FR-055-SCA-OFFLINE-LICENSE-RESOLUTION-001
-    digest: sha256:e30758a662030166efe15f86abbf0cb35a9bfccb77c36f5fc7f86fbe83d34fb9
+    digest: sha256:3c5d2e59cbeec0bac5bd87a94595bff7a3c5c3789943fd2b582b836997942562
     comment: Citación upstream
-
+  - id: BR-SCA-LICENSE-ATTRIBUTION-INTEGRITY
+    digest: sha256:b967c3e510f66024ee48be54ae3c0175a02055fa7a4a5dd265e313e3672f4a94
+    comment: Citación upstream
+  - id: BR-SCA-EXTERNAL-CLI-SAFE-EXECUTION
+    digest: sha256:4ff171048a4f674c53c72528e260f54f815d4ffc94a649c9f4bdbb51485fbc3c
+    comment: Citación upstream
+  - id: CMP-054-SCA-LICENSE-RESOLUTION
+    digest: sha256:6415b7c4495732b493b658c9046e4a579564a708b99e7edd9bd65283d97a7996
+    comment: Citación upstream
