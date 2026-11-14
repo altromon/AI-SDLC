@@ -7,6 +7,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import { ScannedDependency, ScaTool, ScaVulnerability, VexStatement, VulnerabilityThresholds } from '../../types/index.js';
+import { buildPurl } from './purl.js';
+import { parseMavenPomDependencies } from './maven-xml.js';
 
 export interface ScanOptions {
   depth?: 'direct' | 'transitive';
@@ -403,48 +405,23 @@ export function scanRustDependencies(rootDir: string, seen: Map<string, ScannedD
   }
 }
 
-function extractXmlTag(xml: string, tag: string): string | undefined {
-  const m = xml.match(new RegExp(`<${tag}>([^<]+)</${tag}>`));
-  return m ? m[1].trim() : undefined;
-}
-
-function resolveMavenBlockLicense(block: string, defaultLic: string): string {
-  const tagLic = extractXmlTag(block, 'license');
-  if (tagLic) return tagLic;
-  const commentLic = block.match(/<!--\s*(?:spdx|license)\s*:\s*([A-Za-z0-9.+-]+)\s*-->/i)?.[1];
-  return commentLic || defaultLic;
-}
-
-function parseMavenDepBlock(block: string, defaultLic: string, pomPath: string): ScannedDependency | null {
-  const groupId = extractXmlTag(block, 'groupId');
-  const artifactId = extractXmlTag(block, 'artifactId');
-  if (!groupId || !artifactId) return null;
-  const version = extractXmlTag(block, 'version') || 'unknown';
-  const inlineLic = resolveMavenBlockLicense(block, defaultLic);
-  return {
-    name: `${groupId}:${artifactId}`,
-    version,
-    spdxLicense: normalizeSpdxLicense(inlineLic),
-    purl: `pkg:maven/${groupId}/${artifactId}@${version}`,
-    path: pomPath,
-    isDirect: true,
-  };
-}
-
 export function scanMavenDependencies(rootDir: string, seen: Map<string, ScannedDependency>): void {
   const pomPath = path.join(rootDir, 'pom.xml');
   const content = readTextIfExists(pomPath);
   if (!content) return;
 
-  const projectLicBlock = content.match(/<licenses>([\s\S]*?)<\/licenses>/)?.[1] || '';
-  const defaultLic = extractXmlTag(projectLicBlock, 'name') || 'UNKNOWN';
-  const depBlocks = content.match(/<dependency>[\s\S]*?<\/dependency>/g) || [];
-
-  for (const block of depBlocks) {
-    const dep = parseMavenDepBlock(block, defaultLic, pomPath);
-    if (dep && !seen.has(`maven:${dep.name}@${dep.version}`)) {
-      seen.set(`maven:${dep.name}@${dep.version}`, dep);
-    }
+  for (const raw of parseMavenPomDependencies(content)) {
+    const name = `${raw.groupId}:${raw.artifactId}`;
+    const dep: ScannedDependency = {
+      name,
+      version: raw.version,
+      spdxLicense: normalizeSpdxLicense(raw.license),
+      purl: buildPurl({ ecosystem: 'maven', namespace: raw.groupId, name: raw.artifactId, version: raw.version }),
+      path: pomPath,
+      isDirect: true,
+    };
+    const key = `maven:${dep.name}@${dep.version}`;
+    if (!seen.has(key)) seen.set(key, dep);
   }
 }
 
@@ -575,12 +552,14 @@ function parseTrivyOutput(stdout: string): ScannedDependency[] {
   const data = JSON.parse(stdout);
   const deps: ScannedDependency[] = [];
   for (const r of data.Results || []) {
+    const ecosystem = typeof r.Type === 'string' ? r.Type : 'generic';
     for (const p of r.Packages || []) {
+      const version = p.Version || 'unknown';
       deps.push({
         name: p.Name,
-        version: p.Version || 'unknown',
+        version,
         spdxLicense: normalizeSpdxLicense(p.Licenses?.[0] || 'UNKNOWN'),
-        purl: p.Identifier?.PURL || `pkg:npm/${p.Name}@${p.Version || 'unknown'}`,
+        purl: p.Identifier?.PURL || buildPurl({ ecosystem, name: p.Name, version }),
       });
     }
   }
@@ -624,11 +603,13 @@ function parseSyftOutput(stdout: string): ScannedDependency[] {
   const deps: ScannedDependency[] = [];
   for (const a of data.artifacts || []) {
     const lic = a.licenses?.[0]?.value || 'UNKNOWN';
+    const version = a.version || 'unknown';
+    const ecosystem = typeof a.type === 'string' ? a.type : 'generic';
     deps.push({
       name: a.name,
-      version: a.version || 'unknown',
+      version,
       spdxLicense: normalizeSpdxLicense(lic),
-      purl: a.purl || `pkg:npm/${a.name}@${a.version || 'unknown'}`,
+      purl: a.purl || buildPurl({ ecosystem, name: a.name, version }),
       author: a.metadata?.author,
     });
   }

@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-maven-license.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:
@@ -36,7 +36,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-purl.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:
@@ -51,8 +51,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-sbom-purl.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-002'
+    status: COMPLETED
     blocked-by:
       - TSK-002
     implements-components:
@@ -69,8 +68,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-purl-fallback.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-002'
+    status: COMPLETED
     blocked-by:
       - TSK-002
     implements-components:
@@ -87,8 +85,7 @@ tasks:
       method: quality-gate
       command-or-criteria: pnpm run typecheck; pnpm test; pnpm run verify:all
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-001, TSK-003, TSK-004'
+    status: COMPLETED
     blocked-by:
       - TSK-001
       - TSK-003

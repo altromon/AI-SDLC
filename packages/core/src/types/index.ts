@@ -687,6 +687,8 @@ export interface ScaVulnerability {
   installedVersion: string;
   fixedVersion?: string;
   severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'UNKNOWN';
+  ecosystem?: string;
+  purl?: string;
   cvssV3Score?: number;
   cvssV3Vector?: string;
   title?: string;
