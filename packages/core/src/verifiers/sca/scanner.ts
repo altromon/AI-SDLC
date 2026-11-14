@@ -13,6 +13,12 @@ import { resolveLicense } from './license-resolve.js';
 import { resetGlobalBudget } from './safe-exec.js';
 import { ingestSbomFile } from './sbom-ingest.js';
 import { parseIngestedSbom, parseStrictPurl, type SbomComponent } from './sbom-parse.js';
+import {
+  ensureToolAvailable,
+  resolveTrustedBinaryPath,
+  type EnsureToolOptions,
+  type EnsureToolResult,
+} from '../tool-installer.js';
 
 export interface ScanOptions {
   depth?: 'direct' | 'transitive';
@@ -645,10 +651,12 @@ export function parseTrivyOutput(stdout: string): ScannedDependency[] {
 
 function execTrivyCli(rootDir: string, checkTypes: string): string | null {
   try {
+    const trivyBin = resolveTrustedBinaryPath('trivy', rootDir);
+    if (!trivyBin) return null;
     const res = child_process.spawnSync(
-      'trivy',
+      trivyBin,
       ['fs', '--format', 'json', '--security-checks', checkTypes, rootDir],
-      { encoding: 'utf-8', timeout: 30000 }
+      { encoding: 'utf-8', timeout: 30000, shell: false }
     );
     return res.status === 0 && res.stdout ? res.stdout : null;
   } catch {
@@ -672,6 +680,43 @@ export function scanWithTrivy(
     dependencies: parseTrivyOutput(stdout),
     vulnerabilities: parseTrivyVulnerabilities(stdout),
     executed: true,
+  };
+}
+
+export async function ensureTrivyAvailable(options: EnsureToolOptions = {}): Promise<EnsureToolResult> {
+  return ensureToolAvailable('trivy', options);
+}
+
+export interface TrivyAsyncResult {
+  dependencies: ScannedDependency[];
+  vulnerabilities: ScaVulnerability[];
+  executed: boolean;
+  warnings: string[];
+  missingError?: string;
+}
+
+function emptyTrivyResult(warnings: string[], missingError?: string): TrivyAsyncResult {
+  return { dependencies: [], vulnerabilities: [], executed: false, warnings, missingError };
+}
+
+export async function scanWithTrivyAsync(
+  rootDir: string,
+  options: EnsureToolOptions & { scanVulnerabilities?: boolean } = {}
+): Promise<TrivyAsyncResult> {
+  const ensured = await ensureTrivyAvailable({ ...options, rootDir });
+  if (!ensured.available) {
+    return emptyTrivyResult(ensured.warning ? [ensured.warning] : [], ensured.missingError);
+  }
+  const checkTypes = options.scanVulnerabilities !== false ? 'vuln,license' : 'license';
+  const stdout = execTrivyCli(rootDir, checkTypes);
+  if (!stdout) {
+    return emptyTrivyResult(['Trivy execution produced no output.']);
+  }
+  return {
+    dependencies: parseTrivyOutput(stdout),
+    vulnerabilities: parseTrivyVulnerabilities(stdout),
+    executed: true,
+    warnings: [],
   };
 }
 

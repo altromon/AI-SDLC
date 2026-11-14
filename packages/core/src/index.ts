@@ -24,6 +24,8 @@ export * from './verifiers/manuals.js';
 export * from './verifiers/duplicates.js';
 export * from './verifiers/secrets.js';
 export * from './verifiers/sast.js';
+export * from './verifiers/tool-installer.js';
+export * from './verifiers/sast-orchestrator.js';
 export * from './verifiers/sarif-ingest.js';
 export * from './verifiers/sarif-sast.js';
 export * from './verifiers/security-suppressions.js';

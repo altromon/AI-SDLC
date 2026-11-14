@@ -16,7 +16,14 @@ import {
   ScannedDependency,
   VexStatement,
 } from '../types/index.js';
-import { scanInstalledLicenses, scanWithSbom, scanWithTrivy, evaluateVulnerabilityThresholds } from './sca/scanner.js';
+import {
+  ensureTrivyAvailable,
+  scanInstalledLicenses,
+  scanWithSbom,
+  scanWithTrivy,
+  evaluateVulnerabilityThresholds,
+} from './sca/scanner.js';
+import { readFailOnMissingToolFromQualityPolicy } from './sast.js';
 import {
   generateCycloneDxSbom,
   generateThirdPartyNotices,
@@ -43,6 +50,7 @@ interface RawLicensePolicy {
     sbom_format?: string;
     output_notices_file?: string;
     allowed_depth?: 'DIRECT' | 'TRANSITIVE' | string;
+    fail_on_missing_tool?: boolean;
   };
 }
 
@@ -592,4 +600,61 @@ export function verifyLicenses(options: LicenseVerificationOptions = {}): Licens
     return handleStaticManifestVerification(options, rootDir, toCleanPolicy(policyWithRaw));
   }
   return runDynamicLicenseVerification(options, rootDir, policyWithRaw);
+}
+
+function resolveLicenseFailOnMissingTool(
+  options: LicenseVerificationOptions,
+  rootDir: string,
+  rawPolicy?: RawLicensePolicy
+): boolean {
+  if (options.failOnMissingTool !== undefined) return options.failOnMissingTool;
+  if (rawPolicy?.ci_gates?.fail_on_missing_tool !== undefined) {
+    return Boolean(rawPolicy.ci_gates.fail_on_missing_tool);
+  }
+  return readFailOnMissingToolFromQualityPolicy(rootDir);
+}
+
+async function checkTrivyToolPrecondition(
+  options: LicenseVerificationOptions,
+  rootDir: string,
+  failOnMissingTool: boolean
+): Promise<{ warnings: string[]; blocked: boolean }> {
+  if (options.tool !== 'trivy' && options.scanVulnerabilities === false) {
+    return { warnings: [], blocked: false };
+  }
+  const ensured = await ensureTrivyAvailable({
+    rootDir,
+    nonInteractive: options.nonInteractive,
+    noInstallPrompt: options.noInstallPrompt,
+    ci: options.ci,
+    isTTY: options.isTTY,
+    failOnMissingTool,
+    confirmInstall: options.confirmInstall as NonNullable<Parameters<typeof ensureTrivyAvailable>[0]>['confirmInstall'],
+  });
+  if (ensured.available) return { warnings: [], blocked: false };
+  return {
+    warnings: ensured.warning ? [ensured.warning] : [],
+    blocked: Boolean(ensured.missingError),
+  };
+}
+
+export async function verifyLicensesAsync(
+  options: LicenseVerificationOptions = {}
+): Promise<LicenseVerificationResult> {
+  const rootDir = options.rootDir || process.cwd();
+  const policyWithRaw = loadLicensePolicy(rootDir, options.policyPath);
+  if (Boolean(options.manifestPath || options.dynamic === false)) {
+    return handleStaticManifestVerification(options, rootDir, toCleanPolicy(policyWithRaw));
+  }
+  const failOnMissingTool = resolveLicenseFailOnMissingTool(options, rootDir, policyWithRaw.rawPolicy);
+  const trivyCheck = await checkTrivyToolPrecondition(options, rootDir, failOnMissingTool);
+  const base = runDynamicLicenseVerification(options, rootDir, policyWithRaw);
+  const allWarnings = [...(base.warnings || []), ...trivyCheck.warnings];
+  const success = base.success && !trivyCheck.blocked;
+  return {
+    ...base,
+    success,
+    passed: success,
+    ...(allWarnings.length > 0 ? { warnings: allWarnings } : {}),
+  };
 }

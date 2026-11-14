@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as child_process from 'child_process';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { scanWithSyft, scanWithTrivy } from '../src/verifiers/sca/scanner.js';
 
 vi.mock('child_process', () => ({
@@ -8,12 +11,25 @@ vi.mock('child_process', () => ({
 }));
 
 describe('CHG-054 TSK-004: Trivy & Syft PURL fallback without changing CLI argv', () => {
+  const tmpDirs: string[] = [];
+
   afterEach(() => {
     vi.clearAllMocks();
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+    for (const dir of tmpDirs.splice(0)) {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('uses buildPurl for Trivy packages lacking Identifier.PURL and preserves spawnSync argv', () => {
+    const binDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-sca-trivy-'));
+    tmpDirs.push(binDir);
+    const trivyBin = path.join(binDir, process.platform === 'win32' ? 'trivy.exe' : 'trivy');
+    fs.writeFileSync(trivyBin, '');
+    if (process.platform !== 'win32') fs.chmodSync(trivyBin, 0o755);
+    vi.stubEnv('PATH', binDir);
+
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.mocked(child_process.execFileSync).mockReturnValue(Buffer.from(''));
     vi.mocked(child_process.spawnSync).mockReturnValue({
@@ -47,9 +63,9 @@ describe('CHG-054 TSK-004: Trivy & Syft PURL fallback without changing CLI argv'
 
     expect(result.executed).toBe(true);
     expect(child_process.spawnSync).toHaveBeenCalledWith(
-      'trivy',
+      trivyBin,
       ['fs', '--format', 'json', '--security-checks', 'vuln,license', '/tmp/repo'],
-      expect.objectContaining({ encoding: 'utf-8' })
+      expect.objectContaining({ encoding: 'utf-8', shell: false })
     );
 
     const goDep = result.dependencies.find((d) => d.name === 'github.com/gin-gonic/gin');

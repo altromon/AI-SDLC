@@ -731,6 +731,12 @@ export interface LicenseVerificationOptions {
   productionOnly?: boolean;
   scanVulnerabilities?: boolean;
   vulnerabilityThresholds?: VulnerabilityThresholds;
+  nonInteractive?: boolean;
+  noInstallPrompt?: boolean;
+  ci?: boolean;
+  isTTY?: boolean;
+  failOnMissingTool?: boolean;
+  confirmInstall?: (spec: import('../verifiers/tool-installer.js').ToolInstallSpec) => Promise<boolean> | boolean;
 }
 
 export interface LicenseVerificationResult {
@@ -1095,6 +1101,13 @@ export interface SastVerifierOptions {
   targetDirectories?: string[];
   minSeverity?: SastSeverity;
   sarifPaths?: string[];
+  orchestrate?: boolean;
+  nonInteractive?: boolean;
+  noInstallPrompt?: boolean;
+  ci?: boolean;
+  isTTY?: boolean;
+  failOnMissingTool?: boolean;
+  confirmInstall?: (spec: import('../verifiers/tool-installer.js').ToolInstallSpec) => Promise<boolean> | boolean;
 }
 
 export interface SastVerifierResult {
@@ -1104,6 +1117,8 @@ export interface SastVerifierResult {
   violations: SastViolation[];
   suppressions?: SecuritySuppression[];
   reportMarkdown?: string;
+  warnings?: string[];
+  executedTools?: string[];
 }
 
 export interface PromptInjectionFinding {

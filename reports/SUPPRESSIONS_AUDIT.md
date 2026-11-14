@@ -1,6 +1,6 @@
 # 📋 Security Suppressions and Audit Exceptions Inventory
 
-> **Generated at:** 2026-11-14T10:42:33.000Z
+> **Generated at:** 2026-11-14T12:51:01.000Z
 > **Total Audited Suppressions:** 4 | **Active:** 2 | **Expired:** 0 | **Invalid:** 2
 
 ## 1. Executive Summary
@@ -16,7 +16,7 @@
 | Engine | Rule / ID | Location | Details / Justification | Expires | Approved By |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | SECRET | `SEC-001` | `C:\Users\reypo\Documents\Workspace\AI-SDLC\packages\core\tests\security-suppressions.spec.ts:42` | Test fixture | 2099-01-01 | sec-lead@empresa.com |
-| SAST | `PROMPT-INJ-MODE-OVERRIDE` | `packages/core/src/verifiers/sast.ts:566` | Regla interna de deteccion | 2099-12-31 | security@ai-sdlc.dev |
+| SAST | `PROMPT-INJ-MODE-OVERRIDE` | `packages/core/src/verifiers/sast.ts:673` | Regla interna de deteccion | 2099-12-31 | security@ai-sdlc.dev |
 
 ## 3. Expired or Invalid Exceptions (Blocking/Rejected)
 

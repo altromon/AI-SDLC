@@ -27,6 +27,8 @@ import {
 import { parseSecuritySuppression } from './security-suppressions.js';
 import { ingestSarifFiles, isPathOutsideRoot, normalizeWinDrive, SarifIngestionError } from './sarif-ingest.js';
 import { parseSarifDocuments, SEVERITY_RANK } from './sarif-sast.js';
+import { ensureToolAvailable } from './tool-installer.js';
+import { deduplicateAndSortSastViolations, orchestratePolyglotSast } from './sast-orchestrator.js';
 
 export const GENERAL_SOURCE_EXTENSIONS: readonly string[] = [
   '.ts',
@@ -493,6 +495,111 @@ export function verifySast(options: SastVerifierOptions = {}): SastVerifierResul
 
   result.reportMarkdown = generateSastReportMarkdown(result);
   return result;
+}
+
+export function readFailOnMissingToolFromQualityPolicy(rootDir: string): boolean {
+  const policyPath = path.join(rootDir, 'quality-policy.yaml');
+  if (!fs.existsSync(policyPath)) return false;
+  try {
+    const doc = yaml.load(fs.readFileSync(policyPath, 'utf-8')) as Record<string, unknown> | undefined;
+    const rt = doc?.release_thresholds as Record<string, unknown> | undefined;
+    const sast = rt?.sast_analysis as Record<string, unknown> | undefined;
+    return Boolean(sast?.fail_on_missing_tool ?? doc?.fail_on_missing_tool);
+  } catch {
+    return false;
+  }
+}
+
+interface AsyncSastExtras {
+  violations: SastViolation[];
+  warnings: string[];
+  executedTools: string[];
+  blocked: boolean;
+}
+
+function emptySastExtras(): AsyncSastExtras {
+  return { violations: [], warnings: [], executedTools: [], blocked: false };
+}
+
+async function runSemgrepWithEnsure(
+  rootDir: string,
+  options: SastVerifierOptions,
+  failOnMissingTool: boolean
+): Promise<AsyncSastExtras> {
+  const ensured = await ensureToolAvailable('semgrep', { ...options, rootDir, failOnMissingTool });
+  if (!ensured.available) {
+    return {
+      violations: [],
+      warnings: ensured.warning ? [ensured.warning] : [],
+      executedTools: [],
+      blocked: Boolean(ensured.missingError),
+    };
+  }
+  try {
+    return { violations: runSemgrepCli(rootDir), warnings: [], executedTools: ['semgrep'], blocked: false };
+  } catch {
+    return { violations: [], warnings: ['Semgrep execution failed.'], executedTools: [], blocked: false };
+  }
+}
+
+async function runAsyncSastTools(
+  rootDir: string,
+  options: SastVerifierOptions,
+  failOnMissingTool: boolean
+): Promise<AsyncSastExtras> {
+  if (options.orchestrate) {
+    const orch = await orchestratePolyglotSast(rootDir, { ...options, failOnMissingTool });
+    const blocked = failOnMissingTool && orch.diagnostics.some((d) => d.status === 'skipped');
+    return { violations: orch.violations, warnings: orch.warnings, executedTools: orch.executedTools, blocked };
+  }
+  if (options.semgrep) {
+    return runSemgrepWithEnsure(rootDir, options, failOnMissingTool);
+  }
+  return emptySastExtras();
+}
+
+function collectBuiltinSast(rootDir: string, options: SastVerifierOptions) {
+  const minSeverity = options.minSeverity || 'HIGH';
+  const targetDirs = options.targetDirectories || ['src', 'packages', 'prompts'];
+  const filesToScan = collectSastFiles(rootDir, targetDirs);
+  const violations: SastViolation[] = [];
+  const suppressions: SecuritySuppression[] = [];
+  for (const file of filesToScan) {
+    violations.push(...scanFileForSast(file, rootDir, minSeverity, suppressions));
+  }
+  return { filesToScan, violations, suppressions };
+}
+
+function buildAsyncSastResult(
+  filesScanned: number,
+  violations: SastViolation[],
+  suppressions: SecuritySuppression[],
+  extras: AsyncSastExtras
+): SastVerifierResult {
+  const merged = deduplicateAndSortSastViolations([...violations, ...extras.violations]);
+  const hasExpired = suppressions.some((s) => s.status === 'expired');
+  const result: SastVerifierResult = {
+    success: merged.length === 0 && !hasExpired && !extras.blocked,
+    totalFilesScanned: filesScanned,
+    violationsCount: merged.length,
+    violations: merged,
+    suppressions,
+    ...(extras.warnings.length > 0 ? { warnings: extras.warnings } : {}),
+    ...(extras.executedTools.length > 0 ? { executedTools: extras.executedTools } : {}),
+  };
+  result.reportMarkdown = generateSastReportMarkdown(result);
+  return result;
+}
+
+export async function verifySastAsync(options: SastVerifierOptions = {}): Promise<SastVerifierResult> {
+  const rootDir = options.rootDir || process.cwd();
+  if (options.sarifPaths && options.sarifPaths.length > 0) {
+    return verifySastFromSarif(rootDir, options);
+  }
+  const { filesToScan, violations, suppressions } = collectBuiltinSast(rootDir, options);
+  const failOnMissingTool = options.failOnMissingTool ?? readFailOnMissingToolFromQualityPolicy(rootDir);
+  const extras = await runAsyncSastTools(rootDir, options, failOnMissingTool);
+  return buildAsyncSastResult(filesToScan.length, violations, suppressions, extras);
 }
 
 const SAST_SEVERITY_BADGES: Record<SastSeverity, string> = {

@@ -4,17 +4,20 @@
 
 import pc from 'picocolors';
 import * as path from 'path';
+import * as readline from 'node:readline/promises';
 import {
   writeReportFileIfChanged,
   checkGherkinInSync,
   verifyArtifactDuplicates,
   verifyArtifactsSchemas,
   verifyLicenses,
+  verifyLicensesAsync,
   verifyPdacGraph,
   verifyPrivacy,
   verifyProgressiveFriction,
   verifyQualityGate,
   verifySast,
+  verifySastAsync,
   SarifIngestionError,
   verifySecrets,
   verifyTasksGovernance,
@@ -26,7 +29,22 @@ import {
   writeSecuritySarifReport,
   type SecuritySuppression,
   type SastSeverity,
+  type ToolInstallSpec,
 } from '@aisdlc/core';
+
+function createTtyConfirmInstall() {
+  return async (spec: ToolInstallSpec): Promise<boolean> => {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    try {
+      const answer = await rl.question(
+        `Tool "${spec.tool}" is not installed. Run "${spec.displayCommand}"? [y/N] `
+      );
+      return /^y(es)?$/i.test(answer.trim());
+    } finally {
+      rl.close();
+    }
+  };
+}
 
 export interface VerifyBaseOptions {
   root?: string;
@@ -473,6 +491,9 @@ export interface LicenseVerifyOptions extends VerifyBaseOptions {
   sbom?: boolean | string;
   sbomInput?: string;
   notices?: boolean | string;
+  nonInteractive?: boolean;
+  noInstallPrompt?: boolean;
+  ci?: boolean;
 }
 
 function emitLicensesJson(result: ReturnType<typeof verifyLicenses>): void {
@@ -549,7 +570,29 @@ function buildLicenseVerifyInput(options: LicenseVerifyOptions, rootDir: string)
     generateNotices: options.notices !== undefined ? Boolean(options.notices) : undefined,
     noticesPath: typeof options.notices === 'string' ? options.notices : undefined,
     scanVulnerabilities: options.vuln !== undefined ? Boolean(options.vuln) : undefined,
+    nonInteractive: options.nonInteractive,
+    noInstallPrompt: options.noInstallPrompt,
+    ci: options.ci,
+    confirmInstall: createTtyConfirmInstall(),
   };
+}
+
+function finalizeLicensesOutput(
+  result: ReturnType<typeof verifyLicenses>,
+  options: LicenseVerifyOptions,
+  useJson: boolean
+): boolean {
+  if (result.warnings && result.warnings.length > 0 && !options.silent) {
+    for (const warning of result.warnings) {
+      process.stderr.write(`[SBOM WARNING] ${warning}\n`);
+    }
+  }
+  if (useJson) {
+    emitLicensesJson(result);
+  } else if (!options.silent) {
+    printLicensesConsole(result);
+  }
+  return result.success;
 }
 
 export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
@@ -558,21 +601,18 @@ export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
   if (!options.silent && !useJson) {
     console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verifying Open Source License Compliance (SCA)...')));
   }
-
   const result = verifyLicenses(buildLicenseVerifyInput(options, rootDir));
+  return finalizeLicensesOutput(result, options, useJson);
+}
 
-  if (result.warnings && result.warnings.length > 0 && !options.silent) {
-    for (const warning of result.warnings) {
-      process.stderr.write(`[SBOM WARNING] ${warning}\n`);
-    }
+export async function runVerifyLicensesAsync(options: LicenseVerifyOptions = {}): Promise<boolean> {
+  const rootDir = options.root || process.cwd();
+  const useJson = isJsonOutput(options);
+  if (!options.silent && !useJson) {
+    console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC] Verifying Open Source License Compliance (SCA)...')));
   }
-
-  if (useJson) {
-    emitLicensesJson(result);
-  } else if (!options.silent) {
-    printLicensesConsole(result);
-  }
-  return result.success;
+  const result = await verifyLicensesAsync(buildLicenseVerifyInput(options, rootDir));
+  return finalizeLicensesOutput(result, options, useJson);
 }
 
 export interface PdacVerifyOptions extends VerifyBaseOptions {}
@@ -977,6 +1017,10 @@ export interface SastVerifyCliOptions extends VerifyBaseOptions {
   semgrep?: boolean;
   minSeverity?: string;
   sarif?: string[];
+  orchestrate?: boolean;
+  nonInteractive?: boolean;
+  noInstallPrompt?: boolean;
+  ci?: boolean;
 }
 
 function emitSastJson(result: ReturnType<typeof verifySast>): void {
@@ -996,6 +1040,7 @@ function emitSastJson(result: ReturnType<typeof verifySast>): void {
       severity: v.severity,
       message: v.message,
     })),
+    ...(result.warnings?.length ? { warnings: result.warnings } : {}),
   };
   console.log(JSON.stringify(payload, null, 2));
 }
@@ -1037,6 +1082,9 @@ function handleSastOutput(
     return result.success;
   }
   if (!options.silent) {
+    for (const warning of result.warnings ?? []) {
+      process.stderr.write(`[SAST WARNING] ${warning}\n`);
+    }
     printSastConsole(result);
   }
   return result.success;
@@ -1076,6 +1124,39 @@ export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
   return executeSastWithGuard(rootDir, options, useSarif, useJson);
 }
 
+function buildSastAsyncInput(rootDir: string, options: SastVerifyCliOptions) {
+  return {
+    rootDir,
+    semgrep: options.semgrep,
+    minSeverity: options.minSeverity as SastSeverity,
+    sarifPaths: options.sarif,
+    orchestrate: options.orchestrate,
+    nonInteractive: options.nonInteractive,
+    noInstallPrompt: options.noInstallPrompt,
+    ci: options.ci,
+    confirmInstall: createTtyConfirmInstall(),
+  };
+}
+
+export async function runVerifySastAsync(options: SastVerifyCliOptions = {}): Promise<boolean> {
+  const rootDir = options.root || process.cwd();
+  const useJson = isJsonOutput(options);
+  const useSarif = isSarifOutput(options);
+  if (!options.silent && !useJson && !useSarif) {
+    console.log(pc.bold(pc.cyan("\n🛡️  [AI-SDLC] Verifying Shift-Left SAST Security (Injections & OWASP Top 10)...")));
+  }
+  try {
+    const result = await verifySastAsync(buildSastAsyncInput(rootDir, options));
+    return handleSastOutput(result, options, useSarif, useJson);
+  } catch (err) {
+    if (err instanceof SarifIngestionError) {
+      if (!options.silent) console.error(pc.red(`✖ ${err.message}`));
+      return false;
+    }
+    throw err;
+  }
+}
+
 export interface SecurityVerifyCliOptions extends VerifyBaseOptions {
   diff?: boolean;
   base?: string;
@@ -1083,6 +1164,10 @@ export interface SecurityVerifyCliOptions extends VerifyBaseOptions {
   semgrep?: boolean;
   entropy?: number | string;
   minSeverity?: string;
+  orchestrate?: boolean;
+  nonInteractive?: boolean;
+  noInstallPrompt?: boolean;
+  ci?: boolean;
 }
 
 function buildSecurityViolations(
@@ -1152,6 +1237,19 @@ function executeSecurityVerifiers(rootDir: string, options: SecurityVerifyCliOpt
   return { resultSecrets, resultSast };
 }
 
+async function executeSecurityVerifiersAsync(rootDir: string, options: SecurityVerifyCliOptions) {
+  const entropyThreshold = options.entropy !== undefined ? Number(options.entropy) : undefined;
+  const resultSecrets = verifySecrets({
+    rootDir,
+    diff: options.diff,
+    baseBranch: options.base,
+    gitleaks: options.gitleaks,
+    entropyThreshold,
+  });
+  const resultSast = await verifySastAsync(buildSastAsyncInput(rootDir, options));
+  return { resultSecrets, resultSast };
+}
+
 function printSecurityConsoleSummary(silent: boolean | undefined, hasExpired: boolean): void {
   if (silent) return;
   console.log(`  Audit exceptions report: ${pc.cyan('reports/SUPPRESSIONS_AUDIT.md')}`);
@@ -1172,6 +1270,24 @@ function persistSecuritySarif(
   });
   const targetPath = customOutput || path.join(rootDir, "reports", "security.sarif");
   writeSecuritySarifReport(targetPath, doc);
+}
+
+function printSecurityConsole(
+  resultSecrets: ReturnType<typeof verifySecrets>,
+  resultSast: ReturnType<typeof verifySast>,
+  silent: boolean | undefined,
+  hasExpired: boolean
+): void {
+  if (!silent) {
+    console.log(pc.bold(pc.cyan("\n🔐 [AI-SDLC] Verifying Deterministic Secrets and Credentials Detection (Gitleaks Gate)...")));
+    printSecretsConsole(resultSecrets);
+    console.log(pc.bold(pc.cyan("\n🛡️  [AI-SDLC] Verifying Shift-Left SAST Security (Injections & OWASP Top 10)...")));
+    for (const warning of resultSast.warnings ?? []) {
+      process.stderr.write(`[SAST WARNING] ${warning}\n`);
+    }
+    printSastConsole(resultSast);
+  }
+  printSecurityConsoleSummary(silent, hasExpired);
 }
 
 function handleSecurityOutput(
@@ -1195,26 +1311,29 @@ function handleSecurityOutput(
     emitSecurityJson(resultSecrets, resultSast, isOk);
     return isOk;
   }
-  const okS = runVerifySecrets({ ...options, silent: options.silent });
-  const okA = runVerifySast({ ...options, silent: options.silent });
-  printSecurityConsoleSummary(options.silent, hasExpired);
-  return okS && okA && !hasExpired;
+  printSecurityConsole(resultSecrets, resultSast, options.silent, hasExpired);
+  return isOk;
 }
 
 export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
   const { resultSecrets, resultSast } = executeSecurityVerifiers(rootDir, options);
-
-  const allSuppressions = [
-    ...(resultSecrets.suppressions || []),
-    ...(resultSast.suppressions || []),
-  ];
+  const allSuppressions = [...(resultSecrets.suppressions || []), ...(resultSast.suppressions || [])];
   writeSuppressionsAuditReport(rootDir, allSuppressions);
   persistSecuritySarif(rootDir, resultSecrets, resultSast, options.output);
-
-  const hasExpired = allSuppressions.some((s) => s.status === "expired");
+  const hasExpired = allSuppressions.some((s) => s.status === 'expired');
   const isOk = resultSecrets.success && resultSast.success && !hasExpired;
+  return handleSecurityOutput(options, resultSecrets, resultSast, isOk, hasExpired);
+}
 
+export async function runVerifySecurityAsync(options: SecurityVerifyCliOptions = {}): Promise<boolean> {
+  const rootDir = options.root || process.cwd();
+  const { resultSecrets, resultSast } = await executeSecurityVerifiersAsync(rootDir, options);
+  const allSuppressions = [...(resultSecrets.suppressions || []), ...(resultSast.suppressions || [])];
+  writeSuppressionsAuditReport(rootDir, allSuppressions);
+  persistSecuritySarif(rootDir, resultSecrets, resultSast, options.output);
+  const hasExpired = allSuppressions.some((s) => s.status === 'expired');
+  const isOk = resultSecrets.success && resultSast.success && !hasExpired;
   return handleSecurityOutput(options, resultSecrets, resultSast, isOk, hasExpired);
 }
 
@@ -1362,20 +1481,34 @@ export function runVerifyPrivacy(options: PrivacyVerifyCliOptions = {}): boolean
   return result.success;
 }
 
-function collectAllGates(options: QualityVerifyOptions, root: string, isSilent: boolean) {
+function collectSyncNonAsyncGates(options: QualityVerifyOptions, root: string, isSilent: boolean) {
   return {
     quality: { success: runVerifyQuality({ ...options, root, silent: isSilent, json: false }) },
     traceability: { success: runVerifyTraceability({ root, silent: isSilent, json: false }) },
     governance: { success: runVerifyGovernance({ root, silent: isSilent, json: false }) },
     testing: { success: runVerifyTesting({ root, silent: isSilent, json: false }) },
     gherkin: { success: runVerifyGherkin({ root, silent: isSilent, json: false }) },
-    licenses: { success: runVerifyLicenses({ root, silent: isSilent, json: false }) },
     pdac: { success: runVerifyPdac({ root, silent: isSilent, json: false }) },
     schemas: { success: runVerifySchemas({ root, silent: isSilent, json: false }) },
     duplicates: { success: runVerifyDuplicates({ root, silent: isSilent, json: false }) },
     friction: { success: runVerifyFriction({ root, silent: isSilent, json: false }) },
-    security: { success: runVerifySecurity({ root, silent: isSilent, json: false }) },
     privacy: { success: runVerifyPrivacy({ root, silent: isSilent, json: false }) },
+  };
+}
+
+function collectAllGates(options: QualityVerifyOptions, root: string, isSilent: boolean) {
+  return {
+    ...collectSyncNonAsyncGates(options, root, isSilent),
+    licenses: { success: runVerifyLicenses({ root, silent: isSilent, json: false }) },
+    security: { success: runVerifySecurity({ root, silent: isSilent, json: false }) },
+  };
+}
+
+async function collectAllGatesAsync(options: QualityVerifyOptions, root: string, isSilent: boolean) {
+  return {
+    ...collectSyncNonAsyncGates(options, root, isSilent),
+    licenses: { success: await runVerifyLicensesAsync({ root, silent: isSilent, json: false }) },
+    security: { success: await runVerifySecurityAsync({ root, silent: isSilent, json: false }) },
   };
 }
 
@@ -1438,19 +1571,12 @@ function printVerifyAllSummaryTable(gatesSummary: Record<string, { success: bool
   }
 }
 
-export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
-  const useJson = isJsonOutput(options);
-  const isSilent = Boolean(options.silent || useJson);
-  if (!isSilent) {
-    console.log(pc.bold(pc.magenta('================================================================')));
-    console.log(pc.bold(pc.magenta('          AI-SDLC: FULL QUALITY GATES AND GOVERNANCE SUITE      ')));
-    console.log(pc.bold(pc.magenta('================================================================')));
-  }
-
-  const root = options.root || process.cwd();
-  const gatesSummary = collectAllGates(options, root, isSilent);
+function finalizeVerifyAll(
+  gatesSummary: Record<string, { success: boolean }>,
+  options: QualityVerifyOptions,
+  useJson: boolean
+): boolean {
   const allPassed = Object.values(gatesSummary).every((g) => g.success);
-
   if (useJson) {
     emitVerifyAllJson(gatesSummary, allPassed);
     return allPassed;
@@ -1459,6 +1585,32 @@ export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
     printVerifyAllSummaryTable(gatesSummary, allPassed);
   }
   return allPassed;
+}
+
+export function runVerifyAll(options: QualityVerifyOptions = {}): boolean {
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
+  if (!isSilent) {
+    console.log(pc.bold(pc.magenta('================================================================')));
+    console.log(pc.bold(pc.magenta('          AI-SDLC: FULL QUALITY GATES AND GOVERNANCE SUITE      ')));
+    console.log(pc.bold(pc.magenta('================================================================')));
+  }
+  const root = options.root || process.cwd();
+  const gatesSummary = collectAllGates(options, root, isSilent);
+  return finalizeVerifyAll(gatesSummary, options, useJson);
+}
+
+export async function runVerifyAllAsync(options: QualityVerifyOptions = {}): Promise<boolean> {
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
+  if (!isSilent) {
+    console.log(pc.bold(pc.magenta('================================================================')));
+    console.log(pc.bold(pc.magenta('          AI-SDLC: FULL QUALITY GATES AND GOVERNANCE SUITE      ')));
+    console.log(pc.bold(pc.magenta('================================================================')));
+  }
+  const root = options.root || process.cwd();
+  const gatesSummary = await collectAllGatesAsync(options, root, isSilent);
+  return finalizeVerifyAll(gatesSummary, options, useJson);
 }
 
 
