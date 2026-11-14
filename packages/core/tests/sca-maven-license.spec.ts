@@ -192,4 +192,80 @@ describe('CHG-054 TSK-001: Maven pom.xml license & XML hardening', () => {
     expect(dep?.version).toBe('3.0.0');
     expect(dep?.spdxLicense).toBe('MIT');
   });
+
+  it('strips <exclusions> before <groupId> and supports attributes on <dependency> and inner tags', () => {
+    const dir = createPomDir(`
+      <project>
+        <dependencies>
+          <dependency scope="compile">
+            <exclusions>
+              <exclusion>
+                <groupId>com.excluded</groupId>
+                <artifactId>bad-art</artifactId>
+              </exclusion>
+            </exclusions>
+            <groupId xml:space="preserve">com.real</groupId>
+            <artifactId>good-art</artifactId>
+            <version>1.4.0</version>
+          </dependency>
+        </dependencies>
+      </project>
+    `);
+
+    const seen = new Map<string, ScannedDependency>();
+    scanMavenDependencies(dir, seen);
+
+    const dep = Array.from(seen.values()).find((d) => d.name === 'com.real:good-art');
+    expect(dep).toBeDefined();
+    expect(dep?.version).toBe('1.4.0');
+    expect(seen.has('maven:com.excluded:bad-art@1.4.0')).toBe(false);
+  });
+
+  it('combines multiple <license> entries conservatively (MIT AND GPL-3.0-only)', () => {
+    const dir = createPomDir(`
+      <project>
+        <dependencies>
+          <dependency>
+            <groupId>com.dual</groupId>
+            <artifactId>multi-lic</artifactId>
+            <version>2.0.0</version>
+            <licenses>
+              <license><name>MIT</name></license>
+              <license><name>GPL-3.0-only</name></license>
+            </licenses>
+          </dependency>
+        </dependencies>
+      </project>
+    `);
+
+    const seen = new Map<string, ScannedDependency>();
+    scanMavenDependencies(dir, seen);
+
+    const dep = Array.from(seen.values()).find((d) => d.name === 'com.dual:multi-lic');
+    expect(dep).toBeDefined();
+    expect(dep?.spdxLicense).toBe('MIT AND GPL-3.0-only');
+  });
+
+  it('treats empty property placeholder ${} as UNKNOWN', () => {
+    const dir = createPomDir(`
+      <project>
+        <dependencies>
+          <dependency>
+            <groupId>com.acme</groupId>
+            <artifactId>empty-prop</artifactId>
+            <version>\${}</version>
+            <license>\${}</license>
+          </dependency>
+        </dependencies>
+      </project>
+    `);
+
+    const seen = new Map<string, ScannedDependency>();
+    scanMavenDependencies(dir, seen);
+
+    const dep = Array.from(seen.values()).find((d) => d.name === 'com.acme:empty-prop');
+    expect(dep).toBeDefined();
+    expect(dep?.version).toBe('UNKNOWN');
+    expect(dep?.spdxLicense).toBe('UNKNOWN');
+  });
 });

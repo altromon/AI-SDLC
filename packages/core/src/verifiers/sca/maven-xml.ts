@@ -10,7 +10,7 @@ export interface MavenDependencyRaw {
   license: string;
 }
 
-const UNRESOLVED_PROP_RE = /\$\{[^}]+\}/;
+const UNRESOLVED_PROP_RE = /\$\{[^}]*\}/;
 const DISALLOWED_DTD_RE = /<!(?:DOCTYPE|ENTITY)\b/i;
 
 function hasDisallowedDtd(xml: string): boolean {
@@ -36,15 +36,22 @@ function stripCommentsAndCdata(xml: string): string {
 }
 
 function readTagText(block: string, tag: string): string | undefined {
-  const open = `<${tag}>`;
-  const close = `</${tag}>`;
-  const start = block.indexOf(open);
-  if (start === -1) return undefined;
-  const contentStart = start + open.length;
-  const end = block.indexOf(close, contentStart);
-  if (end === -1) return undefined;
-  const text = block.slice(contentStart, end).trim();
+  const re = new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}\\s*>`, 'i');
+  const match = re.exec(block);
+  if (!match) return undefined;
+  const text = match[1].trim();
   return text.length > 0 ? text : undefined;
+}
+
+function readAllTagTexts(block: string, tag: string): string[] {
+  const re = new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}\\s*>`, 'gi');
+  const results: string[] = [];
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(block)) !== null) {
+    const text = match[1].trim();
+    if (text.length > 0) results.push(text);
+  }
+  return results;
 }
 
 function resolveField(raw: string | undefined): string {
@@ -53,23 +60,27 @@ function resolveField(raw: string | undefined): string {
 }
 
 function resolveLicenseField(block: string): string {
-  const raw = readTagText(block, 'license');
-  if (!raw) return 'UNKNOWN';
-  const nested = raw.includes('<') ? readTagText(raw, 'name') : raw;
-  return resolveField(nested);
+  const rawLicenses = readAllTagTexts(block, 'license');
+  if (rawLicenses.length === 0) return 'UNKNOWN';
+  const resolved = rawLicenses
+    .map((raw) => resolveField(raw.includes('<') ? readTagText(raw, 'name') : raw))
+    .filter((lic) => lic !== 'UNKNOWN');
+  if (resolved.length === 0) return 'UNKNOWN';
+  return Array.from(new Set(resolved)).join(' AND ');
 }
 
 function extractSingleMavenDep(block: string): MavenDependencyRaw | null {
-  const groupId = readTagText(block, 'groupId');
-  const artifactId = readTagText(block, 'artifactId');
+  const cleanBlock = block.replace(/<exclusions(?:\s[^>]*)?>[\s\S]*?<\/exclusions\s*>/gi, '');
+  const groupId = readTagText(cleanBlock, 'groupId');
+  const artifactId = readTagText(cleanBlock, 'artifactId');
   if (!groupId || !artifactId) return null;
   if (UNRESOLVED_PROP_RE.test(groupId) || UNRESOLVED_PROP_RE.test(artifactId)) return null;
 
   return {
     groupId,
     artifactId,
-    version: resolveField(readTagText(block, 'version')),
-    license: resolveLicenseField(block),
+    version: resolveField(readTagText(cleanBlock, 'version')),
+    license: resolveLicenseField(cleanBlock),
   };
 }
 
@@ -81,17 +92,12 @@ export function parseMavenPomDependencies(xml: string): MavenDependencyRaw[] {
 
   const sanitized = stripCommentsAndCdata(xml);
   const deps: MavenDependencyRaw[] = [];
-  let cursor = 0;
+  const depRe = /<dependency(?:\s[^>]*)?>([\s\S]*?)<\/dependency\s*>/gi;
+  let match: RegExpExecArray | null;
 
-  while (cursor < sanitized.length) {
-    const start = sanitized.indexOf('<dependency>', cursor);
-    if (start === -1) break;
-    const end = sanitized.indexOf('</dependency>', start + 12);
-    if (end === -1) break;
-
-    const dep = extractSingleMavenDep(sanitized.slice(start + 12, end));
+  while ((match = depRe.exec(sanitized)) !== null) {
+    const dep = extractSingleMavenDep(match[1]);
     if (dep) deps.push(dep);
-    cursor = end + 13;
   }
 
   return deps;

@@ -157,7 +157,7 @@ export function processPackageDir(pkgDir: string, directNames: Set<string>, seen
     name: pkg.name,
     version: pkg.version,
     spdxLicense: spdx,
-    purl: `pkg:npm/${pkg.name}@${pkg.version}`,
+    purl: buildPurl({ ecosystem: 'npm', name: pkg.name, version: pkg.version }),
     path: pkgDir,
     licenseFile: licFile,
     repository: repoUrl,
@@ -235,7 +235,7 @@ function parseSingleTomlBlock(block: string, lockPath: string, directNames: Set<
     name,
     version,
     spdxLicense: spdx,
-    purl: `pkg:pypi/${name.toLowerCase()}@${version}`,
+    purl: buildPurl({ ecosystem: 'pypi', name, version }),
     path: lockPath,
     isDirect: directNames.size === 0 || directNames.has(name.toLowerCase()),
   };
@@ -270,7 +270,7 @@ function parsePipfileSection(
         name,
         version: rawVer,
         spdxLicense: spdx,
-        purl: `pkg:pypi/${name.toLowerCase()}@${rawVer}`,
+        purl: buildPurl({ ecosystem: 'pypi', name, version: rawVer }),
         path: lockPath,
         isDirect,
       });
@@ -318,7 +318,7 @@ function parseGoRequireLine(line: string, goModPath: string): ScannedDependency 
     name: modName,
     version: rawVer,
     spdxLicense: spdx,
-    purl: `pkg:golang/${modName}@v${rawVer}`,
+    purl: buildPurl({ ecosystem: 'golang', name: modName, version: `v${rawVer}` }),
     path: goModPath,
     isDirect: !isIndirect,
   };
@@ -382,7 +382,7 @@ function parseCargoLockBlock(
     name,
     version,
     spdxLicense: normalizeSpdxLicense(blockLic),
-    purl: `pkg:cargo/${name}@${version}`,
+    purl: buildPurl({ ecosystem: 'cargo', name, version }),
     path: cargoLockPath,
     isDirect: directMeta.size === 0 || directMeta.has(name),
   };
@@ -480,18 +480,28 @@ function normalizeVulnerabilitySeverity(raw?: string): 'CRITICAL' | 'HIGH' | 'ME
   return 'UNKNOWN';
 }
 
-function parseSingleVulnerability(v: Record<string, unknown>): ScaVulnerability {
+function optStr(val: unknown): string | undefined {
+  return typeof val === 'string' && val.length > 0 ? val : undefined;
+}
+
+function parseSingleVulnerability(
+  v: Record<string, unknown>,
+  ecosystem?: string
+): ScaVulnerability {
+  const pkgId = v.PkgIdentifier as Record<string, unknown> | undefined;
   return {
-    id: (v.VulnerabilityID as string) || 'UNKNOWN',
-    packageName: (v.PkgName as string) || 'UNKNOWN',
-    installedVersion: (v.InstalledVersion as string) || 'unknown',
-    fixedVersion: (v.FixedVersion as string) || undefined,
+    id: optStr(v.VulnerabilityID) ?? 'UNKNOWN',
+    packageName: optStr(v.PkgName) ?? 'UNKNOWN',
+    installedVersion: optStr(v.InstalledVersion) ?? 'unknown',
+    fixedVersion: optStr(v.FixedVersion),
     severity: normalizeVulnerabilitySeverity(v.Severity as string | undefined),
+    ecosystem: optStr(ecosystem),
+    purl: optStr(pkgId?.PURL),
     cvssV3Score: extractCvssV3Score(v.CVSS),
     cvssV3Vector: extractCvssV3Vector(v.CVSS),
-    title: (v.Title as string) || undefined,
-    description: (v.Description as string) || undefined,
-    primaryUrl: (v.PrimaryURL as string) || undefined,
+    title: optStr(v.Title),
+    description: optStr(v.Description),
+    primaryUrl: optStr(v.PrimaryURL),
   };
 }
 
@@ -500,8 +510,9 @@ export function parseTrivyVulnerabilities(stdout: string): ScaVulnerability[] {
     const data = JSON.parse(stdout);
     const vulns: ScaVulnerability[] = [];
     for (const r of data.Results || []) {
+      const ecosystem = typeof r.Type === 'string' && r.Type ? r.Type : undefined;
       for (const v of r.Vulnerabilities || []) {
-        vulns.push(parseSingleVulnerability(v as Record<string, unknown>));
+        vulns.push(parseSingleVulnerability(v as Record<string, unknown>, ecosystem));
       }
     }
     return vulns;
@@ -548,22 +559,43 @@ export function evaluateVulnerabilityThresholds(
   };
 }
 
-function parseTrivyOutput(stdout: string): ScannedDependency[] {
-  const data = JSON.parse(stdout);
-  const deps: ScannedDependency[] = [];
-  for (const r of data.Results || []) {
-    const ecosystem = typeof r.Type === 'string' ? r.Type : 'generic';
-    for (const p of r.Packages || []) {
-      const version = p.Version || 'unknown';
-      deps.push({
-        name: p.Name,
-        version,
-        spdxLicense: normalizeSpdxLicense(p.Licenses?.[0] || 'UNKNOWN'),
-        purl: p.Identifier?.PURL || buildPurl({ ecosystem, name: p.Name, version }),
-      });
+function joinSpdxLicenses(items: unknown[]): string {
+  const resolved = items
+    .map((item) => normalizeSpdxLicense(item))
+    .filter((lic) => lic !== 'UNKNOWN');
+  if (resolved.length === 0) return 'UNKNOWN';
+  return Array.from(new Set(resolved)).join(' AND ');
+}
+
+function mapTrivyPackage(p: Record<string, unknown>, ecosystem: string): ScannedDependency {
+  const name = optStr(p.Name) ?? 'unknown';
+  const version = optStr(p.Version) ?? 'unknown';
+  const spdxLicense = Array.isArray(p.Licenses)
+    ? joinSpdxLicenses(p.Licenses)
+    : normalizeSpdxLicense(p.Licenses);
+  const identifier = p.Identifier as Record<string, unknown> | undefined;
+  return {
+    name,
+    version,
+    spdxLicense,
+    purl: optStr(identifier?.PURL) ?? buildPurl({ ecosystem, name, version }),
+  };
+}
+
+export function parseTrivyOutput(stdout: string): ScannedDependency[] {
+  try {
+    const data = JSON.parse(stdout);
+    const deps: ScannedDependency[] = [];
+    for (const r of data.Results || []) {
+      const ecosystem = optStr(r.Type) ?? 'generic';
+      for (const p of r.Packages || []) {
+        deps.push(mapTrivyPackage(p as Record<string, unknown>, ecosystem));
+      }
     }
+    return deps;
+  } catch {
+    return [];
   }
-  return deps;
 }
 
 function execTrivyCli(rootDir: string, checkTypes: string): string | null {
@@ -598,22 +630,28 @@ export function scanWithTrivy(
   };
 }
 
-function parseSyftOutput(stdout: string): ScannedDependency[] {
-  const data = JSON.parse(stdout);
-  const deps: ScannedDependency[] = [];
-  for (const a of data.artifacts || []) {
-    const lic = a.licenses?.[0]?.value || 'UNKNOWN';
-    const version = a.version || 'unknown';
-    const ecosystem = typeof a.type === 'string' ? a.type : 'generic';
-    deps.push({
-      name: a.name,
-      version,
-      spdxLicense: normalizeSpdxLicense(lic),
-      purl: a.purl || buildPurl({ ecosystem, name: a.name, version }),
-      author: a.metadata?.author,
-    });
+export function parseSyftOutput(stdout: string): ScannedDependency[] {
+  try {
+    const data = JSON.parse(stdout);
+    const deps: ScannedDependency[] = [];
+    for (const a of data.artifacts || []) {
+      const rawLicenses = Array.isArray(a.licenses)
+        ? a.licenses.map((l: { value?: unknown }) => l?.value)
+        : [];
+      const version = a.version || 'unknown';
+      const ecosystem = typeof a.type === 'string' && a.type ? a.type : 'generic';
+      deps.push({
+        name: a.name,
+        version,
+        spdxLicense: joinSpdxLicenses(rawLicenses),
+        purl: a.purl || buildPurl({ ecosystem, name: a.name, version }),
+        author: a.metadata?.author,
+      });
+    }
+    return deps;
+  } catch {
+    return [];
   }
-  return deps;
 }
 
 export function scanWithSyft(rootDir: string): { dependencies: ScannedDependency[]; executed: boolean } {

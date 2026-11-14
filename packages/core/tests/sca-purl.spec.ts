@@ -59,4 +59,33 @@ describe('CHG-054 TSK-002: buildPurl ecosystem & percent-encoding', () => {
     expect(purl.startsWith('pkg:npm')).toBe(false);
     expect(warnSpy).toHaveBeenCalled();
   });
+
+  it('normalizes pypi names per PEP 503 (typing_extensions -> typing-extensions)', () => {
+    expect(
+      buildPurl({ ecosystem: 'pypi', name: 'Typing__Extensions.Core', version: '4.11.0' })
+    ).toBe('pkg:pypi/typing-extensions-core@4.11.0');
+  });
+
+  it('normalizes golang namespace and name to lowercase', () => {
+    expect(
+      buildPurl({
+        ecosystem: 'golang',
+        namespace: 'GitHub.com/Gin-Gonic',
+        name: 'Gin',
+        version: 'v1.9.1',
+      })
+    ).toBe('pkg:golang/github.com/gin-gonic/gin@v1.9.1');
+    expect(
+      buildPurl({ ecosystem: 'golang', name: 'GitHub.com/Org/Repo', version: 'v1.0.0' })
+    ).toBe('pkg:golang/github.com/org/repo@v1.0.0');
+  });
+
+  it('does not throw URIError on lone surrogates and does not warn on explicit generic', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const purl = buildPurl({ ecosystem: 'generic', name: 'bad\uD800name', version: '1.0.0' });
+
+    expect(purl).toBe('pkg:generic/bad%EF%BF%BDname@1.0.0');
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
 });

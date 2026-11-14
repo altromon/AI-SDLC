@@ -37,17 +37,24 @@ const ECOSYSTEM_TYPE_MAP: Record<string, string> = {
   'go-module': 'golang',
   nuget: 'nuget',
   dotnet: 'nuget',
+  generic: 'generic',
 };
 
+function sanitizeSurrogates(value: string): string {
+  return value.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDFFF]/g, (m) =>
+    m.length === 2 ? m : '\uFFFD'
+  );
+}
+
 function encodePurlSegment(value: string): string {
-  return encodeURIComponent(value).replace(
+  return encodeURIComponent(sanitizeSurrogates(value)).replace(
     /[!'()*]/g,
     (ch) => `%${ch.charCodeAt(0).toString(16).toUpperCase()}`
   );
 }
 
 function resolvePurlType(ecosystem: string, warnings?: string[]): string {
-  const key = ecosystem.trim().toLowerCase();
+  const key = (ecosystem || '').trim().toLowerCase();
   const mapped = ECOSYSTEM_TYPE_MAP[key];
   if (mapped) return mapped;
 
@@ -63,13 +70,23 @@ const NAMESPACE_SPLITTERS: Record<string, { sep: string; last?: boolean; prefix?
   golang: { sep: '/', last: true },
 };
 
+function normalizePurlName(type: string, name: string): string {
+  const trimmed = (name ?? '').trim() || 'unknown';
+  if (type === 'pypi') return trimmed.toLowerCase().replace(/[-_.]+/g, '-');
+  if (type === 'golang') return trimmed.toLowerCase();
+  return trimmed;
+}
+
 function splitNamespaceAndName(
   type: string,
   namespace: string | undefined,
   name: string
 ): { namespace?: string; name: string } {
-  const normalizedName = type === 'pypi' ? name.toLowerCase() : name;
-  if (namespace) return { namespace, name: normalizedName };
+  const normalizedName = normalizePurlName(type, name);
+  const ns = namespace?.trim();
+  if (ns) {
+    return { namespace: type === 'golang' ? ns.toLowerCase() : ns, name: normalizedName };
+  }
 
   const rule = NAMESPACE_SPLITTERS[type];
   if (!rule || (rule.prefix && !normalizedName.startsWith(rule.prefix))) {
@@ -78,7 +95,7 @@ function splitNamespaceAndName(
   const idx = rule.last
     ? normalizedName.lastIndexOf(rule.sep)
     : normalizedName.indexOf(rule.sep);
-  if (idx === -1) return { name: normalizedName };
+  if (idx <= 0) return { name: normalizedName };
   return { namespace: normalizedName.slice(0, idx), name: normalizedName.slice(idx + 1) };
 }
 
