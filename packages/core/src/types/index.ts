@@ -1094,6 +1094,7 @@ export interface SastVerifierOptions {
   semgrep?: boolean;
   targetDirectories?: string[];
   minSeverity?: SastSeverity;
+  sarifPaths?: string[];
 }
 
 export interface SastVerifierResult {
@@ -1325,6 +1326,12 @@ export interface PrivacyPolicy {
   };
 }
 
+export interface DataAssetField {
+  name: string;
+  sensitivity?: string;
+  maskingStrategy?: string;
+}
+
 export interface DataAssetSummary {
   id: string;
   title: string;
@@ -1334,6 +1341,7 @@ export interface DataAssetSummary {
   retentionPeriod: string;
   erasureMethod: string;
   filePath: string;
+  fields?: DataAssetField[];
 }
 
 export interface PrivacyRopaSummary {
@@ -1441,11 +1449,16 @@ export interface SarifLocation {
   physicalLocation: SarifPhysicalLocation;
 }
 
+export interface SarifUriBaseId {
+  uri?: string;
+  uriBaseId?: string;
+}
+
 export interface SarifResult {
-  ruleId: string;
-  level: SarifLevel;
-  message: { text: string };
-  locations: SarifLocation[];
+  ruleId?: string;
+  level?: SarifLevel;
+  message?: { text?: string };
+  locations?: SarifLocation[];
   ruleIndex?: number;
   properties?: Record<string, unknown>;
 }
@@ -1454,13 +1467,14 @@ export interface SarifToolDriver {
   name: string;
   version?: string;
   informationUri?: string;
-  rules: SarifReportingDescriptor[];
+  rules?: SarifReportingDescriptor[];
 }
 
 export interface SarifRun {
   tool: {
     driver: SarifToolDriver;
   };
+  originalUriBaseIds?: Record<string, SarifUriBaseId>;
   results: SarifResult[];
 }
 

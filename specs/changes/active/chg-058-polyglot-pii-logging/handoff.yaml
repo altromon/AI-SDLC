@@ -1,0 +1,28 @@
+id: HOF-CHG-058-POLYGLOT-PII-LOGGING
+type: handoff
+title: Handoff Canónico de Arquitectura para Polyglot PII Logging
+changeId: CHG-058-POLYGLOT-PII-LOGGING
+version: 1.1.0
+createdAt: '2026-11-14T12:15:00.000Z'
+subgraph:
+  requirements:
+    - FR-058-POLYGLOT-PII-LOGGING-001
+  useCases:
+    - UC-058-POLYGLOT-PII-LOGGING
+  components:
+    - CMP-058-POLYGLOT-PII-LOGGING
+  privacyRequirements:
+    - PRIV-REQ-058-POLYGLOT-LOG-MASKING-001
+citations:
+  - id: UC-058-POLYGLOT-PII-LOGGING
+    digest: sha256:7bb1b28bf832d3be54ad950a2f5b0bc7825d9e1bae4b9b66dc1b9e6f0d13df09
+    comment: Citación de use-case (Inspección políglota de PII-SAST en logs cruzada con DATA-ASSET-* y privacy-policy.yaml)
+  - id: FR-058-POLYGLOT-PII-LOGGING-001
+    digest: sha256:475bb927a31dbb1d3712bb1e7040f49a3b8029710f7075aae65fdbe4d0d07c36
+    comment: Requerimiento derivado de UC-058-POLYGLOT-PII-LOGGING
+  - id: PRIV-REQ-058-POLYGLOT-LOG-MASKING-001
+    digest: sha256:8870481cbccedf538b485499d7d3cc1bc95a36587182008de2bbdc642985ac1c
+    comment: Control de privacidad PDaC para enmascaramiento de logs políglotas y redacción de diagnósticos
+  - id: CMP-058-POLYGLOT-PII-LOGGING
+    digest: sha256:e22135e637ed2ad1fad14300e1dd382b59180da3971e8ef88db50ea2335e628e
+    comment: Componente arquitectónico de inspección políglota de PII-SAST en logs

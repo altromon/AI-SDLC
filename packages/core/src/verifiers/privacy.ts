@@ -24,6 +24,26 @@ import {
 import { walkMdFiles } from '../utils/fs.js';
 import { extractFrontmatter } from './schemas.js';
 import { walkSourceFiles } from './sast.js';
+import {
+  computeParenDelta,
+  deduplicateAndSortPrivacyViolations,
+  detectPolyglotLoggerCall,
+  normalizeIdentifierToSnakeCase,
+  parseDataAssetFields,
+  PolyglotLoggerScanState,
+  resolveDisallowedLogFields,
+  scanLineInLoggerContext,
+  stripMaskingCalls,
+  stripMaskingCallsWithState,
+} from './privacy-polyglot.js';
+
+export {
+  deduplicateAndSortPrivacyViolations,
+  detectPolyglotLoggerCall,
+  normalizeIdentifierToSnakeCase,
+  resolveDisallowedLogFields,
+  stripMaskingCalls,
+};
 
 export const DEFAULT_PRIVACY_POLICY: PrivacyPolicy = {
   version: '1.0',
@@ -172,42 +192,121 @@ function shouldApplyPiiRule(rule: PiiSastRule, policy: PrivacyPolicy): boolean {
   return true;
 }
 
+const REDACTED_SNIPPET_RULES = new Set(['PRIV-001-PII-IN-LOGS', 'PRIV-004-HARDCODED-REAL-PII']);
+
+interface ScanLineContext {
+  filePath: string;
+  relPath: string;
+  policy: PrivacyPolicy;
+  disallowedLogFields?: Map<string, string>;
+}
+
+function buildStaticViolation(
+  rule: PiiSastRule,
+  line: string,
+  lineNumber: number,
+  ctx: ScanLineContext
+): PrivacyViolation {
+  return {
+    ruleId: rule.id,
+    type: rule.type,
+    severity: rule.severity,
+    filePath: ctx.filePath,
+    relPath: ctx.relPath,
+    lineNumber,
+    snippet: REDACTED_SNIPPET_RULES.has(rule.id) ? '[REDACTED]' : line.trim(),
+    message: rule.description,
+  };
+}
+
+function scanLineStaticRules(
+  line: string,
+  stripped: string,
+  lineNumber: number,
+  ctx: ScanLineContext
+): PrivacyViolation[] {
+  const hits: PrivacyViolation[] = [];
+  for (const rule of PII_SAST_RULES) {
+    if (!shouldApplyPiiRule(rule, ctx.policy)) continue;
+    rule.pattern.lastIndex = 0;
+    const target = rule.id === 'PRIV-004-HARDCODED-REAL-PII' ? line : stripped;
+    if (rule.pattern.test(target)) hits.push(buildStaticViolation(rule, line, lineNumber, ctx));
+  }
+  return hits;
+}
+
+function buildDynamicLogViolation(
+  hit: { field: string; assetId: string },
+  lineNumber: number,
+  ctx: ScanLineContext
+): PrivacyViolation {
+  return {
+    ruleId: 'PRIV-001-PII-IN-LOGS',
+    type: 'PII_IN_LOGS',
+    severity: 'HIGH',
+    filePath: ctx.filePath,
+    relPath: ctx.relPath,
+    lineNumber,
+    snippet: '[REDACTED]',
+    message: `Unmasked PII field '${hit.field}' (${hit.assetId}) detected in logger call (GDPR Art. 25 / Art. 32)`,
+  };
+}
+
+function scanDynamicLoggerLine(
+  line: string,
+  lineNumber: number,
+  state: PolyglotLoggerScanState,
+  ctx: ScanLineContext
+): { violation: PrivacyViolation | null; nextState: PolyglotLoggerScanState } {
+  const fields = ctx.disallowedLogFields;
+  if (!ctx.policy.ci_gates.fail_on_pii_in_logs || !fields || fields.size === 0) {
+    return { violation: null, nextState: state };
+  }
+  const res = scanLineInLoggerContext(line, state, fields);
+  const violation = res.hit ? buildDynamicLogViolation(res.hit, lineNumber, ctx) : null;
+  return { violation, nextState: res.nextState };
+}
+
+function advanceExemptLoggerState(line: string, state: PolyglotLoggerScanState): PolyglotLoggerScanState {
+  if (!state.inCall) return state;
+  const depth = state.parenDepth + computeParenDelta(line, 0);
+  const { maskDepth } = stripMaskingCallsWithState(line, state.maskDepth);
+  if (depth <= 0) return { inCall: false, parenDepth: 0, linesInCall: 0, maskDepth: 0 };
+  return { inCall: true, parenDepth: depth, linesInCall: state.linesInCall + 1, maskDepth };
+}
+
 export function scanFileForPrivacyViolations(
   filePath: string,
   rootDir: string,
-  policy: PrivacyPolicy = DEFAULT_PRIVACY_POLICY
+  policy: PrivacyPolicy = DEFAULT_PRIVACY_POLICY,
+  disallowedLogFields?: Map<string, string>
 ): PrivacyViolation[] {
   const violations: PrivacyViolation[] = [];
   try {
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const lines = content.split(/\r?\n/);
-    const relPath = path.relative(rootDir, filePath).replace(/\\/g, '/');
+    const lines = fs.readFileSync(filePath, 'utf-8').split(/\r?\n/);
+    const ctx: ScanLineContext = {
+      filePath,
+      relPath: path.relative(rootDir, filePath).replace(/\\/g, '/'),
+      policy,
+      disallowedLogFields,
+    };
+    let loggerState: PolyglotLoggerScanState = { inCall: false, parenDepth: 0, linesInCall: 0, maskDepth: 0 };
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (isLineExemptFromPrivacyScan(line)) continue;
-
-      for (const rule of PII_SAST_RULES) {
-        if (!shouldApplyPiiRule(rule, policy)) continue;
-        rule.pattern.lastIndex = 0;
-        if (rule.pattern.test(line)) {
-          violations.push({
-            ruleId: rule.id,
-            type: rule.type,
-            severity: rule.severity,
-            filePath,
-            relPath,
-            lineNumber: i + 1,
-            snippet: line.trim(),
-            message: rule.description,
-          });
-        }
+      if (isLineExemptFromPrivacyScan(line)) {
+        loggerState = advanceExemptLoggerState(line, loggerState);
+        continue;
       }
+      violations.push(...scanLineStaticRules(line, stripMaskingCalls(line), i + 1, ctx));
+      const dyn = scanDynamicLoggerLine(line, i + 1, loggerState, ctx);
+      loggerState = dyn.nextState;
+      if (dyn.violation) violations.push(dyn.violation);
     }
   } catch {
     // Skip unreadable files
   }
-  return violations;
+  return deduplicateAndSortPrivacyViolations(violations);
 }
 
 interface DiscoveredPrivacyArtifacts {
@@ -241,7 +340,8 @@ function toStringArray(val: unknown): string[] {
   return [];
 }
 
-function parseDataAsset(fm: Record<string, unknown>, relPath: string): DataAssetSummary {
+export function parseDataAsset(fm: Record<string, unknown>, relPath: string): DataAssetSummary {
+  const fields = parseDataAssetFields(fm.fields);
   return {
     id: String(fm.id || ''),
     title: String(fm.title || ''),
@@ -251,6 +351,7 @@ function parseDataAsset(fm: Record<string, unknown>, relPath: string): DataAsset
     retentionPeriod: String(fm['retention-period'] || ''),
     erasureMethod: String(fm['erasure-method'] || ''),
     filePath: relPath,
+    ...(fields !== undefined ? { fields } : {}),
   };
 }
 
@@ -668,11 +769,14 @@ function buildInitialPrivacyResult(
 export function verifyPrivacy(options: PrivacyVerifierOptions = {}): PrivacyVerifierResult {
   const rootDir = options.rootDir || process.cwd();
   const policy = loadPrivacyPolicy(rootDir, options.policyPath);
-  const sourceFiles = collectSourceFilesForPrivacy(rootDir, options.targetDirectories || ['src', 'packages']);
-  const codeViolations = sourceFiles.flatMap((file) => scanFileForPrivacyViolations(file, rootDir, policy));
   const discovered = discoverPrivacyArtifacts(rootDir);
+  const disallowedLogFields = resolveDisallowedLogFields(discovered.dataAssets, policy);
+  const sourceFiles = collectSourceFilesForPrivacy(rootDir, options.targetDirectories || ['src', 'packages']);
+  const codeViolations = sourceFiles.flatMap((file) =>
+    scanFileForPrivacyViolations(file, rootDir, policy, disallowedLogFields)
+  );
   const gov = evaluateDiscoveredPrivacyGovernance(discovered, policy, rootDir);
-  const violations = [...codeViolations, ...gov.violations];
+  const violations = deduplicateAndSortPrivacyViolations([...codeViolations, ...gov.violations]);
   const result = buildInitialPrivacyResult(sourceFiles.length, discovered, violations, gov.dpiaRequiredCount);
   result.ropaMarkdown = generateRopaInventoryMarkdown(result, policy);
   result.reportMarkdown = generatePrivacyReportMarkdown(result, policy);

@@ -331,6 +331,7 @@ verifyCommand
   .option('-r, --root <path>', 'Project root directory')
   .option('-s, --semgrep', 'Delegate to Semgrep CLI if installed')
   .option('-m, --min-severity <level>', 'Minimum severity for failure: CRITICAL, HIGH, MEDIUM', 'HIGH')
+  .option('--sarif <paths...>', 'Ingest external OASIS SARIF v2.1.0 report(s) for deterministic SAST evaluation')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text, json, or sarif')
   .option('-o, --output <path>', 'Output file path (e.g. reports/sast.sarif)')
@@ -339,6 +340,7 @@ verifyCommand
       root: opts.root,
       semgrep: opts.semgrep,
       minSeverity: opts.minSeverity,
+      sarif: opts.sarif,
       json: opts.json,
       format: opts.format,
       output: opts.output,

@@ -15,6 +15,7 @@ import {
   verifyProgressiveFriction,
   verifyQualityGate,
   verifySast,
+  SarifIngestionError,
   verifySecrets,
   verifyTasksGovernance,
   verifyTestingCoverage,
@@ -975,6 +976,7 @@ export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean 
 export interface SastVerifyCliOptions extends VerifyBaseOptions {
   semgrep?: boolean;
   minSeverity?: string;
+  sarif?: string[];
 }
 
 function emitSastJson(result: ReturnType<typeof verifySast>): void {
@@ -1040,6 +1042,29 @@ function handleSastOutput(
   return result.success;
 }
 
+function executeSastWithGuard(
+  rootDir: string,
+  options: SastVerifyCliOptions,
+  useSarif: boolean,
+  useJson: boolean
+): boolean {
+  try {
+    const result = verifySast({
+      rootDir,
+      semgrep: options.semgrep,
+      minSeverity: options.minSeverity as SastSeverity,
+      sarifPaths: options.sarif,
+    });
+    return handleSastOutput(result, options, useSarif, useJson);
+  } catch (err) {
+    if (err instanceof SarifIngestionError) {
+      if (!options.silent) console.error(pc.red(`✖ ${err.message}`));
+      return false;
+    }
+    throw err;
+  }
+}
+
 export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
   const useJson = isJsonOutput(options);
@@ -1048,14 +1073,7 @@ export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
   if (!options.silent && !useJson && !useSarif) {
     console.log(pc.bold(pc.cyan("\n🛡️  [AI-SDLC] Verifying Shift-Left SAST Security (Injections & OWASP Top 10)...")));
   }
-
-  const result = verifySast({
-    rootDir,
-    semgrep: options.semgrep,
-    minSeverity: options.minSeverity as SastSeverity,
-  });
-
-  return handleSastOutput(result, options, useSarif, useJson);
+  return executeSastWithGuard(rootDir, options, useSarif, useJson);
 }
 
 export interface SecurityVerifyCliOptions extends VerifyBaseOptions {
