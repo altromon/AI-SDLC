@@ -10,6 +10,11 @@ import {
   type UnresolvedReason,
 } from '../src/verifiers/sca/safe-exec.js';
 
+vi.mock('child_process', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('child_process')>();
+  return { ...mod };
+});
+
 describe('CHG-055 TSK-002: safe-exec hardened CLI runner', () => {
   const tmpDirs: string[] = [];
 

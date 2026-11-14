@@ -6,6 +6,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resolveDotnetLicense } from '../src/verifiers/sca/license-dotnet.js';
 import type { ScannedDependency } from '../src/types/index.js';
 
+vi.mock('child_process', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('child_process')>();
+  return { ...mod };
+});
+vi.mock('os', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('os')>();
+  return { ...mod };
+});
+
 describe('CHG-055 TSK-007: .NET/NuGet offline license resolution', () => {
   const tmpDirs: string[] = [];
 

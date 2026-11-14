@@ -8,6 +8,11 @@ import { scanInstalledLicenses } from '../src/verifiers/sca/scanner.js';
 import { evaluateSingleDependency, verifyLicenses } from '../src/verifiers/licenses.js';
 import type { LicensePolicy, ScannedDependency } from '../src/types/index.js';
 
+vi.mock('child_process', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('child_process')>();
+  return { ...mod };
+});
+
 describe('CHG-055 TSK-009: license-resolve orchestrator & Gate 6 integration', () => {
   const tmpDirs: string[] = [];
 

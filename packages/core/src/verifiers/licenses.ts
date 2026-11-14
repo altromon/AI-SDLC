@@ -234,7 +234,7 @@ function evaluateKnownLicense(lic: string, name: string, policy: LicensePolicy):
 
 export function evaluateSingleDependency(dep: ScannedDependency, policy: LicensePolicy): LicenseViolation | null {
   const lic = dep.spdxLicense;
-  if (!lic || lic === 'UNKNOWN') {
+  if (!lic || lic === 'UNKNOWN' || lic === 'UNRESOLVED') {
     return buildViolation(
       dep.name,
       dep.version,
@@ -384,6 +384,7 @@ function handleStaticManifestVerification(
 
   return {
     success: violations.length === 0,
+    passed: violations.length === 0,
     totalEvaluated: dependencies.length,
     permittedCount,
     violations,
@@ -518,8 +519,10 @@ function assembleDynamicLicenseResult(
     skipReason?: string;
   }
 ): LicenseVerificationResult {
+  const success = violations.length === 0 && !vulnData.blocked;
   return {
-    success: violations.length === 0 && !vulnData.blocked,
+    success,
+    passed: success,
     totalEvaluated: dependencies.length,
     permittedCount,
     violations,

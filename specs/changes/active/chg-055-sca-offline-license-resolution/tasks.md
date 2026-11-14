@@ -40,9 +40,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-safe-exec.spec.ts
     assigned-to: agent-developer
-    status: PENDING
-    blocked-by:
-      - TSK-001
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:
@@ -61,10 +59,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-license-python.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-002'
-    blocked-by:
-      - TSK-002
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:
@@ -83,10 +78,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-license-rust.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-002'
-    blocked-by:
-      - TSK-002
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:
@@ -105,10 +97,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-license-go.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-002'
-    blocked-by:
-      - TSK-002
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:
@@ -127,10 +116,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-license-java.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-002'
-    blocked-by:
-      - TSK-002
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:
@@ -149,10 +135,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-license-dotnet.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-002'
-    blocked-by:
-      - TSK-002
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:
@@ -171,10 +154,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-license-node.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-002'
-    blocked-by:
-      - TSK-002
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:
@@ -193,15 +173,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-license-resolve.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-003, TSK-004, TSK-005, TSK-006, TSK-007, TSK-008'
-    blocked-by:
-      - TSK-003
-      - TSK-004
-      - TSK-005
-      - TSK-006
-      - TSK-007
-      - TSK-008
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:
@@ -220,10 +192,7 @@ tasks:
       method: quality-gate
       command-or-criteria: pnpm run typecheck; pnpm test; pnpm run verify:all
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-009'
-    blocked-by:
-      - TSK-009
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:

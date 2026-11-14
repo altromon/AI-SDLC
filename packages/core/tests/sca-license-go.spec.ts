@@ -6,6 +6,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resolveGoLicense } from '../src/verifiers/sca/license-go.js';
 import type { ScannedDependency } from '../src/types/index.js';
 
+vi.mock('child_process', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('child_process')>();
+  return { ...mod };
+});
+
 describe('CHG-055 TSK-005: Go offline license resolution', () => {
   const tmpDirs: string[] = [];
 

@@ -9,6 +9,8 @@ import * as child_process from 'child_process';
 import { ScannedDependency, ScaTool, ScaVulnerability, VexStatement, VulnerabilityThresholds } from '../../types/index.js';
 import { buildPurl } from './purl.js';
 import { parseMavenPomDependencies } from './maven-xml.js';
+import { resolveLicense } from './license-resolve.js';
+import { resetGlobalBudget } from './safe-exec.js';
 
 export interface ScanOptions {
   depth?: 'direct' | 'transitive';
@@ -425,6 +427,40 @@ export function scanMavenDependencies(rootDir: string, seen: Map<string, Scanned
   }
 }
 
+function addMissingGroupDeps(
+  group: Record<string, string> | undefined,
+  installedNames: Set<string>,
+  pkgPath: string,
+  seen: Map<string, ScannedDependency>
+): void {
+  if (!group || typeof group !== 'object') return;
+  for (const [name, rawVer] of Object.entries(group)) {
+    if (installedNames.has(name)) continue;
+    const version = String(rawVer || '').replace(/^[^0-9]*/, '') || 'unknown';
+    seen.set(`${name}@${version}`, {
+      name,
+      version,
+      spdxLicense: 'UNKNOWN',
+      purl: buildPurl({ ecosystem: 'npm', name, version }),
+      path: pkgPath,
+      isDirect: true,
+    });
+  }
+}
+
+function addMissingDirectPackageJsonDeps(
+  rootDir: string,
+  productionOnly: boolean | undefined,
+  seen: Map<string, ScannedDependency>
+): void {
+  const pkgPath = path.join(rootDir, 'package.json');
+  const pkg = readPackageJson(pkgPath);
+  if (!pkg) return;
+  const installedNames = new Set(Array.from(seen.values()).map((d) => d.name));
+  addMissingGroupDeps(pkg.dependencies, installedNames, pkgPath, seen);
+  if (!productionOnly) addMissingGroupDeps(pkg.devDependencies, installedNames, pkgPath, seen);
+}
+
 export function scanWithNativeFs(rootDir: string, options: ScanOptions = {}): ScannedDependency[] {
   const directNames = extractDirectDepNames(rootDir, options.productionOnly);
   const seen = new Map<string, ScannedDependency>();
@@ -436,6 +472,7 @@ export function scanWithNativeFs(rootDir: string, options: ScanOptions = {}): Sc
       scanPnpmStore(path.join(nmDir, '.pnpm'), directNames, seen);
     }
   }
+  addMissingDirectPackageJsonDeps(rootDir, options.productionOnly, seen);
 
   scanPythonDependencies(rootDir, seen);
   scanGoDependencies(rootDir, seen);
@@ -689,8 +726,10 @@ export function scanInstalledLicenses(rootDir: string, options: ScanOptions = {}
     }
   }
 
-  return scanWithNativeFs(rootDir, {
+  resetGlobalBudget();
+  const deps = scanWithNativeFs(rootDir, {
     depth: options.depth || 'transitive',
     productionOnly: options.productionOnly,
   });
+  return deps.map((d) => (d.spdxLicense === 'UNKNOWN' ? resolveLicense(d, rootDir) : d));
 }

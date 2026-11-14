@@ -6,6 +6,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resolveJavaLicense } from '../src/verifiers/sca/license-java.js';
 import type { ScannedDependency } from '../src/types/index.js';
 
+vi.mock('child_process', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('child_process')>();
+  return { ...mod };
+});
+vi.mock('os', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('os')>();
+  return { ...mod };
+});
+
 describe('CHG-055 TSK-006: Java/Maven offline license resolution', () => {
   const tmpDirs: string[] = [];
 

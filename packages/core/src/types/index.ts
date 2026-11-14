@@ -635,6 +635,19 @@ export interface LicenseViolation {
 
 export type ScaTool = 'native' | 'license-checker' | 'trivy' | 'syft';
 
+export type UnresolvedLicenseReason =
+  | 'cli_not_installed'
+  | 'cli_timeout'
+  | 'cache_missing'
+  | 'invalid_output'
+  | 'output_too_large'
+  | 'cli_failed'
+  | 'blocked_by_repo_config'
+  | 'path_rejected'
+  | 'budget_exceeded';
+
+export type LicenseProvenance = 'local-metadata' | 'cli' | 'sbom-declared';
+
 export interface ScannedDependency {
   name: string;
   version: string;
@@ -645,6 +658,8 @@ export interface ScannedDependency {
   repository?: string;
   author?: string;
   isDirect?: boolean;
+  unresolvedReason?: UnresolvedLicenseReason;
+  provenance?: LicenseProvenance;
 }
 
 export interface CycloneDxLicense {
@@ -719,6 +734,7 @@ export interface LicenseVerificationOptions {
 
 export interface LicenseVerificationResult {
   success: boolean;
+  passed?: boolean;
   totalEvaluated: number;
   permittedCount: number;
   violations: LicenseViolation[];
