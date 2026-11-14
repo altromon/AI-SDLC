@@ -210,6 +210,7 @@ verifyCommand
   .option('-m, --manifest <path>', 'Path to license-manifest.yaml')
   .option('--no-dynamic', 'Disable dynamic scanning and require static manifest file')
   .option('--sbom [path]', 'Generate CycloneDX 1.5 JSON standard SBOM file')
+  .option('--sbom-input <path>', 'Ingest an existing CycloneDX 1.x or SPDX 2.x SBOM JSON file to fill license gaps')
   .option('--notices [path]', 'Generate THIRD_PARTY_NOTICES.md legal notices and attributions file')
   .option('--tool <tool>', 'SCA tool: native, trivy, syft', 'native')
   .option('--depth <depth>', 'Analysis depth: direct or transitive', 'transitive')
@@ -226,6 +227,7 @@ verifyCommand
       tool: opts.tool,
       depth: opts.depth,
       sbom: opts.sbom,
+      sbomInput: opts.sbomInput,
       notices: opts.notices,
       vuln: opts.vuln,
       json: opts.json,

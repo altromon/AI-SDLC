@@ -725,6 +725,7 @@ export interface LicenseVerificationOptions {
   depth?: 'direct' | 'transitive';
   generateSbom?: boolean;
   sbomPath?: string;
+  sbomInputPath?: string;
   generateNotices?: boolean;
   noticesPath?: string;
   productionOnly?: boolean;
@@ -745,6 +746,7 @@ export interface LicenseVerificationResult {
   vulnerabilities?: ScaVulnerability[];
   vulnerabilitiesSkipped?: boolean;
   vulnerabilitiesSkipReason?: string;
+  warnings?: string[];
 }
 
 // --- PDaC Graph & Cryptographic Drift Types ---

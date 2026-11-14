@@ -470,6 +470,7 @@ export interface LicenseVerifyOptions extends VerifyBaseOptions {
   tool?: 'native' | 'license-checker' | 'trivy' | 'syft';
   depth?: 'direct' | 'transitive';
   sbom?: boolean | string;
+  sbomInput?: string;
   notices?: boolean | string;
 }
 
@@ -543,6 +544,7 @@ function buildLicenseVerifyInput(options: LicenseVerifyOptions, rootDir: string)
     depth: options.depth,
     generateSbom: options.sbom !== undefined ? Boolean(options.sbom) : undefined,
     sbomPath: typeof options.sbom === 'string' ? options.sbom : undefined,
+    sbomInputPath: options.sbomInput,
     generateNotices: options.notices !== undefined ? Boolean(options.notices) : undefined,
     noticesPath: typeof options.notices === 'string' ? options.notices : undefined,
     scanVulnerabilities: options.vuln !== undefined ? Boolean(options.vuln) : undefined,
@@ -557,6 +559,12 @@ export function runVerifyLicenses(options: LicenseVerifyOptions = {}): boolean {
   }
 
   const result = verifyLicenses(buildLicenseVerifyInput(options, rootDir));
+
+  if (result.warnings && result.warnings.length > 0 && !options.silent) {
+    for (const warning of result.warnings) {
+      process.stderr.write(`[SBOM WARNING] ${warning}\n`);
+    }
+  }
 
   if (useJson) {
     emitLicensesJson(result);

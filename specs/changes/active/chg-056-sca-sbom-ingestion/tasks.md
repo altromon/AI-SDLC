@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-sbom-ingest.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:
@@ -38,8 +38,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-sbom-parse.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-001'
+    status: COMPLETED
     blocked-by:
       - TSK-001
     implements-components:
@@ -58,8 +57,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-sbom-merge.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-002'
+    status: COMPLETED
     blocked-by:
       - TSK-002
     implements-components:
@@ -78,8 +76,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-sbom-cli.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-003'
+    status: COMPLETED
     blocked-by:
       - TSK-003
     implements-components:
@@ -98,8 +95,7 @@ tasks:
       method: quality-gate
       command-or-criteria: pnpm run typecheck; pnpm test; pnpm run verify:all
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-004'
+    status: COMPLETED
     blocked-by:
       - TSK-004
     implements-components:

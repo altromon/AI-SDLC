@@ -11,11 +11,19 @@ import { buildPurl } from './purl.js';
 import { parseMavenPomDependencies } from './maven-xml.js';
 import { resolveLicense } from './license-resolve.js';
 import { resetGlobalBudget } from './safe-exec.js';
+import { ingestSbomFile } from './sbom-ingest.js';
+import { parseIngestedSbom, parseStrictPurl, type SbomComponent } from './sbom-parse.js';
 
 export interface ScanOptions {
   depth?: 'direct' | 'transitive';
   tool?: ScaTool;
   productionOnly?: boolean;
+  sbomPath?: string;
+}
+
+export interface ScaScanResult {
+  dependencies: ScannedDependency[];
+  warnings: string[];
 }
 
 export function isToolAvailable(toolName: string): boolean {
@@ -732,4 +740,91 @@ export function scanInstalledLicenses(rootDir: string, options: ScanOptions = {}
     productionOnly: options.productionOnly,
   });
   return deps.map((d) => (d.spdxLicense === 'UNKNOWN' ? resolveLicense(d, rootDir) : d));
+}
+
+// eslint-disable-next-line no-control-regex
+const ANSI_CTRL_RE = /[\x00-\x1f\x7f]/g;
+
+function sanitizeWarningLabel(raw: string): string {
+  return raw.replace(ANSI_CTRL_RE, '').replace(/[A-Za-z]:\\|\/(?:tmp|Users|home|var|etc)\//g, '').slice(0, 120);
+}
+
+function depMatchKey(dep: ScannedDependency): string {
+  const parsed = dep.purl ? parseStrictPurl(dep.purl) : null;
+  if (parsed) {
+    const fullName = parsed.namespace ? `${parsed.namespace}/${parsed.name}` : parsed.name;
+    return `${parsed.ecosystem}\0${fullName}\0${parsed.version}`;
+  }
+  return `generic\0${dep.name}\0${dep.version}`;
+}
+
+function sbomMatchKey(comp: SbomComponent): string {
+  const fullName = comp.namespace ? `${comp.namespace}/${comp.name}` : comp.name;
+  return `${comp.ecosystem}\0${fullName}\0${comp.version}`;
+}
+
+function formatDepLabel(name: string, version: string, namespace?: string): string {
+  const qualified = namespace && !name.startsWith(`${namespace}/`) ? `${namespace}/${name}` : name;
+  return sanitizeWarningLabel(`${qualified}@${version}`);
+}
+
+function applySbomGapFill(dep: ScannedDependency, sbomComp?: SbomComponent): ScannedDependency {
+  const isGap = dep.spdxLicense === 'UNKNOWN' || dep.spdxLicense === 'UNRESOLVED';
+  if (!isGap || !sbomComp || sbomComp.spdxLicense === 'UNKNOWN') {
+    return dep;
+  }
+  const updated: ScannedDependency = { ...dep, spdxLicense: sbomComp.spdxLicense, provenance: 'sbom-declared' };
+  delete updated.unresolvedReason;
+  return updated;
+}
+
+function cmpStr(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+function buildSbomComponentMap(sbomComponents: SbomComponent[]): Map<string, SbomComponent> {
+  const map = new Map<string, SbomComponent>();
+  for (const comp of sbomComponents) {
+    map.set(sbomMatchKey(comp), comp);
+  }
+  return map;
+}
+
+function appendExtraSbomWarnings(
+  sbomComponents: SbomComponent[],
+  seenLocalKeys: Set<string>,
+  warnings: string[]
+): void {
+  for (const comp of sbomComponents) {
+    if (!seenLocalKeys.has(sbomMatchKey(comp))) {
+      const label = formatDepLabel(comp.name, comp.version, comp.namespace);
+      warnings.push(`SBOM cross-check: SBOM component ${label} is not present in local lockfiles`);
+    }
+  }
+}
+
+export function mergeSbomGaps(localDeps: ScannedDependency[], sbomComponents: SbomComponent[]): ScaScanResult {
+  const sbomMap = buildSbomComponentMap(sbomComponents);
+  const seenLocalKeys = new Set<string>();
+  const warnings: string[] = [];
+  const merged = localDeps.map((dep) => {
+    const key = depMatchKey(dep);
+    seenLocalKeys.add(key);
+    const match = sbomMap.get(key);
+    if (!match) {
+      warnings.push(`SBOM cross-check: local dependency ${formatDepLabel(dep.name, dep.version)} is missing from SBOM`);
+    }
+    return applySbomGapFill(dep, match);
+  });
+  appendExtraSbomWarnings(sbomComponents, seenLocalKeys, warnings);
+  merged.sort((a, b) => cmpStr(a.name, b.name) || cmpStr(a.version, b.version));
+  warnings.sort(cmpStr);
+  return { dependencies: merged, warnings };
+}
+
+export function scanWithSbom(rootDir: string, sbomPath: string, options: ScanOptions = {}): ScaScanResult {
+  const doc = ingestSbomFile(rootDir, sbomPath);
+  const sbomComponents = parseIngestedSbom(doc);
+  const localDeps = scanInstalledLicenses(rootDir, options);
+  return mergeSbomGaps(localDeps, sbomComponents);
 }
