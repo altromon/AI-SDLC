@@ -1,0 +1,23 @@
+id: HOF-CHG-060-DOCTOR-SECURITY-TOOLS
+type: handoff
+title: Handoff Canónico de Arquitectura para Doctor Security Tools
+changeId: CHG-060-DOCTOR-SECURITY-TOOLS
+version: 1.0.0
+createdAt: '2026-11-14T14:45:00.000Z'
+subgraph:
+  requirements:
+    - FR-060-DOCTOR-SECURITY-TOOLS-001
+  useCases:
+    - UC-060-DOCTOR-SECURITY-TOOLS
+  components:
+    - CMP-060-DOCTOR-SECURITY-TOOLS
+citations:
+  - id: UC-060-DOCTOR-SECURITY-TOOLS
+    digest: sha256:6242acc3d3b92f5535c1fcd72e5915a0e8319090092daaaf90b4454c45ae9a7c
+    comment: Caso de uso para diagnóstico de herramientas opcionales de seguridad en aisdlc doctor
+  - id: FR-060-DOCTOR-SECURITY-TOOLS-001
+    digest: sha256:fd55217e0ca647a0aca53709a3b78d4ee78c8b2d873e0ba3c37722999e62988b
+    comment: Requerimiento funcional de diagnóstico no bloqueante para semgrep, trivy y gitleaks
+  - id: CMP-060-DOCTOR-SECURITY-TOOLS
+    digest: sha256:294d7425b4213821fe1c367309395d6c0fd33c6e11286686b5ce143982b627df
+    comment: Componente arquitectónico de diagnóstico de herramientas opcionales de seguridad

@@ -9,5 +9,6 @@ export * from './branch-safety-check.js';
 export * from './schemas-pdac-check.js';
 export * from './toolchain-check.js';
 export * from './signature-check.js';
+export * from './security-tools-check.js';
 export * from './reporter.js';
 export * from './doctor-service.js';

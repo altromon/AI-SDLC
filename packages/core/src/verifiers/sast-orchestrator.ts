@@ -148,6 +148,7 @@ function getToolInvocation(
     eslint: ['--format', '@microsoft/eslint-formatter-sarif', '-o', sarifFile, '.'],
     semgrep: ['scan', '--config', 'auto', '--sarif', '--output', sarifFile],
     trivy: ['fs', '--format', 'sarif', '--output', sarifFile, '.'],
+    gitleaks: ['detect', '--no-git', '--report-format', 'sarif', '--report-path', sarifFile, '--source', '.'],
   };
   return { args: argMap[tool], sarifFile };
 }

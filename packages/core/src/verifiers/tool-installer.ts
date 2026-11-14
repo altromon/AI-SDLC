@@ -16,6 +16,7 @@ import * as path from 'path';
 export type InstallableTool =
   | 'semgrep'
   | 'trivy'
+  | 'gitleaks'
   | 'bandit'
   | 'ruff'
   | 'gosec'
@@ -98,6 +99,12 @@ export const TOOL_INSTALL_ALLOWLIST: Readonly<
     ['winget', ['install', 'AquaSecurity.Trivy']],
     ['brew', ['install', 'trivy']],
     ['apt-get', ['install', '-y', 'trivy']]
+  ),
+  gitleaks: freezePlatforms(
+    'gitleaks',
+    ['winget', ['install', 'Gitleaks.Gitleaks']],
+    ['brew', ['install', 'gitleaks']],
+    ['go', ['install', 'github.com/gitleaks/gitleaks/v8@latest']]
   ),
   bandit: freezePlatforms(
     'bandit',
@@ -216,7 +223,22 @@ export function resolveTrustedBinaryPath(binaryName: string, rootDir?: string): 
   return null;
 }
 
-const WIN_CMD_META_RE = /[&|;<>^%\r\n]/;
+export const WIN_CMD_META_RE = /[&|;<>^%\r\n]/;
+
+export function resolveWinCmdSpawn(
+  binPath: string,
+  args: readonly string[]
+): { command: string; args: string[]; rejectedMetachar?: boolean } {
+  const isWinBatch = process.platform === 'win32' && /\.(cmd|bat)$/i.test(binPath);
+  if (!isWinBatch) {
+    return { command: binPath, args: [...args] };
+  }
+  if (args.some((arg) => WIN_CMD_META_RE.test(arg))) {
+    return { command: binPath, args: [...args], rejectedMetachar: true };
+  }
+  const comSpec = process.env.ComSpec || 'cmd.exe';
+  return { command: comSpec, args: ['/d', '/s', '/c', binPath, ...args] };
+}
 
 function buildSpawnErrorResult(message: string): child_process.SpawnSyncReturns<string> {
   return {
@@ -235,18 +257,11 @@ export function spawnTrustedBinary(
   args: readonly string[],
   options: child_process.SpawnSyncOptionsWithStringEncoding
 ): child_process.SpawnSyncReturns<string> {
-  const isWinBatch = process.platform === 'win32' && /\.(cmd|bat)$/i.test(binPath);
-  if (isWinBatch) {
-    if (args.some((arg) => WIN_CMD_META_RE.test(arg))) {
-      return buildSpawnErrorResult('Rejected unsafe shell metacharacter in Windows batch arguments.');
-    }
-    const comSpec = process.env.ComSpec || 'cmd.exe';
-    return child_process.spawnSync(comSpec, ['/d', '/s', '/c', binPath, ...args], {
-      ...options,
-      shell: false,
-    });
+  const resolved = resolveWinCmdSpawn(binPath, args);
+  if (resolved.rejectedMetachar) {
+    return buildSpawnErrorResult('Rejected unsafe shell metacharacter in Windows batch arguments.');
   }
-  return child_process.spawnSync(binPath, [...args], {
+  return child_process.spawnSync(resolved.command, resolved.args, {
     ...options,
     shell: false,
   });
