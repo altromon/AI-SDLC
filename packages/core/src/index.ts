@@ -40,6 +40,7 @@ export * from './git/agent-detector.js';
 export * from './git/hook-installer.js';
 export * from './reporters/pr-kpis.js';
 export * from './reporters/release-kpis.js';
+export * from './reporters/agent-kpis.js';
 export * from './reporters/cytoscape-bundle.js';
 export * from './reporters/dashboard.js';
 export * from './reporters/sarif.js';

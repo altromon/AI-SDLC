@@ -1,5 +1,14 @@
 # @aisdlc/cli
 
+## 4.3.0
+
+### Minor Changes
+
+- feat(kpis): support AI Agent Performance KPIs in formal quality reporting (`aisdlc report quality`) and interactive dashboard (`aisdlc report dashboard`).
+- Updated dependencies
+  - @aisdlc/core@4.3.0
+  - @aisdlc/mcp@4.3.0
+
 ## 4.2.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 # 📊 Formal Quality and Release Gate Report (AI-SDLC)
 
-> **Generation Date:** 2026-11-14T13:41:20.000Z
+> **Generation Date:** 2026-11-14T19:57:13.000Z
 > **Release Gate Verdict:** 🟢 APPROVED (RELEASE READY)
 > **Global Rating:** **`B`** (MI Index: 61.8/100, Average CC: 3.9)
 
@@ -10,9 +10,9 @@
 
 | Key Metric | Measured Value | Policy Threshold | Compliance |
 | :--- | :---: | :---: | :---: |
-| **Analyzed Files** | `120` | N/A | ℹ️ |
-| **Evaluated Functions** | `1779` | N/A | ℹ️ |
-| **Lines of Code (LOC)** | `22575` | N/A | ℹ️ |
+| **Analyzed Files** | `123` | N/A | ℹ️ |
+| **Evaluated Functions** | `1831` | N/A | ℹ️ |
+| **Lines of Code (LOC)** | `23169` | N/A | ℹ️ |
 | **Cyclomatic Complexity (Average)** | `3.9` | $\le 10$ | ✅ COMPLIANT |
 | **Cognitive Complexity (Average)** | `2.5` | $\le 15$ | ✅ COMPLIANT |
 | **Maintainability Index (SEI MI)** | `61.8 / 100` | $\ge 50$ | ✅ COMPLIANT |
@@ -23,11 +23,28 @@
 
 ---
 
-## 2. Polyglot Breakdown by Language Ecosystem
+## 2. AI Agent Performance KPIs (SWE-bench & DORA AI)
+
+> **Evaluated Tasks:** `20` | **Commits:** `331` | **Audited Trailer Coverage:** `40.8%`
+
+| KPI | Measured Value | Benchmark / Target |
+| :--- | :---: | :---: |
+| **First-Pass Yield (FPY)** | `75%` | $\ge 80\%$ |
+| **Rework Loops per Task** | `0.3` | $\le 0.5$ |
+| **Specification Adherence Index** | `100%` | $\ge 95\%$ |
+| **Human Takeover / Intervention Rate** | `0%` | $\le 15\%$ |
+| **Token Cost Efficiency** | `859 tokens/CC` | Lower is better |
+| **Architecture Drift Rate** | `22.2%` | $0\%$ |
+
+---
+
+## 3. Polyglot Breakdown by Language Ecosystem
 
 | Language | Functions | Total LOC | Average MI | Average CC | Rating |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **TypeScript** | `1779` | `22575` | `61.8` | `3.9` | `B` |
+| **TypeScript** | `1831` | `23169` | `61.8` | `3.9` | `B` |
+
+---
 
 ---
 

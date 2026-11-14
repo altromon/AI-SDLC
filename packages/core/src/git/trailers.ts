@@ -12,6 +12,7 @@ export interface CommitTrailers {
   promptTokens: number;
   completionTokens: number;
   activeTimeSeconds: number;
+  isTelemetryEstimated?: boolean;
 }
 
 export interface CommitKpiRecord {
@@ -24,6 +25,7 @@ export interface CommitKpiRecord {
   linesAdded: number;
   linesDeleted: number;
   isBugFix: boolean;
+  touchedFiles?: string[];
 }
 
 const TRAILER_REGEXES = {
@@ -129,9 +131,10 @@ function parseRawLogChunks(rawLog: string): ParsedCommitChunk[] {
   return chunks;
 }
 
-function sumNumstatLines(lines: string[]): { added: number; deleted: number } {
+function sumNumstatLines(lines: string[]): { added: number; deleted: number; files: string[] } {
   let added = 0;
   let deleted = 0;
+  const files: string[] = [];
   for (const line of lines) {
     const parts = line.trim().split(/\s+/);
     if (parts.length >= 2) {
@@ -139,9 +142,10 @@ function sumNumstatLines(lines: string[]): { added: number; deleted: number } {
       const d = parseInt(parts[1], 10);
       if (!isNaN(a)) added += a;
       if (!isNaN(d)) deleted += d;
+      if (parts.length >= 3) files.push(parts.slice(2).join(' '));
     }
   }
-  return { added, deleted };
+  return { added, deleted, files };
 }
 
 function evaluateIsBugFix(subject: string, parentRef?: string): boolean {
@@ -152,23 +156,30 @@ function evaluateIsBugFix(subject: string, parentRef?: string): boolean {
 function inferAgentTrailers(trailers: CommitTrailers, linesAdded: number, linesDeleted: number): CommitTrailers {
   const res: CommitTrailers = { ...trailers };
   const linesChanged = linesAdded + linesDeleted;
+  let estimated = false;
 
   if (res.promptTokens === 0 && res.completionTokens === 0) {
     res.completionTokens = linesChanged > 0 ? Math.max(linesAdded * 10, 50) : 0;
     res.promptTokens = linesChanged > 0 ? Math.max(2500 + linesChanged * 25, 3000) : 1000;
+    estimated = true;
   }
   if (res.activeTimeSeconds === 0) {
     res.activeTimeSeconds = linesChanged > 0 ? Math.round(30 + linesChanged * 0.5) : 30;
+    estimated = true;
   }
+  res.isTelemetryEstimated = estimated;
   return res;
 }
 
 function inferHumanTrailers(trailers: CommitTrailers, linesAdded: number, linesDeleted: number): CommitTrailers {
   const res: CommitTrailers = { ...trailers };
   const linesChanged = linesAdded + linesDeleted;
+  let estimated = false;
   if (res.activeTimeSeconds === 0) {
     res.activeTimeSeconds = linesChanged > 0 ? Math.round(180 + linesChanged * 2) : 120;
+    estimated = true;
   }
+  res.isTelemetryEstimated = estimated;
   return res;
 }
 
@@ -245,7 +256,7 @@ function buildCommitKpiRecord(chunk: ParsedCommitChunk): CommitKpiRecord | null 
   if (fields.length < 5) return null;
 
   const rawTrailers = parseCommitTrailers(chunk.body);
-  const { added, deleted } = sumNumstatLines(chunk.numstatLines);
+  const { added, deleted, files } = sumNumstatLines(chunk.numstatLines);
   const trailers = inferMissingTrailers(rawTrailers, added, deleted);
 
   return {
@@ -258,6 +269,7 @@ function buildCommitKpiRecord(chunk: ParsedCommitChunk): CommitKpiRecord | null 
     linesAdded: added,
     linesDeleted: deleted,
     isBugFix: evaluateIsBugFix(fields[4], trailers.parentRef),
+    touchedFiles: files,
   };
 }
 

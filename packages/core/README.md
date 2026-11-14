@@ -158,7 +158,7 @@ This separation allows the core functionality to be reused by different interfac
 | Capability | Description | Primary Exports |
 | --- | --- | --- |
 | **Interactive Offline Dashboard** | Generates a 100% self-contained offline HTML dashboard with Cytoscape.js interactive graph for visualizing the full PDaC and RTM network (including `ARCH-INTRO-*`, Bounded Contexts `BC-*`, `DATA-ASSET-*`, `PRIV-ROPA-*`, and `PRIV-REQ-*`). | `generateDashboardReport`, `buildGraphElements`, `renderDashboardHtml` |
-| **Formal Code Quality Reporting** | Compiles granular polyglot code quality analysis into structured Markdown reports (`reports/QUALITY_REPORT.md`). | `generateQualityReport`, `writeQualityReport`, `calculateRating` |
+| **Formal Code Quality Reporting** | Compiles granular polyglot code quality analysis and AI Agent Performance KPIs (SWE-bench & DORA AI) into structured Markdown reports (`reports/QUALITY_REPORT.md`). | `generateQualityReport`, `writeQualityReport`, `calculateRating`, `computeAgentPerformanceKpis` |
 | **Code Coverage Ingestion** | Passively ingests test coverage summaries from standard formats (`coverage/lcov.info`, `coverage/coverage-summary.json`) across polyglot stacks (.NET via Coverlet & ReportGenerator, Node.js, Python). | `readCodeCoverageSummary` |
 | **Pull Request KPIs & Telemetry** | Calculates human vs. AI agent contribution ratios, review cycle duration, and token usage, formatting them for PR templates. | `aggregatePrKpis`, `formatPrKpiMarkdown`, `injectKpisIntoPrBody` |
 | **Release KPIs & Defect Injection Rate** | Computes release-level engineering metrics, Defect Injection Rate (DIR) per author/model, rework costs, and defect density. | `aggregateReleaseKpis`, `formatReleaseKpiMarkdown`, `writeReleaseKpiReport` |
