@@ -42,7 +42,7 @@ Corrección acotada en `CMP-054-SCA-LICENSE-RESOLUTION` (subconjunto de `CMP-COR
 
 - `ScaVulnerability` gana `ecosystem: string` (y `purl?: string` si el origen lo aporta); es la fuente del ecosistema para `sbom.ts:75`.
 - Nuevo `sca/purl.ts`: `buildPurl(p: { ecosystem: string; namespace?: string; name: string; version: string }): string` función plana con tabla ecosistema→tipo (npm, pypi, maven `group/artifact`, cargo, golang, nuget). Percent-encoding: todo carácter fuera de `[A-Za-z0-9.\-_~]` en nombre/namespace/versión (`@scope` → `%40scope`, `+` → `%2B`). Ecosistema desconocido → `pkg:generic` + aviso (canal `warnings`).
-- Maven: tokenizador XML estricto propio (sin dependencias): rechaza `<!DOCTYPE`/`<!ENTITY` (pom descartado con aviso saneado), ignora comentarios y CDATA, `` sin resolver → versión/licencia `UNKNOWN` marcada.
+- Maven: tokenizador XML estricto propio (sin dependencias): rechaza `<!DOCTYPE`/`<!ENTITY` (pom descartado con aviso saneado), ignora comentarios y CDATA, `${prop}` sin resolver → versión/licencia `UNKNOWN` marcada.
 - **trivy/syft**: las invocaciones (`execTrivyCli`, `scanWithSyft`) permanecen sin cambios; solo cambia el fallback de PURL al parsear su salida. Migrarlas a `safe-exec` queda fuera de este cambio (decisión explícita).
 - Requisito previo de CHG-055 (la herencia Maven debe corregirse antes de resolver Java). CHG-056 es independiente de `buildPurl`.
 

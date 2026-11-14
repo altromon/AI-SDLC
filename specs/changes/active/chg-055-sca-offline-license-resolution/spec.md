@@ -36,9 +36,9 @@ Feature: SCA offline license resolution
       | ecosystem | cli          | argv                                              | env                                                  |
       | rust      | cargo        | metadata --offline --locked --frozen --format-version 1 | CARGO_NET_OFFLINE=true                         |
       | go        | go           | list -m -json all                                 | GOFLAGS=-mod=readonly GOPROXY=off GOTOOLCHAIN=local GOWORK=off |
-      | java      | mvn          | -o -B -ntp                                        | MAVEN_OPTS purged                                    |
+      | java      | mvn          | -o -B -ntp -q dependency:list                     | MAVEN_OPTS purged                                    |
       | python    | pip-licenses | --format=json                                     | PYTHONNOUSERSITE=1                                   |
-      | node      | npm          | ls --json --ignore-scripts                        | NODE_OPTIONS purged                                  |
+      | node      | npm          | ls --json --long --ignore-scripts --offline       | NODE_OPTIONS purged                                  |
 
   @boundary
   Scenario Outline: UNRESOLVED es equivalente a UNKNOWN
@@ -79,11 +79,12 @@ Feature: SCA offline license resolution
       | .mvn/maven.config               | mvn    |
       | Directory.Build.props           | dotnet |
       | Directory.Build.targets         | dotnet |
+      | Directory.Packages.props        | dotnet |
       | global.json with msbuild-sdks   | dotnet |
       | nuget.config                    | dotnet |
       | .pnpmfile.cjs                   | pnpm   |
       | .npmrc                          | npm    |
-      | .cargo/config.toml rustc-wrapper | cargo |
+      | .cargo/config.toml o .cargo/config | cargo |
       | rust-toolchain.toml             | cargo  |
 
   @invalid

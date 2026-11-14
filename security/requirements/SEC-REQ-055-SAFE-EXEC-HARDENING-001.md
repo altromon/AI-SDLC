@@ -25,7 +25,7 @@ superseded-by: null
 # SEC-REQ-055-SAFE-EXEC-HARDENING-001: Ejecución Endurecida de CLIs Externos en SCA (sin shell, allowlist de binario/subcomando/flags, entorno saneado)
 
 ## 1. Enunciado del Control Técnico
-`runSafe` DEBE (decisión PO: se mantienen todos los CLIs de issue #161 con medidas de bloqueo; tabla canónica en BR-SCA-EXTERNAL-CLI-SAFE-EXECUTION §2): (1) `spawnSync`/`execFile` con `shell:false`; en Windows resolver el `.exe` explícito, prohibido `shell:true` y shims `.cmd`/`.bat`; (2) lista cerrada de binarios `pip-licenses`, `cargo`, `go`, `mvn`, `dotnet`, `npm`, `pnpm` con subcomando y flags exactos: `cargo metadata --offline --locked --frozen --format-version 1`; `go list -m -json all` con `GOFLAGS=-mod=readonly GOPROXY=off GOTOOLCHAIN=local GOWORK=off`; `mvn -o -B -ntp` (nunca `license:download-licenses`); `npm`/`pnpm` con `--ignore-scripts`; `pip-licenses --format=json` con `PYTHONNOUSERSITE=1` y `PYTHONPATH`/`PYTHONSTARTUP` purgados, nunca el python de un venv del repo; (3) **rechazo previo** del CLI (fallback a parseo de archivos / `UNRESOLVED` `blocked_by_repo_config`) si existe `.mvn/extensions.xml`, `.mvn/maven.config`, `Directory.Build.props|targets`, `global.json` con `msbuild-sdks`, `nuget.config`, `.pnpmfile.cjs`, `.npmrc`, `.cargo/config.toml` con `rustc-wrapper`/fuentes remotas o `rust-toolchain.toml`; (4) nombres de dependencia nunca como argumentos (si fuese imprescindible: regex estricta y rechazo de prefijo `-`); (5) entorno hijo por lista blanca (`PATH` absoluto de sistema, `SYSTEMROOT`, `TMP`, `TEMP`, `HOME`, `USERPROFILE`) con HOME/cachés temporales, purgando proxies, tokens, `NODE_OPTIONS`, `NODE_PATH`, `LD_PRELOAD`, `DYLD_*`, `RUSTC_WRAPPER`, `RUSTC_WORKSPACE_WRAPPER`, `MAVEN_OPTS`, `JAVA_TOOL_OPTIONS`, `DOTNET_*`, `GOFLAGS` heredado, `GIT_*`; (6) `cwd` resuelto con `realpath` y confinado a la raíz; (7) `timeout` ≤ 10000 ms por invocación, `maxBuffer` ≤ 5 MiB, una invocación por manifiesto y presupuesto global de tiempo; (8) binario fuera de lista → `ERR_UNAUTHORIZED_SCA_TOOL` sin ejecutar; (9) stdout vacío o corrupto → `UNRESOLVED` (`invalid_output`); (10) pruebas con red denegada.
+`runSafe` DEBE (decisión PO: se mantienen todos los CLIs de issue #161 con medidas de bloqueo; tabla canónica en BR-SCA-EXTERNAL-CLI-SAFE-EXECUTION §2): (1) `spawnSync`/`execFile` con `shell:false`; en Windows resolver el `.exe` explícito, prohibido `shell:true` y shims `.cmd`/`.bat`; (2) lista cerrada de binarios `pip-licenses`, `cargo`, `go`, `mvn`, `dotnet`, `npm`, `pnpm` con subcomando y flags exactos: `cargo metadata --offline --locked --frozen --format-version 1`; `go list -m -json all` con `GOFLAGS=-mod=readonly GOPROXY=off GOTOOLCHAIN=local GOWORK=off`; `mvn -o -B -ntp -q dependency:list` (nunca `license:download-licenses`); `npm ls --json --long --ignore-scripts --offline` / `pnpm licenses list --json --ignore-scripts` (offline); `pip-licenses --format=json` con `PYTHONNOUSERSITE=1` y `PYTHONPATH`/`PYTHONSTARTUP` purgados, nunca el python de un venv del repo; (3) **rechazo previo** del CLI (fallback a parseo de archivos / `UNRESOLVED` `blocked_by_repo_config`) si existe en `rootDir` o cualquier directorio intermedio entre `manifestDir` y `rootDir`: `.mvn/extensions.xml`, `.mvn/maven.config`, `Directory.Build.props|targets`, `Directory.Packages.props`, `global.json` con `msbuild-sdks`, `nuget.config` (`NuGet.Config`), `.pnpmfile.cjs`, `.npmrc`, `.cargo/config.toml`, `.cargo/config` o `rust-toolchain.toml`; (4) nombres de dependencia nunca como argumentos (si fuese imprescindible: regex estricta y rechazo de prefijo `-`); (5) entorno hijo por lista blanca (`PATH` absoluto de sistema, `SYSTEMROOT`, `TMP`, `TEMP`, `HOME`, `USERPROFILE`) con HOME/cachés temporales, purgando proxies, tokens, `NODE_OPTIONS`, `NODE_PATH`, `LD_PRELOAD`, `DYLD_*`, `RUSTC_WRAPPER`, `RUSTC_WORKSPACE_WRAPPER`, `MAVEN_OPTS`, `JAVA_TOOL_OPTIONS`, `DOTNET_*`, `GOFLAGS` heredado, `GIT_*`; (6) `cwd` resuelto con `realpath` y confinado a la raíz; (7) `timeout` ≤ 10000 ms por invocación, `maxBuffer` ≤ 5 MiB, una invocación por manifiesto y presupuesto global de tiempo; (8) binario fuera de lista → `ERR_UNAUTHORIZED_SCA_TOOL` sin ejecutar; (9) stdout vacío o corrupto → `UNRESOLVED` (`invalid_output`); (10) pruebas con red denegada.
 
 ---
 
@@ -51,7 +51,7 @@ Feature: Ejecución endurecida de CLIs externos en SCA
   Scenario: Invocación sin shell con subcomando y flags de lista cerrada
     Given a request to resolve licenses with "cargo"
     When runSafe launches the process
-    Then it must use "shell: false" and arguments ["metadata","--offline","--locked","--format-version","1"]
+    Then it must use "shell: false" and arguments ["metadata","--offline","--locked","--frozen","--format-version","1"]
     And no shell interpreter "/bin/sh" or "cmd.exe" is spawned
 
   Scenario Outline: Archivos de configuración del repo bloquean el CLI
@@ -64,7 +64,8 @@ Feature: Ejecución endurecida de CLIs externos en SCA
       | blocker                | cli    |
       | .mvn/extensions.xml    | mvn    |
       | .mvn/maven.config      | mvn    |
-      | Directory.Build.props  | dotnet |
+      | Directory.Build.props    | dotnet |
+      | Directory.Packages.props | dotnet |
       | nuget.config           | dotnet |
       | .pnpmfile.cjs          | pnpm   |
       | .npmrc                 | npm    |

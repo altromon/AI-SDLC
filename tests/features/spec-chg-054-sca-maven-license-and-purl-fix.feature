@@ -53,7 +53,7 @@ Feature: SCA Maven license and PURL fix
     Examples:
       | defect                                   |
       | comment "<!-- license: MIT -->"          |
-      | unresolved version ""      |
+      | unresolved version "${project.version}" |
       | DOCTYPE with external ENTITY             |
 
 @CHG-054-SCA-MAVEN-LICENSE-AND-PURL-FIX @security @mitigation

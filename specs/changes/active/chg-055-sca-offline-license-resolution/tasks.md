@@ -76,7 +76,7 @@ tasks:
       - SEC-REQ-055-CLI-HIJACK-RESISTANCE-001
       - SEC-REQ-055-OUTPUT-SANITIZATION-INTEGRITY-001
   - id: TSK-004
-    title: 'Red test primero: license-rust.ts (registro ~/.cargo/registry Cargo.toml; CLI cargo metadata --offline --locked --frozen; rechazo .cargo/config.toml con rustc-wrapper y rust-toolchain.toml)'
+    title: 'Red test primero: license-rust.ts (registro ~/.cargo/registry Cargo.toml; CLI cargo metadata --offline --locked --frozen; rechazo .cargo/config.toml, .cargo/config y rust-toolchain.toml)'
     complexity: MEDIUM
     risk-level: MEDIUM
     autonomy-mode: AUTONOMOUS
@@ -142,7 +142,7 @@ tasks:
       - SEC-REQ-055-CLI-HIJACK-RESISTANCE-001
       - SEC-REQ-055-OUTPUT-SANITIZATION-INTEGRITY-001
   - id: TSK-007
-    title: 'Red test primero: license-dotnet.ts (.nuspec en ~/.nuget/packages; CLI dotnet list package sin restore; rechazo Directory.Build.props|targets, global.json msbuild-sdks, nuget.config)'
+    title: 'Red test primero: license-dotnet.ts (.nuspec en ~/.nuget/packages; CLI dotnet list package sin restore; rechazo Directory.Build.props|targets, Directory.Packages.props, global.json msbuild-sdks, nuget.config en recorrido ascendente)'
     complexity: MEDIUM
     risk-level: MEDIUM
     autonomy-mode: AUTONOMOUS

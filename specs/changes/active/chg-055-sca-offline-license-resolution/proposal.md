@@ -15,7 +15,7 @@ citations:
     digest: sha256:b967c3e510f66024ee48be54ae3c0175a02055fa7a4a5dd265e313e3672f4a94
     comment: Citación upstream
   - id: BR-SCA-EXTERNAL-CLI-SAFE-EXECUTION
-    digest: sha256:4ff171048a4f674c53c72528e260f54f815d4ffc94a649c9f4bdbb51485fbc3c
+    digest: sha256:c1c9b92393daa5056a0721c8ee1b54213ee78d140646d38c953ccbc762e76c13
     comment: Citación upstream
 ---
 

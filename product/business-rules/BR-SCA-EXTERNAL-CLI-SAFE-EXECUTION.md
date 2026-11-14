@@ -35,7 +35,7 @@ Todo CLI externo del escáner SCA (`pip-licenses`, `cargo`, `go`, `mvn`, `dotnet
 Entorno hijo (lista blanca): `PATH` (solo entradas absolutas del sistema), `SYSTEMROOT`, `TMP`, `TEMP`, `HOME`, `USERPROFILE`. Prohibidos: proxies, tokens, `NODE_OPTIONS`, `RUSTC_WRAPPER`, `RUSTC_WORKSPACE_WRAPPER`, `MAVEN_OPTS`, `JAVA_TOOL_OPTIONS`, `DOTNET_*`, `LD_PRELOAD`, `DYLD_*`, `GIT_*`.
 
 ## 3. Archivos bloqueantes (el CLI se rechaza si existe alguno)
-`.mvn/extensions.xml`, `.mvn/maven.config`, `Directory.Build.props`, `Directory.Build.targets`, `global.json` con `msbuild-sdks`, `nuget.config`, `.pnpmfile.cjs`, `.npmrc`, `.cargo/config.toml` (con `rustc-wrapper` o fuentes remotas), `rust-toolchain.toml`.
+`.mvn/extensions.xml`, `.mvn/maven.config`, `Directory.Build.props`, `Directory.Build.targets`, `Directory.Packages.props`, `global.json` con `msbuild-sdks`, `nuget.config` (`NuGet.Config`, case-insensitive en Linux), `.pnpmfile.cjs`, `.npmrc`, `.cargo/config.toml` / `.cargo/config` (cualquier configuración Cargo del repo), `rust-toolchain.toml` (recorrido ascendente desde `manifestDir` hasta `rootDir` incluyendo directorios intermedios para MSBuild/NuGet).
 
 ## 4. Nota de Modelo de Amenazas (STRIDE resumido)
 | Amenaza | Vector | Mitigación |

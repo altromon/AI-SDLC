@@ -15,7 +15,7 @@ Feature: Ejecución endurecida de CLIs externos en SCA
   Scenario: Invocación sin shell con subcomando y flags de lista cerrada
     Given a request to resolve licenses with "cargo"
     When runSafe launches the process
-    Then it must use "shell: false" and arguments ["metadata","--offline","--locked","--format-version","1"]
+    Then it must use "shell: false" and arguments ["metadata","--offline","--locked","--frozen","--format-version","1"]
     And no shell interpreter "/bin/sh" or "cmd.exe" is spawned
 
   Scenario Outline: Archivos de configuración del repo bloquean el CLI
@@ -28,7 +28,8 @@ Feature: Ejecución endurecida de CLIs externos en SCA
       | blocker                | cli    |
       | .mvn/extensions.xml    | mvn    |
       | .mvn/maven.config      | mvn    |
-      | Directory.Build.props  | dotnet |
+      | Directory.Build.props    | dotnet |
+      | Directory.Packages.props | dotnet |
       | nuget.config           | dotnet |
       | .pnpmfile.cjs          | pnpm   |
       | .npmrc                 | npm    |

@@ -80,7 +80,7 @@ Feature: SCA Maven license and PURL fix
     Examples:
       | defect                                   |
       | comment "<!-- license: MIT -->"          |
-      | unresolved version ""      |
+      | unresolved version "${project.version}" |
       | DOCTYPE with external ENTITY             |
 ```
 
