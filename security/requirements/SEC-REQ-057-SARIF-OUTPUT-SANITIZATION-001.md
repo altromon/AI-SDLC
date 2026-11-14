@@ -2,7 +2,7 @@
 id: SEC-REQ-057-SARIF-OUTPUT-SANITIZATION-001
 type: security-requirement
 title: Saneamiento de Salida y Normalización de URIs en Reportes SARIF v2.1.0
-status: draft
+status: active
 version: 0.2.0
 schema-version: '1.0'
 security-domain: data-protection
@@ -22,6 +22,7 @@ cucumber-tags:
 supersedes: null
 superseded-by: null
 ---
+
 
 # SEC-REQ-057-SARIF-OUTPUT-SANITIZATION-001: Saneamiento de Salida y Normalización de URIs en Reportes SARIF v2.1.0
 
@@ -110,5 +111,6 @@ Feature: Saneamiento de salida y normalización de URIs en reportes SARIF v2.1.0
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **0.2.0** | 2026-11-14 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004, TSK-005) | chg-057-sarif-sast-ingestion |
 | **0.1.0** | 2026-11-14 | agent-threat-modeler | Modelado inicial de saneamiento de salida y normalización de URIs SARIF (`UC-057` / `FR-057-001`) | CHG-057-SARIF-SAST-INGESTION |
 | **0.2.0** | 2026-11-14 | agent-system-architect | Remediación Checkpoint 1: decodeURIComponent seguro, uriBaseId, rechazo UNC y normalización de letra de unidad Windows | CHG-057-SARIF-SAST-INGESTION |

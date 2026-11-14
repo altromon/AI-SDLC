@@ -2,7 +2,7 @@
 id: FR-057-SARIF-SAST-INGESTION-001
 type: requirement
 title: sarif-sast-ingestion
-status: draft
+status: active
 version: 0.2.0
 schema-version: '1.0'
 category: functional
@@ -18,6 +18,7 @@ cucumber-tags:
 supersedes: null
 superseded-by: null
 ---
+
 
 # FR-057-SARIF-SAST-INGESTION-001: sarif-sast-ingestion
 
@@ -104,5 +105,6 @@ Feature: sarif-sast-ingestion
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **0.2.0** | 2026-11-14 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004, TSK-005) | chg-057-sarif-sast-ingestion |
 | **0.1.0** | 2026-11-14 | agent-product-analyst | Definición inicial (issue #162, Bloque A: ingesta SARIF v2.1.0 y evaluación contra quality-policy.yaml) | CHG-057-SARIF-SAST-INGESTION |
 | **0.2.0** | 2026-11-14 | agent-system-architect | Remediación Checkpoint 1: modo SARIF en verifySast, alineación quality-policy.yaml, precedencia de severidad, deduplicación y locations vacías | CHG-057-SARIF-SAST-INGESTION |

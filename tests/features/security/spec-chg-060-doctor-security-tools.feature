@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-060-doctor-security-tools/spec.md
+# Origen: specs/changes/completed/chg-060-doctor-security-tools/spec.md
 # ID Requerimiento: SPEC-CHG-060-DOCTOR-SECURITY-TOOLS
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

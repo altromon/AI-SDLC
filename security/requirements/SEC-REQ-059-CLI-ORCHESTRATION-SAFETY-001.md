@@ -2,7 +2,7 @@
 id: SEC-REQ-059-CLI-ORCHESTRATION-SAFETY-001
 type: security-requirement
 title: Orquestación Segura de CLIs SAST Nativos e Instalación Interactiva de Herramientas
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 security-domain: input-validation
@@ -23,6 +23,7 @@ cucumber-tags:
 supersedes: null
 superseded-by: null
 ---
+
 
 # SEC-REQ-059-CLI-ORCHESTRATION-SAFETY-001: Orquestación Segura de CLIs SAST Nativos e Instalación Interactiva de Herramientas
 
@@ -110,5 +111,6 @@ Feature: Orquestación segura de CLIs SAST nativos e instalación de herramienta
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **0.1.0** | 2026-11-14 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004) | chg-059-polyglot-cli-orchestration |
 | **0.1.0** | 2026-11-14 | agent-threat-modeler | Modelado inicial de seguridad para orquestación de CLIs SAST e instalación (`UC-059-POLYGLOT-CLI-ORCHESTRATION`) | feat/162-polyglot-sast-sarif |
 | **0.1.1** | 2026-11-14 | agent-system-architect | Remediación Checkpoint 1: CWE-426 PATH/shims Windows, ingesta en dos raíces (tmpDir/rootDir), spawnSync exit 0/1, CI normalizado y redacción de stderr | CHG-059-POLYGLOT-CLI-ORCHESTRATION |

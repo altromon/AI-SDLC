@@ -1,17 +1,18 @@
 ---
 id: CHG-060-DOCTOR-SECURITY-TOOLS
 type: spec-change-proposal
-title: 'Doctor Diagnostics for Optional Security CLIs (Semgrep, Trivy, Gitleaks)'
-status: draft
-author: 'agent-system-architect'
+title: Doctor Diagnostics for Optional Security CLIs (Semgrep, Trivy, Gitleaks)
+status: applied
+author: agent-system-architect
 citations:
   - id: UC-060-DOCTOR-SECURITY-TOOLS
-    digest: sha256:6242acc3d3b92f5535c1fcd72e5915a0e8319090092daaaf90b4454c45ae9a7c
+    digest: sha256:220cb398fe11050f672ae05a16b9a7a8d8fd804b337983a1918b2304e0f92b83
     comment: Caso de uso para diagnóstico de herramientas opcionales de seguridad en aisdlc doctor
   - id: FR-060-DOCTOR-SECURITY-TOOLS-001
-    digest: sha256:fd55217e0ca647a0aca53709a3b78d4ee78c8b2d873e0ba3c37722999e62988b
+    digest: sha256:139b76c9d23414b6a301368225bf1093c5de32933a22a9052140f835e5b16fb7
     comment: Requerimiento funcional de diagnóstico no bloqueante para semgrep, trivy y gitleaks
 ---
+
 
 # Propuesta de Cambio: CHG-060-DOCTOR-SECURITY-TOOLS
 

@@ -2,7 +2,7 @@
 id: SEC-REQ-057-SARIF-INGESTION-SAFETY-001
 type: security-requirement
 title: Ingesta Segura de Reportes OASIS SARIF v2.1.0 Externos
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 security-domain: input-validation
@@ -22,6 +22,7 @@ cucumber-tags:
 supersedes: null
 superseded-by: null
 ---
+
 
 # SEC-REQ-057-SARIF-INGESTION-SAFETY-001: Ingesta Segura de Reportes OASIS SARIF v2.1.0 Externos
 
@@ -120,4 +121,5 @@ Feature: Ingesta segura de reportes OASIS SARIF v2.1.0 externos
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **0.1.0** | 2026-11-14 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004, TSK-005) | chg-057-sarif-sast-ingestion |
 | **0.1.0** | 2026-11-14 | agent-threat-modeler | Modelado inicial de seguridad para ingesta SARIF v2.1.0 (`UC-057` / `FR-057-001`) | CHG-057-SARIF-SAST-INGESTION |

@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-058-polyglot-pii-logging/spec.md
+# Origen: specs/changes/completed/chg-058-polyglot-pii-logging/spec.md
 # ID Requerimiento: SPEC-CHG-058-POLYGLOT-PII-LOGGING
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

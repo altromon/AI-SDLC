@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/tool-installer.spec.ts packages/core/tests/doctor.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-060-DOCTOR-SECURITY-TOOLS
     satisfies-requirements: &ref_0
@@ -35,7 +35,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/security-tools-check.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     blocked-by:
       - TSK-001
     implements-components:
@@ -50,7 +50,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/doctor.spec.ts packages/core/tests/security-tools-check.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     blocked-by:
       - TSK-002
     implements-components:
@@ -65,7 +65,7 @@ tasks:
       method: quality-gate
       command-or-criteria: pnpm run typecheck && pnpm test && pnpm run verify:quality && pnpm run verify:all
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     blocked-by:
       - TSK-003
     implements-components:

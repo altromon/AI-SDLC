@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-057-sarif-sast-ingestion/spec.md
+# Origen: specs/changes/completed/chg-057-sarif-sast-ingestion/spec.md
 # ID Requerimiento: SPEC-CHG-057-SARIF-SAST-INGESTION
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

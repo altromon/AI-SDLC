@@ -16,17 +16,17 @@ subgraph:
     - SEC-REQ-057-SARIF-OUTPUT-SANITIZATION-001
 citations:
   - id: UC-057-SARIF-SAST-INGESTION
-    digest: sha256:12f598a6924d4be531ae28c0fbc1de3fbfe2827343339be2d6cd1160453e81e1
+    digest: sha256:a463989346a55975ffa55d722f57bcb2e320951c20c28f9f34b52765f7532ab2
     comment: Citación de use-case (Ingesta de reportes OASIS SARIF v2.1.0 externos para evaluación SAST determinista)
   - id: FR-057-SARIF-SAST-INGESTION-001
-    digest: sha256:56218b0fa04791bf019a097023c46f19698e31b622c068300cec8e9946cfeca1
+    digest: sha256:554ab924ee95f7425d4ecc2e12918c151035c55b6d688d9971d051df8118e988
     comment: Requerimiento derivado de UC-057-SARIF-SAST-INGESTION
   - id: SEC-REQ-057-SARIF-INGESTION-SAFETY-001
-    digest: sha256:c5639359de2d804147e691746cb833eb2acc61c83bd07b0d97d5b1ac09eb0b0e
+    digest: sha256:c5ab52c706341fa9abcc219e00e859c0f0613316e6f6ec476fbd5ac7427cc7c5
     comment: Control de seguridad de ingesta SARIF
   - id: SEC-REQ-057-SARIF-OUTPUT-SANITIZATION-001
-    digest: sha256:e7fa0ddc9d46e908b12e4b0eda883e9e07477e80bb4dee27e60a9e6fd4cffcfa
+    digest: sha256:73fc0b59a6525a6c99e705d2aa94ac1c1be186d9a4b9a2ac3d77a465469c7310
     comment: Control de saneamiento de salida y normalización de URIs SARIF
   - id: CMP-057-SARIF-SAST-INGESTION
-    digest: sha256:4a8e20ab8e45f807b3ebd52a651f82ef1deaf0d729c6dbd91023bd439b0fbea0
+    digest: sha256:5c42a50447717e2024c1ffc19ec0a44369abb3b4531f3d5fa588783bd979fc7d
     comment: Componente arquitectónico de ingesta SARIF v2.1.0

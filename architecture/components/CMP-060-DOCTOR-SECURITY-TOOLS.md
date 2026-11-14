@@ -25,6 +25,7 @@ supersedes: null
 superseded-by: null
 ---
 
+
 # CMP-060-DOCTOR-SECURITY-TOOLS: Diagnóstico de Herramientas Opcionales de Seguridad en aisdlc doctor
 
 ## 1. Responsabilidad y Estructura Modular
@@ -62,3 +63,10 @@ graph TD
 - **Cero dependencias externas nuevas**.
 - **Complejidad y tamaño**: todas las funciones nuevas o modificadas mantienen `CC <= 10`, `Cognitive <= 15`, `MI >= 50` y `Lines <= 100`.
 - **Seguridad**: `shell: false`, resolución `CWE-426` en `PATH`, cero `sudo`, cero descargas o instalaciones automáticas, y sanitización DLP en el reporte final.
+
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-14 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-060-doctor-security-tools | chg-060-doctor-security-tools |

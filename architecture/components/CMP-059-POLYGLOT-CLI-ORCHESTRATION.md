@@ -28,6 +28,7 @@ supersedes: null
 superseded-by: null
 ---
 
+
 # CMP-059-POLYGLOT-CLI-ORCHESTRATION: Orquestación Políglota de CLIs SAST Nativos vía SARIF v2.1.0 e Instalador Interactivo de Herramientas
 
 ## 1. Responsabilidad y Estructura Modular
@@ -69,3 +70,10 @@ graph TD
 - **Sin abstracciones especulativas**: funciones exportadas directas sin factorías genéricas, puertos o clases base innecesarias.
 - **Seguridad por defecto**: `shell: false` obligatorio, allowlist congelada con `Object.freeze`, prohibición absoluta de `sudo`, timeouts explícitos, `mkdtempSync` `0o700` con `finally` `rmSync`, y redacción de rutas absolutas del host y variables de entorno sensibles.
 - **Umbrales de calidad**: `CC <= 10` y funciones `<= 40` líneas según `quality-policy.yaml`.
+
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-14 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-059-polyglot-cli-orchestration | chg-059-polyglot-cli-orchestration |

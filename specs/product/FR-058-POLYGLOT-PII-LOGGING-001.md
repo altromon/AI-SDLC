@@ -2,7 +2,7 @@
 id: FR-058-POLYGLOT-PII-LOGGING-001
 type: requirement
 title: polyglot-pii-logging
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 category: functional
@@ -18,6 +18,7 @@ cucumber-tags:
 supersedes: null
 superseded-by: null
 ---
+
 
 # FR-058-POLYGLOT-PII-LOGGING-001: polyglot-pii-logging
 
@@ -99,5 +100,6 @@ Feature: polyglot-pii-logging
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **0.1.0** | 2026-11-14 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004) | chg-058-polyglot-pii-logging |
 | **0.1.0** | 2026-11-14 | agent-product-analyst | Definición inicial (issue #162, Bloque B: inspección políglota PII-SAST en logs) | CHG-058-POLYGLOT-PII-LOGGING |
 | **0.2.0** | 2026-11-14 | agent-system-architect | Remediación Checkpoint 1 (Ronda 1): stripper O(n) pre-PRIV-001, multilínea/zerolog/slog.*Context/LOG.*, normalización snake_case, rechazo de claves de prototipo/Object.hasOwn, redacción de snippet y deduplicación | CHG-058-POLYGLOT-PII-LOGGING |

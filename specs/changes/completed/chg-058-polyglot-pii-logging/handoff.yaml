@@ -15,14 +15,14 @@ subgraph:
     - PRIV-REQ-058-POLYGLOT-LOG-MASKING-001
 citations:
   - id: UC-058-POLYGLOT-PII-LOGGING
-    digest: sha256:7bb1b28bf832d3be54ad950a2f5b0bc7825d9e1bae4b9b66dc1b9e6f0d13df09
+    digest: sha256:799bb26276d50559326b60f66f2eeb7575a2a7a11efcfb37668855a319bc68a1
     comment: Citación de use-case (Inspección políglota de PII-SAST en logs cruzada con DATA-ASSET-* y privacy-policy.yaml)
   - id: FR-058-POLYGLOT-PII-LOGGING-001
-    digest: sha256:475bb927a31dbb1d3712bb1e7040f49a3b8029710f7075aae65fdbe4d0d07c36
+    digest: sha256:d882c7a17d7ab9ee36953af1d3ad131f6ededd82c459b77d474a91aaf01a1212
     comment: Requerimiento derivado de UC-058-POLYGLOT-PII-LOGGING
   - id: PRIV-REQ-058-POLYGLOT-LOG-MASKING-001
-    digest: sha256:8870481cbccedf538b485499d7d3cc1bc95a36587182008de2bbdc642985ac1c
+    digest: sha256:7b4195c7755c0d013b6c7fbb7907a782bc562b2ce0608a9ccab2c753d63fb15a
     comment: Control de privacidad PDaC para enmascaramiento de logs políglotas y redacción de diagnósticos
   - id: CMP-058-POLYGLOT-PII-LOGGING
-    digest: sha256:e22135e637ed2ad1fad14300e1dd382b59180da3971e8ef88db50ea2335e628e
+    digest: sha256:46f56ad1cf9f9b7c58d8819d0c27e10994f29d20c4d089fe32145847e9f54f07
     comment: Componente arquitectónico de inspección políglota de PII-SAST en logs

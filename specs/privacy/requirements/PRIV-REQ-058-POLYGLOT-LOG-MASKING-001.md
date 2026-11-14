@@ -2,9 +2,9 @@
 id: PRIV-REQ-058-POLYGLOT-LOG-MASKING-001
 type: privacy-requirement
 title: Polyglot PII-SAST Log Masking and Diagnostic Redaction
-status: draft
-version: "1.0.0"
-schema-version: "1.0"
+status: active
+version: 1.0.0
+schema-version: '1.0'
 privacy-principle: data-minimization
 linddun-category: disclosure-of-information
 governs-ropa:
@@ -12,19 +12,20 @@ governs-ropa:
 protects-data-assets:
   - DATA-ASSET-058-POLYGLOT-PII-FIELDS
 compliance-references:
-  - "GDPR-Art-25-Privacy-by-Design"
-  - "GDPR-Art-32-Pseudonymization"
-  - "ISO-27701-A.7.4"
+  - GDPR-Art-25-Privacy-by-Design
+  - GDPR-Art-32-Pseudonymization
+  - ISO-27701-A.7.4
 acceptance-format: gherkin
 cucumber-tags:
-  - "@PRIV-REQ-058-POLYGLOT-LOG-MASKING-001"
-  - "@privacy"
-  - "@nominal"
-  - "@boundary"
-  - "@invalid"
+  - '@PRIV-REQ-058-POLYGLOT-LOG-MASKING-001'
+  - '@privacy'
+  - '@nominal'
+  - '@boundary'
+  - '@invalid'
 supersedes: null
 superseded-by: null
 ---
+
 
 # PRIV-REQ-058-POLYGLOT-LOG-MASKING-001: Polyglot PII-SAST Log Masking and Diagnostic Redaction
 
@@ -114,3 +115,10 @@ Feature: Polyglot PII-SAST Log Masking and Diagnostic Redaction
 | :--- | :--- | :--- | :--- | :--- |
 | **1.0.0** | 2026-11-14 | Privacy Officer (`agent-privacy-officer`) | Initial polyglot PII-SAST log masking privacy requirement for UC-058 | UC-058-POLYGLOT-PII-LOGGING |
 | **1.1.0** | 2026-11-14 | System Architect (`agent-system-architect`) | Checkpoint 1 Remediation (Round 1): O(n) masking stripper pre-PRIV-001, multi-line/zerolog/slog.*Context/LOG.* extraction, canonical snake_case normalization, prototype-key & Object.hasOwn hardening, snippet redaction & deduplication | CHG-058-POLYGLOT-PII-LOGGING |
+
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-14 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004) | chg-058-polyglot-pii-logging |

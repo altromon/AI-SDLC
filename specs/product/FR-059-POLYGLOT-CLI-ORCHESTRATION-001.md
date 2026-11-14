@@ -2,7 +2,7 @@
 id: FR-059-POLYGLOT-CLI-ORCHESTRATION-001
 type: requirement
 title: polyglot-cli-orchestration
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 category: functional
@@ -18,6 +18,7 @@ cucumber-tags:
 supersedes: null
 superseded-by: null
 ---
+
 
 # FR-059-POLYGLOT-CLI-ORCHESTRATION-001: polyglot-cli-orchestration
 
@@ -140,5 +141,6 @@ Feature: polyglot-cli-orchestration
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **0.1.0** | 2026-11-14 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004) | chg-059-polyglot-cli-orchestration |
 | **0.1.0** | 2026-11-14 | agent-product-analyst | Definición inicial (issue #162, Bloque C: orquestación políglota vía SARIF v2.1.0, instalador interactivo con allowlist sin sudo y flags CLI) | CHG-059-POLYGLOT-CLI-ORCHESTRATION |
 | **0.1.1** | 2026-11-14 | agent-system-architect | Remediación Checkpoint 1: ingesta SARIF en dos raíces, códigos 0/1 en spawnSync, CWE-426 PATH/shims Windows, fail_on_missing_tool en quality/license policy y --ci | CHG-059-POLYGLOT-CLI-ORCHESTRATION |

@@ -2,7 +2,7 @@
 id: UC-058-POLYGLOT-PII-LOGGING
 type: use-case
 title: Inspección políglota de PII-SAST en logs cruzada con DATA-ASSET-* y privacy-policy.yaml
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 primary-actor: ACT-DEVSECOPS-ENGINEER
@@ -13,6 +13,7 @@ governed-by:
 supersedes: null
 superseded-by: null
 ---
+
 
 # UC-058-POLYGLOT-PII-LOGGING: Inspección políglota de PII-SAST en logs cruzada con DATA-ASSET-* y privacy-policy.yaml
 
@@ -98,4 +99,5 @@ Feature: Inspección políglota de PII-SAST en logs cruzada con DATA-ASSET-* y p
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **0.1.0** | 2026-11-14 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004) | chg-058-polyglot-pii-logging |
 | **0.1.0** | 2026-11-14 | agent-product-analyst | Definición inicial (issue #162, Bloque B: inspección políglota PII-SAST en logs) | CHG-058-POLYGLOT-PII-LOGGING |

@@ -2,7 +2,7 @@
 id: UC-059-POLYGLOT-CLI-ORCHESTRATION
 type: use-case
 title: Orquestación políglota de CLIs SAST nativos vía SARIF v2.1.0 e instalador interactivo de herramientas
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 primary-actor: ACT-DEVSECOPS-ENGINEER
@@ -13,6 +13,7 @@ governed-by:
 supersedes: null
 superseded-by: null
 ---
+
 
 # UC-059-POLYGLOT-CLI-ORCHESTRATION: Orquestación políglota de CLIs SAST nativos vía SARIF v2.1.0 e instalador interactivo de herramientas
 
@@ -122,5 +123,6 @@ Feature: Orquestación políglota de CLIs SAST nativos vía SARIF v2.1.0 e insta
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **0.1.0** | 2026-11-14 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004) | chg-059-polyglot-cli-orchestration |
 | **0.1.0** | 2026-11-14 | agent-product-analyst | Definición inicial (issue #162, Bloque C: orquestación políglota vía SARIF v2.1.0 e instalador interactivo de herramientas) | CHG-059-POLYGLOT-CLI-ORCHESTRATION |
 | **0.1.1** | 2026-11-14 | agent-system-architect | Remediación Checkpoint 1: ingesta SARIF en dos raíces, códigos 0/1 en SAST CLIs, resolución PATH/shims Windows CWE-426, política fail_on_missing_tool y --ci | CHG-059-POLYGLOT-CLI-ORCHESTRATION |

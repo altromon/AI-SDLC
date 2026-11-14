@@ -25,6 +25,7 @@ supersedes: null
 superseded-by: null
 ---
 
+
 # CMP-057-SARIF-SAST-INGESTION: Ingesta Determinista de Reportes OASIS SARIF v2.1.0 para Evaluación SAST
 
 ## 1. Responsabilidad y Estructura Modular
@@ -64,3 +65,10 @@ graph TD
 - **Sin autodescubrimiento**: si no se pasa `--sarif`, no se buscan archivos SARIF automáticamente.
 - **Sin dependencias externas nuevas**: solo módulos nativos de Node.js (`fs`, `path`, `url`).
 - **Umbrales de código**: `CC <= 10` y funciones `<= 40` líneas según `quality-policy.yaml`.
+
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.1.0** | 2026-11-14 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-057-sarif-sast-ingestion | chg-057-sarif-sast-ingestion |

@@ -12,16 +12,16 @@ status: draft
 contracts: []
 citations:
   - id: UC-059-POLYGLOT-CLI-ORCHESTRATION
-    digest: sha256:cf8691ae8f7e3dd439e01d7b57b8f0f5876a4910a1eaa9acb797e9ab21c903a1
+    digest: sha256:8cd06dd5eb3e8c4029833cd6c234f29addf9cdd27b076042d1cfb9bcc754211e
     comment: Citación de use-case (Orquestación políglota de CLIs SAST nativos vía SARIF v2.1.0 e instalador interactivo de herramientas)
   - id: FR-059-POLYGLOT-CLI-ORCHESTRATION-001
-    digest: sha256:6978fc56344381c7bccad3fc88ee20a9a7630c5efd8f4b0fdc2b8b99b208ed39
+    digest: sha256:0280a0dff4d9e83aab0d39bb4db9c6dc0017164b0030872e5d36b1bd2cf97895
     comment: Requerimiento derivado de UC-059-POLYGLOT-CLI-ORCHESTRATION
   - id: SEC-REQ-059-CLI-ORCHESTRATION-SAFETY-001
-    digest: sha256:4963198d443ae7513d2dc9b3e36e63656aeab96e4a383b584dae870454b345a8
+    digest: sha256:35fa5314a4bddbc3687091decaf0924acc503657ece5d65793985b91c1a94d48
     comment: Control de seguridad para orquestación de CLIs SAST e instalación segura sin shell ni sudo
   - id: CMP-059-POLYGLOT-CLI-ORCHESTRATION
-    digest: sha256:247f4d7e9c83ea084503f4292798398db11219e2ad7b3f6832062317126e9577
+    digest: sha256:48253bf6e91fb5a8e39ceafe145b71dbc046b6f0f6a7330366c5bb4d3dcfa942
     comment: Componente arquitectónico de orquestación políglota e instalador de herramientas
 ---
 

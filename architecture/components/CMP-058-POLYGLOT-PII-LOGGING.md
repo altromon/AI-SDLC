@@ -24,6 +24,7 @@ supersedes: null
 superseded-by: null
 ---
 
+
 # CMP-058-POLYGLOT-PII-LOGGING: Inspección Políglota de PII-SAST en Logs Cruzada con DATA-ASSET-* y privacy-policy.yaml
 
 ## 1. Responsabilidad y Estructura Modular
@@ -67,3 +68,10 @@ graph TD
 - **Sin dependencias externas nuevas**: reutiliza `js-yaml`, `walkSourceFiles` y utilidades existentes en `packages/core`.
 - **Cero ReDoS**: prohibido construir `new RegExp(rawField)` con cadenas sin validar/escapar.
 - **Umbrales de código**: complejidad ciclomática `CC <= 10` y funciones `<= 40` líneas según `quality-policy.yaml`.
+
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-14 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-058-polyglot-pii-logging | chg-058-polyglot-pii-logging |

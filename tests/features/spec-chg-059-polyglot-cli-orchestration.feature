@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-059-polyglot-cli-orchestration/spec.md
+# Origen: specs/changes/completed/chg-059-polyglot-cli-orchestration/spec.md
 # ID Requerimiento: SPEC-CHG-059-POLYGLOT-CLI-ORCHESTRATION
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

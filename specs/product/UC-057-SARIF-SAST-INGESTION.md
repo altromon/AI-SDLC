@@ -2,7 +2,7 @@
 id: UC-057-SARIF-SAST-INGESTION
 type: use-case
 title: Ingesta de reportes OASIS SARIF v2.1.0 externos para evaluación SAST determinista
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 primary-actor: ACT-DEVSECOPS-ENGINEER
@@ -13,6 +13,7 @@ governed-by:
 supersedes: null
 superseded-by: null
 ---
+
 
 # UC-057-SARIF-SAST-INGESTION: Ingesta de reportes OASIS SARIF v2.1.0 externos para evaluación SAST determinista
 
@@ -96,4 +97,5 @@ Feature: Ingesta de reportes OASIS SARIF v2.1.0 externos para evaluación SAST d
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **0.1.0** | 2026-11-14 | AI-SDLC Integration Engine | Implementación verificada (TSK-001, TSK-002, TSK-003, TSK-004, TSK-005) | chg-057-sarif-sast-ingestion |
 | **0.1.0** | 2026-11-14 | agent-product-analyst | Definición inicial (issue #162, Bloque A: ingesta SARIF v2.1.0) | CHG-057-SARIF-SAST-INGESTION |
