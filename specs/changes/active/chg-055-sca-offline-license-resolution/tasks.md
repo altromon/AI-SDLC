@@ -21,7 +21,7 @@ tasks:
       method: manual-inspection
       command-or-criteria: Informe de revision en specs/changes/active/chg-055-sca-offline-license-resolution/ con veredicto APROBADO
     assigned-to: agent-security-auditor
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-054-SCA-LICENSE-RESOLUTION
     satisfies-requirements:
@@ -40,8 +40,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/sca-safe-exec.spec.ts
     assigned-to: agent-developer
-    status: BLOCKED
-    blocking-reason: 'blocked-by TSK-001'
+    status: PENDING
     blocked-by:
       - TSK-001
     implements-components:
