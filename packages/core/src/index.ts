@@ -5,6 +5,8 @@
 
 export * from './types/index.js';
 export * from './verifiers/quality-gate.js';
+export * from './verifiers/coverage-normalizer.js';
+export * from './verifiers/test-discovery.js';
 export * from './verifiers/ast/typescript-ast.js';
 export * from './verifiers/ast/polyglot-scanner.js';
 export * from './verifiers/traceability.js';

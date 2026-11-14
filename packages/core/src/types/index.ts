@@ -16,6 +16,7 @@ export interface QualityPolicy {
   target_directories: string[];
   supported_extensions: string[];
   exclude_patterns: string[];
+  test_patterns?: string[];
 }
 
 export interface FunctionMetrics {
@@ -463,10 +464,13 @@ export interface TaskAuditItem {
 
 export interface TestingCoverageOptions {
   rootDir?: string;
+  policyPath?: string;
+  testPatterns?: string[];
   enforceBddVariants?: boolean;
   enforceUseCaseFlows?: boolean;
   cucumberReportPath?: string;
   enforceCucumberExecution?: boolean;
+  enforceBddAttestation?: boolean;
 }
 
 export interface TestingCoverageResult {
@@ -486,6 +490,8 @@ export interface TestingCoverageResult {
     passedScenarios: number;
     failedScenarios: number;
     passed: boolean;
+    attestationValid?: boolean;
+    attestationErrors?: string[];
   };
   reportMarkdown: string;
 }
@@ -847,12 +853,21 @@ export interface PreflightCheckResult {
 }
 
 // --- Quality Report Types ---
+export type CoverageFormat =
+  | 'istanbul'
+  | 'lcov'
+  | 'cobertura'
+  | 'jacoco'
+  | 'go-coverprofile'
+  | 'llvm-cov';
+
 export interface CodeCoverageSummary {
   linesPct: number;
   branchesPct: number;
   functionsPct: number;
   statementsPct?: number;
   source: string;
+  format?: CoverageFormat;
 }
 
 export interface QualityReportOptions {
@@ -1523,12 +1538,30 @@ export interface BddScenarioExecution {
   steps: BddStepExecution[];
 }
 
+export interface BddAttestationRecord {
+  featureUri: string;
+  featureSha256: string;
+  commitSha: string | null;
+  reportDigestSha256: string;
+  signatureSha256: string;
+  attestedAt: string;
+}
+
+export interface BddAttestationVerificationResult {
+  valid: boolean;
+  hasAttestation: boolean;
+  errors: string[];
+  verifiedFeatures: number;
+}
+
 export interface BddFeatureExecutionReport {
   uri: string;
   featureName: string;
   tags: string[];
   scenarios: BddScenarioExecution[];
   passed: boolean;
+  featureSha256?: string;
+  commitSha?: string | null;
 }
 
 // --- Element Inspector Types ---

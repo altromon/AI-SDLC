@@ -11,7 +11,6 @@ import { canonicalSort } from '../utils/fs.js';
 import { resolveDeterministicDate } from '../utils/time.js';
 import {
   AnalysisResult,
-  CodeCoverageSummary,
   FunctionMetrics,
   QualityBaseline,
   QualityBaselineEntry,
@@ -23,6 +22,8 @@ import {
 } from '../types/index.js';
 import { orchestrateNativeAstAnalysis } from './ast/native-ast-orchestrator.js';
 import { extractFunctionsPolyglot } from './ast/polyglot-scanner.js';
+import { readNormalizedCoverage, SUPPORTED_COVERAGE_FORMATS_HINT } from './coverage-normalizer.js';
+import { isPolyglotUnitTestFile } from './test-discovery.js';
 import { scanAllTestArtifacts } from './testing-coverage.js';
 
 export const DEFAULT_EXTENSIONS: readonly string[] = [
@@ -73,23 +74,35 @@ export function createDefaultQualityPolicy(): QualityPolicy {
   };
 }
 
+function appendUniqueStrings(target: string[], raw: unknown): void {
+  if (!Array.isArray(raw)) return;
+  for (const pat of raw) {
+    const p = String(pat);
+    if (!target.includes(p)) target.push(p);
+  }
+}
+
+function appendTestPatterns(policy: QualityPolicy, raw: unknown): void {
+  if (!Array.isArray(raw)) return;
+  const existing = policy.test_patterns ?? [];
+  appendUniqueStrings(existing, raw);
+  policy.test_patterns = existing;
+}
+
+function applyScopeSection(policy: QualityPolicy, scope: Record<string, unknown>): void {
+  if (Array.isArray(scope.target_directories)) policy.target_directories = scope.target_directories.map(String);
+  if (Array.isArray(scope.supported_extensions)) policy.supported_extensions = scope.supported_extensions.map(String);
+  appendUniqueStrings(policy.exclude_patterns, scope.exclude_patterns);
+  appendTestPatterns(policy, scope.test_patterns);
+}
+
 function applyDocScope(policy: QualityPolicy, doc: Record<string, unknown>): void {
   if (typeof doc.enforcement_mode === 'string') policy.enforce_mode = doc.enforcement_mode;
   if (typeof doc.ratchet_mode === 'boolean') policy.ratchet_mode = doc.ratchet_mode;
-  if (!doc.scope || typeof doc.scope !== 'object') return;
-  const scope = doc.scope as Record<string, unknown>;
-
-  if (Array.isArray(scope.target_directories)) {
-    policy.target_directories = scope.target_directories.map(String);
-  }
-  if (Array.isArray(scope.supported_extensions)) {
-    policy.supported_extensions = scope.supported_extensions.map(String);
-  }
-  if (Array.isArray(scope.exclude_patterns)) {
-    for (const pat of scope.exclude_patterns) {
-      const p = String(pat);
-      if (!policy.exclude_patterns.includes(p)) policy.exclude_patterns.push(p);
-    }
+  const testDiscovery = doc.test_discovery as Record<string, unknown> | undefined;
+  if (testDiscovery && typeof testDiscovery === 'object') appendTestPatterns(policy, testDiscovery.patterns);
+  if (doc.scope && typeof doc.scope === 'object') {
+    applyScopeSection(policy, doc.scope as Record<string, unknown>);
   }
 }
 
@@ -316,7 +329,23 @@ function scanDirectTarget(rootDir: string, targetDir: string, policy: QualityPol
   }
 }
 
-export const UNIT_TEST_SUFFIXES = ['.spec.ts', '.test.ts', '.spec.js', '.test.js', '_test.py', '_test.go'];
+export const UNIT_TEST_SUFFIXES = [
+  '.spec.ts',
+  '.test.ts',
+  '.spec.js',
+  '.test.js',
+  '_test.py',
+  '_test.go',
+  'Test.cs',
+  'Tests.cs',
+  'Spec.cs',
+  'Test.java',
+  'Tests.java',
+  'IT.java',
+  'Test.kt',
+  'Tests.kt',
+  '_test.rs',
+];
 
 function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
   const files = new Set<string>();
@@ -329,7 +358,10 @@ function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
     }
   }
 
-  return Array.from(files).filter((f) => !UNIT_TEST_SUFFIXES.some((s) => f.endsWith(s)));
+  return Array.from(files).filter((f) => {
+    const rel = path.relative(rootDir, f).replace(/\\/g, '/');
+    return !isPolyglotUnitTestFile(rel, policy.test_patterns);
+  });
 }
 
 function evaluateViolations(fn: FunctionMetrics, policy: QualityPolicy): string[] {
@@ -366,11 +398,12 @@ function evaluateFileQuality(file: string, rootDir: string, policy: QualityPolic
   });
 }
 
-function collectUnitTestCorpus(rootDir: string): string {
+function collectUnitTestCorpus(rootDir: string, testPatterns?: readonly string[]): string {
   const allCodeFiles = walkDir(rootDir, DEFAULT_EXTENSIONS, DEFAULT_EXCLUDES);
   const chunks: string[] = [];
   for (const tf of allCodeFiles) {
-    if (!UNIT_TEST_SUFFIXES.some((s) => tf.endsWith(s))) continue;
+    const rel = path.relative(rootDir, tf).replace(/\\/g, '/');
+    if (!isPolyglotUnitTestFile(rel, testPatterns)) continue;
     try {
       chunks.push(fs.readFileSync(tf, 'utf-8'));
     } catch {
@@ -418,8 +451,12 @@ export function isFunctionReferencedInTests(fnName: string, rawCorpus: string): 
   return patterns.some((p) => p.test(corpus));
 }
 
-function auditUnitTestsPerFunction(results: AnalysisResult[], rootDir: string): UntestedFunctionItem[] {
-  const corpus = collectUnitTestCorpus(rootDir);
+function auditUnitTestsPerFunction(
+  results: AnalysisResult[],
+  rootDir: string,
+  testPatterns?: readonly string[]
+): UntestedFunctionItem[] {
+  const corpus = collectUnitTestCorpus(rootDir, testPatterns);
   const untested: UntestedFunctionItem[] = [];
   for (const r of results) {
     const fnName = r.functionName.includes('.') ? r.functionName.split('.').pop()! : r.functionName;
@@ -433,37 +470,6 @@ function auditUnitTestsPerFunction(results: AnalysisResult[], rootDir: string): 
   return untested;
 }
 
-function isVitestMidFlightCoverage(rel: string, fullPath: string): boolean {
-  if (!process.env.VITEST || rel !== 'coverage/coverage-summary.json') return false;
-  return path.resolve(fullPath) === path.resolve(process.cwd(), rel);
-}
-
-function parseCoverageSummaryFile(filePath: string, source: string): CodeCoverageSummary | null {
-  try {
-    const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Record<string, unknown>;
-    const total = raw.total as Record<string, Record<string, unknown>> | undefined;
-    if (!total) return null;
-    return {
-      linesPct: Number(total.lines?.pct ?? 0),
-      branchesPct: Number(total.branches?.pct ?? 0),
-      functionsPct: Number(total.functions?.pct ?? 0),
-      source,
-    };
-  } catch {
-    return null;
-  }
-}
-
-function readSummaryCoverageJson(rootDir: string): CodeCoverageSummary | null {
-  for (const rel of ['coverage/coverage-summary.json', 'reports/coverage-summary.json']) {
-    const full = path.join(rootDir, rel);
-    if (!fs.existsSync(full) || isVitestMidFlightCoverage(rel, full)) continue;
-    const summary = parseCoverageSummaryFile(full, rel);
-    if (summary) return summary;
-  }
-  return null;
-}
-
 function checkCoverageThreshold(label: string, actual: number, min: number, out: string[]): void {
   if (actual < min) {
     out.push(`${label} coverage ${actual}% is below minimum threshold of ${min}%`);
@@ -475,9 +481,9 @@ function evaluateCoverageThresholds(
   policy: QualityPolicy,
   requireReport?: boolean
 ): string[] {
-  const cov = readSummaryCoverageJson(rootDir);
+  const cov = readNormalizedCoverage(rootDir, { excludeVitestMidFlight: true });
   if (!cov) {
-    return requireReport ? ['Missing code coverage summary report (coverage/coverage-summary.json)'] : [];
+    return requireReport ? [`Missing code coverage summary report (${SUPPORTED_COVERAGE_FORMATS_HINT})`] : [];
   }
   const violations: string[] = [];
   checkCoverageThreshold('Line', cov.linesPct, policy.min_line_coverage, violations);
@@ -709,7 +715,7 @@ export function verifyQualityGate(options: QualityGateOptions = {}): QualityGate
   }
 
   const untestedFunctions = options.requireFunctionUnitTests
-    ? auditUnitTestsPerFunction(results, rootDir)
+    ? auditUnitTestsPerFunction(results, rootDir, policy.test_patterns)
     : [];
   const coverageViolations = evaluateCoverageThresholds(rootDir, policy, options.requireCoverageReport);
 

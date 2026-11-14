@@ -2,13 +2,18 @@
  * AI-SDLC: Zero-Dependency Deterministic Gherkin (.feature) BDD Runner & Cucumber JSON Reporter (Issue #78)
  */
 
+import { execFileSync } from 'child_process';
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
+  BddAttestationRecord,
+  BddAttestationVerificationResult,
   BddFeatureExecutionReport,
   BddScenarioExecution,
   BddStepExecution,
 } from '../types/index.js';
+import { resolveDeterministicDate } from '../utils/time.js';
 
 export type StepDataTable = Record<string, string>;
 export type StepHandler = (args: string[], table?: StepDataTable) => Promise<void> | void;
@@ -325,6 +330,24 @@ async function runAllExpandedScenarios(
   return out;
 }
 
+export function computeLfSha256(content: string): string {
+  const normalized = content.replace(/\r\n/g, '\n');
+  return crypto.createHash('sha256').update(normalized, 'utf-8').digest('hex');
+}
+
+export function resolveCurrentGitCommit(rootDir: string): string | null {
+  try {
+    const sha = execFileSync('git', ['rev-parse', 'HEAD'], {
+      cwd: rootDir,
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    return sha || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function executeBddFeature(
   featurePath: string,
   registry: BddStepRegistry,
@@ -332,7 +355,8 @@ export async function executeBddFeature(
 ): Promise<BddFeatureExecutionReport> {
   const rootDir = options.rootDir || process.cwd();
   const fullPath = path.isAbsolute(featurePath) ? featurePath : path.join(rootDir, featurePath);
-  const parsed = parseFeatureDocument(fs.readFileSync(fullPath, 'utf-8'));
+  const rawFeature = fs.readFileSync(fullPath, 'utf-8');
+  const parsed = parseFeatureDocument(rawFeature);
   const scenarios = await runAllExpandedScenarios(parsed, registry.getDefinitions());
 
   const report: BddFeatureExecutionReport = {
@@ -341,9 +365,11 @@ export async function executeBddFeature(
     tags: parsed.tags,
     scenarios,
     passed: scenarios.length > 0 && scenarios.every((s) => s.status === 'passed'),
+    featureSha256: computeLfSha256(rawFeature),
+    commitSha: resolveCurrentGitCommit(rootDir),
   };
 
-  if (options.writeReportPath) writeCucumberJsonReport([report], options.writeReportPath);
+  if (options.writeReportPath) writeCucumberJsonReport([report], options.writeReportPath, { rootDir });
   return report;
 }
 
@@ -359,7 +385,7 @@ function mapStepToCucumberJson(st: BddStepExecution) {
   };
 }
 
-function mapFeatureToCucumberJson(r: BddFeatureExecutionReport) {
+function buildBaseCucumberFeature(r: BddFeatureExecutionReport) {
   return {
     uri: r.uri,
     name: r.featureName,
@@ -373,12 +399,146 @@ function mapFeatureToCucumberJson(r: BddFeatureExecutionReport) {
   };
 }
 
+function computeAttestationSignature(
+  uri: string,
+  featureSha256: string,
+  commitSha: string | null,
+  reportDigestSha256: string
+): string {
+  return computeLfSha256([uri, featureSha256, commitSha ?? 'no-git', reportDigestSha256].join(':'));
+}
+
+function resolveFeatureHashForReport(r: BddFeatureExecutionReport, rootDir: string): string {
+  if (r.featureSha256) return r.featureSha256;
+  const fullPath = path.join(rootDir, r.uri);
+  if (fs.existsSync(fullPath)) {
+    return computeLfSha256(fs.readFileSync(fullPath, 'utf-8'));
+  }
+  return computeLfSha256('');
+}
+
+function mapFeatureToCucumberJson(r: BddFeatureExecutionReport, rootDir: string) {
+  const base = buildBaseCucumberFeature(r);
+  const reportDigestSha256 = computeLfSha256(JSON.stringify(base));
+  const featureSha256 = resolveFeatureHashForReport(r, rootDir);
+  const commitSha = r.commitSha !== undefined ? r.commitSha : resolveCurrentGitCommit(rootDir);
+  const signatureSha256 = computeAttestationSignature(r.uri, featureSha256, commitSha, reportDigestSha256);
+
+  const attestation: BddAttestationRecord = {
+    featureUri: r.uri,
+    featureSha256,
+    commitSha,
+    reportDigestSha256,
+    signatureSha256,
+    attestedAt: resolveDeterministicDate().toISOString(),
+  };
+
+  return { ...base, attestation };
+}
+
 export function writeCucumberJsonReport(
   reports: BddFeatureExecutionReport[],
-  outputPath: string
+  outputPath: string,
+  options: { rootDir?: string } = {}
 ): void {
+  const rootDir = options.rootDir || process.cwd();
   const dir = path.dirname(outputPath);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  const payload = JSON.stringify(reports.map(mapFeatureToCucumberJson), null, 2);
+  const payload = JSON.stringify(reports.map((r) => mapFeatureToCucumberJson(r, rootDir)), null, 2);
   fs.writeFileSync(outputPath, payload, 'utf-8');
+}
+
+function verifyFeatureDiskSha256(rootDir: string, uri: string, expectedSha: string, errors: string[]): void {
+  const fullPath = path.join(rootDir, uri);
+  if (!uri || !fs.existsSync(fullPath)) {
+    errors.push(`BDD attested feature file missing on disk: ${uri}`);
+    return;
+  }
+  const actualSha = computeLfSha256(fs.readFileSync(fullPath, 'utf-8'));
+  if (actualSha !== expectedSha) {
+    errors.push(`BDD feature SHA-256 drift detected for ${uri}`);
+  }
+}
+
+function verifyCommitBinding(
+  att: BddAttestationRecord,
+  uri: string,
+  expectedCommit: string | null,
+  requireCurrentCommit: boolean,
+  errors: string[]
+): void {
+  if (!requireCurrentCommit || !expectedCommit) return;
+  if (att.commitSha !== expectedCommit) {
+    errors.push(`BDD attestation commit mismatch for ${uri} (expected ${expectedCommit}, got ${att.commitSha ?? 'none'})`);
+  }
+}
+
+function verifyReportDigestAndSig(
+  entry: Record<string, unknown>,
+  att: BddAttestationRecord,
+  uri: string,
+  errors: string[]
+): void {
+  const base = { uri: entry.uri, name: entry.name, tags: entry.tags, elements: entry.elements };
+  const expectedDigest = computeLfSha256(JSON.stringify(base));
+  if (att.reportDigestSha256 !== expectedDigest) {
+    errors.push(`BDD attestation report digest mismatch for ${uri}`);
+  }
+  const expectedSig = computeAttestationSignature(uri, att.featureSha256, att.commitSha ?? null, expectedDigest);
+  if (att.signatureSha256 !== expectedSig) {
+    errors.push(`BDD attestation signature mismatch for ${uri}`);
+  }
+}
+
+function verifySingleFeatureAttestation(
+  entry: Record<string, unknown>,
+  rootDir: string,
+  expectedCommit: string | null,
+  requireCurrentCommit: boolean,
+  errors: string[]
+): boolean {
+  const att = entry.attestation as BddAttestationRecord | undefined;
+  if (!att || typeof att !== 'object') return false;
+  const uri = String(entry.uri ?? '');
+  verifyReportDigestAndSig(entry, att, uri, errors);
+  verifyFeatureDiskSha256(rootDir, uri, att.featureSha256, errors);
+  verifyCommitBinding(att, uri, expectedCommit, requireCurrentCommit, errors);
+  return true;
+}
+
+function loadCucumberReportArray(reportPath: string): { entries?: Array<Record<string, unknown>>; error?: string } {
+  if (!fs.existsSync(reportPath)) return { error: `Missing BDD report: ${reportPath}` };
+  try {
+    const raw = JSON.parse(fs.readFileSync(reportPath, 'utf-8'));
+    return Array.isArray(raw)
+      ? { entries: raw as Array<Record<string, unknown>> }
+      : { error: 'Cucumber report must be a JSON array' };
+  } catch {
+    return { error: 'Invalid JSON in cucumber-report.json' };
+  }
+}
+
+export function verifyBddReportAttestation(
+  reportPath: string,
+  rootDir: string = process.cwd(),
+  options: { requireCurrentCommit?: boolean; requireAttestation?: boolean } = {}
+): BddAttestationVerificationResult {
+  const loaded = loadCucumberReportArray(reportPath);
+  if (!loaded.entries) return { valid: false, hasAttestation: false, errors: [loaded.error!], verifiedFeatures: 0 };
+
+  const errors: string[] = [];
+  let attestedCount = 0;
+  const requireCommit = Boolean(options.requireCurrentCommit);
+  const expectedCommit = requireCommit ? resolveCurrentGitCommit(rootDir) : null;
+
+  for (const item of loaded.entries) {
+    if (verifySingleFeatureAttestation(item, rootDir, expectedCommit, requireCommit, errors)) {
+      attestedCount++;
+    } else if (options.requireAttestation) {
+      errors.push(`Missing SHA-256 attestation for feature ${String(item.uri ?? 'unknown')}`);
+    }
+  }
+
+  const allAttested = !options.requireAttestation || attestedCount === loaded.entries.length;
+  return { valid: errors.length === 0 && allAttested, hasAttestation: attestedCount > 0, errors, verifiedFeatures: attestedCount };
 }
