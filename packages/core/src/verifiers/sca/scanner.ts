@@ -7,11 +7,23 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import { ScannedDependency, ScaTool, ScaVulnerability, VexStatement, VulnerabilityThresholds } from '../../types/index.js';
+import { buildPurl } from './purl.js';
+import { parseMavenPomDependencies } from './maven-xml.js';
+import { resolveLicense } from './license-resolve.js';
+import { resetGlobalBudget } from './safe-exec.js';
+import { ingestSbomFile } from './sbom-ingest.js';
+import { parseIngestedSbom, parseStrictPurl, type SbomComponent } from './sbom-parse.js';
 
 export interface ScanOptions {
   depth?: 'direct' | 'transitive';
   tool?: ScaTool;
   productionOnly?: boolean;
+  sbomPath?: string;
+}
+
+export interface ScaScanResult {
+  dependencies: ScannedDependency[];
+  warnings: string[];
 }
 
 export function isToolAvailable(toolName: string): boolean {
@@ -155,7 +167,7 @@ export function processPackageDir(pkgDir: string, directNames: Set<string>, seen
     name: pkg.name,
     version: pkg.version,
     spdxLicense: spdx,
-    purl: `pkg:npm/${pkg.name}@${pkg.version}`,
+    purl: buildPurl({ ecosystem: 'npm', name: pkg.name, version: pkg.version }),
     path: pkgDir,
     licenseFile: licFile,
     repository: repoUrl,
@@ -233,7 +245,7 @@ function parseSingleTomlBlock(block: string, lockPath: string, directNames: Set<
     name,
     version,
     spdxLicense: spdx,
-    purl: `pkg:pypi/${name.toLowerCase()}@${version}`,
+    purl: buildPurl({ ecosystem: 'pypi', name, version }),
     path: lockPath,
     isDirect: directNames.size === 0 || directNames.has(name.toLowerCase()),
   };
@@ -268,7 +280,7 @@ function parsePipfileSection(
         name,
         version: rawVer,
         spdxLicense: spdx,
-        purl: `pkg:pypi/${name.toLowerCase()}@${rawVer}`,
+        purl: buildPurl({ ecosystem: 'pypi', name, version: rawVer }),
         path: lockPath,
         isDirect,
       });
@@ -316,7 +328,7 @@ function parseGoRequireLine(line: string, goModPath: string): ScannedDependency 
     name: modName,
     version: rawVer,
     spdxLicense: spdx,
-    purl: `pkg:golang/${modName}@v${rawVer}`,
+    purl: buildPurl({ ecosystem: 'golang', name: modName, version: `v${rawVer}` }),
     path: goModPath,
     isDirect: !isIndirect,
   };
@@ -380,7 +392,7 @@ function parseCargoLockBlock(
     name,
     version,
     spdxLicense: normalizeSpdxLicense(blockLic),
-    purl: `pkg:cargo/${name}@${version}`,
+    purl: buildPurl({ ecosystem: 'cargo', name, version }),
     path: cargoLockPath,
     isDirect: directMeta.size === 0 || directMeta.has(name),
   };
@@ -403,49 +415,58 @@ export function scanRustDependencies(rootDir: string, seen: Map<string, ScannedD
   }
 }
 
-function extractXmlTag(xml: string, tag: string): string | undefined {
-  const m = xml.match(new RegExp(`<${tag}>([^<]+)</${tag}>`));
-  return m ? m[1].trim() : undefined;
-}
-
-function resolveMavenBlockLicense(block: string, defaultLic: string): string {
-  const tagLic = extractXmlTag(block, 'license');
-  if (tagLic) return tagLic;
-  const commentLic = block.match(/<!--\s*(?:spdx|license)\s*:\s*([A-Za-z0-9.+-]+)\s*-->/i)?.[1];
-  return commentLic || defaultLic;
-}
-
-function parseMavenDepBlock(block: string, defaultLic: string, pomPath: string): ScannedDependency | null {
-  const groupId = extractXmlTag(block, 'groupId');
-  const artifactId = extractXmlTag(block, 'artifactId');
-  if (!groupId || !artifactId) return null;
-  const version = extractXmlTag(block, 'version') || 'unknown';
-  const inlineLic = resolveMavenBlockLicense(block, defaultLic);
-  return {
-    name: `${groupId}:${artifactId}`,
-    version,
-    spdxLicense: normalizeSpdxLicense(inlineLic),
-    purl: `pkg:maven/${groupId}/${artifactId}@${version}`,
-    path: pomPath,
-    isDirect: true,
-  };
-}
-
 export function scanMavenDependencies(rootDir: string, seen: Map<string, ScannedDependency>): void {
   const pomPath = path.join(rootDir, 'pom.xml');
   const content = readTextIfExists(pomPath);
   if (!content) return;
 
-  const projectLicBlock = content.match(/<licenses>([\s\S]*?)<\/licenses>/)?.[1] || '';
-  const defaultLic = extractXmlTag(projectLicBlock, 'name') || 'UNKNOWN';
-  const depBlocks = content.match(/<dependency>[\s\S]*?<\/dependency>/g) || [];
-
-  for (const block of depBlocks) {
-    const dep = parseMavenDepBlock(block, defaultLic, pomPath);
-    if (dep && !seen.has(`maven:${dep.name}@${dep.version}`)) {
-      seen.set(`maven:${dep.name}@${dep.version}`, dep);
-    }
+  for (const raw of parseMavenPomDependencies(content)) {
+    const name = `${raw.groupId}:${raw.artifactId}`;
+    const dep: ScannedDependency = {
+      name,
+      version: raw.version,
+      spdxLicense: normalizeSpdxLicense(raw.license),
+      purl: buildPurl({ ecosystem: 'maven', namespace: raw.groupId, name: raw.artifactId, version: raw.version }),
+      path: pomPath,
+      isDirect: true,
+    };
+    const key = `maven:${dep.name}@${dep.version}`;
+    if (!seen.has(key)) seen.set(key, dep);
   }
+}
+
+function addMissingGroupDeps(
+  group: Record<string, string> | undefined,
+  installedNames: Set<string>,
+  pkgPath: string,
+  seen: Map<string, ScannedDependency>
+): void {
+  if (!group || typeof group !== 'object') return;
+  for (const [name, rawVer] of Object.entries(group)) {
+    if (installedNames.has(name)) continue;
+    const version = String(rawVer || '').replace(/^[^0-9]*/, '') || 'unknown';
+    seen.set(`${name}@${version}`, {
+      name,
+      version,
+      spdxLicense: 'UNKNOWN',
+      purl: buildPurl({ ecosystem: 'npm', name, version }),
+      path: pkgPath,
+      isDirect: true,
+    });
+  }
+}
+
+function addMissingDirectPackageJsonDeps(
+  rootDir: string,
+  productionOnly: boolean | undefined,
+  seen: Map<string, ScannedDependency>
+): void {
+  const pkgPath = path.join(rootDir, 'package.json');
+  const pkg = readPackageJson(pkgPath);
+  if (!pkg) return;
+  const installedNames = new Set(Array.from(seen.values()).map((d) => d.name));
+  addMissingGroupDeps(pkg.dependencies, installedNames, pkgPath, seen);
+  if (!productionOnly) addMissingGroupDeps(pkg.devDependencies, installedNames, pkgPath, seen);
 }
 
 export function scanWithNativeFs(rootDir: string, options: ScanOptions = {}): ScannedDependency[] {
@@ -459,6 +480,7 @@ export function scanWithNativeFs(rootDir: string, options: ScanOptions = {}): Sc
       scanPnpmStore(path.join(nmDir, '.pnpm'), directNames, seen);
     }
   }
+  addMissingDirectPackageJsonDeps(rootDir, options.productionOnly, seen);
 
   scanPythonDependencies(rootDir, seen);
   scanGoDependencies(rootDir, seen);
@@ -503,18 +525,28 @@ function normalizeVulnerabilitySeverity(raw?: string): 'CRITICAL' | 'HIGH' | 'ME
   return 'UNKNOWN';
 }
 
-function parseSingleVulnerability(v: Record<string, unknown>): ScaVulnerability {
+function optStr(val: unknown): string | undefined {
+  return typeof val === 'string' && val.length > 0 ? val : undefined;
+}
+
+function parseSingleVulnerability(
+  v: Record<string, unknown>,
+  ecosystem?: string
+): ScaVulnerability {
+  const pkgId = v.PkgIdentifier as Record<string, unknown> | undefined;
   return {
-    id: (v.VulnerabilityID as string) || 'UNKNOWN',
-    packageName: (v.PkgName as string) || 'UNKNOWN',
-    installedVersion: (v.InstalledVersion as string) || 'unknown',
-    fixedVersion: (v.FixedVersion as string) || undefined,
+    id: optStr(v.VulnerabilityID) ?? 'UNKNOWN',
+    packageName: optStr(v.PkgName) ?? 'UNKNOWN',
+    installedVersion: optStr(v.InstalledVersion) ?? 'unknown',
+    fixedVersion: optStr(v.FixedVersion),
     severity: normalizeVulnerabilitySeverity(v.Severity as string | undefined),
+    ecosystem: optStr(ecosystem),
+    purl: optStr(pkgId?.PURL),
     cvssV3Score: extractCvssV3Score(v.CVSS),
     cvssV3Vector: extractCvssV3Vector(v.CVSS),
-    title: (v.Title as string) || undefined,
-    description: (v.Description as string) || undefined,
-    primaryUrl: (v.PrimaryURL as string) || undefined,
+    title: optStr(v.Title),
+    description: optStr(v.Description),
+    primaryUrl: optStr(v.PrimaryURL),
   };
 }
 
@@ -523,8 +555,9 @@ export function parseTrivyVulnerabilities(stdout: string): ScaVulnerability[] {
     const data = JSON.parse(stdout);
     const vulns: ScaVulnerability[] = [];
     for (const r of data.Results || []) {
+      const ecosystem = typeof r.Type === 'string' && r.Type ? r.Type : undefined;
       for (const v of r.Vulnerabilities || []) {
-        vulns.push(parseSingleVulnerability(v as Record<string, unknown>));
+        vulns.push(parseSingleVulnerability(v as Record<string, unknown>, ecosystem));
       }
     }
     return vulns;
@@ -571,20 +604,43 @@ export function evaluateVulnerabilityThresholds(
   };
 }
 
-function parseTrivyOutput(stdout: string): ScannedDependency[] {
-  const data = JSON.parse(stdout);
-  const deps: ScannedDependency[] = [];
-  for (const r of data.Results || []) {
-    for (const p of r.Packages || []) {
-      deps.push({
-        name: p.Name,
-        version: p.Version || 'unknown',
-        spdxLicense: normalizeSpdxLicense(p.Licenses?.[0] || 'UNKNOWN'),
-        purl: p.Identifier?.PURL || `pkg:npm/${p.Name}@${p.Version || 'unknown'}`,
-      });
+function joinSpdxLicenses(items: unknown[]): string {
+  const resolved = items
+    .map((item) => normalizeSpdxLicense(item))
+    .filter((lic) => lic !== 'UNKNOWN');
+  if (resolved.length === 0) return 'UNKNOWN';
+  return Array.from(new Set(resolved)).join(' AND ');
+}
+
+function mapTrivyPackage(p: Record<string, unknown>, ecosystem: string): ScannedDependency {
+  const name = optStr(p.Name) ?? 'unknown';
+  const version = optStr(p.Version) ?? 'unknown';
+  const spdxLicense = Array.isArray(p.Licenses)
+    ? joinSpdxLicenses(p.Licenses)
+    : normalizeSpdxLicense(p.Licenses);
+  const identifier = p.Identifier as Record<string, unknown> | undefined;
+  return {
+    name,
+    version,
+    spdxLicense,
+    purl: optStr(identifier?.PURL) ?? buildPurl({ ecosystem, name, version }),
+  };
+}
+
+export function parseTrivyOutput(stdout: string): ScannedDependency[] {
+  try {
+    const data = JSON.parse(stdout);
+    const deps: ScannedDependency[] = [];
+    for (const r of data.Results || []) {
+      const ecosystem = optStr(r.Type) ?? 'generic';
+      for (const p of r.Packages || []) {
+        deps.push(mapTrivyPackage(p as Record<string, unknown>, ecosystem));
+      }
     }
+    return deps;
+  } catch {
+    return [];
   }
-  return deps;
 }
 
 function execTrivyCli(rootDir: string, checkTypes: string): string | null {
@@ -619,20 +675,28 @@ export function scanWithTrivy(
   };
 }
 
-function parseSyftOutput(stdout: string): ScannedDependency[] {
-  const data = JSON.parse(stdout);
-  const deps: ScannedDependency[] = [];
-  for (const a of data.artifacts || []) {
-    const lic = a.licenses?.[0]?.value || 'UNKNOWN';
-    deps.push({
-      name: a.name,
-      version: a.version || 'unknown',
-      spdxLicense: normalizeSpdxLicense(lic),
-      purl: a.purl || `pkg:npm/${a.name}@${a.version || 'unknown'}`,
-      author: a.metadata?.author,
-    });
+export function parseSyftOutput(stdout: string): ScannedDependency[] {
+  try {
+    const data = JSON.parse(stdout);
+    const deps: ScannedDependency[] = [];
+    for (const a of data.artifacts || []) {
+      const rawLicenses = Array.isArray(a.licenses)
+        ? a.licenses.map((l: { value?: unknown }) => l?.value)
+        : [];
+      const version = a.version || 'unknown';
+      const ecosystem = typeof a.type === 'string' && a.type ? a.type : 'generic';
+      deps.push({
+        name: a.name,
+        version,
+        spdxLicense: joinSpdxLicenses(rawLicenses),
+        purl: a.purl || buildPurl({ ecosystem, name: a.name, version }),
+        author: a.metadata?.author,
+      });
+    }
+    return deps;
+  } catch {
+    return [];
   }
-  return deps;
 }
 
 export function scanWithSyft(rootDir: string): { dependencies: ScannedDependency[]; executed: boolean } {
@@ -670,8 +734,97 @@ export function scanInstalledLicenses(rootDir: string, options: ScanOptions = {}
     }
   }
 
-  return scanWithNativeFs(rootDir, {
+  resetGlobalBudget();
+  const deps = scanWithNativeFs(rootDir, {
     depth: options.depth || 'transitive',
     productionOnly: options.productionOnly,
   });
+  return deps.map((d) => (d.spdxLicense === 'UNKNOWN' ? resolveLicense(d, rootDir) : d));
+}
+
+// eslint-disable-next-line no-control-regex
+const ANSI_CTRL_RE = /[\x00-\x1f\x7f]/g;
+
+function sanitizeWarningLabel(raw: string): string {
+  return raw.replace(ANSI_CTRL_RE, '').replace(/[A-Za-z]:\\|\/(?:tmp|Users|home|var|etc)\//g, '').slice(0, 120);
+}
+
+function depMatchKey(dep: ScannedDependency): string {
+  const parsed = dep.purl ? parseStrictPurl(dep.purl) : null;
+  if (parsed) {
+    const fullName = parsed.namespace ? `${parsed.namespace}/${parsed.name}` : parsed.name;
+    return `${parsed.ecosystem}\0${fullName}\0${parsed.version}`;
+  }
+  return `generic\0${dep.name}\0${dep.version}`;
+}
+
+function sbomMatchKey(comp: SbomComponent): string {
+  const fullName = comp.namespace ? `${comp.namespace}/${comp.name}` : comp.name;
+  return `${comp.ecosystem}\0${fullName}\0${comp.version}`;
+}
+
+function formatDepLabel(name: string, version: string, namespace?: string): string {
+  const qualified = namespace && !name.startsWith(`${namespace}/`) ? `${namespace}/${name}` : name;
+  return sanitizeWarningLabel(`${qualified}@${version}`);
+}
+
+function applySbomGapFill(dep: ScannedDependency, sbomComp?: SbomComponent): ScannedDependency {
+  const isGap = dep.spdxLicense === 'UNKNOWN' || dep.spdxLicense === 'UNRESOLVED';
+  if (!isGap || !sbomComp || sbomComp.spdxLicense === 'UNKNOWN') {
+    return dep;
+  }
+  const updated: ScannedDependency = { ...dep, spdxLicense: sbomComp.spdxLicense, provenance: 'sbom-declared' };
+  delete updated.unresolvedReason;
+  return updated;
+}
+
+function cmpStr(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+function buildSbomComponentMap(sbomComponents: SbomComponent[]): Map<string, SbomComponent> {
+  const map = new Map<string, SbomComponent>();
+  for (const comp of sbomComponents) {
+    map.set(sbomMatchKey(comp), comp);
+  }
+  return map;
+}
+
+function appendExtraSbomWarnings(
+  sbomComponents: SbomComponent[],
+  seenLocalKeys: Set<string>,
+  warnings: string[]
+): void {
+  for (const comp of sbomComponents) {
+    if (!seenLocalKeys.has(sbomMatchKey(comp))) {
+      const label = formatDepLabel(comp.name, comp.version, comp.namespace);
+      warnings.push(`SBOM cross-check: SBOM component ${label} is not present in local lockfiles`);
+    }
+  }
+}
+
+export function mergeSbomGaps(localDeps: ScannedDependency[], sbomComponents: SbomComponent[]): ScaScanResult {
+  const sbomMap = buildSbomComponentMap(sbomComponents);
+  const seenLocalKeys = new Set<string>();
+  const warnings: string[] = [];
+  const merged = localDeps.map((dep) => {
+    const key = depMatchKey(dep);
+    seenLocalKeys.add(key);
+    const match = sbomMap.get(key);
+    if (!match) {
+      warnings.push(`SBOM cross-check: local dependency ${formatDepLabel(dep.name, dep.version)} is missing from SBOM`);
+    }
+    return applySbomGapFill(dep, match);
+  });
+  appendExtraSbomWarnings(sbomComponents, seenLocalKeys, warnings);
+  merged.sort((a, b) => cmpStr(a.name, b.name) || cmpStr(a.version, b.version));
+  warnings.sort(cmpStr);
+  return { dependencies: merged, warnings };
+}
+
+export function scanWithSbom(rootDir: string, sbomPath: string, options: ScanOptions = {}): ScaScanResult {
+  const doc = ingestSbomFile(rootDir, sbomPath);
+  const sbomComponents = parseIngestedSbom(doc);
+  const localDeps = scanInstalledLicenses(rootDir, options);
+  return mergeSbomGaps(localDeps, sbomComponents);
 }

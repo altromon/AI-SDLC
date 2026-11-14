@@ -124,28 +124,6 @@ export const DASHBOARD_CSS = `
     .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 16px; font-weight: 600; font-size: 0.875rem; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
     .tab-btn:hover { color: var(--text-main); }
     .tab-btn.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); }
-    nav.tabs { overflow-x: auto; overflow-y: hidden; flex-shrink: 0; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
-    .tab-btn { white-space: nowrap; flex-shrink: 0; }
-
-    /* Autonomy tasks must stay inside their container */
-    .autonomy-tasks-panel > td { max-width: 0; overflow: hidden; }
-    .autonomy-tasks-container { min-width: 0; max-width: 100%; }
-    .autonomy-tasks-container .sub-data-table { display: block; overflow-x: auto; max-width: 100%; }
-    .sub-data-table td { word-break: break-word; }
-    .tab-panel { min-height: 0; }
-
-    @media (max-width: 768px) {
-      body { height: auto; min-height: 100vh; overflow: auto; }
-      body main { overflow: visible; flex-direction: column; }
-      body .tab-panel { height: auto; overflow: auto; }
-      body nav.tabs { padding: 0 8px; }
-      body .content-container { padding: 12px; }
-      body #graph-view { flex-direction: column; height: auto; }
-      body #cy { flex: none; width: 100%; height: 60vh; min-height: 320px; }
-      body .graph-toolbar { position: static; max-width: none; border-radius: 0; }
-      body .sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border-color); max-height: 50vh; }
-      body .data-table { display: block; overflow-x: auto; }
-    }
 
     main { flex: 1; position: relative; overflow: hidden; display: flex; }
     .tab-panel { display: none; width: 100%; height: 100%; overflow: auto; }
