@@ -10,7 +10,8 @@ export type DiagnosticCategory =
   | 'branch_safety'
   | 'schemas_pdac'
   | 'toolchain'
-  | 'signing_readiness';
+  | 'signing_readiness'
+  | 'security_tools';
 
 export interface DiagnosticFinding {
   id: string; // e.g. 'ERR_HOOKS_NOT_INSTALLED', 'ERR_PROTECTED_BRANCH_ACTIVE'
@@ -63,9 +64,11 @@ export interface ProcessExecResult {
   exitCode: number | null;
 }
 
+export type SafeProbeExecutable = 'node' | 'pnpm' | 'git' | 'semgrep' | 'trivy' | 'gitleaks';
+
 export interface IProcessRunner {
   execSafe(
-    executable: 'node' | 'pnpm' | 'git',
+    executable: SafeProbeExecutable,
     args: string[],
     options?: ProcessExecOptions
   ): Promise<ProcessExecResult>;

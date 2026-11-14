@@ -3,18 +3,47 @@
  */
 
 import { execFile } from 'node:child_process';
-import { IProcessRunner, ProcessExecOptions, ProcessExecResult } from '../types/doctor.js';
+import * as path from 'node:path';
+import {
+  IProcessRunner,
+  ProcessExecOptions,
+  ProcessExecResult,
+  SafeProbeExecutable,
+} from '../types/doctor.js';
+import { resolveTrustedBinaryPath, resolveWinCmdSpawn } from '../verifiers/tool-installer.js';
 
-const ALLOWED_TOOLS = new Set<string>(['node', 'pnpm', 'git']);
+const ALLOWED_TOOLS = new Set<string>(['node', 'pnpm', 'git', 'semgrep', 'trivy', 'gitleaks']);
 const DANGEROUS_KEYS = ['NODE_OPTIONS', 'NODE_PATH', 'LD_PRELOAD', 'DYLD_INSERT_LIBRARIES', 'GIT_EXEC_PATH'];
-const SAFE_KEYS = ['PATH', 'Path', 'SYSTEMROOT', 'SystemRoot', 'TMP', 'TEMP', 'HOME', 'USERPROFILE'];
+const SAFE_KEYS = ['PATH', 'Path', 'SYSTEMROOT', 'SystemRoot', 'TMP', 'TEMP', 'HOME', 'USERPROFILE', 'ComSpec', 'COMSPEC'];
 
-export function buildSafeEnvironment(): NodeJS.ProcessEnv {
+function normalizePathKey(target: string): string {
+  const resolved = path.resolve(target);
+  return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
+}
+
+function sanitizePathValue(rawPath: string, cwd?: string): string {
+  const normalizedCwd = cwd ? normalizePathKey(cwd) : undefined;
+  return rawPath
+    .split(path.delimiter)
+    .filter((entry) => {
+      const trimmed = entry.trim();
+      if (!trimmed || trimmed === '.' || trimmed === './' || trimmed === '.\\') return false;
+      if (!path.isAbsolute(trimmed)) return false;
+      return !normalizedCwd || normalizePathKey(trimmed) !== normalizedCwd;
+    })
+    .join(path.delimiter);
+}
+
+export function buildSafeEnvironment(cwd?: string): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   for (const k of SAFE_KEYS) {
     if (process.env[k] !== undefined) env[k] = process.env[k];
   }
   for (const d of DANGEROUS_KEYS) delete env[d];
+  if (env.PATH !== undefined) env.PATH = sanitizePathValue(env.PATH, cwd);
+  if (env.Path !== undefined) env.Path = sanitizePathValue(env.Path, cwd);
+  env.SEMGREP_ENABLE_VERSION_CHECK = '0';
+  env.SEMGREP_SEND_METRICS = 'off';
   return env;
 }
 
@@ -30,7 +59,7 @@ function resolveExitCode(error: unknown): number | null {
 }
 
 function runSpawn(
-  executable: string,
+  file: string,
   args: string[],
   cwd: string,
   timeout: number,
@@ -38,9 +67,9 @@ function runSpawn(
 ): Promise<ProcessExecResult> {
   return new Promise<ProcessExecResult>((resolve) => {
     execFile(
-      executable,
+      file,
       args,
-      { shell: false, timeout, maxBuffer, cwd, env: buildSafeEnvironment(), windowsHide: true },
+      { shell: false, timeout, maxBuffer, cwd, env: buildSafeEnvironment(cwd), windowsHide: true },
       (err, stdout, stderr) => {
         resolve({
           stdout: truncateBuffer(stdout, maxBuffer),
@@ -54,7 +83,7 @@ function runSpawn(
 
 export class SafeProcessRunnerAdapter implements IProcessRunner {
   public async execSafe(
-    executable: 'node' | 'pnpm' | 'git',
+    executable: SafeProbeExecutable,
     args: string[],
     options: ProcessExecOptions = {}
   ): Promise<ProcessExecResult> {
@@ -62,10 +91,19 @@ export class SafeProcessRunnerAdapter implements IProcessRunner {
       throw new Error(`ERR_UNAUTHORIZED_PROBE_TOOL: Executable '${executable}' is not authorized.`);
     }
 
+    const cwd = options.cwd ?? process.cwd();
+    const trustedPath = resolveTrustedBinaryPath(executable, cwd);
+    if (!trustedPath) {
+      throw new Error(`ERR_UNTRUSTED_OR_MISSING_BINARY: Executable '${executable}' was not found on trusted PATH.`);
+    }
+
     const timeout = Math.min(options.timeout ?? 2000, 2000);
     const maxBuffer = options.maxBuffer ?? 1024;
-    const cwd = options.cwd ?? process.cwd();
+    const resolved = resolveWinCmdSpawn(trustedPath, args);
+    if (resolved.rejectedMetachar) {
+      throw new Error('ERR_UNSAFE_WIN_BATCH_ARGS: Rejected unsafe shell metacharacter in Windows batch arguments.');
+    }
 
-    return runSpawn(executable, args, cwd, timeout, maxBuffer);
+    return runSpawn(resolved.command, resolved.args, cwd, timeout, maxBuffer);
   }
 }

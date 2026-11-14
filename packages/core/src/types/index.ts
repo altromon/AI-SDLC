@@ -16,6 +16,7 @@ export interface QualityPolicy {
   target_directories: string[];
   supported_extensions: string[];
   exclude_patterns: string[];
+  test_patterns?: string[];
 }
 
 export interface FunctionMetrics {
@@ -463,10 +464,13 @@ export interface TaskAuditItem {
 
 export interface TestingCoverageOptions {
   rootDir?: string;
+  policyPath?: string;
+  testPatterns?: string[];
   enforceBddVariants?: boolean;
   enforceUseCaseFlows?: boolean;
   cucumberReportPath?: string;
   enforceCucumberExecution?: boolean;
+  enforceBddAttestation?: boolean;
 }
 
 export interface TestingCoverageResult {
@@ -486,6 +490,8 @@ export interface TestingCoverageResult {
     passedScenarios: number;
     failedScenarios: number;
     passed: boolean;
+    attestationValid?: boolean;
+    attestationErrors?: string[];
   };
   reportMarkdown: string;
 }
@@ -635,6 +641,19 @@ export interface LicenseViolation {
 
 export type ScaTool = 'native' | 'license-checker' | 'trivy' | 'syft';
 
+export type UnresolvedLicenseReason =
+  | 'cli_not_installed'
+  | 'cli_timeout'
+  | 'cache_missing'
+  | 'invalid_output'
+  | 'output_too_large'
+  | 'cli_failed'
+  | 'blocked_by_repo_config'
+  | 'path_rejected'
+  | 'budget_exceeded';
+
+export type LicenseProvenance = 'local-metadata' | 'cli' | 'sbom-declared';
+
 export interface ScannedDependency {
   name: string;
   version: string;
@@ -645,6 +664,8 @@ export interface ScannedDependency {
   repository?: string;
   author?: string;
   isDirect?: boolean;
+  unresolvedReason?: UnresolvedLicenseReason;
+  provenance?: LicenseProvenance;
 }
 
 export interface CycloneDxLicense {
@@ -687,6 +708,8 @@ export interface ScaVulnerability {
   installedVersion: string;
   fixedVersion?: string;
   severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'UNKNOWN';
+  ecosystem?: string;
+  purl?: string;
   cvssV3Score?: number;
   cvssV3Vector?: string;
   title?: string;
@@ -708,15 +731,23 @@ export interface LicenseVerificationOptions {
   depth?: 'direct' | 'transitive';
   generateSbom?: boolean;
   sbomPath?: string;
+  sbomInputPath?: string;
   generateNotices?: boolean;
   noticesPath?: string;
   productionOnly?: boolean;
   scanVulnerabilities?: boolean;
   vulnerabilityThresholds?: VulnerabilityThresholds;
+  nonInteractive?: boolean;
+  noInstallPrompt?: boolean;
+  ci?: boolean;
+  isTTY?: boolean;
+  failOnMissingTool?: boolean;
+  confirmInstall?: (spec: import('../verifiers/tool-installer.js').ToolInstallSpec) => Promise<boolean> | boolean;
 }
 
 export interface LicenseVerificationResult {
   success: boolean;
+  passed?: boolean;
   totalEvaluated: number;
   permittedCount: number;
   violations: LicenseViolation[];
@@ -727,6 +758,7 @@ export interface LicenseVerificationResult {
   vulnerabilities?: ScaVulnerability[];
   vulnerabilitiesSkipped?: boolean;
   vulnerabilitiesSkipReason?: string;
+  warnings?: string[];
 }
 
 // --- PDaC Graph & Cryptographic Drift Types ---
@@ -821,12 +853,21 @@ export interface PreflightCheckResult {
 }
 
 // --- Quality Report Types ---
+export type CoverageFormat =
+  | 'istanbul'
+  | 'lcov'
+  | 'cobertura'
+  | 'jacoco'
+  | 'go-coverprofile'
+  | 'llvm-cov';
+
 export interface CodeCoverageSummary {
   linesPct: number;
   branchesPct: number;
   functionsPct: number;
   statementsPct?: number;
   source: string;
+  format?: CoverageFormat;
 }
 
 export interface QualityReportOptions {
@@ -1074,6 +1115,14 @@ export interface SastVerifierOptions {
   semgrep?: boolean;
   targetDirectories?: string[];
   minSeverity?: SastSeverity;
+  sarifPaths?: string[];
+  orchestrate?: boolean;
+  nonInteractive?: boolean;
+  noInstallPrompt?: boolean;
+  ci?: boolean;
+  isTTY?: boolean;
+  failOnMissingTool?: boolean;
+  confirmInstall?: (spec: import('../verifiers/tool-installer.js').ToolInstallSpec) => Promise<boolean> | boolean;
 }
 
 export interface SastVerifierResult {
@@ -1083,6 +1132,8 @@ export interface SastVerifierResult {
   violations: SastViolation[];
   suppressions?: SecuritySuppression[];
   reportMarkdown?: string;
+  warnings?: string[];
+  executedTools?: string[];
 }
 
 export interface PromptInjectionFinding {
@@ -1305,6 +1356,12 @@ export interface PrivacyPolicy {
   };
 }
 
+export interface DataAssetField {
+  name: string;
+  sensitivity?: string;
+  maskingStrategy?: string;
+}
+
 export interface DataAssetSummary {
   id: string;
   title: string;
@@ -1314,6 +1371,7 @@ export interface DataAssetSummary {
   retentionPeriod: string;
   erasureMethod: string;
   filePath: string;
+  fields?: DataAssetField[];
 }
 
 export interface PrivacyRopaSummary {
@@ -1421,11 +1479,16 @@ export interface SarifLocation {
   physicalLocation: SarifPhysicalLocation;
 }
 
+export interface SarifUriBaseId {
+  uri?: string;
+  uriBaseId?: string;
+}
+
 export interface SarifResult {
-  ruleId: string;
-  level: SarifLevel;
-  message: { text: string };
-  locations: SarifLocation[];
+  ruleId?: string;
+  level?: SarifLevel;
+  message?: { text?: string };
+  locations?: SarifLocation[];
   ruleIndex?: number;
   properties?: Record<string, unknown>;
 }
@@ -1434,13 +1497,14 @@ export interface SarifToolDriver {
   name: string;
   version?: string;
   informationUri?: string;
-  rules: SarifReportingDescriptor[];
+  rules?: SarifReportingDescriptor[];
 }
 
 export interface SarifRun {
   tool: {
     driver: SarifToolDriver;
   };
+  originalUriBaseIds?: Record<string, SarifUriBaseId>;
   results: SarifResult[];
 }
 
@@ -1474,12 +1538,30 @@ export interface BddScenarioExecution {
   steps: BddStepExecution[];
 }
 
+export interface BddAttestationRecord {
+  featureUri: string;
+  featureSha256: string;
+  commitSha: string | null;
+  reportDigestSha256: string;
+  signatureSha256: string;
+  attestedAt: string;
+}
+
+export interface BddAttestationVerificationResult {
+  valid: boolean;
+  hasAttestation: boolean;
+  errors: string[];
+  verifiedFeatures: number;
+}
+
 export interface BddFeatureExecutionReport {
   uri: string;
   featureName: string;
   tags: string[];
   scenarios: BddScenarioExecution[];
   passed: boolean;
+  featureSha256?: string;
+  commitSha?: string | null;
 }
 
 // --- Element Inspector Types ---

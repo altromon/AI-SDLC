@@ -1,0 +1,28 @@
+id: HOF-CHG-059-POLYGLOT-CLI-ORCHESTRATION
+type: handoff
+title: Handoff Canónico de Arquitectura para Polyglot CLI Orchestration
+changeId: CHG-059-POLYGLOT-CLI-ORCHESTRATION
+version: 1.1.0
+createdAt: '2026-11-14T12:55:00.000Z'
+subgraph:
+  requirements:
+    - FR-059-POLYGLOT-CLI-ORCHESTRATION-001
+  useCases:
+    - UC-059-POLYGLOT-CLI-ORCHESTRATION
+  components:
+    - CMP-059-POLYGLOT-CLI-ORCHESTRATION
+  securityRequirements:
+    - SEC-REQ-059-CLI-ORCHESTRATION-SAFETY-001
+citations:
+  - id: UC-059-POLYGLOT-CLI-ORCHESTRATION
+    digest: sha256:8cd06dd5eb3e8c4029833cd6c234f29addf9cdd27b076042d1cfb9bcc754211e
+    comment: Citación de use-case (Orquestación políglota de CLIs SAST nativos vía SARIF v2.1.0 e instalador interactivo de herramientas)
+  - id: FR-059-POLYGLOT-CLI-ORCHESTRATION-001
+    digest: sha256:0280a0dff4d9e83aab0d39bb4db9c6dc0017164b0030872e5d36b1bd2cf97895
+    comment: Requerimiento derivado de UC-059-POLYGLOT-CLI-ORCHESTRATION
+  - id: SEC-REQ-059-CLI-ORCHESTRATION-SAFETY-001
+    digest: sha256:35fa5314a4bddbc3687091decaf0924acc503657ece5d65793985b91c1a94d48
+    comment: Control de seguridad para orquestación de CLIs SAST e instalación segura sin shell ni sudo
+  - id: CMP-059-POLYGLOT-CLI-ORCHESTRATION
+    digest: sha256:48253bf6e91fb5a8e39ceafe145b71dbc046b6f0f6a7330366c5bb4d3dcfa942
+    comment: Componente arquitectónico de orquestación políglota e instalador de herramientas

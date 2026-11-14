@@ -16,7 +16,14 @@ import {
   ScannedDependency,
   VexStatement,
 } from '../types/index.js';
-import { scanInstalledLicenses, scanWithTrivy, evaluateVulnerabilityThresholds } from './sca/scanner.js';
+import {
+  ensureTrivyAvailable,
+  scanInstalledLicenses,
+  scanWithSbom,
+  scanWithTrivy,
+  evaluateVulnerabilityThresholds,
+} from './sca/scanner.js';
+import { readFailOnMissingToolFromQualityPolicy } from './sast.js';
 import {
   generateCycloneDxSbom,
   generateThirdPartyNotices,
@@ -43,6 +50,7 @@ interface RawLicensePolicy {
     sbom_format?: string;
     output_notices_file?: string;
     allowed_depth?: 'DIRECT' | 'TRANSITIVE' | string;
+    fail_on_missing_tool?: boolean;
   };
 }
 
@@ -234,7 +242,7 @@ function evaluateKnownLicense(lic: string, name: string, policy: LicensePolicy):
 
 export function evaluateSingleDependency(dep: ScannedDependency, policy: LicensePolicy): LicenseViolation | null {
   const lic = dep.spdxLicense;
-  if (!lic || lic === 'UNKNOWN') {
+  if (!lic || lic === 'UNKNOWN' || lic === 'UNRESOLVED') {
     return buildViolation(
       dep.name,
       dep.version,
@@ -384,6 +392,7 @@ function handleStaticManifestVerification(
 
   return {
     success: violations.length === 0,
+    passed: violations.length === 0,
     totalEvaluated: dependencies.length,
     permittedCount,
     violations,
@@ -505,21 +514,27 @@ function checkVulnerabilities(
   return { vulnerabilities: res.vulnerabilities, blocked: evalResult.blocked };
 }
 
-function assembleDynamicLicenseResult(
-  dependencies: ScannedDependency[],
-  permittedCount: number,
-  violations: LicenseViolation[],
-  reportMarkdown: string,
-  artifacts: { sbomPath?: string; noticesPath?: string },
+interface DynamicResultInput {
+  dependencies: ScannedDependency[];
+  permittedCount: number;
+  violations: LicenseViolation[];
+  reportMarkdown: string;
+  artifacts: { sbomPath?: string; noticesPath?: string };
   vulnData: {
     vulnerabilities: ScaVulnerability[];
     blocked: boolean;
     skipped?: boolean;
     skipReason?: string;
-  }
-): LicenseVerificationResult {
+  };
+  warnings: string[];
+}
+
+function assembleDynamicLicenseResult(input: DynamicResultInput): LicenseVerificationResult {
+  const { dependencies, permittedCount, violations, reportMarkdown, artifacts, vulnData, warnings } = input;
+  const success = violations.length === 0 && !vulnData.blocked;
   return {
-    success: violations.length === 0 && !vulnData.blocked,
+    success,
+    passed: success,
     totalEvaluated: dependencies.length,
     permittedCount,
     violations,
@@ -530,6 +545,7 @@ function assembleDynamicLicenseResult(
     sbomPath: artifacts.sbomPath,
     noticesPath: artifacts.noticesPath,
     scannedDependencies: dependencies,
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 }
 
@@ -548,38 +564,97 @@ function scanDependenciesForVerification(
   options: LicenseVerificationOptions,
   rootDir: string,
   rawPolicy?: RawLicensePolicy
-): ScannedDependency[] {
+): { dependencies: ScannedDependency[]; warnings: string[] } {
   const depth =
     options.depth ||
     (rawPolicy?.ci_gates?.allowed_depth?.toLowerCase() === 'direct' ? 'direct' : 'transitive');
-  return scanInstalledLicenses(rootDir, {
+  const scanOpts = {
     tool: options.tool || 'native',
     depth,
     productionOnly: options.productionOnly,
-  });
+  };
+  if (options.sbomInputPath) {
+    return scanWithSbom(rootDir, options.sbomInputPath, scanOpts);
+  }
+  return { dependencies: scanInstalledLicenses(rootDir, scanOpts), warnings: [] };
+}
+
+function runDynamicLicenseVerification(
+  options: LicenseVerificationOptions,
+  rootDir: string,
+  policyWithRaw: ReturnType<typeof loadLicensePolicy>
+): LicenseVerificationResult {
+  const policy = toCleanPolicy(policyWithRaw);
+  const { dependencies, warnings } = scanDependenciesForVerification(options, rootDir, policyWithRaw.rawPolicy);
+  const { violations, permittedCount } = evaluateDependencyList(dependencies, policy);
+  const vulnData = checkVulnerabilities(rootDir, options, policy.vex_statements);
+  const artifacts = handleDynamicScaArtifacts(options, rootDir, policyWithRaw.rawPolicy, dependencies, vulnData.vulnerabilities, policy.vex_statements);
+  const reportMarkdown = generateLicenseReportMarkdown(dependencies, violations, policy, artifacts.sbomPath);
+  return assembleDynamicLicenseResult({ dependencies, permittedCount, violations, reportMarkdown, artifacts, vulnData, warnings });
 }
 
 export function verifyLicenses(options: LicenseVerificationOptions = {}): LicenseVerificationResult {
   const rootDir = options.rootDir || process.cwd();
   const policyWithRaw = loadLicensePolicy(rootDir, options.policyPath);
-  const policy = toCleanPolicy(policyWithRaw);
-
   if (Boolean(options.manifestPath || options.dynamic === false)) {
-    return handleStaticManifestVerification(options, rootDir, policy);
+    return handleStaticManifestVerification(options, rootDir, toCleanPolicy(policyWithRaw));
   }
+  return runDynamicLicenseVerification(options, rootDir, policyWithRaw);
+}
 
-  const dependencies = scanDependenciesForVerification(options, rootDir, policyWithRaw.rawPolicy);
-  const { violations, permittedCount } = evaluateDependencyList(dependencies, policy);
-  const vulnData = checkVulnerabilities(rootDir, options, policy.vex_statements);
-  const artifacts = handleDynamicScaArtifacts(
-    options,
+function resolveLicenseFailOnMissingTool(
+  options: LicenseVerificationOptions,
+  rootDir: string,
+  rawPolicy?: RawLicensePolicy
+): boolean {
+  if (options.failOnMissingTool !== undefined) return options.failOnMissingTool;
+  if (rawPolicy?.ci_gates?.fail_on_missing_tool !== undefined) {
+    return Boolean(rawPolicy.ci_gates.fail_on_missing_tool);
+  }
+  return readFailOnMissingToolFromQualityPolicy(rootDir);
+}
+
+async function checkTrivyToolPrecondition(
+  options: LicenseVerificationOptions,
+  rootDir: string,
+  failOnMissingTool: boolean
+): Promise<{ warnings: string[]; blocked: boolean }> {
+  if (options.tool !== 'trivy' && options.scanVulnerabilities === false) {
+    return { warnings: [], blocked: false };
+  }
+  const ensured = await ensureTrivyAvailable({
     rootDir,
-    policyWithRaw.rawPolicy,
-    dependencies,
-    vulnData.vulnerabilities,
-    policy.vex_statements
-  );
-  const reportMarkdown = generateLicenseReportMarkdown(dependencies, violations, policy, artifacts.sbomPath);
+    nonInteractive: options.nonInteractive,
+    noInstallPrompt: options.noInstallPrompt,
+    ci: options.ci,
+    isTTY: options.isTTY,
+    failOnMissingTool,
+    confirmInstall: options.confirmInstall as NonNullable<Parameters<typeof ensureTrivyAvailable>[0]>['confirmInstall'],
+  });
+  if (ensured.available) return { warnings: [], blocked: false };
+  return {
+    warnings: ensured.warning ? [ensured.warning] : [],
+    blocked: Boolean(ensured.missingError),
+  };
+}
 
-  return assembleDynamicLicenseResult(dependencies, permittedCount, violations, reportMarkdown, artifacts, vulnData);
+export async function verifyLicensesAsync(
+  options: LicenseVerificationOptions = {}
+): Promise<LicenseVerificationResult> {
+  const rootDir = options.rootDir || process.cwd();
+  const policyWithRaw = loadLicensePolicy(rootDir, options.policyPath);
+  if (Boolean(options.manifestPath || options.dynamic === false)) {
+    return handleStaticManifestVerification(options, rootDir, toCleanPolicy(policyWithRaw));
+  }
+  const failOnMissingTool = resolveLicenseFailOnMissingTool(options, rootDir, policyWithRaw.rawPolicy);
+  const trivyCheck = await checkTrivyToolPrecondition(options, rootDir, failOnMissingTool);
+  const base = runDynamicLicenseVerification(options, rootDir, policyWithRaw);
+  const allWarnings = [...(base.warnings || []), ...trivyCheck.warnings];
+  const success = base.success && !trivyCheck.blocked;
+  return {
+    ...base,
+    success,
+    passed: success,
+    ...(allWarnings.length > 0 ? { warnings: allWarnings } : {}),
+  };
 }

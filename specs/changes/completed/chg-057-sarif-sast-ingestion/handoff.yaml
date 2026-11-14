@@ -1,0 +1,32 @@
+id: HOF-CHG-057-SARIF-SAST-INGESTION
+type: handoff
+title: Handoff Canónico de Arquitectura para SARIF SAST Ingestion
+changeId: CHG-057-SARIF-SAST-INGESTION
+version: 1.1.0
+createdAt: '2026-11-14T11:20:00.000Z'
+subgraph:
+  requirements:
+    - FR-057-SARIF-SAST-INGESTION-001
+  useCases:
+    - UC-057-SARIF-SAST-INGESTION
+  components:
+    - CMP-057-SARIF-SAST-INGESTION
+  securityRequirements:
+    - SEC-REQ-057-SARIF-INGESTION-SAFETY-001
+    - SEC-REQ-057-SARIF-OUTPUT-SANITIZATION-001
+citations:
+  - id: UC-057-SARIF-SAST-INGESTION
+    digest: sha256:a463989346a55975ffa55d722f57bcb2e320951c20c28f9f34b52765f7532ab2
+    comment: Citación de use-case (Ingesta de reportes OASIS SARIF v2.1.0 externos para evaluación SAST determinista)
+  - id: FR-057-SARIF-SAST-INGESTION-001
+    digest: sha256:554ab924ee95f7425d4ecc2e12918c151035c55b6d688d9971d051df8118e988
+    comment: Requerimiento derivado de UC-057-SARIF-SAST-INGESTION
+  - id: SEC-REQ-057-SARIF-INGESTION-SAFETY-001
+    digest: sha256:c5ab52c706341fa9abcc219e00e859c0f0613316e6f6ec476fbd5ac7427cc7c5
+    comment: Control de seguridad de ingesta SARIF
+  - id: SEC-REQ-057-SARIF-OUTPUT-SANITIZATION-001
+    digest: sha256:73fc0b59a6525a6c99e705d2aa94ac1c1be186d9a4b9a2ac3d77a465469c7310
+    comment: Control de saneamiento de salida y normalización de URIs SARIF
+  - id: CMP-057-SARIF-SAST-INGESTION
+    digest: sha256:5c42a50447717e2024c1ffc19ec0a44369abb3b4531f3d5fa588783bd979fc7d
+    comment: Componente arquitectónico de ingesta SARIF v2.1.0

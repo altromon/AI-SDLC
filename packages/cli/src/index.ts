@@ -24,19 +24,19 @@ import { runDoctor } from './commands/doctor.js';
 import { runMigrate } from './commands/migrate.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
-  runVerifyAll,
+  runVerifyAllAsync,
   runVerifyDuplicates,
   runVerifyFriction,
   runVerifyGherkin,
   runVerifyGovernance,
-  runVerifyLicenses,
+  runVerifyLicensesAsync,
   runVerifyPdac,
   runVerifyPrivacy,
   runVerifyQuality,
-  runVerifySast,
+  runVerifySastAsync,
   runVerifySchemas,
   runVerifySecrets,
-  runVerifySecurity,
+  runVerifySecurityAsync,
   runVerifyTesting,
   runVerifyTraceability,
 } from './commands/verify.js';
@@ -107,8 +107,8 @@ verifyCommand
   .option('--no-vuln', 'Disable dependency vulnerability scanning')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text or json')
-  .action((opts) => {
-    const passed = runVerifyAll({
+  .action(async (opts) => {
+    const passed = await runVerifyAllAsync({
       root: opts.root,
       policy: opts.policy,
       maxCyclomatic: opts.maxCyclomatic,
@@ -210,15 +210,19 @@ verifyCommand
   .option('-m, --manifest <path>', 'Path to license-manifest.yaml')
   .option('--no-dynamic', 'Disable dynamic scanning and require static manifest file')
   .option('--sbom [path]', 'Generate CycloneDX 1.5 JSON standard SBOM file')
+  .option('--sbom-input <path>', 'Ingest an existing CycloneDX 1.x or SPDX 2.x SBOM JSON file to fill license gaps')
   .option('--notices [path]', 'Generate THIRD_PARTY_NOTICES.md legal notices and attributions file')
   .option('--tool <tool>', 'SCA tool: native, trivy, syft', 'native')
   .option('--depth <depth>', 'Analysis depth: direct or transitive', 'transitive')
   .option('--vuln', 'Scan for known vulnerabilities (CVE/GHSA) in dependencies')
   .option('--no-vuln', 'Disable dependency vulnerability scanning')
+  .option('--non-interactive', 'Run in non-interactive mode without tool install prompts')
+  .option('--no-install-prompt', 'Disable interactive tool install prompt')
+  .option('--ci', 'Run in non-interactive CI mode')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text or json')
-  .action((opts) => {
-    const passed = runVerifyLicenses({
+  .action(async (opts) => {
+    const passed = await runVerifyLicensesAsync({
       root: opts.root,
       policy: opts.policy,
       manifest: opts.manifest,
@@ -226,8 +230,12 @@ verifyCommand
       tool: opts.tool,
       depth: opts.depth,
       sbom: opts.sbom,
+      sbomInput: opts.sbomInput,
       notices: opts.notices,
       vuln: opts.vuln,
+      nonInteractive: opts.nonInteractive,
+      noInstallPrompt: opts.installPrompt === false,
+      ci: opts.ci,
       json: opts.json,
       format: opts.format,
     });
@@ -282,8 +290,8 @@ verifyCommand
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text, json, or sarif')
   .option('-o, --output <path>', 'Output SARIF report file path (default: reports/security.sarif)')
-  .action((opts) => {
-    const passed = runVerifySecurity({
+  .action(async (opts) => {
+    const passed = await runVerifySecurityAsync({
       root: opts.root,
       diff: opts.diff,
       base: opts.base,
@@ -329,14 +337,24 @@ verifyCommand
   .option('-r, --root <path>', 'Project root directory')
   .option('-s, --semgrep', 'Delegate to Semgrep CLI if installed')
   .option('-m, --min-severity <level>', 'Minimum severity for failure: CRITICAL, HIGH, MEDIUM', 'HIGH')
+  .option('--sarif <paths...>', 'Ingest external OASIS SARIF v2.1.0 report(s) for deterministic SAST evaluation')
+  .option('--orchestrate', 'Auto-detect project ecosystems and orchestrate native SAST CLIs via SARIF')
+  .option('--non-interactive', 'Run in non-interactive mode without tool install prompts')
+  .option('--no-install-prompt', 'Disable interactive tool install prompt')
+  .option('--ci', 'Run in non-interactive CI mode')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text, json, or sarif')
   .option('-o, --output <path>', 'Output file path (e.g. reports/sast.sarif)')
-  .action((opts) => {
-    const passed = runVerifySast({
+  .action(async (opts) => {
+    const passed = await runVerifySastAsync({
       root: opts.root,
       semgrep: opts.semgrep,
       minSeverity: opts.minSeverity,
+      sarif: opts.sarif,
+      orchestrate: opts.orchestrate,
+      nonInteractive: opts.nonInteractive,
+      noInstallPrompt: opts.installPrompt === false,
+      ci: opts.ci,
       json: opts.json,
       format: opts.format,
       output: opts.output,

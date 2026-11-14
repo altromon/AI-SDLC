@@ -4,7 +4,6 @@ import { writeReportFileIfChanged } from '../utils/fs.js';
  * AI-SDLC: Automated Formal Quality Report Generator (Polyglot)
  */
 
-import * as fs from 'fs';
 import * as path from 'path';
 import {
   AnalysisResult,
@@ -14,6 +13,7 @@ import {
   QualityReportOptions,
   QualityReportResult,
 } from '../types/index.js';
+import { readNormalizedCoverage } from '../verifiers/coverage-normalizer.js';
 import { verifyQualityGate } from '../verifiers/quality-gate.js';
 
 export function calculateRating(mi: number, cc: number): 'A' | 'B' | 'C' | 'D' | 'F' {
@@ -49,70 +49,8 @@ export function detectLanguage(filePath: string): string {
   }
 }
 
-function parseJsonSummaryFile(filePath: string, relSource: string): CodeCoverageSummary | null {
-  try {
-    const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Record<string, unknown>;
-    const total = raw.total as Record<string, Record<string, unknown>> | undefined;
-    if (!total || typeof total !== 'object') return null;
-    const linesPct = Number(total.lines?.pct);
-    const branchesPct = Number(total.branches?.pct);
-    const functionsPct = Number(total.functions?.pct);
-    if (Number.isNaN(linesPct) || Number.isNaN(branchesPct) || Number.isNaN(functionsPct)) return null;
-    const statementsPct = total.statements?.pct !== undefined ? Number(total.statements.pct) : undefined;
-    return { linesPct, branchesPct, functionsPct, statementsPct, source: relSource };
-  } catch {
-    return null;
-  }
-}
-
-function updateLcovCounts(line: string, counts: Record<string, number>): void {
-  const idx = line.indexOf(':');
-  if (idx === -1) return;
-  const key = line.slice(0, idx);
-  if (counts[key] !== undefined) {
-    counts[key] += parseInt(line.slice(idx + 1), 10) || 0;
-  }
-}
-
-function parseLcovFile(filePath: string, relSource: string): CodeCoverageSummary | null {
-  try {
-    const lines = fs.readFileSync(filePath, 'utf-8').split(/\r?\n/);
-    const counts: Record<string, number> = { LF: 0, LH: 0, BRF: 0, BRH: 0, FNF: 0, FNH: 0 };
-    for (const line of lines) {
-      updateLcovCounts(line, counts);
-    }
-    if (counts.LF === 0 && counts.FNF === 0 && counts.BRF === 0) return null;
-    const pct = (hit: number, found: number): number =>
-      found > 0 ? Math.round((hit / found) * 1000) / 10 : 100;
-    return {
-      linesPct: pct(counts.LH, counts.LF),
-      branchesPct: pct(counts.BRH, counts.BRF),
-      functionsPct: pct(counts.FNH, counts.FNF),
-      source: relSource,
-    };
-  } catch {
-    return null;
-  }
-}
-
 export function readCodeCoverageSummary(rootDir: string = process.cwd()): CodeCoverageSummary | null {
-  const jsonCandidates = ['coverage/coverage-summary.json', 'reports/coverage-summary.json'];
-  for (const rel of jsonCandidates) {
-    const full = path.join(rootDir, rel);
-    if (fs.existsSync(full)) {
-      const parsed = parseJsonSummaryFile(full, rel);
-      if (parsed) return parsed;
-    }
-  }
-  const lcovCandidates = ['coverage/lcov.info', 'lcov.info', 'reports/lcov.info'];
-  for (const rel of lcovCandidates) {
-    const full = path.join(rootDir, rel);
-    if (fs.existsSync(full)) {
-      const parsed = parseLcovFile(full, rel);
-      if (parsed) return parsed;
-    }
-  }
-  return null;
+  return readNormalizedCoverage(rootDir);
 }
 
 function formatCoverageRow(label: string, measured: number | undefined, minThreshold: number): string {

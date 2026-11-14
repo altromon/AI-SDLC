@@ -14,6 +14,7 @@ import { BranchSafetyCheck } from './branch-safety-check.js';
 import { SchemasPdacHealthCheck } from './schemas-pdac-check.js';
 import { ToolchainHealthCheck } from './toolchain-check.js';
 import { SignatureReadinessCheck } from './signature-check.js';
+import { SecurityToolsHealthCheck } from './security-tools-check.js';
 import { sanitizeDlpPayload } from '../security/dlp-sanitizer.js';
 
 export class DoctorOrchestrator {
@@ -22,6 +23,7 @@ export class DoctorOrchestrator {
   private schemasCheck = new SchemasPdacHealthCheck();
   private toolchainCheck = new ToolchainHealthCheck();
   private signatureCheck = new SignatureReadinessCheck();
+  private securityToolsCheck = new SecurityToolsHealthCheck();
 
   public async runAll(options: DoctorOptions): Promise<CategoryReport[]> {
     const categories: CategoryReport[] = [];
@@ -31,6 +33,7 @@ export class DoctorOrchestrator {
     categories.push(await this.schemasCheck.inspect(options));
     categories.push(await this.toolchainCheck.inspect(options));
     categories.push(await this.signatureCheck.inspect(options));
+    categories.push(await this.securityToolsCheck.inspect(options));
 
     return categories;
   }

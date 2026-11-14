@@ -1,0 +1,28 @@
+id: HOF-CHG-054-SCA-MAVEN-LICENSE-AND-PURL-FIX
+type: handoff
+title: Handoff de Arquitectura para SCA Maven license and PURL fix
+changeId: CHG-054-SCA-MAVEN-LICENSE-AND-PURL-FIX
+version: 1.1.0
+createdAt: '2026-11-13T07:00:00.000Z'
+subgraph:
+  requirements:
+    - FR-054-SCA-MAVEN-LICENSE-PURL-FIX-001
+  useCases:
+    - UC-054-SCA-MAVEN-LICENSE-PURL-FIX
+  components:
+    - CMP-054-SCA-LICENSE-RESOLUTION
+  businessRules:
+    - BR-SCA-LICENSE-ATTRIBUTION-INTEGRITY
+citations:
+  - id: UC-054-SCA-MAVEN-LICENSE-PURL-FIX
+    digest: sha256:205354315e6f9b6ea28aeccf32526218d5d92fef63fb56fedb6fff839abb37d7
+    comment: Citación upstream
+  - id: FR-054-SCA-MAVEN-LICENSE-PURL-FIX-001
+    digest: sha256:2a69ed39684f961e72d8400bdbb695a643828319866c77006e8860f4e95c4a52
+    comment: Citación upstream
+  - id: BR-SCA-LICENSE-ATTRIBUTION-INTEGRITY
+    digest: sha256:b967c3e510f66024ee48be54ae3c0175a02055fa7a4a5dd265e313e3672f4a94
+    comment: Citación upstream
+  - id: CMP-054-SCA-LICENSE-RESOLUTION
+    digest: sha256:6415b7c4495732b493b658c9046e4a579564a708b99e7edd9bd65283d97a7996
+    comment: Citación upstream

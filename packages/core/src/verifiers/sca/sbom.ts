@@ -14,6 +14,7 @@ import {
   ScannedDependency,
   VexStatement,
 } from '../../types/index.js';
+import { buildPurl } from './purl.js';
 
 export interface SbomGenerateOptions {
   rootDir?: string;
@@ -28,7 +29,7 @@ export function buildCycloneDxComponent(dep: ScannedDependency): CycloneDxCompon
     type: 'library',
     name: dep.name,
     version: dep.version,
-    purl: dep.purl || `pkg:npm/${dep.name}@${dep.version}`,
+    purl: dep.purl || buildPurl({ ecosystem: 'generic', name: dep.name, version: dep.version }),
     author: dep.author,
   };
 
@@ -72,7 +73,17 @@ function mapScaVulnToCycloneDx(v: ScaVulnerability, vexStatements: VexStatement[
     source: v.primaryUrl ? { name: 'NVD/GHSA', url: v.primaryUrl } : undefined,
     ratings: [{ score: v.cvssV3Score, severity: v.severity.toLowerCase(), method: 'CVSSv3', vector: v.cvssV3Vector }],
     analysis: buildVexAnalysis(matchingVex),
-    affects: [{ ref: `pkg:npm/${v.packageName}@${v.installedVersion}` }],
+    affects: [
+      {
+        ref:
+          v.purl ||
+          buildPurl({
+            ecosystem: v.ecosystem || 'generic',
+            name: v.packageName,
+            version: v.installedVersion,
+          }),
+      },
+    ],
   };
 }
 

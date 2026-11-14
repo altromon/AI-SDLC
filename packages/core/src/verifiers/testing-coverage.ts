@@ -15,7 +15,9 @@ import {
 } from '../types/index.js';
 import { walkMdFiles, canonicalSort } from '../utils/fs.js';
 import { resolveDeterministicDate } from '../utils/time.js';
+import { verifyBddReportAttestation } from './bdd-runner.js';
 import { extractGherkinBlock } from './gherkin.js';
+import { compileTestPatterns } from './test-discovery.js';
 
 interface ParsedTaskItem {
   id: string;
@@ -164,12 +166,6 @@ const EXCLUDED_TEST_DIRS = new Set([
   '.vs', '.idea',
 ]);
 
-const TEST_EXTENSIONS = ['.feature', '.spec.ts', '.spec.js', '.test.ts', '.test.js', '_test.py', '_test.go'];
-
-function isTestFile(fileName: string): boolean {
-  return TEST_EXTENSIONS.some((ext) => fileName.endsWith(ext));
-}
-
 function recordRequirementTest(reqToTestsMap: Map<string, string[]>, reqId: string, relTest: string): void {
   const existing = reqToTestsMap.get(reqId) || [];
   if (!existing.includes(relTest)) {
@@ -213,17 +209,24 @@ function processTestFile(fullPath: string, rootDir: string, reqToTestsMap: Map<s
   }
 }
 
-function collectTestFiles(dir: string, files: string[] = []): string[] {
+function collectTestFiles(
+  dir: string,
+  rootDir: string,
+  matcher: ReturnType<typeof compileTestPatterns>,
+  files: string[] = []
+): string[] {
   if (!fs.existsSync(dir)) return files;
   try {
     const entries = fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => canonicalSort(a.name, b.name));
     for (const e of entries) {
+      const fullPath = path.join(dir, e.name);
       if (e.isDirectory()) {
         if (!EXCLUDED_TEST_DIRS.has(e.name)) {
-          collectTestFiles(path.join(dir, e.name), files);
+          collectTestFiles(fullPath, rootDir, matcher, files);
         }
-      } else if (isTestFile(e.name)) {
-        files.push(path.join(dir, e.name));
+      } else {
+        const relPath = path.relative(rootDir, fullPath).replace(/\\/g, '/');
+        if (matcher.matches(relPath)) files.push(fullPath);
       }
     }
   } catch {
@@ -232,9 +235,10 @@ function collectTestFiles(dir: string, files: string[] = []): string[] {
   return files;
 }
 
-export function scanAllTestArtifacts(rootDir: string): Map<string, string[]> {
+export function scanAllTestArtifacts(rootDir: string, customPatterns?: readonly string[]): Map<string, string[]> {
   const reqToTestsMap = new Map<string, string[]>();
-  const testFiles = collectTestFiles(rootDir);
+  const matcher = compileTestPatterns(customPatterns, true);
+  const testFiles = collectTestFiles(rootDir, rootDir, matcher);
   for (const file of testFiles) {
     processTestFile(file, rootDir, reqToTestsMap);
   }
@@ -503,10 +507,15 @@ function auditTasks(
   return { items, errorCount };
 }
 
-function collectTestCorpus(rootDir: string, allMdFiles: string[]): { gherkinSources: string[]; combinedTests: string } {
+function collectTestCorpus(
+  rootDir: string,
+  allMdFiles: string[],
+  customPatterns?: readonly string[]
+): { gherkinSources: string[]; combinedTests: string } {
   const gherkinSources: string[] = [];
   const testContents: string[] = [];
-  for (const tf of collectTestFiles(rootDir)) {
+  const matcher = compileTestPatterns(customPatterns, true);
+  for (const tf of collectTestFiles(rootDir, rootDir, matcher)) {
     try {
       const content = fs.readFileSync(tf, 'utf-8');
       testContents.push(content);
@@ -549,18 +558,35 @@ function countCucumberScenarios(raw: Array<Record<string, unknown>>): { passed: 
   return { passed, failed };
 }
 
-function parseCucumberReportFile(reportPath: string): NonNullable<TestingCoverageResult['cucumberExecution']> | undefined {
+function buildCucumberExecResult(
+  raw: Array<Record<string, unknown>>,
+  reportPath: string,
+  rootDir: string,
+  enforceAttestation: boolean
+): NonNullable<TestingCoverageResult['cucumberExecution']> {
+  const { passed, failed } = countCucumberScenarios(raw);
+  const att = verifyBddReportAttestation(reportPath, rootDir, { requireAttestation: enforceAttestation });
+  const attestationOk = (!att.hasAttestation && !enforceAttestation) || att.valid;
+  const includeAtt = att.hasAttestation || enforceAttestation;
+  return {
+    evaluatedFeatures: raw.length,
+    passedScenarios: passed,
+    failedScenarios: failed,
+    passed: passed + failed > 0 && failed === 0 && attestationOk,
+    ...(includeAtt ? { attestationValid: att.valid, attestationErrors: att.errors } : {}),
+  };
+}
+
+function parseCucumberReportFile(
+  reportPath: string,
+  rootDir: string,
+  enforceAttestation = false
+): NonNullable<TestingCoverageResult['cucumberExecution']> | undefined {
   if (!fs.existsSync(reportPath)) return undefined;
   try {
     const raw = JSON.parse(fs.readFileSync(reportPath, 'utf-8'));
     if (!Array.isArray(raw)) return undefined;
-    const { passed, failed } = countCucumberScenarios(raw as Array<Record<string, unknown>>);
-    return {
-      evaluatedFeatures: raw.length,
-      passedScenarios: passed,
-      failedScenarios: failed,
-      passed: passed + failed > 0 && failed === 0,
-    };
+    return buildCucumberExecResult(raw as Array<Record<string, unknown>>, reportPath, rootDir, enforceAttestation);
   } catch {
     return undefined;
   }
@@ -575,7 +601,7 @@ function resolveCucumberReport(
         ? options.cucumberReportPath
         : path.join(rootDir, options.cucumberReportPath))
     : path.join(rootDir, 'reports', 'cucumber-report.json');
-  const parsed = parseCucumberReportFile(candidate);
+  const parsed = parseCucumberReportFile(candidate, rootDir, Boolean(options.enforceBddAttestation));
   if (parsed) return parsed;
   if (options.enforceCucumberExecution) {
     return { evaluatedFeatures: 0, passedScenarios: 0, failedScenarios: 1, passed: false };
@@ -659,11 +685,40 @@ function processMdFileForCoverage(
   state.taskErrors += auditedTasks.errorCount;
 }
 
+function resolvePolicyFilePath(rootDir: string, policyPath?: string): string {
+  if (!policyPath) return path.join(rootDir, 'quality-policy.yaml');
+  return path.isAbsolute(policyPath) ? policyPath : path.join(rootDir, policyPath);
+}
+
+function extractPatternsFromPolicyDoc(doc: unknown): string[] | undefined {
+  if (!doc || typeof doc !== 'object') return undefined;
+  const rec = doc as Record<string, unknown>;
+  const scope = rec.scope as Record<string, unknown> | undefined;
+  const discovery = rec.test_discovery as Record<string, unknown> | undefined;
+  const patterns: string[] = [
+    ...(Array.isArray(scope?.test_patterns) ? scope.test_patterns.map(String) : []),
+    ...(Array.isArray(discovery?.patterns) ? discovery.patterns.map(String) : []),
+  ];
+  return patterns.length > 0 ? patterns : undefined;
+}
+
+function resolvePolicyTestPatterns(rootDir: string, options: TestingCoverageOptions): string[] | undefined {
+  if (options.testPatterns && options.testPatterns.length > 0) return options.testPatterns;
+  const policyFile = resolvePolicyFilePath(rootDir, options.policyPath);
+  if (!fs.existsSync(policyFile)) return undefined;
+  try {
+    return extractPatternsFromPolicyDoc(yaml.load(fs.readFileSync(policyFile, 'utf-8')));
+  } catch {
+    return undefined;
+  }
+}
+
 export function verifyTestingCoverage(options: TestingCoverageOptions = {}): TestingCoverageResult {
   const rootDir = options.rootDir || process.cwd();
+  const testPatterns = resolvePolicyTestPatterns(rootDir, options);
   const allMdFiles = walkMdFiles(rootDir);
-  const reqToTestsMap = scanAllTestArtifacts(rootDir);
-  const corpus = collectTestCorpus(rootDir, allMdFiles);
+  const reqToTestsMap = scanAllTestArtifacts(rootDir, testPatterns);
+  const corpus = collectTestCorpus(rootDir, allMdFiles, testPatterns);
 
   const state: CoverageScanState = {
     reqAudit: [],

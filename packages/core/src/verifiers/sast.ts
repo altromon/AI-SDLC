@@ -12,8 +12,9 @@
 import { execFileSync } from 'child_process';
 import { canonicalSort } from '../utils/fs.js';
 import { resolveDeterministicDate } from '../utils/time.js';
-import * as fs from 'fs';
+import fs from 'fs';
 import * as path from 'path';
+import yaml from 'js-yaml';
 import {
   PromptInjectionFinding,
   SastFindingType,
@@ -24,6 +25,10 @@ import {
   SecuritySuppression,
 } from '../types/index.js';
 import { parseSecuritySuppression } from './security-suppressions.js';
+import { ingestSarifFiles, isPathOutsideRoot, normalizeWinDrive, SarifIngestionError } from './sarif-ingest.js';
+import { parseSarifDocuments, SEVERITY_RANK } from './sarif-sast.js';
+import { ensureToolAvailable } from './tool-installer.js';
+import { deduplicateAndSortSastViolations, orchestratePolyglotSast } from './sast-orchestrator.js';
 
 export const GENERAL_SOURCE_EXTENSIONS: readonly string[] = [
   '.ts',
@@ -299,8 +304,168 @@ function shouldRunSemgrep(options: SastVerifierOptions): boolean {
   return isSemgrepInstalled();
 }
 
+interface SastPolicyConfig {
+  enforcementMode: 'STRICT' | 'PERMISSIVE';
+  maxVulnerabilities: number;
+  failOnSeverity?: SastSeverity;
+  zeroToleranceSeverities: SastSeverity[];
+}
+
+const VALID_SAST_SEVERITIES = new Set<SastSeverity>(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']);
+
+function parseSastSeverityValue(raw: unknown): SastSeverity | undefined {
+  if (typeof raw !== 'string') return undefined;
+  const upper = raw.trim().toUpperCase() as SastSeverity;
+  return VALID_SAST_SEVERITIES.has(upper) ? upper : undefined;
+}
+
+function applySastThresholds(defaults: SastPolicyConfig, thresholds: Record<string, unknown>): void {
+  const sastCfg = (thresholds.sast_analysis as Record<string, unknown> | undefined) || {};
+  if (typeof sastCfg.max_vulnerabilities === 'number' && Number.isFinite(sastCfg.max_vulnerabilities)) {
+    defaults.maxVulnerabilities = Math.max(0, sastCfg.max_vulnerabilities);
+  }
+  defaults.failOnSeverity = parseSastSeverityValue(sastCfg.fail_on_severity);
+
+  const debt = (thresholds.technical_debt as Record<string, unknown> | undefined) || {};
+  if (Array.isArray(debt.zero_tolerance_severities)) {
+    const sevs = debt.zero_tolerance_severities.map(parseSastSeverityValue).filter((s): s is SastSeverity => Boolean(s));
+    if (sevs.length > 0) defaults.zeroToleranceSeverities = sevs;
+  }
+}
+
+function parseYamlPolicyFile(policyPath: string): Record<string, unknown> | null {
+  try {
+    return yaml.load(fs.readFileSync(policyPath, 'utf-8')) as Record<string, unknown> | null;
+  } catch (err) {
+    throw new SarifIngestionError(
+      'ERR_SARIF_MALFORMED',
+      `Malformed quality-policy.yaml: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+}
+
+function loadSastPolicy(rootDir: string): SastPolicyConfig {
+  const defaults: SastPolicyConfig = {
+    enforcementMode: 'STRICT',
+    maxVulnerabilities: 0,
+    zeroToleranceSeverities: ['CRITICAL'],
+  };
+  const policyPath = path.join(rootDir, 'quality-policy.yaml');
+  if (!fs.existsSync(policyPath)) return defaults;
+
+  const parsed = parseYamlPolicyFile(policyPath);
+  if (!parsed || typeof parsed !== 'object') return defaults;
+  if (parsed.enforcement_mode === 'PERMISSIVE') defaults.enforcementMode = 'PERMISSIVE';
+
+  const thresholds = parsed.release_thresholds as Record<string, unknown> | undefined;
+  if (thresholds && typeof thresholds === 'object') applySastThresholds(defaults, thresholds);
+  return defaults;
+}
+
+function readRegularFdLines(realTarget: string): string[] | null {
+  try {
+    const lstat = fs.lstatSync(realTarget);
+    if (!lstat.isFile()) return null;
+    const fd = fs.openSync(realTarget, fs.constants.O_RDONLY);
+    try {
+      const fstat = fs.fstatSync(fd);
+      const sameFile = Number(lstat.dev) === Number(fstat.dev) && Number(lstat.ino) === Number(fstat.ino);
+      return fstat.isFile() && sameFile ? fs.readFileSync(fd, 'utf-8').split(/\r?\n/) : null;
+    } finally {
+      fs.closeSync(fd);
+    }
+  } catch {
+    return null;
+  }
+}
+
+function readConfinedSourceLines(realRoot: string, relPath: string): string[] | null {
+  if (!relPath || relPath === '<unknown>') return null;
+  const candidate = path.resolve(realRoot, relPath);
+  if (isPathOutsideRoot(realRoot, candidate)) return null;
+
+  try {
+    const realTarget = normalizeWinDrive(fs.realpathSync(candidate));
+    if (isPathOutsideRoot(realRoot, realTarget)) return null;
+    return readRegularFdLines(realTarget);
+  } catch {
+    return null;
+  }
+}
+
+function matchSarifLineSuppression(
+  line: string,
+  violation: SastViolation,
+  suppressions: SecuritySuppression[]
+): boolean {
+  if (!line.includes('ai-sdlc:allow-sast')) return false;
+  const supp = parseSecuritySuppression(line, violation.relPath, violation.lineNumber);
+  if (!supp || supp.kind !== 'sast') return false;
+  if (supp.ruleId !== violation.ruleId && supp.ruleId !== '*') return false;
+  suppressions.push(supp);
+  return supp.status === 'active';
+}
+
+function filterSarifSuppressions(
+  realRoot: string,
+  violations: SastViolation[],
+  suppressions: SecuritySuppression[]
+): SastViolation[] {
+  const lineCache = new Map<string, string[] | null>();
+  const active: SastViolation[] = [];
+
+  for (const v of violations) {
+    if (!lineCache.has(v.relPath)) {
+      lineCache.set(v.relPath, readConfinedSourceLines(realRoot, v.relPath));
+    }
+    const lines = lineCache.get(v.relPath);
+    if (lines && v.lineNumber >= 1 && v.lineNumber <= lines.length) {
+      if (matchSarifLineSuppression(lines[v.lineNumber - 1], v, suppressions)) continue;
+    }
+    active.push(v);
+  }
+  return active;
+}
+
+function evaluateSarifPolicySuccess(
+  unsuppressed: SastViolation[],
+  suppressions: SecuritySuppression[],
+  policy: SastPolicyConfig,
+  minSeverity?: SastSeverity
+): boolean {
+  const effectiveMin = policy.failOnSeverity ?? minSeverity ?? 'HIGH';
+  const blocking = unsuppressed.filter((v) => SEVERITY_RANK[v.severity] >= SEVERITY_RANK[effectiveMin]);
+  const hasBadSuppression = suppressions.some((s) => s.status === 'expired' || s.status === 'invalid');
+  const exceedsMax = blocking.length > policy.maxVulnerabilities;
+  const hasZeroTolerance = blocking.some((v) => policy.zeroToleranceSeverities.includes(v.severity));
+  const policyBlocked = (exceedsMax || hasZeroTolerance) && policy.enforcementMode !== 'PERMISSIVE';
+  return !hasBadSuppression && !policyBlocked;
+}
+
+function verifySastFromSarif(rootDir: string, options: SastVerifierOptions): SastVerifierResult {
+  const sarifPaths = options.sarifPaths || [];
+  const parsedViolations = parseSarifDocuments(rootDir, ingestSarifFiles(rootDir, sarifPaths));
+  const suppressions: SecuritySuppression[] = [];
+  const unsuppressed = filterSarifSuppressions(normalizeWinDrive(fs.realpathSync(rootDir)), parsedViolations, suppressions);
+  const policy = loadSastPolicy(rootDir);
+
+  const result: SastVerifierResult = {
+    success: evaluateSarifPolicySuccess(unsuppressed, suppressions, policy, options.minSeverity),
+    totalFilesScanned: sarifPaths.length,
+    violationsCount: unsuppressed.length,
+    violations: unsuppressed,
+    suppressions,
+  };
+  result.reportMarkdown = generateSastReportMarkdown(result);
+  return result;
+}
+
 export function verifySast(options: SastVerifierOptions = {}): SastVerifierResult {
   const rootDir = options.rootDir || process.cwd();
+  if (options.sarifPaths && options.sarifPaths.length > 0) {
+    return verifySastFromSarif(rootDir, options);
+  }
+
   const minSeverity = options.minSeverity || 'HIGH';
   const targetDirs = options.targetDirectories || ['src', 'packages', 'prompts'];
   const filesToScan = collectSastFiles(rootDir, targetDirs);
@@ -332,8 +497,120 @@ export function verifySast(options: SastVerifierOptions = {}): SastVerifierResul
   return result;
 }
 
+export function readFailOnMissingToolFromQualityPolicy(rootDir: string): boolean {
+  const policyPath = path.join(rootDir, 'quality-policy.yaml');
+  if (!fs.existsSync(policyPath)) return false;
+  try {
+    const doc = yaml.load(fs.readFileSync(policyPath, 'utf-8')) as Record<string, unknown> | undefined;
+    const rt = doc?.release_thresholds as Record<string, unknown> | undefined;
+    const sast = rt?.sast_analysis as Record<string, unknown> | undefined;
+    return Boolean(sast?.fail_on_missing_tool ?? doc?.fail_on_missing_tool);
+  } catch {
+    return false;
+  }
+}
+
+interface AsyncSastExtras {
+  violations: SastViolation[];
+  warnings: string[];
+  executedTools: string[];
+  blocked: boolean;
+}
+
+function emptySastExtras(): AsyncSastExtras {
+  return { violations: [], warnings: [], executedTools: [], blocked: false };
+}
+
+async function runSemgrepWithEnsure(
+  rootDir: string,
+  options: SastVerifierOptions,
+  failOnMissingTool: boolean
+): Promise<AsyncSastExtras> {
+  const ensured = await ensureToolAvailable('semgrep', { ...options, rootDir, failOnMissingTool });
+  if (!ensured.available) {
+    return {
+      violations: [],
+      warnings: ensured.warning ? [ensured.warning] : [],
+      executedTools: [],
+      blocked: Boolean(ensured.missingError),
+    };
+  }
+  try {
+    return { violations: runSemgrepCli(rootDir), warnings: [], executedTools: ['semgrep'], blocked: false };
+  } catch {
+    return { violations: [], warnings: ['Semgrep execution failed.'], executedTools: [], blocked: false };
+  }
+}
+
+async function runAsyncSastTools(
+  rootDir: string,
+  options: SastVerifierOptions,
+  failOnMissingTool: boolean
+): Promise<AsyncSastExtras> {
+  if (options.orchestrate) {
+    const orch = await orchestratePolyglotSast(rootDir, { ...options, failOnMissingTool });
+    const blocked = failOnMissingTool && orch.diagnostics.some((d) => d.status === 'skipped');
+    return { violations: orch.violations, warnings: orch.warnings, executedTools: orch.executedTools, blocked };
+  }
+  if (options.semgrep) {
+    return runSemgrepWithEnsure(rootDir, options, failOnMissingTool);
+  }
+  return emptySastExtras();
+}
+
+function collectBuiltinSast(rootDir: string, options: SastVerifierOptions) {
+  const minSeverity = options.minSeverity || 'HIGH';
+  const targetDirs = options.targetDirectories || ['src', 'packages', 'prompts'];
+  const filesToScan = collectSastFiles(rootDir, targetDirs);
+  const violations: SastViolation[] = [];
+  const suppressions: SecuritySuppression[] = [];
+  for (const file of filesToScan) {
+    violations.push(...scanFileForSast(file, rootDir, minSeverity, suppressions));
+  }
+  return { filesToScan, violations, suppressions };
+}
+
+function buildAsyncSastResult(
+  filesScanned: number,
+  violations: SastViolation[],
+  suppressions: SecuritySuppression[],
+  extras: AsyncSastExtras
+): SastVerifierResult {
+  const merged = deduplicateAndSortSastViolations([...violations, ...extras.violations]);
+  const hasExpired = suppressions.some((s) => s.status === 'expired');
+  const result: SastVerifierResult = {
+    success: merged.length === 0 && !hasExpired && !extras.blocked,
+    totalFilesScanned: filesScanned,
+    violationsCount: merged.length,
+    violations: merged,
+    suppressions,
+    ...(extras.warnings.length > 0 ? { warnings: extras.warnings } : {}),
+    ...(extras.executedTools.length > 0 ? { executedTools: extras.executedTools } : {}),
+  };
+  result.reportMarkdown = generateSastReportMarkdown(result);
+  return result;
+}
+
+export async function verifySastAsync(options: SastVerifierOptions = {}): Promise<SastVerifierResult> {
+  const rootDir = options.rootDir || process.cwd();
+  if (options.sarifPaths && options.sarifPaths.length > 0) {
+    return verifySastFromSarif(rootDir, options);
+  }
+  const { filesToScan, violations, suppressions } = collectBuiltinSast(rootDir, options);
+  const failOnMissingTool = options.failOnMissingTool ?? readFailOnMissingToolFromQualityPolicy(rootDir);
+  const extras = await runAsyncSastTools(rootDir, options, failOnMissingTool);
+  return buildAsyncSastResult(filesToScan.length, violations, suppressions, extras);
+}
+
+const SAST_SEVERITY_BADGES: Record<SastSeverity, string> = {
+  CRITICAL: '🛑 CRITICAL',
+  HIGH: '⚠️ HIGH',
+  MEDIUM: '🟡 MEDIUM',
+  LOW: '🔵 LOW',
+};
+
 function formatSastViolationRow(v: SastViolation): string {
-  const badge = v.severity === 'CRITICAL' ? '🛑 CRITICAL' : '⚠️ HIGH';
+  const badge = SAST_SEVERITY_BADGES[v.severity] || '⚠️ HIGH';
   return `| **${badge}** | \`${v.ruleId}\` | \`${v.type}\` | \`${v.relPath}:${v.lineNumber}\` | \`${v.snippet.replace(/\|/g, '\\|')}\` | ${v.message} |`;
 }
 

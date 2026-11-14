@@ -5,6 +5,8 @@
 
 export * from './types/index.js';
 export * from './verifiers/quality-gate.js';
+export * from './verifiers/coverage-normalizer.js';
+export * from './verifiers/test-discovery.js';
 export * from './verifiers/ast/typescript-ast.js';
 export * from './verifiers/ast/polyglot-scanner.js';
 export * from './verifiers/traceability.js';
@@ -15,6 +17,8 @@ export * from './verifiers/gherkin.js';
 export * from './verifiers/licenses.js';
 export * from './verifiers/sca/scanner.js';
 export * from './verifiers/sca/sbom.js';
+export * from './verifiers/sca/sbom-ingest.js';
+export * from './verifiers/sca/sbom-parse.js';
 export * from './verifiers/pdac-graph.js';
 export * from './verifiers/schemas.js';
 export * from './verifiers/progressive-friction.js';
@@ -22,6 +26,10 @@ export * from './verifiers/manuals.js';
 export * from './verifiers/duplicates.js';
 export * from './verifiers/secrets.js';
 export * from './verifiers/sast.js';
+export * from './verifiers/tool-installer.js';
+export * from './verifiers/sast-orchestrator.js';
+export * from './verifiers/sarif-ingest.js';
+export * from './verifiers/sarif-sast.js';
 export * from './verifiers/security-suppressions.js';
 export * from './verifiers/privacy.js';
 export * from './reporters/quality-report.js';

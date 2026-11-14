@@ -350,7 +350,7 @@ categories:
       // 5. Java Maven pom.xml
       fs.writeFileSync(
         path.join(tmpDir, 'pom.xml'),
-        `<project>\n  <licenses><license><name>Apache-2.0</name></license></licenses>\n  <dependencies>\n    <dependency>\n      <groupId>org.slf4j</groupId>\n      <artifactId>slf4j-api</artifactId>\n      <version>2.0.12</version>\n      <!-- license: MIT -->\n    </dependency>\n  </dependencies>\n</project>\n`
+        `<project>\n  <licenses><license><name>Apache-2.0</name></license></licenses>\n  <dependencies>\n    <dependency>\n      <groupId>org.slf4j</groupId>\n      <artifactId>slf4j-api</artifactId>\n      <version>2.0.12</version>\n      <license>MIT</license>\n    </dependency>\n  </dependencies>\n</project>\n`
       );
 
       const allDeps = scanWithNativeFs(tmpDir, { depth: 'transitive' });
