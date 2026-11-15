@@ -1,5 +1,11 @@
 # @aisdlc/cli
 
+## 4.3.2
+
+### Patch Changes
+
+- feat(gherkin): enforce deterministic Gherkin & step scaffold engines across agents and Quality Gates.
+
 ## 4.3.1
 
 ### Patch Changes
