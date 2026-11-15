@@ -14,11 +14,13 @@ export const REVIEW_VERDICTS = ['COMPLIANT', 'SUGGESTIONS', 'BLOCKING'] as const
 export type ReviewVerdict = (typeof REVIEW_VERDICTS)[number];
 
 export const REVIEWER_ROLES = [
+  'agent-auditor',
+  'agent-adversary',
+  'agent-privacy-officer',
+  'agent-expert-user',
   'agent-code-reviewer',
   'agent-security-auditor',
   'agent-compliance-checker',
-  'agent-privacy-officer',
-  'agent-expert-user',
   'auditor',
   'reviewer',
 ] as const;

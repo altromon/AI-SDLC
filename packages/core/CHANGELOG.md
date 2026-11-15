@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 4.4.0
+
+### Minor Changes
+
+- feat(agents): consolidate 13 specialist roles into 10 (`agent-auditor`, `agent-adversary`, `agent-devops` deployment discovery) across agent templates, lifecycle skills, and reviewer role bindings.
+
 ## 4.3.2
 
 ### Patch Changes

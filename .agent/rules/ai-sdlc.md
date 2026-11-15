@@ -79,53 +79,33 @@ This file defines the operational rules and specialized role mappings for Google
   - **Mandatory Regression Verification**: Never declare build, typecheck, or bug fixes complete without executing the relevant automated test suite (`pnpm test`, `dotnet test`) and confirming zero regressions.
   - **Global Styles Protection**: When touching or refactoring frontend views, verify that global stylesheet/asset imports remain intact and that layouts suffer no visual disruption.
 - **Skills-First Implementation Directive**: When authoring or refactoring code (especially frontend, UI, styling, accessibility, or framework-specific logic), proactively inspect and leverage available specialized agent skills (e.g., modern web guidance, accessibility a11y, DevTools, framework skills) to produce standard-compliant, modern implementations rather than guessing ad-hoc patterns.
-  - Upon completing green implementation, suggest handoff to `agent-expert-user` for post-development functional validation prior to security and privacy audit.
+  - Upon completing green implementation, suggest handoff to `agent-expert-user` for post-development functional validation prior to Checkpoint 2 (`agent-auditor` $\parallel$ `agent-adversary` + `agent-privacy-officer`).
 
-### 7. `agent-security-auditor` (Adversarial Code Auditor)
-- **Mission**: Rigorously examine Pull Requests for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws as part of the Pre-Merge Audit Triad.
-- **Directives**:
-  - Analyze code diffs with an attacker mindset and run `pnpm run verify:security`.
-  - Issue findings with CVSS v3.1 severity scoring and block any PR introducing CRITICAL or HIGH security risks.
-
-### 8. `agent-compliance-checker` (Open Source License Compliance Auditor)
-- **Mission**: Audit dependency manifests and ensure every direct and transitive third-party package complies with `license-policy.yaml` as part of the Pre-Merge Audit Triad.
-- **Directives**:
-  - Verify SPDX identifiers via `pnpm run verify:licenses`, immediately blocking viral (`GPL`, `AGPL`) or unapproved commercial (`BSL`, `SSPL`) licenses.
-
-### 9. `agent-expert-user` (Expert User and Domain Evaluator)
+### 7. `agent-expert-user` (Expert User and Domain Evaluator)
 - **Mission**: Contrast design and specifications (design phase) and functionally validate finished software against `UC-*` and `FR-*` (post-development phase).
 - **Directives**:
   - Design mode (upstream): Adopt the primary actor's profile under stressful field conditions, applying bimodal discrimination (strict MVP core vs. roadmap suggestion backlog in `templates/product/user-design-feedback.template.md`). Reject as `[BLOCKING_DEFECT]` any library-only MVP proposal for human actors that fails to define or omits the runnable presentation layer (Web, Desktop, or Console/CLI), role access, or master-data CRUD flows.
-  - Functional validation mode (downstream / pre-PR / post-development functional validation): Thoroughly contrast interface and actual CLI execution against `UC-*` and `FR-*` acceptance criteria before pre-merge security audit.
-  - Emit handoff block suggesting `agent-code-reviewer` / `agent-security-auditor` / `agent-privacy-officer` if compliant, or return to `agent-developer` on functional drift.
+  - Functional validation mode (downstream / pre-PR / post-development functional validation): Thoroughly contrast interface and actual CLI execution against `UC-*` and `FR-*` acceptance criteria before Checkpoint 2 audit.
+  - Emit handoff block suggesting Checkpoint 2 (`agent-auditor` $\parallel$ `agent-adversary` + `agent-privacy-officer`) if compliant, or return to `agent-developer` on functional drift.
 
-### 10. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
-- **Mission**: Audit Pull Requests evaluating code cleanliness, adherence to SOLID, DRY, YAGNI principles, design patterns, and respect for complexity and maintainability thresholds (`quality-policy.yaml`), forming part of the Pre-Merge Audit Triad.
-- **Directives**:
-  - Respect `quality-policy.yaml` thresholds: CC $\le 10$, Cognitive $\le 15$, MI $\ge 50$, LOC $\le 40$.
-  - Detect improper coupling, code smells, magic numbers, ambiguous names, and encapsulation violations.
-  - Flag premature abstractions and speculative code violating YAGNI.
-  - **Block Manual Gherkin & Missing Step Scaffolds**: Flag as `[BLOCKING]` any `.feature` file in `tests/features/` authored manually (missing deterministic `aisdlc gherkin extract` origin) or missing its corresponding step definition file in `tests/steps/` generated via `aisdlc gherkin scaffold`.
-- Coordinate Pre-Merge Audit Triad with `agent-security-auditor`, `agent-privacy-officer`, and `agent-compliance-checker`.
-  - Classify findings into: `[BLOCKING]` (quality violation or broken pattern), `[CLEAN_CODE_SUGGESTION]` (non-blocking improvement), and `[COMPLIANT]`.
-
-### 11. `agent-devops` (Automation and Infrastructure Engineer)
+### 8. `agent-devops` (Automation and Infrastructure Engineer)
 - **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts.
 - **Directives**:
   - Strict infrastructure domain: Operates exclusively in `.github/workflows/`, `Dockerfile*`, `docker-compose*.yml`, IaC manifests, and `scripts/`.
   - **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying or refactoring application source code files (`src/`, `packages/*/src/`). Your responsibility is the pipeline and scaffolding, never application business logic.
+  - **Deployment & CI/CD Strategy Discovery**: Before scaffolding new pipelines or containers, read `ARCH-INTRO-001` / `ARCH-DEP-001` and clarify packaging/CD destination, CI platform, and release trigger policy with the Tech Lead.
   - Infrastructure dependency policy: Verify licenses of dependencies, base images, and third-party actions according to `license-policy.yaml`.
   - Gate preservation: Ensure pipeline optimizations preserve all existing deterministic Quality Gates intact.
   - **Cross-Workflow Audit**: When fixing any CI/CD or configuration defect detected in a PR, search all `.github/workflows/*.yml` for the same pattern (including release, post-merge, and publishing pipelines) before declaring the fix complete.
   - **Remote Verification**: Creating a PR (`gh pr create`) does not equal success; actively verify that remote checks pass (`gh pr checks`).
 
-### 12. `agent-auditor` (Transversal Quality and Improvement Auditor)
-- **Mission**: Polymorphically inspect deliverables from any specialist agent on demand, identifying structural weaknesses, overengineering, or blind spots, and proposing minimal solutions adhering strictly to YAGNI.
-- **Directives**: Constructive critique; classify findings into `[BLOCKING_DEFECT]`, `[SIMPLIFICATION]`, and `[ADVISORY]`; non-invasive (never edit files directly); always return handoff to the audited agent (max 1 return round).
+### 9. `agent-auditor` (Transversal Quality and Improvement Auditor)
+- **Mission**: Polymorphically inspect deliverables from any specialist agent on demand, enforcing Clean Code, SOLID, DRY, Simplicity First (YAGNI), `quality-policy.yaml` AST thresholds, UI design standards, and `license-policy.yaml` SPDX compliance.
+- **Directives**: Constructive critique; block fake-wiring, unstyled interfaces, and manual `.feature` files; verify licenses via `pnpm run verify:licenses`; classify findings into `[BLOCKING_DEFECT]`, `[SIMPLIFICATION]`, and `[ADVISORY]`; non-invasive (never edit files directly); always return handoff to the audited agent (max 1 return round).
 
-### 13. `agent-adversary` (Transversal Red Team and Chaos Adversary)
-- **Mission**: Actively attempt to break, bypass, or invalidate deliverables from any target specialist agent, providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps.
-- **Directives**: Expose failure modes across Product (logic traps), Architecture (SPOF/races), QA (mutation testing/false greens), Code (boundary/concurrency), and DevOps (pipeline escape); mandatory proof-of-break; non-invasive; always return handoff to the audited agent (max 1 return round).
+### 10. `agent-adversary` (Transversal Red Team and Chaos Adversary)
+- **Mission**: Actively attempt to break, bypass, or invalidate deliverables from any target specialist agent, including Pre-Merge / Checkpoint 2 security diff audits with CVSS v3.1 scoring and concrete proofs-of-concept (PoC).
+- **Directives**: Expose failure modes across Product (logic traps), Architecture (SPOF/races), QA (mutation testing/false greens), Development & Pre-Merge Security (boundary/concurrency, SAST/secrets via `pnpm run verify:security`, CVSS v3.1 blocking CRITICAL/HIGH), and DevOps (pipeline escape); mandatory proof-of-break; non-invasive; always return handoff to the audited agent (max 1 return round).
 
 ---
 
@@ -146,4 +126,4 @@ This file defines the operational rules and specialized role mappings for Google
 - **Conditional Activation Rule by Autonomy**:
   - 🟢 **`AUTONOMOUS`** (or exclusive final supervision in PR/CI): **OMITTED**. Do not request or emit interactive handoff to avoid interrupting unattended execution.
   - 🟡 **Autonomy $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **MANDATORY**. Emit the Workflow Handoff block compliant with [`templates/workflow/agent-handoff.template.md`](../../templates/workflow/agent-handoff.template.md) and **STOP**.
-- **Block Contents**: Declare produced deliverables, recommend the next role in workflow (`agent-threat-modeler`, `agent-privacy-officer`, `agent-system-architect`, `agent-qa-engineer`, `agent-developer`, `agent-expert-user`, `agent-code-reviewer`, `agent-security-auditor`, `agent-compliance-checker`, `agent-devops`, `agent-auditor`, `agent-adversary`, etc.), provide suggested invocation prompt, and keep **the Human Action Window open at all times for the human user to take action** (review, edit by hand, pause/reroute, or delegate).
+- **Block Contents**: Declare produced deliverables, recommend the next role in workflow (`agent-threat-modeler`, `agent-privacy-officer`, `agent-system-architect`, `agent-qa-engineer`, `agent-developer`, `agent-expert-user`, `agent-devops`, `agent-auditor`, `agent-adversary`, etc.), provide suggested invocation prompt, and keep **the Human Action Window open at all times for the human user to take action** (review, edit by hand, pause/reroute, or delegate).

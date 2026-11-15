@@ -23,14 +23,14 @@ Across Brownfield retro-inception, quality auditing and adversarial stress-testi
 ### Step 1: Turnkey Repository Scaffolding (Non-Destructive)
 1. Initialize AI-SDLC configuration without overwriting existing application files using `npx @aisdlc/cli init` (or MCP tool `new`).
 2. Install the Git telemetry hook via `npx aisdlc git hook install` (`pnpm run git:hook:install`).
-3. Commit initial AI-SDLC schemas and policies (`.github/`, `schemas/`, `templates/`, `*-policy.yaml`).
+3. Invoke [`agent-devops`](../agent-devops/SKILL.md) to audit existing CI/CD workflows and container manifests and integrate `aisdlc verify all` into the pipeline without breaking legacy deployments.
+4. Commit initial AI-SDLC schemas and policies (`.github/`, `schemas/`, `templates/`, `*-policy.yaml`).
 
 ### Step 2: Automated Baseline Audit & Debt Inventory (Read-Only)
 Before modifying any code or creating SDD changes, run diagnostic verifiers to quantify existing technical, legal, privacy, and security debt:
-1. **License & Dependency Audit (`agent-compliance-checker`)**: Run MCP tool `verify_licenses` (`npx aisdlc verify licenses`). Identify any viral (`GPL`/`AGPL`) or commercial (`BSL`/`SSPL`) dependencies already present in the lockfile and document exceptions or remediation plans.
-2. **Shift-Left Security Scan (`agent-security-auditor`)**: Run MCP tool `verify_security` (`npx aisdlc verify security`) to detect hardcoded secrets (Gate 11) or OWASP SAST vulnerabilities in legacy files.
+1. **License & AST Code Quality Baseline (`agent-auditor`)**: Run MCP tools `verify_licenses` (`npx aisdlc verify licenses`) and `report_quality` (`npx aisdlc report quality`) to identify viral (`GPL`/`AGPL`) or commercial (`BSL`/`SSPL`) dependencies and legacy hotspots exceeding Cyclomatic Complexity ($\le 10$), Cognitive Complexity ($\le 15$), or Maintainability Index ($\ge 50$).
+2. **Shift-Left Security Scan (`agent-adversary`)**: Run MCP tool `verify_security` (`npx aisdlc verify security`) to detect hardcoded secrets (Gate 11) or OWASP SAST vulnerabilities in legacy files.
 3. **Privacy & PII Scan (`agent-privacy-officer`)**: Run MCP tool `verify_privacy` (`npx aisdlc verify privacy`) to detect PII in logs/telemetry or hardcoded real PII in legacy tests/seeds.
-4. **AST Code Quality Baseline (`agent-code-reviewer`)**: Run MCP tool `report_quality` (`npx aisdlc report quality`) to generate `reports/QUALITY_REPORT.md` and identify legacy hotspots exceeding Cyclomatic Complexity ($\le 10$), Cognitive Complexity ($\le 15$), or Maintainability Index ($\ge 50$).
 
 ### Step 3: Brownfield Retro-Inception (`agent-system-architect` & `agent-product-analyst`)
 Instead of attempting to document 100% of a legacy monolith upfront, apply **bounded retro-inception** focused on the system boundary and the domain areas under active evolution:

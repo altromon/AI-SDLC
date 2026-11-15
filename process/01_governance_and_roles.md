@@ -41,20 +41,14 @@ The AI-SDLC framework organizes humans and AI agents into a clear, balanced gove
    - Reads SDD delivery specifications and generates clean, modular, strictly-typed source code adhering to architectural contracts.
 6. **Test / QA Agent (`agent-test-engineer` / `agent-qa-engineer`)**:
    - Generates exhaustive unit, integration, contract, and BDD/Gherkin test suites in RED prior to implementation.
-7. **Code and Security Auditor Agent (`agent-security-auditor`)**:
-   - Conducts adversarial PR code reviews searching for logic vulnerabilities, injection flaws, and authorization bypasses.
-8. **License Compliance Agent (`agent-compliance-checker`)**:
-   - Inspects dependency manifests against `license-policy.yaml`, flags commercial licenses, and generates attribution drafts.
-9. **Expert User and Domain Evaluator Agent (`agent-expert-user`)**:
-   - Operates bimodally: in design phase defines strict MVP boundaries and roadmap suggestion bank (`templates/product/user-design-feedback.template.md`); in post-development phase conducts end-to-end functional validation contrasting UI and CLI behavior against `UC-*` and `FR-*` prior to pre-merge security audit.
-10. **Technical and Architectural Reviewer Agent (`agent-code-reviewer`)**:
-    - Audits Pull Requests evaluating readability, SOLID/DRY adherence, absence of code smells, and cyclomatic/cognitive complexity limits, completing the Pre-Merge Audit Triad (alongside `agent-security-auditor`, `agent-compliance-checker`, and `agent-privacy-officer`).
-11. **DevOps and Infrastructure Engineer Agent (`agent-devops`)**:
-    - Maintains and evolves automated infrastructure: CI/CD workflows, Dockerfiles, IaC manifests, and support scripts, under the strict non-invasion guardrail protecting application source code (`src/`).
-12. **Transversal Quality and Improvement Auditor Agent (`agent-auditor`)**:
-    - Operates polymorphically on demand across any development phase (Product, Threat Modeling, Privacy, Architecture, QA, Development, DevOps). Inspects deliverables for structural weaknesses, blind spots, or overengineering, proposing concrete, minimal solutions adhering strictly to YAGNI and returning handoff directly to the audited agent.
-13. **Transversal Red Team and Chaos Adversary Agent (`agent-adversary`)**:
-    - Operates polymorphically on demand across any development phase. Actively attempts to break, bypass, or invalidate deliverables by formulating reproducible proofs-of-concept (PoC), counterexamples, test mutations, or boundary failure vectors, returning handoff directly to the audited agent for mitigation before promotion.
+7. **Expert User and Domain Evaluator Agent (`agent-expert-user`)**:
+   - Operates bimodally: in design phase defines strict MVP boundaries and roadmap suggestion bank (`templates/product/user-design-feedback.template.md`); in post-development phase conducts end-to-end functional validation contrasting UI and CLI behavior against `UC-*` and `FR-*` prior to Checkpoint 2 audit.
+8. **DevOps and Infrastructure Engineer Agent (`agent-devops`)**:
+   - Maintains and evolves automated infrastructure: CI/CD workflows, Dockerfiles, IaC manifests, and support scripts, clarifying deployment/CI strategy against `ARCH-INTRO-001` / `ARCH-DEP-001` under the strict non-invasion guardrail protecting application source code (`src/`).
+9. **Transversal Quality and Improvement Auditor Agent (`agent-auditor`)**:
+   - Operates polymorphically on demand across any development phase (including Checkpoint 2 Pre-Merge Review). Inspects deliverables for structural weaknesses, blind spots, or overengineering (YAGNI), enforces Clean Code, SOLID, DRY, `quality-policy.yaml` AST thresholds, UI design standards, and `license-policy.yaml` SPDX compliance (`aisdlc verify licenses`), returning handoff directly to the audited agent.
+10. **Transversal Red Team and Chaos Adversary Agent (`agent-adversary`)**:
+    - Operates polymorphically on demand across any development phase (including Checkpoint 2 Pre-Merge Security Audit). Actively attempts to break, bypass, or invalidate deliverables by formulating reproducible proofs-of-concept (PoC), counterexamples, test mutations, CVSS v3.1 security diff audits (`aisdlc verify security`), or boundary failure vectors, returning handoff directly to the audited agent for mitigation before promotion.
 
 ---
 
@@ -149,7 +143,7 @@ To prevent context loss or invalid assumptions:
      * 🟢 **`AUTONOMOUS` Mode** (or tasks where humans supervise solely final PR execution or CI pipelines): **This interactive handoff is NOT emitted**, allowing unattended, frictionless agent execution.
      * 🟡 **Autonomy Level $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **Emitting the Workflow Handoff block and HALTING is MANDATORY**, exposing completed deliverables, suggesting next roles, and **preserving an open window for human action** (review, edit, pause, divert, or delegate).
    - **Canonical Lifecycle Transition Chain**:
-     $\text{Human PO} \rightarrow \text{agent-product-analyst} \rightarrow \text{agent-expert-user} \rightarrow \text{agent-threat-modeler} \rightarrow \text{agent-privacy-officer} \rightarrow \text{agent-system-architect} \rightarrow \text{agent-developer} \rightarrow \text{agent-test-engineer} \rightarrow \text{agent-security-auditor} \rightarrow \text{agent-compliance-checker} \rightarrow \text{agent-privacy-officer} \rightarrow \text{Human Tech Lead}$
+     $\text{Human PO} \rightarrow \text{agent-product-analyst} \rightarrow \text{agent-expert-user} \rightarrow \text{agent-threat-modeler} \rightarrow \text{agent-privacy-officer} \rightarrow \text{agent-system-architect} \rightarrow \text{agent-qa-engineer} \rightarrow \text{agent-developer} \rightarrow \text{agent-expert-user} \rightarrow (\text{agent-auditor} \parallel \text{agent-adversary} + \text{agent-privacy-officer}) \rightarrow \text{Human Tech Lead}$
 
    - **Transversal Feedback & Return Loop Protocol (`agent-auditor` & `agent-adversary`)**:
      * In addition to the sequential chain, any active specialist agent's deliverable may be routed on-demand to **`agent-auditor`** (constructive review for YAGNI, simplifications, and completeness) or **`agent-adversary`** (destructive red-team testing requiring reproducible PoC breaks or test mutations).

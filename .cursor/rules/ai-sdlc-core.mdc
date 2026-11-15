@@ -38,13 +38,10 @@ Before finalizing changes or proposing commits:
 | `agent-system-architect` | Modular arc42 + NAF v4 architecture (`CMP-*`, Mermaid diagrams, `ADR-*`). |
 | `agent-qa-engineer` | FAILING BDD/Gherkin, E2E, and UI suites (using agreed project tech; Happy Path, Sad Path & Boundary Values per interactive UI element) before `agent-developer` writes code. |
 | `agent-developer` | Atomic tasks from `tasks.md`; respects autonomy mode; runs `pnpm run check:fix` + `pnpm run verify:all`. |
-| `agent-security-auditor` | Adversarial PR security audit, SAST, secrets, and CVSS v3.1 evaluation. |
-| `agent-compliance-checker` | SPDX license compliance audit against `license-policy.yaml`. |
 | `agent-expert-user` | Bimodal MVP evaluation (design) and functional validation against `UC-*` and `FR-*` (pre-PR). |
-| `agent-code-reviewer` | PR audit (SOLID, DRY, YAGNI): `[BLOCKING]` / `[CLEAN_CODE_SUGGESTION]` / `[COMPLIANT]`. |
-| `agent-devops` | CI/CD, Docker, IaC only — **FORBIDDEN** to touch `src/` or `packages/*/src/`. |
-| `agent-auditor` | Transversal on-demand constructive auditor; identifies overengineering, blind spots & YAGNI simplifications; returns handoff to audited agent. |
-| `agent-adversary` | Transversal on-demand Red Team adversary; breaks deliverables with reproducible PoC & mutation tests; returns handoff to audited agent. |
+| `agent-devops` | CI/CD, Docker, IaC only — clarifies deployment/CI strategy; **FORBIDDEN** to touch `src/` or `packages/*/src/`. |
+| `agent-auditor` | Transversal auditor: YAGNI, Clean Code/SOLID/AST thresholds, UI standards, SPDX licenses (`verify:licenses`); returns handoff to audited agent. |
+| `agent-adversary` | Transversal Red Team adversary: PoC breaks, mutation testing & Pre-Merge security diff audit (`verify:security`, CVSS v3.1); returns handoff to audited agent. |
 
 ## 5. Task Autonomy Modes (`tasks.md`)
 - 🟢 **`AUTONOMOUS`**: Low risk. Implement directly, omit handoff block.

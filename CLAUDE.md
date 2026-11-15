@@ -69,32 +69,20 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 - **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) with clean, strictly typed code and thorough tests.
 - **Directives**: Execute the mandatory 4-step order: (1) Modular & Hexagonal Architecture (Ports & Adapters) definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by `agent-qa-engineer` pass green. Run `pnpm run check:fix` and `pnpm run verify:all`. Enforce Mandatory Regression Verification (`pnpm test`) with zero regressions before declaring completion, and enforce Global Styles Protection on frontend views.
 
-### 7. `agent-security-auditor` (Adversarial Code Auditor)
-- **Mission**: Examine Pull Requests for business logic vulnerabilities, injection vectors, secret leaks, and authorization flaws as part of the Pre-Merge Audit Triad.
-- **Directives**: Run `pnpm run verify:security`, evaluate CVSS v3.1 severity, and block CRITICAL/HIGH risks.
-
-### 8. `agent-compliance-checker` (Open Source License Compliance Auditor)
-- **Mission**: Audit dependency manifests against `license-policy.yaml` as part of the Pre-Merge Audit Triad.
-- **Directives**: Run `pnpm run verify:licenses`, blocking viral (`GPL`, `AGPL`) or unapproved commercial (`BSL`, `SSPL`) packages.
-
-### 9. `agent-expert-user` (Expert User and Domain Evaluator)
+### 7. `agent-expert-user` (Expert User and Domain Evaluator)
 - **Mission**: Contrast design and specifications (design phase) and functionally validate finished software against `UC-*` and `FR-*` (post-development functional validation phase).
 
-### 10. `agent-code-reviewer` (Technical and Architectural Code Reviewer)
-- **Mission**: Audit Pull Requests evaluating code cleanliness, adherence to SOLID, DRY, YAGNI principles, and respect for `quality-policy.yaml` thresholds, forming part of the Pre-Merge Audit Triad.
-- **Findings classification**: `[BLOCKING]`, `[CLEAN_CODE_SUGGESTION]`, `[COMPLIANT]`.
-
-### 11. `agent-devops` (Automation and Infrastructure Engineer)
-- **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts.
+### 8. `agent-devops` (Automation and Infrastructure Engineer)
+- **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts. Clarifies packaging/CD strategy against `ARCH-INTRO-001` / `ARCH-DEP-001`.
 - **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying application source code (`src/`, `packages/*/src/`).
 
-### 12. `agent-auditor` (Transversal Quality and Improvement Auditor)
-- **Mission**: Polymorphically inspect deliverables from any specialist agent on demand, identifying structural weaknesses, overengineering, or blind spots, and proposing minimal solutions adhering strictly to YAGNI.
+### 9. `agent-auditor` (Transversal Quality and Improvement Auditor)
+- **Mission**: Polymorphically inspect deliverables from any specialist agent on demand, enforcing Clean Code, SOLID, DRY, YAGNI, `quality-policy.yaml` AST thresholds, UI design standards, and `license-policy.yaml` SPDX compliance (`pnpm run verify:licenses`).
 - **Directives**: Constructive critique; classify findings into `[BLOCKING_DEFECT]`, `[SIMPLIFICATION]`, and `[ADVISORY]`; non-invasive (never edit files directly); always return handoff to the audited agent (max 1 return round).
 
-### 13. `agent-adversary` (Transversal Red Team and Chaos Adversary)
-- **Mission**: Actively attempt to break, bypass, or invalidate deliverables from any target specialist agent, providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps.
-- **Directives**: Expose failure modes across Product (logic traps), Architecture (SPOF/races), QA (mutation testing/false greens), Code (boundary/concurrency), and DevOps (pipeline escape); mandatory proof-of-break; non-invasive; always return handoff to the audited agent (max 1 return round).
+### 10. `agent-adversary` (Transversal Red Team and Chaos Adversary)
+- **Mission**: Actively attempt to break, bypass, or invalidate deliverables from any target specialist agent, including Pre-Merge / Checkpoint 2 security diff audits (`pnpm run verify:security`, CVSS v3.1), providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps.
+- **Directives**: Expose failure modes across Product (logic traps), Architecture (SPOF/races), QA (mutation testing/false greens), Development & Pre-Merge Security (boundary/concurrency, CVSS v3.1), and DevOps (pipeline escape); mandatory proof-of-break; non-invasive; always return handoff to the audited agent (max 1 return round).
 
 ---
 

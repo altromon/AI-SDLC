@@ -99,11 +99,13 @@ export const READONLY_ROLES = new Set([
   'auditor',
   'reviewer',
   'readonly',
+  'agent-auditor',
+  'agent-adversary',
+  'agent-privacy-officer',
+  'agent-expert-user',
   'agent-code-reviewer',
   'agent-security-auditor',
   'agent-compliance-checker',
-  'agent-privacy-officer',
-  'agent-expert-user',
 ]);
 
 export const REVIEWER_ONLY_TOOLS = new Set(['review_submit']);
