@@ -4,6 +4,7 @@ import { writeReportFileIfChanged } from '../utils/fs.js';
  * AI-SDLC: Automated Formal Quality Report Generator (Polyglot)
  */
 
+import * as fs from 'fs';
 import * as path from 'path';
 import {
   AnalysisResult,
@@ -15,6 +16,14 @@ import {
 } from '../types/index.js';
 import { readNormalizedCoverage } from '../verifiers/coverage-normalizer.js';
 import { verifyQualityGate } from '../verifiers/quality-gate.js';
+import { verifyTestingCoverage } from '../verifiers/testing-coverage.js';
+import { verifyTraceability } from '../verifiers/traceability.js';
+import { extractAllRepoCommitKpis } from '../git/trailers.js';
+import {
+  AgentPerformanceKpis,
+  computeAgentPerformanceKpis,
+  formatAgentKpisMarkdownSection,
+} from './agent-kpis.js';
 
 export function calculateRating(mi: number, cc: number): 'A' | 'B' | 'C' | 'D' | 'F' {
   if (mi >= 75 && cc <= 5) return 'A';
@@ -208,28 +217,47 @@ function buildExecutiveTable(
   ];
 }
 
+function buildPolyglotSection(langMap: AccumulatedMetrics['langMap']): string[] {
+  return [
+    '## 3. Polyglot Breakdown by Language Ecosystem',
+    '',
+    '| Language | Functions | Total LOC | Average MI | Average CC | Rating |',
+    '| :--- | :---: | :---: | :---: | :---: | :---: |',
+    ...renderPolyglotRows(langMap),
+  ];
+}
+
 function renderQualityReportMarkdown(
   gateResult: QualityGateResult,
   coverage: CodeCoverageSummary | null,
   accumulated: AccumulatedMetrics,
-  averages: QualityAverages
+  averages: QualityAverages,
+  agentKpis: AgentPerformanceKpis
 ): string {
   const verdict = gateResult.success ? 'PASS' : 'FAIL';
-  const header = buildReportHeader(verdict, averages.globalRating, averages.avgMaintainability, averages.avgCyclomatic);
-  const table = buildExecutiveTable(gateResult, accumulated.totalLoc, averages, coverage);
-  const polyglot = [
-    '## 2. Polyglot Breakdown by Language Ecosystem',
-    '',
-    '| Language | Functions | Total LOC | Average MI | Average CC | Rating |',
-    '| :--- | :---: | :---: | :---: | :---: | :---: |',
-    ...renderPolyglotRows(accumulated.langMap),
+  const sections: string[][] = [
+    buildReportHeader(verdict, averages.globalRating, averages.avgMaintainability, averages.avgCyclomatic),
+    buildExecutiveTable(gateResult, accumulated.totalLoc, averages, coverage),
+    formatAgentKpisMarkdownSection(agentKpis),
+    buildPolyglotSection(accumulated.langMap),
   ];
+  if (accumulated.violationsList.length > 0) {
+    sections.push(['## 4. Quality Gate Violations Log', '', ...accumulated.violationsList]);
+  }
+  return [...sections.map((s) => s.join('\n')), EVALUATION_STANDARDS_MD].join('\n\n---\n\n');
+}
 
-  const violationsSection = accumulated.violationsList.length > 0
-    ? ['', '---', '', '## 3. Quality Gate Violations Log', '', ...accumulated.violationsList]
-    : [];
-
-  return [...header, '', '---', '', ...table, '', '---', '', ...polyglot, ...violationsSection, '', EVALUATION_STANDARDS_MD].join('\n');
+function collectAgentKpisForReport(rootDir: string, gateResult: QualityGateResult): AgentPerformanceKpis {
+  const records = extractAllRepoCommitKpis({ cwd: rootDir });
+  const hasSpecs = fs.existsSync(path.join(rootDir, 'specs'));
+  const coverageResult = hasSpecs ? verifyTestingCoverage({ rootDir }) : undefined;
+  const traceabilityResult = hasSpecs ? verifyTraceability({ rootDir }) : undefined;
+  return computeAgentPerformanceKpis({
+    records,
+    gateResult,
+    coverageResult,
+    traceabilityResult,
+  });
 }
 
 function writeQualityReportFile(rootDir: string, markdown: string): boolean {
@@ -247,7 +275,8 @@ export function generateQualityReport(options: QualityReportOptions = {}): Quali
   const coverage = readCodeCoverageSummary(rootDir);
   const accumulated = accumulateMetrics(gateResult.results);
   const averages = computeQualityAverages(gateResult.totalFunctions, accumulated);
-  const markdown = renderQualityReportMarkdown(gateResult, coverage, accumulated, averages);
+  const agentKpis = collectAgentKpisForReport(rootDir, gateResult);
+  const markdown = renderQualityReportMarkdown(gateResult, coverage, accumulated, averages, agentKpis);
   writeQualityReportFile(rootDir, markdown);
 
   return {

@@ -754,7 +754,7 @@ AI-SDLC generates a self-contained interactive web dashboard and dependency grap
   - Live filters by layer, typology (including `Vision / Goals (ARCH-INTRO)`, `Bounded Contexts (BC-*)`, `DATA-ASSET`, `PRIV-ROPA`, `PRIV-REQ`), and health, auto-focus search, and multiple layout algorithms.
 - **360° Traceability Matrix Table**: Interactive table with bidirectional graph navigation.
 - **Quality & Autonomy Governance Metrics**: Executive cards (SEI MI, average CC, Release Gate verdict) and autonomy mode distribution.
-- **Telemetry and Historical KPIs**: Active branch metrics and historical trends tracking KLoC, bugs, DIR, and rework from `reports/releases/*.kpis.json`.
+- **Telemetry and Historical KPIs**: Active branch metrics, historical trends tracking KLoC, bugs, DIR, and rework from `reports/releases/*.kpis.json`, and industry-standard AI Agent Performance KPIs (SWE-bench & DORA AI: First-Pass Yield, Rework Loops, Spec Adherence Index, Human Takeover Rate, Token Cost Efficiency, Architecture Drift Rate).
 - **Zero External Infrastructure (100% Offline)**: Embedded JavaScript and styles in a single HTML file. Opens directly via `file:///` or hosts statically on GitHub/GitLab Pages.
 
 ### 2. CLI Commands

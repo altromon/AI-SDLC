@@ -18,6 +18,7 @@ import {
   TraceabilityRow,
 } from '../types/index.js';
 import { AuthorKpiSummary, PrKpiAggregation } from './pr-kpis.js';
+import { AgentPerformanceKpis } from './agent-kpis.js';
 import { ComplianceBundlePayload, RegulatoryGateMapping } from '../types/regulatory-compliance.js';
 import { GraphElementsResult } from './dashboard-graph.js';
 import { getCytoscapeScript } from './cytoscape-bundle.js';
@@ -35,6 +36,7 @@ export interface DashboardMetricsData {
   activeBranch: string;
   branchTelemetries?: Record<string, PrKpiAggregation>;
   totalTelemetry?: PrKpiAggregation | null;
+  agentKpis?: AgentPerformanceKpis;
   complianceBundle?: ComplianceBundlePayload | null;
 }
 
@@ -618,12 +620,31 @@ function resolveBranchFilterKeys(metricsData: DashboardMetricsData): string[] {
   return keys;
 }
 
+function renderAgentKpisSectionHtml(kpis?: AgentPerformanceKpis): string {
+  if (!kpis) return '';
+  return [
+    `<div class="chart-container" id="agent-performance-kpis">`,
+    `  <h3>AI Agent Performance KPIs (SWE-bench &amp; DORA AI)</h3>`,
+    `  <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Tasks: <strong>${kpis.totalTasks}</strong> | Commits: <strong>${kpis.totalCommits}</strong> | Audited Trailers: <strong>${kpis.auditedCommitsPercent}%</strong></p>`,
+    `  <div class="grid-cards">`,
+    `    <div class="metric-card"><span class="title">First-Pass Yield (FPY)</span><span class="value">${kpis.firstPassYieldPercent}%</span><span class="subtitle">Target &ge; 80%</span></div>`,
+    `    <div class="metric-card"><span class="title">Rework Loops / Task</span><span class="value">${kpis.reworkLoopsPerTask}</span><span class="subtitle">Target &le; 0.5</span></div>`,
+    `    <div class="metric-card"><span class="title">Spec Adherence Index</span><span class="value">${kpis.specificationAdherenceIndex}%</span><span class="subtitle">Target &ge; 95%</span></div>`,
+    `    <div class="metric-card"><span class="title">Human Takeover Rate</span><span class="value">${kpis.humanTakeoverRatePercent}%</span><span class="subtitle">Target &le; 15%</span></div>`,
+    `    <div class="metric-card"><span class="title">Token Cost Efficiency</span><span class="value">${kpis.tokenCostEfficiency.toLocaleString('en-US')}</span><span class="subtitle">tokens / CC</span></div>`,
+    `    <div class="metric-card"><span class="title">Architecture Drift Rate</span><span class="value">${kpis.architectureDriftRatePercent}%</span><span class="subtitle">Target 0%</span></div>`,
+    `  </div>`,
+    `</div>`,
+  ].join('\n');
+}
+
 function renderKpisTabHtml(metricsData: DashboardMetricsData): string {
   const displayKpi = metricsData.totalTelemetry || metricsData.activePrKpi;
   const branchKeys = resolveBranchFilterKeys(metricsData);
   const telemetryHtml = displayKpi
     ? renderActiveTelemetrySection(displayKpi, 'Totalizador', branchKeys, metricsData.activeBranch)
     : '<p style="color: var(--text-muted); font-size: 0.85rem;">No telemetry recorded yet in this workspace.</p>';
+  const agentKpisHtml = renderAgentKpisSectionHtml(metricsData.agentKpis);
   const historyContent = renderHistoricalKpisTable(metricsData.history);
 
   return [
@@ -631,6 +652,7 @@ function renderKpisTabHtml(metricsData: DashboardMetricsData): string {
     `      <div class="content-container">`,
     `        <h2>Active Telemetry and KPI History</h2>`,
     telemetryHtml,
+    agentKpisHtml,
     `        <div class="chart-container"><h3>Consolidated Release History</h3>${historyContent}</div>`,
     `      </div>`,
     `    </div>`,

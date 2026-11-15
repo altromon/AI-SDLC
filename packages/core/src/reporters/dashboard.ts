@@ -20,6 +20,7 @@ import { verifyTestingCoverage } from '../verifiers/testing-coverage.js';
 import { verifyTraceability } from '../verifiers/traceability.js';
 import { verifyManuals } from '../verifiers/manuals.js';
 import { aggregateCommitKpiRecords, aggregatePrKpis, PrKpiAggregation } from './pr-kpis.js';
+import { computeAgentPerformanceKpis } from './agent-kpis.js';
 import { CommitKpiRecord, extractAllRepoCommitKpis } from '../git/trailers.js';
 import { readCodeCoverageSummary } from './quality-report.js';
 import { buildGraphElements } from './dashboard-graph.js';
@@ -394,6 +395,12 @@ export function collectDashboardMetrics(rootDir: string) {
     history,
     activePrKpi
   );
+  const agentKpis = computeAgentPerformanceKpis({
+    records: totalTelemetry?.commitRecords || [],
+    gateResult: gate,
+    coverageResult: cov,
+    traceabilityResult: trace,
+  });
 
   return {
     gate,
@@ -407,6 +414,7 @@ export function collectDashboardMetrics(rootDir: string) {
     activeBranch,
     branchTelemetries,
     totalTelemetry,
+    agentKpis,
     complianceBundle,
   };
 }
