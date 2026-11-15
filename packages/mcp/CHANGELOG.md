@@ -1,12 +1,12 @@
 # @aisdlc/mcp
 
-## 4.3.0
+## 4.3.1
 
-### Minor Changes
+### Patch Changes
 
-- chore: bump minor version to align with monorepo 4.3.0 release.
+- chore: bump patch version to align with monorepo 4.3.1 release.
 - Updated dependencies
-  - @aisdlc/core@4.3.0
+  - @aisdlc/core@4.3.1
 
 ## 4.2.0
 

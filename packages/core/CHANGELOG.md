@@ -1,8 +1,8 @@
 # @aisdlc/core
 
-## 4.3.0
+## 4.3.1
 
-### Minor Changes
+### Patch Changes
 
 - feat(kpis): add industry-standard AI Agent Performance KPIs (SWE-bench & DORA AI) including First-Pass Yield (FPY), Rework Loops per Task, Specification Adherence Index, Human Takeover Rate, Token Cost Efficiency (tokens/CC), and Architecture Drift Rate, integrated into `reports/QUALITY_REPORT.md` and the interactive web dashboard (`reports/dashboard.html`).
 
