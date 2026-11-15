@@ -29,29 +29,9 @@ export class TimestampedBackupManagerAdapter implements IBackupManager {
     fs.mkdirSync(targetBackupDir, { recursive: true, mode: 0o700 });
 
     const manifestEntries: BackupManifestEntry[] = [];
-
-    // 3. Copy files and generate manifest
     for (const relPath of filesToBackup) {
-      const srcFile = path.resolve(resolvedRoot, relPath);
-      if (fs.existsSync(srcFile)) {
-        const destFile = path.resolve(targetBackupDir, relPath);
-        const destDir = path.dirname(destFile);
-        if (!fs.existsSync(destDir)) {
-          fs.mkdirSync(destDir, { recursive: true });
-        }
-
-        const content = fs.readFileSync(srcFile, 'utf-8');
-        fs.writeFileSync(destFile, content, 'utf-8');
-
-        const digest = this.diffDetector.computeDigest(content);
-        const stats = fs.statSync(destFile);
-
-        manifestEntries.push({
-          path: relPath,
-          sha256: digest,
-          bytes: stats.size,
-        });
-      }
+      const entry = this.backupSingleFile(resolvedRoot, targetBackupDir, relPath);
+      if (entry) manifestEntries.push(entry);
     }
 
     const manifest: BackupManifest = {
@@ -66,6 +46,25 @@ export class TimestampedBackupManagerAdapter implements IBackupManager {
     );
 
     return targetBackupDir;
+  }
+
+  private backupSingleFile(
+    resolvedRoot: string,
+    targetBackupDir: string,
+    relPath: string
+  ): BackupManifestEntry | null {
+    const srcFile = path.resolve(resolvedRoot, relPath);
+    if (!fs.existsSync(srcFile)) return null;
+
+    const destFile = path.resolve(targetBackupDir, relPath);
+    const destDir = path.dirname(destFile);
+    if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+
+    const content = fs.readFileSync(srcFile, 'utf-8');
+    fs.writeFileSync(destFile, content, 'utf-8');
+    const digest = this.diffDetector.computeDigest(content);
+    const stats = fs.statSync(destFile);
+    return { path: relPath, sha256: digest, bytes: stats.size };
   }
 
   public async restoreBackup(repoRoot: string, backupPath: string): Promise<void> {

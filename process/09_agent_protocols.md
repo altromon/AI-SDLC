@@ -132,9 +132,13 @@ DIRECTIVES:
   @security @mitigation, @privacy, @performance or @idempotence.
 - FORBIDDEN: including production code, suggesting implementation, or anticipating technical solutions.
   Your deliverable is strictly failing tests; any scenario with attached production code violates TDD protocol.
+- MANDATORY DETERMINISTIC GHERKIN ENGINES:
+  1. NEVER author or edit '.feature' files in 'tests/features/' manually, and NEVER write boilerplate BDD step definition files in 'tests/steps/' from scratch.
+  2. Author Gherkin scenarios inside ```gherkin blocks of the specification Markdown ('FR-*', 'SEC-REQ-*', 'PRIV-REQ-*', 'spec.md') and run 'npx aisdlc gherkin extract' (or 'npx aisdlc check --fix') to deterministically generate '.feature' files.
+  3. Run 'npx aisdlc gherkin scaffold <feature-file> --lang <ts|py|go|rs|cs> --fallback' (or without '--fallback' when native generator is installed and approved) to deterministically scaffold RED step definition skeletons in 'tests/steps/'. Implement assertions inside those generated step files and add any extra unit/integration/E2E/UI suites in 'tests/unit/', 'tests/e2e/', etc.
 - QUALITY BLOCK: an FR-* having only nominal scenarios, or a UI/user-facing feature missing E2E, UI, or per-element interactive tests (Happy Path, Sad Path, Boundary Values), cannot hand off to agent-developer.
   Missing boundary or out-of-range scenarios represents an explicit block.
-- Before emitting handoff, run 'npx aisdlc verify testing' to confirm Gherkin scenarios are synchronized and recorded in RTM.
+- Before emitting handoff, run 'npx aisdlc verify gherkin' and 'npx aisdlc verify testing' to confirm Gherkin scenarios, deterministic step scaffolds, and RTM coverage.
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the canonical Workflow Handoff block
   ('templates/workflow/agent-handoff.template.md') suggesting 'agent-developer' and opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.
 ```
@@ -225,6 +229,7 @@ DIRECTIVES:
 - Flag premature abstractions and speculative code violating YAGNI (You Aren't Gonna Need It).
 - BLOCK FAKE-WIRING & DISCONNECTED UI: Flag as '[BLOCKING]' any production UI component containing hardcoded mock data ('mockData'), empty event handlers ('onClick={() => {}}'), missing error/loading state handling, or API calls bypassing shared contracts.
 - BLOCK UNSTYLED & NON-COMPLIANT INTERFACES: Flag as '[BLOCKING]' any web view lacking responsive grid and standard styling classes (such as Bootstrap 5 or project design tokens), any desktop window using raw unstyled legacy controls, or any interactive console tool emitting raw monochrome dumps without colorized badges or structured formatting. Also verify that inline manual styles ('style="..."') are not used to bypass design systems.
+- BLOCK MANUAL GHERKIN & MISSING STEP SCAFFOLDS: Flag as '[BLOCKING]' any '.feature' file in 'tests/features/' authored manually without deterministic 'aisdlc gherkin extract' origin, or missing its corresponding step definition file in 'tests/steps/' generated via 'aisdlc gherkin scaffold'.
 - Form part of the Pre-Merge Audit Triad alongside 'agent-security-auditor', 'agent-compliance-checker', and 'agent-privacy-officer'.
 - Emit a structured review report categorizing findings into: [BLOCKING] (quality violation or broken pattern), [CLEAN_CODE_SUGGESTION] (non-blocking improvement), and [COMPLIANT].
 - If autonomy is >= 'HUMAN_REVIEW_PLAN', conclude by emitting the Workflow Handoff block ('templates/workflow/agent-handoff.template.md') to the human Tech Lead for final approval and merge, opening the Human Action Window. In 'AUTONOMOUS' mode, omit interactive handoff.

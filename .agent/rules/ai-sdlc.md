@@ -105,7 +105,8 @@ This file defines the operational rules and specialized role mappings for Google
   - Respect `quality-policy.yaml` thresholds: CC $\le 10$, Cognitive $\le 15$, MI $\ge 50$, LOC $\le 40$.
   - Detect improper coupling, code smells, magic numbers, ambiguous names, and encapsulation violations.
   - Flag premature abstractions and speculative code violating YAGNI.
-  - Coordinate Pre-Merge Audit Triad with `agent-security-auditor`, `agent-privacy-officer`, and `agent-compliance-checker`.
+  - **Block Manual Gherkin & Missing Step Scaffolds**: Flag as `[BLOCKING]` any `.feature` file in `tests/features/` authored manually (missing deterministic `aisdlc gherkin extract` origin) or missing its corresponding step definition file in `tests/steps/` generated via `aisdlc gherkin scaffold`.
+- Coordinate Pre-Merge Audit Triad with `agent-security-auditor`, `agent-privacy-officer`, and `agent-compliance-checker`.
   - Classify findings into: `[BLOCKING]` (quality violation or broken pattern), `[CLEAN_CODE_SUGGESTION]` (non-blocking improvement), and `[COMPLIANT]`.
 
 ### 11. `agent-devops` (Automation and Infrastructure Engineer)

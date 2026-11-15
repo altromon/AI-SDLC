@@ -1,6 +1,6 @@
 # 📋 Security Suppressions and Audit Exceptions Inventory
 
-> **Generated at:** 2026-11-14T12:51:01.000Z
+> **Generated at:** 2026-11-15T05:16:56.000Z
 > **Total Audited Suppressions:** 4 | **Active:** 2 | **Expired:** 0 | **Invalid:** 2
 
 ## 1. Executive Summary
@@ -22,5 +22,5 @@
 
 | Engine | Rule / ID | Location | Details / Justification | Expires | Approved By |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| SECRET | *(all)* | `packages/cli/src/commands/check.ts:215` | Faltan campos obligatorios: reason, expires, approved-by | N/A | *(Sin aprobador)* |
+| SECRET | *(all)* | `packages/cli/src/commands/check.ts:249` | Faltan campos obligatorios: reason, expires, approved-by | N/A | *(Sin aprobador)* |
 | SECRET | *(all)* | `packages/core/src/verifiers/secrets.ts:586` | Faltan campos obligatorios: reason, expires, approved-by | N/A | *(Sin aprobador)* |

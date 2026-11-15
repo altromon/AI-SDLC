@@ -48,23 +48,6 @@
           "items": {
             "type": "string"
           }
-        },
-        "test_patterns": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "test_discovery": {
-      "type": "object",
-      "properties": {
-        "patterns": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       }
     },

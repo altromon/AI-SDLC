@@ -42,9 +42,10 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 
 ### Step 4: Red Phase — Failing Test Suites (`agent-qa-engineer`)
 1. Delegate to or adopt [`agent-qa-engineer`](../agent-qa-engineer/SKILL.md).
-2. Author FAILING (red) BDD/Gherkin step definitions, integration/contract tests, and mandatory E2E/UI tests (evaluating Happy Path, Sad Path, and Boundary Values for every interactive UI element, plus `UC-*` alternative/exception flows) in `tests/`.
-3. Commit failing test suites with trailer `Task-ID: TSK-YYY`.
-4. Run `verify_testing` (`npx aisdlc verify testing`) to confirm requirement test coverage before writing production code.
+2. Run `npx aisdlc gherkin extract` (`sdd_check_fix`) to deterministically extract `.feature` files from Markdown specifications, and run `npx aisdlc gherkin scaffold <feature-file> --lang <lang> --fallback` to scaffold RED step definitions in `tests/steps/` (never hand-author `.feature` or step skeletons).
+3. Author FAILING (red) assertions inside the scaffolded step definitions, plus integration/contract tests and mandatory E2E/UI tests (evaluating Happy Path, Sad Path, and Boundary Values for every interactive UI element, plus `UC-*` alternative/exception flows) in `tests/`.
+4. Commit failing test suites with trailer `Task-ID: TSK-YYY`.
+5. Run `npx aisdlc verify gherkin` and `verify_testing` (`npx aisdlc verify testing`) to confirm deterministic Gherkin/step sync and requirement test coverage before writing production code.
 
 ### Step 5: Green & Refactor Phase — Surgical Implementation (`agent-developer`)
 1. Delegate to or adopt [`agent-developer`](../agent-developer/SKILL.md).
