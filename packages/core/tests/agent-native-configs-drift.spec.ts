@@ -100,7 +100,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     }
   });
 
-  it('verifies all core IDE rules map all 13 specialized roles directly', () => {
+  it('verifies all core IDE rules map all 10 consolidated specialized roles directly', () => {
     const expectedRoles = [
       'agent-product-analyst',
       'agent-threat-modeler',
@@ -108,10 +108,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       'agent-system-architect',
       'agent-qa-engineer',
       'agent-developer',
-      'agent-security-auditor',
-      'agent-compliance-checker',
       'agent-expert-user',
-      'agent-code-reviewer',
       'agent-devops',
       'agent-auditor',
       'agent-adversary',
@@ -192,29 +189,32 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(agContent).toMatch(/post-development functional validation|modo validaci[oó]n funcional/i);
   });
 
-  it('verifies that canonical protocol and Antigravity rules introduce agent-code-reviewer in the pre-merge audit triad (#84)', () => {
+  it('verifies that canonical protocol and Antigravity rules consolidate pre-merge code/license review into agent-auditor and security audit into agent-adversary', () => {
     const canonicalContent = fs.readFileSync(canonicalProtocolPath, 'utf-8');
-    expect(canonicalContent).toContain('agent-code-reviewer');
-    expect(canonicalContent).toMatch(/Pre-Merge Audit Triad|Tr[ií]ada de Auditor[ií]a Pre-Merge/i);
+    expect(canonicalContent).toContain('agent-auditor');
+    expect(canonicalContent).toContain('agent-adversary');
     expect(canonicalContent).toContain('SOLID');
     expect(canonicalContent).toContain('YAGNI');
+    expect(canonicalContent).toContain('CVSS v3.1');
 
     const agContent = fs.readFileSync(configFiles.antigravity, 'utf-8');
-    expect(agContent).toContain('agent-code-reviewer');
-    expect(agContent).toMatch(/Pre-Merge Audit Triad|Tr[ií]ada de Auditor[ií]a Pre-Merge/i);
+    expect(agContent).toContain('agent-auditor');
+    expect(agContent).toContain('agent-adversary');
     expect(agContent).toContain('SOLID');
     expect(agContent).toContain('YAGNI');
   });
 
-  it('verifies that canonical protocol and Antigravity rules define agent-devops with strict non-invasion guardrail in src/ (#82)', () => {
+  it('verifies that canonical protocol and Antigravity rules define agent-devops with strict non-invasion guardrail and deployment discovery (#82)', () => {
     const canonicalContent = fs.readFileSync(canonicalProtocolPath, 'utf-8');
     expect(canonicalContent).toContain('agent-devops');
     expect(canonicalContent).toMatch(/NON-INVASION GUARDRAIL|GUARDRAIL DE NO INVAS[IÍ]ÓN/i);
+    expect(canonicalContent).toMatch(/Deployment & CI\/CD Strategy Discovery/i);
     expect(canonicalContent).toContain('src/');
 
     const agContent = fs.readFileSync(configFiles.antigravity, 'utf-8');
     expect(agContent).toContain('agent-devops');
     expect(agContent).toMatch(/NON-INVASION GUARDRAIL|GUARDRAIL DE NO INVAS[IÍ]ÓN/i);
+    expect(agContent).toMatch(/Deployment & CI\/CD Strategy Discovery/i);
     expect(canonicalContent).toMatch(/Cross-Workflow Audit|CROSS-WORKFLOW AUDIT/i);
     expect(canonicalContent).toMatch(/Remote Verification|REMOTE VERIFICATION/i);
     expect(agContent).toMatch(/Cross-Workflow Audit/i);
@@ -244,8 +244,8 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     const expertAgent = fs.readFileSync(path.join(rootDir, '.agent/agents/agent-expert-user.md'), 'utf-8');
     expect(expertAgent).toMatch(/Loading.*Empty.*Error/is);
 
-    const reviewerAgent = fs.readFileSync(path.join(rootDir, '.agent/agents/agent-code-reviewer.md'), 'utf-8');
-    expect(reviewerAgent).toMatch(/Fake-Wiring/i);
+    const auditorAgent = fs.readFileSync(path.join(rootDir, '.agent/agents/agent-auditor.md'), 'utf-8');
+    expect(auditorAgent).toMatch(/Fake-Wiring/i);
   });
 
   it('verifies agent-system-architect and agent-developer enforce Modular & Hexagonal Architecture (Ports & Adapters) & exhaustive unit testing order across protocols and agent configs', () => {
@@ -351,7 +351,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     }
   });
 
-  it('verifies all 13 specialized agent skills exist in .claude/skills without drift', async () => {
+  it('verifies all 10 specialized agent skills exist in .claude/skills without drift', async () => {
     const { SPECIALIZED_AGENT_TEMPLATES, renderClaudeAgentFile } = await import('../src/init/index.js');
     for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
       const claudeSkillPath = path.join(rootDir, `.claude/skills/${agent.id}/SKILL.md`);
@@ -362,7 +362,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     }
   });
 
-  it('verifies all 13 specialized agent definitions exist in .agent, .cursor, and .github without drift', async () => {
+  it('verifies all 10 specialized agent definitions exist in .agent, .cursor, and .github without drift', async () => {
     const {
       SPECIALIZED_AGENT_TEMPLATES,
       renderAntigravityAgentFile,
@@ -431,7 +431,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(productAnalyst!.body).toMatch(/Bootstrap 5.*Fluent.*ANSI/is);
   });
 
-  it('verifies agent-developer and code-reviewer enforce modern visual aesthetics and skills-first implementation', async () => {
+  it('verifies agent-developer and agent-auditor enforce modern visual aesthetics and skills-first implementation', async () => {
     const { SPECIALIZED_AGENT_TEMPLATES } = await import('../src/init/index.js');
     const developer = SPECIALIZED_AGENT_TEMPLATES.find((a) => a.id === 'agent-developer');
     expect(developer).toBeDefined();
@@ -440,8 +440,8 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(developer!.body).toMatch(/Bootstrap 5/);
     expect(developer!.body).toMatch(/Spectre\.Console|Rich|Ink|Chalk/);
 
-    const reviewer = SPECIALIZED_AGENT_TEMPLATES.find((a) => a.id === 'agent-code-reviewer');
-    expect(reviewer).toBeDefined();
-    expect(reviewer!.body).toMatch(/Block Unstyled & Non-Compliant Interfaces/i);
+    const auditor = SPECIALIZED_AGENT_TEMPLATES.find((a) => a.id === 'agent-auditor');
+    expect(auditor).toBeDefined();
+    expect(auditor!.body).toMatch(/Block Unstyled & Non-Compliant Interfaces/i);
   });
 });

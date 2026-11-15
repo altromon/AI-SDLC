@@ -3,13 +3,17 @@
  * Unified Pre-flight check command with optional non-destructive auto-fix.
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
 import pc from 'picocolors';
 import {
   checkGherkinInSync,
   extractGherkinFeatures,
+  GherkinScaffoldLanguage,
   PreflightCheckOptions,
   PreflightCheckResult,
   PreflightGateSummary,
+  scaffoldGherkinSteps,
   syncPdacDigests,
   verifyArtifactDuplicates,
   verifyArtifactsSchemas,
@@ -32,13 +36,38 @@ export interface CheckCommandOptions extends PreflightCheckOptions {
 }
 
 
+function detectDefaultScaffoldLanguage(rootDir: string): GherkinScaffoldLanguage {
+  if (fs.existsSync(path.join(rootDir, 'pyproject.toml')) || fs.existsSync(path.join(rootDir, 'requirements.txt'))) return 'py';
+  if (fs.existsSync(path.join(rootDir, 'go.mod'))) return 'go';
+  if (fs.existsSync(path.join(rootDir, 'Cargo.toml'))) return 'rs';
+  return 'ts';
+}
+
+function autoScaffoldMissingSteps(rootDir: string): number {
+  const sync = checkGherkinInSync({ rootDir });
+  const missing = sync.missingStepFiles ?? [];
+  if (missing.length === 0) return 0;
+  const lang = detectDefaultScaffoldLanguage(rootDir);
+  let count = 0;
+  for (const fp of missing) {
+    if (scaffoldGherkinSteps({ rootDir, featurePath: fp, lang, allowFallback: true }).success) {
+      count++;
+    }
+  }
+  return count;
+}
+
 export function runAutoFix(rootDir: string, silent?: boolean): { gherkinCount: number; digestsCount: number } {
   const gherkinRes = extractGherkinFeatures({ rootDir });
+  const scaffoldedCount = autoScaffoldMissingSteps(rootDir);
   const pdacRes = syncPdacDigests({ rootDir });
 
   if (!silent) {
     if (gherkinRes.features.length > 0) {
       console.log(`  ${pc.cyan('🔧 [AUTO-FIX]')} Synchronized ${pc.bold(String(gherkinRes.features.length))} .feature files (${gherkinRes.totalScenarios} scenarios).`);
+    }
+    if (scaffoldedCount > 0) {
+      console.log(`  ${pc.cyan('🔧 [AUTO-FIX]')} Scaffolded ${pc.bold(String(scaffoldedCount))} deterministic step files in tests/steps/.`);
     }
     if (pdacRes.syncedCount > 0) {
       console.log(`  ${pc.cyan('🔧 [AUTO-FIX]')} Synchronized ${pc.bold(String(pdacRes.syncedCount))} SHA-256 digests across ${pdacRes.updatedFiles.length} files.`);
@@ -48,28 +77,33 @@ export function runAutoFix(rootDir: string, silent?: boolean): { gherkinCount: n
   return { gherkinCount: gherkinRes.features.length, digestsCount: pdacRes.syncedCount };
 }
 
+function buildGherkinFailedGate(totalOut: number, hasMissingSteps: boolean): PreflightGateSummary {
+  const remediation = hasMissingSteps
+    ? "Run 'aisdlc gherkin scaffold <feature-file> --lang <lang> --fallback' to generate step definitions in tests/steps/."
+    : "Run 'aisdlc check --fix' to extract and regenerate .feature files, and remove orphan manual .feature files.";
+  return {
+    name: 'BDD Synchronization (Gherkin -> .feature & steps)',
+    status: 'FAILED',
+    message: `${totalOut} Gherkin sync/step-scaffold violation(s) detected`,
+    remediation,
+  };
+}
+
 export function auditGherkinGate(rootDir: string, wasAutoFixed: boolean): PreflightGateSummary {
   const syncCheck = checkGherkinInSync({ rootDir });
-  if (wasAutoFixed) {
-    return {
-      name: 'BDD Synchronization (Gherkin -> .feature)',
-      status: 'FIXED',
-      message: `${syncCheck.totalFeatures} specifications automatically synchronized`,
-    };
-  }
+  const orphans = syncCheck.orphanFeatureFiles ?? [];
+  const missingSteps = syncCheck.missingStepFiles ?? [];
+
   if (!syncCheck.inSync) {
-    const totalOut = syncCheck.missingFiles.length + syncCheck.outOfSyncFiles.length;
-    return {
-      name: 'BDD Synchronization (Gherkin -> .feature)',
-      status: 'FAILED',
-      message: `${totalOut} out-of-sync or missing .feature file(s)`,
-      remediation: "Run 'aisdlc check --fix' to extract and regenerate .feature files.",
-    };
+    const totalOut = syncCheck.missingFiles.length + syncCheck.outOfSyncFiles.length + orphans.length + missingSteps.length;
+    return buildGherkinFailedGate(totalOut, missingSteps.length > 0);
   }
   return {
-    name: 'BDD Synchronization (Gherkin -> .feature)',
-    status: 'PASSED',
-    message: `${syncCheck.totalFeatures} specifications up to date on disk`,
+    name: 'BDD Synchronization (Gherkin -> .feature & steps)',
+    status: wasAutoFixed ? 'FIXED' : 'PASSED',
+    message: wasAutoFixed
+      ? `${syncCheck.totalFeatures} specifications automatically synchronized`
+      : `${syncCheck.totalFeatures} specifications and step scaffolds up to date on disk`,
   };
 }
 

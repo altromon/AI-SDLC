@@ -79,7 +79,7 @@ AI-SDLC implements a **Privacy-by-Design as Code** layer governed by `privacy-po
 2. **Technical Security & Privacy Feedback Loop**:
    When `agent-system-architect` introduces persistence stores, message queues, analytics, or external LLM integrations, it triggers the feedback loop to `agent-threat-modeler` $\rightarrow$ **`agent-privacy-officer`** to refine technical `SEC-REQ-*` and `PRIV-REQ-*` before `agent-qa-engineer` authors failing tests.
 3. **Pre-Merge Audit Mode**:
-   During Pull Request review, `agent-privacy-officer` executes `aisdlc verify privacy` alongside `agent-code-reviewer`, `agent-security-auditor`, and `agent-compliance-checker`.
+   During Pull Request review, `agent-privacy-officer` executes `aisdlc verify privacy` alongside Checkpoint 2 (`agent-auditor` and `agent-adversary`).
 
 ---
 

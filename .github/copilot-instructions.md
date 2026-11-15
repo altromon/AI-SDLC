@@ -64,7 +64,7 @@ Non-Negotiable Quality Thresholds (`quality-policy.yaml`):
 - **Conditional Activation**:
   * 🟢 **`AUTONOMOUS` Mode** (or PR/CI final supervision): **OMITTED**. Do not interrupt unattended execution.
   * 🟡 **Autonomy $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **MANDATORY**. Emit Workflow Handoff block compliant with [`templates/workflow/agent-handoff.template.md`](../templates/workflow/agent-handoff.template.md) and **STOP**.
-- **Components**: Declare completed deliverables, recommend next roles (`agent-threat-modeler`, `agent-privacy-officer`, `agent-system-architect`, `agent-developer`, `agent-security-auditor`), provide suggested invocation prompt, and **keep the Human Action Window open at all times for the user to take action** (review, edit by hand, pause/reroute, or delegate).
+- **Components**: Declare completed deliverables, recommend next roles (`agent-threat-modeler`, `agent-privacy-officer`, `agent-system-architect`, `agent-developer`, `agent-devops`, `agent-auditor`, `agent-adversary`), provide suggested invocation prompt, and **keep the Human Action Window open at all times for the user to take action** (review, edit by hand, pause/reroute, or delegate).
 
 ---
 
@@ -72,19 +72,16 @@ Non-Negotiable Quality Thresholds (`quality-policy.yaml`):
 
 | Role | Mission (summary) |
 | :--- | :--- |
-| `agent-product-analyst` | Phase 0 NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`, up to 15-question discovery interview defining UI modality & CRUD prerequisites) + ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); `status` starts `draft`. |
+| `agent-product-analyst` | Phase 0 NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`, up to 15-question discovery interview defining UI modality, delivery model & CRUD prerequisites) + ProductShape artifacts (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); `status` starts `draft`. |
 | `agent-threat-modeler` | STRIDE/OWASP threat triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`); hands off to `agent-privacy-officer`. |
 | `agent-privacy-officer` | LINDDUN & GDPR/LOPDGDD privacy triad (`DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*`) + Pre-Merge `verify:privacy`. |
-| `agent-system-architect` | Modular arc42 + NAF v4 architecture (`CMP-*`, Mermaid diagrams, `ADR-*`). |
+| `agent-system-architect` | Modular arc42 + NAF v4 architecture (`CMP-*`, `ARCH-DEP-001`, Mermaid diagrams, `ADR-*`). |
 | `agent-qa-engineer` | FAILING BDD/Gherkin, E2E, and UI suites (using agreed project tech; Happy Path, Sad Path & Boundary Values per interactive UI element) before `agent-developer` writes production code. |
 | `agent-developer` | Atomic tasks from `tasks.md`; autonomy mode must be respected; runs `pnpm run check:fix` + `pnpm run verify:all`. |
-| `agent-security-auditor` | Adversarial PR security audit, SAST, secrets, and CVSS v3.1 evaluation. |
-| `agent-compliance-checker` | SPDX license compliance audit against `license-policy.yaml`. |
 | `agent-expert-user` | Bimodal MVP evaluation (design) and functional validation against `UC-*` and `FR-*` (pre-PR). |
-| `agent-code-reviewer` | PR audit (SOLID, DRY, YAGNI): `[BLOCKING]` / `[CLEAN_CODE_SUGGESTION]` / `[COMPLIANT]`. |
-| `agent-devops` | CI/CD, Docker, IaC only — **FORBIDDEN** to touch `src/` or `packages/*/src/`. |
-| `agent-auditor` | Transversal on-demand constructive auditor; identifies overengineering, blind spots & YAGNI simplifications; returns handoff to audited agent. |
-| `agent-adversary` | Transversal on-demand Red Team adversary; breaks deliverables with reproducible PoC & mutation tests; returns handoff to audited agent. |
+| `agent-devops` | CI/CD, Docker, IaC only — clarifies deployment/CI strategy; **FORBIDDEN** to touch `src/` or `packages/*/src/`. |
+| `agent-auditor` | Transversal auditor: YAGNI, Clean Code/SOLID/AST thresholds, UI standards, SPDX licenses (`verify:licenses`); returns handoff to audited agent. |
+| `agent-adversary` | Transversal Red Team adversary: PoC breaks, mutation testing & Pre-Merge security diff audit (`verify:security`, CVSS v3.1); returns handoff to audited agent. |
 
 ---
 

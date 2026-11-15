@@ -116,7 +116,7 @@ To guarantee continuous compliance with GDPR (EU) 2016/679, LOPDGDD, and ISO/IEC
 
 Traditional static tools (SAST) excel at spotting known syntactic patterns (like a simple SQL injection), but struggle with **business logic vulnerabilities**, **horizontal privilege escalations**, **unlawful secondary data processing**, or nuanced **prompt injection vectors**.
 
-To fill this gap, the pipeline invokes the **Security Auditor Agent (`agent-security-auditor`)** and **Data Protection & Privacy Officer Agent (`agent-privacy-officer`)**:
+To fill this gap, the pipeline invokes the **Red Team Adversary Agent (`agent-adversary`)** and **Data Protection & Privacy Officer Agent (`agent-privacy-officer`)**:
 - **Input**: The Pull Request diff, associated abuse cases (`ABUSE-*`), security requirements (`SEC-REQ-*`), privacy requirements (`PRIV-REQ-*`), data assets (`DATA-ASSET-*`), and technical design (`design.md`).
 - **Analysis**:
   - Is there an execution path where an unauthenticated user can invoke this endpoint?

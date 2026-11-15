@@ -1,5 +1,17 @@
 # @aisdlc/cli
 
+## 4.4.0
+
+### Minor Changes
+
+- feat(agents): consolidate 13 specialist roles into 10 (merging pre-merge code/license audit into `agent-auditor` and security diff audit into `agent-adversary`) and integrate `agent-devops` with 3-tier deployment discovery across lifecycle skills.
+
+## 4.3.2
+
+### Patch Changes
+
+- feat(gherkin): enforce deterministic Gherkin & step scaffold engines across agents and Quality Gates.
+
 ## 4.3.1
 
 ### Patch Changes

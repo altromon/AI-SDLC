@@ -10,7 +10,8 @@ import {
   GherkinExtractionResult,
   GherkinSyncCheckResult,
 } from '../types/index.js';
-import { walkMdFiles } from '../utils/fs.js';
+import { canonicalSort, walkMdFiles } from '../utils/fs.js';
+import { GHERKIN_GENERATOR_SPECS } from './gherkin-scaffold.js';
 
 interface MarkdownFrontmatter {
   id?: string;
@@ -162,47 +163,116 @@ export function extractGherkinFeatures(
   return { success: true, features, totalScenarios };
 }
 
+function walkFeatureFiles(dir: string, fileList: string[] = []): string[] {
+  if (!fs.existsSync(dir)) return fileList;
+  for (const entry of fs.readdirSync(dir).sort(canonicalSort)) {
+    const fullPath = path.join(dir, entry);
+    if (fs.statSync(fullPath).isDirectory()) {
+      walkFeatureFiles(fullPath, fileList);
+    } else if (entry.endsWith('.feature')) {
+      fileList.push(fullPath);
+    }
+  }
+  return fileList;
+}
+
+function hasDeterministicStepFile(rootDir: string, featureFullPath: string): boolean {
+  return Object.values(GHERKIN_GENERATOR_SPECS).some((spec) => {
+    const stepPath = spec.resolveOutputPath(rootDir, featureFullPath);
+    return fs.existsSync(stepPath) && fs.statSync(stepPath).size > 0;
+  });
+}
+
+function findOrphanFeatureFiles(rootDir: string, expectedRelPaths: Set<string>): string[] {
+  const featuresDir = path.join(rootDir, 'tests', 'features');
+  const orphans: string[] = [];
+  for (const fp of walkFeatureFiles(featuresDir)) {
+    const rel = path.relative(rootDir, fp).replace(/\\/g, '/');
+    if (!expectedRelPaths.has(rel)) {
+      orphans.push(rel);
+    }
+  }
+  return orphans;
+}
+
+interface SyncCheckState {
+  outOfSyncFiles: string[];
+  missingFiles: string[];
+  missingStepFiles: string[];
+  expectedRelPaths: Set<string>;
+  totalFeatures: number;
+}
+
+function verifyExistingFeatureFile(
+  rootDir: string,
+  targetPath: string,
+  expectedContent: string,
+  relTarget: string,
+  state: SyncCheckState
+): void {
+  const actualContent = fs.readFileSync(targetPath, 'utf-8');
+  if (actualContent.replace(/\r\n/g, '\n') !== expectedContent.replace(/\r\n/g, '\n')) {
+    state.outOfSyncFiles.push(relTarget);
+  }
+  if (!hasDeterministicStepFile(rootDir, targetPath)) {
+    state.missingStepFiles.push(relTarget);
+  }
+}
+
+function checkSingleMarkdownFeatureSync(rootDir: string, filePath: string, state: SyncCheckState): void {
+  const { frontmatter, body } = parseMarkdownFrontmatter(fs.readFileSync(filePath, 'utf-8'));
+  const gherkinBlocks = extractGherkinBlock(body);
+  if (gherkinBlocks.length === 0) return;
+
+  state.totalFeatures++;
+  const id = frontmatter.id || path.basename(filePath, path.extname(filePath));
+  const targetPath = resolveFeatureFilePath(rootDir, filePath, id, frontmatter['cucumber-feature-file']);
+  const relTarget = path.relative(rootDir, targetPath).replace(/\\/g, '/');
+  state.expectedRelPaths.add(relTarget);
+
+  if (!fs.existsSync(targetPath)) {
+    state.missingFiles.push(relTarget);
+    return;
+  }
+  const expectedContent = buildFeatureFileContent(rootDir, filePath, id, frontmatter.version, gherkinBlocks);
+  verifyExistingFeatureFile(rootDir, targetPath, expectedContent, relTarget, state);
+}
+
 export function checkGherkinInSync(
   options: GherkinExtractionOptions = {}
 ): GherkinSyncCheckResult {
   const rootDir = options.rootDir || process.cwd();
   const targetFiles = resolveTargetFiles(rootDir, options.targetPath);
-  const outOfSyncFiles: string[] = [];
-  const missingFiles: string[] = [];
-  let totalFeatures = 0;
+  const state: SyncCheckState = {
+    outOfSyncFiles: [],
+    missingFiles: [],
+    missingStepFiles: [],
+    expectedRelPaths: new Set<string>(),
+    totalFeatures: 0,
+  };
 
   for (const filePath of targetFiles) {
     try {
-      const content = fs.readFileSync(filePath, 'utf-8');
-      const { frontmatter, body } = parseMarkdownFrontmatter(content);
-      const gherkinBlocks = extractGherkinBlock(body);
-      if (gherkinBlocks.length === 0) continue;
-
-      totalFeatures++;
-      const id = frontmatter.id || path.basename(filePath, path.extname(filePath));
-      const targetPath = resolveFeatureFilePath(rootDir, filePath, id, frontmatter['cucumber-feature-file']);
-      const relTarget = path.relative(rootDir, targetPath).replace(/\\/g, '/');
-
-      if (!fs.existsSync(targetPath)) {
-        missingFiles.push(relTarget);
-        continue;
-      }
-
-      const expectedContent = buildFeatureFileContent(rootDir, filePath, id, frontmatter.version, gherkinBlocks);
-      const actualContent = fs.readFileSync(targetPath, 'utf-8');
-      if (actualContent.replace(/\r\n/g, '\n') !== expectedContent.replace(/\r\n/g, '\n')) {
-        outOfSyncFiles.push(relTarget);
-      }
+      checkSingleMarkdownFeatureSync(rootDir, filePath, state);
     } catch {
       // Ignore unparseable files
     }
   }
 
+  const orphanFeatureFiles = options.targetPath ? [] : findOrphanFeatureFiles(rootDir, state.expectedRelPaths);
+  const inSync =
+    state.missingFiles.length === 0 &&
+    state.outOfSyncFiles.length === 0 &&
+    orphanFeatureFiles.length === 0 &&
+    state.missingStepFiles.length === 0;
+
   return {
-    inSync: missingFiles.length === 0 && outOfSyncFiles.length === 0,
-    outOfSyncFiles,
-    missingFiles,
-    totalFeatures,
+    inSync,
+    outOfSyncFiles: state.outOfSyncFiles,
+    missingFiles: state.missingFiles,
+    orphanFeatureFiles,
+    missingStepFiles: state.missingStepFiles,
+    totalFeatures: state.totalFeatures,
   };
 }
 

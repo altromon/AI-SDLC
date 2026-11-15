@@ -1,0 +1,24 @@
+// AUTO-GENERATED RED BDD STEP DEFINITIONS (tests/features/spec-chg-034-optimize-qa-agent-with-mandatory-e2e-and-ui-testing.feature)
+import { BddStepRegistry } from '@aisdlc/core';
+
+const STEP_SPECS: ReadonlyArray<readonly ['given' | 'when' | 'then', string]> = [
+  ['given', "the system is in a nominal operational state"],
+  ['when', "the operation for \"Optimize QA Agent with Mandatory E2E and UI Testing\" is processed"],
+  ['then', "the operation completes successfully satisfying acceptance criteria"],
+  ['given', "the system is configured with boundary value \"<value>\""],
+  ['then', "the boundary result matches \"<expected>\""],
+  ['given', "an invalid or malformed payload \"<payload>\""],
+  ['when', "the operation for \"Optimize QA Agent with Mandatory E2E and UI Testing\" is attempted"],
+  ['then', "the system rejects the operation with \"<error>\""],
+  ['given', "an unauthenticated actor or invalid credentials"],
+  ['when', "the request reaches protected enclaves"],
+  ['then', "the connection is rejected immediately and a security event is recorded"],
+];
+
+export function registerSteps(registry: BddStepRegistry): void {
+  for (const [method, text] of STEP_SPECS) {
+    registry[method](text, () => {
+      throw new Error(`RED: Step not implemented: ${text}`);
+    });
+  }
+}

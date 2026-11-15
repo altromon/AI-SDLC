@@ -520,6 +520,8 @@ export interface GherkinSyncCheckResult {
   inSync: boolean;
   outOfSyncFiles: string[];
   missingFiles: string[];
+  orphanFeatureFiles?: string[];
+  missingStepFiles?: string[];
   totalFeatures: number;
 }
 

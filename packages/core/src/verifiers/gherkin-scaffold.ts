@@ -141,21 +141,24 @@ function collectUniqueSteps(doc: ParsedFeatureDocument): ParsedStepItem[] {
 }
 
 function renderTsFallback(relFeature: string, steps: ParsedStepItem[]): string {
-  const lines = [
+  const entries = steps.map((st) => `  ['${mapStepKeyword(st.keyword)}', "${escapeDoubleQuotes(st.text)}"],`);
+  return [
     `// AUTO-GENERATED RED BDD STEP DEFINITIONS (${relFeature})`,
     `import { BddStepRegistry } from '@aisdlc/core';`,
     ``,
+    `const STEP_SPECS: ReadonlyArray<readonly ['given' | 'when' | 'then', string]> = [`,
+    ...entries,
+    `];`,
+    ``,
     `export function registerSteps(registry: BddStepRegistry): void {`,
-  ];
-  for (const st of steps) {
-    const method = mapStepKeyword(st.keyword);
-    const escaped = escapeDoubleQuotes(st.text);
-    lines.push(`  registry.${method}("${escaped}", () => {`);
-    lines.push(`    throw new Error("RED: Step not implemented: ${escaped}");`);
-    lines.push(`  });`);
-  }
-  lines.push(`}`, ``);
-  return lines.join('\n');
+    `  for (const [method, text] of STEP_SPECS) {`,
+    `    registry[method](text, () => {`,
+    `      throw new Error(\`RED: Step not implemented: \${text}\`);`,
+    `    });`,
+    `  }`,
+    `}`,
+    ``,
+  ].join('\n');
 }
 
 function renderPyFallback(relFeature: string, steps: ParsedStepItem[]): string {

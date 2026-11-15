@@ -1,5 +1,17 @@
 # @aisdlc/mcp
 
+## 4.4.0
+
+### Minor Changes
+
+- feat(mcp): add `agent-auditor` and `agent-adversary` to `READONLY_ROLES` and bump server version to `4.4.0`.
+
+## 4.3.2
+
+### Patch Changes
+
+- feat(gherkin): enforce deterministic Gherkin & step scaffold engines across agents and Quality Gates.
+
 ## 4.3.1
 
 ### Patch Changes

@@ -1337,19 +1337,24 @@ export async function runVerifySecurityAsync(options: SecurityVerifyCliOptions =
   return handleSecurityOutput(options, resultSecrets, resultSast, isOk, hasExpired);
 }
 
-function emitGherkinVerifyJson(result: ReturnType<typeof checkGherkinInSync>): void {
-  const violations = [
-    ...result.missingFiles.map((f) => ({
-      type: 'MISSING_FEATURE',
+function buildGherkinViolations(result: ReturnType<typeof checkGherkinInSync>) {
+  const orphans = result.orphanFeatureFiles ?? [];
+  const missingSteps = result.missingStepFiles ?? [];
+  return [
+    ...result.missingFiles.map((f) => ({ type: 'MISSING_FEATURE', file: f, message: `Missing .feature file: ${f}` })),
+    ...result.outOfSyncFiles.map((f) => ({ type: 'OUT_OF_SYNC_FEATURE', file: f, message: `Out-of-sync .feature file: ${f}` })),
+    ...orphans.map((f) => ({ type: 'ORPHAN_FEATURE', file: f, message: `Manual/orphan .feature file without Markdown source: ${f}` })),
+    ...missingSteps.map((f) => ({
+      type: 'MISSING_STEP_FILE',
       file: f,
-      message: `Missing .feature file: ${f}`,
-    })),
-    ...result.outOfSyncFiles.map((f) => ({
-      type: 'OUT_OF_SYNC_FEATURE',
-      file: f,
-      message: `Out-of-sync .feature file: ${f}`,
+      message: `Missing deterministic step definition file in tests/steps/ for: ${f}. Run 'aisdlc gherkin scaffold ${f} --lang <lang> --fallback'.`,
     })),
   ];
+}
+
+function emitGherkinVerifyJson(result: ReturnType<typeof checkGherkinInSync>): void {
+  const orphans = result.orphanFeatureFiles ?? [];
+  const missingSteps = result.missingStepFiles ?? [];
   const payload: VerifyJsonPayload = {
     gate: 'gherkin',
     success: result.inSync,
@@ -1358,22 +1363,31 @@ function emitGherkinVerifyJson(result: ReturnType<typeof checkGherkinInSync>): v
       totalFeatures: result.totalFeatures,
       missingCount: result.missingFiles.length,
       outOfSyncCount: result.outOfSyncFiles.length,
+      orphanFeatureCount: orphans.length,
+      missingStepFileCount: missingSteps.length,
     },
-    violations,
+    violations: buildGherkinViolations(result),
   };
   console.log(JSON.stringify(payload, null, 2));
 }
 
+function printGherkinIssueList(items: string[], tag: string, suffix = ''): void {
+  for (const f of items) {
+    const extra = suffix ? suffix.replace('{file}', f) : '';
+    console.log(`    ${pc.red('✖')} [${tag}] ${f}${extra}`);
+  }
+}
+
 function printGherkinVerifyConsole(result: ReturnType<typeof checkGherkinInSync>): void {
-  const totalOut = result.missingFiles.length + result.outOfSyncFiles.length;
+  const orphans = result.orphanFeatureFiles ?? [];
+  const missingSteps = result.missingStepFiles ?? [];
+  const totalOut = result.missingFiles.length + result.outOfSyncFiles.length + orphans.length + missingSteps.length;
   console.log(`  Evaluated features:      ${pc.bold(String(result.totalFeatures))}`);
-  console.log(`  Out-of-sync / missing:   ${totalOut > 0 ? pc.red(String(totalOut)) : pc.green('0')}`);
-  for (const f of result.missingFiles) {
-    console.log(`    ${pc.red('✖')} [MISSING] ${f}`);
-  }
-  for (const f of result.outOfSyncFiles) {
-    console.log(`    ${pc.red('✖')} [OUT_OF_SYNC] ${f}`);
-  }
+  console.log(`  Violations / missing:    ${totalOut > 0 ? pc.red(String(totalOut)) : pc.green('0')}`);
+  printGherkinIssueList(result.missingFiles, 'MISSING');
+  printGherkinIssueList(result.outOfSyncFiles, 'OUT_OF_SYNC');
+  printGherkinIssueList(orphans, 'ORPHAN_FEATURE');
+  printGherkinIssueList(missingSteps, 'MISSING_STEP_FILE', ' (run: aisdlc gherkin scaffold {file} --lang <lang> --fallback)');
   console.log(result.inSync ? pc.green('\n✔ BDD Synchronization COMPLIANT\n') : pc.red('\n✖ BDD Synchronization BLOCKED\n'));
 }
 
