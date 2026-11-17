@@ -304,17 +304,19 @@ const PROTECTED_CODING_RULES_FILES = [
 ];
 
 const PROTECTED_BYPASS_PATTERNS = [
-  /^schemas\\//,
-  /^examples\\/security\\//,
-  /^specs\\/security\\//,
-  /enclaves?\\//,
+  /^schemas\\//i,
+  /^examples\\/security\\//i,
+  /^specs\\/security\\//i,
+  /^specs\\/privacy\\//i,
+  /^packages\\/security\\//i,
+  /enclaves?\\//i,
   /SEC-ENC-/,
-  /quality-policy\\.ya?ml$/,
-  /license-policy\\.ya?ml$/,
-  /privacy-policy\\.ya?ml$/,
-  /08_security_concept\\.md$/,
-  /09_decisions\\//,
-  /migrations?\\//,
+  /quality-policy\\.ya?ml$/i,
+  /license-policy\\.ya?ml$/i,
+  /privacy-policy\\.ya?ml$/i,
+  /08_security_concept\\.md$/i,
+  /09_decisions\\//i,
+  /migrations?\\//i,
   /^\\.github\\/CODEOWNERS$/,
 ];
 
@@ -383,16 +385,18 @@ function extractBranchChangePrefix(branch) {
   return match ? match[1].toLowerCase() : '';
 }
 
+function matchesBranchPrefix(dirName, branchPrefix) {
+  if (!branchPrefix) return true;
+  const lower = dirName.toLowerCase();
+  return lower === branchPrefix || lower.startsWith(branchPrefix + '-');
+}
+
 function listActiveChangeDirs(activeRoot, branchPrefix) {
   if (!fs.existsSync(activeRoot)) return [];
   try {
     return fs
       .readdirSync(activeRoot, { withFileTypes: true })
-      .filter(
-        (entry) =>
-          entry.isDirectory() &&
-          (!branchPrefix || entry.name.toLowerCase().startsWith(branchPrefix))
-      )
+      .filter((entry) => entry.isDirectory() && matchesBranchPrefix(entry.name, branchPrefix))
       .map((entry) => path.join(activeRoot, entry.name));
   } catch {
     return [];

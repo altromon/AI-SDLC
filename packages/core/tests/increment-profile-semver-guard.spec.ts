@@ -241,6 +241,9 @@ describe('CHG-061: Deterministic SDD Increment Guard in scripts/guard-branch.cjs
     for (const protectedPath of [
       'schemas/sdd/spec.schema.json',
       'specs/security/SEC-REQ-001.md',
+      'specs/privacy/PRIV-REQ-001.md',
+      'packages/security/src/enclave.ts',
+      'src/migrations/001_init.sql',
       'quality-policy.yaml',
     ]) {
       const res = runGuardHook(tempWorkspace, protectedPath);
