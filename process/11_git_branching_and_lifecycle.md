@@ -63,18 +63,19 @@ To govern collaborative development between humans and AI agents with maximum st
 
 ## 3. Branch and Merge Flow Diagrams
 
-### Streamlined Flow (Default — 1 Feature PR with SemVer Bump)
+### Streamlined Flow (Default — Early Draft PR + 1 Feature PR with SemVer Bump)
 ```mermaid
 gitGraph
     commit id: "v1.0.0 (main)"
     branch feat/CHG-001-telemetry
     checkout feat/CHG-001-telemetry
-    commit id: "spec & design [Checkpoint 1 OK]"
-    commit id: "test(TSK-001): Red BDD/E2E"
-    commit id: "feat(TSK-001): Green impl"
-    commit id: "test(TSK-002): Red adapter"
-    commit id: "feat(TSK-002): Green adapter"
-    commit id: "verify all + Checkpoint 2 OK"
+    commit id: "spec & scaffolding [Open Draft PR]"
+    commit id: "design & tasks [Checkpoint 1 OK]"
+    commit id: "test(TSK-001): Red BDD/E2E [push]"
+    commit id: "feat(TSK-001): Green impl [push]"
+    commit id: "test(TSK-002): Red adapter [push]"
+    commit id: "feat(TSK-002): Green adapter [push]"
+    commit id: "verify all + Checkpoint 2 OK [PR Ready]"
     checkout main
     merge feat/CHG-001-telemetry id: "PR: CHG-001 (12 Gates Green)"
     commit id: "Tag v1.1.0"
@@ -114,15 +115,17 @@ gitGraph
 
 ## 5. Guardrails and Rules for AI Agents
 
-1. **Strict Branch Isolation**:
+1. **Strict Branch Isolation (Branch-Before-Change)**:
    - Direct commits to `main`, `master`, and `release/*` are strictly forbidden for AI agents across all IDEs and tools.
-   - Agents operate directly on `feat/<CHG-ID>-*` / `fix/<CHG-ID>-*` working branches.
+   - Agents MUST create or switch to the working branch (`feat/<CHG-ID>-*` / `fix/<CHG-ID>-*` / `chore/*`) at the start of any skill **before** modifying or creating any files (including specs).
    - Task-level branches (`task/*`) are utilized only when concurrent `--parallel` subagent execution is explicitly configured.
 2. **Commit Trailer & Scope Discipline**:
    - Every commit produced by an agent must include the `Task-ID: TSK-YYY` trailer (or declare it in the commit subject `feat(TSK-YYY): ...`).
    - The git hook `prepare-commit-msg` automatically parses the task ID and injects author metadata and token telemetry.
-3. **Mandatory Checkpoint Completion**:
-   - An agent cannot open or present a PR until Checkpoint 1 (Design), TDD Red-Green implementation, and Checkpoint 2 (Pre-PR Quality & Mutation) are completed.
+3. **Early Draft PR & Mandatory Ready-for-Review Gate**:
+   - **Draft PR from Spec/Scaffolding**: After the initial specification/scaffolding commit on the working branch, the agent should push (`git push -u origin <branch>`) and open a **Draft PR** (`gh pr create --draft`, with graceful fallback when no remote or CLI auth exists). Subsequent phase commits (Checkpoint 1 design, Step 4 Red tests, Step 5 Green implementation, Checkpoint 2 fixes) are pushed incrementally to this Draft PR for live auditability and Checkpoint 1 human review.
+   - **Ready for Review Gate (`gh pr ready`)**: An agent MUST NOT mark a PR as Ready for Review (`gh pr ready`) or present it for merge until Checkpoint 1 (Design), TDD Red-Green implementation, Checkpoint 2 (Pre-PR Quality & Mutation), and all 12 Quality Gates are completed and green.
+   - **CI Draft Guard**: CI workflows skip heavy verification/test jobs while a PR is in `draft` state (`github.event.pull_request.draft == false` with `ready_for_review` trigger) so intentional TDD Red commits do not trigger false CI failures or waste runner minutes.
 
 ---
 

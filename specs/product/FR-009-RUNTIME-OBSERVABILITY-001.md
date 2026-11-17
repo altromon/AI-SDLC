@@ -24,7 +24,9 @@ El sistema DEBE proveer capacidades unificadas de observabilidad en tiempo de ej
 1. **Logs Estructurados**: Emisión de eventos en formato JSON con campos obligatorios (`timestamp` ISO 8601, `level`, `service`, `trace_id`, `span_id`, `message`, `context`) y niveles de granularidad configurables (`DEBUG`, `INFO`, `WARN`, `ERROR`, `SILENT`) controlados por la variable de entorno `LOG_LEVEL`.
 2. **Trazas Distribuidas**: Captura y propagación del contexto de trazas conforme al estándar OpenTelemetry y cabeceras W3C Trace Context (`traceparent`).
 3. **Métricas Operativas**: Registro de métricas RED (Rate, Errors, Duration) expuestas en formato texto OpenMetrics/Prometheus para su ingesta por Prometheus y visualización en paneles de Grafana.
-4. **Protección de Datos Personales**: Enmascaramiento determinista de datos catalogados como PII en cumplimiento con `privacy-policy.yaml`.
+4. **Protección de Datos Personales**: Enmascaramiento determinista de datos catalogados como PII en cumplimiento con `privacy-policy.yaml` antes de emitir o persistir cualquier evento.
+5. **Persistencia Local y Vaciado Seguro (Shutdown Flush)**: Almacenamiento persistente en disco (`OBS_STORAGE_PATH`, por defecto `.observability/`) para logs (`.jsonl`), trazas (`.otlp.jsonl`) y snapshots de métricas (`.prom`/`.jsonl` o SQLite), garantizando el vaciado (`flush()`) al finalizar el proceso (`beforeExit`/`SIGTERM`).
+6. **Exportación Offline y Visualización Diferida Opcional**: Capacidad de consultar y exportar telemetría histórica por ventana temporal (JSONL, CSV, OpenMetrics, OTLP) y soporte para stack opcional Prometheus + Grafana (`docker-compose.observability.yml`) para visualización en directo o post-mortem.
 
 ---
 
@@ -60,6 +62,19 @@ Feature: Generación de Logs Estructurados, Trazas y Métricas de Ejecución
     When se invoca el exportador de métricas para scraping
     Then la salida cumple con la especificación de formato texto de Prometheus
     And incluye contadores de peticiones y duraciones de latencia
+
+  @persistence
+  Scenario: Persistencia local de logs, trazas y métricas tras finalizar la ejecución
+    Given el almacenamiento persistente está configurado en ".observability"
+    When el proceso registra eventos, cierra un span y finaliza su ejecución
+    Then los ficheros persistentes contienen los logs JSONL, spans OTLP y snapshots de métricas
+    And los datos sobreviven al cierre del proceso sin colector en directo
+
+  @export
+  Scenario: Exportación en diferido de telemetría histórica filtrada
+    Given existen registros de telemetría persistidos en almacenamiento local
+    When se invoca ITelemetryExporter con un rango temporal y formato "jsonl" o "openmetrics"
+    Then se genera el artefacto exportado listo para su análisis o ingesta en Prometheus y Grafana
 ```
 
 ---

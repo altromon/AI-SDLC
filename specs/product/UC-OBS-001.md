@@ -18,18 +18,19 @@ superseded-by: null
 # UC-OBS-001: Observabilidad Runtime con Logs Estructurados, Trazas y Métricas
 
 ## 1. Intención y Resultado
-Permitir a los operadores, ingenieros y sistemas de monitorización capturar la telemetría operativa de componentes y servicios en ejecución mediante logs estructurados en formato JSON con niveles de granularidad configurables, captura de trazas distribuidas correlacionadas y métricas operativas compatibles con Prometheus y paneles de Grafana.
+Permitir a los operadores, ingenieros y sistemas de monitorización capturar, persistir localmente, exportar en diferido y visualizar la telemetría operativa de componentes y servicios en ejecución mediante logs estructurados en formato JSON con niveles de granularidad configurables, captura de trazas distribuidas correlacionadas y métricas operativas compatibles con Prometheus y paneles opcionales de Grafana.
 
 ## 2. Precondiciones
 - El componente o servicio de ejecución se encuentra inicializado en su entorno operativo.
-- Las variables de entorno de configuración (`LOG_LEVEL`, `OTEL_EXPORTER_*`) están configuradas o adoptan valores deterministas por defecto.
+- Las variables de entorno de configuración (`LOG_LEVEL`, `OBS_STORAGE_PATH`, `OTEL_EXPORTER_*`) están configuradas o adoptan valores deterministas por defecto (`.observability/`).
 
 ## 3. Flujo Principal
 1. El componente o agente emite registros de ejecución utilizando el cliente estructurado.
 2. El sistema aplica el filtro de nivel de severidad configurado (`DEBUG`, `INFO`, `WARN`, `ERROR`).
 3. El registro se enriquece automáticamente con los identificadores de contexto distribuido (`trace_id`, `span_id`).
 4. Las métricas de tasa, errores y duración (RED) se agregan en el registro de métricas.
-5. Los sistemas estándar de observabilidad (Prometheus, Loki, Grafana) recolectan los datos vía endpoint `/metrics` y salida JSON.
+5. Los adaptadores persistentes vuelcan de forma asíncrona (y garantizan `flush()` al cierre del proceso) los logs, trazas OTLP y snapshots de métricas en el almacenamiento local (`OBS_STORAGE_PATH`).
+6. Los operadores pueden exportar los datos históricos en diferido (JSONL, CSV, OpenMetrics, OTLP/Jaeger JSON) o levantar el stack opcional de Prometheus y Grafana (`docker-compose.observability.yml`) para visualizarlos sin necesidad de captura en directo.
 
 ## 4. Criterios de Aceptación en Formato Gherkin (Cucumber)
 

@@ -43,3 +43,6 @@ thresholds:
     min_acceptable_score: 50.0
   function_length:
     max_function_lines: 40
+  test_enforcement:
+    require_function_unit_tests: false
+    require_ui_component_tests: true

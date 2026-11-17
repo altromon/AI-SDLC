@@ -572,8 +572,8 @@ Once change implementation finishes and all tasks in `tasks.md` are `COMPLETED`:
 
 1. **Unattended CI/CD Automation (Recommended)**:
    - Upon merging the Pull Request into `main` or release branches (`release/*`), GitHub Actions workflow [`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml) triggers automatically.
-   - Detects the active change, executes canonical integration safely, and commits/pushes with `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
-   - **Developer workflow**: Simply run `git pull` locally to receive the updated baseline.
+   - Detects the active change, executes canonical integration safely, refreshes `reports/QUALITY_REPORT.md` and `reports/dashboard.html`, and commits/pushes with `chore(sdd): integrate changes into canonical baseline [skip ci]`.
+   - **Developer workflow**: Compute reports locally during PR review without committing global `reports/*` on `feat/CHG-*` branches (to avoid parallel-PR merge conflicts); once merged, run `git pull` locally to receive the updated baseline and consolidated reports.
 
 2. **Local / Manual Execution (Simplified Command)**:
    ```bash
@@ -772,6 +772,8 @@ npx aisdlc report dashboard --open
 npx aisdlc report dashboard --output docs/dashboard.html --title "SentinelCore Mission Control"
 ```
 
+> **Multi-PR Workflow**: Skills generate `reports/QUALITY_REPORT.md` and `reports/dashboard.html` locally at the end of an increment for inspection, without committing global `reports/*` files on `feat/CHG-*` PR branches. Post-merge automation (`.github/workflows/sdd-integrate-on-merge.yml`) consolidates and commits the updated reports on `main` / `release/*`.
+
 ---
 
 ## 🔌 Native Model Context Protocol (MCP) Server: Full Control from your IDE
@@ -900,6 +902,15 @@ Beyond linear phase progression, the framework introduces two **on-demand transv
 - **`agent-auditor` (Constructive Critic)**: Polymorphically inspects deliverables to identify premature abstractions, overengineering, or structural debt, suggesting minimal, standard YAGNI improvements.
 - **`agent-adversary` (Destructive Red Team)**: Actively attempts to break or invalidate deliverables, delivering concrete proofs-of-concept (PoC) such as logic traps in product rules, race conditions in architecture diagrams, mutant code that bypasses QA tests, or boundary payloads that crash implementation code.
 - **Mandatory Return Handoff & Anti-Ping-Pong Protocol**: Both agents operate under strict non-invasion rules (they inspect without altering files directly) and emit their canonical Workflow Handoff back to the **audited specialist agent** to resolve findings. To eliminate infinite review cycles, the loop is limited to **maximum 1 return round** per increment before escalation.
+
+### 6. Persistent Runtime Observability & Optional Prometheus/Grafana Stack
+Every software system generated under AI-SDLC instantiates `CMP-OBSERVABILITY` (`FR-009-RUNTIME-OBSERVABILITY-001`) with **local persistence by default** (not ephemeral `stdout`/RAM):
+- **Persistent Local Sinks (`OBS_STORAGE_PATH=.observability`)**: Structured JSONL logs, OpenTelemetry W3C traces (`.otlp.jsonl`), and Prometheus/OpenMetrics RED snapshots (`.prom` / `.jsonl`) with PII redaction (`[REDACTED]`) and guaranteed `ITelemetryStore.flush()` on process exit (`beforeExit`/`SIGTERM`).
+- **Offline Export (`ITelemetryExporter`)**: Query and export historical telemetry by time range or `trace_id` in `jsonl`, `csv`, `openmetrics`, or `otlp` format without requiring a live collector.
+- **Optional Prometheus & Grafana Stack**: [`templates/ci/docker-compose.observability.yml`](templates/ci/docker-compose.observability.yml) provides Prometheus (`Apache-2.0`) and an isolated optional Grafana container (zero application code coupling per `license-policy.yaml`) mounting `.observability/` for both live scraping and deferred post-mortem visualization:
+  ```bash
+  docker compose -f templates/ci/docker-compose.observability.yml up -d
+  ```
 
 ### Native Integration by AI Environment
 

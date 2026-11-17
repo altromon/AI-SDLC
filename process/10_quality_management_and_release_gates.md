@@ -433,6 +433,9 @@ npx aisdlc report dashboard --open
 npx aisdlc report dashboard --output dist/governance.html --title "SentinelCore Enterprise SDLC"
 ```
 
+> [!IMPORTANT]
+> **Multi-PR Report Hygiene**: Lifecycle skills (`aisdlc-increment`, `aisdlc-greenfield`, `aisdlc-legacy-onboarding`) run `report quality` and `report dashboard` locally at the end of their workflow for immediate review, **without committing global `reports/*` files on feature PR branches (`feat/CHG-*`)**. Canonical `reports/` artifacts are regenerated and committed post-merge on `main` / `release/*` by `.github/workflows/sdd-integrate-on-merge.yml` (or during release consolidation) to prevent merge conflicts across parallel PRs.
+
 ### Key Dashboard Features:
 1. **Network Visualizer with Cytoscape.js (MIT)**:
    - Geometric and color-coded semantic layers: Product Upstream (including root `Vision / Goals` `ARCH-INTRO-*` with `identifies`, `envisions`, and `defines-goal` semantic edges, `JRN-*`, `ACT-*`, `UC-*`, `BR-*`), Requirements (`FR-*`, `QR-*`, `SEC-REQ-*`), Architecture Midstream (`CMP-*`, `ADR-*`, `SEC-ENC-*`), and Testing Downstream (`.feature`).

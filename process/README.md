@@ -16,3 +16,4 @@ This directory hosts the deterministic governance, verification gates, and lifec
   - Privacy & Data Protection: `npx aisdlc verify privacy`
   - Schemas: `npx aisdlc verify schemas`
   - Release Gates: `npx aisdlc check` / `npx aisdlc verify all`
+- **Runtime Observability (`CMP-OBSERVABILITY`)**: Persistent local telemetry under `OBS_STORAGE_PATH` (`.observability/` JSONL logs, OTLP traces, OpenMetrics snapshots), shutdown `flush()`, offline `ITelemetryExporter`, and optional Prometheus + Grafana stack (`templates/ci/docker-compose.observability.yml`).

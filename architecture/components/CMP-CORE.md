@@ -1,8 +1,8 @@
 ---
 id: CMP-CORE
 type: component
-version: "1.0.0"
-schema-version: "1.0"
+version: 1.0.0
+schema-version: '1.0'
 title: Motor Central AI-SDLC (@ai-sdlc/core)
 status: accepted
 level: 1
@@ -27,6 +27,7 @@ implements-use-cases:
   - UC-042-BOUNDED-CONTEXTS-AND-DOCS
   - UC-043-SARIF-SECURITY-REPORTING
   - UC-047-MCP-SERVER-HARDENING-DLP
+  - UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
 satisfies-requirements:
   - FR-025-STRUCTURED-JSON-VERIFY-001
   - FR-026-AGENT-NATIVE-CONFIGS-001
@@ -51,6 +52,7 @@ satisfies-requirements:
   - FR-050-IDE-AGENT-TOOLS-MCP-001
   - FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001
   - FR-050-IDE-AGENT-TOOLS-MCP-001
+  - FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001
   - SEC-REQ-DETERMINISTIC-VERIFY
 interfaces:
   - name: TypeScript API Engine
@@ -58,6 +60,7 @@ interfaces:
 supersedes: null
 superseded-by: null
 ---
+
 
 # CMP-CORE: Motor Central AI-SDLC
 
@@ -73,3 +76,10 @@ graph TD
     CORE --> Verifiers[Verificadores: Schemas, Traceability, Quality, Governance, Licenses]
     CORE --> Adapters[Adaptadores SDD: OpenSpec, SpecKit]
 ```
+
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-17 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-061-increment-profile-and-semver-guard | chg-061-increment-profile-and-semver-guard |

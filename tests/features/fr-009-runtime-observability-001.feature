@@ -35,3 +35,16 @@ Feature: Generación de Logs Estructurados, Trazas y Métricas de Ejecución
     When se invoca el exportador de métricas para scraping
     Then la salida cumple con la especificación de formato texto de Prometheus
     And incluye contadores de peticiones y duraciones de latencia
+
+  @persistence
+  Scenario: Persistencia local de logs, trazas y métricas tras finalizar la ejecución
+    Given el almacenamiento persistente está configurado en ".observability"
+    When el proceso registra eventos, cierra un span y finaliza su ejecución
+    Then los ficheros persistentes contienen los logs JSONL, spans OTLP y snapshots de métricas
+    And los datos sobreviven al cierre del proceso sin colector en directo
+
+  @export
+  Scenario: Exportación en diferido de telemetría histórica filtrada
+    Given existen registros de telemetría persistidos en almacenamiento local
+    When se invoca ITelemetryExporter con un rango temporal y formato "jsonl" o "openmetrics"
+    Then se genera el artefacto exportado listo para su análisis o ingesta en Prometheus y Grafana

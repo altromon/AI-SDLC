@@ -74,7 +74,8 @@ Models internal system structure through a **single universal component schema (
 
 #### Mandatory Observability Building Block (`CMP-OBSERVABILITY`):
 - Every software system modeled under AI-SDLC MUST instantiate an explicit building block `CMP-OBSERVABILITY` (Level 2 or 3, `implementation-type: dll` or `service`).
-- This component encapsulates the runtime telemetry subsystem, exposing typed contracts for structured logging (`ILogger`), distributed tracing (`ITracer` via OpenTelemetry / W3C Trace Context), and operational metrics (`IMetricsRegistry` via Prometheus RED metrics).
+- This component encapsulates the runtime telemetry subsystem, exposing typed contracts for structured logging (`ILogger`), distributed tracing (`ITracer` via OpenTelemetry / W3C Trace Context), operational metrics (`IMetricsRegistry` via Prometheus RED metrics), persistent local storage (`ITelemetryStore` under `OBS_STORAGE_PATH` with guaranteed shutdown `flush()`), and offline export (`ITelemetryExporter` for JSONL, CSV, OpenMetrics, and OTLP).
+- Optional visualization and post-mortem analysis can be enabled via `templates/ci/docker-compose.observability.yml` (Prometheus `Apache-2.0` + isolated optional Grafana container mounting `.observability/`).
 - All functional and operational components depend on `CMP-OBSERVABILITY` unidirectionally, isolating third-party telemetry SDKs from domain business logic and satisfying `QR-OBS-*`.
 
 ### Section 6: Runtime View (NAF Sequences & Behaviour)

@@ -138,7 +138,8 @@ AI-SDLC structures its `specs/` directory connecting to established Spec-Driven 
      - To avoid misalignment from human omission prior to merge, the framework shifts canonical integration responsibility to the CI/CD pipeline following Pull Request merge into `main` or release branches (`release/*`).
      - **Automatic Detection Engine**: Deterministically identifies the active change analyzing hierarchically: PR source branch (`headRef`), PR title and body (`CHG-*`), modified files under `specs/changes/active/`, or the existence of a single active change with completed tasks.
      - **Git Security and Traceability**: Runs via GitHub Actions under least privilege permissions (`contents: write`). The bot (`github-actions[bot]`) makes an automated commit and push using conventional commits format `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
-     - **Developer Experience**: Engineers and agents do not need to manually run `sdd integrate` before opening a PR; once merged, running `git pull` locally synchronizes the updated canonical catalog.
+     - **Post-Merge Report & Dashboard Refresh**: After `sdd integrate --auto`, `.github/workflows/sdd-integrate-on-merge.yml` regenerates `reports/QUALITY_REPORT.md` (`aisdlc report quality`) and `reports/dashboard.html` (`aisdlc report dashboard`) on the target branch. Feature PR branches (`feat/CHG-*`) should compute reports locally for review **without committing global `reports/*` files**, avoiding merge conflicts across parallel PRs.
+     - **Developer Experience**: Engineers and agents do not need to manually run `sdd integrate` before opening a PR; once merged, running `git pull` locally synchronizes the updated canonical catalog and consolidated reports.
 
 4. **Operational CLI Commands**:
    - `npx aisdlc check [--fix] [--json]`: Executes the consolidated pre-flight suite across all Quality Gates with optional non-destructive auto-fix.

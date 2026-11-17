@@ -118,8 +118,14 @@ function buildQualityViolations(result: ReturnType<typeof verifyQualityGate>) {
     metric: 'unit-test',
     message: `Function [${u.functionName}] lacks direct unit test`,
   }));
+  const untestedUi = (result.untestedUiComponents || []).map((c) => ({
+    file: c.file,
+    component: c.componentName,
+    metric: 'ui-test',
+    message: `UI component [${c.componentName}] lacks UI/E2E test`,
+  }));
   const cov = (result.coverageViolations || []).map((message) => ({ metric: 'coverage', message }));
-  return [...fnViolations, ...untested, ...cov];
+  return [...fnViolations, ...untested, ...untestedUi, ...cov];
 }
 
 function emitQualityJson(result: ReturnType<typeof verifyQualityGate>): void {
@@ -134,6 +140,7 @@ function emitQualityJson(result: ReturnType<typeof verifyQualityGate>): void {
       passCount: result.passCount,
       failCount: result.failCount,
       untestedFunctionsCount: result.untestedFunctions?.length || 0,
+      untestedUiComponentsCount: result.untestedUiComponents?.length || 0,
       coverageViolationsCount: result.coverageViolations?.length || 0,
       baselineViolationsCount: result.baselineViolationsCount || 0,
       toleratedViolationsCount: result.toleratedViolationsCount || 0,
@@ -164,6 +171,13 @@ function printQualityTestAndCoverageGaps(result: ReturnType<typeof verifyQuality
     console.log(pc.red('\n  Functions lacking unit tests:'));
     for (const u of untested.slice(0, 15)) {
       console.log(`    ${pc.red('✖')} ${pc.bold(u.file)} [${u.functionName}]`);
+    }
+  }
+  const untestedUi = result.untestedUiComponents || [];
+  if (untestedUi.length > 0) {
+    console.log(pc.red('\n  UI components lacking UI/E2E tests:'));
+    for (const c of untestedUi.slice(0, 15)) {
+      console.log(`    ${pc.red('✖')} ${pc.bold(c.file)} [${c.componentName}]`);
     }
   }
   for (const cv of result.coverageViolations || []) {
