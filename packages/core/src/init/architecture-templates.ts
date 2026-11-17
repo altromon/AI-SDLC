@@ -258,10 +258,11 @@ Specifies exchange schemas and canonical interfaces:
 
 ---
 
-## 3. Observability, Metrics, and Immutable Auditing
-- **Distributed Tracing**: W3C Trace Context (\`traceparent\`) injection via OpenTelemetry.
-- **Operational Metrics**: Prometheus RED metrics exposition (Rate, Errors, Duration).
-- **Structured Logging**: Deterministic JSON format with mandatory fields (\`timestamp\`, \`level\`, \`trace_id\`, \`component_id\`).
+## 3. Observability, Persistent Telemetry, and Immutable Auditing
+- **Distributed Tracing**: W3C Trace Context (\`traceparent\`) injection via OpenTelemetry with persistent span export (\`.observability/traces/traces.otlp.jsonl\`).
+- **Operational Metrics**: Prometheus RED metrics exposition (Rate, Errors, Duration) with periodic local snapshots (\`.observability/metrics/metrics.prom\`) for offline backfill and optional Grafana dashboards.
+- **Structured Logging**: Deterministic JSONL format with mandatory fields (\`timestamp\`, \`level\`, \`trace_id\`, \`component_id\`), PII redaction, and rolling local persistence (\`OBS_STORAGE_PATH\`).
+- **Offline Export & Shutdown Flush**: Guaranteed \`ITelemetryStore.flush()\` on process exit and \`ITelemetryExporter\` supporting JSONL, CSV, OpenMetrics, and OTLP exports without requiring a live collector.
 
 ---
 

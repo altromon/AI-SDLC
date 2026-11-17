@@ -903,6 +903,15 @@ Beyond linear phase progression, the framework introduces two **on-demand transv
 - **`agent-adversary` (Destructive Red Team)**: Actively attempts to break or invalidate deliverables, delivering concrete proofs-of-concept (PoC) such as logic traps in product rules, race conditions in architecture diagrams, mutant code that bypasses QA tests, or boundary payloads that crash implementation code.
 - **Mandatory Return Handoff & Anti-Ping-Pong Protocol**: Both agents operate under strict non-invasion rules (they inspect without altering files directly) and emit their canonical Workflow Handoff back to the **audited specialist agent** to resolve findings. To eliminate infinite review cycles, the loop is limited to **maximum 1 return round** per increment before escalation.
 
+### 6. Persistent Runtime Observability & Optional Prometheus/Grafana Stack
+Every software system generated under AI-SDLC instantiates `CMP-OBSERVABILITY` (`FR-009-RUNTIME-OBSERVABILITY-001`) with **local persistence by default** (not ephemeral `stdout`/RAM):
+- **Persistent Local Sinks (`OBS_STORAGE_PATH=.observability`)**: Structured JSONL logs, OpenTelemetry W3C traces (`.otlp.jsonl`), and Prometheus/OpenMetrics RED snapshots (`.prom` / `.jsonl`) with PII redaction (`[REDACTED]`) and guaranteed `ITelemetryStore.flush()` on process exit (`beforeExit`/`SIGTERM`).
+- **Offline Export (`ITelemetryExporter`)**: Query and export historical telemetry by time range or `trace_id` in `jsonl`, `csv`, `openmetrics`, or `otlp` format without requiring a live collector.
+- **Optional Prometheus & Grafana Stack**: [`templates/ci/docker-compose.observability.yml`](templates/ci/docker-compose.observability.yml) provides Prometheus (`Apache-2.0`) and an isolated optional Grafana container (zero application code coupling per `license-policy.yaml`) mounting `.observability/` for both live scraping and deferred post-mortem visualization:
+  ```bash
+  docker compose -f templates/ci/docker-compose.observability.yml up -d
+  ```
+
 ### Native Integration by AI Environment
 
 Standard configuration files are ready for automated loading:

@@ -89,7 +89,42 @@ export interface IMetricsRegistry {
   setGauge(name: string, value: number, labels?: Record<string, string>): void;
   exportPrometheusFormat(): string;
 }
+
+export type TelemetrySignal = 'logs' | 'traces' | 'metrics';
+export type TelemetryExportFormat = 'jsonl' | 'csv' | 'openmetrics' | 'otlp';
+
+export interface TelemetryQueryOptions {
+  signal: TelemetrySignal;
+  fromIso?: string;
+  toIso?: string;
+  traceId?: string;
+  level?: LogLevel;
+}
+
+/**
+ * Puerto de almacenamiento y vaciado persistente en disco (OBS_STORAGE_PATH)
+ */
+export interface ITelemetryStore {
+  flush(): Promise<void>;
+  close(): Promise<void>;
+}
+
+/**
+ * Puerto de consulta y exportación offline para análisis diferido o ingesta en Prometheus/Grafana
+ */
+export interface ITelemetryExporter {
+  export(options: TelemetryQueryOptions, format: TelemetryExportFormat): Promise<string>;
+}
 ```
+
+### 2.2 Persistencia Local y Stack Opcional Prometheus + Grafana
+- **Almacenamiento Local por Defecto (`OBS_STORAGE_PATH=.observability`)**:
+  - Logs rotativos en `.observability/logs/app-YYYY-MM-DD.jsonl`.
+  - Trazas OpenTelemetry en `.observability/traces/traces.otlp.jsonl`.
+  - Snapshots periódicos de métricas en `.observability/metrics/metrics.prom` y `.observability/metrics/metrics.jsonl`.
+  - Hook de cierre seguro (`beforeExit` / `SIGTERM` / `SIGINT`) que invoca `ITelemetryStore.flush()` para no perder telemetría en CLIs o procesos efímeros.
+- **Stack Opcional (`docker-compose.observability.yml`)**:
+  - Prometheus (`Apache-2.0`) y Grafana (aislado como contenedor opcional de visualización sin acoplamiento en dependencias de código) montando `.observability/` para inspección tanto en directo como en diferido.
 
 ---
 
