@@ -35,7 +35,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/increment-profile-semver-guard.spec.ts packages/core/tests/init.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     blocked-by:
       - TSK-061-001
     implements-components:
