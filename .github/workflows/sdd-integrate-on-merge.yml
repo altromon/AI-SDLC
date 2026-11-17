@@ -63,6 +63,11 @@ jobs:
         run: |
           node packages/cli/bin/aisdlc.js sdd integrate --auto || true
 
+      - name: Refresh Canonical Reports and Interactive Dashboard
+        run: |
+          node packages/cli/bin/aisdlc.js report quality || true
+          node packages/cli/bin/aisdlc.js report dashboard || true
+
       - name: Commit and Push Canonical Baseline Changes
         run: |
           git config user.name "github-actions[bot]"

@@ -42,6 +42,7 @@ Instead of attempting to document 100% of a legacy monolith upfront, apply **bou
 ### Step 4: Characterization Testing & Synchronization
 1. Run MCP tool `sdd_check_fix` (`npx aisdlc check --fix`) to extract `.feature` files and compute canonical SHA-256 digests.
 2. Run `verify_schemas` and `verify_pdac` to confirm the reverse-engineered baseline graph is structurally valid and drift-free.
+3. Run `report_quality` (`npx aisdlc report quality`) and `report_dashboard` (`npx aisdlc report dashboard`) to generate the local baseline quality report and interactive dashboard for inspection (commit global `reports/` only on the onboarding baseline or post-merge on `main`, never on parallel feature PRs).
 
 ### Step 5: Transition to Governed SDD Increments (Boy Scout / Strangler Rule)
 Once the target domain's baseline artifacts (`ARCH-INTRO-*`, `UC-*`, `FR-*`, `CMP-*`) are in place, execute all new features, refactorings, or bugfixes via [`aisdlc-increment`](../aisdlc-increment/SKILL.md).
