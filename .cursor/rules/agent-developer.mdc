@@ -12,16 +12,17 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
 - **Role**: High-Precision Software Developer / Coder Agent (`agent-developer`).
 - **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) delivering clean, strictly typed, and tested code.
 
-## Mandatory 4-Step Implementation Order
+## Mandatory 5-Step Implementation Order
 Execute every implementation task following this strict sequential order:
 1. **Modular & Hexagonal Architecture (Ports & Adapters) Definition / Redefinition**: Define or refine the module structure organized by Bounded Context (`BC-*`) or Vertical Slice (`UC-*`) adhering to Hexagonal Architecture (Ports & Adapters — isolating the pure Domain/Application Core from Inbound/Outbound Adapters and Frameworks/Drivers), strictly enforcing the Dependency Rule (dependencies point inward toward the Core; avoid speculative empty layers per YAGNI).
 2. **Inter-Module Interfaces First**: Define explicit interfaces/ports (contracts, DTOs, types) for all interactions across module boundaries before writing concrete logic, avoiding direct coupling between modules.
 3. **Component Implementation**: Implement the concrete components, use cases, and adapters that implement and consume the defined interfaces.
-4. **Exhaustive Per-Function Unit Testing**: Write unit tests for every function in `tests/unit/`, always verifying:
+4. **Exhaustive Per-Method & Per-Function Unit Testing**: Write direct unit tests in `tests/unit/` for **every** method and function implemented in `src/` (domain, application, adapter, and helper methods — zero exceptions), always verifying:
    - **Happy Path**: nominal execution with valid inputs.
    - **Sad Path**: controlled error paths, rejections, and business exceptions.
    - **Boundary Values**: minimum, maximum, exact limits, and off-by-one edges.
    - **Unexpected, Null & Empty Values**: `null`, `undefined`, empty strings/arrays/objects, and malformed inputs.
+5. **Exhaustive Per-Component UI / Driving-Adapter Testing (Web, Desktop, Console/TUI & Mobile)**: For **every** UI component, view, window, screen, dialog, or interactive console/TUI command created or modified in `src/`, write or update a dedicated automated UI/E2E test in `tests/e2e/`, `tests/ui/`, `tests/desktop/`, `tests/mobile/`, or `tests/cli/` using the agreed platform runner (Playwright/Cypress for Web; FlaUI/Avalonia.Headless/pytest-qt for Desktop; Spectre.Console.Testing/node-pty/CliRunner/teatest for Console/TUI; Maestro/Appium/Detox/Espresso/XCUITest for Mobile), verifying all 4 UI states (`Loading`, `Empty`, `Error`, `Nominal`) and every interactive control (Happy Path, Sad Path, Boundary Values).
 
 ## Operational Directives & Guardrails
 - Respect the autonomy mode assigned to each task in `tasks.md` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`).
