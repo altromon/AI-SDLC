@@ -749,6 +749,24 @@ interface BaselineAuditMeta {
   untestedUiComponents?: UntestedUiComponentItem[];
 }
 
+function computeGateSummaryCounts(
+  results: AnalysisResult[],
+  coverageViolations: string[],
+  untestedUi: UntestedUiComponentItem[],
+  policy: QualityPolicy,
+  baselineUpdated?: boolean
+) {
+  const failCount = results.filter((r) => r.status === "FAIL").length;
+  const passCount = results.length - failCount;
+  const violationsCount =
+    results.reduce((acc, r) => acc + r.violations.length, 0) +
+    coverageViolations.length +
+    untestedUi.length;
+  const hasFailures = failCount > 0 || coverageViolations.length > 0 || untestedUi.length > 0;
+  const success = baselineUpdated ? true : policy.enforce_mode === "STRICT" ? !hasFailures : true;
+  return { failCount, passCount, violationsCount, success };
+}
+
 function buildQualityGateResult(
   results: AnalysisResult[],
   totalFiles: number,
@@ -758,38 +776,21 @@ function buildQualityGateResult(
   baselineMeta?: BaselineAuditMeta
 ): QualityGateResult {
   const untestedUi = baselineMeta?.untestedUiComponents ?? [];
-  const failCount = results.filter((r) => r.status === "FAIL").length;
-  const passCount = results.length - failCount;
-  const violationsCount =
-    results.reduce((acc, r) => acc + r.violations.length, 0) +
-    coverageViolations.length +
-    untestedUi.length;
-  const hasFailures = failCount > 0 || coverageViolations.length > 0 || untestedUi.length > 0;
-  const success = baselineMeta?.baselineUpdated
-    ? true
-    : policy.enforce_mode === "STRICT"
-      ? !hasFailures
-      : true;
-
-  // Reference scanAllTestArtifacts so reverse-traceability remains linked
+  const counts = computeGateSummaryCounts(
+    results, coverageViolations, untestedUi, policy, baselineMeta?.baselineUpdated
+  );
   void scanAllTestArtifacts;
 
   return {
-    success,
+    ...counts,
     totalFiles,
     totalFunctions: results.length,
-    passCount,
-    failCount,
-    violationsCount,
     results,
     policy,
     coverageViolations,
     untestedFunctions,
     untestedUiComponents: untestedUi,
-    baselineUpdated: baselineMeta?.baselineUpdated,
-    baselineViolationsCount: baselineMeta?.baselineViolationsCount,
-    toleratedViolationsCount: baselineMeta?.toleratedViolationsCount,
-    newViolationsCount: baselineMeta?.newViolationsCount,
+    ...baselineMeta,
   };
 }
 
