@@ -19,11 +19,12 @@ import {
   QualityPolicy,
   QualityThresholds,
   UntestedFunctionItem,
+  UntestedUiComponentItem,
 } from '../types/index.js';
 import { orchestrateNativeAstAnalysis } from './ast/native-ast-orchestrator.js';
 import { extractFunctionsPolyglot } from './ast/polyglot-scanner.js';
 import { readNormalizedCoverage, SUPPORTED_COVERAGE_FORMATS_HINT } from './coverage-normalizer.js';
-import { isPolyglotUnitTestFile } from './test-discovery.js';
+import { isPolyglotUnitTestFile, isUiComponentFile, isUiTestFile } from './test-discovery.js';
 import { scanAllTestArtifacts } from './testing-coverage.js';
 
 export const DEFAULT_EXTENSIONS: readonly string[] = [
@@ -116,24 +117,47 @@ function applyCoverageThresholds(policy: QualityPolicy, covRaw: unknown): void {
   }
 }
 
+function applyTestEnforcement(policy: QualityPolicy, raw: unknown): void {
+  if (!raw || typeof raw !== 'object') return;
+  const enf = raw as Record<string, unknown>;
+  if (typeof enf.require_function_unit_tests === 'boolean') {
+    policy.require_function_unit_tests = enf.require_function_unit_tests;
+  }
+  if (typeof enf.require_ui_component_tests === 'boolean') {
+    policy.require_ui_component_tests = enf.require_ui_component_tests;
+  }
+  if (Array.isArray(enf.ui_component_patterns)) {
+    policy.ui_component_patterns = enf.ui_component_patterns.map(String);
+  }
+  if (Array.isArray(enf.ui_test_patterns)) {
+    policy.ui_test_patterns = enf.ui_test_patterns.map(String);
+  }
+}
+
+function applySectionThresholds(policy: QualityPolicy, s: Record<string, unknown>): void {
+  const cc = (s.cyclomatic_complexity as Record<string, unknown>)?.max_per_function;
+  const cog = (s.cognitive_complexity as Record<string, unknown>)?.max_per_function;
+  const mi = (s.maintainability_index as Record<string, unknown>)?.min_acceptable_score;
+  const loc = (s.function_length as Record<string, unknown>)?.max_function_lines;
+
+  if (cc !== undefined) policy.max_cyclomatic = Number(cc);
+  if (cog !== undefined) policy.max_cognitive = Number(cog);
+  if (mi !== undefined) policy.min_maintainability = Number(mi);
+  if (loc !== undefined) policy.max_function_lines = Number(loc);
+  applyCoverageThresholds(policy, s.test_coverage);
+  applyTestEnforcement(policy, s.test_enforcement);
+}
+
 function applyDocThresholds(policy: QualityPolicy, doc: Record<string, unknown>): void {
   const sections = [doc.release_thresholds, doc.thresholds].filter(
     (s): s is Record<string, unknown> => Boolean(s && typeof s === 'object')
   );
 
   for (const s of sections) {
-    const cc = (s.cyclomatic_complexity as Record<string, unknown>)?.max_per_function;
-    const cog = (s.cognitive_complexity as Record<string, unknown>)?.max_per_function;
-    const mi = (s.maintainability_index as Record<string, unknown>)?.min_acceptable_score;
-    const loc = (s.function_length as Record<string, unknown>)?.max_function_lines;
-
-    if (cc !== undefined) policy.max_cyclomatic = Number(cc);
-    if (cog !== undefined) policy.max_cognitive = Number(cog);
-    if (mi !== undefined) policy.min_maintainability = Number(mi);
-    if (loc !== undefined) policy.max_function_lines = Number(loc);
-    applyCoverageThresholds(policy, s.test_coverage);
+    applySectionThresholds(policy, s);
   }
 
+  applyTestEnforcement(policy, doc.test_enforcement);
   const codingRules = doc.coding_rules as Record<string, unknown> | undefined;
   const rules = codingRules?.rules as Record<string, unknown> | undefined;
   if (rules?.max_function_lines !== undefined) {
@@ -470,6 +494,70 @@ function auditUnitTestsPerFunction(
   return untested;
 }
 
+const UI_COMPONENT_EXTENSIONS: readonly string[] = [
+  ...DEFAULT_EXTENSIONS,
+  '.vue',
+  '.svelte',
+  '.kt',
+  '.swift',
+  '.dart',
+];
+
+const UI_TEST_EXTENSIONS: readonly string[] = [
+  ...UI_COMPONENT_EXTENSIONS,
+  '.yaml',
+  '.yml',
+];
+
+function collectUiTestFiles(rootDir: string, customPatterns?: readonly string[]): Array<{ relPath: string; content: string }> {
+  const allFiles = walkDir(rootDir, UI_TEST_EXTENSIONS, DEFAULT_EXCLUDES);
+  const uiTests: Array<{ relPath: string; content: string }> = [];
+  for (const tf of allFiles) {
+    const relPath = path.relative(rootDir, tf).replace(/\\/g, '/');
+    if (!isUiTestFile(relPath, customPatterns)) continue;
+    try {
+      uiTests.push({ relPath, content: fs.readFileSync(tf, 'utf-8') });
+    } catch {
+      // Ignore unreadable files
+    }
+  }
+  return uiTests;
+}
+
+function extractUiComponentName(relPath: string): string {
+  const base = path.basename(relPath);
+  return base.replace(/\.(?:xaml\.cs|component\.ts|vue|svelte|tsx?|jsx?|py|cs|java|kt|swift|dart)$/i, '');
+}
+
+function buildComponentNameVariants(componentName: string): string[] {
+  const kebab = componentName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+  const snake = kebab.replace(/-/g, '_');
+  return Array.from(new Set([componentName, kebab, snake]));
+}
+
+function isUiComponentTested(componentName: string, uiTests: Array<{ relPath: string; content: string }>): boolean {
+  const variants = buildComponentNameVariants(componentName);
+  const patterns = variants.map((v) => new RegExp(`\\b${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i'));
+  return uiTests.some((t) => patterns.some((re) => re.test(t.relPath) || re.test(t.content)));
+}
+
+function auditUiComponents(rootDir: string, policy: QualityPolicy): UntestedUiComponentItem[] {
+  const uiPolicy = { ...policy, supported_extensions: [...UI_COMPONENT_EXTENSIONS] };
+  const candidateFiles = collectFilesToScan(rootDir, uiPolicy);
+  const uiTests = collectUiTestFiles(rootDir, policy.ui_test_patterns);
+  const untested: UntestedUiComponentItem[] = [];
+
+  for (const file of candidateFiles) {
+    const relPath = path.relative(rootDir, file).replace(/\\/g, '/');
+    if (!isUiComponentFile(relPath, policy.ui_component_patterns)) continue;
+    const componentName = extractUiComponentName(relPath);
+    if (!isUiComponentTested(componentName, uiTests)) {
+      untested.push({ file: relPath, componentName });
+    }
+  }
+  return untested;
+}
+
 function checkCoverageThreshold(label: string, actual: number, min: number, out: string[]): void {
   if (actual < min) {
     out.push(`${label} coverage ${actual}% is below minimum threshold of ${min}%`);
@@ -658,6 +746,7 @@ interface BaselineAuditMeta {
   baselineViolationsCount?: number;
   toleratedViolationsCount?: number;
   newViolationsCount?: number;
+  untestedUiComponents?: UntestedUiComponentItem[];
 }
 
 function buildQualityGateResult(
@@ -668,11 +757,14 @@ function buildQualityGateResult(
   untestedFunctions: UntestedFunctionItem[],
   baselineMeta?: BaselineAuditMeta
 ): QualityGateResult {
+  const untestedUi = baselineMeta?.untestedUiComponents ?? [];
   const failCount = results.filter((r) => r.status === "FAIL").length;
   const passCount = results.length - failCount;
   const violationsCount =
-    results.reduce((acc, r) => acc + r.violations.length, 0) + coverageViolations.length;
-  const hasFailures = failCount > 0 || coverageViolations.length > 0;
+    results.reduce((acc, r) => acc + r.violations.length, 0) +
+    coverageViolations.length +
+    untestedUi.length;
+  const hasFailures = failCount > 0 || coverageViolations.length > 0 || untestedUi.length > 0;
   const success = baselineMeta?.baselineUpdated
     ? true
     : policy.enforce_mode === "STRICT"
@@ -693,6 +785,7 @@ function buildQualityGateResult(
     policy,
     coverageViolations,
     untestedFunctions,
+    untestedUiComponents: untestedUi,
     baselineUpdated: baselineMeta?.baselineUpdated,
     baselineViolationsCount: baselineMeta?.baselineViolationsCount,
     toleratedViolationsCount: baselineMeta?.toleratedViolationsCount,
@@ -714,9 +807,12 @@ export function verifyQualityGate(options: QualityGateOptions = {}): QualityGate
     }
   }
 
-  const untestedFunctions = options.requireFunctionUnitTests
+  const requireUnitTests = Boolean(options.requireFunctionUnitTests ?? policy.require_function_unit_tests);
+  const requireUiTests = Boolean(options.requireUiComponentTests ?? policy.require_ui_component_tests);
+  const untestedFunctions = requireUnitTests
     ? auditUnitTestsPerFunction(results, rootDir, policy.test_patterns)
     : [];
+  const untestedUiComponents = requireUiTests ? auditUiComponents(rootDir, policy) : [];
   const coverageViolations = evaluateCoverageThresholds(rootDir, policy, options.requireCoverageReport);
 
   const baselineFile = resolveBaselineFilePath(rootDir, options);
@@ -726,6 +822,7 @@ export function verifyQualityGate(options: QualityGateOptions = {}): QualityGate
     return buildQualityGateResult(results, allFiles.length, policy, coverageViolations, untestedFunctions, {
       baselineUpdated: true,
       baselineViolationsCount: entries.length,
+      untestedUiComponents,
     });
   }
 
@@ -737,5 +834,6 @@ export function verifyQualityGate(options: QualityGateOptions = {}): QualityGate
     baselineViolationsCount: ratchetEval.baselineViolationsCount,
     toleratedViolationsCount: ratchetEval.toleratedViolationsCount,
     newViolationsCount: ratchetEval.newViolationsCount,
+    untestedUiComponents,
   });
 }

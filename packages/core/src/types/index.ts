@@ -17,6 +17,10 @@ export interface QualityPolicy {
   supported_extensions: string[];
   exclude_patterns: string[];
   test_patterns?: string[];
+  require_function_unit_tests?: boolean;
+  require_ui_component_tests?: boolean;
+  ui_component_patterns?: string[];
+  ui_test_patterns?: string[];
 }
 
 export interface FunctionMetrics {
@@ -80,6 +84,7 @@ export interface QualityGateOptions {
   thresholds?: QualityThresholds;
   requireCoverageReport?: boolean;
   requireFunctionUnitTests?: boolean;
+  requireUiComponentTests?: boolean;
   baseline?: boolean | string;
   baselinePath?: string;
   updateBaseline?: boolean;
@@ -89,6 +94,11 @@ export interface QualityGateOptions {
 export interface UntestedFunctionItem {
   file: string;
   functionName: string;
+}
+
+export interface UntestedUiComponentItem {
+  file: string;
+  componentName: string;
 }
 
 export interface QualityGateResult {
@@ -102,6 +112,7 @@ export interface QualityGateResult {
   policy: QualityPolicy;
   coverageViolations?: string[];
   untestedFunctions?: UntestedFunctionItem[];
+  untestedUiComponents?: UntestedUiComponentItem[];
   reportMarkdown?: string;
   baselineViolationsCount?: number;
   toleratedViolationsCount?: number;
