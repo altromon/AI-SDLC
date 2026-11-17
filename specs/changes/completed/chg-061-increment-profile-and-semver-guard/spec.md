@@ -12,13 +12,13 @@ cucumber-tags:
   - "@increment-profile-semver"
 citations:
   - id: UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
-    digest: sha256:f98d6031597730c33d3f5b2d59095058b34072dcddcf1c7fbca78f1483a91fa7
+    digest: sha256:a4d5eaf42eec48f9e80ee55f77d53616bb189d546969b9b639f03199c079b64b
     comment: Caso de uso que gobierna la selección de perfil, SemVer por precedencia y guardián SDD
   - id: FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001
-    digest: sha256:91199a3304f752350e6018c0d51efed73a6c48c721a74858349c3e43568e8a17
+    digest: sha256:639eaa8e6f460283def54b05093020fa537e2e4fd2b872e0af5c87d9c8526243
     comment: Requisito funcional en el catálogo canónico
   - id: CMP-CORE
-    digest: sha256:c080c54860f16acf816a89b1e032899c5f28d4bad6c01200e18e1a094fe3586a
+    digest: sha256:694456d7048a95af19287c58451b108fc97d2c99dbac1b029ad4ce7ef1ae14a6
     comment: Componente arquitectónico central que aloja las plantillas de skills y guard-branch.cjs
 ---
 
@@ -38,8 +38,7 @@ citations:
 
 | Catalog Category | Proposed ID | Target Catalog Location | Formal Scope & Functional Contract |
 | :--- | :--- | :--- | :--- |
-| Use Case | `UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD` | `specs/product/UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD.md` | Selección interactiva de perfil de fricción (`patch \| standard \| critical`), versionado SemVer por precedencia en `aisdlc-increment` y bloqueo determinista SDD en `guard-branch.cjs`. |
-| Functional Requirement | `FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001` | `specs/product/FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001.md` | Contrato normativo del Paso 0 y Paso 6 en `aisdlc-increment` y validación `hasValidActiveSddIncrement` en `scripts/guard-branch.cjs` y `STARTER_GUARD_BRANCH_CJS`. |
+| _None_ | _N/A_ | _N/A_ | `UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD` and `FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001` already exist in `specs/product/` (see Section 1.1). |
 
 ---
 

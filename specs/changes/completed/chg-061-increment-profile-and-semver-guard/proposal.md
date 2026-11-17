@@ -1,18 +1,20 @@
 ---
 id: CHG-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
 type: spec-change-proposal
-title: "Increment Profile Triage, SemVer Precedence, and SDD Branch Guard"
-status: draft
-author: "agent-system-architect"
+title: Increment Profile Triage, SemVer Precedence, and SDD Branch Guard
+status: completed
+author: agent-system-architect
 handoff: HOF-CHG-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
 citations:
   - id: UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
-    digest: sha256:f98d6031597730c33d3f5b2d59095058b34072dcddcf1c7fbca78f1483a91fa7
+    digest: sha256:a4d5eaf42eec48f9e80ee55f77d53616bb189d546969b9b639f03199c079b64b
     comment: Caso de uso de selección interactiva de perfil de fricción, versionado SemVer por precedencia y bloqueo SDD en guard-branch.cjs
   - id: FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001
-    digest: sha256:91199a3304f752350e6018c0d51efed73a6c48c721a74858349c3e43568e8a17
+    digest: sha256:639eaa8e6f460283def54b05093020fa537e2e4fd2b872e0af5c87d9c8526243
     comment: Requisito funcional para triaje interactivo de perfil, SemVer por precedencia y guardián SDD en guard-branch.cjs
 ---
+
+
 
 # Propuesta de Cambio: CHG-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
 

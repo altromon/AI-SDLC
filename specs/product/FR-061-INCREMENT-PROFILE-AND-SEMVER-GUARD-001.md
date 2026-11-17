@@ -2,7 +2,7 @@
 id: FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001
 type: requirement
 title: increment-profile-semver-and-sdd-guard
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 category: functional
@@ -19,6 +19,7 @@ cucumber-tags:
 supersedes: null
 superseded-by: null
 ---
+
 
 
 # FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001: increment-profile-semver-and-sdd-guard
@@ -50,7 +51,7 @@ Formalizar el triaje interactivo de perfil en el Paso 0 y el versionado SemVer c
 ## 2. Criterios de Aceptación en Formato Gherkin (Cucumber)
 
 ```gherkin
-@FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001 @functional @automated @increment-profile-semver @regression
+@FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001 @UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD @functional @automated @increment-profile-semver @regression
 Feature: Deterministic SDD increment profile triage, SemVer precedence bump, and branch/SDD guard enforcement
   As a DevSecOps engineer
   I want aisdlc-increment and guard-branch.cjs to enforce profile-proportional SDD artifacts and precedence-based SemVer versioning

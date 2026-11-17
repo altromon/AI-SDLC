@@ -2,7 +2,7 @@
 id: UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
 type: use-case
 title: Selección interactiva de perfil de fricción, versionado SemVer por precedencia en aisdlc-increment y bloqueo determinista SDD en guard-branch.cjs
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 primary-actor: ACT-DEVSECOPS-ENGINEER
@@ -15,6 +15,7 @@ governed-by:
 supersedes: null
 superseded-by: null
 ---
+
 
 
 # UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD: Selección interactiva de perfil de fricción, versionado SemVer por precedencia en aisdlc-increment y bloqueo determinista SDD en guard-branch.cjs
@@ -59,42 +60,43 @@ Incorporar el Paso 0 de triaje interactivo de perfil (`patch | standard | critic
 ## 6. Criterios de Aceptación en Formato Gherkin (Cucumber)
 
 ```gherkin
-@UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD @functional @automated @increment-profile-semver
-Feature: Interactive increment profile selection, precedence-based SemVer bump, and deterministic SDD guard
+@FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001 @UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD @functional @automated @increment-profile-semver @regression
+Feature: Deterministic SDD increment profile triage, SemVer precedence bump, and branch/SDD guard enforcement
   As a DevSecOps engineer
-  I want aisdlc-increment to triage the friction profile, apply precedence-based SemVer bumps, and block unspec'd code edits in guard-branch.cjs
-  So that every code change follows proportional SDD rigor and deterministic semantic versioning
+  I want aisdlc-increment and guard-branch.cjs to enforce profile-proportional SDD artifacts and precedence-based SemVer versioning
+  So that AI agents cannot modify source or test files without an active SDD increment and version numbers evolve deterministically
 
   @nominal
-  Scenario: Active standard SDD increment allows source edits and applies a Minor SemVer bump on closure
-    Given the repository is on branch "feat/CHG-061-sample" with version "1.2.3"
-    And an active SDD increment "CHG-061-SAMPLE" with profile "standard" has "spec.md", "design.md", "tasks.md", and "handoff.yaml" in "specs/changes/active/CHG-061-SAMPLE"
-    When the agent edits "packages/core/src/index.ts" through "guard-branch.cjs" and completes Step 6 integration
-    Then "guard-branch.cjs" returns decision "allow"
-    And the software version is bumped once to "1.3.0"
+  Scenario: Guard allows editing source files when a valid active SDD increment exists in specs/changes/active
+    Given the current Git branch is "feat/CHG-061-increment-profile-and-semver-guard"
+    And "specs/changes/active/CHG-061-INCREMENT-PROFILE-AND-SEMVER-GUARD" contains "spec.md", "design.md", "tasks.md", and "handoff.yaml"
+    When "guard-branch.cjs" evaluates a file edit on "packages/core/src/init/agent-templates.ts"
+    Then the hook output decision is "allow"
 
   @boundary
-  Scenario Outline: Multi-increment batch resolves to a single SemVer bump of the highest precedence profile
-    Given current software version is "<current_version>"
-    And pending increments in the batch have profiles "<profiles_list>"
-    When Step 6 SemVer consolidation is applied
-    Then the highest profile rank resolved is "<winning_profile>"
-    And the resulting software version is "<next_version>"
+  Scenario Outline: Profile-to-SemVer mapping and multi-increment highest-precedence consolidation
+    Given the baseline package version is "<base_version>"
+    And the active SDD increment profiles to integrate are "<profiles>"
+    When the Step 6 SemVer bump rule is evaluated
+    Then the effective profile precedence is "<effective_profile>"
+    And the target version is "<target_version>"
 
     Examples:
-      | current_version | profiles_list              | winning_profile | next_version |
-      | 1.2.3           | patch                      | patch           | 1.2.4        |
-      | 1.2.3           | patch, patch               | patch           | 1.2.4        |
-      | 1.2.3           | patch, standard            | standard        | 1.3.0        |
-      | 1.2.3           | standard, standard         | standard        | 1.3.0        |
-      | 1.2.3           | patch, standard, critical  | critical        | 2.0.0        |
+      | base_version | profiles                   | effective_profile | target_version |
+      | 3.2.0        | patch                      | patch             | 3.2.1          |
+      | 3.2.0        | patch, patch               | patch             | 3.2.1          |
+      | 3.2.0        | standard                   | standard          | 3.3.0          |
+      | 3.2.0        | patch, standard            | standard          | 3.3.0          |
+      | 3.2.0        | critical                   | critical          | 4.0.0          |
+      | 3.2.0        | patch, standard, critical  | critical          | 4.0.0          |
 
   @invalid
-  Scenario: Editing source or test files without an active SDD increment in specs/changes/active is denied
-    Given the repository is on branch "feat/CHG-061-no-spec"
-    And "specs/changes/active" contains no valid active SDD increment directory
-    When the agent attempts to edit "packages/core/src/index.ts" or "tests/sample.test.ts"
-    Then "guard-branch.cjs" returns decision "deny" mentioning "specs/changes/active/" and "aisdlc-increment"
+  Scenario: Guard denies editing source or test files when no active SDD increment exists in specs/changes/active
+    Given the current Git branch is "feat/CHG-061-increment-profile-and-semver-guard"
+    And "specs/changes/active" has no active SDD increment with required artifacts
+    When "guard-branch.cjs" evaluates a file edit on "packages/core/src/init/coding-rules-templates.ts"
+    Then the hook output decision is "deny"
+    And the denial reason references "specs/changes/active/" and "aisdlc-increment"
 ```
 
 ## Historial de Revisiones

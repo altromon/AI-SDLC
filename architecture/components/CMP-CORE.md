@@ -1,8 +1,8 @@
 ---
 id: CMP-CORE
 type: component
-version: "1.0.0"
-schema-version: "1.0"
+version: 1.0.0
+schema-version: '1.0'
 title: Motor Central AI-SDLC (@ai-sdlc/core)
 status: accepted
 level: 1
@@ -61,6 +61,7 @@ supersedes: null
 superseded-by: null
 ---
 
+
 # CMP-CORE: Motor Central AI-SDLC
 
 ## 1. Responsabilidad y Límites
@@ -75,3 +76,10 @@ graph TD
     CORE --> Verifiers[Verificadores: Schemas, Traceability, Quality, Governance, Licenses]
     CORE --> Adapters[Adaptadores SDD: OpenSpec, SpecKit]
 ```
+
+
+## Historial de Revisiones
+
+| Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-17 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-061-increment-profile-and-semver-guard | chg-061-increment-profile-and-semver-guard |
