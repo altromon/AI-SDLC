@@ -19,10 +19,12 @@ Across Phase 0 and Inception, quality auditing and adversarial stress-testing ar
 
 ## End-to-End Execution Playbook
 
-### Step 1: Repository Turnkey Initialization
-1. If the workspace has not been initialized with AI-SDLC schemas, policies, and templates, run MCP tool `new` (or CLI `npx @aisdlc/cli init`).
-2. Install the Git telemetry hook via `npx aisdlc git hook install` (`pnpm run git:hook:install`).
-3. Verify `quality-policy.yaml`, `license-policy.yaml`, and `privacy-policy.yaml` are present in the repository root.
+### Step 1: Branch-Before-Change & Repository Turnkey Initialization
+1. **Branch-Before-Change**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to an inception branch (e.g., `feat/inception-baseline` or `chore/aisdlc-inception`) **before** modifying or creating any files.
+2. If the workspace has not been initialized with AI-SDLC schemas, policies, and templates, run MCP tool `new` (or CLI `npx @aisdlc/cli init`).
+3. Install the Git telemetry hook via `npx aisdlc git hook install` (`pnpm run git:hook:install`).
+4. Verify `quality-policy.yaml`, `license-policy.yaml`, and `privacy-policy.yaml` are present in the repository root.
+5. Commit initial scaffolding, push (`git push -u origin <branch>`), and open a **Draft PR** (`gh pr create --draft`, with graceful fallback if no remote or CLI auth exists) so all Phase 0 Inception artifacts (`ARCH-INTRO-001`, ProductShape, Threat/Privacy, Architecture) are pushed incrementally to the Draft PR.
 
 ### Step 2: Phase 0 Product Inception (`agent-product-analyst`)
 1. Delegate to or adopt [`agent-product-analyst`](../agent-product-analyst/SKILL.md).
@@ -58,8 +60,8 @@ Across Phase 0 and Inception, quality auditing and adversarial stress-testing ar
 
 ### Checkpoint 1 (Inception Design Checkpoint): `agent-auditor` $\parallel$ `agent-adversary`
 1. Concurrently invoke `agent-auditor` (evaluating YAGNI, architecture bloat, interface contracts) and `agent-adversary` (simulating SPOFs, race conditions, unhandled threat scenarios) in isolated context windows over all Phase 0 deliverables.
-2. Consolidate findings and remediate in authoring agents (max 2 correction rounds).
-3. **Human Approval Gate**: Present the comprehensive Inception model for Human PO & Tech Lead sign-off.
+2. Consolidate findings and remediate in authoring agents (max 2 correction rounds), committing and pushing (`git push`) updates to the Draft PR.
+3. **Human Approval Gate**: Mark the Inception Draft PR ready (`gh pr ready`) and present the comprehensive Inception model for Human PO & Tech Lead sign-off.
 
 ### Step 5: Release Milestone & Topological Wave SDD Plan (`1 UC-* = 1 CHG-*`)
 1. **Open Release Milestone (`Tier 2: release/v1.0.0` or Streamlined `main`)**: Group approved MVP Use Cases (`UC-001`, `UC-002`, ...) and visualize execution plan.

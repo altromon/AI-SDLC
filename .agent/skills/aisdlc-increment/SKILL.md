@@ -13,8 +13,9 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 
 ## End-to-End Execution Playbook
 
-### Step 0: Friction Profile Selection & Scope Triage (`patch | standard | critical`)
-1. Before editing any files or running `sdd_change_new`, inspect if the user explicitly specified the friction profile (`patch`, `standard`, or `critical`). If not, analyze the requested scope and ask the user via interactive question (`ask_question`) with the recommended option first (`(Recommended)`):
+### Step 0: Branch-Before-Change, Friction Profile Selection & Scope Triage (`patch | standard | critical`)
+1. **Branch-Before-Change**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to a dedicated working branch (`feat/<CHG-ID>-<slug>` or `fix/<CHG-ID>-<slug>`) **before** modifying or creating any files.
+2. Before editing any files or running `sdd_change_new`, inspect if the user explicitly specified the friction profile (`patch`, `standard`, or `critical`). If not, analyze the requested scope and ask the user via interactive question (`ask_question`) with the recommended option first (`(Recommended)`):
    - **`patch`**: low-risk isolated bugfixes ($\le 2$ source files, zero Anti-Bypass paths), typos, or linter fixes on `patch/*` or `fix/*` branches (`npx aisdlc change new "<Title>" --id <chg-id> --profile patch` generates `spec.md` with `profile: patch` and `verification` block only, omitting `design.md`, `tasks.md`, and `handoff.yaml`; fast-track directly to Step 3 -> Step 4 -> Step 5 -> Step 6).
    - **`standard`**: functional increments, new/updated `UC-*` or `FR-*`, or contract changes (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml`).
    - **`critical`**: changes touching security enclaves (`SEC-ENC-*`), sensitive PII (`SPECIAL_CATEGORY` / `DPIA-*`), schemas, or migrations (full `standard` artifacts + `ADR-*` + mandatory STRIDE modeling and dual human approval).
@@ -35,15 +36,16 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
    - Structure `CMP-*` and `design.md` around **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports) and define **Contract-First** shared interfaces/DTOs/schemas when spanning Frontend and Backend.
    - Map 100% of `handoff.yaml` requirements and components to atomic tasks (`TSK-*`) in `tasks.md` with explicit `autonomy-mode` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `HIGH_RISK_MANUAL`, `AMBIGUOUS`).
 3. Run `verify_governance` and `verify_friction` to validate task governance, 100% design/handoff scope coverage, and anti-monolith limits (`maxUseCasesPerChange = 1`).
+4. **Open Draft PR from Spec/Scaffolding (Option A)**: Commit the initial SDD scaffolding and specification/design artifacts on the working branch, push to remote (`git push -u origin <branch>`), and open a **Draft PR** (`gh pr create --draft --title "<type>(<CHG-ID>): <Title>" --body "..."`; graceful fallback to local-only commits if no remote or CLI auth exists). For `patch` profile increments, open the Draft PR right after scaffolding `spec.md`.
 
 ### Checkpoint 1: Specification & Design Checkpoint (`agent-auditor` $\parallel$ `agent-adversary`)
 1. Concurrently invoke `agent-auditor` (evaluating YAGNI, interface bloat, and task completeness) and `agent-adversary` (probing contradictions, race conditions, and architecture SPOFs) in clean, isolated context windows over the combined upstream deliverables.
-2. Consolidate findings and remediate any blocking defects (max 2 correction rounds).
-3. **Human Approval Gate 1**: Present the specification and architectural design for Human Tech Lead / PO sign-off before proceeding to code.
+2. Consolidate findings and remediate any blocking defects (max 2 correction rounds), committing and pushing updates (`git push`) to the open Draft PR.
+3. **Human Approval Gate 1**: Present the specification and architectural design (reviewable directly in the Draft PR) for Human Tech Lead / PO sign-off before proceeding to code.
 
 ### Step 3: Streamlined Git Branch Navigation & Multi-Agent Parallelism
-1. Navigate to the working branch using `npx aisdlc git checkout <TSK-ID>` (`pnpm run git:checkout <TSK-ID>`).
-   - **Default Streamlined Mode**: Switches to the working branch `feat/<CHG-ID>-<slug>` (created from `main`).
+1. Confirm you are on the working branch via `npx aisdlc git checkout <TSK-ID>` (`pnpm run git:checkout <TSK-ID>`).
+   - **Default Streamlined Mode**: Ensures the agent is on `feat/<CHG-ID>-<slug>` (already created in Step 0).
    - Granular task traceability is maintained via commit trailers (`Task-ID: TSK-*`, `Parent-Ref: CHG-*`) and commit scopes (`feat(TSK-001): ...`), enabling per-task rework KPIs without branch explosion.
 2. **Parallel Agent Execution Rules (`--parallel`)**:
    - When concurrent multi-agent implementation is configured (e.g. Backend adapter $\parallel$ Frontend UI), `aisdlc git checkout <TSK-ID> --parallel` creates isolated worktrees (`task/<PARENT-ID>/<TSK-ID>-<slug>`).
@@ -52,14 +54,14 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 1. Delegate to or adopt [`agent-qa-engineer`](../agent-qa-engineer/SKILL.md).
 2. Run `npx aisdlc gherkin extract` (`sdd_check_fix`) to deterministically extract `.feature` files from Markdown specifications, and run `npx aisdlc gherkin scaffold <feature-file> --lang <lang> --fallback` to scaffold RED step definitions in `tests/steps/` (never hand-author `.feature` or step skeletons).
 3. Author FAILING (red) assertions inside the scaffolded step definitions, plus integration/contract tests and mandatory E2E/UI tests (evaluating Happy Path, Sad Path, and Boundary Values for every interactive UI element, plus `UC-*` alternative/exception flows) in `tests/`.
-4. Commit failing test suites with trailer `Task-ID: TSK-YYY`.
+4. Commit failing test suites with trailer `Task-ID: TSK-YYY` and push (`git push`) to the Draft PR (CI workflows skip heavy checks while the PR is in `draft` state).
 5. Run `npx aisdlc verify gherkin` and `verify_testing` (`npx aisdlc verify testing`) to confirm deterministic Gherkin/step sync and requirement test coverage before writing production code.
 
 ### Step 5: Green & Refactor Phase — Surgical Implementation (`agent-developer` / `agent-devops`)
 1. Delegate application tasks (`src/`, `tests/`) to [`agent-developer`](../agent-developer/SKILL.md). For tasks (`TSK-*`) targeting CI/CD workflows (`.github/workflows/`), `Dockerfile*`, IaC manifests, or support scripts (`scripts/`), delegate to [`agent-devops`](../agent-devops/SKILL.md) under its strict non-invasion guardrail on `src/`.
 2. Execute the **Mandatory 4-Step Implementation Order**:
    - (1) Modular & Hexagonal Architecture (Ports & Adapters) boundaries, (2) Inter-module interfaces/ports first, (3) Concrete component implementation (zero fake-wiring; all 4 UI states `Loading`, `Empty`, `Error`, `Nominal`), (4) Exhaustive per-function unit tests in `tests/unit/` (Happy Path, Sad Path, Boundary, Null/Empty).
-3. Commit implementations with trailer `Task-ID: TSK-YYY`.
+3. Commit implementations with trailer `Task-ID: TSK-YYY` and push (`git push`) incrementally to the Draft PR.
 4. Verify any new dependency against `license-policy.yaml` via `verify_licenses` and PII handling against `privacy-policy.yaml` via `verify_privacy`.
 5. Run `sdd_check_fix` (`npx aisdlc check --fix`) and `verify_quality` (`npx aisdlc verify quality`) until Cyclomatic Complexity $\le 10$, Cognitive $\le 15$, Maintainability $\ge 50$, and Function Length $\le 40$ lines pass with zero violations.
 6. Run `verify` (`npx aisdlc verify all`) confirming all **12 Quality Gates** pass green.
@@ -67,12 +69,12 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 ### Checkpoint 2: Implementation & Pre-PR Checkpoint (`agent-auditor` $\parallel$ `agent-adversary`)
 1. **Functional Validation (`agent-expert-user`)**: Validate live runtime behavior against `UC-*` and `FR-*` criteria (including `0` browser `console.error`/`pageerror` on UI changes).
 2. Concurrently invoke `agent-auditor` (verifying Clean Code, SOLID, DRY, AST thresholds, and eliminating unnecessary abstractions) and `agent-adversary` (performing conceptual test mutation to verify QA tests catch defects, and attacking boundary inputs with concrete PoC breaks).
-3. Consolidate findings and remediate in `agent-developer` (max 2 correction rounds).
+3. Consolidate findings and remediate in `agent-developer` (max 2 correction rounds), committing and pushing (`git push`) fixes to the Draft PR.
 4. Run `npx aisdlc verify all` to confirm final green status, then run `report_quality` (`npx aisdlc report quality`) and `report_dashboard` (`npx aisdlc report dashboard`) to compute local reports and the interactive dashboard for review (**do NOT stage or commit global `reports/*` files on `feat/CHG-*` branches** to prevent merge conflicts across parallel PRs).
 
 ### Step 6: Human PR Sign-Off, Baseline Integration & Release Closure
-1. **Feature Merge (`feat/CHG-*` ➔ `main` or `release/vX.Y.Z`)**:
-   - Present the PR, KPI summary (`kpi_pr` including per-task rework metrics), and local verification/report summary (`reports/QUALITY_REPORT.md`, `reports/TRACEABILITY_MATRIX.md`, `reports/dashboard.html` inspected locally, without committing global `reports/*` to the feature PR) to the human Tech Lead for review and approval (never auto-approve or auto-merge).
+1. **Ready for Review & Feature Merge (`feat/CHG-*` ➔ `main` or `release/vX.Y.Z`)**:
+   - Update the Draft PR body with the Plan Execution Matrix (`[X]` vs `[O]`), KPI summary (`kpi_pr` including per-task rework metrics), and local verification/report summary (`reports/QUALITY_REPORT.md`, `reports/TRACEABILITY_MATRIX.md`, `reports/dashboard.html` inspected locally, without committing global `reports/*` to the feature PR), then run `gh pr ready` to mark the PR **Ready for Review** (triggering full CI verification) and present it to the human Tech Lead for review and approval (never auto-approve or auto-merge).
 2. **Canonical Baseline Promotion**: Once tasks in `tasks.md` are marked `COMPLETED` and approved, promote the change into the canonical baseline via MCP tool `sdd_integrate` (`npx aisdlc sdd integrate --auto`), which synchronizes the normative text and BDD Gherkin scenarios into `FR-*` / `UC-*` / `SEC-REQ-*` / `PRIV-REQ-*`, bumps minor SemVer when updating active specs, resyncs PDaC SHA-256 digests, promotes `FR-*` to `active`, links `CMP-*`, and archives the change under `specs/changes/completed/` (or `npx aisdlc sdd integrate --all` to consolidate all completed changes).
 3. **Semantic Versioning Promotion**:
    - **Profile-Driven SemVer Mapping**: Bump the version of the software under development according to the increment's friction profile:
