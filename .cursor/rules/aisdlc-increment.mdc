@@ -13,8 +13,8 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 
 ## End-to-End Execution Playbook
 
-### Step 0: Branch-Before-Change, Friction Profile Selection & Scope Triage (`patch | standard | critical`)
-1. **Branch-Before-Change**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to a dedicated working branch (`feat/<CHG-ID>-<slug>` or `fix/<CHG-ID>-<slug>`) **before** modifying or creating any files.
+### Step 0: Branch-Before-Change, Pre-Change Draft PR & Scope Triage (`patch | standard | critical`)
+1. **Branch-Before-Change & Pre-Change Draft PR**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to a dedicated working branch (`feat/<CHG-ID>-<slug>` or `fix/<CHG-ID>-<slug>`) **before** modifying or creating any files. Whenever a remote repository is configured (`git remote`), check if an open PR already exists for the branch (`gh pr view` / `gh pr list --head <branch>`); if none exists, create an empty bootstrap commit (`git commit --allow-empty -m "chore(<CHG-ID>): open draft PR"`), push (`git push -u origin <branch>`), and open a **Draft PR** (`gh pr create --draft`) before making any changes (if no remote exists, work locally).
 2. Before editing any files or running `sdd_change_new`, inspect if the user explicitly specified the friction profile (`patch`, `standard`, or `critical`). If not, analyze the requested scope and ask the user via interactive question (`ask_question`) with the recommended option first (`(Recommended)`):
    - **`patch`**: low-risk isolated bugfixes ($\le 2$ source files, zero Anti-Bypass paths), typos, or linter fixes on `patch/*` or `fix/*` branches (`npx aisdlc change new "<Title>" --id <chg-id> --profile patch` generates `spec.md` with `profile: patch` and `verification` block only, omitting `design.md`, `tasks.md`, and `handoff.yaml`; fast-track directly to Step 3 -> Step 4 -> Step 5 -> Step 6).
    - **`standard`**: functional increments, new/updated `UC-*` or `FR-*`, or contract changes (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml`).
@@ -36,7 +36,7 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
    - Structure `CMP-*` and `design.md` around **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports) and define **Contract-First** shared interfaces/DTOs/schemas when spanning Frontend and Backend.
    - Map 100% of `handoff.yaml` requirements and components to atomic tasks (`TSK-*`) in `tasks.md` with explicit `autonomy-mode` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `HIGH_RISK_MANUAL`, `AMBIGUOUS`).
 3. Run `verify_governance` and `verify_friction` to validate task governance, 100% design/handoff scope coverage, and anti-monolith limits (`maxUseCasesPerChange = 1`).
-4. **Open Draft PR from Spec/Scaffolding (Option A)**: Commit the initial SDD scaffolding and specification/design artifacts on the working branch, push to remote (`git push -u origin <branch>`), and open a **Draft PR** (`gh pr create --draft --title "<type>(<CHG-ID>): <Title>" --body "..."`; graceful fallback to local-only commits if no remote or CLI auth exists). For `patch` profile increments, open the Draft PR right after scaffolding `spec.md`.
+4. Commit the SDD scaffolding and specification/design artifacts on the working branch and push (`git push`) to the open Draft PR.
 
 ### Checkpoint 1: Specification & Design Checkpoint (`agent-auditor` $\parallel$ `agent-adversary`)
 1. Concurrently invoke `agent-auditor` (evaluating YAGNI, interface bloat, and task completeness) and `agent-adversary` (probing contradictions, race conditions, and architecture SPOFs) in clean, isolated context windows over the combined upstream deliverables.

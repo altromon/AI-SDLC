@@ -19,12 +19,12 @@ Across Phase 0 and Inception, quality auditing and adversarial stress-testing ar
 
 ## End-to-End Execution Playbook
 
-### Step 1: Branch-Before-Change & Repository Turnkey Initialization
-1. **Branch-Before-Change**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to an inception branch (e.g., `feat/inception-baseline` or `chore/aisdlc-inception`) **before** modifying or creating any files.
+### Step 1: Branch-Before-Change, Pre-Change Draft PR & Repository Initialization
+1. **Branch-Before-Change & Pre-Change Draft PR**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to an inception branch (e.g., `feat/inception-baseline` or `chore/aisdlc-inception`) **before** modifying or creating any files. Whenever a remote repository is configured (`git remote`), check if an open PR exists for the branch (`gh pr view` / `gh pr list --head <branch>`); if none exists, create an empty bootstrap commit (`git commit --allow-empty -m "chore(inception): open draft PR"`), push (`git push -u origin <branch>`), and open a **Draft PR** (`gh pr create --draft`) before making any changes (if no remote exists, work locally).
 2. If the workspace has not been initialized with AI-SDLC schemas, policies, and templates, run MCP tool `new` (or CLI `npx @aisdlc/cli init`).
 3. Install the Git telemetry hook via `npx aisdlc git hook install` (`pnpm run git:hook:install`).
 4. Verify `quality-policy.yaml`, `license-policy.yaml`, and `privacy-policy.yaml` are present in the repository root.
-5. Commit initial scaffolding, push (`git push -u origin <branch>`), and open a **Draft PR** (`gh pr create --draft`, with graceful fallback if no remote or CLI auth exists) so all Phase 0 Inception artifacts (`ARCH-INTRO-001`, ProductShape, Threat/Privacy, Architecture) are pushed incrementally to the Draft PR.
+5. Commit and push (`git push`) Phase 0 Inception artifacts (`ARCH-INTRO-001`, ProductShape, Threat/Privacy, Architecture) incrementally to the open Draft PR.
 
 ### Step 2: Phase 0 Product Inception (`agent-product-analyst`)
 1. Delegate to or adopt [`agent-product-analyst`](../agent-product-analyst/SKILL.md).

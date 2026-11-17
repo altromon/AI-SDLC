@@ -20,12 +20,12 @@ Across Brownfield retro-inception, quality auditing and adversarial stress-testi
 
 ## End-to-End Execution Playbook
 
-### Step 1: Branch-Before-Change & Turnkey Repository Scaffolding (Non-Destructive)
-1. **Branch-Before-Change**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to an onboarding branch (e.g., `chore/aisdlc-onboarding`) **before** modifying or creating any files.
+### Step 1: Branch-Before-Change, Pre-Change Draft PR & Turnkey Repository Scaffolding
+1. **Branch-Before-Change & Pre-Change Draft PR**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to an onboarding branch (e.g., `chore/aisdlc-onboarding`) **before** modifying or creating any files. Whenever a remote repository is configured (`git remote`), check if an open PR exists for the branch (`gh pr view` / `gh pr list --head <branch>`); if none exists, create an empty bootstrap commit (`git commit --allow-empty -m "chore(onboarding): open draft PR"`), push (`git push -u origin <branch>`), and open a **Draft PR** (`gh pr create --draft`) before making any changes (if no remote exists, work locally).
 2. Initialize AI-SDLC configuration without overwriting existing application files using `npx @aisdlc/cli init` (or MCP tool `new`).
 3. Install the Git telemetry hook via `npx aisdlc git hook install` (`pnpm run git:hook:install`).
 4. Invoke [`agent-devops`](../agent-devops/SKILL.md) to audit existing CI/CD workflows and container manifests and integrate `aisdlc verify all` into the pipeline without breaking legacy deployments.
-5. Commit initial AI-SDLC schemas and policies (`.github/`, `schemas/`, `templates/`, `*-policy.yaml`), push (`git push -u origin <branch>`), and open a **Draft PR** (`gh pr create --draft`, with graceful fallback if no remote or CLI auth exists) so subsequent retro-inception and characterization commits are pushed incrementally.
+5. Commit initial AI-SDLC schemas and policies (`.github/`, `schemas/`, `templates/`, `*-policy.yaml`) and push (`git push`) to the open Draft PR so subsequent retro-inception and characterization commits are pushed incrementally.
 
 ### Step 2: Automated Baseline Audit & Debt Inventory (Read-Only)
 Before modifying any code or creating SDD changes, run diagnostic verifiers to quantify existing technical, legal, privacy, and security debt:

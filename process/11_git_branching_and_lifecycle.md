@@ -63,14 +63,14 @@ To govern collaborative development between humans and AI agents with maximum st
 
 ## 3. Branch and Merge Flow Diagrams
 
-### Streamlined Flow (Default — Early Draft PR + 1 Feature PR with SemVer Bump)
+### Streamlined Flow (Default — Pre-Change Draft PR + 1 Feature PR with SemVer Bump)
 ```mermaid
 gitGraph
     commit id: "v1.0.0 (main)"
     branch feat/CHG-001-telemetry
     checkout feat/CHG-001-telemetry
-    commit id: "spec & scaffolding [Open Draft PR]"
-    commit id: "design & tasks [Checkpoint 1 OK]"
+    commit id: "chore(CHG-001): open Draft PR"
+    commit id: "spec & design [Checkpoint 1 OK]"
     commit id: "test(TSK-001): Red BDD/E2E [push]"
     commit id: "feat(TSK-001): Green impl [push]"
     commit id: "test(TSK-002): Red adapter [push]"
@@ -122,8 +122,8 @@ gitGraph
 2. **Commit Trailer & Scope Discipline**:
    - Every commit produced by an agent must include the `Task-ID: TSK-YYY` trailer (or declare it in the commit subject `feat(TSK-YYY): ...`).
    - The git hook `prepare-commit-msg` automatically parses the task ID and injects author metadata and token telemetry.
-3. **Early Draft PR & Mandatory Ready-for-Review Gate**:
-   - **Draft PR from Spec/Scaffolding**: After the initial specification/scaffolding commit on the working branch, the agent should push (`git push -u origin <branch>`) and open a **Draft PR** (`gh pr create --draft`, with graceful fallback when no remote or CLI auth exists). Subsequent phase commits (Checkpoint 1 design, Step 4 Red tests, Step 5 Green implementation, Checkpoint 2 fixes) are pushed incrementally to this Draft PR for live auditability and Checkpoint 1 human review.
+3. **Mandatory Pre-Change Draft PR (When Remote Exists) & Ready-for-Review Gate**:
+   - **Draft PR Before Any Changes**: Whenever a remote repository is configured (`git remote` / `origin`), after switching to the working branch at the start of a skill and **before** modifying or creating any files, the agent MUST check if an open PR already exists for the branch (`gh pr view` / `gh pr list --head <branch>`). If none exists, the agent MUST create an empty bootstrap commit (`git commit --allow-empty -m "chore(<ID>): open draft PR"`), push (`git push -u origin <branch>`), and open a **Draft PR** (`gh pr create --draft`). Subsequent phase commits (specs, Checkpoint 1 design, Step 4 Red tests, Step 5 Green implementation, Checkpoint 2 fixes) are pushed incrementally to this Draft PR. (If no remote repository exists, the agent works locally on the working branch.)
    - **Ready for Review Gate (`gh pr ready`)**: An agent MUST NOT mark a PR as Ready for Review (`gh pr ready`) or present it for merge until Checkpoint 1 (Design), TDD Red-Green implementation, Checkpoint 2 (Pre-PR Quality & Mutation), and all 12 Quality Gates are completed and green.
    - **CI Draft Guard**: CI workflows skip heavy verification/test jobs while a PR is in `draft` state (`github.event.pull_request.draft == false` with `ready_for_review` trigger) so intentional TDD Red commits do not trigger false CI failures or waste runner minutes.
 
