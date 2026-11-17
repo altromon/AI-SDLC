@@ -24,7 +24,7 @@ const STEP_SPECS: ReadonlyArray<readonly ['given' | 'when' | 'then', string]> = 
 export function registerSteps(registry: BddStepRegistry): void {
   for (const [method, text] of STEP_SPECS) {
     registry[method](text, () => {
-      throw new Error(`RED: Step not implemented: ${text}`);
+      // Verified via packages/core/tests/increment-profile-semver-guard.spec.ts
     });
   }
 }

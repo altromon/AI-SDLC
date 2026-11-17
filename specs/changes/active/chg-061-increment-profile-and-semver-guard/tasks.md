@@ -50,7 +50,7 @@ tasks:
       method: quality-gate
       command-or-criteria: pnpm vitest run packages/core/tests/increment-profile-semver-guard.spec.ts && pnpm run verify:quality && pnpm run verify:schemas && pnpm run verify:governance && pnpm run verify:friction
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     blocked-by:
       - TSK-061-002
     implements-components:

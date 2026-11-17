@@ -262,4 +262,38 @@ describe('CHG-061: Deterministic SDD Increment Guard in scripts/guard-branch.cjs
 
     expect(runGuardHook(tempWorkspace, 'src/app.ts').decision).toBe('allow');
   });
+
+  it('9. directly unit-tests exported helper functions for happy, sad, boundary, and null/empty inputs', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const guard = require(guardScriptPath);
+    expect(typeof guard.evaluateGuardDecision).toBe('function');
+    expect(typeof guard.hasValidActiveSddIncrement).toBe('function');
+    expect(typeof guard.detectChangeDirProfile).toBe('function');
+    expect(typeof guard.isSourceOrTestTarget).toBe('function');
+    expect(typeof guard.isProtectedBypassPath).toBe('function');
+
+    // Null/empty/boundary on isSourceOrTestTarget & isProtectedBypassPath
+    expect(guard.isSourceOrTestTarget('')).toBe(false);
+    expect(guard.isSourceOrTestTarget(null)).toBe(false);
+    expect(guard.isSourceOrTestTarget(undefined)).toBe(false);
+    expect(guard.isSourceOrTestTarget('packages\\core\\src\\index.ts')).toBe(true);
+    expect(guard.isSourceOrTestTarget('specs/product/UC-001.md')).toBe(false);
+
+    expect(guard.isProtectedBypassPath('')).toBe(false);
+    expect(guard.isProtectedBypassPath(null)).toBe(false);
+    expect(guard.isProtectedBypassPath(undefined)).toBe(false);
+    expect(guard.isProtectedBypassPath('schemas/sdd/spec.schema.json')).toBe(true);
+    expect(guard.isProtectedBypassPath('09_decisions/ADR-001.md')).toBe(true);
+    expect(guard.isProtectedBypassPath('migrations/001_init.sql')).toBe(true);
+    expect(guard.isProtectedBypassPath('README.md')).toBe(false);
+
+    // detectChangeDirProfile defaults to 'standard' for non-existent dir
+    expect(guard.detectChangeDirProfile(path.join(os.tmpdir(), 'non-existent-chg-dir-061'))).toBe('standard');
+
+    // hasValidActiveSddIncrement with empty or parent-relative target path
+    tempWorkspace = initTempGitWorkspace('feat/CHG-061-unit', true);
+    expect(guard.hasValidActiveSddIncrement(tempWorkspace, 'feat/CHG-061-unit', '').valid).toBe(true);
+    expect(guard.hasValidActiveSddIncrement(tempWorkspace, 'feat/CHG-061-unit', '../outside.ts').valid).toBe(true);
+    expect(guard.hasValidActiveSddIncrement(tempWorkspace, 'feat/CHG-061-unit').valid).toBe(false);
+  });
 });
