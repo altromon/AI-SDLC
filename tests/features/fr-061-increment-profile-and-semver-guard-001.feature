@@ -6,7 +6,7 @@
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.
 # ==============================================================================
 
-@FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001 @functional @automated @increment-profile-semver @regression
+@FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001 @UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD @functional @automated @increment-profile-semver @regression
 Feature: Deterministic SDD increment profile triage, SemVer precedence bump, and branch/SDD guard enforcement
   As a DevSecOps engineer
   I want aisdlc-increment and guard-branch.cjs to enforce profile-proportional SDD artifacts and precedence-based SemVer versioning

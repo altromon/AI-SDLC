@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-061-increment-profile-and-semver-guard/spec.md
+# Origen: specs/changes/completed/chg-061-increment-profile-and-semver-guard/spec.md
 # ID Requerimiento: SPEC-CHG-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.
