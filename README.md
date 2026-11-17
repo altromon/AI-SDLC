@@ -572,8 +572,8 @@ Once change implementation finishes and all tasks in `tasks.md` are `COMPLETED`:
 
 1. **Unattended CI/CD Automation (Recommended)**:
    - Upon merging the Pull Request into `main` or release branches (`release/*`), GitHub Actions workflow [`.github/workflows/sdd-integrate-on-merge.yml`](.github/workflows/sdd-integrate-on-merge.yml) triggers automatically.
-   - Detects the active change, executes canonical integration safely, and commits/pushes with `chore(sdd): integrate <change-id> into canonical baseline [skip ci]`.
-   - **Developer workflow**: Simply run `git pull` locally to receive the updated baseline.
+   - Detects the active change, executes canonical integration safely, refreshes `reports/QUALITY_REPORT.md` and `reports/dashboard.html`, and commits/pushes with `chore(sdd): integrate changes into canonical baseline [skip ci]`.
+   - **Developer workflow**: Compute reports locally during PR review without committing global `reports/*` on `feat/CHG-*` branches (to avoid parallel-PR merge conflicts); once merged, run `git pull` locally to receive the updated baseline and consolidated reports.
 
 2. **Local / Manual Execution (Simplified Command)**:
    ```bash
@@ -771,6 +771,8 @@ npx aisdlc report dashboard --open
 # Custom path and title
 npx aisdlc report dashboard --output docs/dashboard.html --title "SentinelCore Mission Control"
 ```
+
+> **Multi-PR Workflow**: Skills generate `reports/QUALITY_REPORT.md` and `reports/dashboard.html` locally at the end of an increment for inspection, without committing global `reports/*` files on `feat/CHG-*` PR branches. Post-merge automation (`.github/workflows/sdd-integrate-on-merge.yml`) consolidates and commits the updated reports on `main` / `release/*`.
 
 ---
 
