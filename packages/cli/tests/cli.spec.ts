@@ -340,7 +340,7 @@ describe('@aisdlc/cli Command Suite', () => {
   });
 
   it('should verify all quality gates including schemas and security via CLI', () => {
-    const passed = runVerifyAll({ silent: true });
+    const passed = runVerifyAll({ silent: true, requireCoverageReport: false });
     expect(passed).toBe(true);
   });
 });

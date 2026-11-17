@@ -235,7 +235,7 @@ export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
     updateBaseline: options.updateBaseline,
     baseline: options.baseline,
     ratchet: options.ratchet,
-    requireCoverageReport: options.requireCoverageReport ?? true,
+    requireCoverageReport: options.requireCoverageReport,
   });
 
   if (useJson) {

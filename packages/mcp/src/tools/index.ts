@@ -338,8 +338,8 @@ async function executeSecuredTool<T extends Record<string, unknown>>(
   }
 }
 
-function runCoreGates(root: string) {
-  const qg = verifyQualityGate({ rootDir: root });
+function runCoreGates(root: string, requireCoverageReport?: boolean) {
+  const qg = verifyQualityGate({ rootDir: root, requireCoverageReport });
   const sec = verifySecrets({ rootDir: root });
   const sast = verifySast({ rootDir: root });
   const lc = verifyLicenses({ rootDir: root });
@@ -375,12 +375,12 @@ function runExtendedGates(root: string) {
   ];
 }
 
-function runFullGates(root: string) {
-  return [...runCoreGates(root), ...runExtendedGates(root)];
+function runFullGates(root: string, requireCoverageReport?: boolean) {
+  return [...runCoreGates(root, requireCoverageReport), ...runExtendedGates(root)];
 }
 
-function runLiteGates(root: string) {
-  const qg = verifyQualityGate({ rootDir: root });
+function runLiteGates(root: string, requireCoverageReport?: boolean) {
+  const qg = verifyQualityGate({ rootDir: root, requireCoverageReport });
   const sec = verifySecrets({ rootDir: root });
   const sast = verifySast({ rootDir: root });
   const lc = verifyLicenses({ rootDir: root });
@@ -401,8 +401,8 @@ function resolveCompositeExitCode(allPassed: boolean, gates: Array<{ name: strin
   return 1;
 }
 
-function runVerifyAllGates(root: string, isLite: boolean) {
-  const gates = isLite ? runLiteGates(root) : runFullGates(root);
+function runVerifyAllGates(root: string, isLite: boolean, requireCoverageReport?: boolean) {
+  const gates = isLite ? runLiteGates(root, requireCoverageReport) : runFullGates(root, requireCoverageReport);
   const allPassed = gates.every((g) => g.success);
 
   return {
@@ -484,10 +484,10 @@ function registerVerifyTool(server: McpServer, options: RegisterToolsOptions): v
   server.tool(
     'verify',
     'Executes deterministic AI-SDLC Quality Gates.',
-    { root: z.string().optional(), profile: z.enum(['full', 'lite']).optional() },
+    { root: z.string().optional(), profile: z.enum(['full', 'lite']).optional(), requireCoverageReport: z.boolean().optional() },
     async (params) => {
       return executeSecuredTool('verify', params, options, (root) => {
-        const result = runVerifyAllGates(root, params.profile === 'lite');
+        const result = runVerifyAllGates(root, params.profile === 'lite', params.requireCoverageReport);
         return { data: result, isError: !result.success, root };
       });
     }
@@ -723,6 +723,7 @@ const VERIFY_QUALITY_SCHEMA = {
   updateBaseline: z.boolean().optional(),
   baseline: z.string().optional(),
   ratchet: z.boolean().optional(),
+  requireCoverageReport: z.boolean().optional(),
 };
 
 function registerVerifyQualityTool(server: McpServer, options: RegisterToolsOptions): void {
@@ -744,6 +745,7 @@ function registerVerifyQualityTool(server: McpServer, options: RegisterToolsOpti
           updateBaseline: params.updateBaseline,
           baseline: params.baseline,
           ratchet: params.ratchet,
+          requireCoverageReport: params.requireCoverageReport,
         });
         return { data: result, isError: !result.success, root };
       });
