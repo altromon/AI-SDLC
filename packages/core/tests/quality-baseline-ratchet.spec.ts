@@ -137,7 +137,7 @@ export function legacyFunction(x: number): string {
       verifyQualityGate({ rootDir: tmp, updateBaseline: true });
 
       // 2. Run verify in ratchet mode
-      const result = verifyQualityGate({ rootDir: tmp, ratchet: true });
+      const result = verifyQualityGate({ rootDir: tmp, ratchet: true, requireCoverageReport: false });
       
       expect(result.success).toBe(true);
       expect(result.failCount).toBe(0);
@@ -267,7 +267,7 @@ agent_guardrails:
       verifyQualityGate({ rootDir: tmp, updateBaseline: true });
 
       // Run without explicit ratchet option; policy has ratchet_mode: true
-      const result = verifyQualityGate({ rootDir: tmp });
+      const result = verifyQualityGate({ rootDir: tmp, requireCoverageReport: false });
       expect(result.success).toBe(true);
       expect(result.toleratedViolationsCount).toBeGreaterThan(0);
     } finally {

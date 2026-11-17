@@ -94,6 +94,7 @@ export interface QualityVerifyOptions extends VerifyBaseOptions {
   updateBaseline?: boolean;
   baseline?: string | boolean;
   ratchet?: boolean;
+  requireCoverageReport?: boolean;
 }
 
 function buildFunctionMetricViolations(results: ReturnType<typeof verifyQualityGate>['results']) {
@@ -234,6 +235,7 @@ export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
     updateBaseline: options.updateBaseline,
     baseline: options.baseline,
     ratchet: options.ratchet,
+    requireCoverageReport: options.requireCoverageReport ?? true,
   });
 
   if (useJson) {

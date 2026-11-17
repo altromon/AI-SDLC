@@ -1,5 +1,11 @@
 # @aisdlc/core
 
+## 4.5.1
+
+### Patch Changes
+
+- fix(quality-gate): require code coverage report by default in `STRICT` enforcement mode (`CHG-062-STRICT-COVERAGE-GATE`), failing `verifyQualityGate` when no coverage report is present on disk unless `PERMISSIVE` mode or `requireCoverageReport: false` is set.
+
 ## 4.4.0
 
 ### Minor Changes

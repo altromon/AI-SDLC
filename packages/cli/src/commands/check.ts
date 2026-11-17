@@ -125,7 +125,7 @@ export function auditPdacGate(rootDir: string, wasAutoFixed: boolean): Preflight
 }
 
 export function auditQualityGate(rootDir: string): PreflightGateSummary {
-  const res = verifyQualityGate({ rootDir });
+  const res = verifyQualityGate({ rootDir, requireCoverageReport: false });
   if (res.success) {
     return {
       name: 'Quality Gate (Complexity & Maintainability)',

@@ -96,7 +96,7 @@ describe('Generalized UI Component & Per-Method Test Enforcement', () => {
         'utf-8'
       );
 
-      const passed = verifyQualityGate({ rootDir: tmpDir });
+      const passed = verifyQualityGate({ rootDir: tmpDir, requireCoverageReport: false });
       expect(passed.success).toBe(true);
       expect(passed.untestedUiComponents).toEqual([]);
     } finally {
@@ -140,7 +140,7 @@ describe('Generalized UI Component & Per-Method Test Enforcement', () => {
         'utf-8'
       );
 
-      const passed = verifyQualityGate({ rootDir: tmpDir });
+      const passed = verifyQualityGate({ rootDir: tmpDir, requireCoverageReport: false });
       expect(passed.success).toBe(true);
       expect(passed.untestedUiComponents).toEqual([]);
     } finally {

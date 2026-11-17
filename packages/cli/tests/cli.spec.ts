@@ -316,6 +316,12 @@ describe('@aisdlc/cli Command Suite', () => {
   it('should support quality gate baseline and ratchet mode via CLI options', () => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-baseline-test-'));
     fs.mkdirSync(path.join(tempDir, 'src'), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, 'coverage'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, 'coverage', 'coverage-summary.json'),
+      JSON.stringify({ total: { lines: { pct: 95 }, branches: { pct: 90 }, functions: { pct: 95 } } }),
+      'utf-8'
+    );
     fs.writeFileSync(
       path.join(tempDir, 'src', 'legacy.ts'),
       'export function complex(x: number) { if (x === 1) return 1; if (x === 2) return 2; if (x === 3) return 3; if (x === 4) return 4; if (x === 5) return 5; if (x === 6) return 6; return 0; }',

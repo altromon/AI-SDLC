@@ -138,9 +138,13 @@ Running `aisdlc init` (or `npx @aisdlc/cli init`) delivers a turnkey governance 
 
 ### Automated Code Coverage Ingestion (.NET / Polyglot)
 
-`aisdlc report quality` and `aisdlc report dashboard` passively ingest test coverage from standard locations:
+`aisdlc verify quality`, `aisdlc verify all`, `aisdlc report quality`, and `aisdlc report dashboard` passively ingest test coverage from standard locations:
 - `coverage/lcov.info` or `reports/lcov.info` (LCOV format)
 - `coverage/coverage-summary.json` or `reports/coverage-summary.json` (Istanbul/JSON summary format)
+- `coverage.cobertura.xml` / `coverage.xml` / `TestResults/*/coverage.cobertura.xml` (Cobertura XML, e.g. .NET Coverlet & Pytest)
+- `jacoco.xml`, `coverage.out` (Go), `llvm-cov.json` (Rust/C++)
+
+> **Strict Enforcement:** In `STRICT` mode (`quality-policy.yaml`), `aisdlc verify quality` (enabled by default), `aisdlc verify all`, and `aisdlc report quality` fail if no coverage report is found on disk. In `PERMISSIVE` mode (or during pre-flight `aisdlc check`), missing coverage is non-blocking.
 
 #### Setting up .NET / C# projects:
 1. Ensure `coverlet.collector` is installed in your test project (`*.Tests.csproj`):
