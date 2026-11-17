@@ -20,7 +20,7 @@ Across Brownfield retro-inception, quality auditing and adversarial stress-testi
 ## End-to-End Execution Playbook
 
 ### Step 1: Branch-Before-Change, Pre-Change Draft PR & Turnkey Repository Scaffolding
-1. **Branch-Before-Change & Pre-Change Draft PR**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to an onboarding branch (e.g., `chore/aisdlc-onboarding`) **before** modifying or creating any files. Whenever a remote repository is configured (`git remote`), check if an open PR exists for the branch (`gh pr view` / `gh pr list --head <branch>`); if none exists, create an empty bootstrap commit (`git commit --allow-empty -m "chore(onboarding): open draft PR"`), push (`git push -u origin <branch>`), and open a **Draft PR** (`gh pr create --draft`) before making any changes (if no remote exists, work locally).
+1. **Branch-Before-Change & Pre-Change Draft PR/MR**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to an onboarding branch (e.g., `chore/aisdlc-onboarding`) **before** modifying or creating any files. Whenever a remote repository is configured (`git remote`), check if an open PR/MR exists for the branch (`gh pr view` / `gh pr list --head <branch>` on GitHub; `glab mr view` / `glab mr list --source-branch <branch>` on GitLab); if none exists, create an empty bootstrap commit (`git commit --allow-empty -m "chore(onboarding): open draft PR"`), push (`git push -u origin <branch>`), and open a **Draft PR/MR** (`gh pr create --draft` on GitHub; `glab mr create --draft` or `git push -o merge_request.create -o merge_request.draft` on GitLab) before making any changes (if no remote exists, work locally).
 2. Initialize AI-SDLC configuration without overwriting existing application files using `npx @aisdlc/cli init` (or MCP tool `new`).
 3. Install the Git telemetry hook via `npx aisdlc git hook install` (`pnpm run git:hook:install`).
 4. Invoke [`agent-devops`](../agent-devops/SKILL.md) to audit existing CI/CD workflows and container manifests and integrate `aisdlc verify all` into the pipeline without breaking legacy deployments.
@@ -44,7 +44,7 @@ Instead of attempting to document 100% of a legacy monolith upfront, apply **bou
 1. Run MCP tool `sdd_check_fix` (`npx aisdlc check --fix`) to extract `.feature` files and compute canonical SHA-256 digests.
 2. Run `verify_schemas` and `verify_pdac` to confirm the reverse-engineered baseline graph is structurally valid and drift-free.
 3. Run `report_quality` (`npx aisdlc report quality`) and `report_dashboard` (`npx aisdlc report dashboard`) to generate the local baseline quality report and interactive dashboard for inspection (commit global `reports/` only on the onboarding baseline or post-merge on `main`, never on parallel feature PRs).
-4. Push final baseline commits (`git push`) and mark the onboarding Draft PR ready (`gh pr ready`) for human Tech Lead review before merging to `main`.
+4. Push final baseline commits (`git push`) and mark the onboarding Draft PR/MR ready (`gh pr ready` / `glab mr update --ready`) for human Tech Lead review before merging to `main`.
 
 ### Step 5: Transition to Governed SDD Increments (Boy Scout / Strangler Rule)
 Once the target domain's baseline artifacts (`ARCH-INTRO-*`, `UC-*`, `FR-*`, `CMP-*`) are in place, execute all new features, refactorings, or bugfixes via [`aisdlc-increment`](../aisdlc-increment/SKILL.md).

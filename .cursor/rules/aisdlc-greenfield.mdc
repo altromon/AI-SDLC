@@ -21,7 +21,7 @@ Across Phase 0 and Inception, quality auditing and adversarial stress-testing ar
 ## End-to-End Execution Playbook
 
 ### Step 1: Branch-Before-Change, Pre-Change Draft PR & Repository Initialization
-1. **Branch-Before-Change & Pre-Change Draft PR**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to an inception branch (e.g., `feat/inception-baseline` or `chore/aisdlc-inception`) **before** modifying or creating any files. Whenever a remote repository is configured (`git remote`), check if an open PR exists for the branch (`gh pr view` / `gh pr list --head <branch>`); if none exists, create an empty bootstrap commit (`git commit --allow-empty -m "chore(inception): open draft PR"`), push (`git push -u origin <branch>`), and open a **Draft PR** (`gh pr create --draft`) before making any changes (if no remote exists, work locally).
+1. **Branch-Before-Change & Pre-Change Draft PR/MR**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to an inception branch (e.g., `feat/inception-baseline` or `chore/aisdlc-inception`) **before** modifying or creating any files. Whenever a remote repository is configured (`git remote`), check if an open PR/MR exists for the branch (`gh pr view` / `gh pr list --head <branch>` on GitHub; `glab mr view` / `glab mr list --source-branch <branch>` on GitLab); if none exists, create an empty bootstrap commit (`git commit --allow-empty -m "chore(inception): open draft PR"`), push (`git push -u origin <branch>`), and open a **Draft PR/MR** (`gh pr create --draft` on GitHub; `glab mr create --draft` or `git push -o merge_request.create -o merge_request.draft` on GitLab) before making any changes (if no remote exists, work locally).
 2. If the workspace has not been initialized with AI-SDLC schemas, policies, and templates, run MCP tool `new` (or CLI `npx @aisdlc/cli init`).
 3. Install the Git telemetry hook via `npx aisdlc git hook install` (`pnpm run git:hook:install`).
 4. Verify `quality-policy.yaml`, `license-policy.yaml`, and `privacy-policy.yaml` are present in the repository root.
@@ -62,7 +62,7 @@ Across Phase 0 and Inception, quality auditing and adversarial stress-testing ar
 ### Checkpoint 1 (Inception Design Checkpoint): `agent-auditor` $\parallel$ `agent-adversary`
 1. Concurrently invoke `agent-auditor` (evaluating YAGNI, architecture bloat, interface contracts) and `agent-adversary` (simulating SPOFs, race conditions, unhandled threat scenarios) in isolated context windows over all Phase 0 deliverables.
 2. Consolidate findings and remediate in authoring agents (max 2 correction rounds), committing and pushing (`git push`) updates to the Draft PR.
-3. **Human Approval Gate**: Mark the Inception Draft PR ready (`gh pr ready`) and present the comprehensive Inception model for Human PO & Tech Lead sign-off.
+3. **Human Approval Gate**: Mark the Inception Draft PR/MR ready (`gh pr ready` / `glab mr update --ready`) and present the comprehensive Inception model for Human PO & Tech Lead sign-off.
 
 ### Step 5: Release Milestone & Topological Wave SDD Plan (`1 UC-* = 1 CHG-*`)
 1. **Open Release Milestone (`Tier 2: release/v1.0.0` or Streamlined `main`)**: Group approved MVP Use Cases (`UC-001`, `UC-002`, ...) and visualize execution plan.
