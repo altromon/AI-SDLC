@@ -3,6 +3,8 @@
  */
 
 // --- Quality Gate Types ---
+export type UiModality = 'web' | 'desktop' | 'console' | 'mobile';
+
 export interface QualityPolicy {
   max_cyclomatic: number;
   max_cognitive: number;
@@ -19,6 +21,7 @@ export interface QualityPolicy {
   test_patterns?: string[];
   require_function_unit_tests?: boolean;
   require_ui_component_tests?: boolean;
+  verify_ui_driver_signatures?: boolean;
   ui_component_patterns?: string[];
   ui_test_patterns?: string[];
 }
@@ -85,6 +88,7 @@ export interface QualityGateOptions {
   requireCoverageReport?: boolean;
   requireFunctionUnitTests?: boolean;
   requireUiComponentTests?: boolean;
+  verifyUiDriverSignatures?: boolean;
   baseline?: boolean | string;
   baselinePath?: string;
   updateBaseline?: boolean;
