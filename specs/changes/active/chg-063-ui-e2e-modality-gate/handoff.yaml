@@ -13,11 +13,11 @@ subgraph:
     - CMP-063-UI-E2E-MODALITY-GATE
 citations:
   - id: UC-063-UI-E2E-MODALITY-GATE
-    digest: sha256:a42c27eb12d00d9219500ca5a5528568ac67f2bc9b48b64a7ece91b2ffd4028f
+    digest: sha256:f7139d058de3c42f712408e918844c8becabbbbd33a5c1d1b53ebba9f2f79ccc
     comment: Caso de uso para verificación determinista de pruebas UI y E2E por modalidad (Web Playwright, Desktop FlaUI, Consola CLI/TUI y Mobile) en el Quality Gate
   - id: FR-063-UI-E2E-MODALITY-GATE-001
-    digest: sha256:c1339af72bbfc9c3fb2c0ac0ea439706f77f0e384a0b62ebd3307344cc8d3f71
+    digest: sha256:e3120949399c5bc3a8bdd7230973a7cffca029f747f0d8ddbfa8bbf371872c8e
     comment: Requisito funcional del gate determinista políglota de pruebas UI y E2E en las 4 modalidades
   - id: CMP-063-UI-E2E-MODALITY-GATE
-    digest: sha256:3e03e8dac780c1387fa5acd67e897f902be42711af6bd36f9298bf5c070b1159
+    digest: sha256:c594c46a10240b9ceef8e234ca6b2449c012a313c9a39ed0d3f4123e1cd4351f
     comment: Componente arquitectónico del gate determinista políglota de pruebas UI y E2E por modalidad

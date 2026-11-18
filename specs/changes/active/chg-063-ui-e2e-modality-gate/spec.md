@@ -13,13 +13,13 @@ cucumber-tags:
   - "@ui-e2e-modality-gate"
 citations:
   - id: UC-063-UI-E2E-MODALITY-GATE
-    digest: sha256:a42c27eb12d00d9219500ca5a5528568ac67f2bc9b48b64a7ece91b2ffd4028f
+    digest: sha256:f7139d058de3c42f712408e918844c8becabbbbd33a5c1d1b53ebba9f2f79ccc
     comment: Caso de uso para verificación determinista de pruebas UI y E2E por modalidad (Web Playwright, Desktop FlaUI, Consola CLI/TUI y Mobile) en el Quality Gate
   - id: FR-063-UI-E2E-MODALITY-GATE-001
-    digest: sha256:c1339af72bbfc9c3fb2c0ac0ea439706f77f0e384a0b62ebd3307344cc8d3f71
+    digest: sha256:e3120949399c5bc3a8bdd7230973a7cffca029f747f0d8ddbfa8bbf371872c8e
     comment: Requisito funcional del gate determinista políglota de pruebas UI y E2E en las 4 modalidades
   - id: CMP-063-UI-E2E-MODALITY-GATE
-    digest: sha256:3e03e8dac780c1387fa5acd67e897f902be42711af6bd36f9298bf5c070b1159
+    digest: sha256:c594c46a10240b9ceef8e234ca6b2449c012a313c9a39ed0d3f4123e1cd4351f
     comment: Componente arquitectónico del gate determinista políglota de pruebas UI y E2E por modalidad
 ---
 
@@ -31,7 +31,7 @@ citations:
 
 | Catalog Category | Catalog ID | Action (`MODIFIED` / `DEPRECATED`) | Description of Delta & Behavioral Impact |
 | :--- | :--- | :--- | :--- |
-| Architecture / Component | `CMP-063-UI-E2E-MODALITY-GATE` | `MODIFIED` | Activa `require_ui_component_tests: true` por defecto en `createDefaultQualityPolicy()`, amplía el descubrimiento de componentes y pruebas UI/E2E a las 4 modalidades (`web`, `desktop`, `console`, `mobile`) y exige verificación determinista de firmas de drivers E2E por modalidad en `auditUiComponents()`. |
+| Architecture / Component | `CMP-063-UI-E2E-MODALITY-GATE` | `MODIFIED` | Activa `require_ui_component_tests: true` por defecto en `createDefaultQualityPolicy()`, amplía el descubrimiento de componentes y pruebas UI/E2E a las 4 modalidades (`web`, `desktop`, `console`, `mobile`, incluyendo globs de monorepo y `**/*.xaml.cs`/`**/*.axaml.cs`), aplica precedencia de 2 niveles en `detectUiComponentModality()` y exige verificación determinista de firmas de drivers E2E sobre el cuerpo del test sin comentarios (`stripTestComments`) en `auditUiComponents()`. |
 | Use Case | `UC-063-UI-E2E-MODALITY-GATE` | `MODIFIED` | Materializa el flujo nominal de verificación UI/E2E por modalidad y el rechazo determinista de pruebas stub sin firma de driver E2E. |
 | Functional Requirement | `FR-063-UI-E2E-MODALITY-GATE-001` | `MODIFIED` | Implementa y verifica los criterios de aceptación BDD/Gherkin para las 4 modalidades (`web`, `desktop`, `console`, `mobile`). |
 
@@ -51,8 +51,8 @@ citations:
 * **Associated Use Case(s):** `UC-063-UI-E2E-MODALITY-GATE`
 * **Architectural Scope:** `CMP-063-UI-E2E-MODALITY-GATE` (Security Enclave: `SEC-ENC-DMZ`)
 * **Behavioral Contract (Delta Specification):**
-  * **Baseline (Before):** `createDefaultQualityPolicy()` no inicializaba `require_ui_component_tests: true` en memoria (dependiendo de `quality-policy.yaml`), `DEFAULT_UI_COMPONENT_PATTERNS` y `DEFAULT_UI_TEST_PATTERNS` no cubrían la totalidad de patrones de **Web** (`.razor`, `.cshtml`), **Desktop** (`.xaml`, `.axaml`), **Console CLI/TUI** (`**/cli/**`, `**/commands/**`, `**/console/**`, `*Command.*`, `*Cli.*`, `tests/console/**`, `*CliTest*`, `*ConsoleTest*`) y **Mobile** (`*View.swift`, `*Page.dart`, `*Widget.dart`, `*MobileTest*`, `*WidgetTest*.dart`), e `isUiComponentTested()` aceptaba archivos de prueba stub que solo contenían el nombre del componente en un comentario o literal sin firma de driver E2E.
-  * **Target Delta (After):** `createDefaultQualityPolicy()` inicializa `require_ui_component_tests: true` por defecto; `test-discovery.ts` define `UiModality = 'web' | 'desktop' | 'console' | 'mobile'`, `detectUiComponentModality(filePath)` y `hasModalityDriverSignature(content, modality)`; y `auditUiComponents()` / `isUiComponentTested()` verifican que la prueba UI/E2E referencie el componente fuera de comentarios y contenga una firma determinista del driver E2E de su modalidad (salvo que `verify_ui_driver_signatures: false` esté explícitamente configurado).
+  * **Baseline (Before):** `createDefaultQualityPolicy()` no inicializaba `require_ui_component_tests: true` en memoria (dependiendo de `quality-policy.yaml`), `DEFAULT_UI_COMPONENT_PATTERNS` y `DEFAULT_UI_TEST_PATTERNS` no cubrían la totalidad de patrones de **Web** (`.razor`, `.cshtml`), **Desktop** (`.xaml`, `.axaml`, `.xaml.cs`, `.axaml.cs`), **Console CLI/TUI** (`**/cli/**`, `**/commands/**`, `**/console/**`, `*Command.*`, `*Cli.*`, `tests/console/**`, `**/cli/tests/**`, `**/*.cli.spec.*`, `**/*-cli.spec.*`, `*CliTest*`, `*ConsoleTest*`) y **Mobile** (`*View.swift`, `*Page.dart`, `*Widget.dart`, `*MobileTest*`, `*WidgetTest*.dart`), e `isUiComponentTested()` aceptaba archivos de prueba stub que solo contenían el nombre del componente en la ruta `relPath`, en un comentario o en un literal sin firma de driver E2E.
+  * **Target Delta (After):** `createDefaultQualityPolicy()` inicializa `require_ui_component_tests: true` por defecto; `test-discovery.ts` define `UiModality = 'web' | 'desktop' | 'console' | 'mobile'`, `detectUiComponentModality(filePath)` (precedencia de 2 niveles: Nivel 1 extensiones/sufijos inequívocos, Nivel 2 directorios para extensiones genéricas), `stripTestComments(content)` y `hasModalityDriverSignature(content, modality)`; y `auditUiComponents()` / `isUiComponentTested()` verifican que el cuerpo limpio del test (`cleanedContent`, nunca solo `t.relPath`) referencie el componente y contenga una firma determinista del driver E2E de su modalidad (salvo que `verify_ui_driver_signatures: false` esté explícitamente configurado).
 
 ---
 
