@@ -16,6 +16,7 @@ import {
 import {
   detectUiComponentModality,
   hasModalityDriverSignature,
+  inferFallbackUiModality,
   isUiComponentFile,
   isUiTestFile,
   stripTestComments,
@@ -228,6 +229,51 @@ describe('FR-063-UI-E2E-MODALITY-GATE-001 / CMP-063-UI-E2E-MODALITY-GATE: Determ
       expect(cleaned).toContain("http://localhost:3000/login");
       expect(cleaned).toContain("https://example.com/checkout");
     });
+
+    it('handles large newline payloads in linear time without ReDoS (ADV-CHG-063-C2-001)', () => {
+      const start = performance.now();
+      const cleaned = stripTestComments('\n'.repeat(20000));
+      const elapsedMs = performance.now() - start;
+      expect(cleaned.length).toBe(20000);
+      expect(elapsedMs).toBeLessThan(100);
+    });
+
+    it('strips inline # comments while preserving quoted CSS selectors like "#submit" (ADV-CHG-063-C2-002)', () => {
+      const playwrightSnippet = "await page.locator('#submit').click();  # inline comment with CliRunner";
+      const cleaned = stripTestComments(playwrightSnippet);
+      expect(cleaned).toContain("'#submit'");
+      expect(cleaned).not.toContain('CliRunner');
+
+      expect(
+        isUiComponentTested(
+          'DoctorCommand',
+          [{ relPath: 'tests/cli/test_cli_doctor.py', content: 'assert True  # CliRunner DoctorCommand' }],
+          'console',
+          true
+        )
+      ).toBe(false);
+      expect(
+        isUiComponentTested(
+          'ProfileScreen',
+          [{ relPath: 'tests/mobile/profile.yaml', content: 'name: stub  # appId: com.example ProfileScreen' }],
+          'mobile',
+          true
+        )
+      ).toBe(false);
+    });
+
+    it('infers fallback modality by file extension directly via inferFallbackUiModality()', () => {
+      expect(inferFallbackUiModality('src/panels/OrdersPanel.cs')).toBe('desktop');
+      expect(inferFallbackUiModality('src/panels/OrdersPanel.xaml')).toBe('desktop');
+      expect(inferFallbackUiModality('src/tools/status.py')).toBe('console');
+      expect(inferFallbackUiModality('cmd/sync/main.go')).toBe('console');
+      expect(inferFallbackUiModality('src/bin/runner.rs')).toBe('console');
+      expect(inferFallbackUiModality('src/ui/Home.kt')).toBe('mobile');
+      expect(inferFallbackUiModality('src/ui/Home.swift')).toBe('mobile');
+      expect(inferFallbackUiModality('src/ui/Home.dart')).toBe('mobile');
+      expect(inferFallbackUiModality('src/ui/Widget.ts')).toBe('web');
+      expect(inferFallbackUiModality('src/ui/Widget.js')).toBe('web');
+    });
   });
 
   describe('Modality Driver Signatures (hasModalityDriverSignature)', () => {
@@ -254,6 +300,7 @@ describe('FR-063-UI-E2E-MODALITY-GATE-001 / CMP-063-UI-E2E-MODALITY-GATE: Determ
       expect(hasModalityDriverSignature("const spy = vi.spyOn(console, 'log'); runDoctorCommand();", 'console')).toBe(true);
       expect(hasModalityDriverSignature('console.log("DoctorCommand");', 'console')).toBe(false);
       expect(hasModalityDriverSignature('# CliRunner DoctorCommand', 'console')).toBe(false);
+      expect(hasModalityDriverSignature("/DoctorCommand/.exec('DoctorCommand');", 'console')).toBe(false);
     });
 
     it('detects authentic Mobile E2E/widget driver signatures and rejects stubs/comments', () => {

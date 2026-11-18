@@ -275,9 +275,33 @@ const MODALITY_PRECEDENCE_RULES: ReadonlyArray<{ modality: UiModality; matcher: 
 const MODALITY_DRIVER_SIGNATURES: Readonly<Record<UiModality, RegExp>> = {
   web: /(?:@playwright\/test|\bplaywright\b|\bpage\.(?:goto|locator|getByRole|getByText|getByTestId|getByLabel|click|fill|waitForSelector)\b|\bexpect\(\s*(?:page|locator)\b|\bcypress\b|\bcy\.(?:visit|get|contains|intercept)\b|\brender\s*\(|\bscreen\.(?:getBy|findBy|queryBy)\w*|\bfireEvent\b|\buserEvent\b|\bTestBed\b|\bbUnit\b|\bRenderComponent\b)/,
   desktop: /(?:\bFlaUI\b|\bUIA3Automation\b|\bUIA2Automation\b|\bApplication\.Launch\b|\bFindFirstDescendant\b|\bAsButton\b|\bAsTextBox\b|\bMainWindowHandle\b|\bWinAppDriver\b|\bWindowsDriver\b|\bAvalonia\.Headless\b|\bAutomationElement\b)/,
-  console: /(?:\bspawn\b|\bspawnSync\b|\bexecFile\b|\bexecFileSync\b|\bexecSync\b|\bexec\s*\(|\bchild_process\b|\bSpectre\.Console\.Testing\b|\bCommandAppTester\b|\bCliRunner\b|\bclick\.testing\b|\bnode-pty\b|\bpty\b|\bprocess\.stdout\b|\bprocess\.stderr\b|\bConsole\.SetOut\b|\bspyOn\(\s*console\s*,|\bconsole\.(?:log|error|warn)\s*=|\b(?:run|execute)[A-Z]\w*\s*\()/,
+  console: /(?:\bspawn\b|\bspawnSync\b|\bexecFile\b|\bexecFileSync\b|\bexecSync\b|(?<!\.)\bexec\s*\(|\bchild_process\b|\bSpectre\.Console\.Testing\b|\bCommandAppTester\b|\bCliRunner\b|\bclick\.testing\b|\bnode-pty\b|\bpty\b|\bprocess\.stdout\b|\bprocess\.stderr\b|\bConsole\.SetOut\b|\bspyOn\(\s*console\s*,|\bconsole\.(?:log|error|warn)\s*=|\b(?:run|execute)[A-Z]\w*\s*\()/,
   mobile: /(?:\bWidgetTester\b|\btestWidgets\b|\bfind\.by\w+\b|\btester\.(?:tap|pump|pumpWidget|enterText)\b|\bXCUIApplication\b|\bEspresso\b|\bonView\s*\(|\bcomposeTestRule\b|\bAppium\b|\bMaestro\b|\bappId\s*:|\btapOn\s*:|\bassertVisible\s*:|\bDetox\b|\bdevice\.(?:launchApp|reloadReactNative)\b|\belement\(\s*by\.)/,
 };
+
+const DEFAULT_UI_COMPONENT_MATCHER = compilePatternList(DEFAULT_UI_COMPONENT_PATTERNS);
+const DEFAULT_UI_TEST_MATCHER = compilePatternList(DEFAULT_UI_TEST_PATTERNS);
+const QUOTE_CHARS = new Set(["'", '"', '`']);
+
+function isHashCommentStart(line: string, idx: number): boolean {
+  if (line[idx] !== '#') return false;
+  return idx === 0 || line[idx - 1] === ' ' || line[idx - 1] === '\t';
+}
+
+function stripLineHashComment(line: string): string {
+  let quote = '';
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (quote) {
+      if (ch === '\\') { i++; }
+      else if (ch === quote) { quote = ''; }
+      continue;
+    }
+    if (QUOTE_CHARS.has(ch)) { quote = ch; continue; }
+    if (isHashCommentStart(line, i)) return line.slice(0, i);
+  }
+  return line;
+}
 
 export function detectUiComponentModality(filePath: string): UiModality | null {
   const norm = filePath.replace(/\\/g, '/').replace(/^\.\//, '');
@@ -296,11 +320,11 @@ export function inferFallbackUiModality(filePath: string): UiModality {
 }
 
 export function stripTestComments(content: string): string {
-  return content
+  const withoutBlockAndSlash = content
     .replace(/\/\*[\s\S]*?\*\//g, ' ')
     .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/(?<!:)\/\/[^\r\n]*/g, ' ')
-    .replace(/^\s*#[^\r\n]*/gm, ' ');
+    .replace(/(?<!:)\/\/[^\r\n]*/g, ' ');
+  return withoutBlockAndSlash.split('\n').map(stripLineHashComment).join('\n');
 }
 
 export function hasModalityDriverSignature(content: string, modality: UiModality): boolean {
@@ -316,18 +340,18 @@ export function isUiComponentFile(
   if (isPolyglotUnitTestFile(norm) || norm.endsWith('.d.ts') || NON_COMPONENT_UI_FILES.test(norm)) {
     return false;
   }
-  const patterns = customPatterns && customPatterns.length > 0
-    ? customPatterns
-    : DEFAULT_UI_COMPONENT_PATTERNS;
-  return compilePatternList(patterns).matches(norm);
+  const matcher = customPatterns && customPatterns.length > 0
+    ? compilePatternList(customPatterns)
+    : DEFAULT_UI_COMPONENT_MATCHER;
+  return matcher.matches(norm);
 }
 
 export function isUiTestFile(
   filePath: string,
   customPatterns?: readonly string[]
 ): boolean {
-  const patterns = customPatterns && customPatterns.length > 0
-    ? [...DEFAULT_UI_TEST_PATTERNS, ...customPatterns]
-    : DEFAULT_UI_TEST_PATTERNS;
-  return compilePatternList(patterns).matches(filePath);
+  const matcher = customPatterns && customPatterns.length > 0
+    ? compilePatternList([...DEFAULT_UI_TEST_PATTERNS, ...customPatterns])
+    : DEFAULT_UI_TEST_MATCHER;
+  return matcher.matches(filePath);
 }
