@@ -18,13 +18,22 @@ import {
   QualityGateResult,
   QualityPolicy,
   QualityThresholds,
+  UiModality,
   UntestedFunctionItem,
   UntestedUiComponentItem,
 } from '../types/index.js';
 import { orchestrateNativeAstAnalysis } from './ast/native-ast-orchestrator.js';
 import { extractFunctionsPolyglot } from './ast/polyglot-scanner.js';
 import { readNormalizedCoverage, SUPPORTED_COVERAGE_FORMATS_HINT } from './coverage-normalizer.js';
-import { isPolyglotUnitTestFile, isUiComponentFile, isUiTestFile } from './test-discovery.js';
+import {
+  detectUiComponentModality,
+  hasModalityDriverSignature,
+  inferFallbackUiModality,
+  isPolyglotUnitTestFile,
+  isUiComponentFile,
+  isUiTestFile,
+  stripTestComments,
+} from './test-discovery.js';
 import { scanAllTestArtifacts } from './testing-coverage.js';
 
 export const DEFAULT_EXTENSIONS: readonly string[] = [
@@ -72,6 +81,8 @@ export function createDefaultQualityPolicy(): QualityPolicy {
     target_directories: ['src', 'lib'],
     supported_extensions: [...DEFAULT_EXTENSIONS],
     exclude_patterns: [...DEFAULT_EXCLUDES],
+    require_ui_component_tests: true,
+    verify_ui_driver_signatures: true,
   };
 }
 
@@ -125,6 +136,9 @@ function applyTestEnforcement(policy: QualityPolicy, raw: unknown): void {
   }
   if (typeof enf.require_ui_component_tests === 'boolean') {
     policy.require_ui_component_tests = enf.require_ui_component_tests;
+  }
+  if (typeof enf.verify_ui_driver_signatures === 'boolean') {
+    policy.verify_ui_driver_signatures = enf.verify_ui_driver_signatures;
   }
   if (Array.isArray(enf.ui_component_patterns)) {
     policy.ui_component_patterns = enf.ui_component_patterns.map(String);
@@ -496,6 +510,10 @@ function auditUnitTestsPerFunction(
 
 const UI_COMPONENT_EXTENSIONS: readonly string[] = [
   ...DEFAULT_EXTENSIONS,
+  '.razor',
+  '.cshtml',
+  '.xaml',
+  '.axaml',
   '.vue',
   '.svelte',
   '.kt',
@@ -524,9 +542,9 @@ function collectUiTestFiles(rootDir: string, customPatterns?: readonly string[])
   return uiTests;
 }
 
-function extractUiComponentName(relPath: string): string {
+export function extractUiComponentName(relPath: string): string {
   const base = path.basename(relPath);
-  return base.replace(/\.(?:xaml\.cs|component\.ts|vue|svelte|tsx?|jsx?|py|cs|java|kt|swift|dart)$/i, '');
+  return base.replace(/\.(?:a?xaml\.cs|component\.ts|razor|cshtml|a?xaml|vue|svelte|tsx?|jsx?|py|cs|java|kt|swift|dart)$/i, '');
 }
 
 function buildComponentNameVariants(componentName: string): string[] {
@@ -535,23 +553,41 @@ function buildComponentNameVariants(componentName: string): string[] {
   return Array.from(new Set([componentName, kebab, snake]));
 }
 
-function isUiComponentTested(componentName: string, uiTests: Array<{ relPath: string; content: string }>): boolean {
+export function isUiComponentTested(
+  componentName: string,
+  uiTests: Array<{ relPath: string; content: string }>,
+  modality?: UiModality | null,
+  verifyDriverSignatures = true
+): boolean {
   const variants = buildComponentNameVariants(componentName);
   const patterns = variants.map((v) => new RegExp(`\\b${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i'));
-  return uiTests.some((t) => patterns.some((re) => re.test(t.relPath) || re.test(t.content)));
+  return uiTests.some((t) => {
+    const cleaned = stripTestComments(t.content);
+    if (!patterns.some((re) => re.test(cleaned))) return false;
+    if (verifyDriverSignatures && modality) {
+      return hasModalityDriverSignature(cleaned, modality);
+    }
+    return true;
+  });
 }
 
-function auditUiComponents(rootDir: string, policy: QualityPolicy): UntestedUiComponentItem[] {
+function auditUiComponents(
+  rootDir: string,
+  policy: QualityPolicy,
+  verifyDriverOverride?: boolean
+): UntestedUiComponentItem[] {
   const uiPolicy = { ...policy, supported_extensions: [...UI_COMPONENT_EXTENSIONS] };
   const candidateFiles = collectFilesToScan(rootDir, uiPolicy);
   const uiTests = collectUiTestFiles(rootDir, policy.ui_test_patterns);
+  const verifyDriver = verifyDriverOverride ?? policy.verify_ui_driver_signatures ?? true;
   const untested: UntestedUiComponentItem[] = [];
 
   for (const file of candidateFiles) {
     const relPath = path.relative(rootDir, file).replace(/\\/g, '/');
     if (!isUiComponentFile(relPath, policy.ui_component_patterns)) continue;
     const componentName = extractUiComponentName(relPath);
-    if (!isUiComponentTested(componentName, uiTests)) {
+    const modality = detectUiComponentModality(relPath) ?? inferFallbackUiModality(relPath);
+    if (!isUiComponentTested(componentName, uiTests, modality, verifyDriver)) {
       untested.push({ file: relPath, componentName });
     }
   }
@@ -813,7 +849,7 @@ export function verifyQualityGate(options: QualityGateOptions = {}): QualityGate
   const untestedFunctions = requireUnitTests
     ? auditUnitTestsPerFunction(results, rootDir, policy.test_patterns)
     : [];
-  const untestedUiComponents = requireUiTests ? auditUiComponents(rootDir, policy) : [];
+  const untestedUiComponents = requireUiTests ? auditUiComponents(rootDir, policy, options.verifyUiDriverSignatures) : [];
   const requireCoverageReport = options.requireCoverageReport ?? policy.enforce_mode === 'STRICT';
   const coverageViolations = evaluateCoverageThresholds(rootDir, policy, requireCoverageReport);
 

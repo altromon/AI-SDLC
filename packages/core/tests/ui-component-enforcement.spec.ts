@@ -82,12 +82,12 @@ describe('Generalized UI Component & Per-Method Test Enforcement', () => {
       );
       fs.writeFileSync(
         path.join(tmpDir, 'tests', 'desktop', 'MainWindowTests.cs'),
-        'public class MainWindowTests { /* FlaUI MainWindow */ }\n',
+        'using FlaUI.UIA3; public class MainWindowTests { void Run() { Application.Launch("app.exe"); var title = "MainWindow"; } }\n',
         'utf-8'
       );
       fs.writeFileSync(
         path.join(tmpDir, 'tests', 'cli', 'test_status_view.py'),
-        'def test_status_view(): assert "StatusView"\n',
+        'from click.testing import CliRunner\ndef test_status_view(): assert CliRunner().invoke("StatusView")\n',
         'utf-8'
       );
       fs.writeFileSync(
@@ -136,7 +136,7 @@ describe('Generalized UI Component & Per-Method Test Enforcement', () => {
       fs.mkdirSync(path.join(tmpDir, 'tests', 'flaui'), { recursive: true });
       fs.writeFileSync(
         path.join(tmpDir, 'tests', 'flaui', 'OrdersPanelFlaUITests.cs'),
-        'class OrdersPanelFlaUITests { /* OrdersPanel */ }\n',
+        'using FlaUI.UIA3; class OrdersPanelFlaUITests { void Run() { Application.Launch("app.exe"); var panel = "OrdersPanel"; } }\n',
         'utf-8'
       );
 

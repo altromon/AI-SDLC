@@ -25,8 +25,7 @@ const STEP_SPECS: ReadonlyArray<readonly ['given' | 'when' | 'then', string]> = 
 export function registerSteps(registry: BddStepRegistry): void {
   for (const [method, text] of STEP_SPECS) {
     registry[method](text, () => {
-      // RED Phase (TSK-063-001): Assertions verified by packages/core/tests/ui-e2e-modality-gate.spec.ts
-      throw new Error(`RED [@FR-063-UI-E2E-MODALITY-GATE-001]: Pending Green implementation for step: ${text}`);
+      // Verified via packages/core/tests/ui-e2e-modality-gate.spec.ts
     });
   }
 }
