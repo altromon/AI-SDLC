@@ -1,5 +1,13 @@
 # @aisdlc/cli
 
+## 4.5.1
+
+### Patch Changes
+
+- fix(verify): enable `requireCoverageReport: true` by default in `runVerifyQuality` (`CHG-062-STRICT-COVERAGE-GATE`), keeping pre-flight `aisdlc check` non-blocking for coverage.
+- Updated dependencies
+  - @aisdlc/core@4.5.1
+
 ## 4.4.0
 
 ### Minor Changes

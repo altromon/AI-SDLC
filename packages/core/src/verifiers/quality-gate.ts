@@ -814,7 +814,8 @@ export function verifyQualityGate(options: QualityGateOptions = {}): QualityGate
     ? auditUnitTestsPerFunction(results, rootDir, policy.test_patterns)
     : [];
   const untestedUiComponents = requireUiTests ? auditUiComponents(rootDir, policy) : [];
-  const coverageViolations = evaluateCoverageThresholds(rootDir, policy, options.requireCoverageReport);
+  const requireCoverageReport = options.requireCoverageReport ?? policy.enforce_mode === 'STRICT';
+  const coverageViolations = evaluateCoverageThresholds(rootDir, policy, requireCoverageReport);
 
   const baselineFile = resolveBaselineFilePath(rootDir, options);
   if (options.updateBaseline) {

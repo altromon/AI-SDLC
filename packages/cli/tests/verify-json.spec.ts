@@ -50,7 +50,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
   it('should emit valid JSON without ANSI codes for runVerifyQuality in nominal pass', () => {
     let passed: boolean = false;
     const output = captureConsoleLog(() => {
-      passed = runVerifyQuality({ json: true });
+      passed = runVerifyQuality({ json: true, requireCoverageReport: false });
     });
 
     expect(passed).toBe(true);
@@ -350,7 +350,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
   it('should emit consolidated valid JSON for runVerifyAll with all 12 gates mapped', () => {
     let allPassed: boolean = false;
     const output = captureConsoleLog(() => {
-      allPassed = runVerifyAll({ json: true });
+      allPassed = runVerifyAll({ json: true, requireCoverageReport: false });
     });
 
     expect(allPassed).toBe(true);
@@ -407,7 +407,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
       process.env.AISDLC_FORMAT = 'json';
       let passed: boolean = false;
       const output = captureConsoleLog(() => {
-        passed = runVerifyQuality();
+        passed = runVerifyQuality({ requireCoverageReport: false });
       });
 
       expect(passed).toBe(true);
@@ -448,7 +448,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
       process.env.AISDLC_FORMAT = 'json';
       let passed: boolean = false;
       const output = captureConsoleLog(() => {
-        passed = runVerifyQuality({ json: false });
+        passed = runVerifyQuality({ json: false, requireCoverageReport: false });
       });
 
       expect(passed).toBe(true);
@@ -460,7 +460,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
       process.env.AISDLC_FORMAT = 'json';
       let passed: boolean = false;
       const output = captureConsoleLog(() => {
-        passed = runVerifyQuality({ format: 'text' });
+        passed = runVerifyQuality({ format: 'text', requireCoverageReport: false });
       });
 
       expect(passed).toBe(true);
@@ -473,7 +473,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
       delete process.env.AISDLC_OUTPUT;
       let passed: boolean = false;
       const output = captureConsoleLog(() => {
-        passed = runVerifyQuality();
+        passed = runVerifyQuality({ requireCoverageReport: false });
       });
 
       expect(passed).toBe(true);
@@ -485,7 +485,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
       process.env.AISDLC_FORMAT = 'json';
       let passed: boolean = false;
       const output = captureConsoleLog(() => {
-        passed = runVerifyAll();
+        passed = runVerifyAll({ requireCoverageReport: false });
       });
 
       expect(passed).toBe(true);

@@ -43,6 +43,14 @@ describe('Standalone Unknown Project End-to-End Suite', () => {
     fs.cpSync(path.join(examplesDir, 'src'), path.join(tempProjectDir, 'src'), { recursive: true });
     fs.cpSync(path.join(examplesDir, 'tests'), path.join(tempProjectDir, 'tests'), { recursive: true });
 
+    // 4. Provide a compliant coverage summary for STRICT quality gate verification
+    fs.mkdirSync(path.join(tempProjectDir, 'coverage'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempProjectDir, 'coverage', 'coverage-summary.json'),
+      JSON.stringify({ total: { lines: { pct: 92 }, branches: { pct: 88 }, functions: { pct: 95 } } }),
+      'utf-8'
+    );
+
     // 4. Deploy change spec to standard active SDD path: specs/changes/active/chg-001-telemetry-ingestion
     const activeSpecsDest = path.join(tempProjectDir, 'specs', 'changes', 'active', 'chg-001-telemetry-ingestion');
     fs.mkdirSync(path.dirname(activeSpecsDest), { recursive: true });

@@ -133,7 +133,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
     it('should execute summary tool "verify" returning consolidated gates (default full profile)', async () => {
       const result = await client.callTool({
         name: 'verify',
-        arguments: {},
+        arguments: { requireCoverageReport: false },
       });
 
       expect(result.isError).toBeFalsy();
@@ -151,7 +151,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
     it('should execute summary tool "verify" with profile "lite" evaluating only essential gates', async () => {
       const result = await client.callTool({
         name: 'verify',
-        arguments: { profile: 'lite' },
+        arguments: { profile: 'lite', requireCoverageReport: false },
       });
 
       expect(result.isError).toBeFalsy();
@@ -198,7 +198,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
     it('should execute "verify_quality" and evaluate maintainability and cyclomatic complexity', async () => {
       const result = await client.callTool({
         name: 'verify_quality',
-        arguments: {},
+        arguments: { requireCoverageReport: false },
       });
 
       expect(result.isError).toBeFalsy();

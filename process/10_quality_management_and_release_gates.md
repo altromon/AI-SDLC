@@ -328,9 +328,14 @@ For enterprise integrations, AI-SDLC adopts the **SARIF (JSON OASIS)** standard.
 
 ### D. Automated Code Coverage Ingestion and .NET Integration
 
-AI-SDLC deterministically ingests automated test coverage metrics without proprietary lock-in. The core reporting engines (`readCodeCoverageSummary`, `aisdlc report quality`, `aisdlc report dashboard`) passively scan the following canonical locations:
+AI-SDLC deterministically ingests automated test coverage metrics without proprietary lock-in. The core reporting and verification engines (`readCodeCoverageSummary`, `verifyQualityGate`, `aisdlc verify quality`, `aisdlc report quality`, `aisdlc report dashboard`) passively scan the following canonical locations:
 - `coverage/lcov.info` or `reports/lcov.info` (LCOV format)
 - `coverage/coverage-summary.json` or `reports/coverage-summary.json` (Istanbul/JSON summary format)
+- `coverage.cobertura.xml` / `coverage.xml` / `TestResults/*/coverage.cobertura.xml` (Cobertura XML)
+- `jacoco.xml`, `coverage.out`, `llvm-cov.json`
+
+> [!NOTE]
+> In `STRICT` enforcement mode, `verifyQualityGate` (and `aisdlc verify quality` by default) fails if no code coverage report is present on disk. In `PERMISSIVE` mode or pre-flight `aisdlc check`, missing coverage remains non-blocking.
 
 #### 1. The .NET / C# Testing & Coverage Toolchain
 For C#/.NET projects, the canonical stack declared in `quality-policy.yaml` uses **xUnit** / **Reqnroll** with **Coverlet**:
