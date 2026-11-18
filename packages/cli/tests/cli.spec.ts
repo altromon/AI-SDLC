@@ -4,6 +4,7 @@ import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import { runGitPlan, runGitValidate } from '../src/commands/git.js';
 import { runInit } from '../src/commands/init.js';
+import { runMcpServer } from '../src/commands/mcp.js';
 import { runSddDeposit, runSddIntegrate, runSddVerify } from '../src/commands/sdd.js';
 import {
   runVerifyAll,
@@ -337,6 +338,10 @@ describe('@aisdlc/cli Command Suite', () => {
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
+  });
+
+  it('should expose runMcpServer CLI command handler', () => {
+    expect(typeof runMcpServer).toBe('function');
   });
 
   it('should verify all quality gates including schemas and security via CLI', () => {
