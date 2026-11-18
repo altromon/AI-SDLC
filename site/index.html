@@ -347,21 +347,110 @@
     }
     @media (max-width: 900px) { .dashboard-spotlight { grid-template-columns: 1fr; } }
     .dashboard-preview {
-      border-radius: 14px; border: 1px solid var(--border); background: #05060a; padding: 1.5rem; font-family: var(--mono);
-      font-size: .82rem; line-height: 1.6; color: var(--muted);
+      border-radius: 14px; border: 1px solid var(--border); background: #05060a; padding: 1.2rem; font-family: var(--mono);
+      font-size: .8rem; line-height: 1.5; color: var(--muted);
       box-shadow: 0 20px 50px -15px rgb(0 0 0 / .7);
     }
-    .dashboard-preview .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .8rem; margin-top: 1rem; }
-    .dashboard-preview .m-item { background: rgb(255 255 255 / .03); padding: .7rem; border-radius: 8px; border: 1px solid var(--border); }
-    .dashboard-preview .m-item b { display: block; font-size: 1.3rem; color: var(--text); }
+    .dp-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--border); padding-bottom: .6rem; margin-bottom: .7rem; }
+    .dp-head button { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; font: .7rem var(--mono); padding: .18rem .48rem; cursor: pointer; }
+    .dp-head button:hover { color: var(--text); }
+    .dp-tabs { display: flex; gap: .35rem; margin-bottom: .85rem; overflow-x: auto; border-bottom: 1px solid var(--border); }
+    .dp-tab {
+      position: relative; flex: none; background: none; border: 0; color: var(--muted); font: 600 .72rem var(--mono);
+      padding: .42rem .6rem .55rem; cursor: pointer;
+    }
+    .dp-tab[aria-selected="true"] { color: var(--cyan); }
+    .dp-tab[aria-selected="true"]::after { content: ""; position: absolute; inset: auto 0 0; border-block-end: 2px solid var(--cyan); }
+    .dp-stage { min-height: 185px; }
+    .dp-graph { width: 100%; height: 132px; display: block; }
+    .dp-node rect { fill: #0e1320; stroke: rgb(255 255 255 / .18); stroke-width: 1.2; transition: stroke .25s, fill .25s; }
+    .dp-node text { fill: #cbd5e1; font: 600 9.5px var(--mono); text-anchor: middle; dominant-baseline: central; }
+    .dp-node.active rect { stroke: var(--cyan); fill: rgb(34 211 238 / .14); }
+    .dp-node.done rect { stroke: var(--green); fill: rgb(52 211 153 / .09); }
+    .dp-edge { stroke: rgb(255 255 255 / .14); stroke-width: 1.5; fill: none; transition: stroke .25s; }
+    .dp-edge.lit { stroke: var(--cyan); }
+    .dp-inspector { margin-top: .55rem; padding: .45rem .65rem; border-radius: 8px; border: 1px solid var(--border); background: rgb(255 255 255 / .02); font-size: .72rem; color: var(--text); display: flex; justify-content: space-between; gap: .5rem; }
+    .dp-rtm { display: grid; gap: .4rem; }
+    .dp-rtm-row { display: grid; grid-template-columns: 1.1fr 1fr auto; gap: .5rem; align-items: center; padding: .42rem .6rem; border-radius: 7px; border: 1px solid var(--border); background: rgb(255 255 255 / .02); font-size: .73rem; }
+    .dp-rtm-row.active { border-color: rgb(34 211 238 / .45); background: rgb(34 211 238 / .06); }
+    .dp-rtm-row .st { color: var(--green); font-weight: 700; }
+    .dashboard-preview .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .65rem; margin-top: .65rem; }
+    .dashboard-preview .m-item { background: rgb(255 255 255 / .03); padding: .6rem .7rem; border-radius: 8px; border: 1px solid var(--border); }
+    .dashboard-preview .m-item b { display: block; font-size: 1.2rem; color: var(--text); }
 
-    /* ---------- Quickstart ---------- */
-    .steps { counter-reset: s; display: grid; gap: 1rem; margin-top: 3rem; }
-    .qs { display: grid; grid-template-columns: 52px 1fr; gap: 1.2rem; align-items: start; padding: 1.2rem 1.4rem; border-radius: 14px; border: 1px solid var(--border); background: var(--card); }
-    .qs::before { counter-increment: s; content: counter(s); width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font: 700 1rem var(--mono); background: var(--grad); color: #05060a; }
-    .qs h4 { margin: 0 0 .3rem; }
-    .qs code { display: block; font-size: .85rem; color: var(--cyan); background: #0a0c14; padding: .55rem .8rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; white-space: nowrap; }
-    .qs p { margin: .5rem 0 0; color: var(--muted); font-size: .9rem; }
+    /* ---------- Quickstart (4 Skills Showcase) ---------- */
+    .skill-tabs { margin-top: 2.5rem; }
+    .skill-tablist {
+      display: flex; gap: .5rem; overflow-x: auto; scrollbar-width: thin;
+      border-bottom: 1px solid var(--border); padding-bottom: 0;
+    }
+    .skill-tab {
+      position: relative; flex: none; display: flex; flex-direction: column; align-items: flex-start; gap: .18rem;
+      padding: .85rem 1.15rem 1rem; border: 0; background: transparent; color: var(--muted);
+      cursor: pointer; font-family: inherit; text-align: left; border-radius: 10px 10px 0 0;
+      transition: color .2s, background-color .2s;
+    }
+    .skill-tab:hover { color: var(--text); background: rgb(255 255 255 / .03); }
+    .skill-tab:focus-visible { outline: 2px solid var(--cyan); outline-offset: -2px; }
+    .skill-tab .st-name { font: 700 .9rem var(--mono); color: inherit; }
+    .skill-tab .st-sub { font-size: .75rem; color: var(--muted); }
+    .skill-tab[aria-selected="true"] { color: var(--text); background: rgb(34 211 238 / .06); }
+    .skill-tab[aria-selected="true"] .st-name { color: var(--cyan); }
+    .skill-tab[aria-selected="true"]::after {
+      content: ""; position: absolute; inset: auto 0 0;
+      border-block-end: 3px solid var(--cyan);
+    }
+    .skill-panel-inner {
+      margin-top: 1.4rem; padding: 1.6rem; border-radius: 20px; border: 1px solid var(--border);
+      background: radial-gradient(700px circle at 15% 15%, rgb(139 92 246 / .08), transparent 60%), var(--bg-2);
+      display: grid; grid-template-columns: 1fr 1.15fr; gap: 1.8rem; align-items: start;
+    }
+    @media (max-width: 960px) { .skill-panel-inner { grid-template-columns: 1fr; } }
+    .skill-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .75rem; }
+    .skill-tag { font: 600 .72rem var(--mono); padding: .22rem .55rem; border-radius: 999px; border: 1px solid rgb(139 92 246 / .4); background: rgb(139 92 246 / .12); color: #c4b5fd; }
+    .skill-tag.cy { border-color: rgb(34 211 238 / .4); background: rgb(34 211 238 / .1); color: var(--cyan); }
+    .skill-desc { margin: 0 0 1rem; color: var(--muted); font-size: .92rem; line-height: 1.5; }
+    .skill-prompt {
+      display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+      padding: .55rem .8rem; border-radius: 10px; border: 1px solid var(--border); background: #05060a;
+      font: 500 .8rem var(--mono); color: var(--cyan); margin-bottom: 1.1rem;
+    }
+    .skill-prompt code { overflow-x: auto; white-space: nowrap; }
+    .skill-prompt button {
+      flex: none; background: rgb(255 255 255 / .06); border: 1px solid var(--border); color: var(--muted);
+      border-radius: 6px; padding: .25rem .55rem; cursor: pointer; font: inherit; font-size: .72rem;
+    }
+    .skill-prompt button:hover { color: var(--text); }
+    .skill-pipeline { display: grid; gap: .55rem; list-style: none; margin: 0; padding: 0; }
+    .sp-step {
+      display: grid; grid-template-columns: 28px 1fr auto; gap: .75rem; align-items: center;
+      padding: .65rem .85rem; border-radius: 12px; border: 1px solid var(--border); background: var(--card);
+      cursor: pointer; text-align: left; font-family: inherit; color: var(--text); width: 100%;
+      transition: border-color .2s, background-color .2s;
+    }
+    .sp-step:hover { border-color: rgb(255 255 255 / .2); }
+    .sp-step:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+    .sp-num {
+      width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+      font: 700 .75rem var(--mono); border: 1px solid var(--border); color: var(--muted); background: #05060a;
+    }
+    .sp-title { font-size: .86rem; font-weight: 600; display: block; }
+    .sp-sub { font: .74rem var(--mono); color: var(--muted); display: block; margin-top: .12rem; }
+    .sp-badge { font: 600 .68rem var(--mono); padding: .15rem .45rem; border-radius: 6px; border: 1px solid var(--border); color: var(--muted); }
+    .sp-step[data-state="run"] { border-color: rgb(34 211 238 / .55); background: rgb(34 211 238 / .07); }
+    .sp-step[data-state="run"] .sp-num { border-color: var(--cyan); color: var(--cyan); }
+    .sp-step[data-state="run"] .sp-badge { border-color: rgb(34 211 238 / .4); color: var(--cyan); }
+    .sp-step[data-state="ok"] { border-color: rgb(52 211 153 / .35); background: rgb(52 211 153 / .04); }
+    .sp-step[data-state="ok"] .sp-num { border-color: var(--green); color: var(--green); }
+    .sp-step[data-state="ok"] .sp-badge { border-color: rgb(52 211 153 / .35); color: var(--green); }
+    .skill-term .term-body { height: 400px; }
+    .skill-term-actions { margin-left: auto; display: flex; gap: .4rem; }
+    .skill-term .term-bar button { margin-left: 0; }
+    .skill-progress { height: 3px; background: rgb(255 255 255 / .06); }
+    .skill-progress > i { display: block; height: 100%; width: 0%; background: var(--grad); }
+    @media (prefers-reduced-motion: no-preference) {
+      .skill-progress > i { transition: width .3s ease; }
+    }
 
     /* ---------- CTA / Footer ---------- */
     .cta-box { text-align: center; padding: 4.5rem 2rem; border-radius: 28px; border: 1px solid var(--border); background: radial-gradient(600px circle at 50% 0%, rgb(139 92 246 / .25), transparent 70%), var(--bg-2); }
@@ -736,17 +825,54 @@
             </div>
           </div>
 
-          <div class="dashboard-preview">
-            <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:.6rem;margin-bottom:.8rem">
+          <div class="dashboard-preview" id="dashPreview">
+            <div class="dp-head">
               <span style="color:var(--text);font-weight:600">ai-sdlc-graph-v4</span>
-              <span style="color:var(--green)">100% Compliant</span>
+              <span style="color:var(--green);font-size:.74rem">● 100% Compliant</span>
+              <button type="button" id="dpToggle">❚❚ Pause</button>
             </div>
-            <div>Traceability: 100% · Maintainability: 61/100</div>
-            <div class="metric-grid">
-              <div class="m-item"><b>100</b> Nodes Analyzed</div>
-              <div class="m-item"><b>178</b> Active Edges</div>
-              <div class="m-item"><b>0</b> Circular Dependencies</div>
-              <div class="m-item" style="color:var(--green)"><b>PASS</b> Gate Verdict</div>
+            <div class="dp-tabs" role="tablist" aria-label="Dashboard preview views">
+              <button type="button" class="dp-tab" role="tab" id="dp-t-graph" aria-selected="true" tabindex="0" data-dp="graph">🌐 PDaC / RTM Graph</button>
+              <button type="button" class="dp-tab" role="tab" id="dp-t-rtm" aria-selected="false" tabindex="-1" data-dp="rtm">📋 360° RTM Matrix</button>
+              <button type="button" class="dp-tab" role="tab" id="dp-t-kpis" aria-selected="false" tabindex="-1" data-dp="kpis">📊 Quality &amp; KPIs</button>
+            </div>
+
+            <div class="dp-stage">
+              <div role="tabpanel" aria-labelledby="dp-t-graph" data-dp-panel="graph">
+                <svg class="dp-graph" viewBox="0 0 420 132" aria-label="Traceability graph from UC-052 to tests">
+                  <path class="dp-edge" data-edge="0" d="M84 36 L146 36"/>
+                  <path class="dp-edge" data-edge="1" d="M234 36 L296 36"/>
+                  <path class="dp-edge" data-edge="2" d="M342 54 L268 96"/>
+                  <path class="dp-edge" data-edge="3" d="M180 96 L112 96"/>
+                  <g class="dp-node" data-node="0"><rect x="10" y="18" width="74" height="36" rx="8"/><text x="47" y="36">UC-052</text></g>
+                  <g class="dp-node" data-node="1"><rect x="146" y="18" width="88" height="36" rx="8"/><text x="190" y="36">FR-052</text></g>
+                  <g class="dp-node" data-node="2"><rect x="296" y="18" width="112" height="36" rx="8"/><text x="352" y="36">CMP-ALERT</text></g>
+                  <g class="dp-node" data-node="3"><rect x="180" y="78" width="88" height="36" rx="8"/><text x="224" y="96">TSK-001</text></g>
+                  <g class="dp-node" data-node="4"><rect x="16" y="78" width="96" height="36" rx="8"/><text x="64" y="96">fr-052.steps</text></g>
+                </svg>
+                <div class="dp-inspector" id="dpInspector">
+                  <span>Inspecting: <strong style="color:var(--cyan)">FR-052</strong> (Product)</span>
+                  <span style="color:var(--green)">sha256:9f2c…a71e</span>
+                </div>
+              </div>
+
+              <div role="tabpanel" aria-labelledby="dp-t-rtm" data-dp-panel="rtm" hidden>
+                <div class="dp-rtm">
+                  <div class="dp-rtm-row" data-rtm="0"><span>FR-052 · Alerts</span><span style="color:var(--cyan)">CMP-ALERT · TSK-001</span><span class="st">✔ VERIFIED</span></div>
+                  <div class="dp-rtm-row" data-rtm="1"><span>SEC-REQ-052 · Auth</span><span style="color:var(--cyan)">SEC-ENC-01 · TSK-002</span><span class="st">✔ VERIFIED</span></div>
+                  <div class="dp-rtm-row" data-rtm="2"><span>PRIV-REQ-052 · PII</span><span style="color:var(--cyan)">PRIV-ROPA-04 · TSK-003</span><span class="st">✔ VERIFIED</span></div>
+                </div>
+              </div>
+
+              <div role="tabpanel" aria-labelledby="dp-t-kpis" data-dp-panel="kpis" hidden>
+                <div>Traceability: 100% · Maintainability: 61/100 · FTR: 100%</div>
+                <div class="metric-grid">
+                  <div class="m-item"><b>100</b> Nodes Analyzed</div>
+                  <div class="m-item"><b>178</b> Active Edges</div>
+                  <div class="m-item"><b>0</b> Circular Dependencies</div>
+                  <div class="m-item" style="color:var(--green)"><b>PASS</b> Gate Verdict</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -757,16 +883,146 @@
     <section id="quickstart">
       <div class="wrap">
         <div class="center">
-          <span class="eyebrow">5-minute quickstart</span>
-          <h2>From zero to a <span class="grad-text">governed increment</span>.</h2>
-          <p class="lead">Requires Node.js 18+, pnpm 9+ and Git 2.30+.</p>
+          <span class="eyebrow">Quickstart · 4 Framework Skills</span>
+          <h2>Choose your entry point. <span class="grad-text">Watch each skill execute.</span></h2>
+          <p class="lead">Requires Node.js 18+, pnpm 9+ and Git 2.30+. Select a skill to inspect its exact workflow, specialist handoffs, and quality gates.</p>
         </div>
-        <div class="steps">
-          <div class="qs reveal"><div><h4>Bootstrap the repository</h4><code>npx @aisdlc/cli init</code><p>Schemas, templates, policies, 10 agent skills, MCP configs and CI/CD — generated via an interactive wizard.</p></div></div>
-          <div class="qs reveal"><div><h4>Scaffold a change from a use case</h4><code>npx aisdlc change new "Real-Time Alerts" --from UC-STREAM-TELEMETRY</code><p>Generates proposal, spec, design, tasks and a <code style="display:inline;padding:0 .3rem">handoff.yaml</code> with SHA-256 digests.</p></div></div>
-          <div class="qs reveal"><div><h4>Branch with streamlined 2-tier</h4><code>git checkout -b feat/CHG-002-real-time-alerts</code><p>Features branch off main; commit hooks automatically inject <code style="display:inline;padding:0 .3rem">Task-ID</code> trailers.</p></div></div>
-          <div class="qs reveal"><div><h4>Implement with TDD, then auto-fix pre-flight</h4><code>npx aisdlc check --fix</code><p>Syncs Gherkin to <code style="display:inline;padding:0 .3rem">.feature</code> files and refreshes cryptographic digests.</p></div></div>
-          <div class="qs reveal"><div><h4>Run all 12 gates &amp; measure rework</h4><code>npx aisdlc verify all &amp;&amp; npx aisdlc kpi pr</code><p>Verifies AST quality, security, and computes task-level code churn and rework metrics.</p></div></div>
+
+        <div class="skill-tabs" id="skillTabs">
+          <div class="skill-tablist" role="tablist" aria-label="AI-SDLC Framework Skills">
+            <button type="button" class="skill-tab" role="tab" id="tab-greenfield" aria-selected="true" tabindex="0" data-skill="greenfield">
+              <span class="st-name">/aisdlc-greenfield</span>
+              <span class="st-sub">Brand-new project</span>
+            </button>
+            <button type="button" class="skill-tab" role="tab" id="tab-legacy" aria-selected="false" tabindex="-1" data-skill="legacy">
+              <span class="st-name">/aisdlc-legacy-onboarding</span>
+              <span class="st-sub">Existing codebase</span>
+            </button>
+            <button type="button" class="skill-tab" role="tab" id="tab-increment" aria-selected="false" tabindex="-1" data-skill="increment">
+              <span class="st-name">/aisdlc-increment</span>
+              <span class="st-sub">Feature / Bugfix (SDD)</span>
+            </button>
+            <button type="button" class="skill-tab" role="tab" id="tab-inspector" aria-selected="false" tabindex="-1" data-skill="inspector">
+              <span class="st-name">/aisdlc-inspector</span>
+              <span class="st-sub">360° Traceability Graph</span>
+            </button>
+          </div>
+
+          <div role="tabpanel" id="panel-greenfield" aria-labelledby="tab-greenfield" data-panel="greenfield">
+            <div class="skill-panel-inner">
+              <div>
+                <div class="skill-meta">
+                  <span class="skill-tag">Phase 0 Inception</span>
+                  <span class="skill-tag cy">1 UC-* = 1 CHG-*</span>
+                </div>
+                <p class="skill-desc">Orchestrates end-to-end onboarding for brand-new projects: NAF v4 Vision, ProductShape, STRIDE &amp; GDPR modeling, arc42 Architecture, Checkpoint 1, and topological wave delivery.</p>
+                <div class="skill-prompt">
+                  <code>/aisdlc-greenfield "Build a real-time telemetry alert platform"</code>
+                  <button type="button" data-copy='/aisdlc-greenfield "Build a real-time telemetry alert platform"'>Copy</button>
+                </div>
+                <ol class="skill-pipeline" data-pipeline="greenfield"></ol>
+              </div>
+              <div class="term skill-term">
+                <div class="term-bar">
+                  <i></i><i></i><i></i>
+                  <span>aisdlc-greenfield — Phase 0 &amp; Waves</span>
+                  <div class="skill-term-actions">
+                    <button type="button" data-skill-toggle="greenfield">❚❚ Pause</button>
+                    <button type="button" data-skill-replay="greenfield">↻ Replay</button>
+                  </div>
+                </div>
+                <div class="skill-progress" aria-hidden="true"><i data-skill-bar="greenfield"></i></div>
+                <div class="term-body" data-skill-term="greenfield" aria-live="off"></div>
+              </div>
+            </div>
+          </div>
+
+          <div role="tabpanel" id="panel-legacy" aria-labelledby="tab-legacy" data-panel="legacy" hidden>
+            <div class="skill-panel-inner">
+              <div>
+                <div class="skill-meta">
+                  <span class="skill-tag">Brownfield</span>
+                  <span class="skill-tag cy">Strangler / Boy Scout</span>
+                </div>
+                <p class="skill-desc">Establishes non-disruptive governance on existing repositories: read-only quality/license/security/PII debt inventory, bounded retro-inception, and characterization specs before touching code.</p>
+                <div class="skill-prompt">
+                  <code>/aisdlc-legacy-onboarding --scope billing-service</code>
+                  <button type="button" data-copy="/aisdlc-legacy-onboarding --scope billing-service">Copy</button>
+                </div>
+                <ol class="skill-pipeline" data-pipeline="legacy"></ol>
+              </div>
+              <div class="term skill-term">
+                <div class="term-bar">
+                  <i></i><i></i><i></i>
+                  <span>aisdlc-legacy-onboarding — Retro-Inception</span>
+                  <div class="skill-term-actions">
+                    <button type="button" data-skill-toggle="legacy">❚❚ Pause</button>
+                    <button type="button" data-skill-replay="legacy">↻ Replay</button>
+                  </div>
+                </div>
+                <div class="skill-progress" aria-hidden="true"><i data-skill-bar="legacy"></i></div>
+                <div class="term-body" data-skill-term="legacy" aria-live="off"></div>
+              </div>
+            </div>
+          </div>
+
+          <div role="tabpanel" id="panel-increment" aria-labelledby="tab-increment" data-panel="increment" hidden>
+            <div class="skill-panel-inner">
+              <div>
+                <div class="skill-meta">
+                  <span class="skill-tag">patch | standard | critical</span>
+                  <span class="skill-tag cy">2 Checkpoints · 12 Gates</span>
+                </div>
+                <p class="skill-desc">Delivers bounded features and bugfixes: scope triage, upstream Product/Security/Privacy delta, Hexagonal design, Checkpoint 1, Red-Green-Refactor TDD, Checkpoint 2, and SemVer baseline integration.</p>
+                <div class="skill-prompt">
+                  <code>/aisdlc-increment "Real-Time Alerts" --from UC-STREAM-TELEMETRY</code>
+                  <button type="button" data-copy='/aisdlc-increment "Real-Time Alerts" --from UC-STREAM-TELEMETRY'>Copy</button>
+                </div>
+                <ol class="skill-pipeline" data-pipeline="increment"></ol>
+              </div>
+              <div class="term skill-term">
+                <div class="term-bar">
+                  <i></i><i></i><i></i>
+                  <span>aisdlc-increment — SDD Lifecycle</span>
+                  <div class="skill-term-actions">
+                    <button type="button" data-skill-toggle="increment">❚❚ Pause</button>
+                    <button type="button" data-skill-replay="increment">↻ Replay</button>
+                  </div>
+                </div>
+                <div class="skill-progress" aria-hidden="true"><i data-skill-bar="increment"></i></div>
+                <div class="term-body" data-skill-term="increment" aria-live="off"></div>
+              </div>
+            </div>
+          </div>
+
+          <div role="tabpanel" id="panel-inspector" aria-labelledby="tab-inspector" data-panel="inspector" hidden>
+            <div class="skill-panel-inner">
+              <div>
+                <div class="skill-meta">
+                  <span class="skill-tag">inspect_element</span>
+                  <span class="skill-tag cy">Report First · Graph Loop</span>
+                </div>
+                <p class="skill-desc">Queries the deterministic traceability graph across requirements, components, tasks, tests, and source files — delivering a full status report before prompting interactive graph navigation.</p>
+                <div class="skill-prompt">
+                  <code>/aisdlc-inspector FR-052</code>
+                  <button type="button" data-copy="/aisdlc-inspector FR-052">Copy</button>
+                </div>
+                <ol class="skill-pipeline" data-pipeline="inspector"></ol>
+              </div>
+              <div class="term skill-term">
+                <div class="term-bar">
+                  <i></i><i></i><i></i>
+                  <span>aisdlc-inspector — 360° Graph Navigator</span>
+                  <div class="skill-term-actions">
+                    <button type="button" data-skill-toggle="inspector">❚❚ Pause</button>
+                    <button type="button" data-skill-replay="inspector">↻ Replay</button>
+                  </div>
+                </div>
+                <div class="skill-progress" aria-hidden="true"><i data-skill-bar="inspector"></i></div>
+                <div class="term-body" data-skill-term="inspector" aria-live="off"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -985,6 +1241,367 @@
     onView(document.getElementById('ide'), async () => {
       for (const m of msgs) { m.classList.add('show'); await sleep(reduceMotion ? 0 : 800); }
     });
+
+    /* ---------- Quickstart 4-Skill Animations ---------- */
+    const SKILLS_DATA = {
+      greenfield: {
+        steps: [
+          { title: 'Branch, Draft PR & Init', sub: 'feat/inception-baseline · @aisdlc/cli init', badge: 'Step 1', lines: [
+            ['cmd', 'git checkout -b feat/inception-baseline && gh pr create --draft'],
+            ['cmd', 'npx @aisdlc/cli init && npx aisdlc git hook install'],
+            ['ok', '✔ quality-policy.yaml · license-policy.yaml · privacy-policy.yaml'],
+          ]},
+          { title: 'Phase 0 Product Inception', sub: 'agent-product-analyst → agent-expert-user', badge: 'Step 2', lines: [
+            ['cy', '▸ Spawning agent-product-analyst (isolated context)'],
+            ['dim', '  ├─ ARCH-INTRO-001 (NAF v4 Vision · Web UI modality)'],
+            ['dim', '  ├─ ACT-*, JRN-*, UC-001..003, FR-* (@nominal @boundary @invalid)'],
+            ['ok', '✔ agent-expert-user: MVP boundary gate passed (no library-only MVP)'],
+          ]},
+          { title: 'Shift-Left Security & Privacy', sub: 'agent-threat-modeler → agent-privacy-officer', badge: 'Step 3', lines: [
+            ['cy', '▸ agent-threat-modeler (STRIDE / OWASP ASVS)'],
+            ['dim', '  ├─ ABUSE-* · SEC-REQ-* (@security @mitigation) · SEC-ENC-*'],
+            ['cy', '▸ agent-privacy-officer (LINDDUN / GDPR Art. 30)'],
+            ['ok', '✔ npx aisdlc verify privacy — DATA-ASSET-* & PRIV-ROPA-* valid'],
+          ]},
+          { title: 'Architecture & Checkpoint 1', sub: 'agent-system-architect · auditor ∥ adversary', badge: 'Gate 1', lines: [
+            ['cy', '▸ agent-system-architect → CMP-*, ARCH-DEP-001, ADR-*'],
+            ['ok', '✔ npx aisdlc verify licenses — 0 GPL/AGPL/SSPL violations'],
+            ['am', '⚡ Checkpoint 1: agent-auditor ∥ agent-adversary (isolated contexts)'],
+            ['ok', '✔ 0 blocking defects · gh pr ready → Human PO/Tech Lead sign-off'],
+          ]},
+          { title: 'Topological Wave Delivery', sub: '1 UC-* = 1 CHG-* · Wave 0 → Waves 1..N', badge: 'Step 5', lines: [
+            ['dim', '  Wave 0 (seq): CHG-001 Core + Presentation Host + agent-devops CI'],
+            ['dim', '  Wave 1 (par): feat/CHG-002 ∥ feat/CHG-003 (isolated worktrees)'],
+            ['cmd', 'npx aisdlc sdd integrate --auto && npx aisdlc kpi release'],
+            ['ok', '✔ Release v1.0.0 · SBOM + dashboard + 12/12 gates green'],
+          ]},
+        ],
+      },
+      legacy: {
+        steps: [
+          { title: 'Non-Disruptive Init & CI Audit', sub: 'chore/aisdlc-onboarding · agent-devops', badge: 'Step 1', lines: [
+            ['cmd', 'git checkout -b chore/aisdlc-onboarding && gh pr create --draft'],
+            ['cmd', 'npx @aisdlc/cli init && npx aisdlc git hook install'],
+            ['cy', '▸ agent-devops: auditing .github/workflows/ (0 edits to src/)'],
+            ['ok', '✔ Schemas & policies committed without breaking legacy deploy'],
+          ]},
+          { title: 'Read-Only Baseline Audit', sub: 'licenses · quality · security · privacy', badge: 'Step 2', lines: [
+            ['cmd', 'npx aisdlc verify licenses && npx aisdlc report quality'],
+            ['am', '  ! 4 legacy hotspots: CC > 10 in src/billing/tax.ts (MI 44)'],
+            ['cmd', 'npx aisdlc verify security && npx aisdlc verify privacy'],
+            ['ok', '✔ 0 hardcoded secrets (Gate 11) · PII log baseline captured'],
+          ]},
+          { title: 'Bounded Retro-Inception', sub: 'ARCH-INTRO-001 · CMP-* · UC-* / FR-*', badge: 'Step 3', lines: [
+            ['cy', '▸ agent-product-analyst → ARCH-INTRO-001 + characterization UC-*/FR-*'],
+            ['cy', '▸ agent-system-architect → CMP-* & ADR-* (target domain only)'],
+            ['cy', '▸ agent-threat-modeler → agent-privacy-officer (SEC-ENC-* / ROPA)'],
+            ['am', '⚡ Retro-Inception Checkpoint: agent-auditor ∥ agent-adversary'],
+          ]},
+          { title: 'Characterization & Sync', sub: 'check --fix · verify pdac · dashboard', badge: 'Step 4', lines: [
+            ['cmd', 'npx aisdlc check --fix && npx aisdlc verify pdac'],
+            ['ok', '✔ .feature files extracted · SHA-256 baseline drift-free'],
+            ['cmd', 'npx aisdlc report dashboard && gh pr ready'],
+            ['ok', '✔ Baseline graph & quality report ready for Tech Lead review'],
+          ]},
+          { title: 'Strangler / Boy Scout Rule', sub: 'Transition to /aisdlc-increment', badge: 'Step 5', lines: [
+            ['dim', '  Zero drive-by rewrites on untouched legacy modules'],
+            ['ok', '✔ Touched functions brought to CC ≤ 10 via governed TSK-* increments'],
+          ]},
+        ],
+      },
+      increment: {
+        steps: [
+          { title: 'Branch, Draft PR & Scope Triage', sub: 'patch | standard | critical · Anti-Bypass', badge: 'Step 0', lines: [
+            ['cmd', 'git checkout -b feat/CHG-052-real-time-alerts && gh pr create --draft'],
+            ['am', '  ? Friction profile: standard (Anti-Bypass: touches src/ & specs/)'],
+            ['ok', '✔ Profile standard selected → full SDD + handoff.yaml'],
+          ]},
+          { title: 'Delta, Design & Checkpoint 1', sub: '1 UC-* = 1 CHG-* · auditor ∥ adversary', badge: 'Gate 1', lines: [
+            ['cmd', 'npx aisdlc verify duplicates && npx aisdlc check --fix'],
+            ['cmd', 'npx aisdlc change new "Real-Time Alerts" --from UC-STREAM-TELEMETRY'],
+            ['cy', '▸ agent-system-architect: Hexagonal CMP-* + 100% tasks.md coverage'],
+            ['am', '⚡ Checkpoint 1: agent-auditor ∥ agent-adversary → Human Gate 1'],
+          ]},
+          { title: 'Red Phase — Failing Tests', sub: 'agent-qa-engineer · gherkin scaffold', badge: 'Step 4', lines: [
+            ['cmd', 'npx aisdlc git checkout TSK-001'],
+            ['cy', '▸ agent-qa-engineer: gherkin extract && gherkin scaffold --lang ts'],
+            ['bad', '  ✕ RED: tests/steps/fr-052.steps.ts + E2E UI specs failing'],
+            ['ok', '✔ npx aisdlc verify testing — 100% reqs have failing tests'],
+          ]},
+          { title: 'Green & Refactor (4-Step Order)', sub: 'agent-developer · 12/12 Quality Gates', badge: 'Step 5', lines: [
+            ['cy', '▸ agent-developer: Ports → Interfaces → Impl (4 UI states) → Unit'],
+            ['dim', '  git commit -m "feat(TSK-001): alert engine" (Task-ID trailer)'],
+            ['cmd', 'npx aisdlc check --fix && npx aisdlc verify all'],
+            ['ok', '✔ 12/12 Quality Gates passed · CC ≤ 10 · MI ≥ 50 · exit 0'],
+          ]},
+          { title: 'Checkpoint 2 & Baseline Merge', sub: 'expert-user · kpi pr · sdd integrate', badge: 'Gate 2', lines: [
+            ['am', '⚡ Checkpoint 2: agent-expert-user + agent-auditor ∥ agent-adversary'],
+            ['cmd', 'npx aisdlc kpi pr && gh pr ready'],
+            ['cmd', 'npx aisdlc sdd integrate --auto'],
+            ['ok', '✔ FR-052 promoted active · SemVer Minor bumped · CHG-052 archived'],
+          ]},
+        ],
+      },
+      inspector: {
+        steps: [
+          { title: 'Target Resolution', sub: 'FR-* · CMP-* · TSK-* · src/**/*', badge: 'Step 1', lines: [
+            ['cmd', '/aisdlc-inspector FR-052'],
+            ['dim', '  Resolving target artifact identifier: FR-052'],
+          ]},
+          { title: 'Deterministic Inspection', sub: 'MCP inspect_element / aisdlc inspect', badge: 'Step 2', lines: [
+            ['cmd', 'npx aisdlc inspect "FR-052" --json'],
+            ['cy', '  Querying traceability graph & SHA-256 PDaC citations…'],
+          ]},
+          { title: 'Complete Technical Report First', sub: 'Status · Upstream ↗ · Downstream ↘', badge: 'Step 3', lines: [
+            ['ok', '■ FR-052 · Real-Time Telemetry Alerts · [requirement | product | COMPLIANT]'],
+            ['dim', '  File: specs/product/FR-052-REAL-TIME-ALERTS.md'],
+            ['cy', '  ↗ Upstream:   [1] UC-STREAM-TELEMETRY  [2] BR-014'],
+            ['cy', '  ↘ Downstream: [3] CMP-ALERT-ENGINE  [4] TSK-001  [5] fr-052.steps.ts'],
+          ]},
+          { title: 'Interactive Navigation Loop', sub: 'Select connected node → repeat Step 2', badge: 'Step 4', lines: [
+            ['am', '  ? Continue graph exploration: (Recommended) 3. CMP-ALERT-ENGINE'],
+            ['cmd', 'npx aisdlc inspect "CMP-ALERT-ENGINE" --json'],
+            ['ok', '■ CMP-ALERT-ENGINE · [component | architecture | COMPLIANT]'],
+            ['dim', '  ↗ Satisfies: FR-052  ↘ Implemented in: src/alerts/engine.ts'],
+          ]},
+        ],
+      },
+    };
+
+    const skillTabsRoot = document.getElementById('skillTabs');
+    if (skillTabsRoot) {
+      const tabs = [...skillTabsRoot.querySelectorAll('[role="tab"]')];
+      const panels = [...skillTabsRoot.querySelectorAll('[role="tabpanel"]')];
+      const skillState = {};
+      let activeSkill = 'greenfield';
+
+      const appendSkillLine = (termEl, cls, text = '') => {
+        const d = document.createElement('div');
+        d.className = `l ${cls}`;
+        d.textContent = text;
+        termEl.appendChild(d);
+        while (termEl.children.length > 18) termEl.firstChild.remove();
+        return d;
+      };
+
+      const renderPipeline = (key) => {
+        const list = skillTabsRoot.querySelector(`[data-pipeline="${key}"]`);
+        const data = SKILLS_DATA[key];
+        list.innerHTML = '';
+        data.steps.forEach((step, idx) => {
+          const li = document.createElement('li');
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'sp-step';
+          btn.dataset.state = 'idle';
+          btn.dataset.stepIdx = idx;
+          btn.innerHTML = `<span class="sp-num">${idx + 1}</span><span><span class="sp-title">${step.title}</span><span class="sp-sub">${step.sub}</span></span><span class="sp-badge">${step.badge}</span>`;
+          btn.addEventListener('click', () => runSkill(key, idx));
+          li.appendChild(btn);
+          list.appendChild(li);
+        });
+      };
+
+      const renderStaticSkill = (key) => {
+        const termEl = skillTabsRoot.querySelector(`[data-skill-term="${key}"]`);
+        const barEl = skillTabsRoot.querySelector(`[data-skill-bar="${key}"]`);
+        const stepEls = [...skillTabsRoot.querySelectorAll(`[data-pipeline="${key}"] .sp-step`)];
+        termEl.textContent = '';
+        SKILLS_DATA[key].steps.forEach((s, i) => {
+          stepEls[i].dataset.state = 'ok';
+          s.lines.forEach(([cls, text]) => appendSkillLine(termEl, cls, text));
+        });
+        barEl.style.width = '100%';
+      };
+
+      const waitSkillPlay = async (key, runId, ms) => {
+        await sleep(ms);
+        while (skillState[key].paused && skillState[key].runId === runId && activeSkill === key) {
+          await sleep(120);
+        }
+      };
+
+      async function runSkill(key, startStep = 0) {
+        const st = skillState[key];
+        const runId = ++st.runId;
+        st.paused = false;
+        const toggleBtn = skillTabsRoot.querySelector(`[data-skill-toggle="${key}"]`);
+        toggleBtn.textContent = '❚❚ Pause';
+
+        if (reduceMotion) { renderStaticSkill(key); return; }
+
+        const termEl = skillTabsRoot.querySelector(`[data-skill-term="${key}"]`);
+        const barEl = skillTabsRoot.querySelector(`[data-skill-bar="${key}"]`);
+        const stepEls = [...skillTabsRoot.querySelectorAll(`[data-pipeline="${key}"] .sp-step`)];
+        const steps = SKILLS_DATA[key].steps;
+
+        for (;;) {
+          if (st.runId !== runId || activeSkill !== key) return;
+          termEl.textContent = '';
+          stepEls.forEach((el, idx) => { el.dataset.state = idx < startStep ? 'ok' : 'idle'; });
+          for (let i = 0; i < startStep; i++) {
+            steps[i].lines.forEach(([cls, text]) => appendSkillLine(termEl, cls, text));
+          }
+          barEl.style.width = `${(startStep / steps.length) * 100}%`;
+
+          for (let i = startStep; i < steps.length; i++) {
+            if (st.runId !== runId || activeSkill !== key) return;
+            stepEls[i].dataset.state = 'run';
+            for (const [cls, text] of steps[i].lines) {
+              if (st.runId !== runId || activeSkill !== key) return;
+              if (cls === 'cmd') {
+                const d = appendSkillLine(termEl, 'cmd');
+                const caret = document.createElement('span');
+                caret.className = 'caret';
+                for (const ch of text) {
+                  if (st.runId !== runId || activeSkill !== key) return;
+                  d.textContent += ch;
+                  d.appendChild(caret);
+                  await waitSkillPlay(key, runId, 14 + Math.random() * 14);
+                }
+                caret.remove();
+                await waitSkillPlay(key, runId, 220);
+              } else {
+                appendSkillLine(termEl, cls, text);
+                await waitSkillPlay(key, runId, 260);
+              }
+            }
+            stepEls[i].dataset.state = 'ok';
+            barEl.style.width = `${((i + 1) / steps.length) * 100}%`;
+            await waitSkillPlay(key, runId, 380);
+          }
+          startStep = 0;
+          await waitSkillPlay(key, runId, 3600);
+        }
+      }
+
+      Object.keys(SKILLS_DATA).forEach((key) => {
+        skillState[key] = { runId: 0, paused: false };
+        renderPipeline(key);
+        renderStaticSkill(key);
+
+        skillTabsRoot.querySelector(`[data-skill-toggle="${key}"]`).addEventListener('click', (e) => {
+          const st = skillState[key];
+          st.paused = !st.paused;
+          e.currentTarget.textContent = st.paused ? '▶ Play' : '❚❚ Pause';
+        });
+        skillTabsRoot.querySelector(`[data-skill-replay="${key}"]`).addEventListener('click', () => {
+          runSkill(key, 0);
+        });
+      });
+
+      const selectSkillTab = (nextTab, focusTab = false) => {
+        const key = nextTab.dataset.skill;
+        activeSkill = key;
+        tabs.forEach((t) => {
+          const isSel = t === nextTab;
+          t.setAttribute('aria-selected', String(isSel));
+          t.tabIndex = isSel ? 0 : -1;
+        });
+        panels.forEach((p) => {
+          const match = p.dataset.panel === key;
+          p.hidden = !match;
+        });
+        Object.keys(skillState).forEach((k) => { if (k !== key) skillState[k].runId++; });
+        if (focusTab) nextTab.focus();
+        runSkill(key, 0);
+      };
+
+      tabs.forEach((tab, idx) => {
+        tab.addEventListener('click', () => selectSkillTab(tab));
+        tab.addEventListener('keydown', (e) => {
+          let nextIdx = -1;
+          if (e.key === 'ArrowRight') nextIdx = (idx + 1) % tabs.length;
+          else if (e.key === 'ArrowLeft') nextIdx = (idx - 1 + tabs.length) % tabs.length;
+          else if (e.key === 'Home') nextIdx = 0;
+          else if (e.key === 'End') nextIdx = tabs.length - 1;
+          if (nextIdx >= 0) {
+            e.preventDefault();
+            selectSkillTab(tabs[nextIdx], true);
+          }
+        });
+      });
+
+      onView(skillTabsRoot, () => runSkill('greenfield', 0), 0.2);
+    }
+
+    /* ---------- Dashboard Spotlight Preview Animation ---------- */
+    const dashPreview = document.getElementById('dashPreview');
+    if (dashPreview) {
+      const dpTabs = [...dashPreview.querySelectorAll('[role="tab"]')];
+      const dpPanels = [...dashPreview.querySelectorAll('[role="tabpanel"]')];
+      const dpNodes = [...dashPreview.querySelectorAll('.dp-node')];
+      const dpEdges = [...dashPreview.querySelectorAll('.dp-edge')];
+      const dpRtmRows = [...dashPreview.querySelectorAll('.dp-rtm-row')];
+      const dpInspector = document.getElementById('dpInspector');
+      const dpToggle = document.getElementById('dpToggle');
+      const DP_META = [
+        ['UC-052', 'Use Case', 'sha256:4a1e…c902'],
+        ['FR-052', 'Product Req', 'sha256:9f2c…a71e'],
+        ['CMP-ALERT', 'Component', 'Ports & Adapters'],
+        ['TSK-001', 'SDD Task', 'AUTONOMOUS · FTR'],
+        ['fr-052.steps', 'BDD Test', 'PASS · 100% cov'],
+      ];
+      let dpPaused = false;
+      let dpAuto = true;
+
+      const setDpTab = (key) => {
+        dpTabs.forEach((t) => {
+          const sel = t.dataset.dp === key;
+          t.setAttribute('aria-selected', String(sel));
+          t.tabIndex = sel ? 0 : -1;
+        });
+        dpPanels.forEach((p) => { p.hidden = p.dataset.dpPanel !== key; });
+      };
+
+      dpTabs.forEach((t, i) => {
+        t.addEventListener('click', () => { dpAuto = false; setDpTab(t.dataset.dp); });
+        t.addEventListener('keydown', (e) => {
+          const next = e.key === 'ArrowRight' ? (i + 1) % dpTabs.length : e.key === 'ArrowLeft' ? (i - 1 + dpTabs.length) % dpTabs.length : -1;
+          if (next >= 0) { e.preventDefault(); dpAuto = false; setDpTab(dpTabs[next].dataset.dp); dpTabs[next].focus(); }
+        });
+      });
+
+      dpToggle.addEventListener('click', () => {
+        dpPaused = !dpPaused;
+        dpToggle.textContent = dpPaused ? '▶ Play' : '❚❚ Pause';
+      });
+
+      const waitDp = async (ms) => { await sleep(ms); while (dpPaused) await sleep(120); };
+
+      async function runDashPreview() {
+        if (reduceMotion) {
+          dpNodes.forEach((n) => n.classList.add('done'));
+          dpEdges.forEach((e) => e.classList.add('lit'));
+          return;
+        }
+        for (;;) {
+          if (dpAuto) setDpTab('graph');
+          dpNodes.forEach((n) => n.classList.remove('active', 'done'));
+          dpEdges.forEach((e) => e.classList.remove('lit'));
+          for (let i = 0; i < dpNodes.length; i++) {
+            dpNodes[i].classList.add('active');
+            if (i > 0) dpEdges[i - 1].classList.add('lit');
+            const [id, kind, meta] = DP_META[i];
+            dpInspector.innerHTML = `<span>Inspecting: <strong style="color:var(--cyan)">${id}</strong> (${kind})</span><span style="color:var(--green)">${meta}</span>`;
+            await waitDp(750);
+            dpNodes[i].classList.remove('active');
+            dpNodes[i].classList.add('done');
+          }
+          await waitDp(900);
+
+          if (dpAuto) setDpTab('rtm');
+          for (let r = 0; r < dpRtmRows.length; r++) {
+            dpRtmRows.forEach((row, idx) => row.classList.toggle('active', idx === r));
+            await waitDp(850);
+          }
+
+          if (dpAuto) setDpTab('kpis');
+          await waitDp(2400);
+        }
+      }
+      onView(dashPreview, runDashPreview, 0.25);
+    }
   </script>
 </body>
 </html>
