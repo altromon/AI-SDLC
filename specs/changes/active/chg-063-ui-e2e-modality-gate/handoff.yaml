@@ -1,0 +1,23 @@
+id: HOF-CHG-063-UI-E2E-MODALITY-GATE
+type: handoff
+title: Handoff Canónico de Arquitectura para Deterministic Polyglot UI and E2E Modality Test Gate
+changeId: CHG-063-UI-E2E-MODALITY-GATE
+version: 1.0.0
+createdAt: '2026-11-18T21:13:21.036Z'
+subgraph:
+  requirements:
+    - FR-063-UI-E2E-MODALITY-GATE-001
+  useCases:
+    - UC-063-UI-E2E-MODALITY-GATE
+  components:
+    - CMP-063-UI-E2E-MODALITY-GATE
+citations:
+  - id: UC-063-UI-E2E-MODALITY-GATE
+    digest: sha256:a42c27eb12d00d9219500ca5a5528568ac67f2bc9b48b64a7ece91b2ffd4028f
+    comment: Caso de uso para verificación determinista de pruebas UI y E2E por modalidad (Web Playwright, Desktop FlaUI, Consola CLI/TUI y Mobile) en el Quality Gate
+  - id: FR-063-UI-E2E-MODALITY-GATE-001
+    digest: sha256:c1339af72bbfc9c3fb2c0ac0ea439706f77f0e384a0b62ebd3307344cc8d3f71
+    comment: Requisito funcional del gate determinista políglota de pruebas UI y E2E en las 4 modalidades
+  - id: CMP-063-UI-E2E-MODALITY-GATE
+    digest: sha256:3e03e8dac780c1387fa5acd67e897f902be42711af6bd36f9298bf5c070b1159
+    comment: Componente arquitectónico del gate determinista políglota de pruebas UI y E2E por modalidad
