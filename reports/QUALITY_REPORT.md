@@ -1,6 +1,6 @@
 # 📊 Formal Quality and Release Gate Report (AI-SDLC)
 
-> **Generation Date:** 2026-11-18T19:04:00.000Z
+> **Generation Date:** 2026-11-18T23:11:52.000Z
 > **Release Gate Verdict:** 🔴 BLOCKED (VIOLATIONS DETECTED)
 > **Global Rating:** **`B`** (MI Index: 61.8/100, Average CC: 3.9)
 
@@ -11,8 +11,8 @@
 | Key Metric | Measured Value | Policy Threshold | Compliance |
 | :--- | :---: | :---: | :---: |
 | **Analyzed Files** | `125` | N/A | ℹ️ |
-| **Evaluated Functions** | `1864` | N/A | ℹ️ |
-| **Lines of Code (LOC)** | `23517` | N/A | ℹ️ |
+| **Evaluated Functions** | `1870` | N/A | ℹ️ |
+| **Lines of Code (LOC)** | `23583` | N/A | ℹ️ |
 | **Cyclomatic Complexity (Average)** | `3.9` | $\le 10$ | ✅ COMPLIANT |
 | **Cognitive Complexity (Average)** | `2.4` | $\le 15$ | ✅ COMPLIANT |
 | **Maintainability Index (SEI MI)** | `61.8 / 100` | $\ge 50$ | ✅ COMPLIANT |
@@ -25,7 +25,7 @@
 
 ## 2. AI Agent Performance KPIs (SWE-bench & DORA AI)
 
-> **Evaluated Tasks:** `13` | **Commits:** `286` | **Audited Trailer Coverage:** `29%`
+> **Evaluated Tasks:** `13` | **Commits:** `288` | **Audited Trailer Coverage:** `28.8%`
 
 | KPI | Measured Value | Benchmark / Target |
 | :--- | :---: | :---: |
@@ -33,8 +33,8 @@
 | **Rework Loops per Task** | `0.31` | $\le 0.5$ |
 | **Specification Adherence Index** | `100%` | $\ge 95\%$ |
 | **Human Takeover / Intervention Rate** | `0%` | $\le 15\%$ |
-| **Token Cost Efficiency** | `583 tokens/CC` | Lower is better |
-| **Architecture Drift Rate** | `25%` | $0\%$ |
+| **Token Cost Efficiency** | `581 tokens/CC` | Lower is better |
+| **Architecture Drift Rate** | `24%` | $0\%$ |
 
 ---
 
@@ -42,7 +42,7 @@
 
 | Language | Functions | Total LOC | Average MI | Average CC | Rating |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **TypeScript** | `1864` | `23517` | `61.8` | `3.9` | `B` |
+| **TypeScript** | `1870` | `23583` | `61.8` | `3.9` | `B` |
 
 ---
 
