@@ -23,6 +23,7 @@ import { TransactionManager } from './transaction-manager.js';
 import { STARTER_QUALITY_POLICY, STARTER_LICENSE_POLICY, STARTER_PRIVACY_POLICY } from '../init/index.js';
 import { STARTER_SCHEMAS } from '../init/starter-schemas.js';
 import { STARTER_BASE_TEMPLATES } from '../init/starter-templates.js';
+import { getAisdlcVersion, readAisdlcManifest, writeAisdlcManifest } from '../version.js';
 
 export class MigrationOrchestrator {
   public fsJail = new FileSystemJailAdapter();
@@ -268,8 +269,7 @@ export class MigrationService implements IMigrationService {
     const evaluation = evaluateGovernedTargets(targets, this.orchestrator, options.force);
 
     if (isDryRun || evaluation.filesToModify.length === 0) {
-      const exitCode = resolveExitCode(evaluation.summary);
-      return { success: exitCode === 0, exitCode, summary: evaluation.summary, details: evaluation.details };
+      return this.buildCompletedResult(root, evaluation, isDryRun);
     }
 
     const tx = await this.runMutationTransaction(root, evaluation, options.backup ?? true);
@@ -277,8 +277,28 @@ export class MigrationService implements IMigrationService {
       return createTransactionFailureResult(evaluation.summary, tx.backupPath, tx.error);
     }
 
+    return this.buildCompletedResult(root, evaluation, isDryRun, tx.backupPath);
+  }
+
+  private buildCompletedResult(
+    root: string,
+    evaluation: ItemEvaluation,
+    isDryRun: boolean,
+    backupPath?: string
+  ): MigrationResult {
     const exitCode = resolveExitCode(evaluation.summary);
-    return { success: exitCode === 0, exitCode, summary: evaluation.summary, backupPath: tx.backupPath, details: evaluation.details };
+    if (!isDryRun && exitCode !== 2) {
+      this.syncManifestVersion(root);
+    }
+    return { success: exitCode === 0, exitCode, summary: evaluation.summary, backupPath, details: evaluation.details };
+  }
+
+  private syncManifestVersion(root: string): void {
+    const installedVersion = getAisdlcVersion();
+    const existing = readAisdlcManifest(root);
+    if (!existing || existing.version !== installedVersion) {
+      writeAisdlcManifest(root, installedVersion);
+    }
   }
 
 

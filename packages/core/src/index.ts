@@ -57,3 +57,4 @@ export * from './inspector/index.js';
 export * from './compliance/index.js';
 export * from './doctor/index.js';
 export * from './migrate/index.js';
+export * from './version.js';
