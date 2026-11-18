@@ -11,7 +11,8 @@ export type DiagnosticCategory =
   | 'schemas_pdac'
   | 'toolchain'
   | 'signing_readiness'
-  | 'security_tools';
+  | 'security_tools'
+  | 'aisdlc_version';
 
 export interface DiagnosticFinding {
   id: string; // e.g. 'ERR_HOOKS_NOT_INSTALLED', 'ERR_PROTECTED_BRANCH_ACTIVE'

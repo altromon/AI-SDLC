@@ -5,6 +5,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { installGitHooks } from '../git/hook-installer.js';
+import { AISDLC_MANIFEST_FILENAME, getAisdlcVersion } from '../version.js';
 import {
   STARTER_ANTIGRAVITY_RULES,
   STARTER_CURSOR_CORE_RULES,
@@ -1051,6 +1052,7 @@ function collectStarterFiles(
   stacks: readonly CodingRuleStack[] = []
 ): { relPath: string; content: string }[] {
   const files: { relPath: string; content: string }[] = [
+    { relPath: AISDLC_MANIFEST_FILENAME, content: JSON.stringify({ version: getAisdlcVersion() }, null, 2) + '\n' },
     ...collectPolicyAndSchemaFiles(),
     ...getCodingRulesFilesForStacks(stacks),
     ...getCiWorkflowFiles(ciProvider),

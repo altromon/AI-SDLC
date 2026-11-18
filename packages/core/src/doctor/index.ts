@@ -10,5 +10,6 @@ export * from './schemas-pdac-check.js';
 export * from './toolchain-check.js';
 export * from './signature-check.js';
 export * from './security-tools-check.js';
+export * from './version-check.js';
 export * from './reporter.js';
 export * from './doctor-service.js';

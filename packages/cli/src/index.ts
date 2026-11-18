@@ -5,6 +5,7 @@
 
 import { Command } from 'commander';
 import pc from 'picocolors';
+import { formatAisdlcVersionOutput } from '@aisdlc/core';
 import { runCheck } from './commands/check.js';
 import { runGherkinExtract, runGherkinScaffold } from './commands/gherkin.js';
 import {
@@ -46,7 +47,7 @@ const program = new Command();
 program
   .name('aisdlc')
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
-  .version('4.5.0');
+  .version(formatAisdlcVersionOutput());
 
 // --- check command (unified pre-flight with auto-fix) ---
 program
