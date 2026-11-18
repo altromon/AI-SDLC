@@ -1,7 +1,7 @@
 # 📊 Formal Quality and Release Gate Report (AI-SDLC)
 
-> **Generation Date:** 2026-11-17T14:36:24.000Z
-> **Release Gate Verdict:** 🟢 APPROVED (RELEASE READY)
+> **Generation Date:** 2026-11-18T07:19:38.000Z
+> **Release Gate Verdict:** 🔴 BLOCKED (VIOLATIONS DETECTED)
 > **Global Rating:** **`B`** (MI Index: 61.8/100, Average CC: 3.9)
 
 ---
@@ -12,7 +12,7 @@
 | :--- | :---: | :---: | :---: |
 | **Analyzed Files** | `123` | N/A | ℹ️ |
 | **Evaluated Functions** | `1854` | N/A | ℹ️ |
-| **Lines of Code (LOC)** | `23390` | N/A | ℹ️ |
+| **Lines of Code (LOC)** | `23393` | N/A | ℹ️ |
 | **Cyclomatic Complexity (Average)** | `3.9` | $\le 10$ | ✅ COMPLIANT |
 | **Cognitive Complexity (Average)** | `2.4` | $\le 15$ | ✅ COMPLIANT |
 | **Maintainability Index (SEI MI)** | `61.8 / 100` | $\ge 50$ | ✅ COMPLIANT |
@@ -25,7 +25,7 @@
 
 ## 2. AI Agent Performance KPIs (SWE-bench & DORA AI)
 
-> **Evaluated Tasks:** `13` | **Commits:** `278` | **Audited Trailer Coverage:** `29.9%`
+> **Evaluated Tasks:** `13` | **Commits:** `280` | **Audited Trailer Coverage:** `29.6%`
 
 | KPI | Measured Value | Benchmark / Target |
 | :--- | :---: | :---: |
@@ -42,7 +42,7 @@
 
 | Language | Functions | Total LOC | Average MI | Average CC | Rating |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **TypeScript** | `1854` | `23390` | `61.8` | `3.9` | `B` |
+| **TypeScript** | `1854` | `23393` | `61.8` | `3.9` | `B` |
 
 ---
 
