@@ -1,6 +1,6 @@
 # 📊 Formal Quality and Release Gate Report (AI-SDLC)
 
-> **Generation Date:** 2026-11-19T08:22:54.000Z
+> **Generation Date:** 2026-11-19T20:10:29.000Z
 > **Release Gate Verdict:** 🔴 BLOCKED (VIOLATIONS DETECTED)
 > **Global Rating:** **`B`** (MI Index: 61.8/100, Average CC: 3.9)
 
@@ -11,10 +11,10 @@
 | Key Metric | Measured Value | Policy Threshold | Compliance |
 | :--- | :---: | :---: | :---: |
 | **Analyzed Files** | `125` | N/A | ℹ️ |
-| **Evaluated Functions** | `1870` | N/A | ℹ️ |
-| **Lines of Code (LOC)** | `23583` | N/A | ℹ️ |
+| **Evaluated Functions** | `1874` | N/A | ℹ️ |
+| **Lines of Code (LOC)** | `23637` | N/A | ℹ️ |
 | **Cyclomatic Complexity (Average)** | `3.9` | $\le 10$ | ✅ COMPLIANT |
-| **Cognitive Complexity (Average)** | `2.4` | $\le 15$ | ✅ COMPLIANT |
+| **Cognitive Complexity (Average)** | `2.5` | $\le 15$ | ✅ COMPLIANT |
 | **Maintainability Index (SEI MI)** | `61.8 / 100` | $\ge 50$ | ✅ COMPLIANT |
 | **Line Coverage** | `N/A (Run test:coverage)` | $\ge 85\%$ | ℹ️ NOT MEASURED |
 | **Branch Coverage** | `N/A (Run test:coverage)` | $\ge 80\%$ | ℹ️ NOT MEASURED |
@@ -25,16 +25,16 @@
 
 ## 2. AI Agent Performance KPIs (SWE-bench & DORA AI)
 
-> **Evaluated Tasks:** `13` | **Commits:** `290` | **Audited Trailer Coverage:** `28.6%`
+> **Evaluated Tasks:** `17` | **Commits:** `299` | **Audited Trailer Coverage:** `30.1%`
 
 | KPI | Measured Value | Benchmark / Target |
 | :--- | :---: | :---: |
-| **First-Pass Yield (FPY)** | `69.2%` | $\ge 80\%$ |
-| **Rework Loops per Task** | `0.31` | $\le 0.5$ |
+| **First-Pass Yield (FPY)** | `64.7%` | $\ge 80\%$ |
+| **Rework Loops per Task** | `0.29` | $\le 0.5$ |
 | **Specification Adherence Index** | `100%` | $\ge 95\%$ |
 | **Human Takeover / Intervention Rate** | `0%` | $\le 15\%$ |
-| **Token Cost Efficiency** | `581 tokens/CC` | Lower is better |
-| **Architecture Drift Rate** | `24%` | $0\%$ |
+| **Token Cost Efficiency** | `591 tokens/CC` | Lower is better |
+| **Architecture Drift Rate** | `22.2%` | $0\%$ |
 
 ---
 
@@ -42,7 +42,7 @@
 
 | Language | Functions | Total LOC | Average MI | Average CC | Rating |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **TypeScript** | `1870` | `23583` | `61.8` | `3.9` | `B` |
+| **TypeScript** | `1874` | `23637` | `61.8` | `3.9` | `B` |
 
 ---
 

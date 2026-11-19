@@ -111,10 +111,11 @@ This file defines the operational rules and specialized role mappings for Google
 
 ## 3. Git 4-Tier Hierarchy and Commit Conventions
 - `task/<PARENT-ID>/<TSK-ID>-<slug>` $\rightarrow$ `feat/<FEAT-ID>-<slug>` $\rightarrow$ `release/vX.Y.Z` $\rightarrow$ `main`.
-- Mandatory commit trailers injection (always declare your actual active model in `AI-Model:` or via `AI_MODEL=<active-model>` when running `git commit`, so the hook does not fall back to a generic IDE identifier like `antigravity-agent`):
+- Mandatory commit trailers injection (always declare your actual active model in `AI-Model:` or via `AI_MODEL=<active-model>` when running `git commit`, so the hook does not fall back to a generic IDE identifier like `antigravity-agent`, and include `AI-Reasoning-Effort: <low|medium|high|max>` or `AI_REASONING_EFFORT=<level>` when applicable):
   ```text
   Author-Type: agent
   AI-Model: <active-model>
+  AI-Reasoning-Effort: <low|medium|high|max>
   Task-ID: TSK-XXX
   Change-ID: CHG-XXX
   ```

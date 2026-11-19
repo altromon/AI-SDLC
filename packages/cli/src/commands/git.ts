@@ -126,7 +126,7 @@ export function runGitDetectAuthor(options: { root?: string; json?: boolean } = 
   if (options.json) {
     console.log(JSON.stringify(identity, null, 2));
   } else {
-    console.log(`${identity.authorType}|${identity.model}|${identity.promptTokens}|${identity.completionTokens}|${identity.activeTimeSeconds}`);
+    console.log(`${identity.authorType}|${identity.model}|${identity.promptTokens}|${identity.completionTokens}|${identity.activeTimeSeconds}|${identity.reasoningEffort || ''}`);
   }
   return true;
 }

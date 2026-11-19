@@ -5,10 +5,12 @@
 import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { ReasoningEffort, normalizeReasoningEffort } from './trailers.js';
 
 export interface AuthorIdentity {
   authorType: 'human' | 'agent';
   model: string;
+  reasoningEffort?: ReasoningEffort;
   source: string;
   confidence: 'HIGH' | 'MEDIUM' | 'LOW';
   promptTokens: number;
@@ -52,6 +54,7 @@ function getGitConfigValue(key: string, cwd: string): string | undefined {
 
 interface TelemetrySessionData {
   model?: string;
+  reasoningEffort?: string;
   promptTokens?: number;
   completionTokens?: number;
   activeTimeSeconds?: number;
@@ -118,8 +121,12 @@ function detectFromGitConfig(cwd: string): AuthorIdentity | null {
   return null;
 }
 
-function detectFromTelemetry(cwd: string, env: NodeJS.ProcessEnv): AuthorIdentity | null {
-  const telemetry = readSessionTelemetry(cwd);
+function detectFromTelemetry(
+  cwd: string,
+  env: NodeJS.ProcessEnv,
+  preloaded?: TelemetrySessionData | null
+): AuthorIdentity | null {
+  const telemetry = preloaded !== undefined ? preloaded : readSessionTelemetry(cwd);
   if (telemetry) {
     const model = telemetry.model || env.AI_MODEL || 'agent-developer';
     return {
@@ -180,6 +187,18 @@ function detectFromSignature(env: NodeJS.ProcessEnv, cwd: string): AuthorIdentit
   return null;
 }
 
+function resolveAgentReasoningEffort(
+  cwd: string,
+  env: NodeJS.ProcessEnv,
+  telemetry?: TelemetrySessionData | null
+): ReasoningEffort | undefined {
+  return (
+    normalizeReasoningEffort(env.AI_REASONING_EFFORT) ??
+    normalizeReasoningEffort(telemetry?.reasoningEffort) ??
+    normalizeReasoningEffort(getGitConfigValue('ai-sdlc.reasoning-effort', cwd))
+  );
+}
+
 /**
  * Universally detects whether the current author is an AI Agent or a Human,
  * regardless of IDE (VSCode, Cursor, Windsurf, Claude Code, CLI, JetBrains).
@@ -189,11 +208,12 @@ export function detectAuthorIdentity(
 ): AuthorIdentity {
   const env = options.env || process.env;
   const cwd = options.cwd || process.cwd();
+  const telemetry = readSessionTelemetry(cwd);
 
-  return (
+  const identity =
     detectFromEnvOverride(env) ||
     detectFromGitConfig(cwd) ||
-    detectFromTelemetry(cwd, env) ||
+    detectFromTelemetry(cwd, env, telemetry) ||
     detectFromAgentEnv(env) ||
     detectFromSignature(env, cwd) || {
       authorType: 'human',
@@ -203,6 +223,12 @@ export function detectAuthorIdentity(
       promptTokens: 0,
       completionTokens: 0,
       activeTimeSeconds: 0,
-    }
-  );
+    };
+
+  if (identity.authorType !== 'agent') {
+    return identity;
+  }
+
+  const reasoningEffort = resolveAgentReasoningEffort(cwd, env, telemetry);
+  return reasoningEffort ? { ...identity, reasoningEffort } : identity;
 }

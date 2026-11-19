@@ -1228,9 +1228,13 @@ export const DASHBOARD_CLIENT_SCRIPT = `
       var tableBranchLabel = document.getElementById('table-branch-label');
       if (tableBranchLabel) tableBranchLabel.textContent = isTotal ? 'Totalizador (Todas las ramas)' : branchKey;
 
+      var escHtml = function(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      };
+
       var badgeElem = document.getElementById('telemetry-badge-container');
       if (badgeElem) {
-        badgeElem.innerHTML = '<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 4px;">' + badgeText + '</span>';
+        badgeElem.innerHTML = '<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 4px;">' + escHtml(badgeText) + '</span>';
       }
 
       var elCommits = document.getElementById('card-commits');
@@ -1258,6 +1262,7 @@ export const DASHBOARD_CLIENT_SCRIPT = `
           html += '<tr>' +
             '<td><strong>Human (Developer)</strong></td>' +
             '<td><span class="badge" style="background:#334155;">HUMAN</span></td>' +
+            '<td>—</td>' +
             '<td>' + data.humanSummary.commits + '</td>' +
             '<td>+' + data.humanSummary.linesAdded + ' / -' + data.humanSummary.linesDeleted + '</td>' +
             '<td>' + Math.round(data.humanSummary.activeTimeSeconds / 60) + 'm</td>' +
@@ -1265,24 +1270,42 @@ export const DASHBOARD_CLIENT_SCRIPT = `
             '</tr>';
         }
         if (data.byModel) {
+          var effortOrder = { low: 0, medium: 1, high: 2, max: 3, unspecified: 4 };
+          var renderRow = function(safeModel, effortKey, s) {
+            var safeEffort = escHtml(effortKey);
+            return '<tr>' +
+              '<td><strong><code>' + safeModel + '</code></strong></td>' +
+              '<td><span class="badge badge-green">AGENT</span></td>' +
+              '<td><span class="badge" style="background:#334155;">' + safeEffort + '</span></td>' +
+              '<td>' + s.commits + '</td>' +
+              '<td>+' + s.linesAdded + ' / -' + s.linesDeleted + '</td>' +
+              '<td>' + Math.round(s.activeTimeSeconds / 60) + 'm</td>' +
+              '<td>' + (s.promptTokens + s.completionTokens).toLocaleString('en-US') + '</td>' +
+              '<td>$' + Number(s.estimatedCostUsd).toFixed(2) + '</td>' +
+              '</tr>';
+          };
           var models = Object.keys(data.byModel);
           for (var i = 0; i < models.length; i++) {
             var m = models[i];
             var summary = data.byModel[m];
-            var safeModel = String(m).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            html += '<tr>' +
-              '<td><strong><code>' + safeModel + '</code></strong></td>' +
-              '<td><span class="badge badge-green">AGENT</span></td>' +
-              '<td>' + summary.commits + '</td>' +
-              '<td>+' + summary.linesAdded + ' / -' + summary.linesDeleted + '</td>' +
-              '<td>' + Math.round(summary.activeTimeSeconds / 60) + 'm</td>' +
-              '<td>' + (summary.promptTokens + summary.completionTokens).toLocaleString('en-US') + '</td>' +
-              '<td>$' + Number(summary.estimatedCostUsd).toFixed(2) + '</td>' +
-              '</tr>';
+            var safeModel = escHtml(m);
+            var effortKeys = summary.byEffort ? Object.keys(summary.byEffort) : [];
+            if (effortKeys.length === 0) {
+              html += renderRow(safeModel, 'unspecified', summary);
+            } else {
+              effortKeys.sort(function(a, b) {
+                var oa = effortOrder.hasOwnProperty(a) ? effortOrder[a] : 99;
+                var ob = effortOrder.hasOwnProperty(b) ? effortOrder[b] : 99;
+                return oa !== ob ? oa - ob : a.localeCompare(b);
+              });
+              for (var j = 0; j < effortKeys.length; j++) {
+                html += renderRow(safeModel, effortKeys[j], summary.byEffort[effortKeys[j]]);
+              }
+            }
           }
         }
         html += '<tr style="font-weight: bold; background: rgba(255,255,255,0.05);">' +
-          '<td>' + (isTotal ? 'TOTAL REPOSITORIO' : 'TOTAL RAMA') + '</td><td>—</td>' +
+          '<td>' + (isTotal ? 'TOTAL REPOSITORIO' : 'TOTAL RAMA') + '</td><td>—</td><td>—</td>' +
           '<td>' + data.totalCommits + '</td>' +
           '<td>+' + data.linesAdded + ' / -' + data.linesDeleted + '</td>' +
           '<td>' + Math.round(data.totalActiveTimeSeconds / 60) + 'm</td>' +

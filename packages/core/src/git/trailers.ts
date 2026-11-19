@@ -4,11 +4,22 @@
 
 import { execFileSync } from 'child_process';
 
+export type ReasoningEffort = 'low' | 'medium' | 'high' | 'max';
+
+const VALID_REASONING_EFFORTS: ReadonlySet<string> = new Set(['low', 'medium', 'high', 'max']);
+
+export function normalizeReasoningEffort(raw?: string): ReasoningEffort | undefined {
+  if (!raw) return undefined;
+  const normalized = raw.trim().toLowerCase();
+  return VALID_REASONING_EFFORTS.has(normalized) ? (normalized as ReasoningEffort) : undefined;
+}
+
 export interface CommitTrailers {
   taskId?: string;
   parentRef?: string;
   authorType: 'human' | 'agent';
   aiModel?: string;
+  reasoningEffort?: ReasoningEffort;
   promptTokens: number;
   completionTokens: number;
   activeTimeSeconds: number;
@@ -33,6 +44,7 @@ const TRAILER_REGEXES = {
   parentRef: /^\s*Parent-Ref:\s*(.+)$/im,
   authorType: /^\s*Author-Type:\s*(human|agent)/im,
   aiModel: /^\s*AI-Model:\s*(.+)$/im,
+  reasoningEffort: /^[ \t]*AI-Reasoning-Effort:[ \t]*([^\r\n]+)$/im,
   promptTokens: /^\s*Prompt-Tokens:\s*([0-9]+)/im,
   completionTokens: /^\s*Completion-Tokens:\s*([0-9]+)/im,
   activeTimeSeconds: /^\s*Active-Time-Seconds:\s*([0-9]+)/im,
@@ -76,12 +88,15 @@ export function parseCommitTrailers(rawMessage: string): CommitTrailers {
   const authorType = resolveAuthorType(authorTypeMatch, aiModelMatch);
   const rawModel = aiModelMatch ? aiModelMatch[1].trim() : undefined;
   const aiModel = rawModel && rawModel !== 'n/a' ? rawModel : undefined;
+  const effortMatch = text.match(TRAILER_REGEXES.reasoningEffort);
+  const reasoningEffort = normalizeReasoningEffort(effortMatch ? effortMatch[1] : undefined);
 
   return {
     taskId: resolveTrailerOrScope(text.match(TRAILER_REGEXES.taskId), text, /\b(TSK-[0-9A-Za-z_-]+)\b/i),
     parentRef: resolveTrailerOrScope(text.match(TRAILER_REGEXES.parentRef), text, /\b((?:CHG|FEAT|BUG|FIX|PATCH)-[0-9A-Za-z_-]+)\b/i),
     authorType,
     aiModel,
+    reasoningEffort,
     promptTokens: parseTrailerInt(text.match(TRAILER_REGEXES.promptTokens)),
     completionTokens: parseTrailerInt(text.match(TRAILER_REGEXES.completionTokens)),
     activeTimeSeconds: parseTrailerInt(text.match(TRAILER_REGEXES.activeTimeSeconds)),
@@ -97,6 +112,8 @@ export function formatCommitTrailers(trailers: Partial<CommitTrailers>): string 
   if (trailers.parentRef) lines.push(`Parent-Ref: ${trailers.parentRef}`);
   lines.push(`Author-Type: ${trailers.authorType || 'human'}`);
   lines.push(`AI-Model: ${trailers.aiModel || 'n/a'}`);
+  const normalizedEffort = normalizeReasoningEffort(trailers.reasoningEffort);
+  if (normalizedEffort) lines.push(`AI-Reasoning-Effort: ${normalizedEffort}`);
   lines.push(`Prompt-Tokens: ${trailers.promptTokens ?? 0}`);
   lines.push(`Completion-Tokens: ${trailers.completionTokens ?? 0}`);
   lines.push(`Active-Time-Seconds: ${trailers.activeTimeSeconds ?? 0}`);

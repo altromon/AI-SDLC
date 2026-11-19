@@ -17,6 +17,7 @@ import {
   TraceabilityResult,
   TraceabilityRow,
 } from '../types/index.js';
+import { ReasoningEffort } from '../git/trailers.js';
 import { AuthorKpiSummary, PrKpiAggregation } from './pr-kpis.js';
 import { AgentPerformanceKpis } from './agent-kpis.js';
 import { ComplianceBundlePayload, RegulatoryGateMapping } from '../types/regulatory-compliance.js';
@@ -524,11 +525,28 @@ function renderTelemetryCardsHtml(kpi: PrKpiAggregation, displayLabel: string = 
   ].join('\n');
 }
 
-function renderModelRow(model: string, summary: AuthorKpiSummary): string {
+export interface ModelKpiRow {
+  model: string;
+  reasoningEffort: ReasoningEffort | 'unspecified';
+  summary: AuthorKpiSummary;
+}
+
+const EFFORT_ORDER: Record<string, number> = { low: 0, medium: 1, high: 2, max: 3, unspecified: 4 };
+
+function sortEffortEntries(entries: Array<[string, AuthorKpiSummary]>): Array<[string, AuthorKpiSummary]> {
+  return [...entries].sort(([a], [b]) => {
+    const oa = EFFORT_ORDER[a] ?? 99;
+    const ob = EFFORT_ORDER[b] ?? 99;
+    return oa !== ob ? oa - ob : a.localeCompare(b);
+  });
+}
+
+function renderModelEffortRow(model: string, effort: string, summary: AuthorKpiSummary): string {
   return [
     `<tr>`,
-    `  <td><strong><code>${model}</code></strong></td>`,
+    `  <td><strong><code>${escapeHtml(model)}</code></strong></td>`,
     `  <td><span class="badge badge-green">AGENT</span></td>`,
+    `  <td><span class="badge" style="background:#334155;">${escapeHtml(effort)}</span></td>`,
     `  <td>${summary.commits}</td>`,
     `  <td>+${summary.linesAdded} / -${summary.linesDeleted}</td>`,
     `  <td>${Math.round(summary.activeTimeSeconds / 60)}m</td>`,
@@ -538,12 +556,23 @@ function renderModelRow(model: string, summary: AuthorKpiSummary): string {
   ].join('');
 }
 
+function renderModelRows(model: string, summary: AuthorKpiSummary): string {
+  const effortEntries = summary.byEffort ? Object.entries(summary.byEffort) : [];
+  if (effortEntries.length === 0) {
+    return renderModelEffortRow(model, 'unspecified', summary);
+  }
+  return sortEffortEntries(effortEntries)
+    .map(([effort, effortSummary]) => renderModelEffortRow(model, effort, effortSummary))
+    .join('\n');
+}
+
 function renderHumanTelemetryRow(human: AuthorKpiSummary): string {
   if (human.commits <= 0) return '';
   return [
     `<tr>`,
     `  <td><strong>Human (Developer)</strong></td>`,
     `  <td><span class="badge" style="background:#334155;">HUMAN</span></td>`,
+    `  <td>—</td>`,
     `  <td>${human.commits}</td>`,
     `  <td>+${human.linesAdded} / -${human.linesDeleted}</td>`,
     `  <td>${Math.round(human.activeTimeSeconds / 60)}m</td>`,
@@ -559,22 +588,22 @@ function renderTotalBranchRow(kpi: PrKpiAggregation, isTotal: boolean = false): 
   const label = isTotal ? 'TOTAL REPOSITORIO' : 'TOTAL RAMA';
   return [
     `<tr style="font-weight: bold; background: rgba(255,255,255,0.05);">`,
-    `  <td>${label}</td><td>—</td><td>${kpi.totalCommits}</td><td>+${kpi.linesAdded} / -${kpi.linesDeleted}</td>`,
+    `  <td>${label}</td><td>—</td><td>—</td><td>${kpi.totalCommits}</td><td>+${kpi.linesAdded} / -${kpi.linesDeleted}</td>`,
     `  <td>${mins}m</td><td>${tokens}</td><td>$${cost} USD</td>`,
     `</tr>`,
   ].join('');
 }
 
-function renderTelemetryTable(kpi: PrKpiAggregation, displayLabel: string): string {
+export function renderModelTelemetryTable(kpi: PrKpiAggregation, displayLabel: string): string {
   const humanRow = renderHumanTelemetryRow(kpi.humanSummary);
-  const modelRows = Object.entries(kpi.byModel).map(([m, s]: [string, AuthorKpiSummary]) => renderModelRow(m, s)).join('\n');
+  const modelRows = Object.entries(kpi.byModel).map(([m, s]: [string, AuthorKpiSummary]) => renderModelRows(m, s)).join('\n');
   const totalRow = renderTotalBranchRow(kpi, displayLabel === 'Totalizador');
   const titleLabel = displayLabel === 'Totalizador' ? 'Totalizador (Todas las ramas)' : displayLabel;
 
   return [
     `<div class="chart-container">`,
     `  <h3>Telemetry Breakdown by Author and Model (<span id="table-branch-label">${escapeHtml(titleLabel)}</span>)</h3>`,
-    `  <table class="data-table"><thead><tr><th>Entity / Model</th><th>Type</th><th>Commits</th><th>Lines (+/-)</th><th>Active Time</th><th>Consumed Tokens</th><th>Estimated Cost ($ USD)</th></tr></thead><tbody id="telemetry-table-tbody">`,
+    `  <table class="data-table"><thead><tr><th>Entity / Model</th><th>Type</th><th>Reasoning Effort</th><th>Commits</th><th>Lines (+/-)</th><th>Active Time</th><th>Consumed Tokens</th><th>Estimated Cost ($ USD)</th></tr></thead><tbody id="telemetry-table-tbody">`,
     humanRow,
     modelRows,
     totalRow,
@@ -591,7 +620,7 @@ function renderActiveTelemetrySection(
 ): string {
   const filterBarHtml = renderTelemetryFilterBarHtml(branches, activeBranch);
   const cardsHtml = renderTelemetryCardsHtml(kpi, displayLabel);
-  const tableHtml = renderTelemetryTable(kpi, displayLabel);
+  const tableHtml = renderModelTelemetryTable(kpi, displayLabel);
   return `${filterBarHtml}\n${cardsHtml}\n${tableHtml}`;
 }
 
