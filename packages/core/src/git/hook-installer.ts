@@ -99,23 +99,32 @@ AI_MODEL_NAME="n/a"
 PROMPT_TOKENS=0
 COMPLETION_TOKENS=0
 ACTIVE_TIME_SEC=0
+REASONING_EFFORT=""
 
 # Execute universal IDE-agnostic author detection engine
-DETECTED=$(node packages/cli/bin/aisdlc.js git detect-author 2>/dev/null || npx aisdlc git detect-author 2>/dev/null || node -e "try { const { detectAuthorIdentity } = require('@aisdlc/core'); const id = detectAuthorIdentity(); console.log([id.authorType, id.model, id.promptTokens, id.completionTokens, id.activeTimeSeconds].join('|')); } catch {}" 2>/dev/null || echo "")
+DETECTED=$(node packages/cli/bin/aisdlc.js git detect-author 2>/dev/null || npx aisdlc git detect-author 2>/dev/null || node -e "try { const { detectAuthorIdentity } = require('@aisdlc/core'); const id = detectAuthorIdentity(); console.log([id.authorType, id.model, id.promptTokens, id.completionTokens, id.activeTimeSeconds, id.reasoningEffort || ''].join('|')); } catch {}" 2>/dev/null || echo "")
 
 if [ -n "$DETECTED" ]; then
-  IFS='|' read -r DET_AUTHOR DET_MODEL DET_PROMPT DET_COMPL DET_TIME <<< "$DETECTED"
+  IFS='|' read -r DET_AUTHOR DET_MODEL DET_PROMPT DET_COMPL DET_TIME DET_EFFORT <<< "$DETECTED"
   AUTHOR_TYPE="\${DET_AUTHOR:-\$AUTHOR_TYPE}"
   AI_MODEL_NAME="\${DET_MODEL:-\$AI_MODEL_NAME}"
   PROMPT_TOKENS="\${DET_PROMPT:-\$PROMPT_TOKENS}"
   COMPLETION_TOKENS="\${DET_COMPL:-\$COMPLETION_TOKENS}"
   ACTIVE_TIME_SEC="\${DET_TIME:-\$ACTIVE_TIME_SEC}"
+  REASONING_EFFORT="\${DET_EFFORT:-\$AI_REASONING_EFFORT}"
 else
   if [ -n "$AI_MODEL" ] || [ -n "$AI_AGENT_NAME" ] || [ -n "$ANTIGRAVITY_AGENT" ] || [ -n "$ANTIGRAVITY_AGENT_ID" ] || [ -n "$ANTIGRAVITY_CONVERSATION_ID" ] || [ -n "$CLAUDE_CODE" ] || [ -n "$CURSOR_AGENT" ] || [ -n "$WINDSURF_AGENT" ] || [ -n "$AIDER_MODEL" ] || [ -f "$TELEMETRY_FILE" ]; then
     AUTHOR_TYPE="agent"
     AI_MODEL_NAME="\${AI_MODEL:-\${AI_AGENT_NAME:-\${AIDER_MODEL:-agent-developer}}}"
+    REASONING_EFFORT="\${AI_REASONING_EFFORT:-}"
   fi
 fi
+
+REASONING_EFFORT=$(printf '%s' "$REASONING_EFFORT" | tr -d '\\r[:space:]' | tr '[:upper:]' '[:lower:]')
+case "$REASONING_EFFORT" in
+  low|medium|high|max) ;;
+  *) REASONING_EFFORT="" ;;
+esac
 
 # Estimate tokens and active time if not provided for agent
 if [ "\$PROMPT_TOKENS" = "0" ] && [ "\$AUTHOR_TYPE" = "agent" ]; then
@@ -145,6 +154,9 @@ if ! grep -qE "^Author-Type:" "$COMMIT_MSG_FILE" 2>/dev/null; then
 fi
 if [ "$AUTHOR_TYPE" = "agent" ] && ! grep -qE "^AI-Model:" "$COMMIT_MSG_FILE" 2>/dev/null; then
   TRAILERS_TO_ADD="\${TRAILERS_TO_ADD}AI-Model: $AI_MODEL_NAME\n"
+fi
+if [ "$AUTHOR_TYPE" = "agent" ] && [ -n "$REASONING_EFFORT" ] && ! grep -qiE "^AI-Reasoning-Effort:" "$COMMIT_MSG_FILE" 2>/dev/null; then
+  TRAILERS_TO_ADD="\${TRAILERS_TO_ADD}AI-Reasoning-Effort: $REASONING_EFFORT\n"
 fi
 if ! grep -qE "^Prompt-Tokens:" "$COMMIT_MSG_FILE" 2>/dev/null; then
   TRAILERS_TO_ADD="\${TRAILERS_TO_ADD}Prompt-Tokens: $PROMPT_TOKENS\n"
