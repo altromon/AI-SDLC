@@ -37,20 +37,20 @@ Materializa `CMP-064-REASONING-EFFORT-TRAILER` dentro de `CMP-CORE` (`@aisdlc/co
    - Definir y exportar `ReasoningEffort = 'low' | 'medium' | 'high' | 'max'`.
    - Definir y exportar `normalizeReasoningEffort(raw?: string): ReasoningEffort | undefined` (recorta espacios, convierte a minúsculas y valida contra `'low' | 'medium' | 'high' | 'max'`, retornando `undefined` si no coincide).
    - Extender `CommitTrailers` con `reasoningEffort?: ReasoningEffort`.
-   - Añadir `reasoningEffort: /^\s*AI-Reasoning-Effort:\s*(.+)$/im` a `TRAILER_REGEXES`.
+   - Añadir `reasoningEffort: /^[ \t]*AI-Reasoning-Effort:[ \t]*([^\r\n]+)$/im` a `TRAILER_REGEXES` (evitando `\s*` para que nunca cruce saltos de línea ante líneas `AI-Reasoning-Effort:` vacías).
    - En `parseCommitTrailers(rawMessage)`: extraer `AI-Reasoning-Effort` usando `normalizeReasoningEffort(...)`.
    - En `formatCommitTrailers(trailers)`: añadir `AI-Reasoning-Effort: ${normalized}` únicamente cuando `normalizeReasoningEffort(trailers.reasoningEffort)` retorne un valor válido.
 
 2. **Detección Agnóstica al IDE (`packages/core/src/git/agent-detector.ts` y `packages/cli/src/commands/git.ts`)**:
    - Extender `AuthorIdentity` con `reasoningEffort?: ReasoningEffort`.
    - Extender `TelemetrySessionData` con `reasoningEffort?: string`.
-   - En `detectAuthorIdentity()` (cubriendo `detectFromEnvOverride`, `detectFromGitConfig`, `detectFromTelemetry`, `detectFromAgentEnv` y `detectFromSignature`): resolver `reasoningEffort` en orden de precedencia (`env.AI_REASONING_EFFORT`, `telemetry.reasoningEffort`, `getGitConfigValue('ai.reasoningEffort', cwd)`), normalizado mediante `normalizeReasoningEffort()`.
-   - En `packages/cli/src/commands/git.ts` (`runGitDetectAuthor`): incluir `identity.reasoningEffort || ''` como sexto campo separado por `|` en la salida de texto plano para consumo de `prepare-commit-msg`.
+   - En `detectAuthorIdentity()` (`packages/core/src/git/agent-detector.ts`): resolver `reasoningEffort` de forma centralizada en orden de precedencia (`env.AI_REASONING_EFFORT`, `telemetry?.reasoningEffort`, `getGitConfigValue('ai.reasoningEffort', cwd)`), normalizado mediante `normalizeReasoningEffort()`, aplicándolo al resultado de `detectFromEnvOverride`, `detectFromGitConfig`, `detectFromTelemetry`, `detectFromAgentEnv`, `detectFromSignature` y al retorno por defecto.
+   - En `packages/cli/src/commands/git.ts` (`runGitDetectAuthor`) y en el fallback inline `node -e` de `PREPARE_COMMIT_MSG_SCRIPT` (`hook-installer.ts`): incluir `identity.reasoningEffort || ''` como sexto campo separado por `|` en la salida de texto plano para consumo de `prepare-commit-msg`.
 
 3. **Inyección en Hook `prepare-commit-msg` (`packages/core/src/git/hook-installer.ts`)**:
    - En `PREPARE_COMMIT_MSG_SCRIPT`:
-     - Leer el sexto campo `DET_EFFORT` desde `git detect-author` (y respaldo desde `AI_REASONING_EFFORT` del entorno o `git config --get ai.reasoningEffort`).
-     - Normalizar a minúsculas (`tr '[:upper:]' '[:lower:]'` y trim) y validar estrictamente contra `low|medium|high|max`.
+     - Leer el sexto campo `DET_EFFORT` desde `git detect-author` (o el fallback inline `node -e`), con respaldo desde `AI_REASONING_EFFORT` del entorno o `git config --get ai.reasoningEffort`.
+     - Eliminar retornos de carro Windows (`\r`) y espacios (`tr -d '\r[:space:]'`) y normalizar a minúsculas (`tr '[:upper:]' '[:lower:]'`), validando estrictamente contra `low|medium|high|max`.
      - Inyectar `AI-Reasoning-Effort: $REASONING_EFFORT\n` únicamente cuando `AUTHOR_TYPE="agent"`, `REASONING_EFFORT` es válido y `! grep -qiE "^AI-Reasoning-Effort:" "$COMMIT_MSG_FILE"`.
 
 4. **Agregación KPI por Modelo y Nivel de Esfuerzo (`packages/core/src/reporters/pr-kpis.ts`)**:
@@ -60,9 +60,11 @@ Materializa `CMP-064-REASONING-EFFORT-TRAILER` dentro de `CMP-CORE` (`@aisdlc/co
      - Acumular `commits`, `linesAdded`, `linesDeleted`, `activeTimeSeconds`, `promptTokens`, `completionTokens` y `estimatedCostUsd` tanto en `byModel[modelName]` como en `byModel[modelName].byEffort[effortKey]`.
 
 5. **Renderizado en Dashboard HTML y Filtrado Dinámico en Cliente (`packages/core/src/reporters/dashboard-html.ts` y `packages/core/src/reporters/dashboard-template.ts`)**:
-   - Exportar `ModelKpiRow` y `renderModelTelemetryTable(kpi: PrKpiAggregation, displayLabel: string): string` (reutilizada por `renderTelemetryTable` / `renderActiveTelemetrySection`) para que la tabla `Telemetry Breakdown by Author and Model` incluya la columna `Reasoning Effort` (mostrando badges/etiquetas para `low`, `medium`, `high`, `max`, o `unspecified` / `—` cuando no haya trailer).
+   - Exportar `ModelKpiRow` y `renderModelTelemetryTable(kpi: PrKpiAggregation, displayLabel: string): string` (reutilizada por `renderTelemetryTable` / `renderActiveTelemetrySection`) para que la tabla `Telemetry Breakdown by Author and Model` incluya la 8ª columna `Reasoning Effort` (mostrando badges/etiquetas para `low`, `medium`, `high`, `max`, o `unspecified` / `—` cuando no haya trailer).
+   - Aplicar escape HTML estricto (`escapeHtml()` en servidor en `dashboard-html.ts` y su equivalente de escape HTML en cliente en `filterTelemetryByBranch`) sobre `model` y `reasoningEffort` para prevenir XSS.
+   - Alinear todas las filas con el `<thead>` de 8 columnas: actualizar `renderHumanTelemetryRow()`, `renderTotalBranchRow()` y `filterTelemetryByBranch()` para emitir la 8ª celda `<td>—</td>` en las filas humanas y de totales.
    - Cuando un modelo tenga múltiples niveles de esfuerzo en `byEffort`, renderizar una fila por cada `(modelo, nivel de esfuerzo)` ordenado determinísticamente (`low`, `medium`, `high`, `max`, `unspecified`); si solo existe `unspecified` o no hay `byEffort`, mostrar `unspecified` / `—`.
-   - Sincronizar la misma lógica de renderizado en `dashboard-template.ts` (`switchTelemetryBranch`) para que al cambiar el selector de rama en `reports/dashboard.html` se actualice dinámicamente la columna `Reasoning Effort`.
+   - Sincronizar la misma lógica de renderizado en `dashboard-template.ts` (`filterTelemetryByBranch`) para que al cambiar el selector de rama en `reports/dashboard.html` se actualice dinámicamente la columna `Reasoning Effort`.
 
 ---
 
@@ -77,7 +79,7 @@ flowchart LR
     GIT --> TR["trailers.ts: parseCommitTrailers()"]
     TR --> KPI["pr-kpis.ts: aggregateCommitKpiRecords()"]
     KPI --> DASH["dashboard-html.ts: renderModelTelemetryTable()"]
-    KPI --> TPL["dashboard-template.ts: switchTelemetryBranch()"]
+    KPI --> TPL["dashboard-template.ts: filterTelemetryByBranch()"]
 ```
 
 ```mermaid

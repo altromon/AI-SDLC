@@ -34,7 +34,7 @@ tasks:
       - ModelKpiRow
       - renderModelTelemetryTable
   - id: TSK-064-002
-    title: 'Green Phase (Git & Trailers) — Implementar ReasoningEffort, normalizeReasoningEffort, CommitTrailers.reasoningEffort, parseCommitTrailers y formatCommitTrailers en packages/core/src/git/trailers.ts; extender AuthorIdentity y detectAuthorIdentity en packages/core/src/git/agent-detector.ts; actualizar runGitDetectAuthor en packages/cli/src/commands/git.ts e inyección AI-Reasoning-Effort en PREPARE_COMMIT_MSG_SCRIPT de packages/core/src/git/hook-installer.ts'
+    title: 'Green Phase (Git & Trailers) — Implementar ReasoningEffort, normalizeReasoningEffort, CommitTrailers.reasoningEffort, parseCommitTrailers (regex /^[ \t]*AI-Reasoning-Effort:[ \t]*([^\r\n]+)$/im) y formatCommitTrailers en packages/core/src/git/trailers.ts; resolver reasoningEffort de forma centralizada en detectAuthorIdentity() de packages/core/src/git/agent-detector.ts; emitir 6º campo en runGitDetectAuthor (packages/cli/src/commands/git.ts) y fallback inline node -e de PREPARE_COMMIT_MSG_SCRIPT con stripping CRLF (tr -d "\r[:space:]") en packages/core/src/git/hook-installer.ts'
     complexity: MEDIUM
     risk-level: LOW
     autonomy-mode: AUTONOMOUS
@@ -54,7 +54,7 @@ tasks:
       - CommitTrailers
       - AuthorIdentity
   - id: TSK-064-003
-    title: 'Green Phase (KPIs & Dashboard) — Extender AuthorKpiSummary con byEffort en packages/core/src/reporters/pr-kpis.ts, implementar ModelKpiRow y renderModelTelemetryTable con desglose por modelo y nivel de esfuerzo (mostrando unspecified / — cuando falte) en packages/core/src/reporters/dashboard-html.ts y sincronizar switchTelemetryBranch en packages/core/src/reporters/dashboard-template.ts'
+    title: 'Green Phase (KPIs & Dashboard) — Extender AuthorKpiSummary con byEffort en packages/core/src/reporters/pr-kpis.ts, implementar ModelKpiRow y renderModelTelemetryTable con escapeHtml() para model/reasoningEffort y alineación a 8 columnas (incluyendo <td>—</td> en renderHumanTelemetryRow y renderTotalBranchRow) en packages/core/src/reporters/dashboard-html.ts, y sincronizar filterTelemetryByBranch con escape HTML y 8 columnas en packages/core/src/reporters/dashboard-template.ts'
     complexity: MEDIUM
     risk-level: LOW
     autonomy-mode: AUTONOMOUS
@@ -128,7 +128,7 @@ superseded-by: null
 - **Requisitos Cubiertos**: `FR-064-REASONING-EFFORT-TRAILER-001`
 - **Contratos Cubiertos**: `ReasoningEffort`, `normalizeReasoningEffort`, `CommitTrailers`, `AuthorIdentity`
 - **Asignado a**: `agent-developer`
-- **Descripción**: Implementar `ReasoningEffort`, `normalizeReasoningEffort()`, `CommitTrailers.reasoningEffort` y soporte en `parseCommitTrailers()`/`formatCommitTrailers()` (`trailers.ts`), `AuthorIdentity.reasoningEffort` en `detectAuthorIdentity()` (`agent-detector.ts`), salida en `runGitDetectAuthor()` (`packages/cli/src/commands/git.ts`) e inyección en `PREPARE_COMMIT_MSG_SCRIPT` (`hook-installer.ts`).
+- **Descripción**: Implementar `ReasoningEffort`, `normalizeReasoningEffort()`, `CommitTrailers.reasoningEffort` y soporte en `parseCommitTrailers()` (regex `/^[ \t]*AI-Reasoning-Effort:[ \t]*([^\r\n]+)$/im`)/`formatCommitTrailers()` (`trailers.ts`), resolución centralizada de `AuthorIdentity.reasoningEffort` en `detectAuthorIdentity()` (`agent-detector.ts`), 6º campo en `runGitDetectAuthor()` (`packages/cli/src/commands/git.ts`) y en el fallback inline `node -e`, e inyección con stripping CRLF (`tr -d '\r[:space:]'`) en `PREPARE_COMMIT_MSG_SCRIPT` (`hook-installer.ts`).
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm vitest run packages/core/tests/reasoning-effort-trailer.spec.ts`
 
@@ -138,7 +138,7 @@ superseded-by: null
 - **Requisitos Cubiertos**: `FR-064-REASONING-EFFORT-TRAILER-001`
 - **Contratos Cubiertos**: `ModelKpiRow`, `renderModelTelemetryTable`
 - **Asignado a**: `agent-developer`
-- **Descripción**: Extender `AuthorKpiSummary` con `byEffort` en `pr-kpis.ts`, implementar `ModelKpiRow` y `renderModelTelemetryTable()` en `dashboard-html.ts` y actualizar `switchTelemetryBranch()` en `dashboard-template.ts` para mostrar el desglose por modelo y nivel de esfuerzo (con `unspecified` / `—` para commits históricos).
+- **Descripción**: Extender `AuthorKpiSummary` con `byEffort` en `pr-kpis.ts`, implementar `ModelKpiRow` y `renderModelTelemetryTable()` (con `escapeHtml()` para `model`/`reasoningEffort` y 8ª celda `<td>—</td>` en `renderHumanTelemetryRow()`/`renderTotalBranchRow()`) en `dashboard-html.ts` y actualizar `filterTelemetryByBranch()` en `dashboard-template.ts` para mostrar el desglose por modelo y nivel de esfuerzo (con `unspecified` / `—` para commits históricos) con escape HTML y alineación a 8 columnas.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm vitest run packages/core/tests/reasoning-effort-trailer.spec.ts`
 
