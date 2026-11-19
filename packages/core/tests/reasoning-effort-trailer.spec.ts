@@ -14,6 +14,7 @@ import { detectAuthorIdentity } from '../src/git/agent-detector.js';
 import { PREPARE_COMMIT_MSG_SCRIPT } from '../src/git/hook-installer.js';
 import { aggregateCommitKpiRecords, PrKpiAggregation } from '../src/reporters/pr-kpis.js';
 import * as dashboardHtmlMod from '../src/reporters/dashboard-html.js';
+import type { ModelKpiRow } from '../src/reporters/dashboard-html.js';
 import { DASHBOARD_CLIENT_SCRIPT } from '../src/reporters/dashboard-template.js';
 
 describe('FR-064-REASONING-EFFORT-TRAILER-001: AI-Reasoning-Effort Trailer & Dashboard Breakdown', () => {
@@ -234,6 +235,21 @@ describe('FR-064-REASONING-EFFORT-TRAILER-001: AI-Reasoning-Effort Trailer & Das
         renderModelTelemetryTable?: (kpi: PrKpiAggregation, label: string) => string;
       }).renderModelTelemetryTable;
       expect(typeof renderFn).toBe('function');
+
+      const sampleRow: ModelKpiRow = {
+        model: 'gpt-4o',
+        reasoningEffort: 'unspecified',
+        summary: {
+          commits: 1,
+          linesAdded: 20,
+          linesDeleted: 5,
+          activeTimeSeconds: 60,
+          promptTokens: 500,
+          completionTokens: 125,
+          estimatedCostUsd: 0.0034,
+        },
+      };
+      expect(sampleRow.reasoningEffort).toBe('unspecified');
 
       const records: CommitKpiRecord[] = [
         makeRecord('sha1', 'human', undefined, undefined, 0),

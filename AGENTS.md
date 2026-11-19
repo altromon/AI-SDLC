@@ -32,7 +32,7 @@ This file provides universal instructions and guardrails for all AI pair program
 
 This repository uses automated Git hooks installed in `.git/hooks/`:
 - **`pre-commit`**: Universal Protected Branches Guard. Blocks direct commits to `main`, `master`, and `release/*` across ALL IDEs (VS Code, Cursor, Windsurf, JetBrains, Terminal, etc.).
-- **`prepare-commit-msg`**: Automatic Commit Trailer Injection. Injects telemetry and traceable metadata (`Task-ID`, `Parent-Ref`, `Author-Type`, `AI-Model`). When committing as an AI agent in multi-model IDEs (e.g. Antigravity, Cursor), always include an explicit `AI-Model: <active-model>` trailer in the commit message (or pass `AI_MODEL=<active-model>`) so the hook records the real model instead of falling back to a generic IDE identifier.
+- **`prepare-commit-msg`**: Automatic Commit Trailer Injection. Injects telemetry and traceable metadata (`Task-ID`, `Parent-Ref`, `Author-Type`, `AI-Model`, `AI-Reasoning-Effort`). When committing as an AI agent in multi-model IDEs (e.g. Antigravity, Cursor), always include an explicit `AI-Model: <active-model>` trailer in the commit message (or pass `AI_MODEL=<active-model>`) so the hook records the real model instead of falling back to a generic IDE identifier, and declare `AI-Reasoning-Effort: <low|medium|high|max>` (or `AI_REASONING_EFFORT=<level>`) when a reasoning effort level is active.
 
 To reinstall or verify hooks at any time:
 ```bash

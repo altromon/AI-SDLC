@@ -13,6 +13,7 @@ export interface AuthorKpiSummary {
   promptTokens: number;
   completionTokens: number;
   estimatedCostUsd: number;
+  byEffort?: Record<string, AuthorKpiSummary>;
 }
 
 export interface PrKpiAggregation {
@@ -91,6 +92,13 @@ function accumulateAuthorSummaries(
       const modelName = record.trailers.aiModel || 'agent-generic';
       if (!byModel[modelName]) byModel[modelName] = createEmptySummary();
       accumulateRecord(byModel[modelName], record);
+
+      const effortKey = record.trailers.reasoningEffort || 'unspecified';
+      if (!byModel[modelName].byEffort) byModel[modelName].byEffort = {};
+      if (!byModel[modelName].byEffort[effortKey]) {
+        byModel[modelName].byEffort[effortKey] = createEmptySummary();
+      }
+      accumulateRecord(byModel[modelName].byEffort[effortKey], record);
     } else {
       accumulateRecord(humanSummary, record);
     }

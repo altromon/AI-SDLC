@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/reasoning-effort-trailer.spec.ts
     assigned-to: agent-qa-engineer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-064-REASONING-EFFORT-TRAILER
     satisfies-requirements: &ref_0
@@ -42,7 +42,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/reasoning-effort-trailer.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     blocked-by:
       - TSK-064-001
     implements-components:
@@ -62,7 +62,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/reasoning-effort-trailer.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     blocked-by:
       - TSK-064-002
     implements-components:
@@ -80,7 +80,7 @@ tasks:
       method: quality-gate
       command-or-criteria: pnpm vitest run packages/core/tests/reasoning-effort-trailer.spec.ts && pnpm run verify:all
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     blocked-by:
       - TSK-064-003
     implements-components:

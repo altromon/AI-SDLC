@@ -407,6 +407,7 @@ Task-ID: TSK-002
 Parent-Ref: CHG-001
 Author-Type: agent              # agent | human
 AI-Model: claude-3-7-sonnet     # LLM model or n/a for humans
+AI-Reasoning-Effort: high       # low | medium | high | max (optional, agent only)
 Prompt-Tokens: 14500
 Completion-Tokens: 1850
 Active-Time-Seconds: 420
