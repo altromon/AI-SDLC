@@ -1,6 +1,6 @@
 # 📊 Formal Quality and Release Gate Report (AI-SDLC)
 
-> **Generation Date:** 2026-11-19T20:10:29.000Z
+> **Generation Date:** 2026-11-19T21:48:04.000Z
 > **Release Gate Verdict:** 🔴 BLOCKED (VIOLATIONS DETECTED)
 > **Global Rating:** **`B`** (MI Index: 61.8/100, Average CC: 3.9)
 
@@ -25,16 +25,16 @@
 
 ## 2. AI Agent Performance KPIs (SWE-bench & DORA AI)
 
-> **Evaluated Tasks:** `17` | **Commits:** `299` | **Audited Trailer Coverage:** `30.1%`
+> **Evaluated Tasks:** `13` | **Commits:** `294` | **Audited Trailer Coverage:** `28.2%`
 
 | KPI | Measured Value | Benchmark / Target |
 | :--- | :---: | :---: |
-| **First-Pass Yield (FPY)** | `64.7%` | $\ge 80\%$ |
-| **Rework Loops per Task** | `0.29` | $\le 0.5$ |
+| **First-Pass Yield (FPY)** | `69.2%` | $\ge 80\%$ |
+| **Rework Loops per Task** | `0.31` | $\le 0.5$ |
 | **Specification Adherence Index** | `100%` | $\ge 95\%$ |
 | **Human Takeover / Intervention Rate** | `0%` | $\le 15\%$ |
-| **Token Cost Efficiency** | `591 tokens/CC` | Lower is better |
-| **Architecture Drift Rate** | `22.2%` | $0\%$ |
+| **Token Cost Efficiency** | `579 tokens/CC` | Lower is better |
+| **Architecture Drift Rate** | `23.1%` | $0\%$ |
 
 ---
 
