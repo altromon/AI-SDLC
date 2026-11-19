@@ -192,11 +192,11 @@ function resolveAgentReasoningEffort(
   env: NodeJS.ProcessEnv,
   telemetry?: TelemetrySessionData | null
 ): ReasoningEffort | undefined {
-  const raw =
-    env.AI_REASONING_EFFORT ||
-    telemetry?.reasoningEffort ||
-    getGitConfigValue('ai-sdlc.reasoning-effort', cwd);
-  return normalizeReasoningEffort(raw);
+  return (
+    normalizeReasoningEffort(env.AI_REASONING_EFFORT) ??
+    normalizeReasoningEffort(telemetry?.reasoningEffort) ??
+    normalizeReasoningEffort(getGitConfigValue('ai-sdlc.reasoning-effort', cwd))
+  );
 }
 
 /**

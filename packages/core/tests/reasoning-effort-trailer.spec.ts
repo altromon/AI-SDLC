@@ -170,6 +170,33 @@ describe('FR-064-REASONING-EFFORT-TRAILER-001: AI-Reasoning-Effort Trailer & Das
       expect(identity.authorType).toBe('human');
       expect(identity.reasoningEffort).toBeUndefined();
     });
+
+    it('falls back to telemetry.reasoningEffort when AI_REASONING_EFFORT is whitespace-only', () => {
+      const sdlcDir = path.join(tmpDir, '.ai-sdlc');
+      fs.mkdirSync(sdlcDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(sdlcDir, 'session-telemetry.json'),
+        JSON.stringify({
+          authorType: 'agent',
+          model: 'claude-3-7-sonnet',
+          reasoningEffort: 'medium',
+          promptTokens: 300,
+          completionTokens: 100,
+          activeTimeSeconds: 15,
+        }),
+        'utf-8'
+      );
+
+      const identity = detectAuthorIdentity({
+        cwd: tmpDir,
+        env: {
+          AI_REASONING_EFFORT: '   ',
+        },
+      }) as unknown as { authorType: string; reasoningEffort?: string };
+
+      expect(identity.authorType).toBe('agent');
+      expect(identity.reasoningEffort).toBe('medium');
+    });
   });
 
   describe('PREPARE_COMMIT_MSG_SCRIPT', () => {
@@ -379,6 +406,19 @@ describe('FR-064-REASONING-EFFORT-TRAILER-001: AI-Reasoning-Effort Trailer & Das
         const tdCount = (row.match(/<td\b/g) || []).length;
         expect(tdCount).toBe(8);
       }
+
+      // Verify XSS escaping on malicious branchKey in telemetry-badge-container
+      const maliciousBranch = 'feat/<img src=x onerror=alert(1)>';
+      (sandbox.telemetryData as Record<string, unknown>)[maliciousBranch] = (
+        sandbox.telemetryData as Record<string, unknown>
+      )['feat/test'];
+      vm.runInNewContext(
+        `${DASHBOARD_CLIENT_SCRIPT}\nfilterTelemetryByBranch(${JSON.stringify(maliciousBranch)});`,
+        sandbox
+      );
+      const badgeHtml = elements['telemetry-badge-container'].innerHTML;
+      expect(badgeHtml).not.toContain('<img src=x onerror=alert(1)>');
+      expect(badgeHtml).toContain('&lt;img src=x onerror=alert(1)&gt;');
     });
   });
 });

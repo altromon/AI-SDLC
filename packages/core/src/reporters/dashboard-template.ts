@@ -1228,9 +1228,13 @@ export const DASHBOARD_CLIENT_SCRIPT = `
       var tableBranchLabel = document.getElementById('table-branch-label');
       if (tableBranchLabel) tableBranchLabel.textContent = isTotal ? 'Totalizador (Todas las ramas)' : branchKey;
 
+      var escHtml = function(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      };
+
       var badgeElem = document.getElementById('telemetry-badge-container');
       if (badgeElem) {
-        badgeElem.innerHTML = '<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 4px;">' + badgeText + '</span>';
+        badgeElem.innerHTML = '<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 4px;">' + escHtml(badgeText) + '</span>';
       }
 
       var elCommits = document.getElementById('card-commits');
@@ -1266,9 +1270,6 @@ export const DASHBOARD_CLIENT_SCRIPT = `
             '</tr>';
         }
         if (data.byModel) {
-          var escHtml = function(s) {
-            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-          };
           var effortOrder = { low: 0, medium: 1, high: 2, max: 3, unspecified: 4 };
           var renderRow = function(safeModel, effortKey, s) {
             var safeEffort = escHtml(effortKey);
