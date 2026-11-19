@@ -17,9 +17,9 @@ export interface AuthorIdentity {
 }
 
 const AGENT_ENV_MAPPINGS: Array<{ envKey: string; defaultModel: string; source: string }> = [
-  { envKey: 'ANTIGRAVITY_AGENT', defaultModel: 'gemini-3.8-flash', source: 'antigravity' },
-  { envKey: 'ANTIGRAVITY_CONVERSATION_ID', defaultModel: 'gemini-3.8-flash', source: 'antigravity' },
-  { envKey: 'ANTIGRAVITY_AGENT_ID', defaultModel: 'gemini-3.8-flash', source: 'antigravity' },
+  { envKey: 'ANTIGRAVITY_AGENT', defaultModel: 'antigravity-agent', source: 'antigravity' },
+  { envKey: 'ANTIGRAVITY_CONVERSATION_ID', defaultModel: 'antigravity-agent', source: 'antigravity' },
+  { envKey: 'ANTIGRAVITY_AGENT_ID', defaultModel: 'antigravity-agent', source: 'antigravity' },
   { envKey: 'CORTEX_SESSION_ID', defaultModel: 'antigravity-agent', source: 'cortex' },
   { envKey: 'CLAUDE_CODE', defaultModel: 'claude-3-7-sonnet', source: 'claude-code' },
   { envKey: 'CLAUDE_AGENT', defaultModel: 'claude-3-7-sonnet', source: 'claude-agent' },

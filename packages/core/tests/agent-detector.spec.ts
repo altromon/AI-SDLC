@@ -37,6 +37,26 @@ describe('Universal IDE-Agnostic Agent Detector Engine', () => {
     expect(identity.source).toBe('explicit-env');
   });
 
+  it('detects Antigravity agent environment with generic fallback when AI_MODEL is unset', () => {
+    const identity = detectAuthorIdentity({
+      cwd: tmpDir,
+      env: { ANTIGRAVITY_AGENT: '1', ANTIGRAVITY_CONVERSATION_ID: 'conv-123' },
+    });
+    expect(identity.authorType).toBe('agent');
+    expect(identity.model).toBe('antigravity-agent');
+    expect(identity.source).toBe('env-antigravity');
+  });
+
+  it('prefers explicit AI_MODEL over Antigravity default fallback', () => {
+    const identity = detectAuthorIdentity({
+      cwd: tmpDir,
+      env: { ANTIGRAVITY_AGENT: '1', AI_MODEL: 'claude-sonnet-4' },
+    });
+    expect(identity.authorType).toBe('agent');
+    expect(identity.model).toBe('claude-sonnet-4');
+    expect(identity.source).toBe('env-antigravity');
+  });
+
   it('detects Claude Code agent environment', () => {
     const identity = detectAuthorIdentity({
       cwd: tmpDir,
