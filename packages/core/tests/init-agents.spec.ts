@@ -59,8 +59,8 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
       expect(fs.existsSync(path.join(tempDir, `.github/agents/${agent.id}.agent.md`))).toBe(true);
     }
 
-    // Lifecycle workflow skills should be present for Greenfield, Legacy, and Increment across all supported IDEs
-    expect(LIFECYCLE_SKILL_TEMPLATES).toHaveLength(3);
+    // Lifecycle workflow skills should be present for Greenfield, Legacy, Increment, and Inspector across all supported IDEs
+    expect(LIFECYCLE_SKILL_TEMPLATES).toHaveLength(4);
     for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
       const agPath = path.join(tempDir, `.agent/skills/${skill.id}/SKILL.md`);
       expect(fs.existsSync(agPath)).toBe(true);

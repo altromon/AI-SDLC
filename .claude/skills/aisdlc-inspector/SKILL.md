@@ -1,7 +1,6 @@
 ---
 name: aisdlc-inspector
-description: >-
-  Interactive technical inspector and graph navigator across AI-SDLC requirements (FR-*, QR-*, SEC-REQ-*, PRIV-REQ-*), architecture components (CMP-*, ADR-*), SDD tasks (TSK-*, CHG-*), test suites, and source code files. Provides concise technical summaries, upstream/downstream traceability mappings, and selectable navigation loops.
+description: Interactive technical inspector and graph navigator across AI-SDLC requirements (FR-*, QR-*, SEC-REQ-*, PRIV-REQ-*), architecture components (CMP-*, ADR-*), SDD tasks (TSK-*, CHG-*), test suites, and source code files. Provides concise technical summaries, upstream/downstream traceability mappings, and selectable navigation loops.
 ---
 
 # aisdlc-inspector (360° Traceability Inspector & Graph Navigator)
@@ -52,7 +51,7 @@ The rendered response MUST contain:
 1. **Header:** Artifact ID, Title, Type (`requirement`, `component`, `source-file`, `task`), Layer (`product`, `architecture`, `code`, `test`, `governance`), and Status (`COMPLIANT`, `ORPHAN`, `DRIFT`).
 2. **File Location:** Clickable markdown link to the file.
 3. **Technical Summary:** Concise explanation (2–4 sentences) of what the element does, its responsibilities, key interfaces, and consolidated evolutionary increments (`### Incremento (CHG-*)`). If a canonical requirement still shows boilerplate text despite completed changes in `specs/changes/`, run `sdd_integrate` with `all: true` (`npx aisdlc sdd integrate --all`) first so canonical requirements reflect the consolidated specification.
-4. **Upstream Relations (Derives from / Mitiga / Alineado con):**
+4. **Upstream Relations (Derives from / Mitigates / Governed by):**
    - ↗️ List all parent requirements, use cases, business rules, or decisions that justify this element.
 5. **Downstream Relations (Satisfied by / Implemented in / Verified by):**
    - ↘️ List all components implementing it, tasks developing it, and test suites validating it.
@@ -63,8 +62,13 @@ The rendered response MUST contain:
 ### Step 4: Subsequent Navigation Formulation & Selector
 Once the technical report is fully constructed:
 1. Formulate the closing question inviting the user to continue navigating the graph.
-2. Present the selectable options cleanly (or trigger interactive selector tool) so the user can easily pick the next element:
-   - Upstream dependencies
-   - Downstream implementations and tests
-   - Option to finish navigation
-3. Loop back to Step 2 with the user's selected element.
+2. If using the interactive selector (`ask_question`), execute it **in conjunction with or immediately following the complete report text**:
+   * **Question:** *"¿Hacia qué elemento conectado deseas continuar la exploración?"*
+   * **Options:** Formatted list of related elements from `relatedItems`:
+     - `(Recommended) <ID-1> (<Type-1> — <relation-1>)`
+     - `<ID-2> (<Type-2> — <relation-2>)`
+     - `<ID-N> (<Type-N> — <relation-N>)`
+     - `Terminar exploración`
+3. **Navigation Loop:**
+   - When the user selects or indicates an element (either via UI selector or plain text/number), repeat **Step 2** with the new selection.
+   - If the user selects `Terminar exploración`, summarize the traversal journey and conclude.
