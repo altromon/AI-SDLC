@@ -166,8 +166,9 @@ const HEADER_EXCLUSIONS = new Set([
 ]);
 
 function matchCStyleHeader(line: string): string | null {
+  if (!line.includes('(') && !line.includes('function ')) return null;
   const match = line.match(
-    /(?:(?:public|private|protected|internal|static|async|virtual|override|sealed|abstract|final|synchronized|default|fn)\s+)*(?:function\s+([a-zA-Z0-9_$]+)|(?:[a-zA-Z0-9_<>[\]?,.\s]+\s+)+([a-zA-Z0-9_$]+)\s*(?:<[^>]+>)?\s*\([^;{}]*\)\s*(?:where\s+[^{]+|throws\s+[^{]+)?\{|([a-zA-Z0-9_$]+)\s*\([^;{}]*\)\s*(?::\s*[^{]+\s*)?\{)/
+    /(?:(?:public|private|protected|internal|static|async|virtual|override|sealed|abstract|final|synchronized|default|fn)\s+)*(?:function\s+([a-zA-Z0-9_$]+)|(?:[a-zA-Z0-9_<>[\]?,.]+\s+)+([a-zA-Z0-9_$]+)\s*(?:<[^>]+>)?\s*\([^;{}]*\)\s*(?:where\s+[^{]+|throws\s+[^{]+)?\{|([a-zA-Z0-9_$]+)\s*\([^;{}]*\)\s*(?::\s*[^{]+\s*)?\{)/
   );
   if (!match) return null;
   const candidate = match[1] || match[2] || match[3];
