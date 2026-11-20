@@ -457,6 +457,21 @@ def route_command(cmd, payload):
       const elapsed = Date.now() - start;
       expect(elapsed).toBeLessThan(1000); // 20 files in < 1 second
     });
+
+    it('should not suffer ReDoS on C-style lines with many space-separated tokens before parentheses', () => {
+      const csCode = `
+        public sealed class Service {
+          public void Run() {
+            var x = a ?? throw new InvalidOperationException("El aula seleccionada no existe en el sistema actual.");
+          }
+        }
+      `;
+      const start = Date.now();
+      const metrics = extractFunctionsPolyglot(csCode, 'src/Service.cs');
+      expect(Date.now() - start).toBeLessThan(100);
+      expect(metrics.length).toBe(1);
+      expect(metrics[0].functionName).toBe('Run');
+    });
   });
 
   describe('Monorepo & Scope Discovery (Issue #106)', () => {
