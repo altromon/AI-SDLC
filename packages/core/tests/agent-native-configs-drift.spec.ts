@@ -453,4 +453,12 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(auditor).toBeDefined();
     expect(auditor!.body).toMatch(/Block Unstyled & Non-Compliant Interfaces/i);
   });
+
+  it('verifies all deployed skills in .agent/skills and .claude/skills have valid frontmatter and non-broken ./references/*.md links', async () => {
+    const { verifySkillsIntegrity } = await import('../src/verifiers/skill-integrity.js');
+    const result = verifySkillsIntegrity(rootDir);
+    expect(result.violations).toEqual([]);
+    expect(result.success).toBe(true);
+    expect(result.checkedSkills).toBeGreaterThanOrEqual(16);
+  });
 });
