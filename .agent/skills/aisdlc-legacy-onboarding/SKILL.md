@@ -56,3 +56,6 @@ Once the target domain's baseline artifacts (`ARCH-INTRO-*`, `UC-*`, `FR-*`, `CM
 - **Zero Drive-By Rewrites**: Never mass-refactor untouched legacy modules during onboarding. Apply the Strangler / Boy Scout rule: bring touched functions into compliance with `quality-policy.yaml` incrementally via governed SDD tasks (`TSK-*`).
 - **Characterization First**: Never alter legacy business logic without first capturing its current behavior in an `FR-*` Gherkin specification and a verifiable test suite (`agent-qa-engineer`).
 - **Immediate Secret Remediation**: If Step 2 (`verify_security`) uncovers leaked credentials (exit code 4), halt feature work and remediate/rotate secrets immediately.
+## Self-Contained References
+- [`retro-inception-and-strangler.md`](./references/retro-inception-and-strangler.md)
+

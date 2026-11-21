@@ -20,7 +20,13 @@ import { OverrideAnalyzer } from './override-analyzer.js';
 import { PolicyRatchetEnforcer } from './policy-ratchet.js';
 import { TimestampedBackupManagerAdapter } from './backup-manager.js';
 import { TransactionManager } from './transaction-manager.js';
-import { STARTER_QUALITY_POLICY, STARTER_LICENSE_POLICY, STARTER_PRIVACY_POLICY } from '../init/index.js';
+import {
+  STARTER_QUALITY_POLICY,
+  STARTER_LICENSE_POLICY,
+  STARTER_PRIVACY_POLICY,
+  collectAgentFiles,
+  resolveAgentTargets,
+} from '../init/index.js';
 import { STARTER_SCHEMAS } from '../init/starter-schemas.js';
 import { STARTER_BASE_TEMPLATES } from '../init/starter-templates.js';
 import { getAisdlcVersion, readAisdlcManifest, writeAisdlcManifest } from '../version.js';
@@ -36,7 +42,7 @@ export class MigrationOrchestrator {
 
 interface GovernedItem {
   relPath: string;
-  category: 'schema' | 'template' | 'policy';
+  category: 'schema' | 'template' | 'policy' | 'agent';
   currentContent: string;
   targetContent: string;
   baseContent: string;
@@ -109,8 +115,8 @@ function evaluateGovernedTargets(targets: GovernedItem[], orchestrator: Migratio
   return { summary, details, filesToModify, filesToBackup };
 }
 
-function buildCanonicalMap(): Map<string, { category: 'schema' | 'template' | 'policy'; content: string }> {
-  const canonicalMap = new Map<string, { category: 'schema' | 'template' | 'policy'; content: string }>();
+function buildCanonicalMap(): Map<string, { category: 'schema' | 'template' | 'policy' | 'agent'; content: string }> {
+  const canonicalMap = new Map<string, { category: 'schema' | 'template' | 'policy' | 'agent'; content: string }>();
   canonicalMap.set('quality-policy.yaml', { category: 'policy', content: STARTER_QUALITY_POLICY });
   canonicalMap.set('license-policy.yaml', { category: 'policy', content: STARTER_LICENSE_POLICY });
   canonicalMap.set('privacy-policy.yaml', { category: 'policy', content: STARTER_PRIVACY_POLICY });
@@ -121,10 +127,13 @@ function buildCanonicalMap(): Map<string, { category: 'schema' | 'template' | 'p
   for (const t of STARTER_BASE_TEMPLATES) {
     canonicalMap.set(t.relPath.replace(/\\/g, '/'), { category: 'template', content: t.content });
   }
+  for (const a of collectAgentFiles(resolveAgentTargets('all')).files) {
+    canonicalMap.set(a.relPath.replace(/\\/g, '/'), { category: 'agent', content: a.content });
+  }
   return canonicalMap;
 }
 
-function scanSchemasDir(schemasDir: string, canonicalMap: Map<string, { category: 'schema' | 'template' | 'policy'; content: string }>): GovernedItem[] {
+function scanSchemasDir(schemasDir: string, canonicalMap: Map<string, { category: 'schema' | 'template' | 'policy' | 'agent'; content: string }>): GovernedItem[] {
   const items: GovernedItem[] = [];
   if (!fs.existsSync(schemasDir)) return items;
   try {
@@ -318,6 +327,45 @@ export class MigrationService implements IMigrationService {
     }
 
     items.push(...scanSchemasDir(path.join(root, 'schemas'), canonicalMap));
+    items.push(...this.discoverAgentFiles(root));
+    return items;
+  }
+
+  private discoverConfiguredAgentTargets(root: string): string[] {
+    const targets: string[] = [];
+    if (fs.existsSync(path.join(root, '.agent'))) targets.push('antigravity');
+    if (fs.existsSync(path.join(root, '.cursor'))) targets.push('cursor');
+    if (fs.existsSync(path.join(root, '.claude')) || fs.existsSync(path.join(root, 'CLAUDE.md'))) targets.push('claude');
+    if (fs.existsSync(path.join(root, '.github', 'agents'))) targets.push('copilot');
+    return targets;
+  }
+
+  private discoverAgentFiles(root: string): GovernedItem[] {
+    const configured = this.discoverConfiguredAgentTargets(root);
+    if (configured.length === 0) return [];
+
+    const items: GovernedItem[] = [];
+    const { files } = collectAgentFiles(resolveAgentTargets(configured));
+    for (const f of files) {
+      const relPath = f.relPath.replace(/\\/g, '/');
+      // Only migrate governed agent/rule/skill/AGENTS paths (skip MCP configs which may hold user env vars)
+      const isGovernedAgentPath =
+        relPath.startsWith('.agent/') ||
+        relPath.startsWith('.claude/') ||
+        relPath.startsWith('.cursor/rules/') ||
+        relPath.startsWith('.github/agents/') ||
+        relPath === 'CLAUDE.md' ||
+        relPath.endsWith('/AGENTS.md');
+      if (!isGovernedAgentPath) continue;
+
+      const fullPath = path.join(root, relPath);
+      if (fs.existsSync(fullPath)) {
+        const currentContent = fs.readFileSync(fullPath, 'utf-8');
+        items.push({ relPath, category: 'agent', currentContent, targetContent: f.content, baseContent: f.content });
+      } else {
+        items.push({ relPath, category: 'agent', currentContent: '', targetContent: f.content, baseContent: '' });
+      }
+    }
     return items;
   }
 }

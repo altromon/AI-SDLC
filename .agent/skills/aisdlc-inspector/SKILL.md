@@ -73,3 +73,6 @@ Once the technical report is fully constructed:
 3. **Navigation Loop:**
    - When the user selects or indicates an element (either via UI selector or plain text/number), repeat **Step 2** with the new selection.
    - If the user selects `Terminar exploración`, summarize the traversal journey and conclude.
+## Self-Contained References
+- [`traceability-graph-legend.md`](./references/traceability-graph-legend.md)
+

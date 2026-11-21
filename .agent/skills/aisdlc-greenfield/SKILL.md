@@ -78,3 +78,6 @@ Across Phase 0 and Inception, quality auditing and adversarial stress-testing ar
 - **FORBIDDEN Greenfield Monolith (`1 UC-* = 1 CHG-*`)**: Never bundle the entire product or multiple `UC-*` into a single SDD change (`CHG-001`). Parallelism is achieved by running **multiple bounded `CHG-*` concurrently** on separate branches/worktrees.
 - Never invoke `sdd_change_new` or write application code in `src/` on a Greenfield project before `ARCH-INTRO-001`, `agent-expert-user` MVP validation, and at least one `UC-*` and `FR-*` exist.
 - All newly drafted specifications must start with `status: draft`.
+## Self-Contained References
+- [`inception-checklist.md`](./references/inception-checklist.md)
+

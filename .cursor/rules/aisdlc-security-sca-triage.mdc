@@ -1,0 +1,28 @@
+---
+description: aisdlc-security-sca-triage (Security, SAST, Secrets & SCA License Triage Playbook) - Triage and remediate failures from Gate 7 (SCA Licenses & Vulnerabilities), Gate 8 (Privacy/PII), Gate 11 (Secrets), and Gate 12 (SAST), including native SARIF/SBOM ingestion (--sarif, --orchestrate, --sbom-input) and audited security suppressions.
+globs: security/**, specs/security/**, license-policy.yaml, privacy-policy.yaml, compliance/**
+alwaysApply: false
+---
+
+# aisdlc-security-sca-triage (Security, SAST, Secrets & SCA License Triage Playbook)
+
+Canonical Reference: [`process/03_security_by_design.md`](../../process/03_security_by_design.md), [`process/04_open_source_license_compliance.md`](../../process/04_open_source_license_compliance.md), and [`process/07_security_and_license_validation.md`](../../process/07_security_and_license_validation.md).
+
+## Purpose & Trigger
+Use this skill when **a security, secrets, privacy, or license gate fails** (e.g., exit code `4` for security/secrets or `5` for privacy), when **ingesting external SARIF/SBOM reports**, or when **evaluating commercial/copyleft dependency exceptions**.
+
+## End-to-End Execution Playbook
+
+### Step 1: Secrets & SAST Triage (Exit Code 4)
+1. Run `npx aisdlc verify security --diff --format sarif -o reports/security.sarif` (add `--gitleaks` or `--semgrep` if native binaries are installed).
+2. For polyglot repositories, run `npx aisdlc verify sast --orchestrate` or ingest external OASIS SARIF v2.1.0 files via `npx aisdlc verify sast --sarif <path...>`.
+3. **Immediate Secret Remediation**: If real credentials are detected, halt feature work, rotate the secret, and remove it from code/history.
+4. **Audited Suppressions**: Never silence findings with inline linter disables. False positives require an audited suppression entry with justification and expiration reviewed by `agent-adversary` / human Tech Lead.
+
+### Step 2: Privacy & PII Triage (Exit Code 5)
+1. Run `npx aisdlc verify privacy --ropa-report reports/ROPA_INVENTORY.md --report reports/PRIVACY_SCAN_REPORT.md`.
+2. Eliminate PII from logs/telemetry/LLM prompts (`[REDACTED]`), ensure `DATA-ASSET-*` and `PRIV-ROPA-*` exist, and escalate `RESTRICTED_SENSITIVE_PII` to a `DPIA-*` request.
+
+### Step 3: SCA License & CVE Triage
+1. Run `npx aisdlc verify licenses --vuln --depth transitive` (or ingest an air-gapped CycloneDX/SPDX SBOM via `--sbom-input <path>`).
+2. Block `GPL`/`AGPL` (viral) and `BSL`/`SSPL` (commercial) unless a human-approved `templates/compliance/commercial-acquisition-request.template.md` authorization is recorded.

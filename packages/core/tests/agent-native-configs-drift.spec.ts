@@ -14,8 +14,12 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     cursorCore: path.join(rootDir, '.cursor/rules/ai-sdlc-core.mdc'),
     cursorProduct: path.join(rootDir, '.cursor/rules/ai-sdlc-product.mdc'),
     cursorQuality: path.join(rootDir, '.cursor/rules/ai-sdlc-quality.mdc'),
+    cursorTesting: path.join(rootDir, '.cursor/rules/ai-sdlc-testing.mdc'),
     claude: path.join(rootDir, 'CLAUDE.md'),
     antigravity: path.join(rootDir, '.agent/rules/ai-sdlc.md'),
+    antigravitySpecs: path.join(rootDir, '.agent/rules/ai-sdlc-specs.md'),
+    antigravityCode: path.join(rootDir, '.agent/rules/ai-sdlc-code.md'),
+    antigravityTesting: path.join(rootDir, '.agent/rules/ai-sdlc-testing.md'),
   };
 
   const canonicalProtocolPath = path.join(rootDir, 'process/09_agent_protocols.md');
@@ -177,16 +181,16 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     const content = fs.readFileSync(canonicalProtocolPath, 'utf-8');
     expect(content).toMatch(/TECHNICAL SECURITY(&| AND| & PRIVACY)? FEEDBACK LOOP|BUCLE DE RETORNO DE SEGURIDAD TÉCNICA/);
     expect(content).toMatch(/Technical Security(&| and| & Privacy)? Feedback Loop|Bucle de Retorno: Seguridad T[eé]cnica/i);
-    const agContent = fs.readFileSync(configFiles.antigravity, 'utf-8');
-    expect(agContent).toMatch(/technical security(&| and| & privacy)? feedback loop|bucle de retorno de seguridad t[eé]cnica/i);
+    const agArchAgent = fs.readFileSync(path.join(rootDir, '.agent/agents/agent-system-architect.md'), 'utf-8');
+    expect(agArchAgent).toMatch(/technical security(&| and| & privacy)? feedback loop|bucle de retorno de seguridad t[eé]cnica/i);
   });
 
   it('verifies that canonical protocol and configurations document the post-development functional validation step (#83)', () => {
     const content = fs.readFileSync(canonicalProtocolPath, 'utf-8');
     expect(content).toMatch(/Post-Development Functional Validation|Validaci[oó]n Funcional Post-Desarrollo/i);
     expect(content).toMatch(/FUNCTIONAL VALIDATION MODE|MODO VALIDACI[OÓ]N FUNCIONAL/i);
-    const agContent = fs.readFileSync(configFiles.antigravity, 'utf-8');
-    expect(agContent).toMatch(/post-development functional validation|modo validaci[oó]n funcional/i);
+    const agExpertAgent = fs.readFileSync(path.join(rootDir, '.agent/agents/agent-expert-user.md'), 'utf-8');
+    expect(agExpertAgent).toMatch(/post-development functional validation|functional validation mode/i);
   });
 
   it('verifies that canonical protocol and Antigravity rules consolidate pre-merge code/license review into agent-auditor and security audit into agent-adversary', () => {
@@ -211,14 +215,14 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     expect(canonicalContent).toMatch(/Deployment & CI\/CD Strategy Discovery/i);
     expect(canonicalContent).toContain('src/');
 
-    const agContent = fs.readFileSync(configFiles.antigravity, 'utf-8');
-    expect(agContent).toContain('agent-devops');
-    expect(agContent).toMatch(/NON-INVASION GUARDRAIL|GUARDRAIL DE NO INVAS[IÍ]ÓN/i);
-    expect(agContent).toMatch(/Deployment & CI\/CD Strategy Discovery/i);
+    const agDevopsAgent = fs.readFileSync(path.join(rootDir, '.agent/agents/agent-devops.md'), 'utf-8');
+    expect(agDevopsAgent).toContain('agent-devops');
+    expect(agDevopsAgent).toMatch(/NON-INVASION GUARDRAIL|GUARDRAIL DE NO INVAS[IÍ]ÓN/i);
+    expect(agDevopsAgent).toMatch(/Deployment & CI\/CD Strategy Discovery/i);
     expect(canonicalContent).toMatch(/Cross-Workflow Audit|CROSS-WORKFLOW AUDIT/i);
     expect(canonicalContent).toMatch(/Remote Verification|REMOTE VERIFICATION/i);
-    expect(agContent).toMatch(/Cross-Workflow Audit/i);
-    expect(agContent).toMatch(/Remote Verification/i);
+    expect(agDevopsAgent).toMatch(/Cross-Workflow Audit/i);
+    expect(agDevopsAgent).toMatch(/Remote Verification/i);
     expect(canonicalContent).toContain('src/');
   });
 
@@ -255,8 +259,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       path.join(rootDir, '.claude/agents/agent-developer.md'),
       path.join(rootDir, '.cursor/rules/agent-developer.mdc'),
       path.join(rootDir, '.github/agents/agent-developer.agent.md'),
-      configFiles.antigravity,
-      configFiles.claude,
+      configFiles.antigravityCode,
       configFiles.cursorQuality,
     ];
 
@@ -290,8 +293,8 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       path.join(rootDir, '.claude/agents/agent-qa-engineer.md'),
       path.join(rootDir, '.cursor/rules/agent-qa-engineer.mdc'),
       path.join(rootDir, '.github/agents/agent-qa-engineer.agent.md'),
-      configFiles.antigravity,
-      configFiles.claude,
+      configFiles.antigravityTesting,
+      configFiles.cursorTesting,
     ];
 
     for (const filePath of qaFiles) {
@@ -319,6 +322,10 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       'aisdlc-legacy-onboarding',
       'aisdlc-increment',
       'aisdlc-inspector',
+      'aisdlc-doctor-migrate',
+      'aisdlc-release-compliance',
+      'aisdlc-security-sca-triage',
+      'aisdlc-bdd-gherkin',
     ]);
 
     for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
@@ -408,7 +415,8 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
   });
   it('verifies all 3 lifecycle skills document the mandatory transversal loop with agent-auditor and agent-adversary and max 2 correction rounds', async () => {
     const { LIFECYCLE_SKILL_TEMPLATES } = await import('../src/init/index.js');
-    for (const skill of LIFECYCLE_SKILL_TEMPLATES.filter((s) => s.id !== 'aisdlc-inspector')) {
+    const lifecycleOrchestrators = new Set(['aisdlc-greenfield', 'aisdlc-legacy-onboarding', 'aisdlc-increment']);
+    for (const skill of LIFECYCLE_SKILL_TEMPLATES.filter((s) => lifecycleOrchestrators.has(s.id))) {
       expect(skill.body).toMatch(/agent-auditor/);
       expect(skill.body).toMatch(/agent-adversary/);
       expect(skill.body).toMatch(/2 correction rounds/i);
