@@ -8,10 +8,10 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov', 'json-summary'],
       thresholds: {
-        lines: 65,
-        branches: 65,
-        functions: 80,
-        statements: 65,
+        lines: 85,
+        branches: 80,
+        functions: 92,
+        statements: 85,
       },
       exclude: [
         '**/node_modules/**',
