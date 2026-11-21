@@ -3,8 +3,6 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-// Target import that will be provided once agent-developer implements packages/cli/src/commands/doctor.ts
-// @ts-expect-error Implemented in TSK-005 by agent-developer
 import { runDoctor } from '../src/commands/doctor.js';
 
 describe('Doctor CLI Command Integration Suite (FR-052-CLI-DOCTOR-001)', () => {
@@ -22,7 +20,7 @@ describe('Doctor CLI Command Integration Suite (FR-052-CLI-DOCTOR-001)', () => {
     logSpy.mockRestore();
     errorSpy.mockRestore();
     try {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
+      fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     } catch {
       // ignore
     }
@@ -42,7 +40,7 @@ describe('Doctor CLI Command Integration Suite (FR-052-CLI-DOCTOR-001)', () => {
 
     const jsonCall = logSpy.mock.calls.find((call) => {
       try {
-        const parsed = JSON.parse(call[0]);
+        const parsed = JSON.parse(String(call[0]));
         return parsed && typeof parsed.overallStatus === 'string';
       } catch {
         return false;
@@ -50,7 +48,7 @@ describe('Doctor CLI Command Integration Suite (FR-052-CLI-DOCTOR-001)', () => {
     });
 
     expect(jsonCall).toBeDefined();
-    const report = JSON.parse(jsonCall![0]);
+    const report = JSON.parse(String(jsonCall![0]));
     expect(report).toHaveProperty('overallStatus');
     expect(report).toHaveProperty('exitCode');
     expect(report).toHaveProperty('categories');

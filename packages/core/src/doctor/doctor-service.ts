@@ -28,17 +28,15 @@ export class DoctorOrchestrator {
   private versionCheck = new AisdlcVersionCheck();
 
   public async runAll(options: DoctorOptions): Promise<CategoryReport[]> {
-    const categories: CategoryReport[] = [];
-
-    categories.push(await this.hooksCheck.inspect(options));
-    categories.push(await this.branchCheck.inspect(options));
-    categories.push(await this.schemasCheck.inspect(options));
-    categories.push(await this.toolchainCheck.inspect(options));
-    categories.push(await this.signatureCheck.inspect(options));
-    categories.push(await this.securityToolsCheck.inspect(options));
-    categories.push(await this.versionCheck.inspect(options));
-
-    return categories;
+    return Promise.all([
+      this.hooksCheck.inspect(options),
+      this.branchCheck.inspect(options),
+      this.schemasCheck.inspect(options),
+      this.toolchainCheck.inspect(options),
+      this.signatureCheck.inspect(options),
+      this.securityToolsCheck.inspect(options),
+      this.versionCheck.inspect(options),
+    ]);
   }
 }
 

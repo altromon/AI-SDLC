@@ -85,13 +85,14 @@ describe('CLI check individual gate auditors & renderDashboard (Happy / Sad / Bo
         { name: 'G3', status: 'FAILED', message: 'bad', remediation: 'fix it' },
       ],
       false,
-      { gherkinCount: 2, digestsCount: 3 }
+      2,
+      3
     );
 
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('PRE-FLIGHT BLOCKED'));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('fix it'));
 
-    renderDashboard([{ name: 'G1', status: 'PASSED', message: 'ok' }], true, { gherkinCount: 0, digestsCount: 0 });
+    renderDashboard([{ name: 'G1', status: 'PASSED', message: 'ok' }], true, 0, 0);
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('EXIT 0'));
   });
 });

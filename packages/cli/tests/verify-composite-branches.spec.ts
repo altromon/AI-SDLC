@@ -49,18 +49,19 @@ describe('CLI verify composite flow branches (Happy / Sad / Boundary / Malformed
         maxLines: 50,
         enforceMode: 'STRICT',
         updateBaseline: true,
-        baselineFile: baselinePath,
+        baseline: baselinePath,
         requireCoverageReport: false,
         silent: false,
       })
     ).toBe(true);
+    expect(fs.existsSync(baselinePath)).toBe(true);
 
     // Strict ratchet mode
     expect(
       runVerifyQuality({
         root: tmpDir,
-        strictRatchet: true,
-        baselineFile: baselinePath,
+        ratchet: true,
+        baseline: baselinePath,
         requireCoverageReport: false,
         silent: false,
       })
@@ -109,7 +110,7 @@ describe('CLI verify composite flow branches (Happy / Sad / Boundary / Malformed
       typeof (await runVerifyLicensesAsync({
         root: tmpDir,
         dynamic: true,
-        scanVulnerabilities: false,
+        vuln: false,
         json: true,
       }))
     ).toBe('boolean');

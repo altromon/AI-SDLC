@@ -9,13 +9,14 @@ import { createMcpServer } from '../src/server.js';
 describe('MCP Tools Composite Branch Paths (Happy / Sad / Boundary / Malformed)', () => {
   let tmpDir: string;
   let client: Client;
+  let server: ReturnType<typeof createMcpServer>;
 
   beforeEach(async () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-mcp-br-'));
     fs.mkdirSync(path.join(tmpDir, 'src'), { recursive: true });
     fs.writeFileSync(path.join(tmpDir, 'src', 'index.ts'), 'export const x = 1;\n', 'utf-8');
 
-    const server = createMcpServer({ rootDir: tmpDir });
+    server = createMcpServer({ rootDir: tmpDir });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await server.connect(serverTransport);
 
@@ -25,29 +26,32 @@ describe('MCP Tools Composite Branch Paths (Happy / Sad / Boundary / Malformed)'
 
   afterEach(async () => {
     await client.close();
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    await server.close();
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   });
 
-  it('exercises path traversal confinement, doctor, git_detect_author, kpi_pr, kpi_release, report_quality, and sdd tools', async () => {
+  it('exercises path traversal confinement, doctor, and git_detect_author', async () => {
     // Path traversal blocked
     const travRes = await client.callTool({ name: 'verify_quality', arguments: { root: '../../outside' } });
     expect(travRes.isError).toBe(true);
 
-    // doctor
-    const docRes = await client.callTool({ name: 'doctor', arguments: { root: tmpDir } });
+    // doctor (offline for deterministic local execution)
+    const docRes = await client.callTool({ name: 'doctor', arguments: { root: tmpDir, offline: true } });
     expect(docRes.isError).toBeFalsy();
 
     // git_detect_author
     const authRes = await client.callTool({ name: 'git_detect_author', arguments: {} });
     expect(authRes.isError).toBeFalsy();
+  });
 
-    // sdd_change_new -> get_active_handoff -> sdd_deposit -> sdd_check_fix -> sdd_integrate
+  it('exercises SDD lifecycle tools (sdd_change_new, get_active_handoff, sdd_deposit, sdd_check_fix, sdd_integrate)', async () => {
     const newChg = await client.callTool({
       name: 'sdd_change_new',
       arguments: { root: tmpDir, name: 'Add MCP branch test', profile: 'standard' },
     });
     expect(newChg.isError).toBeFalsy();
-    const newChgData = JSON.parse((newChg.content[0] as { text: string }).text);
+    const newChgContent = newChg.content as Array<{ text: string }>;
+    const newChgData = JSON.parse(newChgContent[0].text);
     expect(newChgData.changeId).toBeTruthy();
 
     const handoffRes = await client.callTool({
@@ -69,7 +73,8 @@ describe('MCP Tools Composite Branch Paths (Happy / Sad / Boundary / Malformed)'
     expect(depRes.isError).toBeFalsy();
 
     const fixRes = await client.callTool({ name: 'sdd_check_fix', arguments: { root: tmpDir } });
-    expect(fixRes.content.length).toBeGreaterThan(0);
+    const fixContent = fixRes.content as Array<{ text: string }>;
+    expect(fixContent.length).toBeGreaterThan(0);
 
     const intRes = await client.callTool({
       name: 'sdd_integrate',
@@ -77,7 +82,9 @@ describe('MCP Tools Composite Branch Paths (Happy / Sad / Boundary / Malformed)'
     });
     // Pending tasks -> fails or returns non-success
     expect(intRes).toBeDefined();
+  });
 
+  it('exercises reporting, KPI, migrate, and inspect_element tools', async () => {
     // report_quality & report_dashboard
     const rqRes = await client.callTool({ name: 'report_quality', arguments: { root: tmpDir } });
     expect(rqRes.isError).toBeFalsy();

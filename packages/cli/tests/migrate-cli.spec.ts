@@ -3,8 +3,6 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-// Target import that will exist once developer implements packages/cli/src/commands/migrate.ts
-// @ts-expect-error Implemented in TSK-006 by agent-developer
 import { runMigrate } from '../src/commands/migrate.js';
 
 describe('Migrate CLI Command Integration Suite (FR-053-CLI-MIGRATE-001)', () => {
@@ -72,7 +70,7 @@ describe('Migrate CLI Command Integration Suite (FR-053-CLI-MIGRATE-001)', () =>
 
     const jsonCall = logSpy.mock.calls.find((call) => {
       try {
-        const parsed = JSON.parse(call[0]);
+        const parsed = JSON.parse(String(call[0]));
         return parsed && typeof parsed.exitCode === 'number' && parsed.summary !== undefined;
       } catch {
         return false;
@@ -80,7 +78,7 @@ describe('Migrate CLI Command Integration Suite (FR-053-CLI-MIGRATE-001)', () =>
     });
 
     expect(jsonCall).toBeDefined();
-    const report = JSON.parse(jsonCall![0]);
+    const report = JSON.parse(String(jsonCall![0]));
     expect(report).toHaveProperty('exitCode');
     expect(report).toHaveProperty('summary');
     expect(report).toHaveProperty('details');

@@ -2,7 +2,7 @@
  * AI-SDLC: Safe Process Runner Adapter (SEC-REQ-052-SAFE-TOOLCHAIN-PROBE-001)
  */
 
-import { execFile } from 'node:child_process';
+import { execFile, spawnSync } from 'node:child_process';
 import * as path from 'node:path';
 import {
   IProcessRunner,
@@ -66,18 +66,14 @@ function runSpawn(
   maxBuffer: number
 ): Promise<ProcessExecResult> {
   return new Promise<ProcessExecResult>((resolve) => {
-    execFile(
-      file,
-      args,
-      { shell: false, timeout, maxBuffer, cwd, env: buildSafeEnvironment(cwd), windowsHide: true },
-      (err, stdout, stderr) => {
-        resolve({
-          stdout: truncateBuffer(stdout, maxBuffer),
-          stderr: truncateBuffer(stderr, maxBuffer),
-          exitCode: resolveExitCode(err),
-        });
+    const opts = { shell: false, timeout, maxBuffer, cwd, env: buildSafeEnvironment(cwd), windowsHide: true };
+    let child: ReturnType<typeof execFile> | undefined;
+    child = execFile(file, args, opts, (err, stdout, stderr) => {
+      if ((err as { killed?: boolean } | null)?.killed && child?.pid && process.platform === 'win32') {
+        spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' });
       }
-    );
+      resolve({ stdout: truncateBuffer(stdout, maxBuffer), stderr: truncateBuffer(stderr, maxBuffer), exitCode: resolveExitCode(err) });
+    });
   });
 }
 

@@ -79,16 +79,15 @@ export class SignatureReadinessCheck {
   }
 
   public async inspect(options: DoctorOptions): Promise<CategoryReport> {
-    const findings: DiagnosticFinding[] = [];
     const rootDir = options.rootDir || process.cwd();
     const isOffline = options.offline || process.env.AI_SDLC_OFFLINE === '1';
 
-    findings.push(await checkLocalKey(this.runner, rootDir));
+    const [localFinding, remoteFinding] = await Promise.all([
+      checkLocalKey(this.runner, rootDir),
+      isOffline ? Promise.resolve(null) : checkRemoteEndpoint(this.runner, rootDir, options.timeout ?? 2000),
+    ]);
 
-    if (!isOffline) {
-      const remoteFinding = await checkRemoteEndpoint(this.runner, rootDir, options.timeout ?? 2000);
-      if (remoteFinding) findings.push(remoteFinding);
-    }
+    const findings: DiagnosticFinding[] = remoteFinding ? [localFinding, remoteFinding] : [localFinding];
 
     for (const f of findings) {
       sanitizeFinding(f);

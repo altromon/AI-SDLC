@@ -2,8 +2,6 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
-// In Red Phase, runReportCompliance will fail to resolve until implemented in @aisdlc/cli
-// @ts-expect-error - Command handler to be implemented in Step 5 (TSK-004)
 import { runReportCompliance } from '../src/commands/report.js';
 
 describe('BDD / Integration: aisdlc report compliance', () => {
