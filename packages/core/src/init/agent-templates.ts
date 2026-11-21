@@ -442,13 +442,19 @@ function formatSkillReferencesSection(skillId: string): string {
   return `\n## Self-Contained References\n${links}\n`;
 }
 
+function formatInlineSkillReferences(skillId: string): string {
+  const refs = SKILL_REFERENCES[skillId];
+  if (!refs || refs.length === 0) return '';
+  return '\n' + refs.map((r) => r.content.trim()).join('\n\n') + '\n';
+}
+
 export function renderAntigravitySkillFile(skill: LifecycleSkillTemplate): string {
   return `---\nname: ${skill.id}\ndescription: >-\n  ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}${formatSkillReferencesSection(skill.id)}\n`;
 }
 
 export function renderCursorSkillFile(skill: LifecycleSkillTemplate): string {
   const globs = skill.globs || '';
-  return `---\ndescription: ${skill.id} (${skill.title}) - ${skill.description}\nglobs: ${globs}\nalwaysApply: false\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}\n`;
+  return `---\ndescription: ${skill.id} (${skill.title}) - ${skill.description}\nglobs: ${globs}\nalwaysApply: false\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}${formatInlineSkillReferences(skill.id)}\n`;
 }
 
 export function renderClaudeSkillFile(skill: LifecycleSkillTemplate): string {
@@ -456,7 +462,7 @@ export function renderClaudeSkillFile(skill: LifecycleSkillTemplate): string {
 }
 
 export function renderCopilotSkillFile(skill: LifecycleSkillTemplate): string {
-  return `---\nname: ${skill.id}\ndescription: ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}\n`;
+  return `---\nname: ${skill.id}\ndescription: ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}${formatInlineSkillReferences(skill.id)}\n`;
 }
 
 export const STARTER_ANTIGRAVITY_RULES = `# Google Antigravity & Gemini CLI Rules - AI-SDLC Framework

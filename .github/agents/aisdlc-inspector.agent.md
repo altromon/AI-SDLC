@@ -72,3 +72,13 @@ Once the technical report is fully constructed:
 3. **Navigation Loop:**
    - When the user selects or indicates an element (either via UI selector or plain text/number), repeat **Step 2** with the new selection.
    - If the user selects `Terminar exploración`, summarize the traversal journey and conclude.
+# 360° Traceability Graph Legend
+
+## Node Statuses
+- `COMPLIANT`: All upstream citations and downstream test/code links are valid and drift-free.
+- `ORPHAN`: Missing upstream justification or downstream implementation/verification link.
+- `DRIFT`: Upstream SHA-256 citation digest no longer matches the referenced artifact.
+
+## UX Rule (Report First, Question After)
+Always render the full technical report (Header, File Location, Summary, Upstream ↗️, Downstream ↘️, Numbered Items) before prompting for the next navigation step.
+

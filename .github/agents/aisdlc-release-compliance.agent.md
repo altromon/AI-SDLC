@@ -25,3 +25,12 @@ Use this skill when **closing a release milestone (`release/vX.Y.Z`), preparing 
 2. Regenerate canonical reports (`report_quality`, `report_dashboard`) on the release branch.
 3. **Highest-Precedence SemVer Rule**: When consolidating multiple increments in a single release/PR, apply **ONLY one version bump** matching the highest friction profile (`critical` = Major, `standard` = Minor, `patch` = Patch).
 4. Open the Release PR for human Tech Lead approval and SemVer tagging (never auto-approve or auto-merge).
+# Release Compliance & SemVer Reference
+
+## Regulatory Compliance Evidence Bundle
+`npx aisdlc report compliance --strict --offline` generates `reports/audit-evidence-bundle.json` mapping all 12 Quality Gates to EU AI Act, ISO 42001, NIST SSDF, OSCAL, and in-toto provenance.
+
+## Highest-Precedence SemVer Rule
+When consolidating multiple increments in a single release or PR, apply **only one** version bump matching the highest friction profile:
+`critical` (Major `X.0.0`) > `standard` (Minor `x.Y.0`) > `patch` (Patch `x.y.Z`).
+
