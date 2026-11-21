@@ -227,7 +227,11 @@ function executeResolvedBinary(resolvedBin: string, bin: AllowedBin, realManifes
     });
     return mapSpawnResult(res);
   } finally {
-    fs.rmSync(tempHome, { recursive: true, force: true });
+    try {
+      fs.rmSync(tempHome, { recursive: true, force: true, maxRetries: 3 });
+    } catch {
+      // Best-effort temp cleanup (e.g. read-only go mod cache on Linux)
+    }
   }
 }
 
