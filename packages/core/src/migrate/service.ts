@@ -355,7 +355,8 @@ export class MigrationService implements IMigrationService {
         relPath.startsWith('.cursor/rules/') ||
         relPath.startsWith('.github/agents/') ||
         relPath === 'CLAUDE.md' ||
-        relPath.endsWith('/AGENTS.md');
+        relPath.endsWith('/AGENTS.md') ||
+        relPath === 'scripts/guard-post-edit.cjs';
       if (!isGovernedAgentPath) continue;
 
       const fullPath = path.join(root, relPath);

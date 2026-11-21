@@ -55,6 +55,7 @@ import {
   STARTER_AGENT_GUARD_WRAPPER_CJS,
   STARTER_ANTIGRAVITY_HOOKS_JSON,
   STARTER_GUARD_BRANCH_CJS,
+  STARTER_GUARD_POST_EDIT_CJS,
 } from './coding-rules-templates.js';
 
 export const VALID_CI_PROVIDERS = ['github', 'gitlab', 'azure', 'bitbucket'] as const;
@@ -847,6 +848,7 @@ const ANTIGRAVITY_CORE_FILES: readonly { relPath: string; content: string }[] = 
   { relPath: '.agent/hooks.json', content: STARTER_ANTIGRAVITY_HOOKS_JSON },
   { relPath: '.agent/scripts/guard-branch.cjs', content: STARTER_AGENT_GUARD_WRAPPER_CJS },
   { relPath: 'scripts/guard-branch.cjs', content: STARTER_GUARD_BRANCH_CJS },
+  { relPath: 'scripts/guard-post-edit.cjs', content: STARTER_GUARD_POST_EDIT_CJS },
 ];
 
 function appendAntigravityFiles(dirs: string[], files: { relPath: string; content: string }[]): void {

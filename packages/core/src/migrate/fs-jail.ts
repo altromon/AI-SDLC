@@ -25,6 +25,7 @@ const GOVERNED_ROOT_FILES = new Set([
   path.join('specs', 'AGENTS.md'),
   path.join('src', 'AGENTS.md'),
   path.join('tests', 'AGENTS.md'),
+  path.join('scripts', 'guard-post-edit.cjs'),
 ]);
 
 function validateRawInputs(repoRoot: string, targetPath: string): void {
