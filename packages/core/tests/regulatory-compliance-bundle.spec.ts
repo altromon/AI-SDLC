@@ -2,9 +2,6 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { describe, expect, it } from 'vitest';
-// We expect these exports to be implemented in CMP-051-REGULATORY-COMPLIANCE-ENGINE (@aisdlc/core)
-// In Red Phase, these will fail predictably until implemented
-// @ts-expect-error - Module will be created during Green implementation phase
 import {
   RegulatoryControlMapper,
   OscalAssessmentBuilder,

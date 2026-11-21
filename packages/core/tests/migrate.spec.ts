@@ -3,8 +3,6 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-// Target imports that will exist once developer implements them in packages/core/src/migrate/
-// @ts-expect-error Types and implementations will be provided by agent-developer in TSK-001..005
 import {
   FileSystemJailAdapter,
   DiffDetector,

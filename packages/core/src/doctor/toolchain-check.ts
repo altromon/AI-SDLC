@@ -53,13 +53,9 @@ export class ToolchainHealthCheck {
   }
 
   public async inspect(options: DoctorOptions): Promise<CategoryReport> {
-    const findings: DiagnosticFinding[] = [];
     const rootDir = options.rootDir || process.cwd();
-
-    for (const tool of TOOLS) {
-      const f = await probeTool(this.runner, rootDir, tool);
-      if (f) findings.push(f);
-    }
+    const results = await Promise.all(TOOLS.map((tool) => probeTool(this.runner, rootDir, tool)));
+    const findings = results.filter((f): f is DiagnosticFinding => f !== null);
 
     const hasFail = findings.some((f) => f.status === 'fail');
     return {
