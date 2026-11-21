@@ -21,6 +21,7 @@ import {
   isFunctionReferencedInTests,
   isTargetIdentifierLiteral,
   loadPreSanitizedTestFiles,
+  loadQualityBaseline,
   preSanitizeTestFile,
   sanitizeTestCorpus,
   scanCodeSegment,
@@ -35,9 +36,10 @@ import {
   stepQuotedOrTemplate,
   tryScanCommentOrRegex,
   verifyQualityGate,
+  writeQualityBaseline,
   type ScanState,
 } from '../src/verifiers/quality-gate.js';
-import type { AnalysisResult } from '../src/types/index.js';
+import type { AnalysisResult, QualityBaselineEntry } from '../src/types/index.js';
 
 describe('@FR-046-NATIVE-SDK-CLI-AST-001: Gate 1 Lexical Corpus Sanitizer', () => {
   let tmpDir: string;
@@ -326,6 +328,87 @@ describe('@FR-046-NATIVE-SDK-CLI-AST-001: Gate 1 Lexical Corpus Sanitizer', () =
       });
       expect((gate.untestedFunctions ?? []).some((u) => u.functionName === 'alphaFn')).toBe(false);
       expect((gate.untestedFunctions ?? []).some((u) => u.functionName === 'untestedFn')).toBe(true);
+    });
+  });
+
+  describe('writeQualityBaseline', () => {
+    it('writes valid deterministic baseline JSON to an existing directory and round-trips via loadQualityBaseline (happy path)', () => {
+      const baselineFile = path.join(tmpDir, 'quality-baseline.json');
+      const entries: QualityBaselineEntry[] = [
+        {
+          signature: 'sig-alpha-001',
+          file: 'src/alpha.ts',
+          functionName: 'alphaFn',
+          line: 10,
+          metric: 'cyclomatic',
+          value: 12,
+          threshold: 10,
+          message: 'Cyclomatic Complexity 12 exceeds max 10',
+        },
+        {
+          signature: 'sig-beta-002',
+          file: 'src/beta.ts',
+          functionName: 'betaFn',
+          line: 25,
+          metric: 'cognitive',
+          value: 18,
+          threshold: 15,
+          message: 'Cognitive Complexity 18 exceeds max 15',
+        },
+      ];
+
+      const returned = writeQualityBaseline(baselineFile, entries);
+      expect(fs.existsSync(baselineFile)).toBe(true);
+      expect(returned.version).toBe('1.0');
+      expect(returned.totalViolations).toBe(2);
+      expect(returned.violations).toEqual(entries);
+      expect(Number.isNaN(Date.parse(returned.generatedAt))).toBe(false);
+
+      const raw = fs.readFileSync(baselineFile, 'utf-8');
+      expect(raw.endsWith('\n')).toBe(true);
+      const parsed = JSON.parse(raw) as typeof returned;
+      expect(parsed).toEqual(returned);
+
+      const loaded = loadQualityBaseline(baselineFile);
+      expect(loaded).toEqual(returned);
+    });
+
+    it('creates deeply nested non-existent parent directories, handles empty entries, and overwrites existing baselines (boundary paths)', () => {
+      const nestedFile = path.join(tmpDir, 'nested', 'a', 'b', 'quality-baseline.json');
+      const emptyBaseline = writeQualityBaseline(nestedFile, []);
+      expect(fs.existsSync(nestedFile)).toBe(true);
+      expect(emptyBaseline.totalViolations).toBe(0);
+      expect(emptyBaseline.violations).toEqual([]);
+      expect(loadQualityBaseline(nestedFile)).toEqual(emptyBaseline);
+
+      const updatedEntries: QualityBaselineEntry[] = [
+        {
+          signature: 'sig-gamma-003',
+          file: 'src/gamma.ts',
+          functionName: 'gammaFn',
+          line: 4,
+          metric: 'loc',
+          value: 45,
+          threshold: 40,
+          message: 'Function lines 45 exceeds max 40',
+        },
+      ];
+      const overwritten = writeQualityBaseline(nestedFile, updatedEntries);
+      expect(overwritten.totalViolations).toBe(1);
+      expect(loadQualityBaseline(nestedFile)?.violations).toEqual(updatedEntries);
+    });
+
+    it('throws when target path is an existing directory, parent is a regular file, or path is empty/malformed (sad & malformed paths)', () => {
+      const existingDir = path.join(tmpDir, 'baseline-dir');
+      fs.mkdirSync(existingDir, { recursive: true });
+      expect(() => writeQualityBaseline(existingDir, [])).toThrow();
+
+      const fileAsParent = path.join(tmpDir, 'not-a-dir');
+      fs.writeFileSync(fileAsParent, 'occupied', 'utf-8');
+      expect(() => writeQualityBaseline(path.join(fileAsParent, 'quality-baseline.json'), [])).toThrow();
+
+      expect(() => writeQualityBaseline('', [])).toThrow();
+      expect(() => writeQualityBaseline(path.join(tmpDir, 'bad\0file.json'), [])).toThrow();
     });
   });
 });

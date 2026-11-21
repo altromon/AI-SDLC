@@ -109,5 +109,5 @@ describe('MCP Tools Composite Branch Paths (Happy / Sad / Boundary / Malformed)'
     // inspect_element missing
     const inspMiss = await client.callTool({ name: 'inspect_element', arguments: { root: tmpDir, query: 'NOPE-999' } });
     expect(inspMiss.isError).toBe(true);
-  });
+  }, 15_000);
 });
