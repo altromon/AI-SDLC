@@ -33,6 +33,7 @@ export * from './verifiers/sarif-sast.js';
 export * from './verifiers/security-suppressions.js';
 export * from './verifiers/privacy.js';
 export * from './verifiers/skill-integrity.js';
+export * from './verifiers/skill-execution-audit.js';
 export * from './reporters/quality-report.js';
 export * from './git/workflow.js';
 export * from './git/checkout.js';
