@@ -839,21 +839,22 @@ function appendSkillReferenceFiles(
   }
 }
 
+const ANTIGRAVITY_CORE_FILES: readonly { relPath: string; content: string }[] = [
+  { relPath: '.agent/rules/ai-sdlc.md', content: STARTER_ANTIGRAVITY_RULES },
+  { relPath: '.agent/rules/ai-sdlc-specs.md', content: STARTER_ANTIGRAVITY_SPECS_RULES },
+  { relPath: '.agent/rules/ai-sdlc-code.md', content: STARTER_ANTIGRAVITY_CODE_RULES },
+  { relPath: '.agent/rules/ai-sdlc-testing.md', content: STARTER_ANTIGRAVITY_TESTING_RULES },
+  { relPath: '.agent/hooks.json', content: STARTER_ANTIGRAVITY_HOOKS_JSON },
+  { relPath: '.agent/scripts/guard-branch.cjs', content: STARTER_AGENT_GUARD_WRAPPER_CJS },
+  { relPath: 'scripts/guard-branch.cjs', content: STARTER_GUARD_BRANCH_CJS },
+];
+
 function appendAntigravityFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
   dirs.push('.agent/rules', '.agent/agents', '.agent/skills');
-  files.push(
-    { relPath: '.agent/rules/ai-sdlc.md', content: STARTER_ANTIGRAVITY_RULES },
-    { relPath: '.agent/rules/ai-sdlc-specs.md', content: STARTER_ANTIGRAVITY_SPECS_RULES },
-    { relPath: '.agent/rules/ai-sdlc-code.md', content: STARTER_ANTIGRAVITY_CODE_RULES },
-    { relPath: '.agent/rules/ai-sdlc-testing.md', content: STARTER_ANTIGRAVITY_TESTING_RULES },
-    { relPath: '.agent/hooks.json', content: STARTER_ANTIGRAVITY_HOOKS_JSON },
-    { relPath: '.agent/scripts/guard-branch.cjs', content: STARTER_AGENT_GUARD_WRAPPER_CJS },
-    { relPath: 'scripts/guard-branch.cjs', content: STARTER_GUARD_BRANCH_CJS }
-  );
+  files.push(...ANTIGRAVITY_CORE_FILES);
   appendHierarchicalAgentsMd(dirs, files);
   for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
-    const content = renderAntigravityAgentFile(agent);
-    files.push({ relPath: `.agent/agents/${agent.id}.md`, content });
+    files.push({ relPath: `.agent/agents/${agent.id}.md`, content: renderAntigravityAgentFile(agent) });
   }
   for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
     dirs.push(`.agent/skills/${skill.id}`);
