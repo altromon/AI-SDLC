@@ -30,7 +30,7 @@ describe('DoctorService, SARIF Helpers & Async Compliance Bundle (Happy / Sad / 
 
   it('DoctorService.diagnose: returns structured DoctorReport for workspace (happy/boundary)', async () => {
     const svc = new DoctorService();
-    const report = await svc.diagnose({ rootDir: tmpDir });
+    const report = await svc.diagnose({ rootDir: tmpDir, offline: true });
     expect(report.categories.length).toBeGreaterThan(0);
     expect(['pass', 'warn', 'fail']).toContain(report.overallStatus);
     expect(typeof report.exitCode).toBe('number');
