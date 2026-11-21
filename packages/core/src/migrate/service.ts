@@ -340,32 +340,29 @@ export class MigrationService implements IMigrationService {
     return targets;
   }
 
+  private isGovernedAgentPath(relPath: string): boolean {
+    const prefixes = ['.agent/', '.claude/', '.cursor/rules/', '.github/agents/'];
+    return (
+      prefixes.some((p) => relPath.startsWith(p)) ||
+      relPath === 'CLAUDE.md' ||
+      relPath.endsWith('/AGENTS.md') ||
+      relPath === 'scripts/guard-post-edit.cjs'
+    );
+  }
+
   private discoverAgentFiles(root: string): GovernedItem[] {
     const configured = this.discoverConfiguredAgentTargets(root);
     if (configured.length === 0) return [];
 
     const items: GovernedItem[] = [];
-    const { files } = collectAgentFiles(resolveAgentTargets(configured));
-    for (const f of files) {
+    for (const f of collectAgentFiles(resolveAgentTargets(configured)).files) {
       const relPath = f.relPath.replace(/\\/g, '/');
-      // Only migrate governed agent/rule/skill/AGENTS paths (skip MCP configs which may hold user env vars)
-      const isGovernedAgentPath =
-        relPath.startsWith('.agent/') ||
-        relPath.startsWith('.claude/') ||
-        relPath.startsWith('.cursor/rules/') ||
-        relPath.startsWith('.github/agents/') ||
-        relPath === 'CLAUDE.md' ||
-        relPath.endsWith('/AGENTS.md') ||
-        relPath === 'scripts/guard-post-edit.cjs';
-      if (!isGovernedAgentPath) continue;
+      if (!this.isGovernedAgentPath(relPath)) continue;
 
       const fullPath = path.join(root, relPath);
-      if (fs.existsSync(fullPath)) {
-        const currentContent = fs.readFileSync(fullPath, 'utf-8');
-        items.push({ relPath, category: 'agent', currentContent, targetContent: f.content, baseContent: f.content });
-      } else {
-        items.push({ relPath, category: 'agent', currentContent: '', targetContent: f.content, baseContent: '' });
-      }
+      const exists = fs.existsSync(fullPath);
+      const currentContent = exists ? fs.readFileSync(fullPath, 'utf-8') : '';
+      items.push({ relPath, category: 'agent', currentContent, targetContent: f.content, baseContent: exists ? f.content : '' });
     }
     return items;
   }

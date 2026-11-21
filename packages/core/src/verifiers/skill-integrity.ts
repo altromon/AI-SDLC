@@ -43,11 +43,25 @@ function extractReferenceLinks(content: string): string[] {
   return Array.from(links);
 }
 
+function checkSkillReferences(skillDir: string, relSkillFile: string, content: string): SkillIntegrityViolation[] {
+  const violations: SkillIntegrityViolation[] = [];
+  for (const refRel of extractReferenceLinks(content)) {
+    if (!fs.existsSync(path.join(skillDir, refRel))) {
+      violations.push({
+        skillFile: relSkillFile,
+        code: 'BROKEN_REFERENCE',
+        message: `Referenced file './${refRel}' does not exist`,
+      });
+    }
+  }
+  return violations;
+}
+
 function validateSingleSkill(skillDir: string, rootDir: string, expectedName: string): SkillIntegrityViolation[] {
   const skillFile = path.join(skillDir, 'SKILL.md');
-  const relSkillFile = path.relative(rootDir, skillFile).replace(/\\/g, '/');
   if (!fs.existsSync(skillFile)) return [];
 
+  const relSkillFile = path.relative(rootDir, skillFile).replace(/\\/g, '/');
   const content = fs.readFileSync(skillFile, 'utf-8');
   const fm = parseSkillFrontmatter(content);
   if (!fm) {
@@ -61,13 +75,7 @@ function validateSingleSkill(skillDir: string, rootDir: string, expectedName: st
   if (typeof fm.description !== 'string' || fm.description.trim().length < 10) {
     violations.push({ skillFile: relSkillFile, code: 'MISSING_DESCRIPTION', message: 'Frontmatter description is missing or too short' });
   }
-
-  for (const refRel of extractReferenceLinks(content)) {
-    if (!fs.existsSync(path.join(skillDir, refRel))) {
-      violations.push({ skillFile: relSkillFile, code: 'BROKEN_REFERENCE', message: `Referenced file './${refRel}' does not exist` });
-    }
-  }
-  return violations;
+  return [...violations, ...checkSkillReferences(skillDir, relSkillFile, content)];
 }
 
 export function verifySkillsIntegrity(rootDir: string = process.cwd()): SkillIntegrityResult {
