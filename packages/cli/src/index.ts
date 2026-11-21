@@ -38,6 +38,7 @@ import {
   runVerifySchemas,
   runVerifySecrets,
   runVerifySecurityAsync,
+  runVerifySkills,
   runVerifyTesting,
   runVerifyTraceability,
 } from './commands/verify.js';
@@ -394,6 +395,18 @@ verifyCommand
   .option('-F, --format <format>', 'Output format: text or json')
   .action((change, opts) => {
     const passed = runVerifyFriction({ root: opts.root, change, json: opts.json, format: opts.format });
+    process.exit(passed ? 0 : 1);
+  });
+
+verifyCommand
+  .command('skills')
+  .description('Verify SKILL.md frontmatter, relative ./references/*.md links, and optional MCP execution evidence')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-s, --skill <id>', 'Optional skill ID to audit execution evidence in reports/mcp-audit.jsonl')
+  .option('--json', 'Emit verification results in structured JSON format')
+  .option('-F, --format <format>', 'Output format: text or json')
+  .action((opts) => {
+    const passed = runVerifySkills({ root: opts.root, skill: opts.skill, json: opts.json, format: opts.format });
     process.exit(passed ? 0 : 1);
   });
 

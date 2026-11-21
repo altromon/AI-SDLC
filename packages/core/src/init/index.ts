@@ -8,11 +8,18 @@ import { installGitHooks } from '../git/hook-installer.js';
 import { AISDLC_MANIFEST_FILENAME, getAisdlcVersion } from '../version.js';
 import {
   STARTER_ANTIGRAVITY_RULES,
+  STARTER_ANTIGRAVITY_SPECS_RULES,
+  STARTER_ANTIGRAVITY_CODE_RULES,
+  STARTER_ANTIGRAVITY_TESTING_RULES,
   STARTER_CURSOR_CORE_RULES,
   STARTER_CURSOR_PRODUCT_RULES,
   STARTER_CURSOR_QUALITY_RULES,
+  STARTER_CURSOR_TESTING_RULES,
   STARTER_CLAUDE_RULES,
   STARTER_COPILOT_RULES,
+  STARTER_SPECS_AGENTS_MD,
+  STARTER_SRC_AGENTS_MD,
+  STARTER_TESTS_AGENTS_MD,
   STARTER_CURSOR_MCP,
   STARTER_ANTIGRAVITY_MCP,
   STARTER_VSCODE_MCP,
@@ -27,6 +34,7 @@ import {
   renderCursorAgentFile,
   renderCursorSkillFile,
 } from './agent-templates.js';
+import { SKILL_REFERENCES } from './skill-references.js';
 import {
   getArchitectureTemplates,
   VALID_ARCHITECTURE_GRANULARITIES,
@@ -47,6 +55,7 @@ import {
   STARTER_AGENT_GUARD_WRAPPER_CJS,
   STARTER_ANTIGRAVITY_HOOKS_JSON,
   STARTER_GUARD_BRANCH_CJS,
+  STARTER_GUARD_POST_EDIT_CJS,
 } from './coding-rules-templates.js';
 
 export const VALID_CI_PROVIDERS = ['github', 'gitlab', 'azure', 'bitbucket'] as const;
@@ -807,21 +816,52 @@ export function resolveAgentTargets(agents?: string | boolean | string[]): Set<s
   return result;
 }
 
+function appendHierarchicalAgentsMd(dirs: string[], files: { relPath: string; content: string }[]): void {
+  dirs.push('specs', 'src', 'tests');
+  files.push(
+    { relPath: 'specs/AGENTS.md', content: STARTER_SPECS_AGENTS_MD },
+    { relPath: 'src/AGENTS.md', content: STARTER_SRC_AGENTS_MD },
+    { relPath: 'tests/AGENTS.md', content: STARTER_TESTS_AGENTS_MD }
+  );
+}
+
+function appendSkillReferenceFiles(
+  baseSkillDir: string,
+  skillId: string,
+  dirs: string[],
+  files: { relPath: string; content: string }[]
+): void {
+  const refs = SKILL_REFERENCES[skillId];
+  if (!refs || refs.length === 0) return;
+  const refsDir = `${baseSkillDir}/references`;
+  dirs.push(refsDir);
+  for (const ref of refs) {
+    files.push({ relPath: `${refsDir}/${ref.filename}`, content: ref.content });
+  }
+}
+
+const ANTIGRAVITY_CORE_FILES: readonly { relPath: string; content: string }[] = [
+  { relPath: '.agent/rules/ai-sdlc.md', content: STARTER_ANTIGRAVITY_RULES },
+  { relPath: '.agent/rules/ai-sdlc-specs.md', content: STARTER_ANTIGRAVITY_SPECS_RULES },
+  { relPath: '.agent/rules/ai-sdlc-code.md', content: STARTER_ANTIGRAVITY_CODE_RULES },
+  { relPath: '.agent/rules/ai-sdlc-testing.md', content: STARTER_ANTIGRAVITY_TESTING_RULES },
+  { relPath: '.agent/hooks.json', content: STARTER_ANTIGRAVITY_HOOKS_JSON },
+  { relPath: '.agent/scripts/guard-branch.cjs', content: STARTER_AGENT_GUARD_WRAPPER_CJS },
+  { relPath: 'scripts/guard-branch.cjs', content: STARTER_GUARD_BRANCH_CJS },
+  { relPath: 'scripts/guard-post-edit.cjs', content: STARTER_GUARD_POST_EDIT_CJS },
+];
+
 function appendAntigravityFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
   dirs.push('.agent/rules', '.agent/agents', '.agent/skills');
-  files.push(
-    { relPath: '.agent/rules/ai-sdlc.md', content: STARTER_ANTIGRAVITY_RULES },
-    { relPath: '.agent/hooks.json', content: STARTER_ANTIGRAVITY_HOOKS_JSON },
-    { relPath: '.agent/scripts/guard-branch.cjs', content: STARTER_AGENT_GUARD_WRAPPER_CJS },
-    { relPath: 'scripts/guard-branch.cjs', content: STARTER_GUARD_BRANCH_CJS }
-  );
+  files.push(...ANTIGRAVITY_CORE_FILES);
+  appendHierarchicalAgentsMd(dirs, files);
   for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
-    const content = renderAntigravityAgentFile(agent);
-    files.push({ relPath: `.agent/agents/${agent.id}.md`, content });
+    files.push({ relPath: `.agent/agents/${agent.id}.md`, content: renderAntigravityAgentFile(agent) });
   }
   for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
     dirs.push(`.agent/skills/${skill.id}`);
     files.push({ relPath: `.agent/skills/${skill.id}/SKILL.md`, content: renderAntigravitySkillFile(skill) });
+    appendSkillReferenceFiles(`.agent/skills/${skill.id}`, skill.id, dirs, files);
   }
 }
 
@@ -830,7 +870,8 @@ function appendCursorFiles(dirs: string[], files: { relPath: string; content: st
   files.push(
     { relPath: '.cursor/rules/ai-sdlc-core.mdc', content: STARTER_CURSOR_CORE_RULES },
     { relPath: '.cursor/rules/ai-sdlc-product.mdc', content: STARTER_CURSOR_PRODUCT_RULES },
-    { relPath: '.cursor/rules/ai-sdlc-quality.mdc', content: STARTER_CURSOR_QUALITY_RULES }
+    { relPath: '.cursor/rules/ai-sdlc-quality.mdc', content: STARTER_CURSOR_QUALITY_RULES },
+    { relPath: '.cursor/rules/ai-sdlc-testing.mdc', content: STARTER_CURSOR_TESTING_RULES }
   );
   for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
     files.push({ relPath: `.cursor/rules/${agent.id}.mdc`, content: renderCursorAgentFile(agent) });
@@ -843,6 +884,7 @@ function appendCursorFiles(dirs: string[], files: { relPath: string; content: st
 function appendClaudeFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
   dirs.push('.claude/agents', '.claude/skills');
   files.push({ relPath: 'CLAUDE.md', content: STARTER_CLAUDE_RULES });
+  appendHierarchicalAgentsMd(dirs, files);
   for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
     const content = renderClaudeAgentFile(agent);
     dirs.push(`.claude/skills/${agent.id}`);
@@ -854,6 +896,7 @@ function appendClaudeFiles(dirs: string[], files: { relPath: string; content: st
   for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
     dirs.push(`.claude/skills/${skill.id}`);
     files.push({ relPath: `.claude/skills/${skill.id}/SKILL.md`, content: renderClaudeSkillFile(skill) });
+    appendSkillReferenceFiles(`.claude/skills/${skill.id}`, skill.id, dirs, files);
   }
 }
 
@@ -894,7 +937,13 @@ export function collectAgentFiles(targets: Set<string>): {
   if (isTargetIncluded(targets, 'copilot')) appendCopilotFiles(dirs, files);
 
   appendMcpFiles(dirs, files);
-  return { dirs, files };
+  const seen = new Set<string>();
+  const uniqueFiles = files.filter((f) => {
+    if (seen.has(f.relPath)) return false;
+    seen.add(f.relPath);
+    return true;
+  });
+  return { dirs: Array.from(new Set(dirs)), files: uniqueFiles };
 }
 
 function recordDryRunFile(exists: boolean, canOverwrite: boolean, relPath: string, results: { filesCreated: string[]; filesUpdated: string[] }): void {

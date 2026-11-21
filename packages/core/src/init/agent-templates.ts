@@ -2,6 +2,8 @@
  * AI-SDLC: Starter templates for Agent Native Configs, Specialized Agents, and MCP
  */
 
+import { SKILL_REFERENCES } from './skill-references.js';
+
 export interface SpecializedAgentTemplate {
   id: string;
   title: string;
@@ -333,6 +335,11 @@ export function renderCursorAgentFile(agent: SpecializedAgentTemplate): string {
   return `---\ndescription: ${agent.id} (${agent.title}) - ${agent.description}\nglobs: ${agent.globs}\nalwaysApply: false\n---\n\n# ${agent.id} (${agent.title})\n\nCanonical Reference: [\`process/09_agent_protocols.md\`](../../process/09_agent_protocols.md) and [\`process/01_governance_and_roles.md\`](../../process/01_governance_and_roles.md).\n\n${agent.body}\n`;
 }
 
+export interface SkillReferenceFile {
+  filename: string;
+  content: string;
+}
+
 export interface LifecycleSkillTemplate {
   id: string;
   title: string;
@@ -340,6 +347,7 @@ export interface LifecycleSkillTemplate {
   references: string;
   globs?: string;
   body: string;
+  referenceFiles?: readonly SkillReferenceFile[];
 }
 
 export const LIFECYCLE_SKILL_TEMPLATES: readonly LifecycleSkillTemplate[] = [
@@ -385,23 +393,76 @@ export const LIFECYCLE_SKILL_TEMPLATES: readonly LifecycleSkillTemplate[] = [
     globs: 'specs/**, architecture/**, src/**, packages/**, tests/**',
     body: "## Purpose & Trigger\nUse this skill whenever a user or agent requests to **inspect, explain, trace, or navigate** any element of the system:\n- **Requirements & Product:** `UC-*`, `FR-*`, `QR-*`, `BR-*`, `BC-*`, `ABUSE-*`, `DATA-ASSET-*`, `PRIV-ROPA-*`, `ARCH-INTRO-*`.\n- **Architecture & Decisions:** `CMP-*`, `ADR-*`, `SEC-ENC-*`.\n- **SDD & Tasks:** `TSK-*`, `CHG-*`, `HOF-*`.\n- **Source Code Files:** `src/**/*.ts`, `packages/**/*.ts`, etc.\n- **Verification Suites:** `.feature` BDD files, unit/integration specs.\n\nThis skill provides **impact analysis, context comprehension, and interactive graph exploration** with zero guesswork.\n\n---\n\n## Interactive Execution Playbook\n\n### Step 1: Target Resolution\n1. Extract the target identifier or file path indicated by the user (e.g., `FR-001`, `CMP-CORE`, `src/auth/jwt.ts`, `TSK-001`).\n2. If no target was specified, prompt the user with common anchor options (e.g., primary Use Cases `UC-*`, Core Components `CMP-*`, or an open input).\n\n### Step 2: Deterministic Inspection Engine\nExecute the inspection via MCP or CLI:\n* **Primary (MCP Tool):**\n  Invoke MCP tool `inspect_element`:\n  ```json\n  {\n    \"query\": \"<target-id-or-path>\"\n  }\n  ```\n* **Fallback (CLI):**\n  Run command:\n  ```bash\n  npx aisdlc inspect \"<target-id-or-path>\" --json\n  ```\n\n---\n\n### Step 3: Complete Technical Report Delivery (MANDATORY FIRST)\n> [!IMPORTANT]\n> **CRITICAL UX DIRECTIVE (Report First, Question After):**\n> The agent MUST always render and deliver the complete, detailed technical report to the user in visible text **BEFORE** prompting for the next element. Never invoke a blocking dialog or selector on an empty turn without the user having the full inspection visible.\n\nThe rendered response MUST contain:\n1. **Header:** Artifact ID, Title, Type (`requirement`, `component`, `source-file`, `task`), Layer (`product`, `architecture`, `code`, `test`, `governance`), and Status (`COMPLIANT`, `ORPHAN`, `DRIFT`).\n2. **File Location:** Clickable markdown link to the file.\n3. **Technical Summary:** Concise explanation (2–4 sentences) of what the element does, its responsibilities, key interfaces, and consolidated evolutionary increments (`### Incremento (CHG-*)`). If a canonical requirement still shows boilerplate text despite completed changes in `specs/changes/`, run `sdd_integrate` with `all: true` (`npx aisdlc sdd integrate --all`) first so canonical requirements reflect the consolidated specification.\n4. **Upstream Relations (Derives from / Mitigates / Governed by):**\n   - ↗️ List all parent requirements, use cases, business rules, or decisions that justify this element.\n5. **Downstream Relations (Satisfied by / Implemented in / Verified by):**\n   - ↘️ List all components implementing it, tasks developing it, and test suites validating it.\n6. **Numbered Navigable Items:** Clear, numbered list of connected nodes with their ID, type, and relationship.\n\n---\n\n### Step 4: Subsequent Navigation Formulation & Selector\nOnce the technical report is fully constructed:\n1. Formulate the closing question inviting the user to continue navigating the graph.\n2. If using the interactive selector (`ask_question`), execute it **in conjunction with or immediately following the complete report text**:\n   * **Question:** *\"¿Hacia qué elemento conectado deseas continuar la exploración?\"*\n   * **Options:** Formatted list of related elements from `relatedItems`:\n     - `(Recommended) <ID-1> (<Type-1> — <relation-1>)`\n     - `<ID-2> (<Type-2> — <relation-2>)`\n     - `<ID-N> (<Type-N> — <relation-N>)`\n     - `Terminar exploración`\n3. **Navigation Loop:**\n   - When the user selects or indicates an element (either via UI selector or plain text/number), repeat **Step 2** with the new selection.\n   - If the user selects `Terminar exploración`, summarize the traversal journey and conclude.",
   },
+  {
+    id: 'aisdlc-doctor-migrate',
+    title: 'Environment Diagnostics & Framework Migration Playbook',
+    description:
+      "Diagnose AI-SDLC environment health, git hooks, and security tools (aisdlc doctor), synchronize IDE agent configs (aisdlc sync), and safely upgrade schemas, templates, policies, and skills (aisdlc migrate) with backup and policy-ratchet protection.",
+    references:
+      "[`process/09_agent_protocols.md`](../../process/09_agent_protocols.md) and [`process/10_quality_management_and_release_gates.md`](../../process/10_quality_management_and_release_gates.md).",
+    globs: '.aisdlc.json, schemas/**, templates/**, *-policy.yaml, .agent/**, .claude/**, .cursor/**',
+    body: "## Purpose & Trigger\nUse this skill whenever the user asks to **diagnose the AI-SDLC setup, repair git hooks, check installed security/SCA tools, synchronize IDE configs, or upgrade/migrate schemas, templates, policies, and skills**.\n\n## End-to-End Execution Playbook\n\n### Step 1: Environment & Toolchain Diagnostics (`aisdlc doctor`)\n1. Run MCP tool `doctor` or CLI `npx aisdlc doctor --json` (use `--offline` in air-gapped environments, `--strict` in CI).\n2. Inspect checks for: Node.js LTS, Git branch safety (never on `main`/`master`/`release/*`), Git hooks (`pre-commit`, `prepare-commit-msg`), schemas/PDaC integrity, and external security/SCA binaries (`gitleaks`, `semgrep`, `trivy`, `syft`).\n3. If hooks are missing or broken, run `npx aisdlc doctor --fix` (or `npx aisdlc git hook install`).\n\n### Step 2: Safe Framework Migration (`aisdlc migrate`)\n1. **Protected Branch Guard**: Never run mutating migrations on `main`, `master`, or `release/*`. Switch to a working branch first.\n2. **Preview First**: Always run MCP tool `migrate` with `dryRun: true` (`npx aisdlc migrate --dry-run --json`) to inspect `upToDate`, `cleanUpdated`, `overridesPreserved`, and `conflicts`.\n3. **Execute Migration**: Run `npx aisdlc migrate` (creates `.backup/migration-<timestamp>/` automatically). Local customizations are preserved (`LOCAL_OVERRIDE_PRESERVED`, exit code `1`) unless `--force` is explicitly requested.\n4. **Policy Ratchet Guard**: `migrate` blocks relaxing stricter local thresholds in `quality-policy.yaml` / `privacy-policy.yaml` unless `--allow-policy-downgrade` is explicitly authorized by a human Tech Lead.\n\n### Step 3: IDE Agent Config Synchronization (`aisdlc sync`)\n1. To refresh `.agent/`, `.claude/`, `.cursor/`, `.github/agents/`, and MCP configs without touching `specs/` or `src/`, run `npx aisdlc sync` (or `npx aisdlc sync --agents antigravity,cursor`).",
+  },
+  {
+    id: 'aisdlc-release-compliance',
+    title: 'Release Consolidation, SemVer & Regulatory Compliance Playbook',
+    description:
+      "Consolidate release milestones (release/vX.Y.Z), compute release KPIs (kpi_release), generate CycloneDX SBOMs and THIRD_PARTY_NOTICES.md, build Regulatory Compliance Evidence Bundles (EU AI Act, ISO 42001, NIST SSDF, OSCAL, in-toto), and apply highest-precedence SemVer promotion.",
+    references:
+      "[`process/10_quality_management_and_release_gates.md`](../../process/10_quality_management_and_release_gates.md) and [`process/11_git_branching_and_lifecycle.md`](../../process/11_git_branching_and_lifecycle.md).",
+    globs: 'reports/**, compliance/**, .changeset/**, package.json',
+    body: "## Purpose & Trigger\nUse this skill when **closing a release milestone (`release/vX.Y.Z`), preparing a regulatory/audit evidence bundle, generating SBOM/legal notices, or calculating consolidated SemVer bumps**.\n\n## End-to-End Execution Playbook\n\n### Step 1: Consolidated Quality, License & Supply Chain Verification\n1. Run `npx aisdlc verify all` to confirm all 12 Quality Gates pass.\n2. Generate CycloneDX 1.5 SBOM and legal attributions: `npx aisdlc verify licenses --sbom reports/sbom.cdx.json --notices THIRD_PARTY_NOTICES.md`.\n\n### Step 2: Regulatory Compliance Evidence Bundle\n1. Generate the deterministic evidence bundle (EU AI Act, ISO 42001, NIST SSDF, OSCAL, in-toto provenance) via `npx aisdlc report compliance --strict --offline` (use `--dry-run` to preview, `--keyless` for OIDC attestation claims).\n2. Verify `reports/audit-evidence-bundle.json` is valid and free of unmasked PII/secrets (DLP sanitized).\n\n### Step 3: Release KPIs, Reports & Highest-Precedence SemVer\n1. Compute release KPIs and DIR/rework metrics via MCP tool `kpi_release` (`npx aisdlc kpi release --release release/vX.Y.Z --base main`).\n2. Regenerate canonical reports (`report_quality`, `report_dashboard`) on the release branch.\n3. **Highest-Precedence SemVer Rule**: When consolidating multiple increments in a single release/PR, apply **ONLY one version bump** matching the highest friction profile (`critical` = Major, `standard` = Minor, `patch` = Patch).\n4. Open the Release PR for human Tech Lead approval and SemVer tagging (never auto-approve or auto-merge).",
+  },
+  {
+    id: 'aisdlc-security-sca-triage',
+    title: 'Security, SAST, Secrets & SCA License Triage Playbook',
+    description:
+      "Triage and remediate failures from Gate 7 (SCA Licenses & Vulnerabilities), Gate 8 (Privacy/PII), Gate 11 (Secrets), and Gate 12 (SAST), including native SARIF/SBOM ingestion (--sarif, --orchestrate, --sbom-input) and audited security suppressions.",
+    references:
+      "[`process/03_security_by_design.md`](../../process/03_security_by_design.md), [`process/04_open_source_license_compliance.md`](../../process/04_open_source_license_compliance.md), and [`process/07_security_and_license_validation.md`](../../process/07_security_and_license_validation.md).",
+    globs: 'security/**, specs/security/**, license-policy.yaml, privacy-policy.yaml, compliance/**',
+    body: "## Purpose & Trigger\nUse this skill when **a security, secrets, privacy, or license gate fails** (e.g., exit code `4` for security/secrets or `5` for privacy), when **ingesting external SARIF/SBOM reports**, or when **evaluating commercial/copyleft dependency exceptions**.\n\n## End-to-End Execution Playbook\n\n### Step 1: Secrets & SAST Triage (Exit Code 4)\n1. Run `npx aisdlc verify security --diff --format sarif -o reports/security.sarif` (add `--gitleaks` or `--semgrep` if native binaries are installed).\n2. For polyglot repositories, run `npx aisdlc verify sast --orchestrate` or ingest external OASIS SARIF v2.1.0 files via `npx aisdlc verify sast --sarif <path...>`.\n3. **Immediate Secret Remediation**: If real credentials are detected, halt feature work, rotate the secret, and remove it from code/history.\n4. **Audited Suppressions**: Never silence findings with inline linter disables. False positives require an audited suppression entry with justification and expiration reviewed by `agent-adversary` / human Tech Lead.\n\n### Step 2: Privacy & PII Triage (Exit Code 5)\n1. Run `npx aisdlc verify privacy --ropa-report reports/ROPA_INVENTORY.md --report reports/PRIVACY_SCAN_REPORT.md`.\n2. Eliminate PII from logs/telemetry/LLM prompts (`[REDACTED]`), ensure `DATA-ASSET-*` and `PRIV-ROPA-*` exist, and escalate `RESTRICTED_SENSITIVE_PII` to a `DPIA-*` request.\n\n### Step 3: SCA License & CVE Triage\n1. Run `npx aisdlc verify licenses --vuln --depth transitive` (or ingest an air-gapped CycloneDX/SPDX SBOM via `--sbom-input <path>`).\n2. Block `GPL`/`AGPL` (viral) and `BSL`/`SSPL` (commercial) unless a human-approved `templates/compliance/commercial-acquisition-request.template.md` authorization is recorded.",
+  },
+  {
+    id: 'aisdlc-bdd-gherkin',
+    title: 'Deterministic BDD & Polyglot Gherkin Scaffolding Playbook',
+    description:
+      "Extract canonical .feature files from Markdown specifications (aisdlc gherkin extract), scaffold failing RED step definitions across TypeScript, Python, Go, Rust, and C# (aisdlc gherkin scaffold), and enforce deterministic BDD synchronization (aisdlc verify gherkin).",
+    references:
+      "[`process/06_spec_driven_development.md`](../../process/06_spec_driven_development.md) and [`process/10_quality_management_and_release_gates.md`](../../process/10_quality_management_and_release_gates.md).",
+    globs: 'tests/features/**, tests/steps/**, specs/**',
+    body: "## Purpose & Trigger\nUse this skill whenever **authoring BDD acceptance criteria, extracting `.feature` files, or scaffolding RED step definitions** in TypeScript, Python, Go, Rust, or C#.\n\n## End-to-End Execution Playbook\n\n### Step 1: Author Gherkin Inside Markdown Specs\n1. Never create or edit `tests/features/*.feature` files manually.\n2. Author ```gherkin blocks inside `FR-*`, `SEC-REQ-*`, `PRIV-REQ-*`, or `specs/changes/active/<chg-id>/spec.md` with tags `@<ID> @automated @regression` and `@nominal`, `@boundary`, `@invalid` scenarios.\n\n### Step 2: Deterministic Extraction & Polyglot Step Scaffolding\n1. Run `npx aisdlc gherkin extract --all` (or `npx aisdlc check --fix`) to generate `tests/features/*.feature` deterministically.\n2. Scaffold failing RED step definitions in `tests/steps/` via:\n   `npx aisdlc gherkin scaffold <feature-file> --lang <ts|py|go|rs|cs> --fallback`\n   (omit `--fallback` when the native BDD generator is installed).\n3. Implement real failing assertions inside the scaffolded step files.\n\n### Step 3: Synchronization Gate\n1. Run `npx aisdlc verify gherkin` and `npx aisdlc verify testing` to confirm 100% Markdown-to-`.feature` parity and scenario coverage.",
+  },
 ];
 
+function formatSkillReferencesSection(skillId: string): string {
+  const refs = SKILL_REFERENCES[skillId];
+  if (!refs || refs.length === 0) return '';
+  const links = refs.map((r) => `- [\`${r.filename}\`](./references/${r.filename})`).join('\n');
+  return `\n## Self-Contained References\n${links}\n`;
+}
+
+function formatInlineSkillReferences(skillId: string): string {
+  const refs = SKILL_REFERENCES[skillId];
+  if (!refs || refs.length === 0) return '';
+  return '\n' + refs.map((r) => r.content.trim()).join('\n\n') + '\n';
+}
+
 export function renderAntigravitySkillFile(skill: LifecycleSkillTemplate): string {
-  return `---\nname: ${skill.id}\ndescription: >-\n  ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}\n`;
+  return `---\nname: ${skill.id}\ndescription: >-\n  ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}${formatSkillReferencesSection(skill.id)}\n`;
 }
 
 export function renderCursorSkillFile(skill: LifecycleSkillTemplate): string {
   const globs = skill.globs || '';
-  return `---\ndescription: ${skill.id} (${skill.title}) - ${skill.description}\nglobs: ${globs}\nalwaysApply: false\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}\n`;
+  return `---\ndescription: ${skill.id} (${skill.title}) - ${skill.description}\nglobs: ${globs}\nalwaysApply: false\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}${formatInlineSkillReferences(skill.id)}\n`;
 }
 
 export function renderClaudeSkillFile(skill: LifecycleSkillTemplate): string {
-  return `---\nname: ${skill.id}\ndescription: ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}\n`;
+  return `---\nname: ${skill.id}\ndescription: ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}${formatSkillReferencesSection(skill.id)}\n`;
 }
 
 export function renderCopilotSkillFile(skill: LifecycleSkillTemplate): string {
-  return `---\nname: ${skill.id}\ndescription: ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}\n`;
+  return `---\nname: ${skill.id}\ndescription: ${skill.description}\n---\n\n# ${skill.id} (${skill.title})\n\nCanonical Reference: ${skill.references}\n\n${skill.body}${formatInlineSkillReferences(skill.id)}\n`;
 }
 
 export const STARTER_ANTIGRAVITY_RULES = `# Google Antigravity & Gemini CLI Rules - AI-SDLC Framework
@@ -422,100 +483,31 @@ This file defines the operational rules and specialized role mappings for Google
 
 ---
 
-## 2. Specialized Roles Mapping
+## 2. Specialized Roles Mapping (Summary — Full Prompts in \`.agent/agents/\`)
 
-### 1. \`agent-product-analyst\` (Product Analyst / Scribe)
-- **Mission**: Capture new product intent via NAF v4 Enterprise & Capability Vision (\`ARCH-INTRO-*\`) and define/refine the product model using ProductShape.
-- **Phase 0 (Greenfield Product Inception)**: When creating a new product from scratch (or when \`specs/product/\` has no baseline), run an iterative discovery interview of **up to 15 questions (or until the product scope is 100% clear and unambiguous)** covering: mission/problem, actors \`ACT-*\`, role/auth model, **target UI/interaction modality (Web UI, Desktop GUI, Console/TUI/CLI, Mobile, or API/SDK)**, **modern visual aesthetic & styling standard (Bootstrap 5-style clean responsive web layouts with cards/tables/badges, Fluent/modern desktop aesthetic with rounded corners/elevated panels, or colorized rich terminal console with ANSI palettes/status badges)**, master-data CRUD prerequisites, MVP capabilities \`UC-*\`, business rules \`BR-*\`, and priority quality goals \`QR-*\`; then draft \`ARCH-INTRO-001\` (\`templates/architecture/introduction-and-goals.template.md\`), and derive initial \`ACT-*\`, \`UC-*\`, \`BR-*\`, \`FR-*\`, and \`QR-*\` drafts.
-- **Input**: Business intent or natural language specification.
-- **Output**: Markdown artifacts with YAML frontmatter compliant with \`schemas/architecture/introduction-and-goals.schema.json\` (\`ARCH-INTRO-*\`) and \`schemas/product/\` (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`).
-- **Guardrails**:
-  - **FORBIDDEN Library-Only MVP for Human Actors**: Whenever primary actors (\`ACT-*\`) are human users, the target UI modality (Web, Desktop, Console/CLI, or Mobile) MUST be explicitly defined at Inception, and the MVP baseline MUST include a runnable presentation interface matching that modality, authentication/session access (when multi-role), and CRUD flows for foundational master entities required to execute the core business use cases without manual database seeding.
-  - \`status\` always starts in \`draft\`.
-  - In \`UC-*\`, format section \`1. Intent and Outcome\` under the standard English structure: \`As a <ACT-ID>... I want <action>... To <outcome>...\`.
-  - Mandatory Gherkin criteria with \`@<ID> @automated @regression\`.
-  - Run \`pnpm run verify:schemas\` and \`pnpm run verify:duplicates\` before delivering the draft.
-
-### 2. \`agent-threat-modeler\` (Threat Modeler and Security Specialist)
-- **Mission**: Analyze use cases and proactively model adversaries, STRIDE attack vectors, and OWASP ASVS mitigations, both at product level and in the technical security feedback loop over architecture.
-- **Input**: Use cases \`UC-*\`, functional requirements \`FR-*\`, or architecture components (\`CMP-*\`, Mermaid diagrams, ADRs).
-- **Output**: Cybersecurity triad (\`ACT-THREAT-*\`, \`ABUSE-*\`, \`SEC-REQ-*\`) compliant with \`schemas/security/\`, followed by handoff to \`agent-privacy-officer\`.
-- **Guardrails**:
-  - \`status\` always starts in \`draft\`.
-  - Negative BDD attack and rejection scenarios tagged with \`@security @mitigation\`.
-  - Assignment of Zero Trust enclaves \`SEC-ENC-*\`.
-
-### 3. \`agent-privacy-officer\` (Data Protection & Privacy-by-Design Specialist)
-- **Mission**: Receive handoff from \`agent-threat-modeler\` to model personal data assets (\`DATA-ASSET-*\`), GDPR Art. 30 processing activities (\`PRIV-ROPA-*\`), and LINDDUN / GDPR / ISO 27701 privacy requirements (\`PRIV-REQ-*\`), and audit PR diffs against \`privacy-policy.yaml\`.
-- **Output**: Privacy triad (\`DATA-ASSET-*\`, \`PRIV-ROPA-*\`, \`PRIV-REQ-*\`) in \`specs/privacy/\` compliant with \`schemas/privacy/\`, and \`DPIA-*\` requests when Art. 9 sensitive data is detected.
-- **Guardrails**:
-  - \`status\` always starts in \`draft\`.
-  - Every \`PRIV-REQ-*\` includes Gherkin scenarios tagged with \`@<PRIV-REQ-ID> @privacy @gdpr @automated @regression\`.
-  - Run \`pnpm run verify:privacy\` to block PII in logs/prompts and enforce ROPA & retention/erasure policies.
-
-### 4. \`agent-system-architect\` (System Architect)
-- **Mission**: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4.
-- **Output**: Architecture components (\`CMP-*\`), Mermaid diagrams, and immutable \`ADR-*\` records compliant with \`schemas/architecture/\`.
-- **Guardrails**:
-  - Every \`CMP-*\` must declare \`satisfies-requirements\` linking \`FR-*\`, \`QR-*\`, \`SEC-REQ-*\`, and \`PRIV-REQ-*\`, and structure modules following **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports, enforcing the Dependency Rule).
-  - **No Orphan Presentation Components (\`CMP-WEB-*\` / \`CMP-UI-*\` / \`CMP-CLI-*\`)**: Never leave a presentation driving adapter unmapped in \`tasks.md\` while scheduling only backend class-library tasks. Wave 0 (\`CHG-001\`) must bootstrap the runnable host shell for the agreed UI modality (Web, Desktop, or Console/CLI) when human actors exist, and every human-facing \`CHG-*\` must deliver its vertical slice end-to-end (Domain + Persistence + Agreed UI/CLI Adapter + E2E).
-  - Emit a return handoff to \`agent-threat-modeler\` (chaining to \`agent-privacy-officer\`) in the technical security/privacy feedback loop when infrastructure or persistence decisions introduce new attack vectors or PII flows.
-
-### 5. \`agent-qa-engineer\` (QA Engineer and SDET)
-- **Mission**: Translate approved requirements (\`FR-*\`, \`SEC-REQ-*\`, \`PRIV-REQ-*\`, \`QR-*\`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before \`agent-developer\` writes production code.
-- **Input**: Approved requirements from the \`handoff.yaml\` sidecar (\`HOF-*\`).
-- **Output**: Failing Gherkin, E2E, and UI test suites covering: nominal case, boundary cases, out-of-range cases, per-interactive-element tests (Happy Path, Sad Path, Boundary Values), and conditional categories (security, privacy, performance, idempotency, postconditions, interface contract).
-- **Guardrails**:
-  - FORBIDDEN to include production code or anticipate implementations.
-  - **Agreed Project Technology**: Always use the testing frameworks, E2E/UI runners, and technology stack agreed upon for the project (if any), without requiring the user to specify it in the prompt.
-  - **Mandatory E2E & UI Testing**: Never forget or omit End-to-End (E2E) and User Interface (UI) tests.
-  - **Per-Interactive-Element Coverage**: Create specific tests for every UI element the user can interact with, using external tools such as Playwright or FlatUI (or the agreed project testing technology), covering Happy Path, Sad Path, and Boundary Values for each one.
-  - Every \`FR-*\` must have at least nominal + boundary + out-of-range scenarios; missing these blocks handoff to \`agent-developer\`.
-  - Mandatory tags: \`@<FR-ID> @automated @regression\`.
-  - Run \`pnpm run verify:testing\` before emitting handoff.
-
-### 6. \`agent-developer\` (Software Developer)
-- **Mission**: Implement atomic tasks from SDD specifications (\`tasks.md\`) with clean, strictly typed code and thorough tests.
-- **Directives**:
-  - **Mandatory 4-Step Implementation Order**: (1) Define/refine Modular & Hexagonal Architecture (Ports & Adapters) module boundaries, (2) Define interfaces/ports for all inter-module interactions to avoid direct module coupling, (3) Implement components consuming/fulfilling those interfaces, (4) Write unit tests for every function covering Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values.
-  - Respect the autonomy mode assigned in \`tasks.md\` (\`AUTONOMOUS\`, \`HUMAN_REVIEW_PLAN\`, \`AMBIGUOUS\`, \`HIGH_RISK_MANUAL\`).
-  - Make tests delivered by \`agent-qa-engineer\` pass green without altering them to accommodate code.
-  - Respect \`quality-policy.yaml\` thresholds: CC $\\le 10$, Cognitive $\\le 15$, MI $\\ge 50$, LOC $\\le 40$.
-  - Run pre-flight with auto-fix: \`pnpm run check:fix\` and full verification: \`pnpm run verify:all\`.
-  - **Mandatory Regression Verification**: Never declare build, typecheck, or bug fixes complete without executing the relevant automated test suite (\`pnpm test\`, \`dotnet test\`) and confirming zero regressions.
-  - **Global Styles Protection**: When touching or refactoring frontend views, verify that global stylesheet/asset imports remain intact and that layouts suffer no visual disruption.
-- **Skills-First Implementation Directive**: When authoring or refactoring code (especially frontend, UI, styling, accessibility, or framework-specific logic), proactively inspect and leverage available specialized agent skills (e.g., modern web guidance, accessibility a11y, DevTools, framework skills) to produce standard-compliant, modern implementations rather than guessing ad-hoc patterns.
-  - Upon completing green implementation, suggest handoff to \`agent-expert-user\` for post-development functional validation prior to Checkpoint 2 (\`agent-auditor\` $\\parallel$ \`agent-adversary\` + \`agent-privacy-officer\`).
-
-### 7. \`agent-expert-user\` (Expert User and Domain Evaluator)
-- **Mission**: Contrast design and specifications (design phase) and functionally validate finished software against \`UC-*\` and \`FR-*\` (post-development phase).
-- **Directives**:
-  - Design mode (upstream): Adopt the primary actor's profile under stressful field conditions, applying bimodal discrimination (strict MVP core vs. roadmap suggestion backlog in \`templates/product/user-design-feedback.template.md\`). Reject as \`[BLOCKING_DEFECT]\` any library-only MVP proposal for human actors that fails to define or omits the runnable presentation layer (Web, Desktop, or Console/CLI), role access, or master-data CRUD flows.
-  - Functional validation mode (downstream / pre-PR / post-development functional validation): Thoroughly contrast interface and actual CLI execution against \`UC-*\` and \`FR-*\` acceptance criteria before Checkpoint 2 audit.
-  - Emit handoff block suggesting Checkpoint 2 (\`agent-auditor\` $\\parallel$ \`agent-adversary\` + \`agent-privacy-officer\`) if compliant, or return to \`agent-developer\` on functional drift.
-
-### 8. \`agent-devops\` (Automation and Infrastructure Engineer)
-- **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts.
-- **Directives**:
-  - Strict infrastructure domain: Operates exclusively in \`.github/workflows/\`, \`Dockerfile*\`, \`docker-compose*.yml\`, IaC manifests, and \`scripts/\`.
-  - **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying or refactoring application source code files (\`src/\`, \`packages/*/src/\`). Your responsibility is the pipeline and scaffolding, never application business logic.
-  - **Deployment & CI/CD Strategy Discovery**: Before scaffolding new pipelines or containers, read \`ARCH-INTRO-001\` / \`ARCH-DEP-001\` and clarify packaging/CD destination, CI platform, and release trigger policy with the Tech Lead.
-  - Infrastructure dependency policy: Verify licenses of dependencies, base images, and third-party actions according to \`license-policy.yaml\`.
-  - Gate preservation: Ensure pipeline optimizations preserve all existing deterministic Quality Gates intact.
-  - **Cross-Workflow Audit**: When fixing any CI/CD or configuration defect detected in a PR, search all \`.github/workflows/*.yml\` for the same pattern (including release, post-merge, and publishing pipelines) before declaring the fix complete.
-  - **Remote Verification**: Creating a PR (\`gh pr create\`) does not equal success; actively verify that remote checks pass (\`gh pr checks\`).
-
-### 9. \`agent-auditor\` (Transversal Quality and Improvement Auditor)
-- **Mission**: Polymorphically inspect deliverables from any specialist agent on demand, enforcing Clean Code, SOLID, DRY, Simplicity First (YAGNI), \`quality-policy.yaml\` AST thresholds, UI design standards, and \`license-policy.yaml\` SPDX compliance.
-- **Directives**: Constructive critique; block fake-wiring, unstyled interfaces, and manual \`.feature\` files; verify licenses via \`pnpm run verify:licenses\`; classify findings into \`[BLOCKING_DEFECT]\`, \`[SIMPLIFICATION]\`, and \`[ADVISORY]\`; non-invasive (never edit files directly); always return handoff to the audited agent (max 1 return round).
-
-### 10. \`agent-adversary\` (Transversal Red Team and Chaos Adversary)
-- **Mission**: Actively attempt to break, bypass, or invalidate deliverables from any target specialist agent, including Pre-Merge / Checkpoint 2 security diff audits with CVSS v3.1 scoring and concrete proofs-of-concept (PoC).
-- **Directives**: Expose failure modes across Product (logic traps), Architecture (SPOF/races), QA (mutation testing/false greens), Development & Pre-Merge Security (boundary/concurrency, SAST/secrets via \`pnpm run verify:security\`, CVSS v3.1 blocking CRITICAL/HIGH), and DevOps (pipeline escape); mandatory proof-of-break; non-invasive; always return handoff to the audited agent (max 1 return round).
+| Role | Mission (summary) |
+| :--- | :--- |
+| \`agent-product-analyst\` | Phase 0 NAF v4 Vision (\`ARCH-INTRO-*\`, up to 15-question discovery defining UI modality & CRUD prerequisites) + ProductShape (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`); \`status\` starts \`draft\`. |
+| \`agent-threat-modeler\` | STRIDE/OWASP threat triad (\`ACT-THREAT-*\`, \`ABUSE-*\`, \`SEC-REQ-*\`); hands off to \`agent-privacy-officer\`. |
+| \`agent-privacy-officer\` | LINDDUN & GDPR/LOPDGDD privacy triad (\`DATA-ASSET-*\`, \`PRIV-ROPA-*\`, \`PRIV-REQ-*\`) + Pre-Merge \`verify:privacy\`. |
+| \`agent-system-architect\` | Modular arc42 + NAF v4 architecture (\`CMP-*\`, \`ARCH-DEP-001\`, Mermaid diagrams, \`ADR-*\`). |
+| \`agent-qa-engineer\` | FAILING BDD/Gherkin, E2E, and UI suites (Happy Path, Sad Path & Boundary Values per interactive UI element) before \`agent-developer\` writes code. |
+| \`agent-developer\` | Atomic tasks from \`tasks.md\` in 5-step Hexagonal order; respects autonomy mode; runs \`pnpm run check:fix\` + \`pnpm run verify:all\`. |
+| \`agent-expert-user\` | Bimodal MVP evaluation (design) and functional validation against \`UC-*\` and \`FR-*\` (pre-PR). |
+| \`agent-devops\` | CI/CD, Docker, IaC only — clarifies deployment/CI strategy; **FORBIDDEN** to touch \`src/\` or \`packages/*/src/\`. |
+| \`agent-auditor\` | Transversal auditor: YAGNI, Clean Code/SOLID/AST thresholds, UI standards, SPDX licenses (\`verify:licenses\`); returns handoff to audited agent. |
+| \`agent-adversary\` | Transversal Red Team adversary: PoC breaks, mutation testing & Pre-Merge security diff audit (\`verify:security\`, CVSS v3.1); returns handoff to audited agent. |
 
 ---
 
-## 3. Git 4-Tier Hierarchy and Commit Conventions
+## 3. Pre-Flight Verification Commands
+- Pre-flight with auto-fix: \`pnpm run check:fix\` (or \`npx aisdlc check --fix\`)
+- Full verification: \`pnpm run verify:all\` (or \`npx aisdlc verify all\`)
+- Unit tests: \`pnpm test\` | Strict typing: \`pnpm run typecheck\`
+
+---
+
+## 4. Git 4-Tier Hierarchy and Commit Conventions
 - \`task/<PARENT-ID>/<TSK-ID>-<slug>\` $\\rightarrow$ \`feat/<FEAT-ID>-<slug>\` $\\rightarrow$ \`release/vX.Y.Z\` $\\rightarrow$ \`main\`.
 - Mandatory commit trailers injection (always declare your actual active model in \`AI-Model:\` or via \`AI_MODEL=<active-model>\` when running \`git commit\`, so the hook does not fall back to a generic IDE identifier like \`antigravity-agent\`, and include \`AI-Reasoning-Effort: <low|medium|high|max>\` or \`AI_REASONING_EFFORT=<level>\` when applicable):
   \`\`\`text
@@ -706,49 +698,20 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ---
 
-## 3. Specialized Roles Mapping
+## 3. Specialized Roles Mapping (Summary — Full Prompts in \`.claude/agents/\`)
 
-### 1. \`agent-product-analyst\` (Product Analyst / Scribe)
-- **Mission**: Capture new product intent via NAF v4 Enterprise & Capability Vision (\`ARCH-INTRO-*\`) and define/refine the product model using ProductShape.
-- **Phase 0 (Greenfield Product Inception)**: When creating a new product from scratch (or when \`specs/product/\` has no baseline), run an iterative discovery interview of **up to 15 questions (or until the product scope is 100% clear and unambiguous)** covering: mission/problem, actors \`ACT-*\`, role/auth model, **target UI/interaction modality (Web UI, Desktop GUI, Console/TUI/CLI, Mobile, or API/SDK)**, **modern visual aesthetic & styling standard (Bootstrap 5-style clean responsive web layouts with cards/tables/badges, Fluent/modern desktop aesthetic with rounded corners/elevated panels, or colorized rich terminal console with ANSI palettes/status badges)**, master-data CRUD prerequisites, MVP capabilities \`UC-*\`, business rules \`BR-*\`, and priority quality goals \`QR-*\`; then draft \`ARCH-INTRO-001\` (\`templates/architecture/introduction-and-goals.template.md\`), and derive initial \`ACT-*\`, \`UC-*\`, \`BR-*\`, \`FR-*\`, and \`QR-*\` drafts.
-- **Input**: Business intent or natural language specification.
-- **Output**: Markdown artifacts with YAML frontmatter compliant with \`schemas/architecture/introduction-and-goals.schema.json\` (\`ARCH-INTRO-*\`) and \`schemas/product/\` (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`).
-- **Guardrails**: \`status\` always starts in \`draft\`. Library-only MVPs without the agreed runnable UI/CLI entry point and master-data CRUDs for human actors are forbidden. Mandatory Gherkin criteria with \`@<ID> @automated @regression\`.
-
-### 2. \`agent-threat-modeler\` (Threat Modeler and Security Specialist)
-- **Mission**: Analyze use cases and proactively model adversaries, STRIDE attack vectors, and OWASP ASVS mitigations, both at product level and in the technical security feedback loop over architecture, handing off to \`agent-privacy-officer\`.
-- **Output**: Cybersecurity triad (\`ACT-THREAT-*\`, \`ABUSE-*\`, \`SEC-REQ-*\`) compliant with \`schemas/security/\`.
-
-### 3. \`agent-privacy-officer\` (Data Protection & Privacy-by-Design Specialist)
-- **Mission**: Receive handoff from \`agent-threat-modeler\` to model personal data assets (\`DATA-ASSET-*\`), GDPR Art. 30 records of processing (\`PRIV-ROPA-*\`), and LINDDUN / GDPR / ISO 27701 privacy requirements (\`PRIV-REQ-*\`), and audit code diffs against \`privacy-policy.yaml\`.
-- **Directives**: Run \`pnpm run verify:privacy\`, enforce PII masking in logs/LLM prompts, and trigger \`DPIA-*\` requests on Art. 9 sensitive data.
-
-### 4. \`agent-system-architect\` (System Architect)
-- **Mission**: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4 (\`CMP-*\`, Mermaid diagrams, \`ADR-*\`).
-- **Guardrails**: Declare \`satisfies-requirements\` on every \`CMP-*\` (including \`PRIV-REQ-*\`), structure components following **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports), instantiate mandatory building block \`CMP-OBSERVABILITY\` (Level 2/3) alongside Section 8 and an ADR for runtime telemetry, and trigger the technical security/privacy feedback loop toward \`agent-threat-modeler\` ➔ \`agent-privacy-officer\` when infrastructure decisions introduce new attack vectors or PII flows.
-
-### 5. \`agent-qa-engineer\` (QA Engineer and SDET)
-- **Mission**: Translate approved requirements (\`FR-*\`, \`SEC-REQ-*\`, \`PRIV-REQ-*\`, \`QR-*\`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before \`agent-developer\` writes production code.
-- **Guardrails**: Always use the agreed project technology/testing stack (if any). Never omit End-to-End (E2E) and UI tests. Create specific tests for every interactive UI element using external tools such as Playwright or FlatUI (or the agreed project testing technology), covering Happy Path, Sad Path, and Boundary Values. FORBIDDEN to include production code. Mandatory tags: \`@<FR-ID> @automated @regression\`.
-
-### 6. \`agent-developer\` (Software Developer)
-- **Mission**: Implement atomic tasks from SDD specifications (\`tasks.md\`) with clean, strictly typed code and thorough tests.
-- **Directives**: Execute the mandatory 4-step order: (1) Modular & Hexagonal Architecture (Ports & Adapters) definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by \`agent-qa-engineer\` pass green. Run \`pnpm run check:fix\` and \`pnpm run verify:all\`. Enforce Mandatory Regression Verification (\`pnpm test\`) with zero regressions before declaring completion, and enforce Global Styles Protection on frontend views.
-
-### 7. \`agent-expert-user\` (Expert User and Domain Evaluator)
-- **Mission**: Contrast design and specifications (design phase) and functionally validate finished software against \`UC-*\` and \`FR-*\` (post-development functional validation phase).
-
-### 8. \`agent-devops\` (Automation and Infrastructure Engineer)
-- **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts. Clarifies packaging/CD strategy against \`ARCH-INTRO-001\` / \`ARCH-DEP-001\`.
-- **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying application source code (\`src/\`, \`packages/*/src/\`).
-
-### 9. \`agent-auditor\` (Transversal Quality and Improvement Auditor)
-- **Mission**: Polymorphically inspect deliverables from any specialist agent on demand, enforcing Clean Code, SOLID, DRY, YAGNI, \`quality-policy.yaml\` AST thresholds, UI design standards, and \`license-policy.yaml\` SPDX compliance (\`pnpm run verify:licenses\`).
-- **Directives**: Constructive critique; classify findings into \`[BLOCKING_DEFECT]\`, \`[SIMPLIFICATION]\`, and \`[ADVISORY]\`; non-invasive (never edit files directly); always return handoff to the audited agent (max 1 return round).
-
-### 10. \`agent-adversary\` (Transversal Red Team and Chaos Adversary)
-- **Mission**: Actively attempt to break, bypass, or invalidate deliverables from any target specialist agent, including Pre-Merge / Checkpoint 2 security diff audits (\`pnpm run verify:security\`, CVSS v3.1), providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps.
-- **Directives**: Expose failure modes across Product (logic traps), Architecture (SPOF/races), QA (mutation testing/false greens), Development & Pre-Merge Security (boundary/concurrency, CVSS v3.1), and DevOps (pipeline escape); mandatory proof-of-break; non-invasive; always return handoff to the audited agent (max 1 return round).
+| Role | Mission (summary) |
+| :--- | :--- |
+| \`agent-product-analyst\` | Phase 0 NAF v4 Vision (\`ARCH-INTRO-*\`, up to 15-question discovery defining UI modality & CRUD prerequisites) + ProductShape (\`ACT-*\`, \`UC-*\`, \`FR-*\`, \`QR-*\`, \`BR-*\`); \`status\` starts \`draft\`. |
+| \`agent-threat-modeler\` | STRIDE/OWASP threat triad (\`ACT-THREAT-*\`, \`ABUSE-*\`, \`SEC-REQ-*\`); hands off to \`agent-privacy-officer\`. |
+| \`agent-privacy-officer\` | LINDDUN & GDPR/LOPDGDD privacy triad (\`DATA-ASSET-*\`, \`PRIV-ROPA-*\`, \`PRIV-REQ-*\`) + Pre-Merge \`verify:privacy\`. |
+| \`agent-system-architect\` | Modular arc42 + NAF v4 architecture (\`CMP-*\`, \`ARCH-DEP-001\`, Mermaid diagrams, \`ADR-*\`). |
+| \`agent-qa-engineer\` | FAILING BDD/Gherkin, E2E, and UI suites (Happy Path, Sad Path & Boundary Values per interactive UI element) before \`agent-developer\` writes code. |
+| \`agent-developer\` | Atomic tasks from \`tasks.md\` in 5-step Hexagonal order; respects autonomy mode; runs \`pnpm run check:fix\` + \`pnpm run verify:all\`. |
+| \`agent-expert-user\` | Bimodal MVP evaluation (design) and functional validation against \`UC-*\` and \`FR-*\` (pre-PR). |
+| \`agent-devops\` | CI/CD, Docker, IaC only — clarifies deployment/CI strategy; **FORBIDDEN** to touch \`src/\` or \`packages/*/src/\`. |
+| \`agent-auditor\` | Transversal auditor: YAGNI, Clean Code/SOLID/AST thresholds, UI standards, SPDX licenses (\`verify:licenses\`); returns handoff to audited agent. |
+| \`agent-adversary\` | Transversal Red Team adversary: PoC breaks, mutation testing & Pre-Merge security diff audit (\`verify:security\`, CVSS v3.1); returns handoff to audited agent. |
 
 ---
 
@@ -899,3 +862,92 @@ export const STARTER_CURSOR_MCP = `{\n  "mcpServers": {\n    "ai-sdlc": {\n     
 export const STARTER_ANTIGRAVITY_MCP = `{\n  "mcpServers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@aisdlc/mcp"\n      ],\n      "env": {\n        "AISDLC_MCP_ROLE": "developer"\n      }\n    }\n  }\n}\n`;
 
 export const STARTER_VSCODE_MCP = `{\n  "servers": {\n    "ai-sdlc": {\n      "command": "npx",\n      "args": [\n        "@aisdlc/mcp"\n      ],\n      "env": {\n        "AISDLC_MCP_ROLE": "developer"\n      }\n    }\n  }\n}\n`;
+
+export const STARTER_ANTIGRAVITY_SPECS_RULES = `---
+description: Directives for SDD specifications editing, ProductShape artifacts, PDaC citations, Cybersecurity, and Privacy
+trigger: model_decision
+---
+
+# Specifications, ProductShape & PDaC Directives
+
+Canonical Reference: [\`process/09_agent_protocols.md\`](process/09_agent_protocols.md).
+
+1. **Identifier Taxonomy & Schemas**: Every artifact in \`specs/\` must satisfy its JSON Schema in \`schemas/\` (\`ARCH-INTRO-*\`, \`ACT-*\`, \`JRN-*\`, \`UC-*\`, \`BR-*\`, \`FR-*\`, \`QR-*\`, \`ACT-THREAT-*\`, \`ABUSE-*\`, \`SEC-REQ-*\`, \`DATA-ASSET-*\`, \`PRIV-ROPA-*\`, \`PRIV-REQ-*\`, \`CMP-*\`, \`ADR-*\`).
+2. **Initial Status**: All newly drafted specifications MUST start with \`status: draft\`.
+3. **Single Canonical Link Direction**: Cite upstream artifacts in one direction only (\`derives-from: [UC-*]\`, \`primary-actor: ACT-*\`, \`satisfies-requirements: [FR-*]\`) with Unix LF-normalized SHA-256 digests.
+4. **Gherkin Acceptance Criteria**: Every \`FR-*\` must embed a \`\`\`gherkin block with \`@<ID> @automated @regression\` covering \`@nominal\`, \`@boundary\`, and \`@invalid\`. \`SEC-REQ-*\` uses \`@security @mitigation\`; \`PRIV-REQ-*\` uses \`@privacy @gdpr\`.
+5. **Validation**: Run \`pnpm run verify:schemas\`, \`pnpm run verify:duplicates\`, \`pnpm run verify:pdac\`, and \`pnpm run verify:privacy\` before delivering drafts.
+`;
+
+export const STARTER_ANTIGRAVITY_CODE_RULES = `---
+description: Directives for code quality thresholds, Hexagonal architecture, observability, UI states, and license compliance
+trigger: model_decision
+---
+
+# Code Quality, Hexagonal Architecture & Observability Directives
+
+Canonical Reference: [\`process/09_agent_protocols.md\`](process/09_agent_protocols.md).
+
+1. **AST Thresholds (\`quality-policy.yaml\`)**: Cyclomatic Complexity $\\le 10$, Cognitive Complexity $\\le 15$, Maintainability Index $\\ge 50$, Function Length $\\le 40$ lines.
+2. **5-Step Implementation Order**: (1) Modular & Hexagonal Architecture (Ports & Adapters) module boundaries, (2) Inter-module interfaces/ports first, (3) Concrete components, (4) Exhaustive per-function unit tests in \`tests/unit/\` (Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values), (5) Per-component UI/E2E tests.
+3. **Mandatory Regression Verification & Global Styles Protection**: Never declare build, typecheck, or bug fixes complete without running \`pnpm test\` / \`dotnet test\` and confirming zero regressions. Verify global stylesheet/asset imports remain intact when touching frontend views.
+4. **Zero Fake-Wiring & 4 UI States**: Never ship hardcoded \`mockData\`, empty handlers, or silent errors. Every data-driven view must implement \`Loading\`, \`Empty\`, \`Error\`, and \`Nominal\` states.
+5. **Structured Observability (\`CMP-OBSERVABILITY\`)**: Never use \`console.log\` in production code; use \`ILogger\`, \`ITracer\`, \`IMetricsRegistry\` backed by \`.observability/\` with PII redaction and shutdown \`flush()\`.
+6. **No Bypass Directives**: Never suppress types or linters (\`@ts-ignore\`, \`eslint-disable\`, \`#pragma warning disable\`, \`#[allow(...)]\`). Check \`license-policy.yaml\` before adding any dependency.
+`;
+
+export const STARTER_ANTIGRAVITY_TESTING_RULES = `---
+description: Directives for deterministic Gherkin extraction, polyglot step scaffolding, E2E/UI coverage, and Zero-Mock integration
+trigger: model_decision
+---
+
+# Deterministic BDD & Testing Directives
+
+Canonical Reference: [\`process/09_agent_protocols.md\`](process/09_agent_protocols.md).
+
+1. **Deterministic Gherkin Engine**: NEVER hand-author \`tests/features/*.feature\` or boilerplate step skeletons. Author Gherkin inside Markdown specs and run \`npx aisdlc gherkin extract\` + \`npx aisdlc gherkin scaffold <feature> --lang <ts|py|go|rs|cs> --fallback\`.
+2. **Reverse Traceability**: Cite \`FR-*\`, \`SEC-REQ-*\`, or \`PRIV-REQ-*\` IDs in test file headers.
+3. **Mandatory E2E/UI & Per-Interactive-Element Coverage**: Always use the agreed project technology (e.g. Playwright or FlatUI) to cover Happy Path, Sad Path, and Boundary Values for every interactive UI element, verifying real UI-to-Backend wiring (Zero-Mock).
+4. **Verification**: Run \`npx aisdlc verify gherkin\`, \`npx aisdlc verify testing\`, and \`pnpm test\` before completing any task.
+`;
+
+export const STARTER_CURSOR_TESTING_RULES = `---
+description: Directives for deterministic Gherkin extraction, polyglot step scaffolding, E2E/UI coverage, and Zero-Mock integration
+globs: tests/**
+alwaysApply: false
+---
+
+# Deterministic BDD & Testing Directives
+
+Canonical Reference: [\`process/09_agent_protocols.md\`](process/09_agent_protocols.md).
+
+1. **Deterministic Gherkin Engine**: NEVER hand-author \`tests/features/*.feature\` or boilerplate step skeletons. Author Gherkin inside Markdown specs and run \`npx aisdlc gherkin extract\` + \`npx aisdlc gherkin scaffold <feature> --lang <ts|py|go|rs|cs> --fallback\`.
+2. **Reverse Traceability**: Cite \`FR-*\`, \`SEC-REQ-*\`, or \`PRIV-REQ-*\` IDs in test file headers.
+3. **Mandatory E2E/UI & Per-Interactive-Element Coverage**: Always use the agreed project technology (e.g. Playwright or FlatUI) to cover Happy Path, Sad Path, and Boundary Values for every interactive UI element, verifying real UI-to-Backend wiring (Zero-Mock).
+4. **Verification**: Run \`npx aisdlc verify gherkin\`, \`npx aisdlc verify testing\`, and \`pnpm test\` before completing any task.
+`;
+
+export const STARTER_SPECS_AGENTS_MD = `# Specifications Directory Rules (\`specs/\`)
+
+- Every new or modified artifact in \`specs/\` must conform to its JSON Schema in \`schemas/\` and start with \`status: draft\`.
+- Always write relationships in their single canonical direction (\`derives-from\`, \`primary-actor\`, \`satisfies-requirements\`) with Unix LF-normalized SHA-256 digests.
+- Every \`FR-*\` must include \`\`\`gherkin blocks tagged \`@<ID> @automated @regression\` with \`@nominal\`, \`@boundary\`, and \`@invalid\` scenarios.
+- Run \`npx aisdlc check --fix\`, \`npx aisdlc verify schemas\`, and \`npx aisdlc verify duplicates\` before committing specification changes.
+`;
+
+export const STARTER_SRC_AGENTS_MD = `# Source Code Directory Rules (\`src/\` & \`packages/\`)
+
+- Enforce \`quality-policy.yaml\` AST thresholds: Cyclomatic Complexity <= 10, Cognitive Complexity <= 15, Maintainability Index >= 50, Function Length <= 40 lines.
+- Follow Modular & Hexagonal Architecture (Ports & Adapters): define inter-module interfaces/ports before concrete implementations.
+- Zero Fake-Wiring: never leave hardcoded \`mockData\`, empty handlers, or missing \`Loading\`/\`Empty\`/\`Error\`/\`Nominal\` UI states.
+- Never use \`console.log\` in production code; route telemetry through \`CMP-OBSERVABILITY\` (\`ILogger\`, \`ITracer\`, \`IMetricsRegistry\`) with PII redaction.
+- Never add \`@ts-ignore\`, \`eslint-disable\`, or dependency packages without verifying \`license-policy.yaml\`.
+`;
+
+export const STARTER_TESTS_AGENTS_MD = `# Test Suite Directory Rules (\`tests/\`)
+
+- NEVER hand-author or manually edit \`tests/features/*.feature\`; always generate via \`npx aisdlc gherkin extract\`.
+- Scaffold new step definitions deterministically via \`npx aisdlc gherkin scaffold <feature> --lang <ts|py|go|rs|cs> --fallback\`.
+- Include header citations (\`FR-*\`, \`SEC-REQ-*\`, \`PRIV-REQ-*\`) for 360° reverse traceability.
+- Cover Happy Path, Sad Path, Boundary Values, and Null/Empty inputs for every function and interactive UI element.
+`;

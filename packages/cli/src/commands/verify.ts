@@ -20,6 +20,8 @@ import {
   verifySastAsync,
   SarifIngestionError,
   verifySecrets,
+  verifySkillExecutionEvidence,
+  verifySkillsIntegrity,
   verifyTasksGovernance,
   verifyTestingCoverage,
   verifyTraceability,
@@ -1641,6 +1643,41 @@ export async function runVerifyAllAsync(options: QualityVerifyOptions = {}): Pro
   const root = options.root || process.cwd();
   const gatesSummary = await collectAllGatesAsync(options, root, isSilent);
   return finalizeVerifyAll(gatesSummary, options, useJson);
+}
+
+function printSkillsIntegrityOutput(
+  integrity: ReturnType<typeof verifySkillsIntegrity>,
+  evidence: ReturnType<typeof verifySkillExecutionEvidence> | undefined,
+  success: boolean
+): void {
+  console.log(pc.bold(pc.cyan(`\n🔍 [AI-SDLC] Verifying Skills Integrity (${integrity.checkedSkills} skills)...`)));
+  for (const v of integrity.violations) {
+    console.log(pc.red(`  ✖ [${v.code}] ${v.skillFile}: ${v.message}`));
+  }
+  if (evidence) {
+    console.log(
+      pc.cyan(`  ℹ Execution evidence for '${evidence.skillId}': ${evidence.status} (executed: ${evidence.executedTools.join(', ') || 'none'})`)
+    );
+  }
+  console.log(success ? pc.green('✔ Skills Integrity COMPLIANT') : pc.red('✖ Skills Integrity FAILED'));
+}
+
+export function runVerifySkills(options: VerifyBaseOptions & { skill?: string } = {}): boolean {
+  const root = options.root || process.cwd();
+  const useJson = isJsonOutput(options);
+  const integrity = verifySkillsIntegrity(root);
+  const evidence = options.skill ? verifySkillExecutionEvidence(root, options.skill) : undefined;
+  const success = integrity.success;
+
+  if (useJson) {
+    console.log(JSON.stringify({ gate: 'skills', success, exitCode: success ? 0 : 1, integrity, ...(evidence ? { evidence } : {}) }, null, 2));
+    return success;
+  }
+
+  if (!options.silent) {
+    printSkillsIntegrityOutput(integrity, evidence, success);
+  }
+  return success;
 }
 
 

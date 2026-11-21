@@ -364,5 +364,31 @@ describe('Migrate Engine Unit Tests (CMP-053-MIGRATE-ENGINE)', () => {
       expect(result.exitCode).toBe(0);
       expect(fs.existsSync(path.join(tmpDir, '.backup'))).toBe(false);
     });
+
+    it('creates missing canonical skills and rules in configured IDE directories during migrate', async () => {
+      const orchestrator = new MigrationOrchestrator();
+      const service = new MigrationService(orchestrator);
+      vi.spyOn(service as any, 'detectBranch').mockResolvedValue('feat/test-migrate');
+
+      // Simulate an older initialized repo with .agent/rules/ai-sdlc.md but missing the new skills
+      fs.mkdirSync(path.join(tmpDir, '.agent', 'rules'), { recursive: true });
+      fs.writeFileSync(path.join(tmpDir, '.agent', 'rules', 'ai-sdlc.md'), '# Legacy rules\n', 'utf-8');
+
+      const result = await service.migrate({ root: tmpDir, backup: false });
+      // Local override in ai-sdlc.md is preserved (exitCode 1), while new skills are created cleanly
+      expect(result.exitCode).toBe(1);
+      expect(fs.existsSync(path.join(tmpDir, '.agent', 'skills', 'aisdlc-doctor-migrate', 'SKILL.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tmpDir, '.agent', 'skills', 'aisdlc-release-compliance', 'SKILL.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tmpDir, '.agent', 'skills', 'aisdlc-security-sca-triage', 'SKILL.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tmpDir, '.agent', 'skills', 'aisdlc-bdd-gherkin', 'SKILL.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tmpDir, '.agent', 'rules', 'ai-sdlc-specs.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tmpDir, '.agent', 'rules', 'ai-sdlc-code.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tmpDir, '.agent', 'rules', 'ai-sdlc-testing.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tmpDir, 'specs', 'AGENTS.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tmpDir, 'src', 'AGENTS.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tmpDir, 'tests', 'AGENTS.md'))).toBe(true);
+      expect(fs.existsSync(path.join(tmpDir, '.agent', 'skills', 'aisdlc-greenfield', 'references', 'inception-checklist.md'))).toBe(true);
+      expect(fs.readFileSync(path.join(tmpDir, '.agent', 'rules', 'ai-sdlc.md'), 'utf-8')).toBe('# Legacy rules\n');
+    });
   });
 });
