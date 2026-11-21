@@ -174,14 +174,23 @@ describe('SCA Vulnerability Detection & Evaluation Suite (#76 / CHG-039)', () =>
   });
   describe('verifyLicenses with graceful vulnerability degradation', () => {
     it('should gracefully degrade and skip vulnerability scanning when Trivy is not installed without failing', () => {
-      const result = verifyLicenses({
-        rootDir: process.cwd(),
-        dynamic: true,
-      });
+      const originalPath = process.env.PATH;
+      const originalPathWin = process.env.Path;
+      process.env.PATH = '';
+      if (originalPathWin !== undefined) process.env.Path = '';
+      try {
+        const result = verifyLicenses({
+          rootDir: process.cwd(),
+          dynamic: true,
+        });
 
-      expect(result.success).toBe(true);
-      expect(result.vulnerabilitiesSkipped).toBe(true);
-      expect(result.vulnerabilitiesSkipReason).toContain('Trivy scanner is not installed');
+        expect(result.success).toBe(true);
+        expect(result.vulnerabilitiesSkipped).toBe(true);
+        expect(result.vulnerabilitiesSkipReason).toContain('Trivy scanner is not installed');
+      } finally {
+        process.env.PATH = originalPath;
+        if (originalPathWin !== undefined) process.env.Path = originalPathWin;
+      }
     });
 
     it('should not scan or report skipped vulnerabilities when scanVulnerabilities is explicitly false', () => {
