@@ -405,6 +405,9 @@ describe('verify.ts Secrets, SAST, Security & VerifyAll Composite Helpers', () =
       ).toBe(4);
       expect(resolveVerifyAllExitCode(false, makeAllGateSummary({ privacy: { success: false } }))).toBe(5);
       expect(resolveVerifyAllExitCode(false, makeAllGateSummary({ quality: { success: false } }))).toBe(1);
+      expect(resolveVerifyAllExitCode(false, { quality: { success: false } })).toBe(1);
+      expect(resolveVerifyAllExitCode(false, { privacy: { success: false } })).toBe(5);
+      expect(resolveVerifyAllExitCode(false, { security: { success: false } })).toBe(4);
 
       emitVerifyAllJson(makeAllGateSummary({ privacy: { success: false } }), false);
       const privFailJson = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0]));

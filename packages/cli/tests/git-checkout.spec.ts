@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-040-RELEASE-SUPPLY-CHAIN-PROVENANCE-001
+ * Tag: @FR-040-RELEASE-SUPPLY-CHAIN-PROVENANCE-001
+ */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -13,16 +17,19 @@ describe('@aisdlc/cli runGitCheckout command', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     try {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
+      fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     } catch {
       // Cleanup fallback
     }
   });
 
-  it('should return false if no taskId is provided', () => {
-    const passed = runGitCheckout('', { silent: true });
-    expect(passed).toBe(false);
+  it('should return false if no taskId or whitespace taskId is provided', () => {
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(runGitCheckout('', { silent: true })).toBe(false);
+    expect(runGitCheckout('   ', { silent: false })).toBe(false);
+    expect(errSpy).toHaveBeenCalledWith(expect.stringContaining('Task identifier to navigate must be specified'));
   });
 
   it('should return false if task is not found in active changes', () => {

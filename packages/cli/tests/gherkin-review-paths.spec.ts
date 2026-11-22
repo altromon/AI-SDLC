@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001, FR-031-WORKFLOW-AGENT-HANDOFF-001
+ * Tag: @FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001 @FR-031-WORKFLOW-AGENT-HANDOFF-001
+ */
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -61,7 +65,11 @@ describe('CLI gherkin & review commands (Happy / Sad / Boundary / Malformed)', (
         execFn: () => ({ status: 1, stdout: '', stderr: 'not found' }),
         promptFn: async () => false,
       });
-      expect(typeof missingGenOk).toBe('boolean');
+      expect(missingGenOk).toBe(true);
+      const scaffoldPayload = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0]));
+      expect(scaffoldPayload.status).toBe('GENERATED_FALLBACK');
+      expect(scaffoldPayload.success).toBe(true);
+      expect(fs.existsSync(path.join(tmpDir, scaffoldPayload.outputFile))).toBe(true);
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }

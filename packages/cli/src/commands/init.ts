@@ -37,7 +37,7 @@ const CI_CHOICE_MAP: Record<string, string | undefined> = {
   none: undefined,
 };
 
-function parseCiChoice(answer: string): string | undefined {
+export function parseCiChoice(answer: string): string | undefined {
   const trimmed = answer.trim().toLowerCase();
   if (!trimmed) return 'github';
   return trimmed in CI_CHOICE_MAP ? CI_CHOICE_MAP[trimmed] : trimmed;
@@ -54,7 +54,7 @@ export async function promptForCi(): Promise<string | undefined> {
   }
 }
 
-function parseArchitectureChoice(answer: string): string {
+export function parseArchitectureChoice(answer: string): string {
   const trimmed = answer.trim().toLowerCase();
   if (!trimmed || trimmed === '1' || trimmed === 'minimal') return 'minimal';
   if (trimmed === '2' || trimmed === 'full' || trimmed === 'complete') return 'full';
@@ -91,12 +91,12 @@ const AGENTS_MENU = [
   '  7) None (only core policies and base templates)',
 ].join('\n');
 
-function parseAgentsChoice(answer: string): string {
+export function parseAgentsChoice(answer: string): string {
   const map: Record<string, string> = {
     '1': 'all', '2': 'cursor', '3': 'claude', '4': 'antigravity',
     '5': 'copilot', '6': 'mcp', '7': 'none',
   };
-  const trimmed = answer.trim();
+  const trimmed = answer.trim().toLowerCase();
   return !trimmed ? 'all' : map[trimmed] || trimmed;
 }
 
@@ -113,7 +113,7 @@ export async function promptForAgents(): Promise<string> {
 
 type InitProjectResult = ReturnType<typeof initProject>;
 
-function emitInitJson(result: InitProjectResult, isSuccess: boolean, dryRun: boolean): void {
+export function emitInitJson(result: InitProjectResult, isSuccess: boolean, dryRun: boolean): void {
   const payload = {
     command: 'init',
     success: isSuccess,
@@ -133,13 +133,13 @@ function emitInitJson(result: InitProjectResult, isSuccess: boolean, dryRun: boo
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function formatGranularityLabel(granularity?: string): string {
+export function formatGranularityLabel(granularity?: string): string {
   if (granularity === 'full' || granularity === 'complete') return 'Full (arc42 + NAF v4, 12 sections)';
   if (granularity === 'minimal') return 'Minimal / Baseline (ARCH-INTRO-*, CMP-* and ADR-*)';
   return 'None';
 }
 
-function printGitHookStatus(dryRun: boolean, installed?: boolean): void {
+export function printGitHookStatus(dryRun: boolean, installed?: boolean): void {
   if (dryRun) {
     console.log(`  ${pc.blue('DRY-RUN')} Install Git Hook: .git/hooks/prepare-commit-msg`);
   } else if (installed) {
@@ -150,7 +150,7 @@ function printGitHookStatus(dryRun: boolean, installed?: boolean): void {
   }
 }
 
-function printCreatedItems(items: string[], type: 'directory' | 'file' | 'updated-file', dryRun: boolean): void {
+export function printCreatedItems(items: string[], type: 'directory' | 'file' | 'updated-file', dryRun: boolean): void {
   const isDir = type === 'directory';
   const isUpdated = type === 'updated-file';
   for (const item of items) {
@@ -161,7 +161,7 @@ function printCreatedItems(items: string[], type: 'directory' | 'file' | 'update
   }
 }
 
-function printInitSuccess(result: InitProjectResult, dryRun: boolean): void {
+export function printInitSuccess(result: InitProjectResult, dryRun: boolean): void {
   console.log(pc.bold(pc.cyan(`\n🚀 [AI-SDLC] Initializing governance structure in: ${result.targetDir}\n`)));
   printCreatedItems(result.directoriesCreated, 'directory', dryRun);
   printCreatedItems(result.filesCreated, 'file', dryRun);
@@ -183,7 +183,7 @@ function printInitSuccess(result: InitProjectResult, dryRun: boolean): void {
   console.log(pc.green('\n✔ Repository configured with AI-SDLC policies and templates.\n'));
 }
 
-function handleInitResult(
+export function handleInitResult(
   result: InitProjectResult,
   ctx: { isSilent: boolean; useJson: boolean; dryRun: boolean }
 ): boolean {
@@ -215,12 +215,14 @@ export function runInit(
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
   const dryRun = Boolean(options.dryRun);
+  const rawAgents = typeof options.agents === 'string' ? options.agents.trim().toLowerCase() : options.agents;
+  const agents = rawAgents === 'none' || rawAgents === 'false' || rawAgents === '' ? false : rawAgents;
 
   const result = initProject({
     rootDir: process.cwd(),
     targetDir,
     ci: options.ci,
-    agents: options.agents === 'none' ? false : options.agents,
+    agents,
     architecture: options.architecture,
     stack: options.stack,
     dryRun,

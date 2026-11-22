@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-030-INIT-AGENT-SCAFFOLDING-001, FR-033-ARCHITECTURE-TEMPLATES-001, FR-026-AGENT-NATIVE-CONFIGS-001
+ * Tag: @FR-030-INIT-AGENT-SCAFFOLDING-001 @FR-033-ARCHITECTURE-TEMPLATES-001 @FR-026-AGENT-NATIVE-CONFIGS-001
+ */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const questionMock = vi.fn();
@@ -92,6 +96,13 @@ describe('CLI init prompts & runInit (Happy / Sad / Boundary / Malformed)', () =
     expect(runInit('.', { json: true, dryRun: true })).toBe(true);
     const jsonCall = logSpy.mock.calls.find((c) => String(c[0]).includes('"command": "init"'));
     expect(jsonCall).toBeDefined();
+    const initPayload = JSON.parse(String(jsonCall![0]));
+    expect(initPayload.command).toBe('init');
+    expect(initPayload.success).toBe(true);
+    expect(initPayload.exitCode).toBe(0);
+    expect(initPayload.dryRun).toBe(true);
+    expect(initPayload.ciProvider).toBe('github');
+    expect(initPayload.architectureGranularity).toBe('full');
 
     initProjectMock.mockReturnValueOnce({
       success: false,

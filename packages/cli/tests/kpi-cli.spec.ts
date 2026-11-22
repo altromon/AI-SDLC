@@ -1,4 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+/**
+ * Cites: FR-040-RELEASE-SUPPLY-CHAIN-PROVENANCE-001, FR-064-REASONING-EFFORT-TRAILER-001
+ * Tag: @FR-040-RELEASE-SUPPLY-CHAIN-PROVENANCE-001 @FR-064-REASONING-EFFORT-TRAILER-001
+ */
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
@@ -11,11 +15,15 @@ describe('@aisdlc/cli KPI & Git Hook Commands', () => {
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-cli-kpi-test-'));
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     try {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
+      fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     } catch {
       // Ignore cleanup error
     }
@@ -56,9 +64,9 @@ describe('@aisdlc/cli KPI & Git Hook Commands', () => {
 
     // Switching to a working branch feat/* must allow committing
     execFileSync('git', ['checkout', '-b', 'feat/test-branch'], { cwd: tmpDir, stdio: 'pipe' });
-    expect(() => {
-      execFileSync('git', ['commit', '-m', 'feat: working branch commit'], { cwd: tmpDir, stdio: 'pipe' });
-    }).not.toThrow();
+    execFileSync('git', ['commit', '-m', 'feat: working branch commit'], { cwd: tmpDir, stdio: 'pipe' });
+    const lastSubject = execFileSync('git', ['log', '-1', '--pretty=%s'], { cwd: tmpDir, encoding: 'utf-8' }).trim();
+    expect(lastSubject).toBe('feat: working branch commit');
   });
 
   it('fails gracefully when installing hook outside git repo', () => {

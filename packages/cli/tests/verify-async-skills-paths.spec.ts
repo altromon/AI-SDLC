@@ -47,7 +47,13 @@ describe('CLI verify async, format helpers, and skills (Happy / Sad / Boundary)'
 
     process.env.AISDLC_FORMAT = 'sarif';
     expect(isSarifOutput({})).toBe(true);
+    expect(isSarifOutput({ json: true })).toBe(false);
     expect(isSarifOutput({ format: 'text' })).toBe(false);
+
+    delete process.env.AISDLC_FORMAT;
+    process.env.AISDLC_OUTPUT = 'sarif';
+    expect(isSarifOutput({})).toBe(true);
+    expect(isSarifOutput({ json: true })).toBe(false);
   });
 
   it('runVerifySkills: supports text, silent, json, and --skill evidence on clean and violating workspaces (happy/sad/boundary)', () => {

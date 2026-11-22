@@ -86,6 +86,9 @@ export function isSarifOutput(options: VerifyBaseOptions = {}): boolean {
   if (options.format !== undefined) {
     return options.format.trim().toLowerCase() === "sarif";
   }
+  if (options.json) {
+    return false;
+  }
   const env = process.env.AISDLC_FORMAT?.trim().toLowerCase() ||
               process.env.AISDLC_OUTPUT?.trim().toLowerCase();
   return env === "sarif";
@@ -1570,17 +1573,14 @@ export function printPrivacyConsole(result: ReturnType<typeof verifyPrivacy>): v
 }
 
 export function buildPrivacyVerifyInput(options: PrivacyVerifyCliOptions, rootDir: string) {
+  const ropa = resolveOptionalArtifactFlag(options.ropaReport);
+  const report = resolveOptionalArtifactFlag(options.report);
   return {
     rootDir,
     policyPath: options.policy,
-    generateRopa: options.ropaReport !== undefined ? Boolean(options.ropaReport) : undefined,
-    ropaOutputPath: typeof options.ropaReport === 'string' ? options.ropaReport : undefined,
-    reportOutputPath:
-      typeof options.report === 'string'
-        ? options.report
-        : options.report
-          ? 'reports/PRIVACY_SCAN_REPORT.md'
-          : undefined,
+    generateRopa: options.ropaReport !== undefined ? Boolean(ropa.enabled) : undefined,
+    ropaOutputPath: ropa.filePath,
+    reportOutputPath: report.filePath ?? (report.enabled ? 'reports/PRIVACY_SCAN_REPORT.md' : undefined),
   };
 }
 
@@ -1638,8 +1638,8 @@ export async function collectAllGatesAsync(options: QualityVerifyOptions, root: 
 
 export function resolveVerifyAllExitCode(allPassed: boolean, gatesSummary: Record<string, { success: boolean }>): number {
   if (allPassed) return 0;
-  if (!gatesSummary.security?.success) return 4;
-  if (!gatesSummary.privacy?.success) return 5;
+  if (gatesSummary.security?.success === false) return 4;
+  if (gatesSummary.privacy?.success === false) return 5;
   return 1;
 }
 
