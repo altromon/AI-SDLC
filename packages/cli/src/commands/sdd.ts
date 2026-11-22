@@ -34,19 +34,21 @@ export interface SddDepositCliOptions {
   format?: string;
 }
 
-function buildHandoffPayload(options: SddDepositCliOptions, changeId: string): { handoff: ProductHandoff; reqList: string[] } {
-  const reqList = options.requirements
-    ? options.requirements.split(',').map((r) => r.trim())
-    : ['FR-001'];
-  const ucList = options.useCases
-    ? options.useCases.split(',').map((u) => u.trim())
-    : ['UC-001'];
+export function parseCsvTokens(raw: string | undefined, fallback: string[]): string[] {
+  const items = raw ? raw.split(',').map((s) => s.trim()).filter(Boolean) : [];
+  return items.length > 0 ? items : fallback;
+}
+
+export function buildHandoffPayload(options: SddDepositCliOptions, changeId: string): { handoff: ProductHandoff; reqList: string[] } {
+  const safeChangeId = String(changeId ?? '');
+  const reqList = parseCsvTokens(options.requirements, ['FR-001']);
+  const ucList = parseCsvTokens(options.useCases, ['UC-001']);
 
   const handoff: ProductHandoff = {
-    id: `HOF-${changeId.toUpperCase()}`,
+    id: `HOF-${safeChangeId.toUpperCase()}`,
     type: 'handoff',
-    title: options.title || `PDaC Handoff for ${changeId}`,
-    changeId,
+    title: options.title || `PDaC Handoff for ${safeChangeId}`,
+    changeId: safeChangeId,
     version: '1.0.0',
     createdAt: new Date().toISOString(),
     subgraph: {
@@ -57,13 +59,13 @@ function buildHandoffPayload(options: SddDepositCliOptions, changeId: string): {
   return { handoff, reqList };
 }
 
-function printDepositSuccess(depositedPath: string, handoffId: string, reqList: string[]): void {
+export function printDepositSuccess(depositedPath: string, handoffId: string, reqList: string[]): void {
   console.log(`  ${pc.green('✔')} Sidecar successfully deposited: ${pc.bold(depositedPath)}`);
   console.log(`  Handoff ID: ${pc.cyan(handoffId)}`);
   console.log(`  Delivered requirements: ${reqList.join(', ')}\n`);
 }
 
-function emitDepositJson(
+export function emitDepositJson(
   success: boolean,
   changeId: string,
   framework: SddFramework,
@@ -71,22 +73,27 @@ function emitDepositJson(
   handoff?: ProductHandoff,
   err?: unknown
 ): void {
+  const errorMessage = err instanceof Error
+    ? err.message
+    : err !== undefined
+      ? String(err)
+      : 'Unknown deposit error';
   const payload = {
     command: 'sdd:deposit',
     success,
     exitCode: success ? 0 : 1,
     changeId,
     framework,
-    ...(depositedPath ? { depositedPath, handoff } : { error: err instanceof Error ? err.message : String(err) }),
+    ...(success && depositedPath ? { depositedPath, handoff } : { error: errorMessage }),
   };
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printDepositHeader(changeId: string, framework: string): void {
+export function printDepositHeader(changeId: string, framework: string): void {
   console.log(pc.bold(pc.cyan(`\n📦 [AI-SDLC SDD] Depositing PDaC Handoff Sidecar for '${changeId}' (${framework})...`)));
 }
 
-function printDepositError(err: unknown): void {
+export function printDepositError(err: unknown): void {
   const errMessage = err instanceof Error ? err.message : String(err);
   console.error(pc.red(`  ✖ Error depositing sidecar: ${errMessage}\n`));
 }
@@ -102,9 +109,8 @@ export function runSddDeposit(options: SddDepositCliOptions): boolean {
     printDepositHeader(changeId, framework);
   }
 
-  const { handoff, reqList } = buildHandoffPayload(options, changeId);
-
   try {
+    const { handoff, reqList } = buildHandoffPayload(options, changeId);
     const depositedPath = depositProductHandoffSidecar({ rootDir, changeId, framework, handoff });
     if (!isSilent) printDepositSuccess(depositedPath, handoff.id, reqList);
     if (useJson) emitDepositJson(true, changeId, framework, depositedPath, handoff);
@@ -125,14 +131,14 @@ export interface SddVerifyCliOptions {
   format?: string;
 }
 
-interface HandoffItem {
+export interface HandoffItem {
   id: string;
   changeDir: string;
   isValid: boolean;
   requirementsCount: number;
 }
 
-function printHandoffEntry(isValid: boolean, id: string, relDir: string, reqCount: number): void {
+export function printHandoffEntry(isValid: boolean, id: string, relDir: string, reqCount: number): void {
   if (isValid) {
     console.log(`  ${pc.green('✔')} [${pc.bold(id)}] in ${relDir} (Requirements: ${reqCount})`);
   } else {
@@ -140,7 +146,7 @@ function printHandoffEntry(isValid: boolean, id: string, relDir: string, reqCoun
   }
 }
 
-function processHandoffEntry(
+export function processHandoffEntry(
   handoff: ProductHandoff,
   changeDir: string,
   rootDir: string,
@@ -150,8 +156,8 @@ function processHandoffEntry(
   const reqCount = (handoff.subgraph && Array.isArray(handoff.subgraph.requirements))
     ? handoff.subgraph.requirements.length
     : 0;
-  const isValid = Boolean(handoff.id && handoff.id.startsWith('HOF-') && reqCount > 0);
-  const id = handoff.id || 'UNKNOWN';
+  const isValid = Boolean(typeof handoff.id === 'string' && handoff.id.startsWith('HOF-') && reqCount > 0);
+  const id = typeof handoff.id === 'string' && handoff.id ? handoff.id : 'UNKNOWN';
 
   if (!isSilent) {
     printHandoffEntry(isValid, id, relDir, reqCount);
@@ -160,7 +166,7 @@ function processHandoffEntry(
   return { id, changeDir: relDir, isValid, requirementsCount: reqCount };
 }
 
-function auditHandoffsMap(
+export function auditHandoffsMap(
   handoffsMap: Map<string, { handoff: ProductHandoff; changeDir: string }>,
   rootDir: string,
   isSilent: boolean
@@ -188,7 +194,7 @@ function auditHandoffsMap(
   return { handoffItems, validCount, invalidCount };
 }
 
-function auditDuplicatesShiftLeft(
+export function auditDuplicatesShiftLeft(
   rootDir: string,
   checkDuplicates: boolean | undefined,
   isSilent: boolean
@@ -206,7 +212,7 @@ function auditDuplicatesShiftLeft(
   return { duplicateErrors: dupResult.errorCount, duplicateIssues: dupResult.issues };
 }
 
-function emitSddVerifyJson(payload: {
+export function emitSddVerifyJson(payload: {
   isOk: boolean;
   totalFound: number;
   validCount: number;
@@ -229,7 +235,7 @@ function emitSddVerifyJson(payload: {
   console.log(JSON.stringify(jsonOutput, null, 2));
 }
 
-function printSddVerifyVerdict(isOk: boolean): void {
+export function printSddVerifyVerdict(isOk: boolean): void {
   console.log(
     isOk
       ? pc.green('\n✔ SDD Integration COMPLIANT: All sidecars and requirements are valid.\n')
@@ -237,9 +243,20 @@ function printSddVerifyVerdict(isOk: boolean): void {
   );
 }
 
-function printSddVerifyHeader(totalFound: number): void {
+export function printSddVerifyHeader(totalFound: number): void {
   console.log(pc.bold(pc.cyan('\n🔍 [AI-SDLC SDD] Verifying SDD Workspaces and Handoff Sidecars (HOF-*)...')));
   console.log(`  Found PDaC sidecars: ${pc.bold(String(totalFound))}`);
+}
+
+export function handleSddVerifyError(err: unknown, isSilent: boolean, useJson: boolean): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (!isSilent) {
+    console.error(pc.red(`\n✖ Error verifying SDD workspace: ${msg}\n`));
+  }
+  if (useJson) {
+    console.log(JSON.stringify({ command: 'sdd:verify', success: false, exitCode: 1, error: msg }, null, 2));
+  }
+  return false;
 }
 
 export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
@@ -247,25 +264,29 @@ export function runSddVerify(options: SddVerifyCliOptions = {}): boolean {
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
 
-  const handoffsMap = scanAllProductHandoffs(rootDir);
-  const totalFound = handoffsMap.size;
-  if (!isSilent) {
-    printSddVerifyHeader(totalFound);
+  try {
+    const handoffsMap = scanAllProductHandoffs(rootDir);
+    const totalFound = handoffsMap.size;
+    if (!isSilent) {
+      printSddVerifyHeader(totalFound);
+    }
+
+    const { handoffItems, validCount, invalidCount } = auditHandoffsMap(handoffsMap, rootDir, isSilent);
+    const { duplicateErrors, duplicateIssues } = auditDuplicatesShiftLeft(rootDir, options.checkDuplicates, isSilent);
+
+    const isOk = invalidCount === 0 && duplicateErrors === 0;
+    if (!isSilent) {
+      printSddVerifyVerdict(isOk);
+    }
+
+    if (useJson) {
+      emitSddVerifyJson({ isOk, totalFound, validCount, invalidCount, duplicateErrors, handoffItems, duplicateIssues });
+    }
+
+    return isOk;
+  } catch (err: unknown) {
+    return handleSddVerifyError(err, isSilent, useJson);
   }
-
-  const { handoffItems, validCount, invalidCount } = auditHandoffsMap(handoffsMap, rootDir, isSilent);
-  const { duplicateErrors, duplicateIssues } = auditDuplicatesShiftLeft(rootDir, options.checkDuplicates, isSilent);
-
-  const isOk = invalidCount === 0 && duplicateErrors === 0;
-  if (!isSilent) {
-    printSddVerifyVerdict(isOk);
-  }
-
-  if (useJson) {
-    emitSddVerifyJson({ isOk, totalFound, validCount, invalidCount, duplicateErrors, handoffItems, duplicateIssues });
-  }
-
-  return isOk;
 }
 
 export interface SddIntegrateCliOptions {
@@ -283,7 +304,7 @@ export interface SddIntegrateCliOptions {
   format?: string;
 }
 
-function handleUndetectedChange(detection: ReturnType<typeof detectActiveChangeForIntegration>, isSilent: boolean, useJson: boolean): null {
+export function handleUndetectedChange(detection: ReturnType<typeof detectActiveChangeForIntegration>, isSilent: boolean, useJson: boolean): null {
   if (!isSilent) {
     console.log(pc.yellow('\nℹ [AI-SDLC SDD] No active SDD change detected to integrate:'));
     for (const r of detection.reasons) console.log(`    - ${r}`);
@@ -296,7 +317,7 @@ function handleUndetectedChange(detection: ReturnType<typeof detectActiveChangeF
   return null;
 }
 
-function handlePendingTasks(detection: ReturnType<typeof detectActiveChangeForIntegration>, isSilent: boolean, useJson: boolean): null {
+export function handlePendingTasks(detection: ReturnType<typeof detectActiveChangeForIntegration>, isSilent: boolean, useJson: boolean): null {
   if (!isSilent) {
     console.log(pc.red(`\n✖ [AI-SDLC SDD] Detected change '${detection.changeId}' has pending tasks (${detection.completedTasksCount}/${detection.totalTasksCount} completed). All tasks must be in COMPLETED status.\n`));
   }
@@ -311,7 +332,7 @@ function handlePendingTasks(detection: ReturnType<typeof detectActiveChangeForIn
   return null;
 }
 
-function resolveAutoChange(
+export function resolveAutoChange(
   options: SddIntegrateCliOptions,
   rootDir: string,
   isSilent: boolean,
@@ -335,8 +356,9 @@ function resolveAutoChange(
   return detection.changeId;
 }
 
-function resolveIntegrationChangeId(options: SddIntegrateCliOptions, rootDir: string, isSilent: boolean, useJson: boolean): string | null {
-  const changeId = options.change || (options.auto ? resolveAutoChange(options, rootDir, isSilent, useJson) : null);
+export function resolveIntegrationChangeId(options: SddIntegrateCliOptions, rootDir: string, isSilent: boolean, useJson: boolean): string | null {
+  const explicitChange = options.change?.trim();
+  const changeId = explicitChange || (options.auto ? resolveAutoChange(options, rootDir, isSilent, useJson) : null);
   if (!changeId) {
     if (!options.auto) {
       if (!isSilent) console.error(pc.red('\n✖ Change identifier (--change <id>) or --auto option must be specified.\n'));
@@ -349,7 +371,7 @@ function resolveIntegrationChangeId(options: SddIntegrateCliOptions, rootDir: st
   return changeId;
 }
 
-function printIntegrationSuccess(changeId: string, result: ReturnType<typeof integrateSddChange>): void {
+export function printIntegrationSuccess(changeId: string, result: ReturnType<typeof integrateSddChange>): void {
   console.log(`  ${pc.green('✔')} Change '${changeId}' successfully processed:`);
   console.log(`    - Completed tasks:             ${pc.bold(String(result.completedTasks.length))}`);
   console.log(`    - Integrated requirements:     ${pc.green(result.integratedRequirements.join(', ') || 'None')}`);
@@ -362,13 +384,13 @@ function printIntegrationSuccess(changeId: string, result: ReturnType<typeof int
   console.log(pc.green('\n✔ Canonical specification integration COMPLETED (EXIT 0)\n'));
 }
 
-function printIntegrationFailure(changeId: string, errors: string[]): void {
+export function printIntegrationFailure(changeId: string, errors: string[]): void {
   console.log(pc.red(`\n✖ Failed to integrate change '${changeId}':`));
   for (const err of errors) console.log(`    ${pc.red('✖')} ${err}`);
   console.log(pc.red('\n✖ Integration BLOCKED (EXIT 1)\n'));
 }
 
-function emitIntegrateJson(changeId: string, result: ReturnType<typeof integrateSddChange>): void {
+export function emitIntegrateJson(changeId: string, result: ReturnType<typeof integrateSddChange>): void {
   const payload = {
     command: 'sdd:integrate',
     success: result.success,
@@ -386,7 +408,7 @@ function emitIntegrateJson(changeId: string, result: ReturnType<typeof integrate
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printBatchIntegrationResult(result: ReturnType<typeof integrateAllSddChanges>): void {
+export function printBatchIntegrationResult(result: ReturnType<typeof integrateAllSddChanges>): void {
   console.log(`  ${pc.green('✔')} Processed changes:           ${pc.bold(String(result.processedChanges.length))} (${result.processedChanges.join(', ') || 'None'})`);
   console.log(`  ${pc.yellow('ℹ')} Skipped changes:             ${pc.bold(String(result.skippedChanges.length))}`);
   console.log(`  ${pc.green('✔')} Updated product artifacts:   ${pc.green(result.updatedProductArtifacts.join(', ') || 'None')}`);
@@ -400,7 +422,7 @@ function printBatchIntegrationResult(result: ReturnType<typeof integrateAllSddCh
   }
 }
 
-function emitBatchIntegrateJson(result: ReturnType<typeof integrateAllSddChanges>): void {
+export function emitBatchIntegrateJson(result: ReturnType<typeof integrateAllSddChanges>): void {
   const payload = {
     command: 'sdd:integrate:all',
     success: result.success,
@@ -416,14 +438,61 @@ function emitBatchIntegrateJson(result: ReturnType<typeof integrateAllSddChanges
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function runBatchSddIntegrate(options: SddIntegrateCliOptions, rootDir: string, isSilent: boolean, useJson: boolean): boolean {
+export function runBatchSddIntegrate(options: SddIntegrateCliOptions, rootDir: string, isSilent: boolean, useJson: boolean): boolean {
   if (!isSilent) {
     console.log(pc.bold(pc.cyan('\n🔄 [AI-SDLC SDD] Consolidating all completed SDD changes into canonical specifications...')));
   }
-  const result = integrateAllSddChanges({ rootDir, author: options.author, autoArchive: options.autoArchive });
-  if (!isSilent) printBatchIntegrationResult(result);
-  if (useJson) emitBatchIntegrateJson(result);
-  return result.success;
+  try {
+    const result = integrateAllSddChanges({ rootDir, author: options.author, autoArchive: options.autoArchive });
+    if (!isSilent) printBatchIntegrationResult(result);
+    if (useJson) emitBatchIntegrateJson(result);
+    return result.success;
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (!isSilent) console.error(pc.red(`\n✖ Error during batch integration: ${msg}\n`));
+    if (useJson) console.log(JSON.stringify({ command: 'sdd:integrate:all', success: false, exitCode: 1, errors: [msg] }, null, 2));
+    return false;
+  }
+}
+
+export function handleSddIntegrateError(changeId: string, err: unknown, isSilent: boolean, useJson: boolean): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (!isSilent) printIntegrationFailure(changeId, [msg]);
+  if (useJson) console.log(JSON.stringify({ command: 'sdd:integrate', success: false, exitCode: 1, errors: [msg] }, null, 2));
+  return false;
+}
+
+export function renderSingleIntegrationOutput(
+  changeId: string,
+  result: ReturnType<typeof integrateSddChange>,
+  isSilent: boolean,
+  useJson: boolean
+): void {
+  if (!isSilent) {
+    if (result.success) printIntegrationSuccess(changeId, result);
+    else printIntegrationFailure(changeId, result.errors);
+  }
+  if (useJson) emitIntegrateJson(changeId, result);
+}
+
+export function executeSingleSddIntegrate(
+  options: SddIntegrateCliOptions,
+  rootDir: string,
+  isSilent: boolean,
+  useJson: boolean
+): boolean {
+  try {
+    const changeId = resolveIntegrationChangeId(options, rootDir, isSilent, useJson);
+    if (!changeId) return false;
+    if (!isSilent) {
+      console.log(pc.bold(pc.cyan(`\n🔄 [AI-SDLC SDD] Integrating change '${changeId}' into canonical specification...`)));
+    }
+    const result = integrateSddChange({ rootDir, changeId, author: options.author, autoArchive: options.autoArchive });
+    renderSingleIntegrationOutput(changeId, result, isSilent, useJson);
+    return result.success;
+  } catch (err: unknown) {
+    return handleSddIntegrateError(options.change || 'unknown', err, isSilent, useJson);
+  }
 }
 
 export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
@@ -433,20 +502,7 @@ export function runSddIntegrate(options: SddIntegrateCliOptions): boolean {
   if (options.all) {
     return runBatchSddIntegrate(options, rootDir, isSilent, useJson);
   }
-  const changeId = resolveIntegrationChangeId(options, rootDir, isSilent, useJson);
-  if (!changeId) return false;
-
-  if (!isSilent) {
-    console.log(pc.bold(pc.cyan(`\n🔄 [AI-SDLC SDD] Integrating change '${changeId}' into canonical specification...`)));
-  }
-
-  const result = integrateSddChange({ rootDir, changeId, author: options.author, autoArchive: options.autoArchive });
-  if (!isSilent) {
-    if (result.success) printIntegrationSuccess(changeId, result);
-    else printIntegrationFailure(changeId, result.errors);
-  }
-  if (useJson) emitIntegrateJson(changeId, result);
-  return result.success;
+  return executeSingleSddIntegrate(options, rootDir, isSilent, useJson);
 }
 
 export interface ChangeNewCliOptions {
@@ -462,7 +518,7 @@ export interface ChangeNewCliOptions {
   format?: string;
 }
 
-function printChangeNewSuccess(result: ReturnType<typeof scaffoldSddChange>): void {
+export function printChangeNewSuccess(result: ReturnType<typeof scaffoldSddChange>): void {
   console.log(`  ${pc.green('✔')} Change directory:    ${pc.bold(result.changeDir)}`);
   console.log(`  ${pc.green('✔')} SDD Change ID:       ${pc.cyan(result.canonicalId)} (${result.changeId})`);
   console.log(`  ${pc.green('✔')} Risk profile:        ${pc.magenta(result.profile || 'standard')}`);
@@ -471,19 +527,19 @@ function printChangeNewSuccess(result: ReturnType<typeof scaffoldSddChange>): vo
   }
   console.log(`  ${pc.green('✔')} Cited artifacts:     ${result.citedArtifacts.length}`);
   for (const cite of result.citedArtifacts) {
-    console.log(`    - [${pc.cyan(cite.id)}] ${cite.digest.substring(0, 19)}... (${cite.title || 'Untitled'})`);
+    console.log(`    - [${pc.cyan(cite.id)}] ${(cite.digest || '').substring(0, 19)}... (${cite.title || 'Untitled'})`);
   }
   console.log(`  ${pc.green('✔')} Generated files:     ${result.createdFiles.length}`);
   console.log(pc.green('\n✔ SDD change successfully initialized and validated.\n'));
 }
 
-function printChangeNewFailure(name: string, errors: string[]): void {
+export function printChangeNewFailure(name: string, errors: string[]): void {
   console.log(pc.red(`\n✖ Failed to create SDD change '${name}':`));
   for (const err of errors) console.log(`    ${pc.red('✖')} ${err}`);
   console.log(pc.red('\n✖ Change creation BLOCKED\n'));
 }
 
-function emitChangeNewJson(name: string, result: ReturnType<typeof scaffoldSddChange>): void {
+export function emitChangeNewJson(name: string, result: ReturnType<typeof scaffoldSddChange>): void {
   const payload = {
     command: 'change:new',
     success: result.success,
@@ -501,16 +557,33 @@ function emitChangeNewJson(name: string, result: ReturnType<typeof scaffoldSddCh
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printChangeNewHeader(name: string, framework: string): void {
+export function printChangeNewHeader(name: string, framework: string): void {
   console.log(pc.bold(pc.cyan(`\n📦 [AI-SDLC SDD] Scaffolding new SDD change '${name}' (${framework})...`)));
 }
 
-function handleScaffoldOutput(name: string, result: ReturnType<typeof scaffoldSddChange>, isSilent: boolean, useJson: boolean): void {
+export function handleScaffoldOutput(name: string, result: ReturnType<typeof scaffoldSddChange>, isSilent: boolean, useJson: boolean): void {
   if (!isSilent) {
     if (result.success) printChangeNewSuccess(result);
     else printChangeNewFailure(name, result.errors);
   }
   if (useJson) emitChangeNewJson(name, result);
+}
+
+export function buildFailedScaffoldResult(
+  options: ChangeNewCliOptions,
+  err: unknown
+): ReturnType<typeof scaffoldSddChange> {
+  const msg = err instanceof Error ? err.message : String(err);
+  return {
+    success: false,
+    changeId: options.id || '',
+    canonicalId: '',
+    profile: options.profile || 'standard',
+    changeDir: '',
+    createdFiles: [],
+    citedArtifacts: [],
+    errors: [msg],
+  };
 }
 
 export function runChangeNew(options: ChangeNewCliOptions): boolean {
@@ -519,22 +592,17 @@ export function runChangeNew(options: ChangeNewCliOptions): boolean {
   const framework = options.framework || 'openspec';
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
+  if (!isSilent) printChangeNewHeader(name, framework);
 
-  if (!isSilent) {
-    printChangeNewHeader(name, framework);
+  try {
+    const result = scaffoldSddChange({
+      rootDir, name, changeId: options.id, profile: options.profile,
+      from: options.from, framework, author: options.author, silent: isSilent,
+    });
+    handleScaffoldOutput(name, result, isSilent, useJson);
+    return result.success;
+  } catch (err: unknown) {
+    handleScaffoldOutput(name, buildFailedScaffoldResult(options, err), isSilent, useJson);
+    return false;
   }
-
-  const result = scaffoldSddChange({
-    rootDir,
-    name,
-    changeId: options.id,
-    profile: options.profile,
-    from: options.from,
-    framework,
-    author: options.author,
-    silent: isSilent,
-  });
-
-  handleScaffoldOutput(name, result, isSilent, useJson);
-  return result.success;
 }

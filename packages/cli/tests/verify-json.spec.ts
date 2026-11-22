@@ -499,7 +499,6 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
 
   describe('Unified JSON Output Suite for check, sdd, gherkin, init (#58)', () => {
     let tmpDir: string;
-    const rootDir = path.resolve(__dirname, '../../..');
 
     afterEach(() => {
       delete process.env.AISDLC_FORMAT;

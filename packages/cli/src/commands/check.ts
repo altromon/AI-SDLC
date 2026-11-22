@@ -33,17 +33,27 @@ import { isJsonOutput } from './verify.js';
 export interface CheckCommandOptions extends PreflightCheckOptions {
   json?: boolean;
   format?: string;
+  vuln?: boolean;
 }
 
+export function hasDotnetProjectFiles(rootDir: string): boolean {
+  if (!fs.existsSync(rootDir)) return false;
+  try {
+    return fs.readdirSync(rootDir).some((f) => f.endsWith('.csproj') || f.endsWith('.sln') || f.endsWith('.slnx'));
+  } catch {
+    return false;
+  }
+}
 
-function detectDefaultScaffoldLanguage(rootDir: string): GherkinScaffoldLanguage {
+export function detectDefaultScaffoldLanguage(rootDir: string): GherkinScaffoldLanguage {
   if (fs.existsSync(path.join(rootDir, 'pyproject.toml')) || fs.existsSync(path.join(rootDir, 'requirements.txt'))) return 'py';
   if (fs.existsSync(path.join(rootDir, 'go.mod'))) return 'go';
   if (fs.existsSync(path.join(rootDir, 'Cargo.toml'))) return 'rs';
+  if (hasDotnetProjectFiles(rootDir)) return 'cs';
   return 'ts';
 }
 
-function autoScaffoldMissingSteps(rootDir: string): number {
+export function autoScaffoldMissingSteps(rootDir: string): number {
   const sync = checkGherkinInSync({ rootDir });
   const missing = sync.missingStepFiles ?? [];
   if (missing.length === 0) return 0;
@@ -77,7 +87,7 @@ export function runAutoFix(rootDir: string, silent?: boolean): { gherkinCount: n
   return { gherkinCount: gherkinRes.features.length, digestsCount: pdacRes.syncedCount };
 }
 
-function buildGherkinFailedGate(totalOut: number, hasMissingSteps: boolean): PreflightGateSummary {
+export function buildGherkinFailedGate(totalOut: number, hasMissingSteps: boolean): PreflightGateSummary {
   const remediation = hasMissingSteps
     ? "Run 'aisdlc gherkin scaffold <feature-file> --lang <lang> --fallback' to generate step definitions in tests/steps/."
     : "Run 'aisdlc check --fix' to extract and regenerate .feature files, and remove orphan manual .feature files.";
@@ -124,6 +134,39 @@ export function auditPdacGate(rootDir: string, wasAutoFixed: boolean): Preflight
   };
 }
 
+export function formatNonMetricQualityFailure(
+  res: ReturnType<typeof verifyQualityGate>
+): { message: string; remediation: string } {
+  const untested = res.untestedFunctions ?? [];
+  if (untested.length > 0) {
+    return { message: `${untested.length} function(s) missing unit tests (e.g. ${untested[0].functionName})`, remediation: 'Add unit tests covering all exported and internal functions in test files.' };
+  }
+  const ui = res.untestedUiComponents ?? [];
+  if (ui.length > 0) {
+    return { message: `${ui.length} UI component(s) missing driver tests (e.g. ${ui[0].componentName})`, remediation: 'Add UI/E2E or console driver tests referencing each UI component.' };
+  }
+  const cov = res.coverageViolations ?? [];
+  return {
+    message: cov.length > 0 ? `${cov.length} coverage threshold violation(s): ${cov[0]}` : `${res.failCount} function(s) exceed quality thresholds`,
+    remediation: cov.length > 0 ? 'Increase test coverage to meet quality-policy.yaml thresholds.' : 'Run aisdlc verify quality for details.',
+  };
+}
+
+export function formatQualityGateFailure(
+  res: ReturnType<typeof verifyQualityGate>
+): { message: string; remediation: string } {
+  const metricFail = res.results.find(
+    (r) => r.status === 'FAIL' && r.violations.some((v) => !v.startsWith('Missing unit test'))
+  );
+  if (metricFail) {
+    return {
+      message: `${res.failCount} function(s) exceed quality thresholds (e.g. ${metricFail.functionName}: ${metricFail.violations.join(', ')})`,
+      remediation: 'Refactor offending functions by reducing conditional branches and lines of code.',
+    };
+  }
+  return formatNonMetricQualityFailure(res);
+}
+
 export function auditQualityGate(rootDir: string): PreflightGateSummary {
   const res = verifyQualityGate({ rootDir, requireCoverageReport: false });
   if (res.success) {
@@ -133,13 +176,12 @@ export function auditQualityGate(rootDir: string): PreflightGateSummary {
       message: `${res.passCount}/${res.totalFunctions} compliant functions (CC <= 10, LOC <= 40)`,
     };
   }
-  const firstFail = res.results.find((r) => r.status === 'FAIL');
-  const detail = firstFail ? ` (e.g. ${firstFail.functionName}: ${firstFail.violations.join(', ')})` : '';
+  const failure = formatQualityGateFailure(res);
   return {
     name: 'Quality Gate (Complexity & Maintainability)',
     status: 'FAILED',
-    message: `${res.failCount} function(s) exceed quality thresholds${detail}`,
-    remediation: 'Refactor offending functions by reducing conditional branches and lines of code.',
+    message: failure.message,
+    remediation: failure.remediation,
   };
 }
 
@@ -195,8 +237,26 @@ export function auditTestingGate(rootDir: string): PreflightGateSummary {
   };
 }
 
-export function auditLicensesGate(rootDir: string): PreflightGateSummary {
-  const res = verifyLicenses({ rootDir });
+export function formatLicenseFailure(
+  res: ReturnType<typeof verifyLicenses>
+): { message: string; remediation: string } {
+  if (res.violations.length > 0) {
+    const badPkgs = res.violations.map((v) => `${v.packageName} (${v.license})`).slice(0, 2).join(', ');
+    return { message: `${res.violations.length} prohibited license(s) detected: ${badPkgs}`, remediation: 'Replace packages with restricted licenses or request approval in license-policy.yaml.' };
+  }
+  const vulns = res.vulnerabilities ?? [];
+  if (vulns.length > 0) {
+    const bad = vulns.map((v) => `${v.id} (${v.packageName})`).slice(0, 2).join(', ');
+    return { message: `${vulns.length} blocking vulnerability(ies) detected: ${bad}`, remediation: 'Upgrade vulnerable dependencies or record VEX statements in license-policy.yaml.' };
+  }
+  return { message: 'License or vulnerability policy gate failed', remediation: 'Run aisdlc verify licenses for detailed diagnostics.' };
+}
+
+export function auditLicensesGate(rootDir: string, vuln?: boolean): PreflightGateSummary {
+  const res = verifyLicenses({
+    rootDir,
+    ...(vuln !== undefined ? { scanVulnerabilities: vuln } : {}),
+  });
   if (res.success) {
     return {
       name: 'Open Source License Governance',
@@ -204,12 +264,12 @@ export function auditLicensesGate(rootDir: string): PreflightGateSummary {
       message: `${res.permittedCount} dependencies compliant with license-policy.yaml`,
     };
   }
-  const badPkgs = res.violations.map((v) => `${v.packageName} (${v.license})`).slice(0, 2).join(', ');
+  const failure = formatLicenseFailure(res);
   return {
     name: 'Open Source License Governance',
     status: 'FAILED',
-    message: `${res.violations.length} prohibited license(s) detected: ${badPkgs}`,
-    remediation: 'Replace packages with restricted licenses or request approval in license-policy.yaml.',
+    message: failure.message,
+    remediation: failure.remediation,
   };
 }
 
@@ -250,15 +310,23 @@ export function auditSecretsGate(rootDir: string): PreflightGateSummary {
   };
 }
 
-function formatSecurityErrors(secRes: ReturnType<typeof verifySecrets>, sastRes: ReturnType<typeof verifySast>): string {
+export function formatSecurityErrors(secRes: ReturnType<typeof verifySecrets>, sastRes: ReturnType<typeof verifySast>): string {
   const errors: string[] = [];
   if (!secRes.success) {
     const f = secRes.findings[0];
-    errors.push(`${secRes.findingsCount} secret(s) (e.g. ${f.ruleId} in ${f.relPath}:${f.lineNumber})`);
+    errors.push(
+      f
+        ? `${secRes.findingsCount} secret(s) (e.g. ${f.ruleId} in ${f.relPath}:${f.lineNumber})`
+        : `${secRes.findingsCount} secret(s) or expired suppression(s) detected`
+    );
   }
   if (!sastRes.success) {
     const v = sastRes.violations[0];
-    errors.push(`${sastRes.violationsCount} SAST violation(s) (e.g. ${v.ruleId} in ${v.relPath}:${v.lineNumber})`);
+    errors.push(
+      v
+        ? `${sastRes.violationsCount} SAST violation(s) (e.g. ${v.ruleId} in ${v.relPath}:${v.lineNumber})`
+        : `${sastRes.violationsCount} SAST violation(s) or expired/invalid suppression(s) detected`
+    );
   }
   return errors.join('; ');
 }
@@ -338,13 +406,13 @@ export function auditPrivacyGate(rootDir: string): PreflightGateSummary {
   };
 }
 
-function renderGateBadge(status: string): string {
+export function renderGateBadge(status: string): string {
   if (status === 'PASSED') return pc.green('✔ PASSED    ');
   if (status === 'FIXED') return pc.cyan('🔧 AUTO-FIX ');
   return pc.red('✖ FAILED    ');
 }
 
-function renderRemediations(failedGates: PreflightGateSummary[]): void {
+export function renderRemediations(failedGates: PreflightGateSummary[]): void {
   console.log(pc.bold(pc.red('\n------------------------------------------------------------------------------')));
   console.log(pc.bold(pc.red('  REQUIRED ACTIONS TO RESOLVE BLOCKING ERRORS:')));
   console.log(pc.bold(pc.red('------------------------------------------------------------------------------')));
@@ -355,19 +423,19 @@ function renderRemediations(failedGates: PreflightGateSummary[]): void {
   console.log(pc.bold(pc.red('\n⛔ VERDICT: PRE-FLIGHT BLOCKED (EXIT 1)\n')));
 }
 
-function printDashboardHeader(autoFixExecuted: boolean, gherkinCount: number, digestsCount: number): void {
+export function printDashboardHeader(autoFixExecuted: boolean, gherkinCount: number, digestsCount: number): void {
   console.log(pc.bold(pc.cyan('\n==============================================================================')));
   console.log(pc.bold(pc.cyan('             AI-SDLC: CONSOLIDATED PRE-FLIGHT DASHBOARD (aisdlc check)        ')));
   console.log(pc.bold(pc.cyan('==============================================================================\n')));
 
   if (autoFixExecuted) {
     console.log(pc.bold(`  ${pc.magenta('AUTO-FIX MODE ACTIVE:')} Non-destructive preliminary syncs applied:`));
-    console.log(`    - Gherkin scenarios synchronized: ${pc.bold(String(gherkinCount))}`);
-    console.log(`    - SHA-256 digests synchronized:    ${pc.bold(String(digestsCount))}\n`);
+    console.log(`    - Gherkin features synchronized: ${pc.bold(String(gherkinCount))}`);
+    console.log(`    - SHA-256 digests synchronized:  ${pc.bold(String(digestsCount))}\n`);
   }
 }
 
-function printDashboardFooter(isPassed: boolean): void {
+export function printDashboardFooter(isPassed: boolean): void {
   if (isPassed) {
     console.log(pc.bold(pc.green('\n==============================================================================')));
     console.log(pc.bold(pc.green('✨ VERDICT: PRE-FLIGHT PASSED (EXIT 0) - Repository ready for Pull Request')));
@@ -396,7 +464,13 @@ export function renderDashboard(
   }
 }
 
-function collectPreflightGates(rootDir: string, fix: boolean, gherkinCount: number, digestsCount: number): PreflightGateSummary[] {
+export function collectPreflightGates(
+  rootDir: string,
+  fix: boolean,
+  gherkinCount: number,
+  digestsCount: number,
+  vuln?: boolean
+): PreflightGateSummary[] {
   return [
     auditGherkinGate(rootDir, fix && gherkinCount > 0),
     auditPdacGate(rootDir, fix && digestsCount > 0),
@@ -404,7 +478,7 @@ function collectPreflightGates(rootDir: string, fix: boolean, gherkinCount: numb
     auditTraceabilityGate(rootDir),
     auditGovernanceGate(rootDir),
     auditTestingGate(rootDir),
-    auditLicensesGate(rootDir),
+    auditLicensesGate(rootDir, vuln),
     auditSchemasGate(rootDir),
     auditDuplicatesGate(rootDir),
     auditFrictionGate(rootDir),
@@ -413,7 +487,7 @@ function collectPreflightGates(rootDir: string, fix: boolean, gherkinCount: numb
   ];
 }
 
-function emitCheckJson(result: PreflightCheckResult): void {
+export function emitCheckJson(result: PreflightCheckResult): void {
   const payload = {
     command: 'check',
     success: result.success,
@@ -426,7 +500,7 @@ function emitCheckJson(result: PreflightCheckResult): void {
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function applyAutoFix(rootDir: string, isSilent: boolean, fix?: boolean): { gherkinCount: number; digestsCount: number } {
+export function applyAutoFix(rootDir: string, isSilent: boolean, fix?: boolean): { gherkinCount: number; digestsCount: number } {
   if (!fix) return { gherkinCount: 0, digestsCount: 0 };
   const res = runAutoFix(rootDir, isSilent);
   return { gherkinCount: res.gherkinCount, digestsCount: res.digestsCount };
@@ -438,7 +512,7 @@ export function executePreflightCheck(options: CheckCommandOptions = {}): Prefli
   const isSilent = Boolean(options.silent || useJson);
   const { gherkinCount, digestsCount } = applyAutoFix(rootDir, isSilent, options.fix);
 
-  const gates = collectPreflightGates(rootDir, Boolean(options.fix), gherkinCount, digestsCount);
+  const gates = collectPreflightGates(rootDir, Boolean(options.fix), gherkinCount, digestsCount, options.vuln);
   const success = gates.every((g) => g.status === 'PASSED' || g.status === 'FIXED');
 
   if (!isSilent) {
