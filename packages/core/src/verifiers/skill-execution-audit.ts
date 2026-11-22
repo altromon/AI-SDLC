@@ -25,6 +25,7 @@ export const SKILL_EXPECTED_TOOLS: Record<string, readonly string[]> = {
   'aisdlc-release-compliance': ['verify', 'kpi_release', 'report_dashboard'],
   'aisdlc-security-sca-triage': ['verify_security', 'verify_privacy', 'verify_licenses'],
   'aisdlc-bdd-gherkin': ['sdd_check_fix', 'verify_testing'],
+  'aisdlc-spot-audit': ['inspect_element'],
 };
 
 function readExecutedMcpTools(auditLogFile: string): Set<string> {
