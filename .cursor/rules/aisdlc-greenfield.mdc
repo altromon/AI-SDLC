@@ -78,3 +78,17 @@ Across Phase 0 and Inception, quality auditing and adversarial stress-testing ar
 - **FORBIDDEN Greenfield Monolith (`1 UC-* = 1 CHG-*`)**: Never bundle the entire product or multiple `UC-*` into a single SDD change (`CHG-001`). Parallelism is achieved by running **multiple bounded `CHG-*` concurrently** on separate branches/worktrees.
 - Never invoke `sdd_change_new` or write application code in `src/` on a Greenfield project before `ARCH-INTRO-001`, `agent-expert-user` MVP validation, and at least one `UC-*` and `FR-*` exist.
 - All newly drafted specifications must start with `status: draft`.
+# Greenfield Inception Quick Reference
+
+## Phase 0 Discovery Interview (Up to 15 Questions)
+1. **Mission & Problem**: Core business problem and measurable success criteria.
+2. **Primary Actors (`ACT-*`)**: Human roles and external systems.
+3. **Interaction Modality (`ARCH-INTRO-001`)**: Web UI, Desktop GUI, Console/TUI/CLI, Mobile, or Headless API/SDK (never library-only when human actors exist).
+4. **Delivery & Operation Model**: Cloud SaaS, Self-Hosted/On-Premise, Local Desktop/CLI, or SDK package.
+5. **Visual Aesthetic Standard**: Bootstrap 5-style responsive Web, modern rounded/elevated Desktop, or colorized rich Console/TUI.
+6. **Master Data CRUD**: Foundational catalogs/entities needed to operate core flows without manual DB seeding.
+7. **MVP Use Cases (`UC-*`) & Quality Goals (`QR-*`)**: Strict MVP core vs. roadmap backlog.
+
+## Upstream Artifact Chain
+`ARCH-INTRO-001` -> `ACT-*` / `JRN-*` / `UC-*` / `BR-*` / `FR-*` / `QR-*` -> `agent-expert-user` (Design Mode) -> `ACT-THREAT-*` / `ABUSE-*` / `SEC-REQ-*` -> `DATA-ASSET-*` / `PRIV-ROPA-*` / `PRIV-REQ-*` -> `CMP-*` / `ARCH-DEP-001` / `ADR-*` -> Checkpoint 1 (`agent-auditor` || `agent-adversary`).
+

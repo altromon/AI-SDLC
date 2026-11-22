@@ -1,0 +1,41 @@
+---
+description: aisdlc-doctor-migrate (Environment Diagnostics & Framework Migration Playbook) - Diagnose AI-SDLC environment health, git hooks, and security tools (aisdlc doctor), synchronize IDE agent configs (aisdlc sync), and safely upgrade schemas, templates, policies, and skills (aisdlc migrate) with backup and policy-ratchet protection.
+globs: .aisdlc.json, schemas/**, templates/**, *-policy.yaml, .agent/**, .claude/**, .cursor/**
+alwaysApply: false
+---
+
+# aisdlc-doctor-migrate (Environment Diagnostics & Framework Migration Playbook)
+
+Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_protocols.md) and [`process/10_quality_management_and_release_gates.md`](../../process/10_quality_management_and_release_gates.md).
+
+## Purpose & Trigger
+Use this skill whenever the user asks to **diagnose the AI-SDLC setup, repair git hooks, check installed security/SCA tools, synchronize IDE configs, or upgrade/migrate schemas, templates, policies, and skills**.
+
+## End-to-End Execution Playbook
+
+### Step 1: Environment & Toolchain Diagnostics (`aisdlc doctor`)
+1. Run MCP tool `doctor` or CLI `npx aisdlc doctor --json` (use `--offline` in air-gapped environments, `--strict` in CI).
+2. Inspect checks for: Node.js LTS, Git branch safety (never on `main`/`master`/`release/*`), Git hooks (`pre-commit`, `prepare-commit-msg`), schemas/PDaC integrity, and external security/SCA binaries (`gitleaks`, `semgrep`, `trivy`, `syft`).
+3. If hooks are missing or broken, run `npx aisdlc doctor --fix` (or `npx aisdlc git hook install`).
+
+### Step 2: Safe Framework Migration (`aisdlc migrate`)
+1. **Protected Branch Guard**: Never run mutating migrations on `main`, `master`, or `release/*`. Switch to a working branch first.
+2. **Preview First**: Always run MCP tool `migrate` with `dryRun: true` (`npx aisdlc migrate --dry-run --json`) to inspect `upToDate`, `cleanUpdated`, `overridesPreserved`, and `conflicts`.
+3. **Execute Migration**: Run `npx aisdlc migrate` (creates `.backup/migration-<timestamp>/` automatically). Local customizations are preserved (`LOCAL_OVERRIDE_PRESERVED`, exit code `1`) unless `--force` is explicitly requested.
+4. **Policy Ratchet Guard**: `migrate` blocks relaxing stricter local thresholds in `quality-policy.yaml` / `privacy-policy.yaml` unless `--allow-policy-downgrade` is explicitly authorized by a human Tech Lead.
+
+### Step 3: IDE Agent Config Synchronization (`aisdlc sync`)
+1. To refresh `.agent/`, `.claude/`, `.cursor/`, `.github/agents/`, and MCP configs without touching `specs/` or `src/`, run `npx aisdlc sync` (or `npx aisdlc sync --agents antigravity,cursor`).
+# Doctor & Migrate Safety Reference
+
+## Migration File Classifications
+- `UP_TO_DATE`: Local file matches canonical SHA-256 (LF-normalized).
+- `CLEAN_UPDATE`: Local file matches base or is missing; safely updated/created.
+- `LOCAL_OVERRIDE_PRESERVED`: Local customization detected; preserved with exit code `1` unless `--force` is passed.
+- `CONFLICT`: Structural corruption detected (exit code `2`).
+
+## Safety Guardrails
+- Mutating migrations are blocked on protected branches (`main`, `master`, `release/*`) with `ERR_PROTECTED_BRANCH_MIGRATION`.
+- Backups are written to `.backup/migration-<timestamp>-<rand>/` with automatic rollback on failure.
+- Policy Ratchet blocks relaxing stricter thresholds in `quality-policy.yaml` / `privacy-policy.yaml` without `--allow-policy-downgrade`.
+

@@ -7,12 +7,25 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type { IFileSystemJail } from '../types/migrate.js';
 
-const GOVERNED_DIR_PREFIXES = ['schemas' + path.sep, 'templates' + path.sep, '.backup' + path.sep];
+const GOVERNED_DIR_PREFIXES = [
+  'schemas' + path.sep,
+  'templates' + path.sep,
+  '.backup' + path.sep,
+  '.agent' + path.sep,
+  '.claude' + path.sep,
+  '.cursor' + path.sep,
+  '.github' + path.sep + 'agents' + path.sep,
+];
 const GOVERNED_ROOT_FILES = new Set([
   'quality-policy.yaml',
   'license-policy.yaml',
   'privacy-policy.yaml',
   'dlp-policy.yaml',
+  'CLAUDE.md',
+  path.join('specs', 'AGENTS.md'),
+  path.join('src', 'AGENTS.md'),
+  path.join('tests', 'AGENTS.md'),
+  path.join('scripts', 'guard-post-edit.cjs'),
 ]);
 
 function validateRawInputs(repoRoot: string, targetPath: string): void {

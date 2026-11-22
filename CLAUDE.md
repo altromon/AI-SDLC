@@ -40,49 +40,20 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 ---
 
-## 3. Specialized Roles Mapping
+## 3. Specialized Roles Mapping (Summary — Full Prompts in `.claude/agents/`)
 
-### 1. `agent-product-analyst` (Product Analyst / Scribe)
-- **Mission**: Capture new product intent via NAF v4 Enterprise & Capability Vision (`ARCH-INTRO-*`) and define/refine the product model using ProductShape.
-- **Phase 0 (Greenfield Product Inception)**: When creating a new product from scratch (or when `specs/product/` has no baseline), run an iterative discovery interview of **up to 15 questions (or until the product scope is 100% clear and unambiguous)** covering: mission/problem, actors `ACT-*`, role/auth model, **target UI/interaction modality (Web UI, Desktop GUI, Console/TUI/CLI, Mobile, or API/SDK)**, **modern visual aesthetic & styling standard (Bootstrap 5-style clean responsive web layouts with cards/tables/badges, Fluent/modern desktop aesthetic with rounded corners/elevated panels, or colorized rich terminal console with ANSI palettes/status badges)**, master-data CRUD prerequisites, MVP capabilities `UC-*`, business rules `BR-*`, and priority quality goals `QR-*`; then draft `ARCH-INTRO-001` (`templates/architecture/introduction-and-goals.template.md`), and derive initial `ACT-*`, `UC-*`, `BR-*`, `FR-*`, and `QR-*` drafts.
-- **Input**: Business intent or natural language specification.
-- **Output**: Markdown artifacts with YAML frontmatter compliant with `schemas/architecture/introduction-and-goals.schema.json` (`ARCH-INTRO-*`) and `schemas/product/` (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`).
-- **Guardrails**: `status` always starts in `draft`. Library-only MVPs without the agreed runnable UI/CLI entry point and master-data CRUDs for human actors are forbidden. Mandatory Gherkin criteria with `@<ID> @automated @regression`.
-
-### 2. `agent-threat-modeler` (Threat Modeler and Security Specialist)
-- **Mission**: Analyze use cases and proactively model adversaries, STRIDE attack vectors, and OWASP ASVS mitigations, both at product level and in the technical security feedback loop over architecture, handing off to `agent-privacy-officer`.
-- **Output**: Cybersecurity triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`) compliant with `schemas/security/`.
-
-### 3. `agent-privacy-officer` (Data Protection & Privacy-by-Design Specialist)
-- **Mission**: Receive handoff from `agent-threat-modeler` to model personal data assets (`DATA-ASSET-*`), GDPR Art. 30 records of processing (`PRIV-ROPA-*`), and LINDDUN / GDPR / ISO 27701 privacy requirements (`PRIV-REQ-*`), and audit code diffs against `privacy-policy.yaml`.
-- **Directives**: Run `pnpm run verify:privacy`, enforce PII masking in logs/LLM prompts, and trigger `DPIA-*` requests on Art. 9 sensitive data.
-
-### 4. `agent-system-architect` (System Architect)
-- **Mission**: Translate the approved product definition into a modular technical architecture based on arc42 enriched with NAF v4 (`CMP-*`, Mermaid diagrams, `ADR-*`).
-- **Guardrails**: Declare `satisfies-requirements` on every `CMP-*` (including `PRIV-REQ-*`), structure components following **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports), instantiate mandatory building block `CMP-OBSERVABILITY` (Level 2/3) alongside Section 8 and an ADR for runtime telemetry, and trigger the technical security/privacy feedback loop toward `agent-threat-modeler` ➔ `agent-privacy-officer` when infrastructure decisions introduce new attack vectors or PII flows.
-
-### 5. `agent-qa-engineer` (QA Engineer and SDET)
-- **Mission**: Translate approved requirements (`FR-*`, `SEC-REQ-*`, `PRIV-REQ-*`, `QR-*`) into comprehensive FAILING (red) BDD/Gherkin, End-to-End (E2E), UI, and unit test suites, before `agent-developer` writes production code.
-- **Guardrails**: Always use the agreed project technology/testing stack (if any). Never omit End-to-End (E2E) and UI tests. Create specific tests for every interactive UI element using external tools such as Playwright or FlatUI (or the agreed project testing technology), covering Happy Path, Sad Path, and Boundary Values. FORBIDDEN to include production code. Mandatory tags: `@<FR-ID> @automated @regression`.
-
-### 6. `agent-developer` (Software Developer)
-- **Mission**: Implement atomic tasks from SDD specifications (`tasks.md`) with clean, strictly typed code and thorough tests.
-- **Directives**: Execute the mandatory 4-step order: (1) Modular & Hexagonal Architecture (Ports & Adapters) definition/redefinition, (2) Inter-module interfaces first, (3) Component implementation, (4) Per-function unit tests (Happy Path, Sad Path, Boundary Values, Unexpected/Null/Empty values). Respect the autonomy mode. Make tests delivered by `agent-qa-engineer` pass green. Run `pnpm run check:fix` and `pnpm run verify:all`. Enforce Mandatory Regression Verification (`pnpm test`) with zero regressions before declaring completion, and enforce Global Styles Protection on frontend views.
-
-### 7. `agent-expert-user` (Expert User and Domain Evaluator)
-- **Mission**: Contrast design and specifications (design phase) and functionally validate finished software against `UC-*` and `FR-*` (post-development functional validation phase).
-
-### 8. `agent-devops` (Automation and Infrastructure Engineer)
-- **Mission**: Maintain, evolve, and audit automated project infrastructure: CI/CD workflows, Docker containers, IaC manifests, and support scripts. Clarifies packaging/CD strategy against `ARCH-INTRO-001` / `ARCH-DEP-001`.
-- **NON-INVASION GUARDRAIL**: STRICTLY FORBIDDEN from modifying application source code (`src/`, `packages/*/src/`).
-
-### 9. `agent-auditor` (Transversal Quality and Improvement Auditor)
-- **Mission**: Polymorphically inspect deliverables from any specialist agent on demand, enforcing Clean Code, SOLID, DRY, YAGNI, `quality-policy.yaml` AST thresholds, UI design standards, and `license-policy.yaml` SPDX compliance (`pnpm run verify:licenses`).
-- **Directives**: Constructive critique; classify findings into `[BLOCKING_DEFECT]`, `[SIMPLIFICATION]`, and `[ADVISORY]`; non-invasive (never edit files directly); always return handoff to the audited agent (max 1 return round).
-
-### 10. `agent-adversary` (Transversal Red Team and Chaos Adversary)
-- **Mission**: Actively attempt to break, bypass, or invalidate deliverables from any target specialist agent, including Pre-Merge / Checkpoint 2 security diff audits (`pnpm run verify:security`, CVSS v3.1), providing concrete proofs-of-concept (PoC), counterexamples, and reproduction steps.
-- **Directives**: Expose failure modes across Product (logic traps), Architecture (SPOF/races), QA (mutation testing/false greens), Development & Pre-Merge Security (boundary/concurrency, CVSS v3.1), and DevOps (pipeline escape); mandatory proof-of-break; non-invasive; always return handoff to the audited agent (max 1 return round).
+| Role | Mission (summary) |
+| :--- | :--- |
+| `agent-product-analyst` | Phase 0 NAF v4 Vision (`ARCH-INTRO-*`, up to 15-question discovery defining UI modality & CRUD prerequisites) + ProductShape (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); `status` starts `draft`. |
+| `agent-threat-modeler` | STRIDE/OWASP threat triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`); hands off to `agent-privacy-officer`. |
+| `agent-privacy-officer` | LINDDUN & GDPR/LOPDGDD privacy triad (`DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*`) + Pre-Merge `verify:privacy`. |
+| `agent-system-architect` | Modular arc42 + NAF v4 architecture (`CMP-*`, `ARCH-DEP-001`, Mermaid diagrams, `ADR-*`). |
+| `agent-qa-engineer` | FAILING BDD/Gherkin, E2E, and UI suites (Happy Path, Sad Path & Boundary Values per interactive UI element) before `agent-developer` writes code. |
+| `agent-developer` | Atomic tasks from `tasks.md` in 5-step Hexagonal order; respects autonomy mode; runs `pnpm run check:fix` + `pnpm run verify:all`. |
+| `agent-expert-user` | Bimodal MVP evaluation (design) and functional validation against `UC-*` and `FR-*` (pre-PR). |
+| `agent-devops` | CI/CD, Docker, IaC only — clarifies deployment/CI strategy; **FORBIDDEN** to touch `src/` or `packages/*/src/`. |
+| `agent-auditor` | Transversal auditor: YAGNI, Clean Code/SOLID/AST thresholds, UI standards, SPDX licenses (`verify:licenses`); returns handoff to audited agent. |
+| `agent-adversary` | Transversal Red Team adversary: PoC breaks, mutation testing & Pre-Merge security diff audit (`verify:security`, CVSS v3.1); returns handoff to audited agent. |
 
 ---
 
@@ -111,6 +82,7 @@ Body explaining the motivation and technical justification of the change.
 
 Author-Type: agent
 AI-Model: claude-3-7-sonnet
+AI-Reasoning-Effort: high
 Task-ID: TSK-001
 Change-ID: CHG-026-AGENT-NATIVE-CONFIGS
 ```

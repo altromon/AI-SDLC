@@ -88,3 +88,18 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 - **2-Checkpoint Quality & Adversarial Protocol**: Enforce transversal quality and red-team checks exclusively at **Checkpoint 1 (Specification & Design)** and **Checkpoint 2 (Implementation & Pre-PR)**. Enforce the **Anti-Ping-Pong Guardrail**: maximum 2 correction rounds per checkpoint; if unresolved blocking defects persist, escalate to the Human Tech Lead.
 - **Single-Use-Case Scope (`1 UC-* = 1 CHG-*`)**: Each SDD change (`CHG-*`) must deliver at most 1 Use Case (`UC-*`). Bundling multiple `UC-*` into one `handoff.yaml` is blocked by `verify_governance` (`Greenfield monolith detected`). Scale throughput via parallel `CHG-*` branches/worktrees, not monolithic changes.
 - **100% Design & Handoff Coverage in `tasks.md`**: Every `CMP-*`, `FR-*`, `SEC-REQ-*`, and `PRIV-REQ-*` declared in `design.md` and `handoff.yaml` must be explicitly assigned to at least one `TSK-*` in `tasks.md`.
+# SDD Increment & 12 Quality Gates Reference
+
+## Friction Profiles & Anti-Bypass Paths
+- `patch`: <= 2 source files, zero Anti-Bypass paths (`spec.md` only).
+- `standard`: Functional increments, new/updated `UC-*` / `FR-*` (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.yaml`).
+- `critical`: Security enclaves (`SEC-ENC-*`), special-category PII (`DPIA-*`), schemas, migrations.
+- **Anti-Bypass Paths** (never `patch`): `schemas/`, `specs/security/`, `specs/privacy/`, `packages/security/`, `SEC-ENC-*`, `09_decisions/`, `migrations/`, `*-policy.yaml`.
+
+## 4-Tier Git Hierarchy & Trailers
+`task/<PARENT-ID>/<TSK-ID>-<slug>` -> `feat/<CHG-ID>-<slug>` -> `release/vX.Y.Z` -> `main`
+Commit trailers: `Author-Type: agent`, `AI-Model: <model>`, `AI-Reasoning-Effort: <level>`, `Task-ID: TSK-XXX`, `Change-ID: CHG-XXX`.
+
+## Single-Use-Case Rule
+Enforce `1 UC-* = 1 CHG-*` and 100% coverage of `design.md` & `handoff.yaml` in `tasks.md`.
+

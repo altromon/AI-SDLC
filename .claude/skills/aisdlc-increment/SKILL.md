@@ -88,3 +88,6 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 - **2-Checkpoint Quality & Adversarial Protocol**: Enforce transversal quality and red-team checks exclusively at **Checkpoint 1 (Specification & Design)** and **Checkpoint 2 (Implementation & Pre-PR)**. Enforce the **Anti-Ping-Pong Guardrail**: maximum 2 correction rounds per checkpoint; if unresolved blocking defects persist, escalate to the Human Tech Lead.
 - **Single-Use-Case Scope (`1 UC-* = 1 CHG-*`)**: Each SDD change (`CHG-*`) must deliver at most 1 Use Case (`UC-*`). Bundling multiple `UC-*` into one `handoff.yaml` is blocked by `verify_governance` (`Greenfield monolith detected`). Scale throughput via parallel `CHG-*` branches/worktrees, not monolithic changes.
 - **100% Design & Handoff Coverage in `tasks.md`**: Every `CMP-*`, `FR-*`, `SEC-REQ-*`, and `PRIV-REQ-*` declared in `design.md` and `handoff.yaml` must be explicitly assigned to at least one `TSK-*` in `tasks.md`.
+## Self-Contained References
+- [`sdd-lifecycle-and-gates.md`](./references/sdd-lifecycle-and-gates.md)
+

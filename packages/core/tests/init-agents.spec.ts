@@ -59,8 +59,8 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
       expect(fs.existsSync(path.join(tempDir, `.github/agents/${agent.id}.agent.md`))).toBe(true);
     }
 
-    // Lifecycle workflow skills should be present for Greenfield, Legacy, Increment, and Inspector across all supported IDEs
-    expect(LIFECYCLE_SKILL_TEMPLATES).toHaveLength(4);
+    // Lifecycle workflow skills should be present for Greenfield, Legacy, Increment, Inspector, Doctor/Migrate, Release/Compliance, Security/SCA Triage, and BDD/Gherkin across all supported IDEs
+    expect(LIFECYCLE_SKILL_TEMPLATES).toHaveLength(8);
     for (const skill of LIFECYCLE_SKILL_TEMPLATES) {
       const agPath = path.join(tempDir, `.agent/skills/${skill.id}/SKILL.md`);
       expect(fs.existsSync(agPath)).toBe(true);
@@ -78,6 +78,17 @@ describe('Core initProject: AI Agent Scaffolding & Governance Suite', () => {
       expect(fs.existsSync(copilotPath)).toBe(true);
       expect(fs.readFileSync(copilotPath, 'utf-8')).toBe(renderCopilotSkillFile(skill));
     }
+
+    // Modular contextual rules, hierarchical AGENTS.md, and self-contained skill references
+    expect(fs.existsSync(path.join(tempDir, '.agent/rules/ai-sdlc-specs.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.agent/rules/ai-sdlc-code.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.agent/rules/ai-sdlc-testing.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.cursor/rules/ai-sdlc-testing.mdc'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'specs/AGENTS.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'src/AGENTS.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'tests/AGENTS.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.agent/skills/aisdlc-greenfield/references/inception-checklist.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.claude/skills/aisdlc-increment/references/sdd-lifecycle-and-gates.md'))).toBe(true);
   });
 
   it('initializes base policies and templates without agents when agents is "none" or false', () => {

@@ -12,6 +12,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "edit_file|write_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/guard-post-edit.cjs",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }

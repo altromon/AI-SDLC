@@ -353,7 +353,7 @@ export function runGitleaksCli(rootDir: string): SecretViolation[] {
   try {
     const output = execFileSync(
       'gitleaks',
-      ['detect', '--no-git', '--report-format', 'json', '--report-path', 'stdout'],
+      ['detect', '--no-git', '--report-format', 'json', '--report-path', '-'],
       {
         cwd: rootDir,
         encoding: 'utf-8',

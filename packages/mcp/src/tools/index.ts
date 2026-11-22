@@ -36,6 +36,8 @@ import {
   verifyQualityGate,
   verifySast,
   verifySecrets,
+  verifySkillExecutionEvidence,
+  verifySkillsIntegrity,
   verifyTasksGovernance,
   verifyTestingCoverage,
   verifyTraceability,
@@ -815,6 +817,22 @@ function registerVerifyTraceabilityTool(server: McpServer, options: RegisterTool
   });
 }
 
+function registerVerifySkillsTool(server: McpServer, options: RegisterToolsOptions): void {
+  server.tool(
+    'verify_skills',
+    'Verifies SKILL.md frontmatter, ./references/*.md integrity, and optional MCP execution evidence.',
+    { root: z.string().optional(), skill: z.string().optional() },
+    async (params) => {
+      return executeSecuredTool('verify_skills', params, options, (root) => {
+        const integrity = verifySkillsIntegrity(root);
+        const evidence = params.skill ? verifySkillExecutionEvidence(root, params.skill) : undefined;
+        const data = { ...integrity, ...(evidence ? { evidence } : {}) };
+        return { data, isError: !integrity.success, root };
+      });
+    }
+  );
+}
+
 function registerVerifyGovernanceTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('verify_governance', 'Audits task governance compliance.', { root: z.string().optional() }, async (params) => {
     return executeSecuredTool('verify_governance', params, options, (root) => {
@@ -1048,6 +1066,7 @@ function registerVerificationTools(server: McpServer, options: RegisterToolsOpti
   registerVerifySecurityTool(server, options);
   registerVerifyTraceabilityTool(server, options);
   registerVerifyGovernanceTool(server, options);
+  registerVerifySkillsTool(server, options);
   registerVerifyTestingTool(server, options);
   registerVerifyLicensesTool(server, options);
   registerVerifyDuplicatesTool(server, options);

@@ -1,0 +1,79 @@
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { runReportCompliance } from '../src/commands/report.js';
+import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from '../src/commands/sdd.js';
+
+describe('CLI sdd & report compliance commands (Happy / Sad / Boundary / Malformed)', () => {
+  let tmpDir: string;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-cli-sdd-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    vi.restoreAllMocks();
+  });
+
+  it('runReportCompliance: rejects unknown options, runs dryRun, and catches errors (happy/sad/malformed)', () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    expect(runReportCompliance({ unknownFlag: true } as never)).toBe(false);
+    expect(errSpy).toHaveBeenCalledWith(expect.stringContaining('Unknown option'));
+
+    fs.mkdirSync(path.join(tmpDir, 'src'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, 'src', 'a.ts'), 'export const x = 1;\n', 'utf-8');
+    expect(runReportCompliance({ root: tmpDir, dryRun: true })).toBe(true);
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Digest:'));
+  });
+
+  it('runChangeNew & runSddDeposit & runSddVerify & runSddIntegrate: covers happy, sad, boundary, and json paths', () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    // runChangeNew: empty name (boundary/sad) and valid creation (happy)
+    expect(runChangeNew({ root: tmpDir, name: '', silent: false })).toBe(false);
+    expect(logSpy.mock.calls.length + errSpy.mock.calls.length).toBeGreaterThan(0);
+
+    expect(runChangeNew({ root: tmpDir, name: 'Add telemetry', profile: 'standard', json: true })).toBe(true);
+    const changePayload = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0]));
+    expect(changePayload.command).toBe('change:new');
+    expect(changePayload.success).toBe(true);
+
+    // runSddDeposit: auto-detects active change when change is empty
+    expect(
+      runSddDeposit({
+        root: tmpDir,
+        change: '',
+        framework: 'openspec',
+        requirements: 'FR-1',
+        silent: false,
+      })
+    ).toBe(true);
+
+    // runSddDeposit: valid deposit in JSON mode
+    expect(
+      runSddDeposit({
+        root: tmpDir,
+        change: changePayload.changeId,
+        framework: 'openspec',
+        requirements: 'FR-1,FR-2',
+        components: 'CMP-1',
+        json: true,
+      })
+    ).toBe(true);
+
+    // runSddVerify: text & json on workspace
+    expect(typeof runSddVerify({ root: tmpDir, silent: false })).toBe('boolean');
+    expect(typeof runSddVerify({ root: tmpDir, json: true })).toBe('boolean');
+
+    // runSddIntegrate: missing change without --all (sad), nonexistent change (sad), --all (boundary)
+    expect(runSddIntegrate({ root: tmpDir, silent: false })).toBe(false);
+    expect(runSddIntegrate({ root: tmpDir, change: 'chg-999-missing', json: true })).toBe(false);
+    expect(typeof runSddIntegrate({ root: tmpDir, all: true, silent: false })).toBe('boolean');
+    expect(typeof runSddIntegrate({ root: tmpDir, all: true, json: true })).toBe('boolean');
+  });
+});

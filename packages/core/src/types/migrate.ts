@@ -25,7 +25,7 @@ export interface MigrationOptions {
 
 export interface MigrationItemReport {
   file: string;
-  category: 'schema' | 'template' | 'policy';
+  category: 'schema' | 'template' | 'policy' | 'agent';
   status: MigrationFileStatus;
   currentDigest?: string;
   targetDigest?: string;
