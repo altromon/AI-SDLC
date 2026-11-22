@@ -27,9 +27,9 @@ Across Phase 0 and Inception, quality auditing and adversarial stress-testing ar
 4. Verify `quality-policy.yaml`, `license-policy.yaml`, and `privacy-policy.yaml` are present in the repository root.
 5. Commit and push (`git push`) Phase 0 Inception artifacts (`ARCH-INTRO-001`, ProductShape, Threat/Privacy, Architecture) incrementally to the open Draft PR.
 
-### Step 2: Phase 0 Product Inception (`agent-product-analyst`)
+### Step 2: Phase 0 Product Inception (`agent-product-analyst` — `/grill-me` Socratic Decision-Tree Interview)
 1. Delegate to or adopt [`agent-product-analyst`](../agent-product-analyst/SKILL.md).
-2. **Iterative Discovery Interview (Up to 15 Questions or Until Product Scope is 100% Clear)**: Before generating artifacts, clarify with the human Product Owner in rounds of 3–5 questions:
+2. **Socratic Decision-Tree Discovery Interview (`/grill-me` Mode — Up to 15 Questions or Until Product Scope is 100% Clear)**: Before generating artifacts, interview the human Product Owner relentlessly like `/grill-me` by walking down the decision tree **one branch at a time (1–2 focused questions per turn, up to 15 questions total)**, exploring the repository first (Read-First Rule), presenting opinionated `(Recommended)` options via `ask_question` when available, challenging vague assumptions/edge cases, and enforcing the **No-Premature-Drafting Gate** (no spec files written until all branches are resolved and the user confirms the Decision Blueprint Summary):
    - Core mission statement and business problem.
    - Primary actors (`ACT-*`) and external systems.
    - **Target Interaction & Presentation Modality (`CON-*` / `ARCH-INTRO-001`)**: Explicitly define at inception how human actors will interact with the MVP (e.g., **Web UI**, **Desktop GUI**, **Interactive Console/TUI/CLI**, **Mobile App**, or **Headless API/SDK** if actors are exclusively external systems). Never assume a headless class library when human actors exist.

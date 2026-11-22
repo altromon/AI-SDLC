@@ -434,10 +434,20 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
     const productAnalyst = SPECIALIZED_AGENT_TEMPLATES.find((a) => a.id === 'agent-product-analyst');
     expect(productAnalyst).toBeDefined();
     expect(productAnalyst!.body).toMatch(/15 questions/i);
+    expect(productAnalyst!.body).toMatch(/\/grill-me/i);
+    expect(productAnalyst!.body).toMatch(/Socratic Decision-Tree/i);
+    expect(productAnalyst!.body).toMatch(/Read-First Rule/i);
+    expect(productAnalyst!.body).toMatch(/\(Recommended\)/);
+    expect(productAnalyst!.body).toMatch(/No-Premature-Drafting Gate/i);
     expect(productAnalyst!.body).toMatch(/ANTI-LIBRARY-ONLY MVP/i);
     expect(productAnalyst!.body).toMatch(/Plain-Language Journey Elicitation/i);
     expect(productAnalyst!.body).toMatch(/persona.*stages.*touchpoints.*pain-points.*related-use-cases/is);
     expect(productAnalyst!.body).toMatch(/Bootstrap 5.*Fluent.*ANSI/is);
+
+    const canonicalContent = fs.readFileSync(canonicalProtocolPath, 'utf-8');
+    expect(canonicalContent).toMatch(/\/grill-me/i);
+    expect(canonicalContent).toMatch(/READ-FIRST RULE/i);
+    expect(canonicalContent).toMatch(/NO-PREMATURE-DRAFTING GATE/i);
   });
 
   it('verifies agent-developer and agent-auditor enforce modern visual aesthetics and skills-first implementation', async () => {
