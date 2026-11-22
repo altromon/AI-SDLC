@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-025-STRUCTURED-JSON-VERIFY-001
+ * Tag: @FR-025-STRUCTURED-JSON-VERIFY-001
+ */
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -216,7 +220,7 @@ describe('CLI verify orchestrator error & edge branches', () => {
   });
 
   afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     vi.restoreAllMocks();
   });
 

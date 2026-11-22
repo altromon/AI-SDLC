@@ -1,10 +1,14 @@
+/**
+ * Cites: FR-025-STRUCTURED-JSON-VERIFY-001, FR-030-INIT-AGENT-SCAFFOLDING-001
+ * Tag: @FR-025-STRUCTURED-JSON-VERIFY-001 @FR-030-INIT-AGENT-SCAFFOLDING-001
+ */
+import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import { runGitPlan, runGitValidate } from '../src/commands/git.js';
 import { runInit } from '../src/commands/init.js';
-import { runMcpServer } from '../src/commands/mcp.js';
 import { runSddDeposit, runSddIntegrate, runSddVerify } from '../src/commands/sdd.js';
 import {
   runVerifyAll,
@@ -225,27 +229,27 @@ describe('@aisdlc/cli Command Suite', () => {
 
   it('should execute traceability verification', () => {
     const passed = runVerifyTraceability({ silent: true });
-    expect(typeof passed).toBe('boolean');
+    expect(passed).toBe(true);
   });
 
   it('should execute tasks governance verification', () => {
     const passed = runVerifyGovernance({ silent: true });
-    expect(typeof passed).toBe('boolean');
+    expect(passed).toBe(true);
   });
 
   it('should execute testing coverage verification', () => {
     const passed = runVerifyTesting({ silent: true });
-    expect(typeof passed).toBe('boolean');
+    expect(passed).toBe(true);
   });
 
   it('should execute license compliance verification', () => {
     const passed = runVerifyLicenses({ silent: true });
-    expect(typeof passed).toBe('boolean');
+    expect(passed).toBe(true);
   });
 
   it('should execute pdac drift verification', () => {
     const passed = runVerifyPdac({ silent: true });
-    expect(typeof passed).toBe('boolean');
+    expect(passed).toBe(true);
   });
 
   it('should execute duplicate requirements verification via CLI', () => {
@@ -340,8 +344,11 @@ describe('@aisdlc/cli Command Suite', () => {
     }
   });
 
-  it('should expose runMcpServer CLI command handler', () => {
-    expect(typeof runMcpServer).toBe('function');
+  it('should expose mcp CLI command help via compiled binary', () => {
+    const cliEntry = path.resolve(process.cwd(), 'packages/cli/dist/index.js');
+    const helpOut = execFileSync('node', [cliEntry, 'mcp', '--help'], { encoding: 'utf-8' });
+    expect(helpOut).toContain('Model Context Protocol');
+    expect(helpOut).toContain('--role');
   });
 
   it('should verify all quality gates including schemas and security via CLI', () => {

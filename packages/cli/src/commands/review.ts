@@ -16,7 +16,7 @@ export interface ReviewSubmitCliOptions {
   json?: boolean;
 }
 
-function printJsonResult(options: ReviewSubmitCliOptions, result: ReviewReportResult): void {
+export function printJsonResult(options: ReviewSubmitCliOptions, result: ReviewReportResult): void {
   console.log(
     JSON.stringify(
       {
@@ -35,7 +35,7 @@ function printJsonResult(options: ReviewSubmitCliOptions, result: ReviewReportRe
   );
 }
 
-function printTextResult(result: ReviewReportResult): void {
+export function printTextResult(result: ReviewReportResult): void {
   if (result.success) {
     console.log(`  ${pc.green('✔')} Review report persisted: ${pc.bold(result.reportPath || '')}`);
     console.log(`    Verdict: ${pc.cyan(result.verdict || '')} | Digest: ${pc.dim(result.digest || '')}`);

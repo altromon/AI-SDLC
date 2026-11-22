@@ -1,7 +1,11 @@
+/**
+ * Cites: FR-051-REGULATORY-COMPLIANCE-BUNDLE-001
+ * Tag: @FR-051-REGULATORY-COMPLIANCE-BUNDLE-001
+ */
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { runReportCompliance } from '../src/commands/report.js';
 
 describe('BDD / Integration: aisdlc report compliance', () => {
@@ -9,12 +13,15 @@ describe('BDD / Integration: aisdlc report compliance', () => {
 
   beforeEach(() => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-cli-compliance-'));
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     if (fs.existsSync(tempDir)) {
       try {
-        fs.rmSync(tempDir, { recursive: true, force: true });
+        fs.rmSync(tempDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
       } catch {
         // Ignore windows cleanup locks
       }
@@ -53,8 +60,12 @@ describe('BDD / Integration: aisdlc report compliance', () => {
       expect(bundle.regulatoryMatrix.euAiActCoverage).toEqual(
         expect.arrayContaining(['Art. 9', 'Art. 10', 'Art. 11', 'Art. 12', 'Art. 13', 'Art. 14', 'Art. 15'])
       );
-      expect(bundle.regulatoryMatrix.iso42001Coverage).toBeDefined();
-      expect(bundle.regulatoryMatrix.nistSsdfCoverage).toBeDefined();
+      expect(bundle.regulatoryMatrix.iso42001Coverage).toEqual(
+        expect.arrayContaining(['A.5.2', 'A.6.1', 'A.8.2', 'A.9.1'])
+      );
+      expect(bundle.regulatoryMatrix.nistSsdfCoverage).toEqual(
+        expect.arrayContaining(['PO.1', 'PS.1', 'PW.1', 'RV.1'])
+      );
     });
   });
 
@@ -73,7 +84,9 @@ describe('BDD / Integration: aisdlc report compliance', () => {
 
       const content = fs.readFileSync(outputPath, 'utf-8');
       const bundle = JSON.parse(content);
-      expect(bundle.inTotoAttestation).toBeDefined();
+      expect(bundle.inTotoAttestation._type).toBe('https://in-toto.io/Statement/v1');
+      expect(Array.isArray(bundle.inTotoAttestation.subject)).toBe(true);
+      expect(bundle.inTotoAttestation.subject.length).toBeGreaterThanOrEqual(1);
     });
 
     it('should execute in CI headless environment recording keyless claims or deterministic reproducibility hash', () => {

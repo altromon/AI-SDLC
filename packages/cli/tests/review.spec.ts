@@ -1,11 +1,13 @@
 /**
  * Tests for CLI: aisdlc review submit (reviewer write channel)
+ * Cites: FR-031-WORKFLOW-AGENT-HANDOFF-001
+ * Tag: @FR-031-WORKFLOW-AGENT-HANDOFF-001
  */
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { runReviewSubmit } from '../src/commands/review.js';
+import { printJsonResult, printTextResult, runReviewSubmit } from '../src/commands/review.js';
 
 describe('aisdlc review submit', () => {
   let rootDir: string;
@@ -71,5 +73,52 @@ describe('aisdlc review submit', () => {
     });
 
     expect(ok).toBe(false);
+  });
+
+  it('printJsonResult emits structured payload for both success and error states', () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    printJsonResult(
+      { change: changeId, reviewer: 'agent-code-reviewer', verdict: 'COMPLIANT', body: 'ok' },
+      { success: true, verdict: 'COMPLIANT', reportPath: 'reviews/r.md', digest: 'abc123' }
+    );
+    const okPayload = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0]));
+    expect(okPayload).toEqual({
+      command: 'review:submit',
+      success: true,
+      change: changeId,
+      reviewer: 'agent-code-reviewer',
+      verdict: 'COMPLIANT',
+      reportPath: 'reviews/r.md',
+      digest: 'abc123',
+    });
+
+    printJsonResult(
+      { change: changeId, reviewer: 'agent-developer', verdict: 'COMPLIANT', body: 'x' },
+      { success: false, error: 'Unauthorized reviewer' }
+    );
+    const errPayload = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0]));
+    expect(errPayload.success).toBe(false);
+    expect(errPayload.error).toBe('Unauthorized reviewer');
+  });
+
+  it('printTextResult prints report summary on success and fallback/error text on failure', () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    printTextResult({ success: true, reportPath: 'r.md', verdict: 'COMPLIANT', digest: 'deadbeef' });
+    expect(logSpy.mock.calls.map((c) => String(c[0])).join('\n')).toContain('Review report persisted: ');
+    expect(logSpy.mock.calls.map((c) => String(c[0])).join('\n')).toContain('deadbeef');
+
+    logSpy.mockClear();
+    printTextResult({ success: true });
+    expect(logSpy.mock.calls.map((c) => String(c[0])).join('\n')).toContain('Verdict:');
+
+    printTextResult({ success: false, error: 'Invalid verdict' });
+    expect(errSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid verdict'));
+
+    errSpy.mockClear();
+    printTextResult({ success: false });
+    expect(errSpy).toHaveBeenCalledWith(expect.stringContaining('Unknown error'));
   });
 });

@@ -24,7 +24,7 @@ export interface CliMigrateOptions {
   branch?: string;
 }
 
-function printConsoleSummary(result: MigrationResult, reporter: MigrationReporter): void {
+export function printConsoleSummary(result: MigrationResult, reporter: MigrationReporter): void {
   console.log(reporter.formatTerminal(result));
   if (result.exitCode === 0) {
     console.log(pc.green('\nMigration completed successfully.'));

@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-028-NATIVE-MCP-SERVER-001, FR-047-MCP-SERVER-HARDENING-DLP-001
+ * Tag: @FR-028-NATIVE-MCP-SERVER-001 @FR-047-MCP-SERVER-HARDENING-DLP-001
+ */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const startMcpServerMock = vi.fn();

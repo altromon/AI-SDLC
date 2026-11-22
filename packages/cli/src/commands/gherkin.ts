@@ -34,7 +34,7 @@ export interface GherkinScaffoldCliOptions {
   execFn?: GherkinScaffoldExecFn;
 }
 
-function printGherkinResult(result: ReturnType<typeof extractGherkinFeatures>): void {
+export function printGherkinResult(result: ReturnType<typeof extractGherkinFeatures>): void {
   console.log(`  Generated .feature files:    ${pc.bold(String(result.features.length))}`);
   console.log(`  Total scenarios:             ${pc.bold(String(result.totalScenarios))}`);
 
@@ -42,10 +42,14 @@ function printGherkinResult(result: ReturnType<typeof extractGherkinFeatures>): 
     console.log(`    ${pc.green('✔')} ${pc.bold(f.featureName)} ➔ ${f.outputFile} (${f.scenarioCount} scenarios)`);
   }
 
-  console.log(pc.green('\n✔ BDD synchronization completed successfully.\n'));
+  if (result.success) {
+    console.log(pc.green('\n✔ BDD synchronization completed successfully.\n'));
+  } else {
+    console.error(pc.red('\n✖ BDD synchronization completed with errors.\n'));
+  }
 }
 
-function emitGherkinJson(result: ReturnType<typeof extractGherkinFeatures>): void {
+export function emitGherkinJson(result: ReturnType<typeof extractGherkinFeatures>): void {
   const payload = {
     command: 'gherkin:extract',
     success: result.success,
@@ -82,28 +86,40 @@ export function runGherkinExtract(options: GherkinExtractCliOptions = {}): boole
   return result.success;
 }
 
-function defaultConfirmInstall(question: string): Promise<boolean> {
+export function defaultConfirmInstall(question: string): Promise<boolean> {
   return new Promise((resolve) => {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    let settled = false;
+    rl.on('close', () => {
+      if (!settled) {
+        settled = true;
+        resolve(false);
+      }
+    });
     rl.question(question, (answer) => {
+      if (!settled) {
+        settled = true;
+        const normalized = answer.trim().toLowerCase();
+        resolve(normalized === 'y' || normalized === 'yes');
+      }
       rl.close();
-      const normalized = answer.trim().toLowerCase();
-      resolve(normalized === 'y' || normalized === 'yes');
     });
   });
 }
 
-function printScaffoldText(result: GherkinScaffoldResult): void {
-  if (result.status === 'ERROR') {
-    console.error(pc.red(`\n✖ [Gherkin Scaffold] Error (${result.errorCode}): ${result.featureFile}\n`));
-    return;
-  }
+export function printScaffoldText(result: GherkinScaffoldResult): void {
   if (result.status === 'GENERATOR_MISSING') {
     console.log(
       pc.yellow(
-        `\n⚠ Native generator (${result.generatorBin}) missing. Run: ${pc.bold(result.installCommand || '')} (License: ${result.license})\n`
+        `\n⚠ Native generator (${result.generatorBin}) missing. Run: ${pc.bold(result.installCommand ?? '')} (License: ${result.license})\n`
       )
     );
+    return;
+  }
+  if (result.status === 'ERROR' || !result.success) {
+    const code = result.errorCode ?? result.status;
+    const detail = result.fallbackReason ? ` - ${result.fallbackReason}` : '';
+    console.error(pc.red(`\n✖ [Gherkin Scaffold] Error (${code}): ${result.featureFile}${detail}\n`));
     return;
   }
   const files = result.outputFiles?.length ? result.outputFiles : [result.outputFile];
@@ -112,7 +128,7 @@ function printScaffoldText(result: GherkinScaffoldResult): void {
   }
 }
 
-async function handleInteractiveMissing(
+export async function handleInteractiveMissing(
   initialResult: GherkinScaffoldResult,
   featurePath: string,
   options: GherkinScaffoldCliOptions,
@@ -133,7 +149,7 @@ async function handleInteractiveMissing(
   });
 }
 
-function emitScaffoldOutput(
+export function emitScaffoldOutput(
   result: GherkinScaffoldResult,
   options: GherkinScaffoldCliOptions,
   useJson: boolean

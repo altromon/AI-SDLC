@@ -496,6 +496,15 @@ describe('verify.ts Licenses, Prompt, PDaC, Schemas, Friction, Duplicates & Priv
         ropaOutputPath: '/tmp/ropa.md',
         reportOutputPath: '/tmp/priv.md',
       });
+      expect(
+        buildPrivacyVerifyInput({ ropaReport: '   ', report: '   ' }, '/tmp/p')
+      ).toEqual({
+        rootDir: '/tmp/p',
+        policyPath: undefined,
+        generateRopa: false,
+        ropaOutputPath: undefined,
+        reportOutputPath: undefined,
+      });
 
       emitPrivacyJson(makePrivacyResult());
       expect(JSON.parse(String(logSpy.mock.calls.at(-1)?.[0])).exitCode).toBe(0);

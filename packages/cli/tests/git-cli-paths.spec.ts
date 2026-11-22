@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-040-RELEASE-SUPPLY-CHAIN-PROVENANCE-001, FR-064-REASONING-EFFORT-TRAILER-001
+ * Tag: @FR-040-RELEASE-SUPPLY-CHAIN-PROVENANCE-001 @FR-064-REASONING-EFFORT-TRAILER-001
+ */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const classifyBranchMock = vi.fn();
