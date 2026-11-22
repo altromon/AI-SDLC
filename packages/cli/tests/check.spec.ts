@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-025-STRUCTURED-JSON-VERIFY-001, FR-046-NATIVE-SDK-CLI-AST-001, FR-063-UI-E2E-MODALITY-GATE-001
+ * Tag: @FR-025-STRUCTURED-JSON-VERIFY-001 @FR-046-NATIVE-SDK-CLI-AST-001 @FR-063-UI-E2E-MODALITY-GATE-001
+ */
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';

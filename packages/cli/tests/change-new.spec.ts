@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-045-PDAC-SCHEMA-FAIL-CLOSED-001, FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001, FR-063-UI-E2E-MODALITY-GATE-001
+ * Tag: @FR-045-PDAC-SCHEMA-FAIL-CLOSED-001 @FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001 @FR-063-UI-E2E-MODALITY-GATE-001
+ */
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -7,48 +11,46 @@ import { runChangeNew, runSddVerify } from '../src/commands/sdd.js';
 
 describe('@aisdlc/cli change new Command Suite', () => {
   it('should scaffold greenfield change with dual product artifact (Option A)', () => {
-    const tmpDir = path.join(process.cwd(), 'scratch', 'test-cli-change-new-greenfield');
-    if (fs.existsSync(tmpDir)) {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test-cli-change-new-greenfield-'));
+
+    try {
+      const passed = runChangeNew({
+        root: tmpDir,
+        name: 'Autenticación Biométrica UAV',
+        silent: true,
+      });
+
+      expect(passed).toBe(true);
+
+      const changeDir = path.join(
+        tmpDir,
+        'specs',
+        'changes',
+        'active',
+        'chg-001-autenticacion-biometrica-uav'
+      );
+      expect(fs.existsSync(changeDir)).toBe(true);
+      expect(fs.existsSync(path.join(changeDir, 'proposal.md'))).toBe(true);
+      expect(fs.existsSync(path.join(changeDir, 'spec.md'))).toBe(true);
+      expect(fs.existsSync(path.join(changeDir, 'design.md'))).toBe(true);
+      expect(fs.existsSync(path.join(changeDir, 'tasks.md'))).toBe(true);
+      expect(fs.existsSync(path.join(changeDir, 'handoff.yaml'))).toBe(true);
+
+      // Verify product draft requirement created
+      const productPath = path.join(
+        tmpDir,
+        'specs',
+        'product',
+        'FR-001-AUTENTICACION-BIOMETRICA-UAV-001.md'
+      );
+      expect(fs.existsSync(productPath)).toBe(true);
+
+      // Verify sidecar validity via runSddVerify
+      const verifyPassed = runSddVerify({ root: tmpDir, silent: true });
+      expect(verifyPassed).toBe(true);
+    } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
-
-    const passed = runChangeNew({
-      root: tmpDir,
-      name: 'Autenticación Biométrica UAV',
-      silent: true,
-    });
-
-    expect(passed).toBe(true);
-
-    const changeDir = path.join(
-      tmpDir,
-      'specs',
-      'changes',
-      'active',
-      'chg-001-autenticacion-biometrica-uav'
-    );
-    expect(fs.existsSync(changeDir)).toBe(true);
-    expect(fs.existsSync(path.join(changeDir, 'proposal.md'))).toBe(true);
-    expect(fs.existsSync(path.join(changeDir, 'spec.md'))).toBe(true);
-    expect(fs.existsSync(path.join(changeDir, 'design.md'))).toBe(true);
-    expect(fs.existsSync(path.join(changeDir, 'tasks.md'))).toBe(true);
-    expect(fs.existsSync(path.join(changeDir, 'handoff.yaml'))).toBe(true);
-
-    // Verify product draft requirement created
-    const productPath = path.join(
-      tmpDir,
-      'specs',
-      'product',
-      'FR-001-AUTENTICACION-BIOMETRICA-UAV-001.md'
-    );
-    expect(fs.existsSync(productPath)).toBe(true);
-
-    // Verify sidecar validity via runSddVerify
-    const verifyPassed = runSddVerify({ root: tmpDir, silent: true });
-    expect(verifyPassed).toBe(true);
-
-    // Clean up
-    fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
   it('should scaffold change citing existing artifact with --from flag', () => {
@@ -160,12 +162,17 @@ El sistema debe exportar informes financieros mensuales en formato PDF.
   });
 
   it('should reject empty name gracefully', () => {
-    const passed = runChangeNew({
-      root: process.cwd(),
-      name: '   ',
-      silent: true,
-    });
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test-cli-change-empty-'));
+    try {
+      const passed = runChangeNew({
+        root: tmpDir,
+        name: '   ',
+        silent: true,
+      });
 
-    expect(passed).toBe(false);
+      expect(passed).toBe(false);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 });

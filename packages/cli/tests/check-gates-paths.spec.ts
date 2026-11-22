@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-025-STRUCTURED-JSON-VERIFY-001, FR-046-NATIVE-SDK-CLI-AST-001, FR-063-UI-E2E-MODALITY-GATE-001
+ * Tag: @FR-025-STRUCTURED-JSON-VERIFY-001 @FR-046-NATIVE-SDK-CLI-AST-001 @FR-063-UI-E2E-MODALITY-GATE-001
+ */
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -39,11 +43,12 @@ describe('CLI check individual gate auditors & renderDashboard (Happy / Sad / Bo
     expect(autoFix.gherkinCount).toBe(0);
     expect(autoFix.digestsCount).toBe(0);
 
-    const gates = [
-      auditGherkinGate(tmpDir, true),
-      auditGherkinGate(tmpDir, false),
-      auditPdacGate(tmpDir, true),
-      auditPdacGate(tmpDir, false),
+    expect(auditGherkinGate(tmpDir, true).status).toBe('FIXED');
+    expect(auditGherkinGate(tmpDir, false).status).toBe('PASSED');
+    expect(auditPdacGate(tmpDir, true).status).toBe('FIXED');
+    expect(auditPdacGate(tmpDir, false).status).toBe('PASSED');
+
+    const passedGates = [
       auditQualityGate(tmpDir),
       auditTraceabilityGate(tmpDir),
       auditGovernanceGate(tmpDir),
@@ -57,9 +62,23 @@ describe('CLI check individual gate auditors & renderDashboard (Happy / Sad / Bo
       auditPrivacyGate(tmpDir),
     ];
 
-    for (const g of gates) {
-      expect(g.name).toBeTruthy();
-      expect(['PASSED', 'FIXED', 'FAILED']).toContain(g.status);
+    expect(passedGates.map((g) => g.name)).toEqual([
+      'Quality Gate (Complexity & Maintainability)',
+      '360° Traceability (Reverse RTM)',
+      'Tasks Governance & Autonomy Classification',
+      'Test Coverage in Requirements & Tasks',
+      'Open Source License Governance',
+      'JSON Schemas Compliance (Draft 2020-12)',
+      'Secrets and Credentials Detection (Gitleaks Gate)',
+      'Shift-Left Security (Gitleaks Secrets & SAST)',
+      'Duplicate Requirements & Redundancy',
+      'Progressive Friction & Anti-Bypass Guardrails',
+      'Data Protection & Privacy-by-Design (GDPR/PII-SAST)',
+    ]);
+
+    for (const g of passedGates) {
+      expect(g.status).toBe('PASSED');
+      expect(g.message.length).toBeGreaterThan(0);
     }
   });
 
@@ -68,14 +87,17 @@ describe('CLI check individual gate auditors & renderDashboard (Happy / Sad / Bo
     fs.writeFileSync(path.join(tmpDir, 'src', 'leak.ts'), `const t = "${fakeGhp}";\n`, 'utf-8');
 
     const secGate = auditSecretsGate(tmpDir);
+    expect(secGate.name).toBe('Secrets and Credentials Detection (Gitleaks Gate)');
     expect(secGate.status).toBe('FAILED');
-    expect(secGate.remediation).toBeTruthy();
+    expect(secGate.message).toContain('1 exposed credential(s)');
+    expect(secGate.remediation).toContain('Revoke exposed tokens');
 
     const unifiedGate = auditSecurityGate(tmpDir);
     expect(unifiedGate.status).toBe('FAILED');
+    expect(unifiedGate.message).toContain('secret(s)');
   });
 
-  it('renderDashboard prints PASSED, FIXED, and FAILED gates with remediation (happy/sad/boundary)', () => {
+  it('renderDashboard prints PASSED, FIXED, and FAILED gates with remediation and auto-fix counts (happy/sad/boundary)', () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     renderDashboard(
@@ -89,10 +111,27 @@ describe('CLI check individual gate auditors & renderDashboard (Happy / Sad / Bo
       3
     );
 
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('PASSED'));
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('AUTO-FIX'));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('PRE-FLIGHT BLOCKED'));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('fix it'));
 
-    renderDashboard([{ name: 'G1', status: 'PASSED', message: 'ok' }], true, 0, 0);
-    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('EXIT 0'));
+    logSpy.mockClear();
+    renderDashboard(
+      [
+        { name: 'G1', status: 'PASSED', message: 'ok' },
+        { name: 'G2', status: 'FIXED', message: 'synced' },
+      ],
+      true,
+      2,
+      3
+    );
+
+    const output = logSpy.mock.calls.map((c) => String(c[0])).join('\n').replace(/\u001b\[[0-9;]*m/g, '');
+    expect(output).toContain('AUTO-FIX MODE ACTIVE');
+    expect(output).toMatch(/Gherkin features synchronized:\s*2$/m);
+    expect(output).toMatch(/SHA-256 digests synchronized:\s*3$/m);
+    expect(output).toContain('AUTO-FIX');
+    expect(output).toContain('EXIT 0');
   });
 });
