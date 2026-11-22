@@ -897,10 +897,11 @@ The `agent-devops` agent maintains CI/CD pipelines, container images, and infras
 - **Permitted scope**: `.github/workflows/`, `Dockerfile*`, `docker-compose*.yml`, IaC manifests, and `scripts/`.
 - **Prohibited scope**: Modifying application source code files (`src/`, `packages/*/src/app/`) is strictly forbidden. Business logic belongs exclusively to `agent-developer`.
 
-### 5. Transversal Quality & Red-Team Feedback Loop (`agent-auditor` & `agent-adversary`)
-Beyond linear phase progression, the framework introduces two **on-demand transversal meta-agents** that can be invoked during any stage of development (Product, Security/Privacy, Architecture, QA Red Phase, Developer Green Phase, or DevOps):
+### 5. Transversal Quality & Red-Team Feedback Loop (`agent-auditor`, `agent-adversary` & `aisdlc-spot-audit`)
+Beyond linear phase progression, the framework introduces two **on-demand transversal meta-agents** that can be invoked during any stage of development (Product, Security/Privacy, Architecture, QA Red Phase, Developer Green Phase, or DevOps) as well as via the dedicated **`aisdlc-spot-audit`** playbook skill:
 - **`agent-auditor` (Constructive Critic)**: Polymorphically inspects deliverables to identify premature abstractions, overengineering, or structural debt, suggesting minimal, standard YAGNI improvements.
 - **`agent-adversary` (Destructive Red Team)**: Actively attempts to break or invalidate deliverables, delivering concrete proofs-of-concept (PoC) such as logic traps in product rules, race conditions in architecture diagrams, mutant code that bypasses QA tests, or boundary payloads that crash implementation code.
+- **On-Demand Spot Auditing (`aisdlc-spot-audit` $\leftrightarrow$ `aisdlc-inspector`)**: Users or workflows can audit any specific artifact (`UC-*`, `FR-*`, `CMP-*`, `TSK-*`, test suite, or source code file `src/...`) on demand by invoking `aisdlc-spot-audit` directly or via interactive handoff from `aisdlc-inspector`, combining deterministic graph inspection (`inspect_element`) and layer-specific gates with parallel isolated runs of `agent-auditor` $\parallel$ `agent-adversary`.
 - **Mandatory Return Handoff & Anti-Ping-Pong Protocol**: Both agents operate under strict non-invasion rules (they inspect without altering files directly) and emit their canonical Workflow Handoff back to the **audited specialist agent** to resolve findings. To eliminate infinite review cycles, the loop is limited to **maximum 1 return round** per increment before escalation.
 
 ### 6. Persistent Runtime Observability & Optional Prometheus/Grafana Stack

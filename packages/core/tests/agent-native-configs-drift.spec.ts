@@ -326,6 +326,7 @@ describe('Agent Native Configs & Anti-Drift Governance Suite', () => {
       'aisdlc-release-compliance',
       'aisdlc-security-sca-triage',
       'aisdlc-bdd-gherkin',
+      'aisdlc-spot-audit',
     ]);
 
     for (const skill of LIFECYCLE_SKILL_TEMPLATES) {

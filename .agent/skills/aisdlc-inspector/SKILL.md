@@ -69,9 +69,11 @@ Once the technical report is fully constructed:
      - `(Recommended) <ID-1> (<Type-1> — <relation-1>)`
      - `<ID-2> (<Type-2> — <relation-2>)`
      - `<ID-N> (<Type-N> — <relation-N>)`
+     - `Auditar este elemento (<ID>) con agent-auditor + agent-adversary (Handoff → aisdlc-spot-audit)`
      - `Terminar exploración`
-3. **Navigation Loop:**
+3. **Navigation & Audit Handoff Loop:**
    - When the user selects or indicates an element (either via UI selector or plain text/number), repeat **Step 2** with the new selection.
+   - If the user selects `Auditar este elemento (<ID>) con agent-auditor + agent-adversary (Handoff → aisdlc-spot-audit)`, emit a Workflow Handoff transitioning directly into [`aisdlc-spot-audit`](../aisdlc-spot-audit/SKILL.md) targeting `<ID>`.
    - If the user selects `Terminar exploración`, summarize the traversal journey and conclude.
 ## Self-Contained References
 - [`traceability-graph-legend.md`](./references/traceability-graph-legend.md)

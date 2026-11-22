@@ -145,8 +145,8 @@ To prevent context loss or invalid assumptions:
    - **Canonical Lifecycle Transition Chain**:
      $\text{Human PO} \rightarrow \text{agent-product-analyst} \rightarrow \text{agent-expert-user} \rightarrow \text{agent-threat-modeler} \rightarrow \text{agent-privacy-officer} \rightarrow \text{agent-system-architect} \rightarrow \text{agent-qa-engineer} \rightarrow \text{agent-developer} \rightarrow \text{agent-expert-user} \rightarrow (\text{agent-auditor} \parallel \text{agent-adversary} + \text{agent-privacy-officer}) \rightarrow \text{Human Tech Lead}$
 
-   - **Transversal Feedback & Return Loop Protocol (`agent-auditor` & `agent-adversary`)**:
-     * In addition to the sequential chain, any active specialist agent's deliverable may be routed on-demand to **`agent-auditor`** (constructive review for YAGNI, simplifications, and completeness) or **`agent-adversary`** (destructive red-team testing requiring reproducible PoC breaks or test mutations).
+   - **Transversal Feedback & Return Loop Protocol (`agent-auditor`, `agent-adversary` & `aisdlc-spot-audit`)**:
+     * In addition to the sequential chain, any active specialist agent's deliverable or individual system element (`UC-*`, `FR-*`, `CMP-*`, `TSK-*`, test file, or source code file) may be routed on-demand — directly via the **`aisdlc-spot-audit`** skill or through a handoff from **`aisdlc-inspector`** — to **`agent-auditor`** (constructive review for YAGNI, simplifications, and completeness) and **`agent-adversary`** (destructive red-team testing requiring reproducible PoC breaks or test mutations) executing in isolated context windows.
      * **Mandatory Return Handoff**: The auditor/adversary operates under non-invasion rules (no direct file editing) and emits its Workflow Handoff directly back to the **audited author agent** so that agent repairs the findings in its own isolated context before downstream promotion.
      * **Anti-Ping-Pong Boundary**: Return rounds are bounded to a maximum of **1 iteration** per task increment to avoid infinite critique cycles; unresolved items are escalated to the Human Tech Lead.
 

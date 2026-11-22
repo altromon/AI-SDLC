@@ -38,6 +38,7 @@ describe('Skill Evals: Trigger Matching & End-to-End Postconditions', () => {
     expect(matchSkillByKeywords(['sarif', 'sast', 'secrets'])).toBe('aisdlc-security-sca-triage');
     expect(matchSkillByKeywords(['gherkin', 'extract', 'scaffold'])).toBe('aisdlc-bdd-gherkin');
     expect(matchSkillByKeywords(['inspect', 'traceability'])).toBe('aisdlc-inspector');
+    expect(matchSkillByKeywords(['audit', 'agent-auditor', 'agent-adversary'])).toBe('aisdlc-spot-audit');
   });
 
   it('evals aisdlc-doctor-migrate postconditions: init -> migrate upgrades skills, rules, hooks, and references', async () => {
