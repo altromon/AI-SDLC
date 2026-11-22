@@ -88,8 +88,8 @@ To prevent inconsistencies and broken reciprocal links:
 ## 4. Product Operations Cycle (Phase 0 Inception & Evolution)
 
 ### A. Phase 0: Greenfield & Brownfield Product Inception (`ARCH-INTRO-*`)
-When starting a new product from scratch (or when adopting AI-SDLC in a Brownfield repository without an `ARCH-INTRO-*` root vision artifact), `agent-product-analyst` executes a structured inception flow before any feature change (`change:new`) or code is written:
-1. **Iterative Discovery Interview (Up to 15 Questions or Until Product Scope is 100% Clear)**: The agent interviews the human Product Owner in rounds of 3–5 questions (up to **15 questions maximum**, stopping earlier as soon as the product is clear) on:
+When starting a new product from scratch (or when adopting AI-SDLC in a Brownfield repository without an `ARCH-INTRO-*` root vision artifact), `agent-product-analyst` executes a structured `/grill-me` Socratic decision-tree inception flow before any feature change (`change:new`) or code is written:
+1. **Socratic Decision-Tree Discovery Interview (`/grill-me` Mode — Up to 15 Questions or Until Product Scope is 100% Clear)**: Instead of dumping a static multi-question form, the agent interviews the human Product Owner one branch at a time (1–2 focused questions per turn, up to **15 questions maximum**, stopping earlier as soon as the product is crystal clear), exploring the repository first (Read-First Rule), presenting opinionated `(Recommended)` options via `ask_question` when available, challenging vague assumptions or edge cases, and enforcing the **No-Premature-Drafting Gate** (no spec files written until all branches are resolved and the user confirms the Decision Blueprint Summary) on:
    - Core problem, mission statement, and value proposition.
    - Primary stakeholders and actors (`ACT-*`).
    - **Target Interaction & Presentation Modality (`CON-*` / `ARCH-INTRO-001`)**: Explicitly define how human actors interact with the MVP (Web UI, Desktop GUI, Interactive Console/TUI/CLI, Mobile App, or Headless API/SDK if exclusively system-to-system). Never default to headless class libraries when human actors exist.
@@ -111,9 +111,9 @@ When starting a new product from scratch (or when adopting AI-SDLC in a Brownfie
   Idea / Need (or Phase 0 New Product Intent)
       │
       ▼
-  ps:explore ────────────► agent-product-analyst conducts iterative discovery
-      │                   (up to 15 questions until clear -> ARCH-INTRO-001) or
-      │                   reasons over existing graph to identify gaps
+  ps:explore ────────────► agent-product-analyst conducts /grill-me Socratic discovery
+      │                   (1–2 questions/turn up to 15 until clear -> ARCH-INTRO-001)
+      │                   or reasons over existing graph to identify gaps
       ▼
 Product Change ─────────► changes/active/<chg-id>/: semantic delta with
       │                   proposed artifacts in their future state

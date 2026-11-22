@@ -23,7 +23,7 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 ### Step 1: Upstream Product, Security & Privacy Delta (`agent-product-analyst`, `agent-threat-modeler` & `agent-privacy-officer`)
 1. Inspect active changes via MCP tool `get_active_handoff` and verify whether the target Use Case (`UC-*`) or Requirement (`FR-*`) already exists in `specs/product/`.
 2. If the increment introduces new behavior or modifies business rules:
-   - Use [`agent-product-analyst`](../agent-product-analyst/SKILL.md) to create or update the `UC-*`, `BR-*`, and `FR-*` (with `@nominal`, `@boundary`, `@invalid` Gherkin scenarios).
+   - Use [`agent-product-analyst`](../agent-product-analyst/SKILL.md) (running a `/grill-me` Socratic Decision-Tree interview of 1–2 focused questions per turn with `(Recommended)` options and Read-First codebase exploration whenever design branches are open) to create or update the `UC-*`, `BR-*`, and `FR-*` (with `@nominal`, `@boundary`, `@invalid` Gherkin scenarios).
    - Run MCP tool `verify_duplicates` (`npx aisdlc verify duplicates`) to block lexical or functional collisions early.
    - Use [`agent-threat-modeler`](../agent-threat-modeler/SKILL.md) to model any new `ABUSE-*` and `SEC-REQ-*` mitigations.
    - Hand off to [`agent-privacy-officer`](../agent-privacy-officer/SKILL.md) to model any personal data assets (`DATA-ASSET-*`), GDPR Art. 30 processing activities (`PRIV-ROPA-*`), and privacy requirements (`PRIV-REQ-*`).

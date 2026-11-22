@@ -44,7 +44,7 @@ npx tsx packages/cli/src/index.ts sdd integrate --change <chg-id>
 
 | Role | Mission (summary) |
 | :--- | :--- |
-| `agent-product-analyst` | Phase 0 NAF v4 Vision (`ARCH-INTRO-*`, up to 15-question discovery defining UI modality & CRUD prerequisites) + ProductShape (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); `status` starts `draft`. |
+| `agent-product-analyst` | Phase 0 NAF v4 Vision (`ARCH-INTRO-*`, `/grill-me` Socratic decision-tree discovery interview of up to 15 questions — 1–2 per turn with `(Recommended)` options — defining UI modality & CRUD prerequisites) + ProductShape (`ACT-*`, `UC-*`, `FR-*`, `QR-*`, `BR-*`); `status` starts `draft`. |
 | `agent-threat-modeler` | STRIDE/OWASP threat triad (`ACT-THREAT-*`, `ABUSE-*`, `SEC-REQ-*`); hands off to `agent-privacy-officer`. |
 | `agent-privacy-officer` | LINDDUN & GDPR/LOPDGDD privacy triad (`DATA-ASSET-*`, `PRIV-ROPA-*`, `PRIV-REQ-*`) + Pre-Merge `verify:privacy`. |
 | `agent-system-architect` | Modular arc42 + NAF v4 architecture (`CMP-*`, `ARCH-DEP-001`, Mermaid diagrams, `ADR-*`). |
