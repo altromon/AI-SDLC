@@ -11,13 +11,21 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createMcpServer } from '../src/server.js';
 
+function resourceText(result: unknown): string {
+  return String((result as { contents: Array<{ text?: unknown }> }).contents[0]?.text ?? '');
+}
+
+function toolText(result: unknown): string {
+  return (result as { content: Array<{ text: string }> }).content[0].text;
+}
+
 describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
   let client: Client;
   let server: ReturnType<typeof createMcpServer>;
 
   beforeAll(async () => {
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-    server = createMcpServer({ rootDir: process.cwd() });
+    server = createMcpServer({ rootDir: process.cwd(), enableAuditLog: false });
     await server.connect(serverTransport);
 
     client = new Client({ name: 'test-mcp-client', version: '1.0.0' }, { capabilities: {} });
@@ -83,26 +91,26 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
     it('should read quality-policy.yaml via aisdlc://policies/quality', async () => {
       const result = await client.readResource({ uri: 'aisdlc://policies/quality' });
       expect(result.contents.length).toBe(1);
-      expect(result.contents[0].text).toContain('cyclomatic_complexity');
+      expect(resourceText(result)).toContain('cyclomatic_complexity');
     });
 
     it('should read license-policy.yaml via aisdlc://policies/licenses', async () => {
       const result = await client.readResource({ uri: 'aisdlc://policies/licenses' });
       expect(result.contents.length).toBe(1);
-      expect(result.contents[0].text).toContain('permissive_free');
+      expect(resourceText(result)).toContain('permissive_free');
     });
 
     it('should list active SDD changes via aisdlc://changes/active', async () => {
       const result = await client.readResource({ uri: 'aisdlc://changes/active' });
       expect(result.contents.length).toBe(1);
-      const parsed = JSON.parse(result.contents[0].text as string);
+      const parsed = JSON.parse(resourceText(result));
       expect(Array.isArray(parsed)).toBe(true);
     });
 
     it('should list completed SDD changes via aisdlc://changes/completed', async () => {
       const result = await client.readResource({ uri: 'aisdlc://changes/completed' });
       expect(result.contents.length).toBe(1);
-      const parsed = JSON.parse(result.contents[0].text as string);
+      const parsed = JSON.parse(resourceText(result));
       expect(Array.isArray(parsed)).toBe(true);
       expect(parsed).toContain('chg-028-native-mcp-server');
     });
@@ -110,7 +118,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
     it('should read summary status via aisdlc://status/summary', async () => {
       const result = await client.readResource({ uri: 'aisdlc://status/summary' });
       expect(result.contents.length).toBe(1);
-      const summary = JSON.parse(result.contents[0].text as string);
+      const summary = JSON.parse(resourceText(result));
       expect(summary.qualityPolicyExists).toBe(true);
       expect(summary.licensePolicyExists).toBe(true);
     });
@@ -124,7 +132,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       });
 
       expect(result.isError).toBeFalsy();
-      const content = JSON.parse((result.content[0] as any).text);
+      const content = JSON.parse(toolText(result));
       expect(content.success).toBe(true);
       expect(content.ciProvider).toBe('github');
       expect(content.directoriesCreated).toContain('templates/ci');
@@ -137,7 +145,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       });
 
       expect(result.isError).toBeFalsy();
-      const content = JSON.parse((result.content[0] as any).text);
+      const content = JSON.parse(toolText(result));
       if (!content.success) {
         console.error('FAILED GATES IN MCP VERIFY:', JSON.stringify(content.gates.filter((g: any) => !g.success), null, 2));
       }
@@ -155,7 +163,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       });
 
       expect(result.isError).toBeFalsy();
-      const content = JSON.parse((result.content[0] as any).text);
+      const content = JSON.parse(toolText(result));
       expect(content.success).toBe(true);
       expect(content.profile).toBe('lite');
       expect(content.totalGates).toBe(3);
@@ -166,16 +174,23 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
     });
 
     it('should execute summary tool "report" generating dashboard and quality report metadata', async () => {
-      const result = await client.callTool({
-        name: 'report',
-        arguments: {},
-      });
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-mcp-report-'));
+      fs.mkdirSync(path.join(tmpDir, 'src'), { recursive: true });
+      fs.writeFileSync(path.join(tmpDir, 'src', 'sample.ts'), 'export function sample() { return 1; }\n', 'utf-8');
+      try {
+        const result = await client.callTool({
+          name: 'report',
+          arguments: { root: tmpDir },
+        });
 
-      expect(result.isError).toBeFalsy();
-      const content = JSON.parse((result.content[0] as any).text);
-      expect(content.success).toBe(true);
-      expect(content.dashboard.outputPath).toContain('dashboard.html');
-      expect(content.qualityReport.totalFunctions).toBeGreaterThan(0);
+        expect(result.isError).toBeFalsy();
+        const content = JSON.parse(toolText(result));
+        expect(content.success).toBe(true);
+        expect(content.dashboard.outputPath).toContain('dashboard.html');
+        expect(content.qualityReport.totalFunctions).toBeGreaterThan(0);
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+      }
     });
   });
 
@@ -187,7 +202,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       });
 
       expect(result.isError).toBeFalsy();
-      const content = JSON.parse((result.content[0] as any).text);
+      const content = JSON.parse(toolText(result));
       expect(content.success).toBe(true);
       expect(content.changeId).toBe('chg-028-native-mcp-server');
       expect(content.files['handoff.yaml']).toBeDefined();
@@ -202,7 +217,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       });
 
       expect(result.isError).toBeFalsy();
-      const content = JSON.parse((result.content[0] as any).text);
+      const content = JSON.parse(toolText(result));
       expect(content.success).toBe(true);
       expect(content.passCount).toBeGreaterThan(0);
       expect(content.totalFunctions).toBeGreaterThan(0);
@@ -215,7 +230,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       });
 
       expect(result.isError).toBeFalsy();
-      const content = JSON.parse((result.content[0] as any).text);
+      const content = JSON.parse(toolText(result));
       expect(content.authorType).toBeDefined();
       expect(content.model).toBeDefined();
     });
@@ -229,7 +244,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       });
 
       expect(result.isError).toBeFalsy();
-      const content = JSON.parse((result.content[0] as any).text);
+      const content = JSON.parse(toolText(result));
       expect(content.success).toBe(true);
       expect(content.profile).toBeDefined();
       expect(content.violations).toBeDefined();
@@ -242,7 +257,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       });
 
       expect(result.isError).toBeFalsy();
-      const content = JSON.parse((result.content[0] as any).text);
+      const content = JSON.parse(toolText(result));
       expect(content.success).toBe(true);
       expect(content.totalNodes).toBeGreaterThan(0);
       expect(content.drifts).toHaveLength(0);
@@ -257,7 +272,7 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       });
 
       expect(result.isError).toBeFalsy();
-      const content = JSON.parse((result.content[0] as any).text);
+      const content = JSON.parse(toolText(result));
       expect(content.found).toBe(true);
       expect(content.id).toBe('CMP-CORE');
       expect(content.relatedItems.length).toBeGreaterThan(0);
@@ -274,15 +289,14 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
       });
 
       expect(result.isError).toBeFalsy();
-      const content = JSON.parse((result.content[0] as any).text);
+      const content = JSON.parse(toolText(result));
       expect(content.releaseBranch).toBe('HEAD');
       expect(content.totalCommits).toBeDefined();
       expect(content.authorStats).toBeDefined();
     });
 
     it('should sanitize sensitive patterns via DLP filter in get_active_handoff (#74)', async () => {
-      const tmpDir = path.join(process.cwd(), 'scratch', 'ai-sdlc-mcp-dlp');
-      fs.mkdirSync(tmpDir, { recursive: true });
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-mcp-dlp-'));
       try {
         const changeDir = path.join(tmpDir, 'specs', 'changes', 'active', 'chg-dlp-test');
         fs.mkdirSync(changeDir, { recursive: true });
@@ -298,12 +312,12 @@ describe('AI-SDLC Model Context Protocol (MCP) Server Suite', () => {
         });
 
         expect(result.isError).toBeFalsy();
-        const rawText = (result.content[0] as any).text as string;
+        const rawText = toolText(result);
         expect(rawText).toContain('[REDACTED:EMAIL]');
         expect(rawText).toContain('[REDACTED:API_TOKEN]');
         expect(rawText).not.toContain('secret.owner@corporate.io');
       } finally {
-        fs.rmSync(tmpDir, { recursive: true, force: true });
+        fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
       }
     });
   });
