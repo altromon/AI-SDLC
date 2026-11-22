@@ -12,6 +12,10 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createMcpServer } from '../src/server.js';
 import { resolveRoot, type McpAuditLogEntry } from '../src/tools/index.js';
 
+function textOf(result: unknown): string {
+  return (result as { content: Array<{ text: string }> }).content[0].text;
+}
+
 describe('MCP Server Hardening Suite (ENT-04 / CHG-047)', () => {
   let tmpDir: string;
   let auditLogFile: string;
@@ -72,7 +76,7 @@ rules:
     await auditorClient.close();
     await auditorServer.close();
     if (fs.existsSync(tmpDir)) {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
+      fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 
@@ -84,7 +88,7 @@ rules:
       });
 
       expect(result.isError).toBe(true);
-      const text = (result.content[0] as { text: string }).text;
+      const text = textOf(result);
       expect(text).toContain('escapes workspace root');
     });
 
@@ -95,7 +99,7 @@ rules:
       });
 
       expect(result.isError).toBe(true);
-      const text = (result.content[0] as { text: string }).text;
+      const text = textOf(result);
       expect(text).toContain('escapes workspace root');
     });
 
@@ -154,7 +158,7 @@ rules:
         arguments: { title: 'DLP Test with SECRET_TOKEN_ABC123XYZ' },
       });
 
-      const text = (result.content[0] as { text: string }).text;
+      const text = textOf(result);
       expect(text).not.toContain('SECRET_TOKEN_ABC123XYZ');
       expect(text).toContain('[REDACTED_CUSTOM-SECRET]');
     });
@@ -166,7 +170,7 @@ rules:
       });
 
       expect(result.isError).toBe(true);
-      const text = (result.content[0] as { text: string }).text;
+      const text = textOf(result);
       expect(text).not.toContain('SECRET_TOKEN_LEAKED_ID');
       expect(text).toContain('[REDACTED_CUSTOM-SECRET]');
     });
@@ -189,7 +193,7 @@ rules:
       });
 
       expect(result.isError).toBe(true);
-      const text = (result.content[0] as { text: string }).text;
+      const text = textOf(result);
       expect(text).toContain('not authorized to invoke mutation tool');
       expect(text).toContain('RBAC blocked');
     });
@@ -201,7 +205,7 @@ rules:
       });
 
       expect(result.isError).toBe(true);
-      const text = (result.content[0] as { text: string }).text;
+      const text = textOf(result);
       expect(text).toContain('not authorized to invoke mutation tool');
     });
 
@@ -212,7 +216,7 @@ rules:
       });
 
       expect(result.isError).toBe(true);
-      const text = (result.content[0] as { text: string }).text;
+      const text = textOf(result);
       expect(text).toContain('not authorized to invoke mutation tool');
     });
 
@@ -223,7 +227,7 @@ rules:
       });
 
       expect(result.isError).toBe(true);
-      const text = (result.content[0] as { text: string }).text;
+      const text = textOf(result);
       expect(text).toContain('not authorized to invoke mutation tool');
     });
 
@@ -234,7 +238,7 @@ rules:
       });
 
       expect(result.isError).toBe(true);
-      const text = (result.content[0] as { text: string }).text;
+      const text = textOf(result);
       expect(text).toContain('not authorized to invoke mutation tool');
     });
 
@@ -245,7 +249,7 @@ rules:
       });
 
       expect(result.isError).toBe(true);
-      const text = (result.content[0] as { text: string }).text;
+      const text = textOf(result);
       expect(text).toContain("Role 'agent-security-auditor' is not authorized to invoke mutation tool");
       expect(text).toContain('RBAC blocked');
     });
