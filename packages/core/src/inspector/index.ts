@@ -13,10 +13,13 @@ import {
   InspectOptions,
   InspectRelation,
   InspectResult,
+  InspectSemanticMatch,
   TaskItem,
 } from '../types/index.js';
 import { buildGraphElements } from '../reporters/dashboard-graph.js';
 import { parseTasksDoc } from '../verifiers/governance.js';
+import { DEFAULT_EXCLUDES, DEFAULT_EXTENSIONS, walkDir } from '../verifiers/quality-gate.js';
+import { isPolyglotUnitTestFile } from '../verifiers/test-discovery.js';
 import { parseFrontmatter } from '../verifiers/traceability.js';
 
 const CITATION_REGEX =
@@ -202,11 +205,28 @@ function findTestNodesForCitations(citations: string[], graphElements: Cytoscape
   return downstream;
 }
 
+const SEMANTIC_STOP_WORDS = new Set([
+  'the', 'and', 'for', 'with', 'from', 'that', 'this', 'into', 'when', 'where', 'how', 'what',
+  'del', 'los', 'las', 'por', 'para', 'con', 'una', 'uno', 'que', 'como', 'donde', 'sobre',
+]);
+
 function extractKeySymbols(content: string): string[] {
-  const fns = Array.from(content.matchAll(/export\s+(?:async\s+)?function\s+([a-zA-Z0-9_]+)/g)).map((m) => m[1]);
-  const cls = Array.from(content.matchAll(/export\s+class\s+([a-zA-Z0-9_]+)/g)).map((m) => m[1]);
-  const cst = Array.from(content.matchAll(/export\s+const\s+([a-zA-Z0-9_]+)/g)).map((m) => m[1]);
-  return [...fns, ...cls, ...cst].slice(0, 6);
+  const tsFns = Array.from(content.matchAll(/(?:export\s+)?(?:async\s+)?function\s+([a-zA-Z0-9_]+)/g)).map((m) => m[1]);
+  const tsCls = Array.from(content.matchAll(/(?:export\s+)?(?:class|interface|type)\s+([a-zA-Z0-9_]+)/g)).map((m) => m[1]);
+  const tsCst = Array.from(content.matchAll(/export\s+const\s+([a-zA-Z0-9_]+)/g)).map((m) => m[1]);
+  const pyDefs = Array.from(content.matchAll(/^\s*(?:def|class)\s+([a-zA-Z0-9_]+)/gm)).map((m) => m[1]);
+  const goFns = Array.from(content.matchAll(/^\s*func\s+(?:\([^)]+\)\s*)?([a-zA-Z0-9_]+)/gm)).map((m) => m[1]);
+  const rsFns = Array.from(content.matchAll(/^\s*(?:pub\s+)?(?:async\s+)?(?:fn|struct|trait)\s+([a-zA-Z0-9_]+)/gm)).map((m) => m[1]);
+  return Array.from(new Set([...tsFns, ...tsCls, ...tsCst, ...pyDefs, ...goFns, ...rsFns]));
+}
+
+export function tokenizeSemanticQuery(query: string): string[] {
+  const raw = query
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .toLowerCase()
+    .split(/[^a-z0-9áéíóúñü]+/)
+    .filter((t) => t.length >= 2 && !SEMANTIC_STOP_WORDS.has(t));
+  return Array.from(new Set(raw));
 }
 
 function buildSourceSummary(ext: string, loc: number, symbols: string[], citations: string[]): string {
@@ -214,7 +234,7 @@ function buildSourceSummary(ext: string, loc: number, symbols: string[], citatio
     `Módulo de código fuente (${ext || 'código'}).`,
     `Tamaño: ${loc} líneas de código.`,
   ];
-  if (symbols.length > 0) parts.push(`Símbolos clave: ${symbols.join(', ')}.`);
+  if (symbols.length > 0) parts.push(`Símbolos clave: ${symbols.slice(0, 6).join(', ')}.`);
   if (citations.length > 0) parts.push(`Trazabilidad: ${citations.join(', ')}.`);
   return parts.join(' ');
 }
@@ -549,12 +569,250 @@ function inspectMatchedNode(
   };
 }
 
+interface SourceSearchEntry {
+  fullPath: string;
+  relPath: string;
+  symbols: string[];
+  citations: string[];
+  contentLower: string;
+}
+
+function collectWorkspaceSourceEntries(rootDir: string): SourceSearchEntry[] {
+  const dirs = ['src', 'lib', 'packages', 'apps'];
+  const files: string[] = [];
+  for (const d of dirs) {
+    const fullDir = path.join(rootDir, d);
+    if (fs.existsSync(fullDir)) {
+      files.push(...walkDir(fullDir, DEFAULT_EXTENSIONS, DEFAULT_EXCLUDES));
+    }
+  }
+  const entries: SourceSearchEntry[] = [];
+  for (const fullPath of files) {
+    const relPath = path.relative(rootDir, fullPath).replace(/\\/g, '/');
+    if (isPolyglotUnitTestFile(relPath)) continue;
+    try {
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      entries.push({
+        fullPath,
+        relPath,
+        symbols: extractKeySymbols(content),
+        citations: Array.from(new Set(content.match(CITATION_REGEX) || [])),
+        contentLower: content.toLowerCase(),
+      });
+    } catch {
+      // Ignore unreadable source files
+    }
+  }
+  return entries;
+}
+
+function matchEntrySymbols(
+  symbols: string[],
+  tokens: string[],
+  normQuery: string
+): { score: number; matched: string[]; hasExactSymbol: boolean } {
+  let score = 0;
+  let hasExactSymbol = false;
+  const exact: string[] = [];
+  const partial: string[] = [];
+  const longTokens = tokens.filter((t) => t.length >= 3);
+  for (const sym of symbols) {
+    const symLower = sym.toLowerCase();
+    if (symLower === normQuery) {
+      score += 40;
+      hasExactSymbol = true;
+      exact.push(sym);
+    } else if (longTokens.some((t) => symLower.includes(t))) {
+      score += 12;
+      partial.push(sym);
+    }
+  }
+  return { score, matched: [...exact, ...partial], hasExactSymbol };
+}
+
+function matchTextTokens(
+  tokens: string[],
+  fields: Array<{ text: string; weight: number }>
+): { score: number; matchedTokens: string[] } {
+  let score = 0;
+  const matched = new Set<string>();
+  for (const token of tokens) {
+    for (const f of fields) {
+      if (f.text.includes(token)) {
+        score += f.weight;
+        matched.add(token);
+      }
+    }
+  }
+  return { score, matchedTokens: Array.from(matched) };
+}
+
+const STRICT_ARTIFACT_ID_QUERY_RE = /^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$/;
+
+function isTokenCoverageSufficient(totalTokens: number, matchedCount: number, score: number): boolean {
+  if (totalTokens === 0 || score < 10) return false;
+  if (matchedCount * 2 < totalTokens) return false;
+  return totalTokens === 1 || matchedCount >= 2;
+}
+
+function buildSourceSemanticMatch(
+  relPath: string,
+  rawScore: number,
+  matchedTokens: string[],
+  topSymbols: string[]
+): InspectSemanticMatch {
+  return {
+    id: relPath,
+    type: 'source-file',
+    layer: 'code',
+    title: relPath,
+    filePath: relPath,
+    score: Math.round((rawScore + matchedTokens.length * 5) * 10) / 10,
+    matchedSymbols: topSymbols,
+    matchedTokens,
+    summary: topSymbols.length > 0 ? `Símbolos coincidentes: ${topSymbols.join(', ')}` : undefined,
+  };
+}
+
+function scoreSourceEntry(
+  entry: SourceSearchEntry,
+  tokens: string[],
+  normQuery: string
+): InspectSemanticMatch | null {
+  const sym = matchEntrySymbols(entry.symbols, tokens, normQuery);
+  const tok = matchTextTokens(tokens, [
+    { text: entry.relPath.toLowerCase(), weight: 8 },
+    { text: entry.contentLower, weight: 3 },
+  ]);
+  const raw = sym.score + tok.score;
+  const ok = sym.hasExactSymbol || isTokenCoverageSufficient(tokens.length, tok.matchedTokens.length, raw);
+  return ok ? buildSourceSemanticMatch(entry.relPath, raw, tok.matchedTokens, sym.matched.slice(0, 5)) : null;
+}
+
+function buildNodeSemanticMatch(
+  node: CytoscapeNodeData,
+  rawScore: number,
+  matchedTokens: string[]
+): InspectSemanticMatch {
+  return {
+    id: node.id,
+    type: node.type,
+    layer: node.layer,
+    title: node.title || node.id,
+    filePath: node.filePath,
+    score: Math.round((rawScore + matchedTokens.length * 5) * 10) / 10,
+    matchedTokens,
+    summary: extractTechnicalSummary(node.content || '', node.title),
+  };
+}
+
+function scoreGraphNode(
+  node: CytoscapeNodeData,
+  tokens: string[],
+  normQuery: string
+): InspectSemanticMatch | null {
+  const titleLower = (node.title || '').toLowerCase();
+  const bonus = titleLower.includes(normQuery) && normQuery.length >= 4 ? 20 : 0;
+  const tok = matchTextTokens(tokens, [
+    { text: node.id.toLowerCase(), weight: 10 },
+    { text: titleLower, weight: 8 },
+    { text: (node.content || '').toLowerCase(), weight: 3 },
+  ]);
+  const raw = bonus + tok.score;
+  return isTokenCoverageSufficient(tokens.length, tok.matchedTokens.length, raw)
+    ? buildNodeSemanticMatch(node, raw, tok.matchedTokens)
+    : null;
+}
+
+function findSemanticCandidates(
+  trimmed: string,
+  rootDir: string,
+  nodeMap: Map<string, CytoscapeNodeData>
+): { matches: InspectSemanticMatch[]; sourceMap: Map<string, SourceSearchEntry> } {
+  const normQuery = trimmed.toLowerCase();
+  const tokens = tokenizeSemanticQuery(trimmed);
+  const sourceEntries = collectWorkspaceSourceEntries(rootDir);
+  const sourceMap = new Map<string, SourceSearchEntry>();
+  const matches: InspectSemanticMatch[] = [];
+
+  for (const entry of sourceEntries) {
+    sourceMap.set(entry.relPath, entry);
+    const scored = scoreSourceEntry(entry, tokens, normQuery);
+    if (scored) matches.push(scored);
+  }
+
+  for (const node of nodeMap.values()) {
+    const scored = scoreGraphNode(node, tokens, normQuery);
+    if (scored) matches.push(scored);
+  }
+
+  matches.sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
+  return { matches: matches.slice(0, 8), sourceMap };
+}
+
+function attachSemanticMatchesToResult(
+  baseResult: InspectResult,
+  matches: InspectSemanticMatch[]
+): InspectResult {
+  const others = matches.filter((m) => m.id !== baseResult.id && m.id !== baseResult.filePath);
+  for (const m of others.slice(0, 5)) {
+    baseResult.relatedItems.push({
+      id: m.id,
+      type: m.type,
+      direction: 'bidirectional',
+      relation: `semantic-match (score: ${m.score})`,
+      title: m.matchedSymbols && m.matchedSymbols.length > 0
+        ? `${m.title} [${m.matchedSymbols.join(', ')}]`
+        : m.title,
+      filePath: m.filePath,
+    });
+  }
+  baseResult.relatedItems = deduplicateRelations(baseResult.relatedItems);
+  baseResult.semanticMatches = matches;
+  return baseResult;
+}
+
+function inspectTopSemanticCandidate(
+  top: InspectSemanticMatch,
+  trimmed: string,
+  sourceMap: Map<string, SourceSearchEntry>,
+  nodeMap: Map<string, CytoscapeNodeData>,
+  allTasks: DiscoveredTask[],
+  edges: CytoscapeEdgeData[],
+  graphElements: CytoscapeElement[]
+): InspectResult | null {
+  const entry = sourceMap.get(top.id);
+  if (entry) {
+    const res = inspectSourceCodeFile(entry.fullPath, entry.relPath, graphElements, allTasks);
+    res.query = trimmed;
+    return res;
+  }
+  const topNode = nodeMap.get(top.id);
+  return topNode ? inspectMatchedNode(topNode, trimmed, edges, nodeMap, allTasks) : null;
+}
+
+function resolveSemanticMatch(
+  trimmed: string,
+  rootDir: string,
+  nodeMap: Map<string, CytoscapeNodeData>,
+  allTasks: DiscoveredTask[],
+  edges: CytoscapeEdgeData[],
+  graphElements: CytoscapeElement[]
+): InspectResult | null {
+  const { matches, sourceMap } = findSemanticCandidates(trimmed, rootDir, nodeMap);
+  if (matches.length === 0) return null;
+  const base = inspectTopSemanticCandidate(matches[0], trimmed, sourceMap, nodeMap, allTasks, edges, graphElements);
+  return base ? attachSemanticMatchesToResult(base, matches) : null;
+}
+
 function resolveTargetMatch(
   normQuery: string,
   nodeMap: Map<string, CytoscapeNodeData>,
   allTasks: DiscoveredTask[],
   edges: CytoscapeEdgeData[],
-  trimmed: string
+  trimmed: string,
+  rootDir: string,
+  graphElements: CytoscapeElement[]
 ): InspectResult {
   // Check task by ID
   const matchedTask = allTasks.find(
@@ -564,7 +822,7 @@ function resolveTargetMatch(
     return inspectDiscoveredTask(matchedTask, nodeMap);
   }
 
-  // Check graph node
+  // Check graph node by exact ID or direct substring
   const matchedNode = findTargetNode(normQuery, nodeMap);
   if (matchedNode) {
     return inspectMatchedNode(matchedNode, trimmed, edges, nodeMap, allTasks);
@@ -573,11 +831,17 @@ function resolveTargetMatch(
     return inspectDiscoveredTask(matchedTask, nodeMap);
   }
 
+  // Semantic AST symbol & multi-token graph resolution (skipped for strict uppercase artifact IDs like NON-EXISTENT-123)
+  if (!STRICT_ARTIFACT_ID_QUERY_RE.test(trimmed)) {
+    const semanticRes = resolveSemanticMatch(trimmed, rootDir, nodeMap, allTasks, edges, graphElements);
+    if (semanticRes) return semanticRes;
+  }
+
   return buildNotFoundResult(trimmed, nodeMap);
 }
 
 /**
- * Inspect any AI-SDLC artifact, code file, task, or test by query (ID or path).
+ * Inspect any AI-SDLC artifact, code file, task, symbol, or natural-language concept by query.
  */
 export function inspectElement(query: string, options: InspectOptions = {}): InspectResult {
   const rootDir = options.rootDir || process.cwd();
@@ -602,7 +866,7 @@ export function inspectElement(query: string, options: InspectOptions = {}): Ins
     .map((e) => e.data as CytoscapeEdgeData);
 
   const allTasks = scanAllTasks(rootDir);
-  return resolveTargetMatch(trimmed.toLowerCase(), nodeMap, allTasks, edges, trimmed);
+  return resolveTargetMatch(trimmed.toLowerCase(), nodeMap, allTasks, edges, trimmed, rootDir, graphRes.elements);
 }
 
 function formatRelationsBlock(title: string, list: InspectRelation[], arrow: string): string[] {
@@ -640,6 +904,19 @@ function formatNotFoundMarkdown(result: InspectResult): string {
   return lines.join('\n');
 }
 
+function formatSemanticMatchesBlock(matches?: InspectSemanticMatch[]): string[] {
+  if (!matches || matches.length <= 1) return [];
+  const lines = ['#### 🔎 Ranking Semántico y de Símbolos (AST + Grafo):'];
+  for (const m of matches.slice(0, 6)) {
+    const symInfo = m.matchedSymbols && m.matchedSymbols.length > 0
+      ? ` | Símbolos: \`${m.matchedSymbols.join('`, `')}\``
+      : '';
+    lines.push(`- **\`${m.id}\`** (\`${m.type}\` — score: **${m.score}**)${symInfo}`);
+  }
+  lines.push('');
+  return lines;
+}
+
 /**
  * Format an InspectResult into GitHub-flavored Markdown for display in Chat and CLI.
  */
@@ -655,6 +932,7 @@ export function formatInspectResultMarkdown(result: InspectResult): string {
     '#### 📝 Resumen Técnico:',
     result.summary,
     '',
+    ...formatSemanticMatchesBlock(result.semanticMatches),
     ...formatRelationsBlock('#### 🔗 Relaciones Upstream (Deriva de / Mitiga / Alineado con):', result.upstream, '↗️'),
     ...formatRelationsBlock('#### 🔗 Relaciones Downstream (Satisfecho por / Verificado por / Implementado en):', result.downstream, '↘️'),
     ...formatRelatedNavBlock(result.relatedItems),

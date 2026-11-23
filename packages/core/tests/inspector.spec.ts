@@ -1,6 +1,10 @@
 import * as path from 'path';
 import { describe, expect, it } from 'vitest';
-import { inspectElement, formatInspectResultMarkdown } from '../src/inspector/index.js';
+import {
+  inspectElement,
+  formatInspectResultMarkdown,
+  tokenizeSemanticQuery,
+} from '../src/inspector/index.js';
 
 describe('AI-SDLC Element Inspector Suite', () => {
   const rootDir = path.resolve(__dirname, '../../..');
@@ -54,6 +58,42 @@ describe('AI-SDLC Element Inspector Suite', () => {
     expect(result.found).toBe(true);
     expect(result.type).toBe('task');
     expect(result.relatedItems.length).toBeGreaterThan(0);
+  });
+
+  it('should tokenize camelCase and multi-word semantic queries while stripping stop words', () => {
+    expect(tokenizeSemanticQuery('sanitizeDlpText in the workspace')).toEqual([
+      'sanitize',
+      'dlp',
+      'text',
+      'in',
+      'workspace',
+    ]);
+    expect(tokenizeSemanticQuery('')).toEqual([]);
+  });
+
+  it('should resolve a source file by exported AST symbol name (semantic symbol search)', () => {
+    const result = inspectElement('sanitizeDlpText', { rootDir });
+
+    expect(result.found).toBe(true);
+    expect(result.type).toBe('source-file');
+    expect(result.filePath).toContain('dlp-sanitizer.ts');
+    expect(result.semanticMatches).toBeDefined();
+    expect(result.semanticMatches!.length).toBeGreaterThan(0);
+    expect(result.semanticMatches![0].matchedSymbols).toContain('sanitizeDlpText');
+
+    const md = formatInspectResultMarkdown(result);
+    expect(md).toContain('dlp-sanitizer.ts');
+  });
+
+  it('should resolve multi-token natural-language semantic queries across AST symbols and PDaC graph', () => {
+    const result = inspectElement('dlp sanitizer policy', { rootDir });
+
+    expect(result.found).toBe(true);
+    expect(result.semanticMatches).toBeDefined();
+    expect(result.semanticMatches!.length).toBeGreaterThan(1);
+
+    const md = formatInspectResultMarkdown(result);
+    expect(md).toContain('Ranking Semántico y de Símbolos');
   });
 
   it('should return found: false with suggestions when an unknown element is queried', () => {
