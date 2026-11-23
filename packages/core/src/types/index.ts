@@ -1591,6 +1591,18 @@ export interface InspectRelation {
   filePath?: string;
 }
 
+export interface InspectSemanticMatch {
+  id: string;
+  type: string;
+  layer: string;
+  title: string;
+  filePath?: string;
+  score: number;
+  matchedSymbols?: string[];
+  matchedTokens?: string[];
+  summary?: string;
+}
+
 export interface InspectResult {
   found: boolean;
   query: string;
@@ -1604,6 +1616,7 @@ export interface InspectResult {
   upstream: InspectRelation[];
   downstream: InspectRelation[];
   relatedItems: InspectRelation[];
+  semanticMatches?: InspectSemanticMatch[];
   metrics?: Record<string, unknown>;
   contentPreview?: string;
 }

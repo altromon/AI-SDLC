@@ -793,9 +793,9 @@ function registerVerifySecurityTool(server: McpServer, options: RegisterToolsOpt
 function registerInspectElementTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool(
     'inspect_element',
-    'Inspects any AI-SDLC artifact, code file, task, or test to retrieve technical summary, upstream/downstream traceability, and related items.',
+    'Inspects any AI-SDLC artifact, code file, symbol, task, test, or semantic concept query to retrieve technical summary, AST/graph semantic matches, upstream/downstream traceability, and related items.',
     {
-      query: z.string().describe('Artifact ID (e.g. FR-001, CMP-002, UC-01, TSK-001) or file path (e.g. src/auth.ts)'),
+      query: z.string().describe('Artifact ID (e.g. FR-001, CMP-002, UC-01, TSK-001), file path (e.g. src/auth.ts), code symbol (e.g. sanitizeDlpText), or semantic concept query (e.g. "dlp sanitization")'),
       root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
