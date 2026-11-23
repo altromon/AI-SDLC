@@ -647,7 +647,7 @@ function matchTextTokens(
   return { score, matchedTokens: Array.from(matched) };
 }
 
-const STRICT_ARTIFACT_ID_QUERY_RE = /^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$/;
+const STRICT_ARTIFACT_ID_QUERY_RE = /^[A-Z][A-Z0-9]*(?:[-_][A-Z0-9]+)+$/;
 
 function isTokenCoverageSufficient(totalTokens: number, matchedCount: number, score: number): boolean {
   if (totalTokens === 0 || score < 10) return false;
