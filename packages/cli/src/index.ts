@@ -22,6 +22,8 @@ import { runReportCompliance, runReportDashboard, runReportQuality } from './com
 import { runReviewSubmit } from './commands/review.js';
 import { runInspect } from './commands/inspect.js';
 import { runSearch } from './commands/search.js';
+import { runGraphQuery } from './commands/graph.js';
+import { runContextPack } from './commands/context.js';
 import { parseDoctorTimeout, runDoctor } from './commands/doctor.js';
 import { runMigrate } from './commands/migrate.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
@@ -920,6 +922,31 @@ program
       verbose: opts.verbose,
     });
     process.exit(exitCode);
+  });
+
+// --- graph & context commands ---
+const graphCmd = program.command('graph').description('Code graph repository map commands');
+graphCmd
+  .command('query <target>')
+  .description('Query bounded k-hop code graph around a file path or symbol')
+  .option('-r, --root <path>', 'Repository root directory')
+  .option('-d, --depth <number>', 'Traversal depth (0..5)', (v) => Number.parseInt(v, 10))
+  .option('--json', 'Output result as deterministic JSON')
+  .action(async (target: string, opts) => {
+    const code = await runGraphQuery(target, { root: opts.root, depth: opts.depth, json: opts.json });
+    process.exit(code);
+  });
+
+const contextCmd = program.command('context').description('Task context packer commands');
+contextCmd
+  .command('pack <taskId>')
+  .description('Pack minimal cited specification summaries and k-hop code subgraph for a TSK-*')
+  .option('-r, --root <path>', 'Repository root directory')
+  .option('-d, --depth <number>', 'Traversal depth (0..5)', (v) => Number.parseInt(v, 10))
+  .option('--json', 'Output result as deterministic JSON')
+  .action(async (taskId: string, opts) => {
+    const code = await runContextPack(taskId, { root: opts.root, depth: opts.depth, json: opts.json });
+    process.exit(code);
   });
 
 // Handle unknown commands gracefully

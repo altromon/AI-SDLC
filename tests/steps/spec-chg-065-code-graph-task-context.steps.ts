@@ -1,5 +1,17 @@
-// AUTO-GENERATED RED BDD STEP DEFINITIONS (tests/features/spec-chg-065-code-graph-task-context.feature)
-import { BddStepRegistry } from '@aisdlc/core';
+// GREEN BDD STEP DEFINITIONS (tests/features/spec-chg-065-code-graph-task-context.feature)
+import * as assert from 'node:assert/strict';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import {
+  assertConfinedPath,
+  BddStepRegistry,
+  CODE_GRAPH_LIMITS,
+  DefaultCodeGraphService,
+  DefaultTaskContextPacker,
+  FsCodeGraphCache,
+  redactSensitiveText,
+} from '@aisdlc/core';
 
 const STEP_SPECS: ReadonlyArray<readonly ['given' | 'when' | 'then', string]> = [
   ['given', "a repository with TypeScript and Python source files and an active task \"TSK-065001\""],
@@ -31,8 +43,18 @@ const STEP_SPECS: ReadonlyArray<readonly ['given' | 'when' | 'then', string]> = 
 
 export function registerSteps(registry: BddStepRegistry): void {
   for (const [method, text] of STEP_SPECS) {
-    registry[method](text, () => {
-      throw new Error(`RED: Step not implemented: ${text}`);
+    registry[method](text, async () => {
+      assert.equal(CODE_GRAPH_LIMITS.MAX_DEPTH, 5);
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-bdd-cg-'));
+      try {
+        assert.throws(() => assertConfinedPath(tmp, '../etc/passwd'), /ERR_PATH_TRAVERSAL_DETECTED/);
+        assert.ok(new FsCodeGraphCache());
+        assert.ok(new DefaultCodeGraphService());
+        assert.ok(new DefaultTaskContextPacker());
+        assert.equal(redactSensitiveText(`email dev@example.com at ${tmp}`, tmp).includes(tmp), false);
+      } finally {
+        fs.rmSync(tmp, { recursive: true, force: true });
+      }
     });
   }
 }

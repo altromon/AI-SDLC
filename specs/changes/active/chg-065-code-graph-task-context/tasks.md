@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/code-graph-cache.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-065-CODE-GRAPH-CONTEXT-ENGINE
     satisfies-requirements:
@@ -39,7 +39,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/language-graph-adapters.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-065-CODE-GRAPH-CONTEXT-ENGINE
     satisfies-requirements:
@@ -57,7 +57,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/code-graph-service.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-065-CODE-GRAPH-CONTEXT-ENGINE
     satisfies-requirements:
@@ -76,7 +76,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/core/tests/task-context-packer.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-065-CODE-GRAPH-CONTEXT-ENGINE
     satisfies-requirements:
@@ -95,7 +95,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm vitest run packages/mcp/tests/mcp-code-graph.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-065-CODE-GRAPH-CONTEXT-ENGINE
       - CMP-MCP-SERVER
@@ -116,7 +116,7 @@ tasks:
       method: quality-gate
       command-or-criteria: pnpm vitest run packages/cli/tests/cli-code-graph.spec.ts; pnpm run typecheck; pnpm test; pnpm run verify:all
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-065-CODE-GRAPH-CONTEXT-ENGINE
       - CMP-CLI
