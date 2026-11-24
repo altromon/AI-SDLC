@@ -13,7 +13,7 @@ governance-summary:
   high-risk-manual-count: 0
 tasks:
   - id: TSK-065001
-    title: 'Red test primero (code-graph-cache.spec.ts): definir contratos hexagonales en packages/core/src/code-graph/types.ts y CodeGraphCachePort en packages/core/src/code-graph/cache/fs-code-graph-cache.ts con FS-Jail estricto en repoRoot (ERR_PATH_TRAVERSAL_DETECTED, ERR_SYMLINK_ESCAPE_DETECTED), parseo seguro contra Prototype Pollution (CWE-1321), escritura atómica en .aisdlc/cache/code-graph.json y minimización/redacción de PII, emails y secretos'
+    title: 'Red test primero (code-graph-cache.spec.ts): definir contratos hexagonales y CODE_GRAPH_LIMITS en packages/core/src/code-graph/types.ts y CodeGraphCachePort en packages/core/src/code-graph/cache/fs-code-graph-cache.ts con FS-Jail estricto en repoRoot (ERR_PATH_TRAVERSAL_DETECTED, ERR_SYMLINK_ESCAPE_DETECTED), parseo seguro contra Prototype Pollution (Object.create(null)/Object.hasOwn, CWE-1321), escritura atómica con temp único (.pid.uuid.tmp) + retry Windows EPERM/EBUSY en .aisdlc/cache/code-graph.json y minimización/redacción de PII, emails y secretos'
     complexity: MEDIUM
     risk-level: LOW
     autonomy-mode: AUTONOMOUS
@@ -31,7 +31,7 @@ tasks:
     implements-contracts:
       - CodeGraphCachePort
   - id: TSK-065002
-    title: 'Red test primero (language-graph-adapters.spec.ts): implementar LanguageGraphAdapter en packages/core/src/code-graph/adapters/ con prioridad a toolchains nativos (TypeScript AST, Python ast, go list -json, cargo metadata, compile_commands.json/clang -MM) mediante shell false, resolveTrustedBinaryPath, purga de entorno y fallback automático a polyglot-scanner'
+    title: 'Red test primero (language-graph-adapters.spec.ts): implementar LanguageGraphAdapter en packages/core/src/code-graph/adapters/ con prioridad a toolchains nativos (TypeScript AST, Python -I -P con cwd temp, go list con GOFLAGS/GOPROXY/GOTOOLCHAIN/GOWORK separados, cargo metadata con purga RUSTC/CARGO_HOME y escaneo .cargo/config*/rust-toolchain*, compile_commands.json -I/-isystem + clang -MM con rechazo de -/@ y re-confinamiento de salidas) mediante shell false, resolveTrustedBinaryPath y fallback automático a polyglot-scanner'
     complexity: MEDIUM
     risk-level: LOW
     autonomy-mode: AUTONOMOUS
@@ -45,6 +45,7 @@ tasks:
     satisfies-requirements:
       - FR-065-CODE-GRAPH-REPO-MAP-001
       - SEC-REQ-065-CODE-GRAPH-SAFE-EXEC-001
+      - PRIV-REQ-065-CODE-GRAPH-DATA-MINIMIZATION-001
     implements-contracts:
       - LanguageGraphAdapter
   - id: TSK-065003
