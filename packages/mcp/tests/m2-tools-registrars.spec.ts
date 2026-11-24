@@ -529,14 +529,14 @@ describe('MCP Tool Registrars (All 29 Individual, 3 Groups & registerAllTools)',
   });
 
   describe('Group Registrars & registerAllTools', () => {
-    it('registers exact expected counts per group (10 + 13 + 6 = 29)', () => {
+    it('registers exact expected counts per group (10 + 14 + 6 = 30)', () => {
       const lifecycleSpy = createSpyServer();
       registerLifecycleAndSddTools(lifecycleSpy.server, { rootDir: tmpDir });
       expect(lifecycleSpy.tools.size).toBe(10);
 
       const verifySpy = createSpyServer();
       registerVerificationTools(verifySpy.server, { rootDir: tmpDir });
-      expect(verifySpy.tools.size).toBe(13);
+      expect(verifySpy.tools.size).toBe(14);
 
       const reportSpy = createSpyServer();
       registerReportingAndKpiTools(reportSpy.server, { rootDir: tmpDir });
@@ -544,7 +544,7 @@ describe('MCP Tool Registrars (All 29 Individual, 3 Groups & registerAllTools)',
 
       const allSpy = createSpyServer();
       registerAllTools(allSpy.server);
-      expect(allSpy.tools.size).toBe(29);
+      expect(allSpy.tools.size).toBe(30);
     });
   });
 });

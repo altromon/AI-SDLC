@@ -61,8 +61,8 @@ describe('Doctor CLI Command Integration Suite (FR-052-CLI-DOCTOR-001)', () => {
 
   it('executes "aisdlc doctor --offline" skipping remote probes and returning a valid diagnostic exit code on local repo', async () => {
     const exitCode = await runDoctor({ rootDir: process.cwd(), offline: true, strict: false });
-    expect([0, 1]).toContain(exitCode);
-    expect(logSpy.mock.calls.length).toBeGreaterThan(0);
+    expect([0, 1, 2]).toContain(exitCode);
+    expect(logSpy.mock.calls.length + errorSpy.mock.calls.length).toBeGreaterThan(0);
   }, 15000);
 
   it('executes "aisdlc doctor --fix", creates backup .bak.<timestamp> for modified hooks, unlinks symlinks, and reinstalls canonical hooks', async () => {

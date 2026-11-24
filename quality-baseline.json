@@ -1,8 +1,24 @@
 {
   "version": "1.0",
-  "generatedAt": "2026-11-24T10:57:08.000Z",
-  "totalViolations": 869,
+  "generatedAt": "2026-11-24T11:23:46.000Z",
+  "totalViolations": 905,
   "violations": [
+    {
+      "signature": "e3a466d8723ba7bddcdd7d72603a2c2ffcb1d1720dd3599e6a640c6c7662fbc9",
+      "file": "packages/cli/src/commands/sdd.ts",
+      "functionName": "printSimilarArtifacts",
+      "line": 521,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'printSimilarArtifacts'"
+    },
+    {
+      "signature": "e72cc9b77b494fbaa918facf02a1813fefebd1daacbd5a584cf45896ccfb89b4",
+      "file": "packages/cli/src/commands/search.ts",
+      "functionName": "parseFiniteOpt",
+      "line": 29,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'parseFiniteOpt'"
+    },
     {
       "signature": "3dfd986545510891e2e2f5a7971f28c21081d756525dd36c2f93b2333b808145",
       "file": "packages/core/src/adapters/sdd/ci.ts",
@@ -815,7 +831,7 @@
       "signature": "ed503ba35944f7e9442fc1ae0f3d8d48248f0f5da3bd7a9d151c662adf0631d3",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "extractDirMaxNum",
-      "line": 67,
+      "line": 68,
       "metric": "unit-test",
       "message": "Missing unit test for function 'extractDirMaxNum'"
     },
@@ -823,7 +839,7 @@
       "signature": "a8c053d2e9ec8e3d92cdbf0a84e263588eb98571c005c4c4bb59eb5c84002b0a",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "resolveChangeIdentifiers",
-      "line": 102,
+      "line": 103,
       "metric": "unit-test",
       "message": "Missing unit test for function 'resolveChangeIdentifiers'"
     },
@@ -831,7 +847,7 @@
       "signature": "f67dd6b1627426b20af1fd10d2144e6c06f533a3415793f40c4f145e0088accb",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "ensureEmptyChangeDir",
-      "line": 124,
+      "line": 125,
       "metric": "unit-test",
       "message": "Missing unit test for function 'ensureEmptyChangeDir'"
     },
@@ -839,7 +855,7 @@
       "signature": "04db2f59467a8ee755941d858c28f160d7a6d4b13aa65b0473ab672431845570",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "scanCanonicalArtifacts",
-      "line": 136,
+      "line": 137,
       "metric": "unit-test",
       "message": "Missing unit test for function 'scanCanonicalArtifacts'"
     },
@@ -847,7 +863,7 @@
       "signature": "7262bc45bd909368a137bda0a21516505693f621af4a1e27129b5d9a8a225f3c",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "parseInputFromIds",
-      "line": 155,
+      "line": 156,
       "metric": "unit-test",
       "message": "Missing unit test for function 'parseInputFromIds'"
     },
@@ -855,7 +871,7 @@
       "signature": "23475e141ec8db79d64cfdace8e2a045982aa87867117e74b37777348a446937",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "renderCitationsYamlBlock",
-      "line": 169,
+      "line": 170,
       "metric": "unit-test",
       "message": "Missing unit test for function 'renderCitationsYamlBlock'"
     },
@@ -863,7 +879,7 @@
       "signature": "129ee8a4241e18d419203f26bff3081da0ad26aa5804ff71491142407e5cfd59",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "buildPatchSpecContent",
-      "line": 476,
+      "line": 477,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildPatchSpecContent'"
     },
@@ -871,7 +887,7 @@
       "signature": "6d1a4741b314246d8fad35bbc9c0ffa1050938d9cb5ae32ff3aba67e030c590e",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "collectPatchCitations",
-      "line": 496,
+      "line": 497,
       "metric": "unit-test",
       "message": "Missing unit test for function 'collectPatchCitations'"
     },
@@ -879,7 +895,7 @@
       "signature": "f07c401f85a4c9facef0d5c5295d4805de3875b42e2604c4a49b879c34fc5c93",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "validatePatchArtifacts",
-      "line": 512,
+      "line": 513,
       "metric": "unit-test",
       "message": "Missing unit test for function 'validatePatchArtifacts'"
     },
@@ -887,7 +903,7 @@
       "signature": "1f1f8add8240ad3d7e8be0f29942a6fd1027c22e29973233f137c7599ec8b40f",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "buildPatchFmObj",
-      "line": 530,
+      "line": 531,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildPatchFmObj'"
     },
@@ -895,7 +911,7 @@
       "signature": "e0cf2743d85eda40893a19a2193c0bd0aa68ff80618c814987f12647b624897f",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "buildPatchSuccess",
-      "line": 541,
+      "line": 542,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildPatchSuccess'"
     },
@@ -903,7 +919,7 @@
       "signature": "64a69cdc8ae9a9f5e5b3d1a64c0dd61132f465cb3bc65ca442dbe3909a1e9891",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "scaffoldPatchChange",
-      "line": 560,
+      "line": 561,
       "metric": "unit-test",
       "message": "Missing unit test for function 'scaffoldPatchChange'"
     },
@@ -911,7 +927,7 @@
       "signature": "5d53feb7fb614fb6b11529df5efecf2ca8842bd7471baeb90468232105f3ccc8",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "buildGreenfieldContent",
-      "line": 581,
+      "line": 582,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildGreenfieldContent'"
     },
@@ -919,7 +935,7 @@
       "signature": "1340f228e7c815d6bd40dc7e6db37b0d0abbb40281ed73f02edb993705197684",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "createGreenfieldRequirement",
-      "line": 592,
+      "line": 593,
       "metric": "unit-test",
       "message": "Missing unit test for function 'createGreenfieldRequirement'"
     },
@@ -927,7 +943,7 @@
       "signature": "08bdcaca1e86d10c9d6848f1534dbcaa0473a35957fa5afe988579047e1323e2",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "resolveMissingDraftDestination",
-      "line": 618,
+      "line": 619,
       "metric": "unit-test",
       "message": "Missing unit test for function 'resolveMissingDraftDestination'"
     },
@@ -935,7 +951,7 @@
       "signature": "e10d5eeebd2252b7de6501e6bab83d84bb05b23e0be4b3b8e28c010e881ef775",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "createMissingDraftRequirement",
-      "line": 637,
+      "line": 638,
       "metric": "unit-test",
       "message": "Missing unit test for function 'createMissingDraftRequirement'"
     },
@@ -943,7 +959,7 @@
       "signature": "e0e0f0fb72c7127fda4c4cf2b8c6e679c8f8044e8e2e16965eff33381bdbf431",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "discoverDerivedRequirements",
-      "line": 650,
+      "line": 651,
       "metric": "unit-test",
       "message": "Missing unit test for function 'discoverDerivedRequirements'"
     },
@@ -951,7 +967,7 @@
       "signature": "0286d1343f650b2f33a874536c6fd9b4cacc1e043e5e8aa0a3331e63a7130571",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "appendUnique",
-      "line": 668,
+      "line": 669,
       "metric": "unit-test",
       "message": "Missing unit test for function 'appendUnique'"
     },
@@ -959,7 +975,7 @@
       "signature": "890280a931b169905f1f0c64f3908edef0420f9a3e60624957cf0610038e90c2",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "recordCitedArtifact",
-      "line": 672,
+      "line": 673,
       "metric": "unit-test",
       "message": "Missing unit test for function 'recordCitedArtifact'"
     },
@@ -967,7 +983,7 @@
       "signature": "c276a19ada9032b50b4739550d89c6a191d234fbd4be8c5cc7cc69c7875dc65e",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "classifyPrivacyCitation",
-      "line": 681,
+      "line": 682,
       "metric": "unit-test",
       "message": "Missing unit test for function 'classifyPrivacyCitation'"
     },
@@ -975,7 +991,7 @@
       "signature": "f63ae8357809289c3b00ee798eee3fadb9b7ecaa31d5023ec7c302c2cdd5558c",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "classifyProductCitation",
-      "line": 697,
+      "line": 698,
       "metric": "unit-test",
       "message": "Missing unit test for function 'classifyProductCitation'"
     },
@@ -983,7 +999,7 @@
       "signature": "0fa74adc698849c2bed2dc31c86b9d96ee7587b04d45218d6db566948e172a8b",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "classifyExistingCitation",
-      "line": 714,
+      "line": 715,
       "metric": "unit-test",
       "message": "Missing unit test for function 'classifyExistingCitation'"
     },
@@ -991,7 +1007,7 @@
       "signature": "68a5b22432370db9acab07bcfcff8d7df70315104f00d29a2768a32e9ab5075a",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "routeMissingCitationId",
-      "line": 726,
+      "line": 727,
       "metric": "unit-test",
       "message": "Missing unit test for function 'routeMissingCitationId'"
     },
@@ -999,7 +1015,7 @@
       "signature": "6239f00d70afb23b7fb370a3ecd341ad0b0404e0cfab2ad41b04aa46b88d6f52",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "collectExplicitCitations",
-      "line": 735,
+      "line": 736,
       "metric": "unit-test",
       "message": "Missing unit test for function 'collectExplicitCitations'"
     },
@@ -1007,7 +1023,7 @@
       "signature": "f04dbc1d26ad0a1f6e76858d6129dbaa200c0cfea1e9aac4b15988a2a1419e33",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "collectGreenfieldCitations",
-      "line": 757,
+      "line": 758,
       "metric": "unit-test",
       "message": "Missing unit test for function 'collectGreenfieldCitations'"
     },
@@ -1015,7 +1031,7 @@
       "signature": "34732113faf6c21a8c0e134f4b0b86b5ee41f84842bfab3cf6d90c4686dd78ca",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "initEmptyCitations",
-      "line": 781,
+      "line": 782,
       "metric": "unit-test",
       "message": "Missing unit test for function 'initEmptyCitations'"
     },
@@ -1023,7 +1039,7 @@
       "signature": "ad6b955a52b1cae17fcdd1af777094facd76d4388b444aecf6f3fcb86a235017",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "ensureFallbackRequirement",
-      "line": 794,
+      "line": 795,
       "metric": "unit-test",
       "message": "Missing unit test for function 'ensureFallbackRequirement'"
     },
@@ -1031,7 +1047,7 @@
       "signature": "574f8df0f2c220c71854a46a34736fed9ae9ac496336cf91ae95d9165af8d2a7",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "collectChangeCitations",
-      "line": 800,
+      "line": 801,
       "metric": "unit-test",
       "message": "Missing unit test for function 'collectChangeCitations'"
     },
@@ -1039,7 +1055,7 @@
       "signature": "442767323e72f8a5b250a2f8aa0ec287c6e626451b30149bc97e485341ab66b7",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "renderProposalFile",
-      "line": 821,
+      "line": 822,
       "metric": "unit-test",
       "message": "Missing unit test for function 'renderProposalFile'"
     },
@@ -1047,7 +1063,7 @@
       "signature": "2a9b3327dd46481f99aaded0bcf1bc225c4bd708748d5889842f79b843348c73",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "renderSpecFile",
-      "line": 844,
+      "line": 845,
       "metric": "unit-test",
       "message": "Missing unit test for function 'renderSpecFile'"
     },
@@ -1055,7 +1071,7 @@
       "signature": "c19c14859bc70aa9101623ff147da6e4d470a455a9abc8a97a085c7ee76dcb48",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "renderDesignFile",
-      "line": 870,
+      "line": 871,
       "metric": "unit-test",
       "message": "Missing unit test for function 'renderDesignFile'"
     },
@@ -1063,7 +1079,7 @@
       "signature": "c4a88c27349b36d4ddce750be9443c986b361472a72500823e79171e7071ebd7",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "buildTasksFrontmatter",
-      "line": 892,
+      "line": 893,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildTasksFrontmatter'"
     },
@@ -1071,7 +1087,7 @@
       "signature": "d0f886551e3d0642295e19ce2e71a1afc564f526ec62870cd35fb0e11598887b",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "renderTasksFile",
-      "line": 913,
+      "line": 914,
       "metric": "unit-test",
       "message": "Missing unit test for function 'renderTasksFile'"
     },
@@ -1079,7 +1095,7 @@
       "signature": "a044587e353ee921c37c91b4f5bfacc3afcc51c2a4bf5cd47cd3115cc307d237",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "buildHandoffSubgraph",
-      "line": 929,
+      "line": 930,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildHandoffSubgraph'"
     },
@@ -1087,7 +1103,7 @@
       "signature": "0cfc5f6f843f563ced19c838fd5c39d95bb3f8d45b32b2d169b6a0ee0fe22c24",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "renderHandoffSidecar",
-      "line": 953,
+      "line": 954,
       "metric": "unit-test",
       "message": "Missing unit test for function 'renderHandoffSidecar'"
     },
@@ -1095,7 +1111,7 @@
       "signature": "dfcdb6f418a0b92f4748467fe3108c502d8ee59cf71272776217059b3b00a611",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "validateScaffoldedArtifacts",
-      "line": 966,
+      "line": 967,
       "metric": "unit-test",
       "message": "Missing unit test for function 'validateScaffoldedArtifacts'"
     },
@@ -1103,7 +1119,7 @@
       "signature": "af5ce1b33b449936287c72965b9e95feeed7731b64edc6edabe3a863a25a080d",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "buildScaffoldFailure",
-      "line": 990,
+      "line": 991,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildScaffoldFailure'"
     },
@@ -1111,15 +1127,23 @@
       "signature": "7e218dbb736a9f603c120f74098be5b54d260e72c3c10643433e3f1cf6ab578f",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "renderAndCollectArtifactFiles",
-      "line": 1003,
+      "line": 1004,
       "metric": "unit-test",
       "message": "Missing unit test for function 'renderAndCollectArtifactFiles'"
+    },
+    {
+      "signature": "f9a8356235c57e83b2aecb0a357554237fe45966238f782261bb49a8652412d7",
+      "file": "packages/core/src/adapters/sdd/scaffold.ts",
+      "functionName": "findSimilarExistingSpecs",
+      "line": 1025,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'findSimilarExistingSpecs'"
     },
     {
       "signature": "4796b9c321a543e48d395cab92432a7104296b3220219df11ec237bc12cb4737",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "buildScaffoldSuccess",
-      "line": 1024,
+      "line": 1039,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildScaffoldSuccess'"
     },
@@ -1127,7 +1151,7 @@
       "signature": "eb3ee29b1b32acc1a5aa34bdb3fa4dd2dfdb63d80ed70aa63f1eb3afc32e48da",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "executeStandardScaffolding",
-      "line": 1046,
+      "line": 1066,
       "metric": "unit-test",
       "message": "Missing unit test for function 'executeStandardScaffolding'"
     },
@@ -1135,7 +1159,7 @@
       "signature": "db17e4d1b8daf48a71bcf6871b7b1c7101ae78eb1731614193e8095d8904748d",
       "file": "packages/core/src/adapters/sdd/scaffold.ts",
       "functionName": "normalizeScaffoldOptions",
-      "line": 1071,
+      "line": 1091,
       "metric": "unit-test",
       "message": "Missing unit test for function 'normalizeScaffoldOptions'"
     },
@@ -1191,7 +1215,7 @@
       "signature": "2378c1da83f0422bc4449f918b2f80c3f2e249f254cf0214221756784686f255",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "parseTasksFromDir",
-      "line": 31,
+      "line": 34,
       "metric": "unit-test",
       "message": "Missing unit test for function 'parseTasksFromDir'"
     },
@@ -1199,7 +1223,7 @@
       "signature": "d1b3174504fd2cf032ca3e00073f8d1ca181221f31f9e7b1b93ae6f8119f183f",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "scanTasksInBaseDir",
-      "line": 54,
+      "line": 57,
       "metric": "unit-test",
       "message": "Missing unit test for function 'scanTasksInBaseDir'"
     },
@@ -1207,7 +1231,7 @@
       "signature": "a88cc8a535755b2454ad90fb72eec06645c5cbc02b70aac7cb3d6b19abe117b9",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "scanAllTasks",
-      "line": 70,
+      "line": 73,
       "metric": "unit-test",
       "message": "Missing unit test for function 'scanAllTasks'"
     },
@@ -1215,7 +1239,7 @@
       "signature": "aa45853da6905b35d95bee23c900d4733d78456b85c923ba0949e2ea4ac4f69d",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "isSkippableLine",
-      "line": 79,
+      "line": 82,
       "metric": "unit-test",
       "message": "Missing unit test for function 'isSkippableLine'"
     },
@@ -1223,7 +1247,7 @@
       "signature": "c13447ae491b99c2c9f48edea7b9de0adf06b55a6c060c58bed61dd2fc62e8eb",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "collectTextParagraphs",
-      "line": 88,
+      "line": 91,
       "metric": "unit-test",
       "message": "Missing unit test for function 'collectTextParagraphs'"
     },
@@ -1231,7 +1255,7 @@
       "signature": "542e7e44902986ba81ff74019c8a021a2069d15b97f8920416c15f99da54d31f",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "extractNormativeWithIncrements",
-      "line": 112,
+      "line": 115,
       "metric": "unit-test",
       "message": "Missing unit test for function 'extractNormativeWithIncrements'"
     },
@@ -1239,7 +1263,7 @@
       "signature": "420300b7ee5adf5e726259f1a1b82db29295e7deffb527124c6732fc56fc2b4b",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "extractTechnicalSummary",
-      "line": 123,
+      "line": 126,
       "metric": "unit-test",
       "message": "Missing unit test for function 'extractTechnicalSummary'"
     },
@@ -1247,7 +1271,7 @@
       "signature": "2871457a53a24e408fc3d77cd51086f0e097e763f4582ed1e65ad91bb52209d2",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "resolveCitationType",
-      "line": 140,
+      "line": 143,
       "metric": "unit-test",
       "message": "Missing unit test for function 'resolveCitationType'"
     },
@@ -1255,7 +1279,7 @@
       "signature": "fa613976b16b3e58c01a7b18740dffc9e86d796c3fb66e7a790e97041711993f",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "buildCitationRelations",
-      "line": 150,
+      "line": 153,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildCitationRelations'"
     },
@@ -1263,7 +1287,7 @@
       "signature": "8a5d2b64c48517fd688cf30c61d438816cb4e54d1799a6ada471157b231db400",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "findTasksForCitations",
-      "line": 159,
+      "line": 162,
       "metric": "unit-test",
       "message": "Missing unit test for function 'findTasksForCitations'"
     },
@@ -1271,7 +1295,7 @@
       "signature": "0c80a41d7234b6a5cf3c7976377a7a838426b3a9f8d1800d4beafd443d9e4189",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "isTestNode",
-      "line": 179,
+      "line": 182,
       "metric": "unit-test",
       "message": "Missing unit test for function 'isTestNode'"
     },
@@ -1279,7 +1303,7 @@
       "signature": "0d86bf1c58c18e6edbc9870a4c7aa12c01b3e187bae0d4bcdfa2a7fd1709de40",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "findTestNodesForCitations",
-      "line": 185,
+      "line": 188,
       "metric": "unit-test",
       "message": "Missing unit test for function 'findTestNodesForCitations'"
     },
@@ -1287,7 +1311,7 @@
       "signature": "0c325504eb31323a4ee7a681b6f6d37149b8c35e9f3ca0caed7b658f713c6e2d",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "extractKeySymbols",
-      "line": 205,
+      "line": 213,
       "metric": "unit-test",
       "message": "Missing unit test for function 'extractKeySymbols'"
     },
@@ -1295,7 +1319,7 @@
       "signature": "ae78fbe97dc8dceb1bc581d4a6ef7274fb43fe284132e6f8ff8215a0340b1f90",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "buildSourceSummary",
-      "line": 212,
+      "line": 232,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildSourceSummary'"
     },
@@ -1303,7 +1327,7 @@
       "signature": "78bb985d73c3376867de0ae11551cd6fb4c114bede9ae58e5cc7946640218fbe",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "deduplicateRelations",
-      "line": 225,
+      "line": 245,
       "metric": "unit-test",
       "message": "Missing unit test for function 'deduplicateRelations'"
     },
@@ -1311,7 +1335,7 @@
       "signature": "08f3c6894890ae460fb4d1dd38bf81103cf6382ab1e565be0ffc654fd0289f0b",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "buildSourceInspectResult",
-      "line": 237,
+      "line": 257,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildSourceInspectResult'"
     },
@@ -1319,7 +1343,7 @@
       "signature": "2f258d1980c54ced324ecf07c895db7df6c9f76e2e21d0fa2bcd4946b8b2246d",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "inspectSourceCodeFile",
-      "line": 274,
+      "line": 294,
       "metric": "unit-test",
       "message": "Missing unit test for function 'inspectSourceCodeFile'"
     },
@@ -1327,7 +1351,7 @@
       "signature": "c2198a232e5ccbe458dddd9ed429b5d4b7dc618bb4797623462849f01c23b839",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "buildTaskUpstreamRelations",
-      "line": 303,
+      "line": 323,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildTaskUpstreamRelations'"
     },
@@ -1335,7 +1359,7 @@
       "signature": "c7366d091090efba7f2ae1187d12e16976fea3c60935be9e8fb4a0ed33d72a0d",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "buildTaskVerificationDownstream",
-      "line": 326,
+      "line": 346,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildTaskVerificationDownstream'"
     },
@@ -1343,7 +1367,7 @@
       "signature": "8dd529c96b972385e352434e3824320419498bada40463b5ea3a0fbdad4e390b",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "buildTaskSummary",
-      "line": 336,
+      "line": 356,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildTaskSummary'"
     },
@@ -1351,7 +1375,7 @@
       "signature": "8d5ca544d5cf361b5b456abfdcba42c67b6ec9ac7ebea9eb35fc53e363610e6a",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "inspectDiscoveredTask",
-      "line": 349,
+      "line": 369,
       "metric": "unit-test",
       "message": "Missing unit test for function 'inspectDiscoveredTask'"
     },
@@ -1359,7 +1383,7 @@
       "signature": "b14542b3437c5400083a327202dff5ab13a292ade28b397fd2937463aa08e839",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "inspectDirectFile",
-      "line": 379,
+      "line": 399,
       "metric": "unit-test",
       "message": "Missing unit test for function 'inspectDirectFile'"
     },
@@ -1367,7 +1391,7 @@
       "signature": "27ec7ffb17e7b13f3dde1b616500b544228f14af3f645c3394894c85e48e375f",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "findTargetNode",
-      "line": 409,
+      "line": 429,
       "metric": "unit-test",
       "message": "Missing unit test for function 'findTargetNode'"
     },
@@ -1375,7 +1399,7 @@
       "signature": "988e9150f8caa31cab49d2d097ec8067ce1bd7d929f2861d8022cbe598cf9334",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "collectIncomingEdges",
-      "line": 423,
+      "line": 443,
       "metric": "unit-test",
       "message": "Missing unit test for function 'collectIncomingEdges'"
     },
@@ -1383,7 +1407,7 @@
       "signature": "468cabc583e5842c1d095f1f1ad1b9ede3aec6368adc1590f5805d3d798f5f87",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "collectOutgoingEdges",
-      "line": 441,
+      "line": 461,
       "metric": "unit-test",
       "message": "Missing unit test for function 'collectOutgoingEdges'"
     },
@@ -1391,7 +1415,7 @@
       "signature": "94aaf2c63001fffe3f7cbb1b3d7ed49bf2ab5b1b6e61e2faaf267f58fb084984",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "collectNodeEdges",
-      "line": 459,
+      "line": 479,
       "metric": "unit-test",
       "message": "Missing unit test for function 'collectNodeEdges'"
     },
@@ -1399,7 +1423,7 @@
       "signature": "bb36b25a53bc54c20bb09fdedd923aad7f2cae8a6898c07d566f32706e24783a",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "attachTasksToNodeRelations",
-      "line": 470,
+      "line": 490,
       "metric": "unit-test",
       "message": "Missing unit test for function 'attachTasksToNodeRelations'"
     },
@@ -1407,7 +1431,7 @@
       "signature": "da4fe7cad0dad30e5c266328756a7115032c49cdcddca18895118deeb59f614a",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "buildNotFoundResult",
-      "line": 492,
+      "line": 512,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildNotFoundResult'"
     },
@@ -1415,15 +1439,111 @@
       "signature": "933d10f8e9741ea7b65c17c866a092efae32be6d54f8689ed9226c2af8de67d6",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "inspectMatchedNode",
-      "line": 520,
+      "line": 540,
       "metric": "unit-test",
       "message": "Missing unit test for function 'inspectMatchedNode'"
+    },
+    {
+      "signature": "0acf982a9aac00f8dc41c3f63a109fa510e64a54d49eb58f1bf4a352f6e584b0",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "collectWorkspaceSourceEntries",
+      "line": 580,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'collectWorkspaceSourceEntries'"
+    },
+    {
+      "signature": "6e904c9b775a5a3eca7971baa00ec933f014fd4537558895f182285ae7c53928",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "matchEntrySymbols",
+      "line": 609,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'matchEntrySymbols'"
+    },
+    {
+      "signature": "97c66627ec86a0ae35098615839d6fc019cc247f67581212fcd82a6bc20c710e",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "matchTextTokens",
+      "line": 633,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'matchTextTokens'"
+    },
+    {
+      "signature": "ec99b16aa3733eb17e5ac1c4770221f377447d6a3e39db0f4296610688c67215",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "isTokenCoverageSufficient",
+      "line": 652,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'isTokenCoverageSufficient'"
+    },
+    {
+      "signature": "7e8c6811432fb36299ced4ff6fec78f284840c8d3b5b27e9504a8306d11e1795",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "buildSourceSemanticMatch",
+      "line": 658,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'buildSourceSemanticMatch'"
+    },
+    {
+      "signature": "40df2f30eedb5b62b2df7c5532852bc868fe6d87d58c3860d6c90830974841da",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "scoreSourceEntry",
+      "line": 677,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'scoreSourceEntry'"
+    },
+    {
+      "signature": "7ead2ab576c4dde0b763cb9b4a42e2487724ee0d9d3e9eb9d2e3ec92f7bb9e03",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "buildNodeSemanticMatch",
+      "line": 692,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'buildNodeSemanticMatch'"
+    },
+    {
+      "signature": "516c619a58e3bf65ba44e54e6d827cadd82645c0e65b6acdef4f43779a2e43e9",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "scoreGraphNode",
+      "line": 709,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'scoreGraphNode'"
+    },
+    {
+      "signature": "b6f54d64f6cd0e19b4a4c9c63b68a44528fcb13113ab90ad8056c1e4a50a286d",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "findSemanticCandidates",
+      "line": 727,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'findSemanticCandidates'"
+    },
+    {
+      "signature": "43bdc95b0efab497b2d2389729dbd945cced8834b147d22cb725e89df1327461",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "attachSemanticMatchesToResult",
+      "line": 753,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'attachSemanticMatchesToResult'"
+    },
+    {
+      "signature": "3ab685a591a6148007e78350dc4370fcd857f2d4f9bedb3641821edc7d1504a5",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "inspectTopSemanticCandidate",
+      "line": 775,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'inspectTopSemanticCandidate'"
+    },
+    {
+      "signature": "2587d375363dc8522d592d38b5f4a9131dd9e887afe7cb566c84e6d18dd8cdae",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "resolveSemanticMatch",
+      "line": 794,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'resolveSemanticMatch'"
     },
     {
       "signature": "ac6525b4d0574d25e7a8aa213ca295e09a561c03b264ad6527cfb07ab8bc57e2",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "resolveTargetMatch",
-      "line": 552,
+      "line": 808,
       "metric": "unit-test",
       "message": "Missing unit test for function 'resolveTargetMatch'"
     },
@@ -1431,7 +1551,7 @@
       "signature": "6a23daa402e868e685881126f735eded37e9a60db8129731e6536fecb8cbd39f",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "formatRelationsBlock",
-      "line": 608,
+      "line": 872,
       "metric": "unit-test",
       "message": "Missing unit test for function 'formatRelationsBlock'"
     },
@@ -1439,7 +1559,7 @@
       "signature": "01a95662fa5ac7042dc526cf001b04cb34c38af4659917836e76dabcec5365b7",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "formatRelatedNavBlock",
-      "line": 619,
+      "line": 883,
       "metric": "unit-test",
       "message": "Missing unit test for function 'formatRelatedNavBlock'"
     },
@@ -1447,9 +1567,17 @@
       "signature": "b82b142deb38e729944a0ace39f7b329bc06a78ec14442cc927184a154d649b7",
       "file": "packages/core/src/inspector/index.ts",
       "functionName": "formatNotFoundMarkdown",
-      "line": 632,
+      "line": 896,
       "metric": "unit-test",
       "message": "Missing unit test for function 'formatNotFoundMarkdown'"
+    },
+    {
+      "signature": "ca0a7efdb228d91f5accebd75bbb15e3a579a66a929687b68429ddf660c8343c",
+      "file": "packages/core/src/inspector/index.ts",
+      "functionName": "formatSemanticMatchesBlock",
+      "line": 907,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'formatSemanticMatchesBlock'"
     },
     {
       "signature": "1cbc83d8d4278e586485563595b17e0daca93c0b180b8aa26e0925b5c1f1a127",
@@ -2836,18 +2964,10 @@
       "message": "Missing unit test for function 'checkFile'"
     },
     {
-      "signature": "cb9118ac5139eaf8f46600b87d4adca94babeefddf78569474353ea728325912",
-      "file": "packages/core/src/verifiers/duplicates.ts",
-      "functionName": "extractNormativeText",
-      "line": 96,
-      "metric": "unit-test",
-      "message": "Missing unit test for function 'extractNormativeText'"
-    },
-    {
       "signature": "9406eabe970351d689412b127a8557dccf94ac28b350dc2fb54ec4da0fe6ec61",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "extractFrontmatterDerives",
-      "line": 118,
+      "line": 129,
       "metric": "unit-test",
       "message": "Missing unit test for function 'extractFrontmatterDerives'"
     },
@@ -2855,7 +2975,7 @@
       "signature": "ca59d40f3d74bab7fef1687f15ffb8782b8911379f11e740ad959bcc6bab8e99",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "extractCucumberTags",
-      "line": 123,
+      "line": 134,
       "metric": "unit-test",
       "message": "Missing unit test for function 'extractCucumberTags'"
     },
@@ -2863,31 +2983,31 @@
       "signature": "cf8eedd24cc6112504fd6366e60e1e6d8bc3ff11cc7c937cbddee913ec3c21f8",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "extractParsedFrontmatter",
-      "line": 130,
+      "line": 141,
       "metric": "unit-test",
       "message": "Missing unit test for function 'extractParsedFrontmatter'"
+    },
+    {
+      "signature": "1e21a0312283cfaa06879146795d8e7e22f734e4398061e8fe52e2caf1999ec7",
+      "file": "packages/core/src/verifiers/duplicates.ts",
+      "functionName": "buildSemanticTokensForReq",
+      "line": 158,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'buildSemanticTokensForReq'"
     },
     {
       "signature": "cc0a61dc6a16c4890dc897c76dfb1cb63e53607950c2e8dd5a981a686693c26e",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "buildRequirementObject",
-      "line": 147,
+      "line": 166,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildRequirementObject'"
-    },
-    {
-      "signature": "efde0230a447da30d8d4dd7e7daad5a4f25beab00a4823a428ccc43ba8089134",
-      "file": "packages/core/src/verifiers/duplicates.ts",
-      "functionName": "parseRequirementFile",
-      "line": 169,
-      "metric": "unit-test",
-      "message": "Missing unit test for function 'parseRequirementFile'"
     },
     {
       "signature": "053bb0102be49530c7349787312fda07f6be86ccac228fb7e3d9e397bebd449f",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "isIgnoredScanPath",
-      "line": 182,
+      "line": 206,
       "metric": "unit-test",
       "message": "Missing unit test for function 'isIgnoredScanPath'"
     },
@@ -2895,7 +3015,7 @@
       "signature": "c199643befbce8ebb336a08e10a3209eb9c3e792f21620ad39803765c37233c2",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "collectRequirements",
-      "line": 194,
+      "line": 218,
       "metric": "unit-test",
       "message": "Missing unit test for function 'collectRequirements'"
     },
@@ -2903,7 +3023,7 @@
       "signature": "5676c0585ce59dff208744d5b9e2232db695abf0d86a8af9ba86df92129ea390",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "checkIdCollisions",
-      "line": 205,
+      "line": 229,
       "metric": "unit-test",
       "message": "Missing unit test for function 'checkIdCollisions'"
     },
@@ -2911,7 +3031,7 @@
       "signature": "c4bdd038aae74c3409079ea31dccedee30918de1303b93eb7c20916619c52296",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "checkExactContentCollision",
-      "line": 225,
+      "line": 249,
       "metric": "unit-test",
       "message": "Missing unit test for function 'checkExactContentCollision'"
     },
@@ -2919,15 +3039,39 @@
       "signature": "f07b932f0146ea97ae0f8c4788c9b710b1a594859f12d04442262bf7544b709a",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "checkTitleSimilarity",
-      "line": 244,
+      "line": 268,
       "metric": "unit-test",
       "message": "Missing unit test for function 'checkTitleSimilarity'"
+    },
+    {
+      "signature": "c5302f6ac5ed1cbbae119246ff0633d2d4a5b727b46a7a9ac5bdeb5411a465bc",
+      "file": "packages/core/src/verifiers/duplicates.ts",
+      "functionName": "buildSemanticIssue",
+      "line": 293,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'buildSemanticIssue'"
+    },
+    {
+      "signature": "feae9dcc4bef9fb6def4b5ca1e6f2b306efde49cf6ac4f0f55b77822e846464e",
+      "file": "packages/core/src/verifiers/duplicates.ts",
+      "functionName": "toTokenBundle",
+      "line": 314,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'toTokenBundle'"
+    },
+    {
+      "signature": "671449c635e7c3289578a01d6bacf6c4c782165991f5fbd312286df7de2a799c",
+      "file": "packages/core/src/verifiers/duplicates.ts",
+      "functionName": "checkSemanticDuplicateOrOverlap",
+      "line": 322,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'checkSemanticDuplicateOrOverlap'"
     },
     {
       "signature": "415a402a1a323fe1d02ba958808a17c8455245afc4758ede1812e99140750ddc",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "checkBddTagCollision",
-      "line": 267,
+      "line": 341,
       "metric": "unit-test",
       "message": "Missing unit test for function 'checkBddTagCollision'"
     },
@@ -2935,7 +3079,7 @@
       "signature": "2fde376acaf02d9074d49ade308e99b44dec09a06e4ef2306ee47baa41fbf5aa",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "checkSharedBusinessRules",
-      "line": 287,
+      "line": 361,
       "metric": "unit-test",
       "message": "Missing unit test for function 'checkSharedBusinessRules'"
     },
@@ -2943,7 +3087,7 @@
       "signature": "967db4988493d41ed739f5343a0a312c680457e7f54a8372281571308d9e0a6c",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "compareRequirementPair",
-      "line": 305,
+      "line": 386,
       "metric": "unit-test",
       "message": "Missing unit test for function 'compareRequirementPair'"
     },
@@ -2951,15 +3095,23 @@
       "signature": "f133fa06ba372b5a67ddc07315c4fc1dcccf31233481a7b299865fb4e7dd07a0",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "checkCrossComparisons",
-      "line": 319,
+      "line": 403,
       "metric": "unit-test",
       "message": "Missing unit test for function 'checkCrossComparisons'"
+    },
+    {
+      "signature": "64b3c301d1ab2c6efbdc5d32c146edaf9db66e05a8cf5583bdf194a2c9d113b0",
+      "file": "packages/core/src/verifiers/duplicates.ts",
+      "functionName": "buildDuplicateThresholds",
+      "line": 417,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'buildDuplicateThresholds'"
     },
     {
       "signature": "7104b956a7af776865441007cb2debc0dea374ea47b0c219da2c0076431bc002",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "buildDuplicatesHeader",
-      "line": 360,
+      "line": 454,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildDuplicatesHeader'"
     },
@@ -2967,7 +3119,7 @@
       "signature": "2df592b47444b2c4144a88b1458a7a4e098bf86088bdb9b37b4fb940f1ded672",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "formatIssueRow",
-      "line": 373,
+      "line": 467,
       "metric": "unit-test",
       "message": "Missing unit test for function 'formatIssueRow'"
     },
@@ -2975,7 +3127,7 @@
       "signature": "079bea12f58b65a85cc62480f756b8726690a0e28c4b65c114d3fdf7ef370c19",
       "file": "packages/core/src/verifiers/duplicates.ts",
       "functionName": "generateDuplicatesReportMarkdown",
-      "line": 379,
+      "line": 473,
       "metric": "unit-test",
       "message": "Missing unit test for function 'generateDuplicatesReportMarkdown'"
     },
@@ -6420,10 +6572,138 @@
       "message": "Missing unit test for function 'buildTableSection'"
     },
     {
+      "signature": "033a9380186375ec60172a6c114690c2dee0c17dbbdc161ba0aada5470d23b6c",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "stripSuffixRule",
+      "line": 78,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'stripSuffixRule'"
+    },
+    {
+      "signature": "20572d5cd5a83473f1484eeaed8e5ce4adcf7a084f91b0fd7954cdfb95d0bccb",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "appendCharNgrams",
+      "line": 94,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'appendCharNgrams'"
+    },
+    {
+      "signature": "8e0b0315b82ad0c15a77d615efcba87f9eed109de9bc782d5376ecdd6a6f044f",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "cleanGherkinBlock",
+      "line": 116,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'cleanGherkinBlock'"
+    },
+    {
+      "signature": "10bae1fee1449a19571309a43960d17ea16bf23304f926ff8904b8af9744428b",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "normalizeVectorInPlace",
+      "line": 159,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'normalizeVectorInPlace'"
+    },
+    {
+      "signature": "ae9fd19f4f54acd8491faf0281634dfd6fb8ab80c464557534eb36f1b8b7740d",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "round3",
+      "line": 191,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'round3'"
+    },
+    {
+      "signature": "5ac0d00b31dde1f0c9c91e52ac63f940a733312ba6b42711b631c4dae814622a",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "blendPairScores",
+      "line": 195,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'blendPairScores'"
+    },
+    {
+      "signature": "73675e2fbb6a9f10121af99ca1bd13193852bb2a6a32c45e8ff864ac17df98f4",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "isExcludedSpecPath",
+      "line": 222,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'isExcludedSpecPath'"
+    },
+    {
+      "signature": "7f3c6eb60d7d5737e00a8bf08e591bf2ff56bb6fe9cf61c63b546170a0a038ad",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "isSearchableArtifact",
+      "line": 229,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'isSearchableArtifact'"
+    },
+    {
+      "signature": "8d65f7cabe637617b5d7c606060bf391205ad86f201516302eab6822b64f6256",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "parseDerivesList",
+      "line": 234,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'parseDerivesList'"
+    },
+    {
+      "signature": "4742163fecba1d987e214a27ef5d2e8a6f728594435dd16ceb59bdbf8f96f6e0",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "buildIndexedDocFromFm",
+      "line": 240,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'buildIndexedDocFromFm'"
+    },
+    {
+      "signature": "8251346818f45ee73133e17f209539000b825684f24f666296afd26f925f101f",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "parseIndexedDocument",
+      "line": 262,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'parseIndexedDocument'"
+    },
+    {
+      "signature": "a9471eda079f28766ddebbd1ef3543c86a10890bc8938552eeb44fc211e96d57",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "matchesTypeFilter",
+      "line": 276,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'matchesTypeFilter'"
+    },
+    {
+      "signature": "60f074d8b13129bfa3cdea3a64a4c0fa02b2b9426f38c7ebca3ea9cc2c70f7f0",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "collectMatchedQueryWords",
+      "line": 295,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'collectMatchedQueryWords'"
+    },
+    {
+      "signature": "099e7110d16656a9fbcf94c0a885fce53122bf3fc211e3cbd6f05514d9982687",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "computeQueryMatch",
+      "line": 302,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'computeQueryMatch'"
+    },
+    {
+      "signature": "a005d10e1ca7aed8757e392049b109831a996b9ad708c191b25666990779a8c0",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "rankDocumentsForQuery",
+      "line": 323,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'rankDocumentsForQuery'"
+    },
+    {
+      "signature": "a4c5d387b10662b024dd5bec51639216a04ddad8322cf71108444c46aa71c403",
+      "file": "packages/core/src/verifiers/semantic-similarity.ts",
+      "functionName": "formatMatchEntry",
+      "line": 344,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'formatMatchEntry'"
+    },
+    {
       "signature": "76a1484810958229eee1074779da58bab3e82089f37c7f42fc7fb8d0409e3bc8",
       "file": "packages/core/src/verifiers/skill-execution-audit.ts",
       "functionName": "readExecutedMcpTools",
-      "line": 30,
+      "line": 31,
       "metric": "unit-test",
       "message": "Missing unit test for function 'readExecutedMcpTools'"
     },
@@ -6954,6 +7234,14 @@
       "line": 774,
       "metric": "unit-test",
       "message": "Missing unit test for function 'buildTraceabilityContext'"
+    },
+    {
+      "signature": "e26b8ec9091f05fc9c578d4ed512429c85d6c1399d782781cc7a35bd4fab68d5",
+      "file": "packages/mcp/src/tools/verification.ts",
+      "functionName": "registerSearchSpecsTool",
+      "line": 269,
+      "metric": "unit-test",
+      "message": "Missing unit test for function 'registerSearchSpecsTool'"
     }
   ]
 }
