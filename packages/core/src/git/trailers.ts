@@ -40,31 +40,34 @@ export interface CommitKpiRecord {
 }
 
 const TRAILER_REGEXES = {
-  taskId: /^\s*Task-ID:\s*(.+)$/im,
-  parentRef: /^\s*Parent-Ref:\s*(.+)$/im,
-  authorType: /^\s*Author-Type:\s*(human|agent)/im,
-  aiModel: /^\s*AI-Model:\s*(.+)$/im,
-  reasoningEffort: /^[ \t]*AI-Reasoning-Effort:[ \t]*([^\r\n]+)$/im,
-  promptTokens: /^\s*Prompt-Tokens:\s*([0-9]+)/im,
-  completionTokens: /^\s*Completion-Tokens:\s*([0-9]+)/im,
-  activeTimeSeconds: /^\s*Active-Time-Seconds:\s*([0-9]+)/im,
+  taskId: /^[ \t]*Task-ID:[ \t]*([^\s\r\n][^\r\n]*)$/im,
+  parentRef: /^[ \t]*Parent-Ref:[ \t]*([^\s\r\n][^\r\n]*)$/im,
+  authorType: /^[ \t]*Author-Type:[ \t]*(human|agent)[ \t]*$/im,
+  aiModel: /^[ \t]*AI-Model:[ \t]*([^\s\r\n][^\r\n]*)$/im,
+  reasoningEffort: /^[ \t]*AI-Reasoning-Effort:[ \t]*([^\s\r\n][^\r\n]*)$/im,
+  promptTokens: /^[ \t]*Prompt-Tokens:[ \t]*([0-9]+)[ \t]*$/im,
+  completionTokens: /^[ \t]*Completion-Tokens:[ \t]*([0-9]+)[ \t]*$/im,
+  activeTimeSeconds: /^[ \t]*Active-Time-Seconds:[ \t]*([0-9]+)[ \t]*$/im,
 };
 
-function parseTrailerInt(match: RegExpMatchArray | null): number {
+export function parseTrailerInt(match: RegExpMatchArray | null): number {
   if (!match) return 0;
   const val = parseInt(match[1], 10);
   return isNaN(val) ? 0 : val;
 }
 
-function resolveAuthorType(
+export function resolveAuthorType(
   authorTypeMatch: RegExpMatchArray | null,
   aiModelMatch: RegExpMatchArray | null
 ): 'human' | 'agent' {
   if (authorTypeMatch) {
     return authorTypeMatch[1].toLowerCase() as 'human' | 'agent';
   }
-  if (aiModelMatch && aiModelMatch[1].trim() !== 'n/a') {
-    return 'agent';
+  if (aiModelMatch) {
+    const model = aiModelMatch[1].trim();
+    if (model.length > 0 && model.toLowerCase() !== 'n/a') {
+      return 'agent';
+    }
   }
   return 'human';
 }
@@ -72,8 +75,9 @@ function resolveAuthorType(
 /**
  * Parses structured AI-SDLC git trailers from a commit message.
  */
-function resolveTrailerOrScope(match: RegExpMatchArray | null, text: string, fallbackRegex: RegExp): string | undefined {
-  if (match) return match[1].trim();
+export function resolveTrailerOrScope(match: RegExpMatchArray | null, text: string, fallbackRegex: RegExp): string | undefined {
+  const trimmed = match ? match[1].trim() : '';
+  if (trimmed) return trimmed;
   const subMatch = text.match(fallbackRegex);
   return subMatch ? subMatch[1].toUpperCase() : undefined;
 }
@@ -87,7 +91,7 @@ export function parseCommitTrailers(rawMessage: string): CommitTrailers {
   const aiModelMatch = text.match(TRAILER_REGEXES.aiModel);
   const authorType = resolveAuthorType(authorTypeMatch, aiModelMatch);
   const rawModel = aiModelMatch ? aiModelMatch[1].trim() : undefined;
-  const aiModel = rawModel && rawModel !== 'n/a' ? rawModel : undefined;
+  const aiModel = rawModel && rawModel.toLowerCase() !== 'n/a' ? rawModel : undefined;
   const effortMatch = text.match(TRAILER_REGEXES.reasoningEffort);
   const reasoningEffort = normalizeReasoningEffort(effortMatch ? effortMatch[1] : undefined);
 
@@ -120,13 +124,13 @@ export function formatCommitTrailers(trailers: Partial<CommitTrailers>): string 
   return lines.join('\n');
 }
 
-interface ParsedCommitChunk {
+export interface ParsedCommitChunk {
   header: string;
   body: string;
   numstatLines: string[];
 }
 
-function parseRawLogChunks(rawLog: string): ParsedCommitChunk[] {
+export function parseRawLogChunks(rawLog: string): ParsedCommitChunk[] {
   const rawCommits = rawLog.split('---AI_SDLC_COMMIT---').filter((c) => c.trim().length > 0);
   const chunks: ParsedCommitChunk[] = [];
 
@@ -138,39 +142,40 @@ function parseRawLogChunks(rawLog: string): ParsedCommitChunk[] {
     const afterEnd = raw.slice(endBodyIdx + '---AI_SDLC_BODY_END---'.length);
 
     const firstNewline = beforeEnd.indexOf('\n');
-    const header = firstNewline === -1 ? beforeEnd : beforeEnd.slice(0, firstNewline);
+    const header = (firstNewline === -1 ? beforeEnd : beforeEnd.slice(0, firstNewline)).replace(/\r$/, '');
     const body = firstNewline === -1 ? '' : beforeEnd.slice(firstNewline + 1);
 
-    const numstatLines = afterEnd.split('\n').filter((l) => /^\d+\s+\d+\s+/.test(l.trim()));
+    const numstatLines = afterEnd.split('\n').filter((l) => /^(?:\d+|-)\s+(?:\d+|-)\s+/.test(l.trim()));
     chunks.push({ header, body, numstatLines });
   }
 
   return chunks;
 }
 
-function sumNumstatLines(lines: string[]): { added: number; deleted: number; files: string[] } {
+export function sumNumstatLines(lines: string[]): { added: number; deleted: number; files: string[] } {
   let added = 0;
   let deleted = 0;
   const files: string[] = [];
   for (const line of lines) {
-    const parts = line.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      const a = parseInt(parts[0], 10);
-      const d = parseInt(parts[1], 10);
-      if (!isNaN(a)) added += a;
-      if (!isNaN(d)) deleted += d;
-      if (parts.length >= 3) files.push(parts.slice(2).join(' '));
-    }
+    const clean = line.replace(/\r$/, '').trimStart();
+    const match = clean.match(/^(\d+|-)[ \t]+(\d+|-)(?:\t(.*)|[ \t]+(.*))?$/);
+    if (!match) continue;
+    const a = parseInt(match[1], 10);
+    const d = parseInt(match[2], 10);
+    if (!isNaN(a)) added += a;
+    if (!isNaN(d)) deleted += d;
+    const file = match[3] ?? match[4];
+    if (file) files.push(file);
   }
   return { added, deleted, files };
 }
 
-function evaluateIsBugFix(subject: string, parentRef?: string): boolean {
+export function evaluateIsBugFix(subject: string, parentRef?: string): boolean {
   if (parentRef && /^(BUG|FIX)-/i.test(parentRef)) return true;
-  return /^(fix|bug)(\([^)]+\))?:/i.test(subject.trim());
+  return /^(fix|bug)(\([^)]+\))?!?:/i.test(subject.trim());
 }
 
-function inferAgentTrailers(trailers: CommitTrailers, linesAdded: number, linesDeleted: number): CommitTrailers {
+export function inferAgentTrailers(trailers: CommitTrailers, linesAdded: number, linesDeleted: number): CommitTrailers {
   const res: CommitTrailers = { ...trailers };
   const linesChanged = linesAdded + linesDeleted;
   let estimated = false;
@@ -188,7 +193,7 @@ function inferAgentTrailers(trailers: CommitTrailers, linesAdded: number, linesD
   return res;
 }
 
-function inferHumanTrailers(trailers: CommitTrailers, linesAdded: number, linesDeleted: number): CommitTrailers {
+export function inferHumanTrailers(trailers: CommitTrailers, linesAdded: number, linesDeleted: number): CommitTrailers {
   const res: CommitTrailers = { ...trailers };
   const linesChanged = linesAdded + linesDeleted;
   let estimated = false;
@@ -244,7 +249,7 @@ export function resolveGitRef(cwd: string, ref: string): string {
   return ref;
 }
 
-function fetchGitLogOutput(cwd: string, baseRef: string, headRef: string, format: string): string {
+export function fetchGitLogOutput(cwd: string, baseRef: string, headRef: string, format: string): string {
   const rangeArg = baseRef ? `${baseRef}..${headRef}` : headRef;
   try {
     return execFileSync('git', ['log', rangeArg, `--format=${format}`, '--numstat'], {
@@ -268,7 +273,7 @@ function fetchGitLogOutput(cwd: string, baseRef: string, headRef: string, format
   }
 }
 
-function buildCommitKpiRecord(chunk: ParsedCommitChunk): CommitKpiRecord | null {
+export function buildCommitKpiRecord(chunk: ParsedCommitChunk): CommitKpiRecord | null {
   const fields = chunk.header.split('\x1f');
   if (fields.length < 5) return null;
 

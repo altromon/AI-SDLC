@@ -19,7 +19,7 @@ import { verifyBddReportAttestation } from './bdd-runner.js';
 import { extractGherkinBlock } from './gherkin.js';
 import { compileTestPatterns } from './test-discovery.js';
 
-interface ParsedTaskItem {
+export interface ParsedTaskItem {
   id: string;
   title?: string;
   verification?: {
@@ -28,7 +28,7 @@ interface ParsedTaskItem {
   };
 }
 
-interface GenericFrontmatter {
+export interface GenericFrontmatter {
   id?: string;
   title?: string;
   type?: string;
@@ -43,7 +43,7 @@ interface GenericFrontmatter {
   [key: string]: unknown;
 }
 
-function parseTaskVerification(v: unknown): ParsedTaskItem['verification'] {
+export function parseTaskVerification(v: unknown): ParsedTaskItem['verification'] {
   const verification: ParsedTaskItem['verification'] = {};
   if (v && typeof v === 'object') {
     const rec = v as Record<string, unknown>;
@@ -53,15 +53,17 @@ function parseTaskVerification(v: unknown): ParsedTaskItem['verification'] {
   return verification;
 }
 
-function parseTaskItem(t: Record<string, unknown>): ParsedTaskItem {
+export function parseTaskItem(t: unknown): ParsedTaskItem {
+  if (!t || typeof t !== 'object') return { id: '', verification: {} };
+  const rec = t as Record<string, unknown>;
   return {
-    id: typeof t['id'] === 'string' ? t['id'] : String(t['id'] ?? ''),
-    title: typeof t['title'] === 'string' ? t['title'] : undefined,
-    verification: parseTaskVerification(t['verification']),
+    id: typeof rec['id'] === 'string' ? rec['id'] : String(rec['id'] ?? ''),
+    title: typeof rec['title'] === 'string' ? rec['title'] : undefined,
+    verification: parseTaskVerification(rec['verification']),
   };
 }
 
-function parseVerifiedByTests(verifiedBy: unknown): string[] | undefined {
+export function parseVerifiedByTests(verifiedBy: unknown): string[] | undefined {
   if (Array.isArray(verifiedBy)) {
     return (verifiedBy as unknown[]).map(String);
   }
@@ -99,7 +101,7 @@ export function parseGenericDoc(content: string): { frontmatter: GenericFrontmat
   return { frontmatter, body: content.substring(match[0].length) };
 }
 
-function buildRequirementsTable(reqAudit: RequirementAuditItem[]): string[] {
+export function buildRequirementsTable(reqAudit: RequirementAuditItem[]): string[] {
   const lines: string[] = [
     `## 1. Requirements Audit (Product, Quality, and Security)`,
     ``,
@@ -115,7 +117,7 @@ function buildRequirementsTable(reqAudit: RequirementAuditItem[]): string[] {
   return lines;
 }
 
-function buildTasksTable(taskAudit: TaskAuditItem[]): string[] {
+export function buildTasksTable(taskAudit: TaskAuditItem[]): string[] {
   const lines: string[] = [
     `## 2. Tasks Audit (SDD Delivery Engineering)`,
     ``,
@@ -166,7 +168,7 @@ const EXCLUDED_TEST_DIRS = new Set([
   '.vs', '.idea',
 ]);
 
-function recordRequirementTest(reqToTestsMap: Map<string, string[]>, reqId: string, relTest: string): void {
+export function recordRequirementTest(reqToTestsMap: Map<string, string[]>, reqId: string, relTest: string): void {
   const existing = reqToTestsMap.get(reqId) || [];
   if (!existing.includes(relTest)) {
     existing.push(relTest);
@@ -174,12 +176,12 @@ function recordRequirementTest(reqToTestsMap: Map<string, string[]>, reqId: stri
   }
 }
 
-function parseFeatureTags(content: string, relTest: string, reqToTestsMap: Map<string, string[]>): void {
+export function parseFeatureTags(content: string, relTest: string, reqToTestsMap: Map<string, string[]>): void {
   const lines = content.split('\n');
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed.startsWith('@')) continue;
-    const tags = trimmed.split(/\s+/).filter((t) => t.startsWith('@'));
+    const tags = trimmed.split(/\s+/).filter((t) => t.startsWith('@') && t.length > 1);
     for (const t of tags) {
       recordRequirementTest(reqToTestsMap, t.substring(1), relTest);
     }
@@ -188,7 +190,7 @@ function parseFeatureTags(content: string, relTest: string, reqToTestsMap: Map<s
 
 const REQ_ID_REGEX = /\b(FR|QR|CON|SEC-REQ|PRIV-REQ)-[A-Z0-9]+(-[A-Z0-9]+)*\b/g;
 
-function parseCodeTestIds(content: string, relTest: string, reqToTestsMap: Map<string, string[]>): void {
+export function parseCodeTestIds(content: string, relTest: string, reqToTestsMap: Map<string, string[]>): void {
   const idMatches = content.match(REQ_ID_REGEX);
   if (!idMatches) return;
   for (const reqId of idMatches) {
@@ -196,7 +198,7 @@ function parseCodeTestIds(content: string, relTest: string, reqToTestsMap: Map<s
   }
 }
 
-function processTestFile(fullPath: string, rootDir: string, reqToTestsMap: Map<string, string[]>): void {
+export function processTestFile(fullPath: string, rootDir: string, reqToTestsMap: Map<string, string[]>): void {
   try {
     const content = fs.readFileSync(fullPath, 'utf-8');
     const relTest = path.relative(rootDir, fullPath).replace(/\\/g, '/');
@@ -209,7 +211,7 @@ function processTestFile(fullPath: string, rootDir: string, reqToTestsMap: Map<s
   }
 }
 
-function collectTestFiles(
+export function collectTestFiles(
   dir: string,
   rootDir: string,
   matcher: ReturnType<typeof compileTestPatterns>,
@@ -250,16 +252,15 @@ const BOUNDARY_KEYWORDS = /\b(boundary|limit|edge|min|max|l[ií]mite|borde|extre
 const INVALID_KEYWORDS =
   /\b(invalid|out[- ]of[- ]range|error|null|empty|reject|fail|unauthorized|exception|inv[aá]lido|fuera de rango|rechaz|excepci[oó]n|fallo)\b/i;
 
-interface ScenarioChunk {
+export interface ScenarioChunk {
   tags: string;
   header: string;
   isOutline: boolean;
 }
 
-function extractScenariosForReq(gherkinText: string, reqId: string): ScenarioChunk[] {
+export function extractScenariosForReq(gherkinText: string, reqId: string): ScenarioChunk[] {
+  if (!reqId || !new RegExp(`@${reqId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=$|\\s)`).test(gherkinText)) return [];
   const lines = gherkinText.split(/\r?\n/);
-  const featureApplies = gherkinText.includes(`@${reqId}`);
-  if (!featureApplies) return [];
 
   const chunks: ScenarioChunk[] = [];
   let pendingTags = '';
@@ -278,16 +279,16 @@ function extractScenariosForReq(gherkinText: string, reqId: string): ScenarioChu
 
 const INVALID_TAG_RE = /@(invalid|error|out-of-range)\b/i;
 
-function isInvalidScenario(chunk: ScenarioChunk, combined: string): boolean {
+export function isInvalidScenario(chunk: ScenarioChunk, combined: string): boolean {
   return INVALID_TAG_RE.test(chunk.tags) || INVALID_KEYWORDS.test(combined);
 }
 
-function isBoundaryScenario(chunk: ScenarioChunk, combined: string, isInvalid: boolean): boolean {
+export function isBoundaryScenario(chunk: ScenarioChunk, combined: string, isInvalid: boolean): boolean {
   if (chunk.tags.includes('@boundary') || BOUNDARY_KEYWORDS.test(combined)) return true;
   return chunk.isOutline && !isInvalid;
 }
 
-function classifyScenarioChunk(chunk: ScenarioChunk, cov: BddVariantCoverage): void {
+export function classifyScenarioChunk(chunk: ScenarioChunk, cov: BddVariantCoverage): void {
   const combined = `${chunk.tags} ${chunk.header}`;
   const isInvalid = isInvalidScenario(chunk, combined);
   const isBoundary = isBoundaryScenario(chunk, combined, isInvalid);
@@ -310,7 +311,7 @@ export function analyzeBddVariantsForRequirement(reqId: string, gherkinSources: 
   return cov;
 }
 
-function computeMissingVariants(cov: BddVariantCoverage): string[] {
+export function computeMissingVariants(cov: BddVariantCoverage): string[] {
   const missing: string[] = [];
   if (!cov.nominal) missing.push('nominal');
   if (!cov.boundary) missing.push('boundary');
@@ -320,7 +321,7 @@ function computeMissingVariants(cov: BddVariantCoverage): string[] {
 
 const REQ_PREFIXES = ['FR-', 'QR-', 'CON-', 'SEC-REQ-', 'PRIV-REQ-'];
 
-function isRequirementArtifact(frontmatter: GenericFrontmatter, id: string): boolean {
+export function isRequirementArtifact(frontmatter: GenericFrontmatter, id: string): boolean {
   if (
     frontmatter.type === 'requirement' ||
     frontmatter.type === 'security-requirement' ||
@@ -331,14 +332,14 @@ function isRequirementArtifact(frontmatter: GenericFrontmatter, id: string): boo
   return REQ_PREFIXES.some((prefix) => id.startsWith(prefix));
 }
 
-function resolveRequirementMethod(declaredMethod: unknown, matchingTests: string[]): string {
+export function resolveRequirementMethod(declaredMethod: unknown, matchingTests: string[]): string {
   if (typeof declaredMethod === 'string' && declaredMethod) {
     return declaredMethod;
   }
   return matchingTests.some((t) => t.endsWith('.feature')) ? 'BDD_CUCUMBER' : 'TEST_EXECUTION';
 }
 
-function shouldEnforceVariantsForReq(
+export function shouldEnforceVariantsForReq(
   id: string,
   frontmatter: GenericFrontmatter,
   options: TestingCoverageOptions
@@ -347,7 +348,7 @@ function shouldEnforceVariantsForReq(
   return Boolean(options.enforceBddVariants || frontmatter['enforce-bdd-variants'] === true);
 }
 
-function evaluateReqVerification(
+export function evaluateReqVerification(
   id: string,
   isTemplate: boolean,
   hasTests: boolean,
@@ -361,12 +362,12 @@ function evaluateReqVerification(
   return hasTests && variantsOk;
 }
 
-function formatTestRefs(matchingTests: string[], relPath: string, totalScenarios: number): string {
+export function formatTestRefs(matchingTests: string[], relPath: string, totalScenarios: number): string {
   if (matchingTests.length > 0) return matchingTests.join(', ');
   return totalScenarios > 0 ? `${relPath} (gherkin)` : 'NINGUNA DETECTADA';
 }
 
-function buildRequirementAuditItem(
+export function buildRequirementAuditItem(
   frontmatter: GenericFrontmatter,
   id: string,
   relPath: string,
@@ -391,7 +392,7 @@ function buildRequirementAuditItem(
   };
 }
 
-function auditRequirement(
+export function auditRequirement(
   frontmatter: GenericFrontmatter,
   id: string,
   relPath: string,
@@ -411,7 +412,7 @@ function auditRequirement(
   return { item, isError: !isVerified };
 }
 
-function parseSingleFlowEntry(entry: unknown): string {
+export function parseSingleFlowEntry(entry: unknown): string {
   if (typeof entry === 'string') return entry.trim();
   if (entry && typeof entry === 'object') {
     const rec = entry as Record<string, unknown>;
@@ -420,7 +421,7 @@ function parseSingleFlowEntry(entry: unknown): string {
   return '';
 }
 
-function extractDeclaredUseCaseFlows(frontmatter: GenericFrontmatter): string[] {
+export function extractDeclaredUseCaseFlows(frontmatter: GenericFrontmatter): string[] {
   const flows: string[] = [];
   const rawLists = [frontmatter['alternative-flows'], frontmatter['exception-flows']];
   for (const list of rawLists) {
@@ -433,7 +434,7 @@ function extractDeclaredUseCaseFlows(frontmatter: GenericFrontmatter): string[] 
   return flows;
 }
 
-function auditUseCaseFlowItem(
+export function auditUseCaseFlowItem(
   id: string,
   relPath: string,
   declaredFlows: string[],
@@ -461,12 +462,12 @@ function auditUseCaseFlowItem(
   };
 }
 
-function isTaskProofValid(criteria: string, isTemplate: boolean): boolean {
+export function isTaskProofValid(criteria: string, isTemplate: boolean): boolean {
   if (isTemplate) return true;
   return criteria.length > 4 && !criteria.includes('TODO') && !criteria.includes('TBD');
 }
 
-function auditSingleTask(
+export function auditSingleTask(
   t: ParsedTaskItem,
   relPath: string,
   isTemplate: boolean
@@ -488,7 +489,7 @@ function auditSingleTask(
   };
 }
 
-function auditTasks(
+export function auditTasks(
   tasks: ParsedTaskItem[] | undefined,
   relPath: string,
   isTemplate: boolean
@@ -507,7 +508,7 @@ function auditTasks(
   return { items, errorCount };
 }
 
-function collectTestCorpus(
+export function collectTestCorpus(
   rootDir: string,
   allMdFiles: string[],
   customPatterns?: readonly string[]
@@ -536,19 +537,21 @@ function collectTestCorpus(
   return { gherkinSources, combinedTests: testContents.join('\n') };
 }
 
-function isCucumberScenarioPassed(element: Record<string, unknown>): boolean {
-  const steps = Array.isArray(element.steps) ? (element.steps as Array<Record<string, unknown>>) : [];
+export function isCucumberScenarioPassed(element: Record<string, unknown> | null | undefined): boolean {
+  if (!element || typeof element !== 'object' || Array.isArray(element)) return false;
+  const steps = Array.isArray(element.steps) ? (element.steps as Array<Record<string, unknown> | null | undefined>) : [];
   if (steps.length === 0) return false;
   return steps.every((s) => {
-    const res = s.result as Record<string, unknown> | undefined;
-    return res && res.status === 'passed';
+    const res = s && typeof s === 'object' ? (s.result as Record<string, unknown> | undefined) : undefined;
+    return Boolean(res && res.status === 'passed');
   });
 }
 
-function countCucumberScenarios(raw: Array<Record<string, unknown>>): { passed: number; failed: number } {
+export function countCucumberScenarios(raw: Array<Record<string, unknown>>): { passed: number; failed: number } {
   let passed = 0;
   let failed = 0;
   for (const feat of raw) {
+    if (!feat || typeof feat !== 'object' || Array.isArray(feat)) continue;
     const elements = Array.isArray(feat.elements) ? (feat.elements as Array<Record<string, unknown>>) : [];
     for (const el of elements) {
       if (isCucumberScenarioPassed(el)) passed++;
@@ -558,7 +561,7 @@ function countCucumberScenarios(raw: Array<Record<string, unknown>>): { passed: 
   return { passed, failed };
 }
 
-function buildCucumberExecResult(
+export function buildCucumberExecResult(
   raw: Array<Record<string, unknown>>,
   reportPath: string,
   rootDir: string,
@@ -566,8 +569,8 @@ function buildCucumberExecResult(
 ): NonNullable<TestingCoverageResult['cucumberExecution']> {
   const { passed, failed } = countCucumberScenarios(raw);
   const att = verifyBddReportAttestation(reportPath, rootDir, { requireAttestation: enforceAttestation });
-  const attestationOk = (!att.hasAttestation && !enforceAttestation) || att.valid;
-  const includeAtt = att.hasAttestation || enforceAttestation;
+  const attestationOk = att.errors.length === 0 && ((!att.hasAttestation && !enforceAttestation) || att.valid);
+  const includeAtt = att.hasAttestation || enforceAttestation || att.errors.length > 0;
   return {
     evaluatedFeatures: raw.length,
     passedScenarios: passed,
@@ -577,7 +580,7 @@ function buildCucumberExecResult(
   };
 }
 
-function parseCucumberReportFile(
+export function parseCucumberReportFile(
   reportPath: string,
   rootDir: string,
   enforceAttestation = false
@@ -592,7 +595,7 @@ function parseCucumberReportFile(
   }
 }
 
-function resolveCucumberReport(
+export function resolveCucumberReport(
   rootDir: string,
   options: TestingCoverageOptions
 ): NonNullable<TestingCoverageResult['cucumberExecution']> | undefined {
@@ -609,7 +612,7 @@ function resolveCucumberReport(
   return undefined;
 }
 
-function assembleCoverageResult(
+export function assembleCoverageResult(
   reqAudit: RequirementAuditItem[],
   taskAudit: TaskAuditItem[],
   useCaseFlows: UseCaseFlowAuditItem[],
@@ -617,8 +620,9 @@ function assembleCoverageResult(
   taskErrors: number,
   ucErrors: number, rootDir: string, options: TestingCoverageOptions
 ): TestingCoverageResult {
+  const cucumberExecution = resolveCucumberReport(rootDir, options);
   return {
-    success: reqErrors === 0 && taskErrors === 0 && ucErrors === 0 && (!resolveCucumberReport(rootDir, options) || resolveCucumberReport(rootDir, options)!.passed),
+    success: reqErrors === 0 && taskErrors === 0 && ucErrors === 0 && (!cucumberExecution || cucumberExecution.passed),
     totalRequirements: reqAudit.length,
     passedRequirements: reqAudit.length - reqErrors,
     failedRequirements: reqErrors,
@@ -629,12 +633,12 @@ function assembleCoverageResult(
     tasks: taskAudit,
     useCaseFlows,
     failedUseCaseFlows: ucErrors,
-    ...(resolveCucumberReport(rootDir, options) ? { cucumberExecution: resolveCucumberReport(rootDir, options) } : {}),
+    ...(cucumberExecution ? { cucumberExecution } : {}),
     reportMarkdown: generateTestingCoverageReportMarkdown(reqAudit, taskAudit, reqErrors, taskErrors),
   };
 }
 
-interface CoverageScanState {
+export interface CoverageScanState {
   reqAudit: RequirementAuditItem[];
   taskAudit: TaskAuditItem[];
   useCaseFlows: UseCaseFlowAuditItem[];
@@ -643,7 +647,7 @@ interface CoverageScanState {
   ucErrors: number;
 }
 
-function recordUseCaseAuditIfPresent(
+export function recordUseCaseAuditIfPresent(
   frontmatter: GenericFrontmatter,
   id: string,
   relPath: string,
@@ -659,7 +663,7 @@ function recordUseCaseAuditIfPresent(
   if (flowAudit.status === 'FALLO_SIN_PRUEBA') state.ucErrors++;
 }
 
-function processMdFileForCoverage(
+export function processMdFileForCoverage(
   file: string,
   rootDir: string,
   reqToTestsMap: Map<string, string[]>,
@@ -685,12 +689,12 @@ function processMdFileForCoverage(
   state.taskErrors += auditedTasks.errorCount;
 }
 
-function resolvePolicyFilePath(rootDir: string, policyPath?: string): string {
+export function resolvePolicyFilePath(rootDir: string, policyPath?: string): string {
   if (!policyPath) return path.join(rootDir, 'quality-policy.yaml');
   return path.isAbsolute(policyPath) ? policyPath : path.join(rootDir, policyPath);
 }
 
-function extractPatternsFromPolicyDoc(doc: unknown): string[] | undefined {
+export function extractPatternsFromPolicyDoc(doc: unknown): string[] | undefined {
   if (!doc || typeof doc !== 'object') return undefined;
   const rec = doc as Record<string, unknown>;
   const scope = rec.scope as Record<string, unknown> | undefined;
@@ -702,7 +706,7 @@ function extractPatternsFromPolicyDoc(doc: unknown): string[] | undefined {
   return patterns.length > 0 ? patterns : undefined;
 }
 
-function resolvePolicyTestPatterns(rootDir: string, options: TestingCoverageOptions): string[] | undefined {
+export function resolvePolicyTestPatterns(rootDir: string, options: TestingCoverageOptions): string[] | undefined {
   if (options.testPatterns && options.testPatterns.length > 0) return options.testPatterns;
   const policyFile = resolvePolicyFilePath(rootDir, options.policyPath);
   if (!fs.existsSync(policyFile)) return undefined;

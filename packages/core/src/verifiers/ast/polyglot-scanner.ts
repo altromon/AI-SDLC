@@ -6,7 +6,7 @@
 import * as path from 'path';
 import { FunctionMetrics } from '../../types/index.js';
 
-interface RawFunctionBlock {
+export interface RawFunctionBlock {
   name: string;
   body: string;
   startLine: number;
@@ -17,39 +17,40 @@ export function extractFunctionsPolyglot(content: string, filePath: string): Fun
   return ext === '.py' ? extractPythonFunctionsPolyglot(content, filePath) : extractBraceFunctions(content, filePath);
 }
 
-function isDocstringToggle(trimmed: string): boolean {
+export function isDocstringToggle(trimmed: string): boolean {
   const dCount = (trimmed.match(/"""/g) || []).length;
   const sCount = (trimmed.match(/'''/g) || []).length;
   return dCount % 2 === 1 || sCount % 2 === 1;
 }
 
-function shouldAppendPythonBody(line: string, baseIndent: number, inDoc: boolean): boolean {
+export function shouldAppendPythonBody(line: string, baseIndent: number, inDoc: boolean): boolean {
   if (inDoc || line.trim().length === 0) return true;
   const lineIndent = line.length - line.trimStart().length;
   return lineIndent > baseIndent;
 }
 
-function parsePythonDefLine(line: string, inDoc: boolean): { name: string; indent: number } | null {
+export function parsePythonDefLine(line: string, inDoc: boolean): { name: string; indent: number } | null {
   if (inDoc) return null;
   const match = line.match(/^(\s*)(?:async\s+)?def\s+([a-zA-Z0-9_$]+)\s*\(/);
   return match ? { name: match[2], indent: match[1].length } : null;
 }
 
-function flushPythonBlock(
-  state: { currentFn: string | null; fnLines: string[] },
+export function flushPythonBlock(
+  state: { currentFn: string | null; fnLines: string[]; startLine?: number },
   blocks: RawFunctionBlock[],
   lineIndex: number
 ): void {
   if (state.currentFn && state.fnLines.length > 0) {
-    blocks.push({ name: state.currentFn, body: state.fnLines.join('\n'), startLine: lineIndex });
+    blocks.push({ name: state.currentFn, body: state.fnLines.join('\n'), startLine: state.startLine ?? lineIndex });
   }
   state.currentFn = null;
   state.fnLines = [];
+  state.startLine = undefined;
 }
 
-function handlePythonBodyLine(
+export function handlePythonBodyLine(
   raw: string,
-  state: { currentFn: string | null; fnLines: string[]; baseIndent: number; inDocstring: boolean },
+  state: { currentFn: string | null; fnLines: string[]; baseIndent: number; inDocstring: boolean; startLine?: number },
   blocks: RawFunctionBlock[],
   lineIndex: number
 ): void {
@@ -60,9 +61,9 @@ function handlePythonBodyLine(
   }
 }
 
-function processPythonLine(
+export function processPythonLine(
   raw: string,
-  state: { currentFn: string | null; fnLines: string[]; baseIndent: number; inDocstring: boolean },
+  state: { currentFn: string | null; fnLines: string[]; baseIndent: number; inDocstring: boolean; startLine?: number },
   blocks: RawFunctionBlock[],
   lineIndex: number
 ): void {
@@ -74,6 +75,7 @@ function processPythonLine(
     state.currentFn = defMatch.name;
     state.baseIndent = defMatch.indent;
     state.fnLines = [raw];
+    state.startLine = lineIndex;
     return;
   }
 
@@ -85,62 +87,78 @@ function processPythonLine(
 export function extractPythonFunctionsPolyglot(content: string, filePath: string): FunctionMetrics[] {
   const lines = content.split('\n');
   const blocks: RawFunctionBlock[] = [];
-  const state = { currentFn: null as string | null, fnLines: [] as string[], baseIndent: 0, inDocstring: false };
+  const state = {
+    currentFn: null as string | null,
+    fnLines: [] as string[],
+    baseIndent: 0,
+    inDocstring: false,
+    startLine: undefined as number | undefined,
+  };
 
   for (let i = 0; i < lines.length; i++) {
     processPythonLine(lines[i], state, blocks, i);
   }
 
   if (state.currentFn && state.fnLines.length > 0) {
-    blocks.push({ name: state.currentFn, body: state.fnLines.join('\n'), startLine: lines.length });
+    blocks.push({ name: state.currentFn, body: state.fnLines.join('\n'), startLine: state.startLine ?? lines.length });
   }
 
   return buildMetricsFromBlocks(blocks, content, filePath);
 }
 
-interface BraceScanState {
+export interface BraceScanState {
   currentFn: string | null;
   braceCount: number;
   fnLines: string[];
   inBlockComment: boolean;
   rawTerm: string | null;
+  sawBrace?: boolean;
+  startLine?: number;
 }
 
-function tryStartBraceFunction(line: string, state: BraceScanState, ext: string): void {
+export function tryStartBraceFunction(line: string, state: BraceScanState, ext: string): void {
   if (state.currentFn || state.inBlockComment || state.rawTerm) return;
   const candidate = matchFunctionHeader(line, ext);
   if (candidate) {
     state.currentFn = candidate;
     state.braceCount = 0;
     state.fnLines = [];
+    state.sawBrace = false;
   }
 }
 
-function updateBraceScanState(line: string, state: BraceScanState, ext: string): void {
+export function updateBraceScanState(line: string, state: BraceScanState, ext: string): void {
   const res = scanBracesInLine(line, state.inBlockComment, state.rawTerm, ext);
   state.inBlockComment = res.nowInBlock;
   state.rawTerm = res.nowRawTerm;
   state.braceCount += res.delta;
+  if (res.sawBrace) state.sawBrace = true;
 }
 
-function processBraceLine(
+export function processBraceLine(
   line: string,
   state: BraceScanState,
   blocks: RawFunctionBlock[],
   lineIndex: number,
   ext: string
 ): void {
+  const wasIdle = !state.currentFn;
   tryStartBraceFunction(line, state, ext);
-  if (state.currentFn) state.fnLines.push(line);
+  if (state.currentFn) {
+    if (wasIdle) state.startLine = lineIndex;
+    state.fnLines.push(line);
+  }
   updateBraceScanState(line, state, ext);
-  if (state.currentFn && state.braceCount === 0 && state.fnLines.length > 1) {
-    blocks.push({ name: state.currentFn, body: state.fnLines.join('\n'), startLine: lineIndex });
+  if (state.currentFn && state.braceCount === 0 && state.sawBrace) {
+    blocks.push({ name: state.currentFn, body: state.fnLines.join('\n'), startLine: state.startLine ?? lineIndex });
     state.currentFn = null;
     state.fnLines = [];
+    state.sawBrace = false;
+    state.startLine = undefined;
   }
 }
 
-function extractBraceFunctions(content: string, filePath: string): FunctionMetrics[] {
+export function extractBraceFunctions(content: string, filePath: string): FunctionMetrics[] {
   const ext = path.extname(filePath).toLowerCase();
   const lines = content.split('\n');
   const blocks: RawFunctionBlock[] = [];
@@ -165,7 +183,7 @@ const HEADER_EXCLUSIONS = new Set([
   'lock', 'fixed', 'synchronized', 'try', 'else',
 ]);
 
-function matchCStyleHeader(line: string): string | null {
+export function matchCStyleHeader(line: string): string | null {
   if (!line.includes('(') && !line.includes('function ')) return null;
   const match = line.match(
     /(?:(?:public|private|protected|internal|static|async|virtual|override|sealed|abstract|final|synchronized|default|fn)\s+)*(?:function\s+([a-zA-Z0-9_$]+)|(?:[a-zA-Z0-9_<>[\]?,.]+\s+)+([a-zA-Z0-9_$]+)\s*(?:<[^>]+>)?\s*\([^;{}]*\)\s*(?:where\s+[^{]+|throws\s+[^{]+)?\{|([a-zA-Z0-9_$]+)\s*\([^;{}]*\)\s*(?::\s*[^{]+\s*)?\{)/
@@ -175,7 +193,7 @@ function matchCStyleHeader(line: string): string | null {
   return candidate && !HEADER_EXCLUSIONS.has(candidate) ? candidate : null;
 }
 
-function matchFunctionHeader(line: string, ext: string): string | null {
+export function matchFunctionHeader(line: string, ext: string): string | null {
   const trimmed = line.trim();
   if (trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*') || trimmed.startsWith('#')) {
     return null;
@@ -192,13 +210,14 @@ function matchFunctionHeader(line: string, ext: string): string | null {
   return matchCStyleHeader(line);
 }
 
-interface ScanResult {
+export interface ScanResult {
   delta: number;
   nowInBlock: boolean;
   nowRawTerm: string | null;
+  sawBrace?: boolean;
 }
 
-function detectRustOrGoRawString(sub: string, ext: string): { term: string; advance: number } | null {
+export function detectRustOrGoRawString(sub: string, ext: string): { term: string; advance: number } | null {
   if (ext === '.rs') {
     const m = sub.match(/^r(#*)"/);
     return m ? { term: `"${m[1]}`, advance: m[0].length - 1 } : null;
@@ -209,7 +228,7 @@ function detectRustOrGoRawString(sub: string, ext: string): { term: string; adva
   return null;
 }
 
-function detectCsJavaOrCppRawString(sub: string, ext: string): { term: string; advance: number } | null {
+export function detectCsJavaOrCppRawString(sub: string, ext: string): { term: string; advance: number } | null {
   if (ext === '.cs' || ext === '.java') {
     const m = sub.match(/^\$*("{3,})/);
     if (m) return { term: m[1], advance: m[0].length - 1 };
@@ -220,12 +239,12 @@ function detectCsJavaOrCppRawString(sub: string, ext: string): { term: string; a
   return cpp ? { term: `)${cpp[1]}"`, advance: cpp[0].length - 1 } : null;
 }
 
-function detectRawStringOpen(line: string, index: number, ext: string): { term: string; advance: number } | null {
+export function detectRawStringOpen(line: string, index: number, ext: string): { term: string; advance: number } | null {
   const sub = line.slice(index);
   return detectRustOrGoRawString(sub, ext) || detectCsJavaOrCppRawString(sub, ext);
 }
 
-function consumeRawOrBlock(
+export function consumeRawOrBlock(
   line: string,
   index: number,
   state: { inBlock: boolean; rawTerm: string | null }
@@ -248,7 +267,7 @@ function consumeRawOrBlock(
   return { advance: 0, handled: false };
 }
 
-function consumeNormalQuote(
+export function consumeNormalQuote(
   line: string,
   index: number,
   state: { inString: string | null }
@@ -260,23 +279,26 @@ function consumeNormalQuote(
   return { advance: 0, handled: true };
 }
 
-function applyQuoteOrBrace(
+export function applyQuoteOrBrace(
   ch: string,
-  state: { delta: number; inString: string | null }
+  state: { delta: number; inString: string | null; sawBrace?: boolean }
 ): void {
   if (ch === '"' || ch === "'") {
     state.inString = ch;
     return;
   }
-  if (ch === '{') state.delta++;
+  if (ch === '{') {
+    state.delta++;
+    state.sawBrace = true;
+  }
   if (ch === '}') state.delta--;
 }
 
-function stepActiveCodeToken(
+export function stepActiveCodeToken(
   line: string,
   j: number,
   ext: string,
-  state: { delta: number; inBlock: boolean; rawTerm: string | null; inString: string | null }
+  state: { delta: number; inBlock: boolean; rawTerm: string | null; inString: string | null; sawBrace?: boolean }
 ): { advance: number; stop: boolean } {
   const pair = line.slice(j, j + 2);
   if (pair === '//') return { advance: 0, stop: true };
@@ -293,13 +315,13 @@ function stepActiveCodeToken(
   return { advance: 0, stop: false };
 }
 
-function scanBracesInLine(
+export function scanBracesInLine(
   line: string,
   wasInBlock: boolean,
   wasRawTerm: string | null,
   ext: string
 ): ScanResult {
-  const state = { delta: 0, inBlock: wasInBlock, rawTerm: wasRawTerm, inString: null as string | null };
+  const state = { delta: 0, inBlock: wasInBlock, rawTerm: wasRawTerm, inString: null as string | null, sawBrace: false };
 
   for (let j = 0; j < line.length; j++) {
     const rawOrBlock = consumeRawOrBlock(line, j, state);
@@ -317,10 +339,10 @@ function scanBracesInLine(
     j += codeStep.advance;
   }
 
-  return { delta: state.delta, nowInBlock: state.inBlock, nowRawTerm: state.rawTerm };
+  return { delta: state.delta, nowInBlock: state.inBlock, nowRawTerm: state.rawTerm, sawBrace: state.sawBrace };
 }
 
-function buildMetricsFromBlocks(blocks: RawFunctionBlock[], content: string, filePath: string): FunctionMetrics[] {
+export function buildMetricsFromBlocks(blocks: RawFunctionBlock[], content: string, filePath: string): FunctionMetrics[] {
   if (blocks.length === 0) {
     const smells = detectPolyglotSmells(content);
     if (smells.length > 0) {
@@ -341,7 +363,7 @@ function buildMetricsFromBlocks(blocks: RawFunctionBlock[], content: string, fil
   return blocks.map((b) => calculatePolyglotMetrics(b.body, b.name, filePath, b.startLine));
 }
 
-function detectPolyglotSmells(body: string): string[] {
+export function detectPolyglotSmells(body: string): string[] {
   const smells: string[] = [];
   if (/#\s*noqa|#\s*type:\s*ignore|@SuppressWarnings|#pragma\s+warning\s+disable/.test(body)) {
     smells.push('Supresión no autorizada de linter');
@@ -349,7 +371,7 @@ function detectPolyglotSmells(body: string): string[] {
   return smells;
 }
 
-function stripStringsAndComments(body: string, ext: string): string {
+export function stripStringsAndComments(body: string, ext: string): string {
   let cleaned = body;
   if (ext === '.py') {
     cleaned = cleaned.replace(/"""[\s\S]*?"""|'''[\s\S]*?'''/g, '""').replace(/#.*/g, '');
@@ -364,35 +386,36 @@ function stripStringsAndComments(body: string, ext: string): string {
   return cleaned.replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, '""');
 }
 
-function computeHalsteadMI(body: string, cyclomatic: number, loc: number, commentCount: number): number {
+export function computeHalsteadMI(body: string, cyclomatic: number, loc: number, commentCount: number): number {
+  const safeLoc = Math.max(1, loc);
   const cleanText = body.replace(/\/\*[\s\S]*?\*\/|\/\/.*|#.*/g, '');
   const tokens = cleanText.split(/[\s,;().{}[\]=+\-*/<>!&|:]+/).filter((t) => t.length > 0);
   const N = tokens.length || 1;
   const n = new Set(tokens).size || 1;
   const V = Math.max(1, N * Math.log2(Math.max(2, n)));
 
-  const totalLines = loc + commentCount;
+  const totalLines = safeLoc + commentCount;
   const perCM = totalLines > 0 ? commentCount / totalLines : 0;
   const commentWeight = 50 * Math.sin(Math.sqrt(2.4 * perCM));
 
-  const rawMI = 171 - 5.2 * Math.log(V) - 0.23 * cyclomatic - 16.2 * Math.log(loc) + commentWeight;
+  const rawMI = 171 - 5.2 * Math.log(V) - 0.23 * cyclomatic - 16.2 * Math.log(safeLoc) + commentWeight;
   return Math.round(Math.max(0, Math.min(100, (rawMI * 100) / 171)) * 10) / 10;
 }
 
-function isCommentLine(line: string, isPy: boolean): boolean {
+export function isCommentLine(line: string, isPy: boolean): boolean {
   return isPy
     ? line.startsWith('#') || line.startsWith('"""') || line.startsWith("'''")
     : line.startsWith('//') || line.startsWith('/*') || line.startsWith('*');
 }
 
-function countCommentsAndLoc(rawLines: string[], isPy: boolean): { loc: number; commentCount: number; cleanLines: string[] } {
+export function countCommentsAndLoc(rawLines: string[], isPy: boolean): { loc: number; commentCount: number; cleanLines: string[] } {
   const commentCount = rawLines.filter((l) => isCommentLine(l, isPy)).length;
   const loc = Math.max(1, rawLines.length - commentCount);
   const cleanLines = rawLines.filter((l) => !isCommentLine(l, isPy));
   return { loc, commentCount, cleanLines };
 }
 
-function calculatePolyglotMetrics(body: string, name: string, filePath: string, startLine?: number): FunctionMetrics {
+export function calculatePolyglotMetrics(body: string, name: string, filePath: string, startLine?: number): FunctionMetrics {
   const ext = path.extname(filePath).toLowerCase();
   const rawLines = body.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0);
   const { loc, commentCount } = countCommentsAndLoc(rawLines, ext === '.py');
@@ -411,11 +434,11 @@ function calculatePolyglotMetrics(body: string, name: string, filePath: string, 
     cognitive,
     maintainability,
     codeSmells: detectPolyglotSmells(body),
-    line: startLine ? startLine + 1 : 1,
+    line: startLine !== undefined ? startLine + 1 : 1,
   };
 }
 
-function getCyclomaticPattern(ext: string): RegExp {
+export function getCyclomaticPattern(ext: string): RegExp {
   if (ext === '.py') {
     return /\b(if|elif|for|while|except|case)\b|\b(and|or)\b/g;
   }
@@ -434,7 +457,7 @@ function getCyclomaticPattern(ext: string): RegExp {
   return /\b(if|else\s+if|for|while|catch|case)\b|\?|&&|\|\|/g;
 }
 
-function computePolyglotCyclomatic(strippedBody: string, ext: string): number {
+export function computePolyglotCyclomatic(strippedBody: string, ext: string): number {
   const regex = getCyclomaticPattern(ext);
   const matches = strippedBody.match(regex);
   return 1 + (matches ? matches.length : 0);
@@ -443,7 +466,7 @@ function computePolyglotCyclomatic(strippedBody: string, ext: string): number {
 const PY_COGNITIVE_RE = /\b(if|elif|for|while|except|match)\b/;
 const BRACE_COGNITIVE_RE = /\b(if|for|foreach|while|catch|match|select|switch)\b/;
 
-function computePythonCognitive(lines: string[]): number {
+export function computePythonCognitive(lines: string[]): number {
   let cognitive = 0;
   const baseIndent = lines.length > 0 ? lines[0].length - lines[0].trimStart().length : 0;
   for (let i = 1; i < lines.length; i++) {
@@ -456,7 +479,7 @@ function computePythonCognitive(lines: string[]): number {
   return cognitive;
 }
 
-function computeBraceCognitive(lines: string[]): number {
+export function computeBraceCognitive(lines: string[]): number {
   let cognitive = 0;
   let nesting = 0;
   for (let i = 1; i < lines.length; i++) {
@@ -471,6 +494,6 @@ function computeBraceCognitive(lines: string[]): number {
   return cognitive;
 }
 
-function computePolyglotCognitive(lines: string[], isPy: boolean): number {
+export function computePolyglotCognitive(lines: string[], isPy: boolean): number {
   return isPy ? computePythonCognitive(lines) : computeBraceCognitive(lines);
 }
