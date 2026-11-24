@@ -8,7 +8,13 @@ import * as path from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createMcpServer } from '../src/server.js';
+import {
+  registerCodeGraphTools,
+  registerGetTaskContextTool,
+  registerQueryCodeGraphTool,
+} from '../src/tools/code-graph.js';
 
 function toolText(result: unknown): string {
   return (result as { content: Array<{ text: string }> }).content[0].text;
@@ -81,5 +87,17 @@ describe('TSK-065005: MCP Code Graph Tools (mcp-code-graph.spec.ts)', () => {
     });
     expect(badRes.isError).toBe(true);
     expect(toolText(badRes)).toMatch(/ERR_PATH_TRAVERSAL_DETECTED/);
+  });
+
+  it('registers tools via registerCodeGraphTools, registerQueryCodeGraphTool, and registerGetTaskContextTool', () => {
+    const s1 = new McpServer({ name: 'test-1', version: '1.0.0' });
+    registerCodeGraphTools(s1, { rootDir: repoRoot, enableAuditLog: false });
+
+    const s2 = new McpServer({ name: 'test-2', version: '1.0.0' });
+    registerQueryCodeGraphTool(s2, { rootDir: repoRoot, enableAuditLog: false });
+    registerGetTaskContextTool(s2, { rootDir: repoRoot, enableAuditLog: false });
+
+    expect(s1).toBeDefined();
+    expect(s2).toBeDefined();
   });
 });

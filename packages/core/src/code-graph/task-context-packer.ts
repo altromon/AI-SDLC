@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
 import { assertConfinedPath, redactSensitiveText } from './cache/fs-code-graph-cache.js';
-import { DefaultCodeGraphService } from './code-graph-service.js';
+import { DefaultCodeGraphService, validateDepth } from './code-graph-service.js';
 import {
   CODE_GRAPH_LIMITS,
   type CodeGraphService,
@@ -32,7 +32,7 @@ const CANONICAL_SPEC_DIRS = [
   'privacy/requirements',
 ];
 
-function collectMarkdownFiles(dir: string, out: string[]): void {
+export function collectMarkdownFiles(dir: string, out: string[]): void {
   if (!fs.existsSync(dir)) return;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
@@ -41,7 +41,7 @@ function collectMarkdownFiles(dir: string, out: string[]): void {
   }
 }
 
-function parseFrontmatter(content: string): { data: Record<string, unknown>; body: string } {
+export function parseFrontmatter(content: string): { data: Record<string, unknown>; body: string } {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) return { data: {}, body: content };
   try {
@@ -52,7 +52,7 @@ function parseFrontmatter(content: string): { data: Record<string, unknown>; bod
   }
 }
 
-function extractBodySummary(body: string, repoRoot: string): string {
+export function extractBodySummary(body: string, repoRoot: string): string {
   for (const rawLine of body.split(/\r?\n/)) {
     const line = rawLine.trim();
     if (!line || line.startsWith('#') || line.startsWith('---') || line.startsWith('|')) continue;
@@ -61,7 +61,7 @@ function extractBodySummary(body: string, repoRoot: string): string {
   return '';
 }
 
-function extractCitedIds(taskObj: Record<string, unknown>): string[] {
+export function extractCitedIds(taskObj: Record<string, unknown>): string[] {
   const ids = new Set<string>();
   for (const field of ['implements-components', 'satisfies-requirements', 'depends-on']) {
     const list = taskObj[field];
@@ -73,7 +73,7 @@ function extractCitedIds(taskObj: Record<string, unknown>): string[] {
   return [...ids];
 }
 
-function findTaskSectionLines(body: string, taskId: string): string[] {
+export function findTaskSectionLines(body: string, taskId: string): string[] {
   const lines = body.split(/\r?\n/);
   const startIdx = lines.findIndex((l) => l.trim().startsWith(`### \`${taskId}\``));
   if (startIdx < 0) return [];
@@ -81,7 +81,7 @@ function findTaskSectionLines(body: string, taskId: string): string[] {
   return lines.slice(startIdx + 1, nextIdx < 0 ? undefined : nextIdx);
 }
 
-function parseFileTouchedLine(line: string, repoRoot: string): string | null {
+export function parseFileTouchedLine(line: string, repoRoot: string): string | null {
   const match = line.match(/^-\s+`([^`]+)`/);
   if (!match?.[1]) return null;
   try {
@@ -92,7 +92,7 @@ function parseFileTouchedLine(line: string, repoRoot: string): string | null {
   }
 }
 
-function extractFilesTouched(body: string, taskId: string, repoRoot: string): string[] {
+export function extractFilesTouched(body: string, taskId: string, repoRoot: string): string[] {
   const sectionLines = findTaskSectionLines(body, taskId);
   const startIdx = sectionLines.findIndex((l) => l.trim().startsWith('- **files-touched**:'));
   if (startIdx < 0) return [];
@@ -106,7 +106,7 @@ function extractFilesTouched(body: string, taskId: string, repoRoot: string): st
   return files;
 }
 
-function findTaskRecord(repoRoot: string, taskId: string): { taskObj: Record<string, unknown>; body: string } | null {
+export function findTaskRecord(repoRoot: string, taskId: string): { taskObj: Record<string, unknown>; body: string } | null {
   const changesDir = assertConfinedPath(repoRoot, 'specs/changes');
   const mdFiles: string[] = [];
   collectMarkdownFiles(changesDir, mdFiles);
@@ -120,7 +120,7 @@ function findTaskRecord(repoRoot: string, taskId: string): { taskObj: Record<str
   return null;
 }
 
-function indexSpecsInDir(repoRoot: string, relDir: string, index: Map<string, SpecSummary>): void {
+export function indexSpecsInDir(repoRoot: string, relDir: string, index: Map<string, SpecSummary>): void {
   let confinedDir: string;
   try {
     confinedDir = assertConfinedPath(repoRoot, relDir);
@@ -143,13 +143,13 @@ function indexSpecsInDir(repoRoot: string, relDir: string, index: Map<string, Sp
   }
 }
 
-function buildSpecIndex(repoRoot: string): Map<string, SpecSummary> {
+export function buildSpecIndex(repoRoot: string): Map<string, SpecSummary> {
   const index = new Map<string, SpecSummary>();
   for (const relDir of CANONICAL_SPEC_DIRS) indexSpecsInDir(repoRoot, relDir, index);
   return index;
 }
 
-function resolveCitedSpecs(citedIds: readonly string[], specIndex: Map<string, SpecSummary>) {
+export function resolveCitedSpecs(citedIds: readonly string[], specIndex: Map<string, SpecSummary>) {
   const specs: SpecSummary[] = [];
   const missingRefs: string[] = [];
   for (const id of citedIds) {
@@ -168,6 +168,7 @@ export class DefaultTaskContextPacker implements TaskContextPacker {
   }
 
   async pack(repoRoot: string, taskId: string, depth: number = CODE_GRAPH_LIMITS.DEFAULT_DEPTH): Promise<TaskContextPayload> {
+    const validDepth = validateDepth(depth);
     if (!TASK_ID_REGEX.test(taskId)) {
       throw new Error(`ERR_INVALID_TASK_ID: Task ID '${taskId}' does not match ^TSK-[A-Z0-9-]+$.`);
     }
@@ -177,7 +178,7 @@ export class DefaultTaskContextPacker implements TaskContextPacker {
     }
     const { specs, missingRefs } = resolveCitedSpecs(extractCitedIds(found.taskObj), buildSpecIndex(repoRoot));
     const filesTouched = extractFilesTouched(found.body, taskId, repoRoot);
-    const codeSubgraph = filesTouched.length > 0 ? await this.graphService.queryMultiple(repoRoot, filesTouched, depth) : null;
-    return { taskId, depth, specs, missingRefs, codeSubgraph };
+    const codeSubgraph = filesTouched.length > 0 ? await this.graphService.queryMultiple(repoRoot, filesTouched, validDepth) : null;
+    return { taskId, depth: validDepth, specs, missingRefs, codeSubgraph };
   }
 }

@@ -27,7 +27,7 @@ const PYTHON_AST_SCRIPT = [
   'print(json.dumps({"symbols": symbols, "imports": imports}))',
 ].join('\n');
 
-function parsePythonAstOutput(stdout: string): { symbols: SymbolSignature[]; imports: string[] } | null {
+export function parsePythonAstOutput(stdout: string): { symbols: SymbolSignature[]; imports: string[] } | null {
   try {
     const parsed = JSON.parse(stdout) as { symbols?: SymbolSignature[]; imports?: string[] };
     if (!parsed || !Array.isArray(parsed.symbols) || !Array.isArray(parsed.imports)) return null;

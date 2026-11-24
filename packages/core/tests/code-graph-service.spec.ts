@@ -6,8 +6,24 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CODE_GRAPH_LIMITS } from '../src/code-graph/types.js';
-import { DefaultCodeGraphService } from '../src/code-graph/code-graph-service.js';
+import { CODE_GRAPH_LIMITS, type CodeGraphDocument, type CodeGraphNode } from '../src/code-graph/types.js';
+import {
+  addEdgeIfMissing,
+  type BfsState,
+  canAddNode,
+  collectSourceFiles,
+  DefaultCodeGraphService,
+  enqueueNeighbors,
+  extractWithAdapter,
+  initBfsQueue,
+  processDirEntry,
+  resolveImportToNodePath,
+  resolveStartNodes,
+  traverseKHop,
+  validateDepth,
+  validateTargetInput,
+} from '../src/code-graph/code-graph-service.js';
+import { createDefaultLanguageAdapters } from '../src/code-graph/adapters/index.js';
 
 describe('TSK-065003: CodeGraphService incremental indexing & bounded k-hop query (code-graph-service.spec.ts)', () => {
   const tmpDirs: string[] = [];
@@ -122,5 +138,90 @@ describe('TSK-065003: CodeGraphService incremental indexing & bounded k-hop quer
 
     expect(res.truncated).toBe(true);
     expect(res.nodes.length).toBeLessThanOrEqual(CODE_GRAPH_LIMITS.MAX_NODES);
+  });
+
+  it('redacts tokens, emails, and host paths on cold-cache Run 1 across indexRepository, query, and queryMultiple', async () => {
+    const repoRoot = makeTmpDir('aisdlc-cgs-cold-redact-');
+    fs.mkdirSync(path.join(repoRoot, 'src'), { recursive: true });
+    const token = 'ghp_1234567890abcdef1234567890abcdef1234';
+    fs.writeFileSync(
+      path.join(repoRoot, 'src', 'secret.ts'),
+      `export function auth(email = "admin@example.com", token = "${token}", root = "${repoRoot}"): void {}\n`,
+      'utf-8'
+    );
+
+    const service = new DefaultCodeGraphService();
+    const doc = await service.indexRepository(repoRoot);
+    const docJson = JSON.stringify(doc);
+    expect(docJson).not.toContain(token);
+    expect(docJson).not.toContain('admin@example.com');
+    expect(docJson).not.toContain(repoRoot);
+
+    const coldQueryService = new DefaultCodeGraphService();
+    fs.rmSync(path.join(repoRoot, '.aisdlc'), { recursive: true, force: true });
+    const qRes = await coldQueryService.query(repoRoot, 'src/secret.ts', 0);
+    expect(JSON.stringify(qRes)).not.toContain(token);
+    expect(JSON.stringify(qRes)).not.toContain('admin@example.com');
+
+    fs.rmSync(path.join(repoRoot, '.aisdlc'), { recursive: true, force: true });
+    const qmRes = await coldQueryService.queryMultiple(repoRoot, ['src/secret.ts'], 0);
+    expect(JSON.stringify(qmRes)).not.toContain(token);
+    expect(JSON.stringify(qmRes)).not.toContain('admin@example.com');
+  });
+
+  it('covers code-graph-service helper functions directly', async () => {
+    const repoRoot = makeTmpDir('aisdlc-cgs-helpers-');
+    fs.mkdirSync(path.join(repoRoot, 'src'), { recursive: true });
+    fs.writeFileSync(path.join(repoRoot, 'src', 'a.ts'), "import { b } from './b.js';\nexport const a = b;\n", 'utf-8');
+    fs.writeFileSync(path.join(repoRoot, 'src', 'b.ts'), 'export const b = 1;\n', 'utf-8');
+
+    const adapters = createDefaultLanguageAdapters();
+    const collected: string[] = [];
+    collectSourceFiles(repoRoot, repoRoot, adapters, collected);
+    expect(collected).toEqual(['src/a.ts', 'src/b.ts']);
+
+    const entries = fs.readdirSync(path.join(repoRoot, 'src'), { withFileTypes: true });
+    const directResults: string[] = [];
+    for (const entry of entries) {
+      processDirEntry(repoRoot, path.join(repoRoot, 'src'), entry, adapters, directResults);
+    }
+    expect(directResults.length).toBe(2);
+
+    expect(validateDepth(undefined)).toBe(1);
+    expect(() => validateDepth(99)).toThrow(/ERR_INVALID_DEPTH/);
+    expect(validateTargetInput(repoRoot, './src/a.ts')).toBe('src/a.ts');
+
+    const extracted = await extractWithAdapter(repoRoot, 'src/a.ts', "import { b } from './b.js';\nexport const a = b;\n", 'abc', 100, adapters);
+    expect(extracted?.path).toBe('src/a.ts');
+
+    const nodeA: CodeGraphNode = extracted!;
+    const nodeB: CodeGraphNode = {
+      path: 'src/b.ts',
+      language: 'typescript',
+      extractor: 'typescript-ast',
+      mtimeMs: 100,
+      sha256: 'def',
+      symbols: [{ name: 'b', kind: 'const', signature: 'export const b', exported: true }],
+      imports: [],
+    };
+    const doc: CodeGraphDocument = { version: '1.0', generatedAt: '2026-01-01T00:00:00Z', nodes: { 'src/a.ts': nodeA, 'src/b.ts': nodeB } };
+
+    expect(resolveImportToNodePath('src/a.ts', './b.js', doc.nodes)).toBe('src/b.ts');
+    expect(resolveStartNodes(doc, 'b')).toEqual(['src/b.ts']);
+
+    const state: BfsState = { nodes: [], edges: [], visited: new Set(), edgeKeys: new Set(), truncated: false, approxBytes: 0 };
+    expect(canAddNode(state, nodeA)).toBe(true);
+    const queue = initBfsQueue(doc, ['src/a.ts'], state.visited);
+    expect(queue).toEqual([{ path: 'src/a.ts', hop: 0 }]);
+    expect(addEdgeIfMissing('src/a.ts', 'src/b.ts', state)).toBe(true);
+    enqueueNeighbors(doc, nodeB, 0, queue, state);
+    const traversal = traverseKHop(doc, ['src/a.ts'], 1);
+    expect(traversal.nodes.length).toBe(2);
+
+    const svc = new DefaultCodeGraphService() as unknown as {
+      indexSingleFile: (r: string, p: string, c: Record<string, CodeGraphNode>) => Promise<CodeGraphNode | null>;
+    };
+    const single = await svc.indexSingleFile(repoRoot, 'src/a.ts', {});
+    expect(single?.path).toBe('src/a.ts');
   });
 });

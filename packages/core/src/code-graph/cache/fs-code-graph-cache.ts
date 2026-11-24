@@ -19,12 +19,12 @@ const FORBIDDEN_PROTO_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 const RETRYABLE_RENAME_CODES = new Set(['EPERM', 'EBUSY', 'EACCES']);
 const EMAIL_PATTERN = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
 
-function isOutsideBase(basePath: string, candidatePath: string): boolean {
+export function isOutsideBase(basePath: string, candidatePath: string): boolean {
   const rel = path.relative(basePath, candidatePath);
   return rel === '..' || rel.startsWith(`..${path.sep}`) || rel.startsWith('../') || path.isAbsolute(rel);
 }
 
-function resolveNearestRealPath(targetPath: string): { realBase: string; tail: string[] } {
+export function resolveNearestRealPath(targetPath: string): { realBase: string; tail: string[] } {
   let cursor = targetPath;
   const tail: string[] = [];
   while (!fs.existsSync(cursor)) {
@@ -58,24 +58,39 @@ export function assertConfinedPath(repoRoot: string, target: string): string {
   return tail.length > 0 ? path.join(realBase, ...tail) : realBase;
 }
 
+export function addRootVariants(candidates: Set<string>, rawPath: string): void {
+  if (!rawPath) return;
+  for (const variant of [rawPath, rawPath.replace(/\\/g, '/')]) {
+    candidates.add(variant);
+    if (/^[A-Za-z]:/.test(variant)) {
+      candidates.add(variant[0].toLowerCase() + variant.slice(1));
+      candidates.add(variant[0].toUpperCase() + variant.slice(1));
+    }
+  }
+}
+
 export function redactSensitiveText(text: string, repoRoot: string): string {
   let result = text;
-  const candidates = new Set<string>([
-    repoRoot,
-    path.resolve(repoRoot),
-    repoRoot.replace(/\\/g, '/'),
-    path.resolve(repoRoot).replace(/\\/g, '/'),
-  ]);
-  for (const rootCandidate of candidates) {
-    if (rootCandidate.length > 1) {
-      result = result.split(rootCandidate).join('<repoRoot>');
+  const candidates = new Set<string>();
+  addRootVariants(candidates, repoRoot);
+  const resolved = path.resolve(repoRoot);
+  addRootVariants(candidates, resolved);
+  try {
+    if (fs.existsSync(resolved)) {
+      addRootVariants(candidates, fs.realpathSync(resolved));
     }
+  } catch {
+    // Ignore unresolvable realpath
+  }
+  const sorted = [...candidates].filter((c) => c.length > 1).sort((a, b) => b.length - a.length);
+  for (const rootCandidate of sorted) {
+    result = result.split(rootCandidate).join('<repoRoot>');
   }
   result = sanitizeDlpText(result, createDefaultDlpPolicy()).sanitizedText;
   return result.replace(EMAIL_PATTERN, '[REDACTED:EMAIL]');
 }
 
-function sanitizeSymbols(symbols: readonly SymbolSignature[], repoRoot: string): SymbolSignature[] {
+export function sanitizeSymbols(symbols: readonly SymbolSignature[], repoRoot: string): SymbolSignature[] {
   return symbols.slice(0, CODE_GRAPH_LIMITS.MAX_SYMBOLS_PER_NODE).map((sym) => ({
     name: redactSensitiveText(sym.name, repoRoot),
     kind: sym.kind,
@@ -84,7 +99,7 @@ function sanitizeSymbols(symbols: readonly SymbolSignature[], repoRoot: string):
   }));
 }
 
-function sanitizeNode(node: CodeGraphNode, repoRoot: string): CodeGraphNode {
+export function sanitizeNode(node: CodeGraphNode, repoRoot: string): CodeGraphNode {
   return {
     path: node.path.replace(/\\/g, '/'),
     language: node.language,
@@ -96,7 +111,7 @@ function sanitizeNode(node: CodeGraphNode, repoRoot: string): CodeGraphNode {
   };
 }
 
-function tryParseSafeNode(candidate: unknown, repoRoot: string): CodeGraphNode | null {
+export function tryParseSafeNode(candidate: unknown, repoRoot: string): CodeGraphNode | null {
   if (!candidate || typeof candidate !== 'object') return null;
   const node = candidate as CodeGraphNode;
   if (typeof node.path !== 'string' || path.isAbsolute(node.path)) return null;
@@ -108,7 +123,7 @@ function tryParseSafeNode(candidate: unknown, repoRoot: string): CodeGraphNode |
   }
 }
 
-function parseSafeNodes(rawNodes: unknown, repoRoot: string): Record<string, CodeGraphNode> {
+export function parseSafeNodes(rawNodes: unknown, repoRoot: string): Record<string, CodeGraphNode> {
   const safeNodes = Object.create(null) as Record<string, CodeGraphNode>;
   if (!rawNodes || typeof rawNodes !== 'object') return safeNodes;
   const record = rawNodes as Record<string, unknown>;
@@ -120,13 +135,13 @@ function parseSafeNodes(rawNodes: unknown, repoRoot: string): Record<string, Cod
   return safeNodes;
 }
 
-function sleepSync(ms: number): void {
+export function sleepSync(ms: number): void {
   const sab = new SharedArrayBuffer(4);
   const view = new Int32Array(sab);
   Atomics.wait(view, 0, 0, ms);
 }
 
-function renameWithRetry(tmpPath: string, finalPath: string): void {
+export function renameWithRetry(tmpPath: string, finalPath: string): void {
   const maxAttempts = 5;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {

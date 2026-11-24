@@ -11,7 +11,7 @@ import { buildCleanEnv, execSafeBinary, resolveTrustedBinaryPath } from './safe-
 
 const CPP_EXTENSIONS = new Set(['.c', '.cpp', '.cc', '.cxx', '.h', '.hpp', '.hh']);
 
-function rejectLeadingFlagOrResponseFile(target: string): void {
+export function rejectLeadingFlagOrResponseFile(target: string): void {
   const normalized = target.trim();
   const base = path.basename(normalized);
   if (normalized.startsWith('-') || normalized.startsWith('@') || base.startsWith('-') || base.startsWith('@')) {
@@ -19,11 +19,11 @@ function rejectLeadingFlagOrResponseFile(target: string): void {
   }
 }
 
-function tokenizeCommand(cmd: string): string[] {
+export function tokenizeCommand(cmd: string): string[] {
   return cmd.match(/"[^"]*"|'[^']*'|\S+/g)?.map((t) => t.replace(/^["']|["']$/g, '')) ?? [];
 }
 
-function tryConfineIncludeDir(repoRoot: string, rawDir: string): string | null {
+export function tryConfineIncludeDir(repoRoot: string, rawDir: string): string | null {
   try {
     return assertConfinedPath(repoRoot, rawDir);
   } catch {
@@ -31,7 +31,7 @@ function tryConfineIncludeDir(repoRoot: string, rawDir: string): string | null {
   }
 }
 
-function collectIncludeArgsFromTokens(tokens: string[], repoRoot: string, args: string[]): void {
+export function collectIncludeArgsFromTokens(tokens: string[], repoRoot: string, args: string[]): void {
   for (let i = 0; i < tokens.length; i++) {
     const tok = tokens[i];
     if ((tok === '-I' || tok === '-isystem') && i + 1 < tokens.length) {
@@ -46,8 +46,13 @@ function collectIncludeArgsFromTokens(tokens: string[], repoRoot: string, args: 
   }
 }
 
-function extractSafeIncludeArgs(repoRoot: string): string[] {
-  const ccPath = path.join(repoRoot, 'compile_commands.json');
+export function extractSafeIncludeArgs(repoRoot: string): string[] {
+  let ccPath: string;
+  try {
+    ccPath = assertConfinedPath(repoRoot, 'compile_commands.json');
+  } catch {
+    return [];
+  }
   if (!fs.existsSync(ccPath)) return [];
   try {
     const entries = JSON.parse(fs.readFileSync(ccPath, 'utf-8')) as Array<{ command?: string; arguments?: string[] }>;
@@ -67,7 +72,7 @@ function extractSafeIncludeArgs(repoRoot: string): string[] {
   }
 }
 
-function parseConfinedClangDeps(stdout: string, repoRoot: string, selfRelPath: string): string[] {
+export function parseConfinedClangDeps(stdout: string, repoRoot: string, selfRelPath: string): string[] {
   const cleaned = stdout.replace(/\\\r?\n/g, ' ');
   const colonIdx = cleaned.indexOf(':');
   const rhs = colonIdx >= 0 ? cleaned.slice(colonIdx + 1) : cleaned;

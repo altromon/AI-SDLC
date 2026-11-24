@@ -6,7 +6,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { createDefaultLanguageAdapters } from './adapters/index.js';
-import { assertConfinedPath, FsCodeGraphCache } from './cache/fs-code-graph-cache.js';
+import { assertConfinedPath, FsCodeGraphCache, sanitizeNode } from './cache/fs-code-graph-cache.js';
 import {
   CODE_GRAPH_LIMITS,
   type CodeGraphCachePort,
@@ -38,7 +38,7 @@ function detectLanguage(relPath: string): string {
   return map[path.extname(relPath).toLowerCase()] ?? 'unknown';
 }
 
-function processDirEntry(
+export function processDirEntry(
   repoRoot: string,
   currentDir: string,
   entry: fs.Dirent,
@@ -56,7 +56,7 @@ function processDirEntry(
   if (adapters.some((a) => a.supports(relPath))) results.push(relPath);
 }
 
-function collectSourceFiles(
+export function collectSourceFiles(
   repoRoot: string,
   currentDir: string,
   adapters: readonly LanguageGraphAdapter[],
@@ -75,7 +75,7 @@ function collectSourceFiles(
   }
 }
 
-function validateDepth(depth: number | undefined): number {
+export function validateDepth(depth: number | undefined): number {
   const resolved = depth === undefined ? CODE_GRAPH_LIMITS.DEFAULT_DEPTH : depth;
   if (!Number.isInteger(resolved) || resolved < 0 || resolved > CODE_GRAPH_LIMITS.MAX_DEPTH) {
     throw new Error(`ERR_INVALID_DEPTH: Depth '${String(depth)}' must be an integer between 0 and ${CODE_GRAPH_LIMITS.MAX_DEPTH}.`);
@@ -83,7 +83,7 @@ function validateDepth(depth: number | undefined): number {
   return resolved;
 }
 
-function validateTargetInput(repoRoot: string, target: string): string {
+export function validateTargetInput(repoRoot: string, target: string): string {
   if (!target || target.includes('\0')) {
     throw new Error('ERR_PATH_TRAVERSAL_DETECTED: Empty or null-byte target rejected.');
   }
@@ -95,7 +95,7 @@ function validateTargetInput(repoRoot: string, target: string): string {
   return normalized;
 }
 
-function resolveImportToNodePath(fromPath: string, specifier: string, nodes: Record<string, CodeGraphNode>): string | null {
+export function resolveImportToNodePath(fromPath: string, specifier: string, nodes: Record<string, CodeGraphNode>): string | null {
   if (Object.hasOwn(nodes, specifier)) return specifier;
   if (!specifier.startsWith('.')) return null;
   const rawJoined = path.posix.normalize(path.posix.join(path.posix.dirname(fromPath), specifier));
@@ -109,12 +109,12 @@ function resolveImportToNodePath(fromPath: string, specifier: string, nodes: Rec
   return null;
 }
 
-function resolveStartNodes(doc: CodeGraphDocument, normTarget: string): string[] {
+export function resolveStartNodes(doc: CodeGraphDocument, normTarget: string): string[] {
   if (Object.hasOwn(doc.nodes, normTarget)) return [normTarget];
   return Object.keys(doc.nodes).filter((k) => doc.nodes[k].symbols.some((s) => s.name === normTarget));
 }
 
-interface BfsState {
+export interface BfsState {
   nodes: CodeGraphNode[];
   edges: CodeGraphEdge[];
   visited: Set<string>;
@@ -123,12 +123,12 @@ interface BfsState {
   approxBytes: number;
 }
 
-function canAddNode(state: BfsState, node: CodeGraphNode): boolean {
+export function canAddNode(state: BfsState, node: CodeGraphNode): boolean {
   if (state.nodes.length >= CODE_GRAPH_LIMITS.MAX_NODES) return false;
   return state.approxBytes + Buffer.byteLength(JSON.stringify(node), 'utf-8') <= CODE_GRAPH_LIMITS.MAX_PAYLOAD_BYTES;
 }
 
-function initBfsQueue(doc: CodeGraphDocument, startNodes: readonly string[], visited: Set<string>) {
+export function initBfsQueue(doc: CodeGraphDocument, startNodes: readonly string[], visited: Set<string>) {
   const queue: Array<{ path: string; hop: number }> = [];
   for (const s of startNodes) {
     if (!visited.has(s) && Object.hasOwn(doc.nodes, s)) {
@@ -139,7 +139,7 @@ function initBfsQueue(doc: CodeGraphDocument, startNodes: readonly string[], vis
   return queue;
 }
 
-function addEdgeIfMissing(from: string, to: string, state: BfsState): boolean {
+export function addEdgeIfMissing(from: string, to: string, state: BfsState): boolean {
   const edgeKey = `${from}->${to}`;
   if (state.edgeKeys.has(edgeKey)) return true;
   if (state.edges.length >= CODE_GRAPH_LIMITS.MAX_EDGES) {
@@ -151,7 +151,7 @@ function addEdgeIfMissing(from: string, to: string, state: BfsState): boolean {
   return true;
 }
 
-function enqueueNeighbors(
+export function enqueueNeighbors(
   doc: CodeGraphDocument,
   node: CodeGraphNode,
   hop: number,
@@ -169,7 +169,7 @@ function enqueueNeighbors(
   }
 }
 
-function traverseKHop(doc: CodeGraphDocument, startNodes: readonly string[], depth: number) {
+export function traverseKHop(doc: CodeGraphDocument, startNodes: readonly string[], depth: number) {
   const state: BfsState = { nodes: [], edges: [], visited: new Set(), edgeKeys: new Set(), truncated: false, approxBytes: 128 };
   const queue = initBfsQueue(doc, startNodes, state.visited);
   while (queue.length > 0) {
@@ -186,7 +186,7 @@ function traverseKHop(doc: CodeGraphDocument, startNodes: readonly string[], dep
   return { truncated: state.truncated, nodes: state.nodes, edges: state.edges };
 }
 
-async function extractWithAdapter(
+export async function extractWithAdapter(
   repoRoot: string,
   relPath: string,
   content: string,
@@ -197,15 +197,18 @@ async function extractWithAdapter(
   const adapter = adapters.find((a) => a.supports(relPath));
   if (!adapter) return null;
   const extracted = await adapter.extract(repoRoot, relPath, content);
-  return {
-    path: relPath,
-    language: detectLanguage(relPath),
-    extractor: extracted.extractor,
-    mtimeMs,
-    sha256,
-    symbols: extracted.symbols,
-    imports: extracted.imports,
-  };
+  return sanitizeNode(
+    {
+      path: relPath,
+      language: detectLanguage(relPath),
+      extractor: extracted.extractor,
+      mtimeMs,
+      sha256,
+      symbols: extracted.symbols,
+      imports: extracted.imports,
+    },
+    repoRoot
+  );
 }
 
 export class DefaultCodeGraphService implements CodeGraphService {

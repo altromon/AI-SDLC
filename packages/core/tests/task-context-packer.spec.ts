@@ -6,7 +6,20 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { DefaultTaskContextPacker } from '../src/code-graph/task-context-packer.js';
+import {
+  buildSpecIndex,
+  collectMarkdownFiles,
+  DefaultTaskContextPacker,
+  extractBodySummary,
+  extractCitedIds,
+  extractFilesTouched,
+  findTaskRecord,
+  findTaskSectionLines,
+  indexSpecsInDir,
+  parseFileTouchedLine,
+  parseFrontmatter,
+  resolveCitedSpecs,
+} from '../src/code-graph/task-context-packer.js';
 
 describe('TSK-065004: TaskContextPacker (task-context-packer.spec.ts)', () => {
   const tmpDirs: string[] = [];
@@ -138,5 +151,53 @@ describe('TSK-065004: TaskContextPacker (task-context-packer.spec.ts)', () => {
     expect(serialized).not.toContain('dev@example.com');
     expect(serialized).not.toContain('ghp_1234567890abcdef1234567890abcdef1234');
     expect(serialized).not.toContain(repoRoot);
+  });
+
+  it('validates depth at pack() entry even when filesTouched is empty and covers helper functions', async () => {
+    const repoRoot = setupFixtureRepo();
+    fs.writeFileSync(
+      path.join(repoRoot, 'specs', 'changes', 'active', 'chg-001', 'tasks.md'),
+      [
+        '---',
+        'id: TSK-PLAN-CHG-001',
+        'type: task-plan',
+        'tasks:',
+        '  - id: TSK-001001',
+        '    satisfies-requirements: [FR-001-DEMO]',
+        '  - id: TSK-001002',
+        '    satisfies-requirements: [FR-001-DEMO]',
+        '---',
+        '### `TSK-001001`: With files',
+        '- **files-touched**:',
+        '  - `src/a.ts`',
+        '### `TSK-001002`: No files',
+      ].join('\n'),
+      'utf-8'
+    );
+
+    const packer = new DefaultTaskContextPacker();
+    await expect(packer.pack(repoRoot, 'TSK-001002', -1)).rejects.toThrow(/ERR_INVALID_DEPTH/);
+    await expect(packer.pack(repoRoot, 'TSK-001002', 6)).rejects.toThrow(/ERR_INVALID_DEPTH/);
+
+    const mdFiles: string[] = [];
+    collectMarkdownFiles(path.join(repoRoot, 'specs'), mdFiles);
+    expect(mdFiles.length).toBeGreaterThan(0);
+
+    const parsed = parseFrontmatter('---\nid: FR-1\n---\nBody line');
+    expect(parsed.data.id).toBe('FR-1');
+    expect(extractBodySummary('# Heading\nSummary dev@example.com', repoRoot)).toContain('[REDACTED:EMAIL]');
+    expect(extractCitedIds({ 'satisfies-requirements': ['FR-001-DEMO'] })).toEqual(['FR-001-DEMO']);
+
+    const record = findTaskRecord(repoRoot, 'TSK-001001');
+    expect(record).not.toBeNull();
+    expect(findTaskSectionLines(record!.body, 'TSK-001001').length).toBeGreaterThan(0);
+    expect(parseFileTouchedLine('- `src/a.ts`', repoRoot)).toBe('src/a.ts');
+    expect(extractFilesTouched(record!.body, 'TSK-001001', repoRoot)).toEqual(['src/a.ts']);
+
+    const idx = buildSpecIndex(repoRoot);
+    indexSpecsInDir(repoRoot, 'specs/product/requirements', idx);
+    const resolved = resolveCitedSpecs(['FR-001-DEMO', 'FR-MISSING'], idx);
+    expect(resolved.specs.map((s) => s.id)).toContain('FR-001-DEMO');
+    expect(resolved.missingRefs).toContain('FR-MISSING');
   });
 });

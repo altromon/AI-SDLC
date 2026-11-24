@@ -7,7 +7,20 @@ import * as os from 'os';
 import * as path from 'path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CODE_GRAPH_LIMITS, type CodeGraphDocument } from '../src/code-graph/types.js';
-import { assertConfinedPath, FsCodeGraphCache } from '../src/code-graph/cache/fs-code-graph-cache.js';
+import {
+  addRootVariants,
+  assertConfinedPath,
+  FsCodeGraphCache,
+  isOutsideBase,
+  parseSafeNodes,
+  redactSensitiveText,
+  renameWithRetry,
+  resolveNearestRealPath,
+  sanitizeNode,
+  sanitizeSymbols,
+  sleepSync,
+  tryParseSafeNode,
+} from '../src/code-graph/cache/fs-code-graph-cache.js';
 
 vi.mock('fs', async (importOriginal) => {
   const mod = await importOriginal<typeof import('fs')>();
@@ -190,5 +203,38 @@ describe('TSK-065001: CodeGraphCachePort & FS-Jail (code-graph-cache.spec.ts)', 
     expect(rawPersisted).not.toContain('dev@example.com');
     expect(rawPersisted).not.toContain(secretToken);
     expect(rawPersisted).not.toContain(repoRoot);
+  });
+
+  it('covers fs-code-graph-cache helpers and Windows drive-case / realpath redaction', () => {
+    const repoRoot = makeTmpDir('aisdlc-cg-helpers-');
+    expect(isOutsideBase(repoRoot, path.join(repoRoot, 'src'))).toBe(false);
+    expect(isOutsideBase(repoRoot, path.join(repoRoot, '..'))).toBe(true);
+
+    const nearest = resolveNearestRealPath(path.join(repoRoot, 'nonexistent', 'file.ts'));
+    expect(nearest.tail).toEqual(['nonexistent', 'file.ts']);
+
+    const variants = new Set<string>();
+    addRootVariants(variants, 'C:\\Workspace\\Repo');
+    expect(variants.has('c:\\Workspace\\Repo')).toBe(true);
+    expect(variants.has('C:/Workspace/Repo')).toBe(true);
+    expect(redactSensitiveText('c:\\Workspace\\Repo\\src\\a.ts', 'C:\\Workspace\\Repo')).toContain('<repoRoot>');
+
+    const syms = sanitizeSymbols([{ name: 'fn', kind: 'function', signature: 'dev@example.com', exported: true }], repoRoot);
+    expect(syms[0].signature).toBe('[REDACTED:EMAIL]');
+
+    const node = sanitizeNode(
+      { path: 'src\\a.ts', language: 'typescript', extractor: 'ts', mtimeMs: 1, sha256: 'a', symbols: syms, imports: [] },
+      repoRoot
+    );
+    expect(node.path).toBe('src/a.ts');
+    expect(tryParseSafeNode(node, repoRoot)?.path).toBe('src/a.ts');
+    expect(Object.keys(parseSafeNodes({ 'src/a.ts': node }, repoRoot))).toEqual(['src/a.ts']);
+
+    sleepSync(1);
+    const tmpFile = path.join(repoRoot, 'a.tmp');
+    const dstFile = path.join(repoRoot, 'b.json');
+    fs.writeFileSync(tmpFile, '{}', 'utf-8');
+    renameWithRetry(tmpFile, dstFile);
+    expect(fs.existsSync(dstFile)).toBe(true);
   });
 });

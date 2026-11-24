@@ -10,12 +10,12 @@ import * as path from 'path';
 const MAX_EXEC_TIMEOUT_MS = 10_000;
 const MAX_EXEC_BUFFER_BYTES = 5 * 1024 * 1024;
 
-function isInsideOrEqual(baseDir: string, candidateDir: string): boolean {
+export function isInsideOrEqual(baseDir: string, candidateDir: string): boolean {
   const rel = path.relative(baseDir, candidateDir);
   return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
 }
 
-function isTrustedPathEntry(entry: string, resolvedRoot: string, resolvedCwd: string): boolean {
+export function isTrustedPathEntry(entry: string, resolvedRoot: string, resolvedCwd: string): boolean {
   if (!entry || entry === '.' || entry === '..' || !path.isAbsolute(entry)) {
     return false;
   }
@@ -26,7 +26,7 @@ function isTrustedPathEntry(entry: string, resolvedRoot: string, resolvedCwd: st
   return true;
 }
 
-function findBinaryInDir(dir: string, binaryName: string): string | null {
+export function findBinaryInDir(dir: string, binaryName: string): string | null {
   const candidates =
     process.platform === 'win32' && !path.extname(binaryName)
       ? [`${binaryName}.exe`, `${binaryName}.cmd`, binaryName]

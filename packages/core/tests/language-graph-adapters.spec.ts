@@ -7,13 +7,51 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { resolveTrustedBinaryPath } from '../src/code-graph/adapters/safe-exec-helper.js';
-import { TypeScriptGraphAdapter } from '../src/code-graph/adapters/typescript-graph-adapter.js';
-import { PythonGraphAdapter } from '../src/code-graph/adapters/python-graph-adapter.js';
-import { GoGraphAdapter } from '../src/code-graph/adapters/go-graph-adapter.js';
-import { RustGraphAdapter } from '../src/code-graph/adapters/rust-graph-adapter.js';
-import { CppGraphAdapter } from '../src/code-graph/adapters/cpp-graph-adapter.js';
-import { PolyglotFallbackAdapter } from '../src/code-graph/adapters/polyglot-fallback-adapter.js';
+import {
+  buildCleanEnv,
+  execSafeBinary,
+  findBinaryInDir,
+  isInsideOrEqual,
+  isTrustedPathEntry,
+  resolveTrustedBinaryPath,
+  withEmptyTempDir,
+} from '../src/code-graph/adapters/safe-exec-helper.js';
+import {
+  collectExportedConsts,
+  extractTsImports,
+  extractTsSymbols,
+  headerOnly,
+  pushSymbol,
+  TypeScriptGraphAdapter,
+} from '../src/code-graph/adapters/typescript-graph-adapter.js';
+import { parsePythonAstOutput, PythonGraphAdapter } from '../src/code-graph/adapters/python-graph-adapter.js';
+import { GoGraphAdapter, parseGoListImports, runGoList } from '../src/code-graph/adapters/go-graph-adapter.js';
+import {
+  hasConfigInDir,
+  hasUntrustedCargoConfig,
+  parseCargoMetadataImports,
+  runCargoMetadata,
+  RustGraphAdapter,
+  scanDescendantsForConfig,
+} from '../src/code-graph/adapters/rust-graph-adapter.js';
+import {
+  collectIncludeArgsFromTokens,
+  CppGraphAdapter,
+  extractSafeIncludeArgs,
+  parseConfinedClangDeps,
+  rejectLeadingFlagOrResponseFile,
+  tokenizeCommand,
+  tryConfineIncludeDir,
+} from '../src/code-graph/adapters/cpp-graph-adapter.js';
+import {
+  extractPolyglotImports,
+  extractTypeSymbols,
+  mergePolyglotSymbols,
+  PolyglotFallbackAdapter,
+} from '../src/code-graph/adapters/polyglot-fallback-adapter.js';
+import { createDefaultLanguageAdapters } from '../src/code-graph/adapters/index.js';
+import { getSharedProject } from '../src/verifiers/ast/typescript-ast.js';
+import type { SymbolSignature } from '../src/code-graph/types.js';
 
 vi.mock('child_process', async (importOriginal) => {
   const mod = await importOriginal<typeof import('child_process')>();
@@ -260,5 +298,66 @@ describe('TSK-065002: LanguageGraphAdapter & Safe-Exec (language-graph-adapters.
     );
     expect(javaRes.extractor).toBe('polyglot-scanner');
     expect(javaRes.symbols.map((s) => s.name)).toContain('Main');
+  });
+
+  it('confines compile_commands.json via assertConfinedPath and covers all adapter helper functions', () => {
+    const repoRoot = makeTmpDir('aisdlc-helpers-root-');
+    const outsideDir = makeTmpDir('aisdlc-helpers-out-');
+    fs.mkdirSync(path.join(repoRoot, 'include'), { recursive: true });
+    fs.writeFileSync(path.join(outsideDir, 'evil.json'), '[{"command":"clang -I/etc"}]', 'utf-8');
+    fs.symlinkSync(path.join(outsideDir, 'evil.json'), path.join(repoRoot, 'compile_commands.json'), 'file');
+    expect(extractSafeIncludeArgs(repoRoot)).toEqual([]);
+
+    expect(createDefaultLanguageAdapters().length).toBe(6);
+
+    expect(() => rejectLeadingFlagOrResponseFile('-flag')).toThrow(/ERR_INVALID_TARGET/);
+    expect(tokenizeCommand('clang++ -I "include" main.cpp')).toEqual(['clang++', '-I', 'include', 'main.cpp']);
+    expect(tryConfineIncludeDir(repoRoot, 'include')).toBeTruthy();
+    const collectedArgs: string[] = [];
+    collectIncludeArgsFromTokens(['-I', 'include', '-Iinclude'], repoRoot, collectedArgs);
+    expect(collectedArgs.length).toBe(3);
+    expect(parseConfinedClangDeps('main.o: src/main.cpp include/a.h /etc/passwd', repoRoot, 'src/main.cpp')).toEqual(['include/a.h']);
+
+    expect(parseGoListImports('{"Imports":["fmt"]}')).toEqual(['fmt']);
+    expect(runGoList('nonexistent-go-bin', path.join(repoRoot, 'main.go'))).toBeNull();
+    expect(parsePythonAstOutput('{"symbols":[],"imports":["sys"]}')).toEqual({ symbols: [], imports: ['sys'] });
+
+    expect(hasConfigInDir(repoRoot)).toBe(false);
+    expect(scanDescendantsForConfig(repoRoot)).toBe(false);
+    expect(hasUntrustedCargoConfig(repoRoot)).toBe(false);
+    expect(parseCargoMetadataImports('{"packages":[{"dependencies":[{"name":"serde"}]}]}')).toEqual(['serde']);
+    expect(runCargoMetadata('nonexistent-cargo-bin', repoRoot)).toBeNull();
+
+    expect(extractTypeSymbols('export class Foo {}').map((s) => s.name)).toEqual(['Foo']);
+    expect(extractPolyglotImports('import java.util.List;')).toEqual(['java.util.List']);
+    const merged = mergePolyglotSymbols(
+      [{ name: 'A', kind: 'class', signature: 'class A', exported: true }],
+      [{ name: 'fn', kind: 'function', signature: 'function fn()', exported: true }] as SymbolSignature[]
+    );
+    expect(merged.length).toBe(2);
+
+    expect(isInsideOrEqual(repoRoot, path.join(repoRoot, 'include'))).toBe(true);
+    expect(isTrustedPathEntry('.', repoRoot, process.cwd())).toBe(false);
+    expect(findBinaryInDir(repoRoot, 'missing-bin')).toBeNull();
+    expect(buildCleanEnv(['FOO']).FOO).toBeUndefined();
+    expect(withEmptyTempDir((d) => fs.existsSync(d))).toBe(true);
+    expect(execSafeBinary('nonexistent-bin', [], { cwd: repoRoot, env: {} }).status).not.toBe(0);
+
+    expect(headerOnly('export function x() {\n return 1;\n}')).toBe('export function x()');
+    const symList: SymbolSignature[] = [];
+    pushSymbol(symList, 'x', 'function', 'export function x() {}', true);
+    expect(symList.length).toBe(1);
+
+    const project = getSharedProject();
+    const sf = project.createSourceFile('__helper_test.ts', "import fs from 'fs';\nexport const C = 1;\n", { overwrite: true });
+    try {
+      expect(extractTsImports(sf)).toEqual(['fs']);
+      const constSyms: SymbolSignature[] = [];
+      collectExportedConsts(sf, constSyms);
+      expect(constSyms.map((s) => s.name)).toEqual(['C']);
+      expect(extractTsSymbols(sf).map((s) => s.name)).toContain('C');
+    } finally {
+      project.removeSourceFile(sf);
+    }
   });
 });
