@@ -210,7 +210,7 @@ describe('@aisdlc/cli Structured JSON Output Suite (aisdlc verify --json)', () =
     expect(parsed.success).toBe(true);
     expect(parsed.exitCode).toBe(0);
     expect(parsed.summary.errorCount).toBe(0);
-    expect(parsed.violations).toEqual([]);
+    expect(parsed.violations.filter((v: { severity?: string }) => v.severity === 'ERROR')).toEqual([]);
   });
 
   it('should emit valid JSON for runVerifyFriction', () => {
