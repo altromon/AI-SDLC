@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-025-STRUCTURED-JSON-VERIFY-001
+ * Tag: @FR-025-STRUCTURED-JSON-VERIFY-001
+ */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -35,10 +39,12 @@ describe('CLI SARIF Output & Reporting Suite', () => {
 
     process.env.AISDLC_FORMAT = 'sarif';
     expect(isSarifOutput({})).toBe(true);
+    expect(isSarifOutput({ json: true })).toBe(false);
 
     delete process.env.AISDLC_FORMAT;
     process.env.AISDLC_OUTPUT = 'sarif';
     expect(isSarifOutput({})).toBe(true);
+    expect(isSarifOutput({ json: true })).toBe(false);
   });
 
   it('generates reports/security.sarif by default during runVerifySecurity', () => {

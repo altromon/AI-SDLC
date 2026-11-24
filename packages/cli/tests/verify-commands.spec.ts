@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-025-STRUCTURED-JSON-VERIFY-001
+ * Tag: @FR-025-STRUCTURED-JSON-VERIFY-001
+ */
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -21,49 +25,56 @@ describe('CLI Verify Commands Text & JSON Coverage Suite', () => {
 
   beforeEach(() => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-cli-verify-cmds-'));
-    initProject({ targetDir: tempDir, agents: 'none', silent: true });
+    initProject({ targetDir: tempDir, agents: 'none' });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
-    fs.rmSync(tempDir, { recursive: true, force: true });
+    fs.rmSync(tempDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   });
 
   it('executes individual verify commands in text and json modes on initialized project', () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    // Text mode executions
-    expect(typeof runVerifyQuality({ root: tempDir })).toBe('boolean');
-    expect(typeof runVerifyTraceability({ root: tempDir })).toBe('boolean');
-    expect(typeof runVerifyGovernance({ root: tempDir })).toBe('boolean');
-    expect(typeof runVerifyTesting({ root: tempDir })).toBe('boolean');
-    expect(typeof runVerifyPdac({ root: tempDir })).toBe('boolean');
-    expect(typeof runVerifySchemas({ root: tempDir })).toBe('boolean');
-    expect(typeof runVerifyFriction({ root: tempDir })).toBe('boolean');
-    expect(typeof runVerifyDuplicates({ root: tempDir })).toBe('boolean');
-    expect(typeof runVerifyGherkin({ root: tempDir })).toBe('boolean');
-    expect(typeof runVerifyPrivacy({ root: tempDir })).toBe('boolean');
+    // Text mode executions (quality fails without coverage report on default policy; remaining 9 pass)
+    expect(runVerifyQuality({ root: tempDir })).toBe(false);
+    expect(runVerifyTraceability({ root: tempDir })).toBe(true);
+    expect(runVerifyGovernance({ root: tempDir })).toBe(true);
+    expect(runVerifyTesting({ root: tempDir })).toBe(true);
+    expect(runVerifyPdac({ root: tempDir })).toBe(true);
+    expect(runVerifySchemas({ root: tempDir })).toBe(true);
+    expect(runVerifyFriction({ root: tempDir })).toBe(true);
+    expect(runVerifyDuplicates({ root: tempDir })).toBe(true);
+    expect(runVerifyGherkin({ root: tempDir })).toBe(true);
+    expect(runVerifyPrivacy({ root: tempDir })).toBe(true);
+
+    const expectJsonGate = (fn: () => boolean, gate: string, expectedSuccess: boolean) => {
+      logSpy.mockClear();
+      expect(fn()).toBe(expectedSuccess);
+      const parsed = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0]));
+      expect(parsed.gate).toBe(gate);
+      expect(parsed.success).toBe(expectedSuccess);
+      expect(parsed.exitCode).toBe(expectedSuccess ? 0 : 1);
+      expect(Array.isArray(parsed.violations)).toBe(true);
+    };
 
     // JSON mode executions
-    expect(typeof runVerifyQuality({ root: tempDir, json: true })).toBe('boolean');
-    expect(typeof runVerifyTraceability({ root: tempDir, json: true })).toBe('boolean');
-    expect(typeof runVerifyGovernance({ root: tempDir, json: true })).toBe('boolean');
-    expect(typeof runVerifyTesting({ root: tempDir, json: true })).toBe('boolean');
-    expect(typeof runVerifyPdac({ root: tempDir, json: true })).toBe('boolean');
-    expect(typeof runVerifySchemas({ root: tempDir, json: true })).toBe('boolean');
-    expect(typeof runVerifyFriction({ root: tempDir, json: true })).toBe('boolean');
-    expect(typeof runVerifyDuplicates({ root: tempDir, json: true })).toBe('boolean');
-    expect(typeof runVerifyGherkin({ root: tempDir, json: true })).toBe('boolean');
-    expect(typeof runVerifyPrivacy({ root: tempDir, json: true })).toBe('boolean');
-
-    expect(logSpy).toHaveBeenCalled();
-    expect(errSpy).not.toThrow();
+    expectJsonGate(() => runVerifyQuality({ root: tempDir, json: true }), 'quality', false);
+    expectJsonGate(() => runVerifyTraceability({ root: tempDir, json: true }), 'traceability', true);
+    expectJsonGate(() => runVerifyGovernance({ root: tempDir, json: true }), 'governance', true);
+    expectJsonGate(() => runVerifyTesting({ root: tempDir, json: true }), 'testing', true);
+    expectJsonGate(() => runVerifyPdac({ root: tempDir, json: true }), 'pdac', true);
+    expectJsonGate(() => runVerifySchemas({ root: tempDir, json: true }), 'schemas', true);
+    expectJsonGate(() => runVerifyFriction({ root: tempDir, json: true }), 'friction', true);
+    expectJsonGate(() => runVerifyDuplicates({ root: tempDir, json: true }), 'duplicates', true);
+    expectJsonGate(() => runVerifyGherkin({ root: tempDir, json: true }), 'gherkin', true);
+    expectJsonGate(() => runVerifyPrivacy({ root: tempDir, json: true }), 'privacy', true);
   });
 
   it('exercises failure-reporting branches across verify commands in text and json modes', () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // 1. High-complexity source file + PII leak in src/
     fs.mkdirSync(path.join(tempDir, 'src'), { recursive: true });
@@ -127,21 +138,34 @@ describe('CLI Verify Commands Text & JSON Coverage Suite', () => {
       'utf-8'
     );
 
-    // 6. Friction / PDAC / Governance / Traceability / Schemas / Quality / Testing / Duplicates / Gherkin / Privacy
-    for (const json of [false, true]) {
-      expect(typeof runVerifyQuality({ root: tempDir, json })).toBe('boolean');
-      expect(typeof runVerifyTraceability({ root: tempDir, json })).toBe('boolean');
-      expect(typeof runVerifyGovernance({ root: tempDir, json })).toBe('boolean');
-      expect(typeof runVerifyTesting({ root: tempDir, json })).toBe('boolean');
-      expect(typeof runVerifyPdac({ root: tempDir, json })).toBe('boolean');
-      expect(typeof runVerifySchemas({ root: tempDir, json })).toBe('boolean');
-      expect(typeof runVerifyFriction({ root: tempDir, json })).toBe('boolean');
-      expect(typeof runVerifyDuplicates({ root: tempDir, json })).toBe('boolean');
-      expect(typeof runVerifyGherkin({ root: tempDir, json })).toBe('boolean');
-      expect(typeof runVerifyPrivacy({ root: tempDir, json })).toBe('boolean');
-    }
+    // 6. Verify concrete pass/fail outcomes across all 10 commands in text and JSON modes
+    const expected: Array<[string, (json: boolean) => boolean, boolean, number]> = [
+      ['quality', (json) => runVerifyQuality({ root: tempDir, json }), false, 1],
+      ['traceability', (json) => runVerifyTraceability({ root: tempDir, json }), false, 1],
+      ['governance', (json) => runVerifyGovernance({ root: tempDir, json }), true, 0],
+      ['testing', (json) => runVerifyTesting({ root: tempDir, json }), false, 1],
+      ['pdac', (json) => runVerifyPdac({ root: tempDir, json }), true, 0],
+      ['schemas', (json) => runVerifySchemas({ root: tempDir, json }), false, 1],
+      ['friction', (json) => runVerifyFriction({ root: tempDir, json }), true, 0],
+      ['duplicates', (json) => runVerifyDuplicates({ root: tempDir, json }), true, 0],
+      ['gherkin', (json) => runVerifyGherkin({ root: tempDir, json }), false, 1],
+      ['privacy', (json) => runVerifyPrivacy({ root: tempDir, json }), true, 0],
+    ];
 
-    expect(logSpy).toHaveBeenCalled();
-    expect(errSpy).not.toThrow();
+    for (const [gate, runFn, expectedPass, expectedExit] of expected) {
+      logSpy.mockClear();
+      expect(runFn(false)).toBe(expectedPass);
+      expect(logSpy).toHaveBeenCalled();
+
+      logSpy.mockClear();
+      expect(runFn(true)).toBe(expectedPass);
+      const parsed = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0]));
+      expect(parsed.gate).toBe(gate);
+      expect(parsed.success).toBe(expectedPass);
+      expect(parsed.exitCode).toBe(expectedExit);
+      if (!expectedPass) {
+        expect(parsed.violations.length).toBeGreaterThan(0);
+      }
+    }
   });
 });

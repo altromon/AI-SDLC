@@ -1,11 +1,14 @@
+/**
+ * Cites: FR-053-CLI-MIGRATE-001
+ * Tag: @FR-053-CLI-MIGRATE-001
+ */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { MigrationReporter, type MigrationResult } from '@aisdlc/core';
 
-// Target import that will exist once developer implements packages/cli/src/commands/migrate.ts
-// @ts-expect-error Implemented in TSK-006 by agent-developer
-import { runMigrate } from '../src/commands/migrate.js';
+import { printConsoleSummary, runMigrate } from '../src/commands/migrate.js';
 
 describe('Migrate CLI Command Integration Suite (FR-053-CLI-MIGRATE-001)', () => {
   let tmpDir: string;
@@ -68,11 +71,11 @@ describe('Migrate CLI Command Integration Suite (FR-053-CLI-MIGRATE-001)', () =>
 
   it('executes "aisdlc migrate --json" emitting structured JSON with exitCode and summary', async () => {
     const exitCode = await runMigrate({ root: tmpDir, dryRun: true, json: true });
-    expect(typeof exitCode).toBe('number');
+    expect(exitCode).toBe(0);
 
     const jsonCall = logSpy.mock.calls.find((call) => {
       try {
-        const parsed = JSON.parse(call[0]);
+        const parsed = JSON.parse(String(call[0]));
         return parsed && typeof parsed.exitCode === 'number' && parsed.summary !== undefined;
       } catch {
         return false;
@@ -80,8 +83,8 @@ describe('Migrate CLI Command Integration Suite (FR-053-CLI-MIGRATE-001)', () =>
     });
 
     expect(jsonCall).toBeDefined();
-    const report = JSON.parse(jsonCall![0]);
-    expect(report).toHaveProperty('exitCode');
+    const report = JSON.parse(String(jsonCall![0]));
+    expect(report.exitCode).toBe(exitCode);
     expect(report).toHaveProperty('summary');
     expect(report).toHaveProperty('details');
   });
@@ -90,5 +93,25 @@ describe('Migrate CLI Command Integration Suite (FR-053-CLI-MIGRATE-001)', () =>
     // Simulate git repo on branch main
     const exitCode = await runMigrate({ root: tmpDir, branch: 'main', dryRun: false });
     expect(exitCode).toBe(2);
+  });
+
+  it('printConsoleSummary prints distinct status messages for exit codes 0, 1, and 2', () => {
+    const reporter = new MigrationReporter();
+    const baseResult: MigrationResult = {
+      success: true,
+      exitCode: 0,
+      summary: { upToDate: 1, cleanUpdated: 1, overridesPreserved: 0, conflicts: 0 },
+      details: [],
+    };
+
+    printConsoleSummary({ ...baseResult, exitCode: 0 }, reporter);
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Migration completed successfully.'));
+
+    logSpy.mockClear();
+    printConsoleSummary({ ...baseResult, exitCode: 1 }, reporter);
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('local overrides preserved'));
+
+    printConsoleSummary({ ...baseResult, success: false, exitCode: 2 }, reporter);
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Migration encountered errors or conflicts.'));
   });
 });

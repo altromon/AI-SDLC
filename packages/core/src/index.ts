@@ -3,60 +3,877 @@
  * Deterministic domain verification, compliance, and governance engine for AI-SDLC
  */
 
-export * from './types/index.js';
-export * from './verifiers/quality-gate.js';
-export * from './verifiers/coverage-normalizer.js';
-export * from './verifiers/test-discovery.js';
-export * from './verifiers/ast/typescript-ast.js';
-export * from './verifiers/ast/polyglot-scanner.js';
-export * from './verifiers/traceability.js';
-export * from './verifiers/governance.js';
-export * from './verifiers/testing-coverage.js';
-export * from './verifiers/bdd-runner.js';
-export * from './verifiers/gherkin.js';
-export * from './verifiers/licenses.js';
-export * from './verifiers/sca/scanner.js';
-export * from './verifiers/sca/sbom.js';
-export * from './verifiers/sca/sbom-ingest.js';
-export * from './verifiers/sca/sbom-parse.js';
-export * from './verifiers/pdac-graph.js';
-export * from './verifiers/schemas.js';
-export * from './verifiers/progressive-friction.js';
-export * from './verifiers/manuals.js';
-export * from './verifiers/duplicates.js';
-export * from './verifiers/secrets.js';
-export * from './verifiers/sast.js';
-export * from './verifiers/tool-installer.js';
-export * from './verifiers/sast-orchestrator.js';
-export * from './verifiers/sarif-ingest.js';
-export * from './verifiers/sarif-sast.js';
-export * from './verifiers/security-suppressions.js';
-export * from './verifiers/privacy.js';
-export * from './verifiers/skill-integrity.js';
-export * from './verifiers/skill-execution-audit.js';
-export * from './reporters/quality-report.js';
-export * from './git/workflow.js';
-export * from './git/checkout.js';
-export * from './git/trailers.js';
-export * from './git/agent-detector.js';
-export * from './git/hook-installer.js';
-export * from './reporters/pr-kpis.js';
-export * from './reporters/release-kpis.js';
-export * from './reporters/agent-kpis.js';
-export * from './reporters/cytoscape-bundle.js';
-export * from './reporters/dashboard.js';
-export * from './reporters/sarif.js';
-export * from './adapters/sdd/index.js';
-export * from './init/index.js';
-export * from './utils/fs.js';
-export * from './security/dlp-sanitizer.js';
-
-export * from './verifiers/ast/python-ast.js';
-export * from './verifiers/ast/native-ast-orchestrator.js';
+export { ALL_QUALITY_GATES, VALID_AUTONOMY_MODES, VALID_CHANGE_PROFILES } from './types/index.js';
+export type {
+  SemanticSearchMatch,
+  SemanticSearchOptions,
+  SemanticSearchResult,
+} from './types/index.js';
+export {
+  buildTfIdfVector,
+  computeIdfMap,
+  computePairwiseSemanticScore,
+  cosineSimilarity,
+  extractGherkinStepsText,
+  extractNormativeSection,
+  extractSemanticTokens,
+  formatSemanticSearchMarkdown,
+  indexWorkspaceSpecs,
+  normalizeText,
+  searchSpecifications,
+  stemToken,
+} from './verifiers/semantic-similarity.js';
+export type { IndexedSpecDocument, SparseVector } from './verifiers/semantic-similarity.js';
+export type {
+  ActiveTaskMatch,
+  AnalysisResult,
+  ArtifactFrontmatter,
+  ArtifactSchemaOptions,
+  ArtifactSchemaResult,
+  ArtifactSchemaViolation,
+  ArtifactValidationResult,
+  AutonomyMode,
+  BackupManifest,
+  BackupManifestEntry,
+  BddAttestationRecord,
+  BddAttestationVerificationResult,
+  BddFeatureExecutionReport,
+  BddScenarioExecution,
+  BddStepExecution,
+  BddVariantCoverage,
+  BranchClassificationResult,
+  BranchHierarchyPlan,
+  BranchValidationError,
+  BranchValidationSuccess,
+  CategoryReport,
+  CategoryResult,
+  ChangeDetectionOptions,
+  ChangeDetectionResult,
+  ChangeProfile,
+  CheckStatus,
+  CodeCoverageSummary,
+  ComplianceBundleOptions,
+  ComplianceBundlePayload,
+  ComplianceBundleResult,
+  ContractTraceAudit,
+  CoverageFormat,
+  CycloneDxBom,
+  CycloneDxComponent,
+  CycloneDxLicense,
+  CycloneDxVulnerability,
+  CytoscapeEdgeData,
+  CytoscapeElement,
+  CytoscapeNodeData,
+  DashboardHistoricalKpi,
+  DashboardOptions,
+  DashboardResult,
+  DataAssetField,
+  DataAssetSummary,
+  DesignContractDeclaration,
+  DiagnosticCategory,
+  DiagnosticFinding,
+  DoctorOptions,
+  DoctorReport,
+  DoctorStatus,
+  DuplicateIssue,
+  DuplicateIssueType,
+  DuplicateSeverity,
+  DuplicateVerifierOptions,
+  DuplicateVerifierResult,
+  ExtractedFeature,
+  FileClassification,
+  FunctionMetrics,
+  GateEvidenceReport,
+  GateFinding,
+  GenerateSarifOptions,
+  GherkinExtractionOptions,
+  GherkinExtractionResult,
+  GherkinGeneratorSpec,
+  GherkinScaffoldExecFn,
+  GherkinScaffoldExecResult,
+  GherkinScaffoldLanguage,
+  GherkinScaffoldOptions,
+  GherkinScaffoldResult,
+  GherkinScaffoldStatus,
+  GherkinSyncCheckResult,
+  GitCheckoutTaskOptions,
+  GitCheckoutTaskResult,
+  GovernanceOptions,
+  GovernanceResult,
+  GraphNodeLayer,
+  GraphNodeStatus,
+  GraphNodeType,
+  IBackupManager,
+  IDiagnosticsReporter,
+  IDoctorService,
+  IFileSystemJail,
+  IFileSystemProbe,
+  IMigrationReporter,
+  IMigrationService,
+  IProcessRunner,
+  ITransactionManager,
+  InTotoStatementV1,
+  InTotoSubject,
+  InspectOptions,
+  InspectRelation,
+  InspectResult,
+  LanguageAstReport,
+  LicensePolicy,
+  LicenseProvenance,
+  LicenseVerificationOptions,
+  LicenseVerificationResult,
+  LicenseViolation,
+  ManualDocumentItem,
+  ManualsCoverageSummary,
+  ManualsVerificationOptions,
+  ManualsVerificationResult,
+  MigrationFileStatus,
+  MigrationItemReport,
+  MigrationOptions,
+  MigrationPlanItem,
+  MigrationReport,
+  MigrationResult,
+  MigrationStatus,
+  MigrationSummary,
+  OscalAssessmentResultsDocument,
+  OscalFinding,
+  OscalResult,
+  PdacDrift,
+  PdacGraphOptions,
+  PdacGraphResult,
+  PdacInvalidAnchor,
+  PdacNode,
+  PdacSyncDetail,
+  PdacSyncOptions,
+  PdacSyncResult,
+  PdacUnresolvedCitation,
+  PreflightCheckOptions,
+  PreflightCheckResult,
+  PreflightGateSummary,
+  PrivacyClassificationRule,
+  PrivacyFindingType,
+  PrivacyPolicy,
+  PrivacyRopaSummary,
+  PrivacyVerifierOptions,
+  PrivacyVerifierResult,
+  PrivacyViolation,
+  ProcessExecOptions,
+  ProcessExecResult,
+  ProductHandoff,
+  ProductHandoffSubgraph,
+  ProgressiveFrictionOptions,
+  ProgressiveFrictionResult,
+  PromptInjectionFinding,
+  QualityBaseline,
+  QualityBaselineEntry,
+  QualityGateId,
+  QualityGateOptions,
+  QualityGateResult,
+  QualityPolicy,
+  QualityReportOptions,
+  QualityReportResult,
+  QualityThresholds,
+  RegulatoryGateMapping,
+  RegulatoryMatrixSection,
+  RequirementAuditItem,
+  SafeProbeExecutable,
+  SarifArtifactLocation,
+  SarifDocument,
+  SarifLevel,
+  SarifLocation,
+  SarifMultiformatMessageString,
+  SarifPhysicalLocation,
+  SarifRegion,
+  SarifReportingDescriptor,
+  SarifResult,
+  SarifRuleConfiguration,
+  SarifRun,
+  SarifToolDriver,
+  SarifUriBaseId,
+  SastFindingType,
+  SastSeverity,
+  SastVerifierOptions,
+  SastVerifierResult,
+  SastViolation,
+  ScaTool,
+  ScaVulnerability,
+  ScannedDependency,
+  SddChangeScaffoldOptions,
+  SddChangeScaffoldResult,
+  SddDepositOptions,
+  SddFramework,
+  SddIntegrateAllOptions,
+  SddIntegrateAllResult,
+  SddIntegrationAudit,
+  SddIntegrationOptions,
+  SddIntegrationResult,
+  SddValidationResult,
+  SddWorkspaceInfo,
+  SecretFindingType,
+  SecretVerifierOptions,
+  SecretVerifierResult,
+  SecretViolation,
+  SecuritySuppression,
+  TaskAuditItem,
+  TaskItem,
+  TaskKpiSummary,
+  TaskSummary,
+  TaskVerification,
+  TestingCoverageOptions,
+  TestingCoverageResult,
+  TraceabilityOptions,
+  TraceabilityResult,
+  TraceabilityRow,
+  UiModality,
+  UnresolvedLicenseReason,
+  UntestedFunctionItem,
+  UntestedUiComponentItem,
+  UseCaseFlowAuditItem,
+  VexAnalysisJustification,
+  VexAnalysisState,
+  VexStatement,
+  VulnerabilityThresholds,
+} from './types/index.js';
+export {
+  DEFAULT_EXCLUDES,
+  DEFAULT_EXTENSIONS,
+  UNIT_TEST_SUFFIXES,
+  applyRatchetMode,
+  calculateMetrics,
+  classifyMetricFromMessage,
+  computeViolationSignature,
+  createDefaultQualityPolicy,
+  extractBaselineEntriesFromResults,
+  extractFunctions,
+  extractFunctionsBraceLanguages,
+  extractFunctionsPython,
+  extractUiComponentName,
+  isFunctionReferencedInTests,
+  isMetricWorsened,
+  isUiComponentTested,
+  loadQualityBaseline,
+  parseQualityPolicy,
+  sanitizeTestCorpus,
+  verifyQualityGate,
+  walkDir,
+  writeQualityBaseline,
+} from './verifiers/quality-gate.js';
+export {
+  SUPPORTED_COVERAGE_FORMATS_HINT,
+  parseCoberturaXmlCoverage,
+  parseGoCoverProfile,
+  parseIstanbulCoverageSummary,
+  parseJacocoXmlCoverage,
+  parseLcovCoverage,
+  parseLlvmCovJson,
+  readNormalizedCoverage,
+} from './verifiers/coverage-normalizer.js';
+export {
+  CONSOLE_UI_COMPONENT_PATTERNS,
+  DEFAULT_TEST_ARTIFACT_PATTERNS,
+  DEFAULT_UI_COMPONENT_PATTERNS,
+  DEFAULT_UI_TEST_PATTERNS,
+  DEFAULT_UNIT_TEST_PATTERNS,
+  DESKTOP_UI_COMPONENT_PATTERNS,
+  MOBILE_UI_COMPONENT_PATTERNS,
+  WEB_UI_COMPONENT_PATTERNS,
+  compilePatternList,
+  compileTestPatterns,
+  detectUiComponentModality,
+  hasModalityDriverSignature,
+  inferFallbackUiModality,
+  isPolyglotTestArtifact,
+  isPolyglotUnitTestFile,
+  isUiComponentFile,
+  isUiTestFile,
+  stripTestComments,
+} from './verifiers/test-discovery.js';
+export type { CompiledTestMatcher } from './verifiers/test-discovery.js';
+export { extractFunctionsTypeScriptAst } from './verifiers/ast/typescript-ast.js';
+export { extractFunctionsPolyglot, extractPythonFunctionsPolyglot } from './verifiers/ast/polyglot-scanner.js';
+export {
+  extractFeatureTags,
+  generateTraceabilityReportMarkdown,
+  parseFrontmatter,
+  verifyTraceability,
+} from './verifiers/traceability.js';
+export {
+  generateGovernanceReportMarkdown,
+  parseTasksDoc,
+  verifyTasksGovernance,
+  walkTaskFiles,
+} from './verifiers/governance.js';
+export {
+  analyzeBddVariantsForRequirement,
+  generateTestingCoverageReportMarkdown,
+  parseGenericDoc,
+  scanAllTestArtifacts,
+  verifyTestingCoverage,
+} from './verifiers/testing-coverage.js';
+export {
+  BddStepRegistry,
+  computeLfSha256,
+  executeBddFeature,
+  parseFeatureDocument,
+  resolveCurrentGitCommit,
+  verifyBddReportAttestation,
+  writeCucumberJsonReport,
+} from './verifiers/bdd-runner.js';
+export type {
+  ParsedFeatureDocument,
+  ParsedScenarioBlock,
+  ParsedStepItem,
+  StepDataTable,
+  StepDefinitionEntry,
+  StepHandler,
+} from './verifiers/bdd-runner.js';
+export {
+  GHERKIN_GENERATOR_SPECS,
+  buildFeatureFileContent,
+  checkGherkinInSync,
+  extractGherkinBlock,
+  extractGherkinFeatures,
+  normalizeScaffoldLanguages,
+  parseMarkdownFrontmatter,
+  resolveFeatureFilePath,
+  resolveTargetFiles,
+  scaffoldGherkinSteps,
+} from './verifiers/gherkin.js';
+export {
+  evaluateCompoundLicense,
+  evaluateSingleDependency,
+  generateLicenseReportMarkdown,
+  parseLicensePolicy,
+  verifyLicenses,
+  verifyLicensesAsync,
+} from './verifiers/licenses.js';
+export {
+  ensureTrivyAvailable,
+  evaluateVulnerabilityThresholds,
+  extractDirectDepNames,
+  findLicenseFile,
+  isToolAvailable,
+  mergeSbomGaps,
+  normalizeSpdxLicense,
+  parseSyftOutput,
+  parseTrivyOutput,
+  parseTrivyVulnerabilities,
+  processPackageDir,
+  readPackageJson,
+  resolveLicenseFromFile,
+  scanGoDependencies,
+  scanInstalledLicenses,
+  scanMavenDependencies,
+  scanPnpmStore,
+  scanPythonDependencies,
+  scanRustDependencies,
+  scanSubdirectories,
+  scanWithNativeFs,
+  scanWithSbom,
+  scanWithSyft,
+  scanWithTrivy,
+  scanWithTrivyAsync,
+} from './verifiers/sca/scanner.js';
+export type {
+  PackageJsonInfo,
+  ScaScanResult,
+  ScanOptions,
+  TrivyAsyncResult,
+} from './verifiers/sca/scanner.js';
+export {
+  buildCycloneDxComponent,
+  buildCycloneDxVulnerabilities,
+  generateCycloneDxSbom,
+  generateThirdPartyNotices,
+  writeCycloneDxSbom,
+  writeThirdPartyNotices,
+} from './verifiers/sca/sbom.js';
+export type { SbomGenerateOptions } from './verifiers/sca/sbom.js';
+export { ScaSbomError, ingestSbomFile } from './verifiers/sca/sbom-ingest.js';
+export type { SbomDocument, SbomErrorCode } from './verifiers/sca/sbom-ingest.js';
+export { parseIngestedSbom, parseStrictPurl, sanitizeSbomLicense } from './verifiers/sca/sbom-parse.js';
+export type { ParsedPurl, SbomComponent } from './verifiers/sca/sbom-parse.js';
+export {
+  computeCanonicalSha256,
+  computeRawSha256,
+  extractCitations,
+  extractSemanticContent,
+  generatePdacReportMarkdown,
+  parseFrontmatterId,
+  syncPdacDigests,
+  updateCitationsInContent,
+  validateAnchorExistence,
+  verifyPdacGraph,
+} from './verifiers/pdac-graph.js';
+export {
+  TYPE_TO_SCHEMA_MAP,
+  extractFrontmatter,
+  inferArtifactTypeFromId,
+  resolveSchemaForArtifact,
+  validateAgainstSchema,
+  validateArtifactSchema,
+  verifyArtifactsSchemas,
+} from './verifiers/schemas.js';
+export type { JsonSchemaRule } from './verifiers/schemas.js';
+export {
+  PROTECTED_BYPASS_PATTERNS,
+  detectProfileFromChange,
+  isPathProtectedFromPatch,
+  verifyProgressiveFriction,
+} from './verifiers/progressive-friction.js';
+export { scanManualsInWorkspace, verifyManuals } from './verifiers/manuals.js';
+export {
+  calculateJaccardSimilarity,
+  computeSha256,
+  extractNormativeText,
+  generateDuplicatesReportMarkdown,
+  isRequirementArtifact,
+  parseRequirementFile,
+  tokenizeTitle,
+  verifyArtifactDuplicates,
+} from './verifiers/duplicates.js';
+export type { ScannedRequirement } from './verifiers/duplicates.js';
+export {
+  DEFAULT_EXCLUDED_PATTERNS,
+  SECRET_RULES,
+  calculateShannonEntropy,
+  generateSecretsReportMarkdown,
+  getGitDiffLines,
+  isGitleaksInstalled,
+  isPlaceholderOrIgnored,
+  maskSecret,
+  runGitleaksCli,
+  scanContentForSecrets,
+  verifySecrets,
+  walkProjectFiles,
+} from './verifiers/secrets.js';
+export type { DiffLineItem, SecretRule } from './verifiers/secrets.js';
+export {
+  DEFAULT_SAST_EXCLUDES,
+  GENERAL_SOURCE_EXTENSIONS,
+  PROMPT_INJECTION_SIGNATURES,
+  SAST_RULES,
+  detectPromptInjection,
+  generateSastReportMarkdown,
+  isSemgrepInstalled,
+  readFailOnMissingToolFromQualityPolicy,
+  runSemgrepCli,
+  scanFileForSast,
+  verifySast,
+  verifySastAsync,
+  walkSourceFiles,
+} from './verifiers/sast.js';
+export type { SastRule } from './verifiers/sast.js';
+export {
+  TOOL_INSTALL_ALLOWLIST,
+  WIN_CMD_META_RE,
+  ensureToolAvailable,
+  getToolInstallSpec,
+  isToolInstalled,
+  redactSensitiveDiagnostics,
+  resolveTrustedBinaryPath,
+  resolveWinCmdSpawn,
+  spawnTrustedBinary,
+} from './verifiers/tool-installer.js';
+export type {
+  EnsureToolOptions,
+  EnsureToolResult,
+  InstallableTool,
+  SupportedPlatform,
+  ToolInstallSpec,
+} from './verifiers/tool-installer.js';
+export { deduplicateAndSortSastViolations, detectProjectEcosystems, orchestratePolyglotSast } from './verifiers/sast-orchestrator.js';
+export type {
+  PolyglotOrchestrationOptions,
+  PolyglotOrchestrationResult,
+  PolyglotToolDiagnostic,
+  ProjectEcosystem,
+} from './verifiers/sast-orchestrator.js';
+export {
+  MAX_SARIF_BYTES,
+  MAX_SARIF_JSON_DEPTH,
+  MAX_SARIF_RESULTS,
+  SarifIngestionError,
+  ingestSarifFiles,
+  isPathOutsideRoot,
+  isUncOrEmptyPath,
+  normalizeWinDrive,
+} from './verifiers/sarif-ingest.js';
+export type { SarifErrorCode } from './verifiers/sarif-ingest.js';
+export {
+  SEVERITY_RANK,
+  deduplicateAndSortViolations,
+  parseSarifDocument,
+  parseSarifDocuments,
+  sanitizeSarifText,
+} from './verifiers/sarif-sast.js';
+export { generateSuppressionsAuditReport, parseSecuritySuppression } from './verifiers/security-suppressions.js';
+export {
+  DEFAULT_PRIVACY_POLICY,
+  PII_SAST_RULES,
+  deduplicateAndSortPrivacyViolations,
+  detectPolyglotLoggerCall,
+  generatePrivacyReportMarkdown,
+  generateRopaInventoryMarkdown,
+  loadPrivacyPolicy,
+  normalizeIdentifierToSnakeCase,
+  parseDataAsset,
+  resolveDisallowedLogFields,
+  scanFileForPrivacyViolations,
+  stripMaskingCalls,
+  verifyPrivacy,
+} from './verifiers/privacy.js';
+export type { PiiSastRule } from './verifiers/privacy.js';
+export { verifySkillsIntegrity } from './verifiers/skill-integrity.js';
+export type { SkillIntegrityResult, SkillIntegrityViolation } from './verifiers/skill-integrity.js';
+export { SKILL_EXPECTED_TOOLS, verifySkillExecutionEvidence } from './verifiers/skill-execution-audit.js';
+export type { SkillEvidenceStatus, SkillExecutionEvidenceResult } from './verifiers/skill-execution-audit.js';
+export {
+  calculateRating,
+  detectLanguage,
+  generateQualityReport,
+  readCodeCoverageSummary,
+} from './reporters/quality-report.js';
+export { BRANCH_PATTERNS, classifyBranch, generateBranchHierarchyPlan } from './git/workflow.js';
+export { checkoutTaskBranch, locateTaskInActiveChanges, resolveBranchHierarchy } from './git/checkout.js';
+export type { TaskLocateResult } from './git/checkout.js';
+export {
+  extractAllRepoCommitKpis,
+  extractCommitKpisFromRange,
+  formatCommitTrailers,
+  inferMissingTrailers,
+  normalizeReasoningEffort,
+  parseCommitTrailers,
+  resolveGitRef,
+} from './git/trailers.js';
+export type { CommitKpiRecord, CommitTrailers, ReasoningEffort } from './git/trailers.js';
+export { detectAuthorIdentity } from './git/agent-detector.js';
+export type { AuthorIdentity } from './git/agent-detector.js';
+export { PREPARE_COMMIT_MSG_SCRIPT, PRE_COMMIT_SCRIPT, installGitHooks } from './git/hook-installer.js';
+export type { HookInstallResult } from './git/hook-installer.js';
+export {
+  KPI_SUMMARY_END_TAG,
+  KPI_SUMMARY_START_TAG,
+  accumulateTaskSummaries,
+  aggregateCommitKpiRecords,
+  aggregatePrKpis,
+  formatPrKpiMarkdown,
+  formatTaskKpiRows,
+  injectKpisIntoPrBody,
+} from './reporters/pr-kpis.js';
+export type { AuthorKpiSummary, PrKpiAggregation } from './reporters/pr-kpis.js';
+export {
+  aggregateReleaseKpis,
+  formatReleaseKpiMarkdown,
+  resolveReleaseBaseBranch,
+  writeReleaseKpiReport,
+} from './reporters/release-kpis.js';
+export type { BugRecordSummary, ModelDefectStats, ReleaseKpiReport } from './reporters/release-kpis.js';
+export { computeAgentPerformanceKpis, formatAgentKpisMarkdownSection } from './reporters/agent-kpis.js';
+export type { AgentKpiComputationInput, AgentPerformanceKpis } from './reporters/agent-kpis.js';
+export { getCytoscapeScript, resolveCytoscapePath } from './reporters/cytoscape-bundle.js';
+export {
+  buildGraphElements,
+  collectDashboardMetrics,
+  collectHistoricalKpis,
+  generateDashboardReport,
+  renderAutonomyModeSection,
+  renderDashboardHtml,
+  renderManualsTab,
+  resolveDefaultBranchBase,
+} from './reporters/dashboard.js';
+export type { GraphElementsResult } from './reporters/dashboard.js';
+export {
+  SARIF_SCHEMA_2_1_0,
+  SARIF_VERSION,
+  generateSecuritySarifReport,
+  mapSastSeverityToSarifLevel,
+  normalizeUri,
+  resolveSastCwe,
+  resolveSastOwasp,
+  serializeSarifDocument,
+  writeSecuritySarifReport,
+} from './reporters/sarif.js';
+export {
+  OpenSpecAdapter,
+  REVIEWER_ROLES,
+  REVIEW_VERDICTS,
+  SpecKitAdapter,
+  appendRevisionHistoryRow,
+  depositProductHandoffSidecar,
+  detectActiveChangeForIntegration,
+  emitCiOutput,
+  findChangeWorkspaceDir,
+  getNextCorrelativeNumber,
+  getSddAdapter,
+  integrateAllSddChanges,
+  integrateSddChange,
+  isReviewerRole,
+  loadProductHandoffSidecar,
+  parseSpecCatalogScope,
+  parseTasksFromContent,
+  resolveCiEnvironment,
+  scaffoldSddChange,
+  scanAllProductHandoffs,
+  slugify,
+  submitReviewReport,
+  verifySddIntegration,
+} from './adapters/sdd/index.js';
+export type {
+  CiProvider,
+  ResolvedCiEnv,
+  ReviewReportResult,
+  ReviewVerdict,
+  ReviewerRole,
+  SddAdapter,
+  SpecCatalogScope,
+  SubmitReviewReportOptions,
+} from './adapters/sdd/index.js';
+export {
+  ALL_ARCHITECTURE_TEMPLATES,
+  CPP_CLANG_TIDY,
+  CPP_CMAKE_STRICT,
+  DOTNET_DIRECTORY_BUILD_PROPS,
+  GO_GOLANGCI_YML,
+  GRADLE_STRICT_INIT_KTS,
+  JAVA_PMD_RULESET_XML,
+  KOTLIN_DETEKT_YML,
+  LIFECYCLE_SKILL_TEMPLATES,
+  PROTECTED_CODING_RULES_FILES,
+  RUST_CARGO_CONFIG_TOML,
+  RUST_CLIPPY_TOML,
+  SCHEMA_SCHEMAS_ARCHITECTURE_ADR_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_ARCHITECTURE_COMPONENT_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_ARCHITECTURE_INTRODUCTION_AND_GOALS_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_COMPLIANCE_LICENSE_MANIFEST_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_COMPLIANCE_LICENSE_POLICY_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_COMPLIANCE_QUALITY_POLICY_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_IDE_MCP_CONFIG_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_MANUALS_PRODUCTION_MANUAL_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_MANUALS_USER_MANUAL_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_PRIVACY_DATA_ASSET_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_PRIVACY_PRIVACY_POLICY_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_PRIVACY_PRIVACY_REQ_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_PRIVACY_PRIVACY_ROPA_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_PRODUCT_ACTOR_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_PRODUCT_BOUNDED_CONTEXT_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_PRODUCT_BUSINESS_RULE_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_PRODUCT_JOURNEY_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_PRODUCT_REQUIREMENT_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_PRODUCT_TERM_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_PRODUCT_USE_CASE_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SAFETY_HAZARD_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SAFETY_SAFETY_REQ_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SDD_DESIGN_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SDD_HANDOFF_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SDD_PROPOSAL_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SDD_RELEASE_KPIS_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SDD_SESSION_TELEMETRY_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SDD_SPEC_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SDD_TASKS_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SECURITY_ABUSE_CASE_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SECURITY_ENCLAVE_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SECURITY_SECURITY_REQ_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_SECURITY_THREAT_ACTOR_SCHEMA_JSON,
+  SCHEMA_SCHEMAS_WORKFLOW_AGENT_HANDOFF_SCHEMA_JSON,
+  SPECIALIZED_AGENT_TEMPLATES,
+  STARTER_AGENT_GUARD_WRAPPER_CJS,
+  STARTER_ANTIGRAVITY_CODE_RULES,
+  STARTER_ANTIGRAVITY_HOOKS_JSON,
+  STARTER_ANTIGRAVITY_MCP,
+  STARTER_ANTIGRAVITY_RULES,
+  STARTER_ANTIGRAVITY_SPECS_RULES,
+  STARTER_ANTIGRAVITY_TESTING_RULES,
+  STARTER_ARCH_ADR,
+  STARTER_ARCH_ARCHITECTURE_CONSTRAINTS,
+  STARTER_ARCH_COMPONENT,
+  STARTER_ARCH_CONTEXT_AND_SCOPE,
+  STARTER_ARCH_CROSS_CUTTING_CONCEPTS,
+  STARTER_ARCH_DEPLOYMENT_VIEW,
+  STARTER_ARCH_GLOSSARY,
+  STARTER_ARCH_INTRODUCTION_AND_GOALS,
+  STARTER_ARCH_LEVEL_1_WHITEBOX,
+  STARTER_ARCH_QUALITY_REQUIREMENTS,
+  STARTER_ARCH_RISKS_AND_TECHNICAL_DEBT,
+  STARTER_ARCH_RUNTIME_VIEW,
+  STARTER_ARCH_SOLUTION_STRATEGY,
+  STARTER_AZURE_PIPELINES,
+  STARTER_BASE_TEMPLATES,
+  STARTER_BITBUCKET_PIPELINES,
+  STARTER_CLAUDE_RULES,
+  STARTER_COMPLIANCE_LICENSE_MANIFEST_YAML,
+  STARTER_COPILOT_RULES,
+  STARTER_CURSOR_CORE_RULES,
+  STARTER_CURSOR_MCP,
+  STARTER_CURSOR_PRODUCT_RULES,
+  STARTER_CURSOR_QUALITY_RULES,
+  STARTER_CURSOR_TESTING_RULES,
+  STARTER_GITHUB_CI,
+  STARTER_GITHUB_DEPLOY_DASHBOARD,
+  STARTER_GITHUB_PR_KPI,
+  STARTER_GITHUB_PULL_REQUEST_TEMPLATE,
+  STARTER_GITHUB_SDD_INTEGRATE,
+  STARTER_GITLAB_CI,
+  STARTER_GUARD_BRANCH_CJS,
+  STARTER_GUARD_POST_EDIT_CJS,
+  STARTER_LICENSE_POLICY,
+  STARTER_PRIVACY_POLICY,
+  STARTER_PROCESS_README,
+  STARTER_PULL_REQUEST_TEMPLATE,
+  STARTER_QUALITY_POLICY,
+  STARTER_REQUIREMENT_TEMPLATE,
+  STARTER_SCHEMAS,
+  STARTER_SCHEMAS_MAP,
+  STARTER_SPECS_AGENTS_MD,
+  STARTER_SRC_AGENTS_MD,
+  STARTER_TASK_TEMPLATE,
+  STARTER_TEMPLATES_CI_AZURE_PIPELINES_YML,
+  STARTER_TEMPLATES_CI_BITBUCKET_PIPELINES_YML,
+  STARTER_TEMPLATES_CI_DOCKER_COMPOSE_OBSERVABILITY_YML,
+  STARTER_TEMPLATES_CI_GITHUB_WORKFLOWS_CI_YML,
+  STARTER_TEMPLATES_CI_GITHUB_WORKFLOWS_DEPLOY_DASHBOARD_YML,
+  STARTER_TEMPLATES_CI_GITHUB_WORKFLOWS_PR_KPI_SUMMARY_YML,
+  STARTER_TEMPLATES_CI_GITHUB_WORKFLOWS_SDD_INTEGRATE_ON_MERGE_YML,
+  STARTER_TEMPLATES_CI_OBSERVABILITY_GRAFANA_DATASOURCES_YML,
+  STARTER_TEMPLATES_CI_OBSERVABILITY_PROMETHEUS_YML,
+  STARTER_TEMPLATES_CI__GITLAB_CI_YML,
+  STARTER_TEMPLATES_CODING_RULES_GO__GOLANGCI_YML,
+  STARTER_TEMPLATES_CODING_RULES_KOTLIN_DETEKT_YML,
+  STARTER_TEMPLATES_COMPLIANCE_COMMERCIAL_ACQUISITION_REQUEST_TEMPLATE_MD,
+  STARTER_TEMPLATES_MANUALS_PRODUCTION_MANUAL_TEMPLATE_MD,
+  STARTER_TEMPLATES_MANUALS_USER_MANUAL_TEMPLATE_MD,
+  STARTER_TEMPLATES_PRIVACY_DATA_ASSET_TEMPLATE_MD,
+  STARTER_TEMPLATES_PRIVACY_DPIA_REQUEST_TEMPLATE_MD,
+  STARTER_TEMPLATES_PRIVACY_PRIVACY_REQ_TEMPLATE_MD,
+  STARTER_TEMPLATES_PRIVACY_PRIVACY_ROPA_TEMPLATE_MD,
+  STARTER_TEMPLATES_PRODUCT_ACTOR_TEMPLATE_MD,
+  STARTER_TEMPLATES_PRODUCT_BOUNDED_CONTEXT_TEMPLATE_MD,
+  STARTER_TEMPLATES_PRODUCT_BUSINESS_RULE_TEMPLATE_MD,
+  STARTER_TEMPLATES_PRODUCT_JOURNEY_TEMPLATE_MD,
+  STARTER_TEMPLATES_PRODUCT_REQUIREMENT_TEMPLATE_MD,
+  STARTER_TEMPLATES_PRODUCT_TERM_TEMPLATE_MD,
+  STARTER_TEMPLATES_PRODUCT_USER_DESIGN_FEEDBACK_TEMPLATE_MD,
+  STARTER_TEMPLATES_PRODUCT_USE_CASE_TEMPLATE_MD,
+  STARTER_TEMPLATES_SAFETY_HAZARD_TEMPLATE_MD,
+  STARTER_TEMPLATES_SAFETY_SAFETY_REQ_TEMPLATE_MD,
+  STARTER_TEMPLATES_SDD_DESIGN_TEMPLATE_MD,
+  STARTER_TEMPLATES_SDD_HANDOFF_TEMPLATE_YAML,
+  STARTER_TEMPLATES_SDD_PROPOSAL_TEMPLATE_MD,
+  STARTER_TEMPLATES_SDD_PULL_REQUEST_TEMPLATE_MD,
+  STARTER_TEMPLATES_SDD_SPEC_TEMPLATE_MD,
+  STARTER_TEMPLATES_SDD_TASKS_TEMPLATE_MD,
+  STARTER_TEMPLATES_SECURITY_ABUSE_CASE_TEMPLATE_MD,
+  STARTER_TEMPLATES_SECURITY_ENCLAVE_TEMPLATE_MD,
+  STARTER_TEMPLATES_SECURITY_SECURITY_REQ_TEMPLATE_MD,
+  STARTER_TEMPLATES_SECURITY_THREAT_ACTOR_TEMPLATE_MD,
+  STARTER_TEMPLATES_WORKFLOW_AGENT_HANDOFF_TEMPLATE_MD,
+  STARTER_TESTS_AGENTS_MD,
+  STARTER_VSCODE_MCP,
+  STARTER_WORKFLOW_HANDOFF_TEMPLATE,
+  STARTER__GITHUB_PULL_REQUEST_TEMPLATE_MD,
+  TS_ESLINT_CONFIG_MJS,
+  TS_STRICT_TSCONFIG,
+  VALID_AGENT_TARGETS,
+  VALID_ARCHITECTURE_GRANULARITIES,
+  VALID_CI_PROVIDERS,
+  VALID_CODING_RULE_STACKS,
+  collectAgentFiles,
+  detectProjectStacks,
+  getArchitectureTemplates,
+  getCodingRulesFilesForStacks,
+  getReferenceCodingRulesTemplates,
+  initProject,
+  isProtectedCodingRulesFile,
+  renderAntigravityAgentFile,
+  renderAntigravitySkillFile,
+  renderClaudeAgentFile,
+  renderClaudeSkillFile,
+  renderCopilotAgentFile,
+  renderCopilotSkillFile,
+  renderCursorAgentFile,
+  renderCursorSkillFile,
+  resolveAgentTargets,
+  resolveCodingRuleStacks,
+} from './init/index.js';
+export type {
+  AgentTarget,
+  ArchTemplateDef,
+  ArchitectureGranularity,
+  CodingRuleStack,
+  InitProjectOptions,
+  InitProjectResult,
+  LifecycleSkillTemplate,
+  SkillReferenceFile,
+  SpecializedAgentTemplate,
+  StarterSchemaEntry,
+  StarterTemplateEntry,
+  SupportedCiProvider,
+} from './init/index.js';
+export {
+  DEFAULT_EXCLUDE_DIRS,
+  canonicalSort,
+  isReportContentSemanticallyEqual,
+  normalizePath,
+  stripVolatileReportMetadata,
+  walkMdFiles,
+  writeReportFileIfChanged,
+} from './utils/fs.js';
+export {
+  DEFAULT_DLP_RULES,
+  createDefaultDlpPolicy,
+  loadDlpPolicy,
+  parseDlpPolicy,
+  sanitizeDlpPayload,
+  sanitizeDlpText,
+} from './security/dlp-sanitizer.js';
+export type { DlpPolicy, DlpRule, DlpSanitizeResult } from './security/dlp-sanitizer.js';
+export { extractFunctionsPythonAst } from './verifiers/ast/python-ast.js';
+export { isCliInstalled, orchestrateNativeAstAnalysis } from './verifiers/ast/native-ast-orchestrator.js';
+export type { NativeAstOptions } from './verifiers/ast/native-ast-orchestrator.js';
 export { resolveDeterministicDate, generateDeterministicUuidV5 } from './utils/time.js';
-export { canonicalSort, normalizePath } from './utils/fs.js';
-export * from './inspector/index.js';
-export * from './compliance/index.js';
-export * from './doctor/index.js';
-export * from './migrate/index.js';
-export * from './version.js';
+export { formatInspectResultMarkdown, inspectElement } from './inspector/index.js';
+export {
+  DlpSanitizer,
+  InTotoAttestationBuilder,
+  OscalAssessmentBuilder,
+  RegulatoryControlMapper,
+  canonicalizeJson,
+  generateComplianceEvidenceBundle,
+  generateComplianceEvidenceBundleSync,
+} from './compliance/index.js';
+export type { OscalBuilderOptions } from './compliance/index.js';
+export {
+  AisdlcVersionCheck,
+  BranchSafetyCheck,
+  DoctorOrchestrator,
+  DoctorReporter,
+  DoctorService,
+  GitHooksHealthCheck,
+  NativeFileSystemProbeAdapter,
+  SafeProcessRunnerAdapter,
+  SchemasPdacHealthCheck,
+  SecurityToolsHealthCheck,
+  SignatureReadinessCheck,
+  ToolchainHealthCheck,
+  buildSafeEnvironment,
+} from './doctor/index.js';
+export {
+  DiffDetector,
+  FileSystemJailAdapter,
+  MigrationOrchestrator,
+  MigrationReporter,
+  MigrationService,
+  OverrideAnalyzer,
+  PolicyRatchetEnforcer,
+  TimestampedBackupManagerAdapter,
+  TransactionManager,
+} from './migrate/index.js';
+export type { ClassifyInput, RatchetOptions } from './migrate/index.js';
+export {
+  AISDLC_MANIFEST_FILENAME,
+  formatAisdlcVersionOutput,
+  getAisdlcVersion,
+  readAisdlcManifest,
+  writeAisdlcManifest,
+} from './version.js';
+export type { AisdlcRepoManifest } from './version.js';

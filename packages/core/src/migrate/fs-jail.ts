@@ -28,7 +28,7 @@ const GOVERNED_ROOT_FILES = new Set([
   path.join('scripts', 'guard-post-edit.cjs'),
 ]);
 
-function validateRawInputs(repoRoot: string, targetPath: string): void {
+export function validateRawInputs(repoRoot: string, targetPath: string): void {
   if (!repoRoot) {
     throw new Error('ERR_PATH_TRAVERSAL_DETECTED: repoRoot is required');
   }
@@ -37,7 +37,7 @@ function validateRawInputs(repoRoot: string, targetPath: string): void {
   }
 }
 
-function checkSiblingAndEscape(resolvedRoot: string, resolvedTarget: string): void {
+export function checkSiblingAndEscape(resolvedRoot: string, resolvedTarget: string): void {
   const rel = path.relative(resolvedRoot, resolvedTarget);
   const escapes = rel.startsWith('..') || path.isAbsolute(rel);
   if (escapes) {
@@ -52,7 +52,7 @@ function checkSiblingAndEscape(resolvedRoot: string, resolvedTarget: string): vo
   }
 }
 
-function resolveRealRoot(resolvedRoot: string): string {
+export function resolveRealRoot(resolvedRoot: string): string {
   try {
     return fs.existsSync(resolvedRoot) ? fs.realpathSync(resolvedRoot) : resolvedRoot;
   } catch {
@@ -60,7 +60,7 @@ function resolveRealRoot(resolvedRoot: string): string {
   }
 }
 
-function checkSymlinkEscapesRealRoot(rootReal: string, absoluteTarget: string): void {
+export function checkSymlinkEscapesRealRoot(rootReal: string, absoluteTarget: string): void {
   if (!fs.existsSync(absoluteTarget)) return;
   try {
     const lstat = fs.lstatSync(absoluteTarget);

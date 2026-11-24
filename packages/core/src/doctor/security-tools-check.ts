@@ -28,12 +28,12 @@ const SECURITY_TOOLS: readonly SecurityToolProbe[] = [
   { name: 'gitleaks', flag: 'version' },
 ];
 
-function sanitizeFindingText(text: string, rootDir: string): string {
+export function sanitizeFindingText(text: string, rootDir: string): string {
   const redacted = redactSensitiveDiagnostics(text, rootDir);
   return sanitizeDlpText(redacted).sanitizedText;
 }
 
-function buildMissingFinding(
+export function buildMissingFinding(
   toolName: SecurityToolProbe['name'],
   platform: NodeJS.Platform
 ): DiagnosticFinding {
@@ -47,7 +47,7 @@ function buildMissingFinding(
   };
 }
 
-function buildIssueFinding(
+export function buildIssueFinding(
   toolName: SecurityToolProbe['name'],
   platform: NodeJS.Platform,
   rootDir: string,
@@ -84,13 +84,11 @@ export class SecurityToolsHealthCheck {
   }
 
   public async inspect(options: DoctorOptions): Promise<CategoryReport> {
-    const findings: DiagnosticFinding[] = [];
     const rootDir = options.rootDir || process.cwd();
-
-    for (const tool of SECURITY_TOOLS) {
-      const finding = await this.probeSingleTool(tool, rootDir, options.timeout);
-      if (finding) findings.push(finding);
-    }
+    const results = await Promise.all(
+      SECURITY_TOOLS.map((tool) => this.probeSingleTool(tool, rootDir, options.timeout))
+    );
+    const findings = results.filter((f): f is DiagnosticFinding => f !== null);
 
     return {
       category: 'security_tools',

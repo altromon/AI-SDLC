@@ -97,10 +97,10 @@ const GATE_REGULATORY_REGISTRY: Record<QualityGateId, RegulatoryGateMapping> = {
 
 export class RegulatoryControlMapper {
   mapGate(gateId: string): RegulatoryGateMapping {
-    const mapping = GATE_REGULATORY_REGISTRY[gateId as QualityGateId];
-    if (!mapping) {
+    if (!Object.prototype.hasOwnProperty.call(GATE_REGULATORY_REGISTRY, gateId)) {
       throw new Error(`[ERR_UNKNOWN_GATE] Unknown or unsupported quality gate identifier: ${gateId}`);
     }
+    const mapping = GATE_REGULATORY_REGISTRY[gateId as QualityGateId];
     return { ...mapping };
   }
 

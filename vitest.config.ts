@@ -3,7 +3,11 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     globals: true,
-    include: ['packages/*/tests/**/*.spec.ts', 'examples/sentinel-core/tests/**/*.spec.ts'],
+    include: [
+      'packages/*/tests/**/*.spec.ts',
+      'tests/unit/**/*.spec.ts',
+      'examples/sentinel-core/tests/**/*.spec.ts',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'json-summary'],

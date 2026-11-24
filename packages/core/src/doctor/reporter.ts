@@ -4,7 +4,7 @@
 
 import { CategoryReport, DiagnosticFinding, DoctorReport, IDiagnosticsReporter } from '../types/doctor.js';
 
-function formatFinding(f: DiagnosticFinding): string[] {
+export function formatFinding(f: DiagnosticFinding): string[] {
   const icon = f.status === 'pass' ? 'ℹ️' : f.status === 'warn' ? '⚠️' : '❌';
   const out = [`   ${icon} [${f.id}] ${f.message}`];
   if (f.remediation) {
@@ -13,7 +13,7 @@ function formatFinding(f: DiagnosticFinding): string[] {
   return out;
 }
 
-function formatCategory(cat: CategoryReport): string[] {
+export function formatCategory(cat: CategoryReport): string[] {
   const icon = cat.status === 'pass' ? '✅' : cat.status === 'warn' ? '⚠️' : '❌';
   const out: string[] = [`${icon} [${cat.category.toUpperCase()}] ${cat.title}`];
 

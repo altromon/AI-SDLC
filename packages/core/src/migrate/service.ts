@@ -62,13 +62,13 @@ interface ItemClassification {
   category: 'upToDate' | 'cleanUpdated' | 'overridesPreserved' | 'conflicts';
 }
 
-function handleOverrideStatus(force?: boolean): ItemClassification {
+export function handleOverrideStatus(force?: boolean): ItemClassification {
   return force
     ? { status: 'CLEAN_UPDATE', message: 'Overridden file updated due to --force flag', shouldModify: true, category: 'cleanUpdated' }
     : { status: 'LOCAL_OVERRIDE_PRESERVED', message: 'Local customization retained (use --force to overwrite)', shouldModify: false, category: 'overridesPreserved' };
 }
 
-function classifySingleItem(item: GovernedItem, orchestrator: MigrationOrchestrator, force?: boolean): ItemClassification {
+export function classifySingleItem(item: GovernedItem, orchestrator: MigrationOrchestrator, force?: boolean): ItemClassification {
   const rawStatus = orchestrator.analyzer.classify({
     currentContent: item.currentContent,
     targetContent: item.targetContent,
@@ -87,7 +87,7 @@ function classifySingleItem(item: GovernedItem, orchestrator: MigrationOrchestra
   }
 }
 
-function evaluateGovernedTargets(targets: GovernedItem[], orchestrator: MigrationOrchestrator, force?: boolean): ItemEvaluation {
+export function evaluateGovernedTargets(targets: GovernedItem[], orchestrator: MigrationOrchestrator, force?: boolean): ItemEvaluation {
   const summary: MigrationSummary = { upToDate: 0, cleanUpdated: 0, overridesPreserved: 0, conflicts: 0 };
   const details: MigrationItemReport[] = [];
   const filesToModify: { relPath: string; content: string }[] = [];
@@ -115,7 +115,7 @@ function evaluateGovernedTargets(targets: GovernedItem[], orchestrator: Migratio
   return { summary, details, filesToModify, filesToBackup };
 }
 
-function buildCanonicalMap(): Map<string, { category: 'schema' | 'template' | 'policy' | 'agent'; content: string }> {
+export function buildCanonicalMap(): Map<string, { category: 'schema' | 'template' | 'policy' | 'agent'; content: string }> {
   const canonicalMap = new Map<string, { category: 'schema' | 'template' | 'policy' | 'agent'; content: string }>();
   canonicalMap.set('quality-policy.yaml', { category: 'policy', content: STARTER_QUALITY_POLICY });
   canonicalMap.set('license-policy.yaml', { category: 'policy', content: STARTER_LICENSE_POLICY });
@@ -133,7 +133,7 @@ function buildCanonicalMap(): Map<string, { category: 'schema' | 'template' | 'p
   return canonicalMap;
 }
 
-function scanSchemasDir(schemasDir: string, canonicalMap: Map<string, { category: 'schema' | 'template' | 'policy' | 'agent'; content: string }>): GovernedItem[] {
+export function scanSchemasDir(schemasDir: string, canonicalMap: Map<string, { category: 'schema' | 'template' | 'policy' | 'agent'; content: string }>): GovernedItem[] {
   const items: GovernedItem[] = [];
   if (!fs.existsSync(schemasDir)) return items;
   try {
@@ -152,13 +152,13 @@ function scanSchemasDir(schemasDir: string, canonicalMap: Map<string, { category
   return items;
 }
 
-function resolveExitCode(summary: MigrationSummary): 0 | 1 | 2 {
+export function resolveExitCode(summary: MigrationSummary): 0 | 1 | 2 {
   if (summary.conflicts > 0) return 2;
   if (summary.overridesPreserved > 0) return 1;
   return 0;
 }
 
-function createProtectedBranchError(errorMsg?: string): MigrationResult {
+export function createProtectedBranchError(errorMsg?: string): MigrationResult {
   return {
     success: false,
     exitCode: 2,
@@ -167,7 +167,7 @@ function createProtectedBranchError(errorMsg?: string): MigrationResult {
   };
 }
 
-function createTransactionFailureResult(summary: MigrationSummary, backupPath?: string, errorMsg?: string): MigrationResult {
+export function createTransactionFailureResult(summary: MigrationSummary, backupPath?: string, errorMsg?: string): MigrationResult {
   return {
     success: false,
     exitCode: 2,

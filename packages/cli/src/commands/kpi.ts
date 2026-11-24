@@ -29,7 +29,7 @@ export interface KpiReleaseCliOptions {
   root?: string;
 }
 
-function applyKpiPrOutput(options: KpiPrCliOptions, markdown: string): boolean {
+export function applyKpiPrOutput(options: KpiPrCliOptions, markdown: string): boolean {
   if (options.updateFile) {
     if (!fs.existsSync(options.updateFile)) {
       console.error(pc.red(`\n✖ [ERROR] Target file '${options.updateFile}' does not exist.\n`));
@@ -67,7 +67,7 @@ export function runKpiPr(options: KpiPrCliOptions): boolean {
   }
 }
 
-function printReleaseKpiSummary(report: ReturnType<typeof aggregateReleaseKpis>, markdownPath: string, jsonPath: string): void {
+export function printReleaseKpiSummary(report: ReturnType<typeof aggregateReleaseKpis>, markdownPath: string, jsonPath: string): void {
   console.log(pc.green(`✔ [COMPLIANT] Consolidated report successfully generated:`));
   console.log(`  - Markdown: ${pc.bold(markdownPath)}`);
   console.log(`  - JSON:     ${pc.bold(jsonPath)}`);
@@ -76,17 +76,18 @@ function printReleaseKpiSummary(report: ReturnType<typeof aggregateReleaseKpis>,
   console.log(`  - Rework:   ${report.reworkTimePercent}% time | ${report.reworkTokensPercent}% tokens\n`);
 }
 
-function printKpiReleaseError(err: unknown): void {
+export function printKpiReleaseError(err: unknown): void {
   const msg = err instanceof Error ? err.message : String(err);
   console.error(pc.red(`\n✖ [ERROR] Failed to calculate Release KPIs: ${msg}\n`));
 }
 
-function executeKpiReleaseReport(
+export function executeKpiReleaseReport(
   release: string,
   baseBranch: string,
   rootDir: string,
   outputDir?: string
 ): void {
+  console.log(pc.cyan(`\n📊 [AI-SDLC Release KPI] Consolidating metrics for '${pc.bold(release)}' (baseline: '${pc.bold(baseBranch)}')...`));
   const report = aggregateReleaseKpis(release, baseBranch, { cwd: rootDir });
   const { markdownPath, jsonPath } = writeReleaseKpiReport(report, {
     outputDir,
@@ -99,16 +100,15 @@ function executeKpiReleaseReport(
 }
 
 export function runKpiRelease(options: KpiReleaseCliOptions): boolean {
-  if (!options.release) {
+  if (!options.release || !options.release.trim()) {
     console.error(pc.red('\n✖ [ERROR] Release branch must be specified (--release <branch>).\n'));
     return false;
   }
 
   const rootDir = options.root || process.cwd();
-  const baseBranch = resolveReleaseBaseBranch(options.release, options.base, { cwd: rootDir });
 
   try {
-    console.log(pc.cyan(`\n📊 [AI-SDLC Release KPI] Consolidating metrics for '${pc.bold(options.release)}' (baseline: '${pc.bold(baseBranch)}')...`));
+    const baseBranch = resolveReleaseBaseBranch(options.release, options.base, { cwd: rootDir });
     if (options.json) {
       const report = aggregateReleaseKpis(options.release, baseBranch, { cwd: rootDir });
       console.log(JSON.stringify(report, null, 2));

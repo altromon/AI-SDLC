@@ -12,15 +12,15 @@ import { canonicalSort } from '../utils/fs.js';
 export const SUPPORTED_COVERAGE_FORMATS_HINT =
   'coverage-summary.json, lcov.info, coverage.cobertura.xml / coverage.xml, jacoco.xml, coverage.out, or llvm-cov.json';
 
-function roundPct(value: number): number {
+export function roundPct(value: number): number {
   return Math.round(value * 10) / 10;
 }
 
-function ratioPct(hit: number, total: number, emptyFallback = 100): number {
+export function ratioPct(hit: number, total: number, emptyFallback = 100): number {
   return total > 0 ? roundPct((hit / total) * 100) : emptyFallback;
 }
 
-function isVitestMidFlight(rel: string, fullPath: string, excludeVitestMidFlight: boolean): boolean {
+export function isVitestMidFlight(rel: string, fullPath: string, excludeVitestMidFlight: boolean): boolean {
   if (!excludeVitestMidFlight || !process.env.VITEST || rel !== 'coverage/coverage-summary.json') {
     return false;
   }
@@ -43,11 +43,11 @@ export function parseIstanbulCoverageSummary(filePath: string, relSource: string
   }
 }
 
-function updateLcovCounts(line: string, counts: Record<string, number>): void {
+export function updateLcovCounts(line: string, counts: Record<string, number>): void {
   const idx = line.indexOf(':');
   if (idx === -1) return;
   const key = line.slice(0, idx);
-  if (counts[key] !== undefined) {
+  if (Object.prototype.hasOwnProperty.call(counts, key)) {
     counts[key] += parseInt(line.slice(idx + 1), 10) || 0;
   }
 }
@@ -70,15 +70,18 @@ export function parseLcovCoverage(filePath: string, relSource: string): CodeCove
   }
 }
 
-function readXmlAttr(tag: string, attrName: string): number | undefined {
-  const re = new RegExp(`\\b${attrName}\\s*=\\s*["']([^"']+)["']`);
+export function readXmlAttr(tag: string, attrName: string): number | undefined {
+  const escaped = attrName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`(?:^|\\s)${escaped}\\s*=\\s*["']([^"']+)["']`);
   const match = tag.match(re);
   if (!match) return undefined;
-  const parsed = Number(match[1]);
+  const raw = match[1].trim();
+  if (!raw) return undefined;
+  const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-function resolveCoberturaRatePct(
+export function resolveCoberturaRatePct(
   tag: string,
   rateAttr: string,
   coveredAttr: string,
@@ -94,7 +97,7 @@ function resolveCoberturaRatePct(
   return rate !== undefined ? roundPct(rate * 100) : undefined;
 }
 
-function computeCoberturaMethodPct(xml: string, fallbackPct: number): number {
+export function computeCoberturaMethodPct(xml: string, fallbackPct: number): number {
   const methodTags = xml.match(/<method\b[^>]*>/g);
   if (!methodTags || methodTags.length === 0) return fallbackPct;
   let covered = 0;
@@ -121,7 +124,7 @@ export function parseCoberturaXmlCoverage(filePath: string, relSource: string): 
   }
 }
 
-function extractReportLevelJacocoCounters(xml: string): Map<string, { covered: number; missed: number }> {
+export function extractReportLevelJacocoCounters(xml: string): Map<string, { covered: number; missed: number }> {
   const counters = new Map<string, { covered: number; missed: number }>();
   const lastPkgClose = xml.lastIndexOf('</package>');
   const tail = lastPkgClose !== -1 ? xml.slice(lastPkgClose) : xml;
@@ -129,7 +132,7 @@ function extractReportLevelJacocoCounters(xml: string): Map<string, { covered: n
   let match: RegExpExecArray | null;
   while ((match = counterRe.exec(tail)) !== null) {
     const attrs = match[1];
-    const typeMatch = attrs.match(/\btype\s*=\s*["']([^"']+)["']/);
+    const typeMatch = attrs.match(/(?:^|\s)type\s*=\s*["']([^"']+)["']/);
     const missed = readXmlAttr(attrs, 'missed') ?? 0;
     const covered = readXmlAttr(attrs, 'covered') ?? 0;
     if (typeMatch) counters.set(typeMatch[1], { covered, missed });
@@ -137,7 +140,7 @@ function extractReportLevelJacocoCounters(xml: string): Map<string, { covered: n
   return counters;
 }
 
-function jacocoCounterPct(
+export function jacocoCounterPct(
   counters: Map<string, { covered: number; missed: number }>,
   key: string,
   fallback = 100
@@ -162,14 +165,14 @@ export function parseJacocoXmlCoverage(filePath: string, relSource: string): Cod
   }
 }
 
-function parseGoCoverLine(raw: string): { stmts: number; covered: number } | null {
+export function parseGoCoverLine(raw: string): { stmts: number; covered: number } | null {
   const line = raw.trim();
   if (!line || line.startsWith('mode:')) return null;
   const parts = line.split(/\s+/);
   if (parts.length < 3) return null;
-  const stmts = parseInt(parts[1], 10);
-  const count = parseInt(parts[2], 10);
-  if (Number.isNaN(stmts) || Number.isNaN(count)) return null;
+  if (!/^\d+$/.test(parts[1]) || !/^\d+$/.test(parts[2])) return null;
+  const stmts = Number(parts[1]);
+  const count = Number(parts[2]);
   return { stmts, covered: count > 0 ? stmts : 0 };
 }
 
@@ -193,7 +196,7 @@ export function parseGoCoverProfile(filePath: string, relSource: string): CodeCo
   }
 }
 
-interface LlvmAccumulator {
+export interface LlvmAccumulator {
   linesHit: number;
   linesTotal: number;
   branchesHit: number;
@@ -202,16 +205,16 @@ interface LlvmAccumulator {
   funcsTotal: number;
 }
 
-function addLlvmMetricTotals(acc: LlvmAccumulator, totals: Record<string, Record<string, unknown>>): void {
-  acc.linesTotal += Number(totals.lines?.count ?? 0);
-  acc.linesHit += Number(totals.lines?.covered ?? 0);
-  acc.branchesTotal += Number(totals.branches?.count ?? 0);
-  acc.branchesHit += Number(totals.branches?.covered ?? 0);
-  acc.funcsTotal += Number(totals.functions?.count ?? 0);
-  acc.funcsHit += Number(totals.functions?.covered ?? 0);
+export function addLlvmMetricTotals(acc: LlvmAccumulator, totals: Record<string, Record<string, unknown>>): void {
+  acc.linesTotal += Number(totals.lines?.count) || 0;
+  acc.linesHit += Number(totals.lines?.covered) || 0;
+  acc.branchesTotal += Number(totals.branches?.count) || 0;
+  acc.branchesHit += Number(totals.branches?.covered) || 0;
+  acc.funcsTotal += Number(totals.functions?.count) || 0;
+  acc.funcsHit += Number(totals.functions?.covered) || 0;
 }
 
-function accumulateLlvmTotals(data: Array<Record<string, unknown>>): LlvmAccumulator | null {
+export function accumulateLlvmTotals(data: Array<Record<string, unknown>>): LlvmAccumulator | null {
   const acc: LlvmAccumulator = { linesHit: 0, linesTotal: 0, branchesHit: 0, branchesTotal: 0, funcsHit: 0, funcsTotal: 0 };
   let found = false;
   for (const item of data) {
@@ -241,7 +244,7 @@ export function parseLlvmCovJson(filePath: string, relSource: string): CodeCover
   }
 }
 
-function findDotNetTestResultsCobertura(rootDir: string): string[] {
+export function findDotNetTestResultsCobertura(rootDir: string): string[] {
   const testResultsDir = path.join(rootDir, 'TestResults');
   if (!fs.existsSync(testResultsDir)) return [];
   const found: string[] = [];
@@ -258,9 +261,9 @@ function findDotNetTestResultsCobertura(rootDir: string): string[] {
   return found;
 }
 
-type CoverageParserFn = (filePath: string, relSource: string) => CodeCoverageSummary | null;
+export type CoverageParserFn = (filePath: string, relSource: string) => CodeCoverageSummary | null;
 
-function tryCandidates(
+export function tryCandidates(
   rootDir: string,
   candidates: readonly string[],
   parser: CoverageParserFn,
@@ -295,7 +298,7 @@ const JACOCO_CANDIDATES = [
 const GO_CANDIDATES = ['coverage/coverage.out', 'reports/coverage.out', 'coverage.out'];
 const LLVM_CANDIDATES = ['coverage/llvm-cov.json', 'reports/llvm-cov.json', 'llvm-cov.json'];
 
-function buildCoveragePipelines(rootDir: string): Array<{ candidates: readonly string[]; parser: CoverageParserFn }> {
+export function buildCoveragePipelines(rootDir: string): Array<{ candidates: readonly string[]; parser: CoverageParserFn }> {
   return [
     { candidates: ISTANBUL_CANDIDATES, parser: parseIstanbulCoverageSummary },
     { candidates: LCOV_CANDIDATES, parser: parseLcovCoverage },

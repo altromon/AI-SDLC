@@ -16,7 +16,7 @@ const TOOLS: ToolItem[] = [
   { name: 'git', flag: '--version' },
 ];
 
-function buildWarning(name: string, stderr: string): DiagnosticFinding {
+export function buildWarning(name: string, stderr: string): DiagnosticFinding {
   return {
     id: `WARN_TOOLCHAIN_${name.toUpperCase()}_ISSUE`,
     category: 'toolchain',
@@ -26,7 +26,7 @@ function buildWarning(name: string, stderr: string): DiagnosticFinding {
   };
 }
 
-function buildError(name: string, err: unknown): DiagnosticFinding {
+export function buildError(name: string, err: unknown): DiagnosticFinding {
   return {
     id: `ERR_TOOLCHAIN_${name.toUpperCase()}_MISSING`,
     category: 'toolchain',
@@ -36,7 +36,7 @@ function buildError(name: string, err: unknown): DiagnosticFinding {
   };
 }
 
-async function probeTool(runner: IProcessRunner, rootDir: string, tool: ToolItem): Promise<DiagnosticFinding | null> {
+export async function probeTool(runner: IProcessRunner, rootDir: string, tool: ToolItem): Promise<DiagnosticFinding | null> {
   try {
     const res = await runner.execSafe(tool.name, [tool.flag], { cwd: rootDir });
     return res.exitCode === 0 && res.stdout.trim() ? null : buildWarning(tool.name, res.stderr);
@@ -53,13 +53,9 @@ export class ToolchainHealthCheck {
   }
 
   public async inspect(options: DoctorOptions): Promise<CategoryReport> {
-    const findings: DiagnosticFinding[] = [];
     const rootDir = options.rootDir || process.cwd();
-
-    for (const tool of TOOLS) {
-      const f = await probeTool(this.runner, rootDir, tool);
-      if (f) findings.push(f);
-    }
+    const results = await Promise.all(TOOLS.map((tool) => probeTool(this.runner, rootDir, tool)));
+    const findings = results.filter((f): f is DiagnosticFinding => f !== null);
 
     const hasFail = findings.some((f) => f.status === 'fail');
     return {

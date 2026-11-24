@@ -1,3 +1,4 @@
+// Cites: FR-028-NATIVE-MCP-SERVER-001, FR-047-MCP-SERVER-HARDENING-DLP-001
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -9,13 +10,14 @@ import { createMcpServer } from '../src/server.js';
 describe('MCP Tools Composite Branch Paths (Happy / Sad / Boundary / Malformed)', () => {
   let tmpDir: string;
   let client: Client;
+  let server: ReturnType<typeof createMcpServer>;
 
   beforeEach(async () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-mcp-br-'));
     fs.mkdirSync(path.join(tmpDir, 'src'), { recursive: true });
     fs.writeFileSync(path.join(tmpDir, 'src', 'index.ts'), 'export const x = 1;\n', 'utf-8');
 
-    const server = createMcpServer({ rootDir: tmpDir });
+    server = createMcpServer({ rootDir: tmpDir });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await server.connect(serverTransport);
 
@@ -25,29 +27,36 @@ describe('MCP Tools Composite Branch Paths (Happy / Sad / Boundary / Malformed)'
 
   afterEach(async () => {
     await client.close();
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    await server.close();
+    try {
+      fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    } catch {
+      // Ignore transient Windows EPERM lock during temp dir cleanup
+    }
   });
 
-  it('exercises path traversal confinement, doctor, git_detect_author, kpi_pr, kpi_release, report_quality, and sdd tools', async () => {
+  it('exercises path traversal confinement, doctor, and git_detect_author', async () => {
     // Path traversal blocked
     const travRes = await client.callTool({ name: 'verify_quality', arguments: { root: '../../outside' } });
     expect(travRes.isError).toBe(true);
 
-    // doctor
-    const docRes = await client.callTool({ name: 'doctor', arguments: { root: tmpDir } });
+    // doctor (offline for deterministic local execution)
+    const docRes = await client.callTool({ name: 'doctor', arguments: { root: tmpDir, offline: true } });
     expect(docRes.isError).toBeFalsy();
 
     // git_detect_author
     const authRes = await client.callTool({ name: 'git_detect_author', arguments: {} });
     expect(authRes.isError).toBeFalsy();
+  });
 
-    // sdd_change_new -> get_active_handoff -> sdd_deposit -> sdd_check_fix -> sdd_integrate
+  it('exercises SDD lifecycle tools (sdd_change_new, get_active_handoff, sdd_deposit, sdd_check_fix, sdd_integrate)', async () => {
     const newChg = await client.callTool({
       name: 'sdd_change_new',
       arguments: { root: tmpDir, name: 'Add MCP branch test', profile: 'standard' },
     });
     expect(newChg.isError).toBeFalsy();
-    const newChgData = JSON.parse((newChg.content[0] as { text: string }).text);
+    const newChgContent = newChg.content as Array<{ text: string }>;
+    const newChgData = JSON.parse(newChgContent[0].text);
     expect(newChgData.changeId).toBeTruthy();
 
     const handoffRes = await client.callTool({
@@ -69,15 +78,29 @@ describe('MCP Tools Composite Branch Paths (Happy / Sad / Boundary / Malformed)'
     expect(depRes.isError).toBeFalsy();
 
     const fixRes = await client.callTool({ name: 'sdd_check_fix', arguments: { root: tmpDir } });
-    expect(fixRes.content.length).toBeGreaterThan(0);
+    // Scaffolded change generates .feature files without step defs -> gherkinInSync: false, pdacInSync: true
+    expect(fixRes.isError).toBe(true);
+    const fixContent = fixRes.content as Array<{ text: string }>;
+    const fixData = JSON.parse(fixContent[0].text);
+    expect(fixData.success).toBe(false);
+    expect(fixData.gherkinInSync).toBe(false);
+    expect(fixData.pdacInSync).toBe(true);
+    expect(fixData.extractedFeaturesCount).toBe(2);
+    expect(typeof fixData.syncedDigestsCount).toBe('number');
 
     const intRes = await client.callTool({
       name: 'sdd_integrate',
       arguments: { root: tmpDir, change: newChgData.changeId },
     });
-    // Pending tasks -> fails or returns non-success
-    expect(intRes).toBeDefined();
+    // Pending tasks -> fails with structured non-success payload
+    expect(intRes.isError).toBe(true);
+    const intData = JSON.parse((intRes.content as Array<{ text: string }>)[0].text);
+    expect(intData.success).toBe(false);
+    expect(intData.changeId).toBe(newChgData.changeId);
+    expect(intData.pendingTasks.length).toBeGreaterThan(0);
+  });
 
+  it('exercises reporting, KPI, migrate, and inspect_element tools', async () => {
     // report_quality & report_dashboard
     const rqRes = await client.callTool({ name: 'report_quality', arguments: { root: tmpDir } });
     expect(rqRes.isError).toBeFalsy();
@@ -87,20 +110,33 @@ describe('MCP Tools Composite Branch Paths (Happy / Sad / Boundary / Malformed)'
 
     // kpi_pr & kpi_release on non-git tmpDir (sad path)
     const kpiPrRes = await client.callTool({ name: 'kpi_pr', arguments: { root: tmpDir } });
-    expect(kpiPrRes).toBeDefined();
+    expect(kpiPrRes.isError).toBeFalsy();
+    const kpiPrData = JSON.parse((kpiPrRes.content as Array<{ text: string }>)[0].text);
+    expect(kpiPrData.baseRef).toBe('main');
+    expect(kpiPrData.headRef).toBe('HEAD');
+    expect(kpiPrData.totalCommits).toBe(0);
+    expect(kpiPrData.commitRecords).toEqual([]);
 
     const kpiRelRes = await client.callTool({
       name: 'kpi_release',
       arguments: { root: tmpDir, release: 'release/v1.0.0' },
     });
-    expect(kpiRelRes).toBeDefined();
+    expect(kpiRelRes.isError).toBeFalsy();
+    const kpiRelData = JSON.parse((kpiRelRes.content as Array<{ text: string }>)[0].text);
+    expect(kpiRelData.releaseBranch).toBe('release/v1.0.0');
+    expect(kpiRelData.totalCommits).toBe(0);
+    expect(kpiRelData.authorStats).toEqual([]);
 
     // migrate dryRun
     const migRes = await client.callTool({ name: 'migrate', arguments: { root: tmpDir, dryRun: true } });
-    expect(migRes).toBeDefined();
+    expect(migRes.isError).toBeFalsy();
+    const migData = JSON.parse((migRes.content as Array<{ text: string }>)[0].text);
+    expect(migData.success).toBe(true);
+    expect(migData.exitCode).toBe(0);
+    expect(migData.summary).toEqual({ upToDate: 0, cleanUpdated: 0, overridesPreserved: 0, conflicts: 0 });
 
     // inspect_element missing
     const inspMiss = await client.callTool({ name: 'inspect_element', arguments: { root: tmpDir, query: 'NOPE-999' } });
     expect(inspMiss.isError).toBe(true);
-  });
+  }, 20000);
 });

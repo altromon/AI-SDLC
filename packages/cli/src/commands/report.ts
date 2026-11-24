@@ -10,25 +10,28 @@ import {
   generateDashboardReport,
   generateQualityReport,
 } from '@aisdlc/core';
+import { buildQualityThresholds } from './verify.js';
 
-function openInBrowser(filePath: string): void {
+export function openInBrowser(filePath: string): void {
   const resolved = path.resolve(filePath);
   const platform = process.platform;
   try {
-    if (platform === 'win32') {
-      spawn('cmd.exe', ['/c', 'start', '', resolved], { detached: true, stdio: 'ignore' });
-    } else if (platform === 'darwin') {
-      spawn('open', [resolved], { detached: true, stdio: 'ignore' });
-    } else {
-      spawn('xdg-open', [resolved], { detached: true, stdio: 'ignore' });
-    }
+    const child =
+      platform === 'win32'
+        ? spawn('cmd.exe', ['/c', 'start', '', resolved], { detached: true, stdio: 'ignore' })
+        : platform === 'darwin'
+          ? spawn('open', [resolved], { detached: true, stdio: 'ignore' })
+          : spawn('xdg-open', [resolved], { detached: true, stdio: 'ignore' });
+    child?.on?.('error', () => {
+      // Graceful fallback if desktop launcher is unavailable
+    });
   } catch {
     // Graceful fallback if desktop launcher is unavailable
   }
 }
 
 
-function printDashboardMetrics(result: ReturnType<typeof generateDashboardReport>, rootDir: string): void {
+export function printDashboardMetrics(result: ReturnType<typeof generateDashboardReport>, rootDir: string): void {
   console.log(`  Compiled nodes:        ${pc.bold(String(result.totalNodes))}`);
   console.log(`  Connections (edges):   ${pc.bold(String(result.totalEdges))}`);
   console.log(`  Compliant nodes:       ${pc.green(String(result.conformingCount))}`);
@@ -41,7 +44,7 @@ function printDashboardMetrics(result: ReturnType<typeof generateDashboardReport
   console.log(pc.green(`\n✔ Self-contained HTML dashboard successfully generated at: ${pc.bold(relPath)}\n`));
 }
 
-function printDashboardError(err: unknown): void {
+export function printDashboardError(err: unknown): void {
   const msg = err instanceof Error ? err.message : String(err);
   console.error(pc.red(`\n✖ [ERROR] Failed to generate web dashboard: ${msg}\n`));
 }
@@ -75,7 +78,7 @@ export function runReportDashboard(options: {
   }
 }
 
-function printQualityReportMetrics(result: ReturnType<typeof generateQualityReport>, rootDir: string): void {
+export function printQualityReportMetrics(result: ReturnType<typeof generateQualityReport>, rootDir: string): void {
   console.log(`  Analyzed files:             ${pc.bold(String(result.totalFiles))}`);
   console.log(`  Evaluated functions:        ${pc.bold(String(result.totalFunctions))}`);
   console.log(`  Average maintainability:    ${pc.green(String(result.avgMaintainability) + ' / 100')}`);
@@ -93,6 +96,11 @@ function printQualityReportMetrics(result: ReturnType<typeof generateQualityRepo
   console.log(pc.green(`\n✔ Report successfully generated at: ${pc.bold(reportRelPath)}\n`));
 }
 
+export function printQualityReportError(err: unknown): void {
+  const msg = err instanceof Error ? err.message : String(err);
+  console.error(pc.red(`\n✖ [ERROR] Failed to generate quality report: ${msg}\n`));
+}
+
 export function runReportQuality(options: {
   root?: string;
   policy?: string;
@@ -105,18 +113,15 @@ export function runReportQuality(options: {
   const rootDir = options.root || process.cwd();
   console.log(pc.bold(pc.cyan('\n📊 Generating Formal Quality Report...')));
 
-  const thresholds = {
-    max_cyclomatic: options.maxCyclomatic !== undefined ? Number(options.maxCyclomatic) : undefined,
-    max_cognitive: options.maxCognitive !== undefined ? Number(options.maxCognitive) : undefined,
-    min_maintainability: options.minMaintainability !== undefined ? Number(options.minMaintainability) : undefined,
-    max_function_lines: options.maxLines !== undefined ? Number(options.maxLines) : undefined,
-    enforce_mode: options.enforceMode,
-  };
-
-  const result = generateQualityReport({ rootDir, policyPath: options.policy, thresholds });
-  printQualityReportMetrics(result, rootDir);
-
-  return result.verdict === 'PASS';
+  try {
+    const thresholds = buildQualityThresholds(options);
+    const result = generateQualityReport({ rootDir, policyPath: options.policy, thresholds });
+    printQualityReportMetrics(result, rootDir);
+    return result.verdict === 'PASS';
+  } catch (err: unknown) {
+    printQualityReportError(err);
+    return false;
+  }
 }
 
 const ALLOWED_COMPLIANCE_OPTIONS = new Set([
@@ -129,7 +134,7 @@ const ALLOWED_COMPLIANCE_OPTIONS = new Set([
 ]);
 
 // Validate user options against permitted whitelist
-function validateComplianceOptions(options: Record<string, unknown>): boolean {
+export function validateComplianceOptions(options: Record<string, unknown>): boolean {
   // Check every key provided by the caller
   for (const key of Object.keys(options)) {
     if (!ALLOWED_COMPLIANCE_OPTIONS.has(key)) {

@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-025-STRUCTURED-JSON-VERIFY-001
+ * Tag: @FR-025-STRUCTURED-JSON-VERIFY-001
+ */
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -21,35 +25,33 @@ const coreMocks = vi.hoisted(() => ({
   verifyPrivacy: vi.fn(),
   verifySkillsIntegrity: vi.fn(),
   verifySkillExecutionEvidence: vi.fn(),
-  generateSuppressionsAuditReport: vi.fn(() => '# Audit\n'),
-  generateSastSarif: vi.fn(() => ({ version: '2.1.0', runs: [] })),
-  generateSecuritySarif: vi.fn(() => ({ version: '2.1.0', runs: [] })),
+  generateSuppressionsAuditReport: vi.fn((..._args: unknown[]) => '# Audit\n'),
 }));
 
 vi.mock('@aisdlc/core', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@aisdlc/core')>();
   return {
     ...actual,
-    verifyQualityGate: (...args: unknown[]) => coreMocks.verifyQualityGate(...args),
-    verifyTraceability: (...args: unknown[]) => coreMocks.verifyTraceability(...args),
-    verifyTasksGovernance: (...args: unknown[]) => coreMocks.verifyTasksGovernance(...args),
-    verifyTestingCoverage: (...args: unknown[]) => coreMocks.verifyTestingCoverage(...args),
-    verifyLicenses: (...args: unknown[]) => coreMocks.verifyLicenses(...args),
-    verifyLicensesAsync: (...args: unknown[]) => coreMocks.verifyLicensesAsync(...args),
-    verifyPdacGraph: (...args: unknown[]) => coreMocks.verifyPdacGraph(...args),
-    verifyArtifactsSchemas: (...args: unknown[]) => coreMocks.verifyArtifactsSchemas(...args),
-    verifyProgressiveFriction: (...args: unknown[]) => coreMocks.verifyProgressiveFriction(...args),
-    verifyArtifactDuplicates: (...args: unknown[]) => coreMocks.verifyArtifactDuplicates(...args),
-    verifySecrets: (...args: unknown[]) => coreMocks.verifySecrets(...args),
-    verifySast: (...args: unknown[]) => coreMocks.verifySast(...args),
-    verifySastAsync: (...args: unknown[]) => coreMocks.verifySastAsync(...args),
-    checkGherkinInSync: (...args: unknown[]) => coreMocks.checkGherkinInSync(...args),
-    verifyPrivacy: (...args: unknown[]) => coreMocks.verifyPrivacy(...args),
-    verifySkillsIntegrity: (...args: unknown[]) => coreMocks.verifySkillsIntegrity(...args),
-    verifySkillExecutionEvidence: (...args: unknown[]) => coreMocks.verifySkillExecutionEvidence(...args),
-    generateSuppressionsAuditReport: (...args: unknown[]) => coreMocks.generateSuppressionsAuditReport(...args),
-    generateSastSarif: (...args: unknown[]) => coreMocks.generateSastSarif(...args),
-    generateSecuritySarif: (...args: unknown[]) => coreMocks.generateSecuritySarif(...args),
+    verifyQualityGate: (...args: Parameters<typeof actual.verifyQualityGate>) => coreMocks.verifyQualityGate(...args),
+    verifyTraceability: (...args: Parameters<typeof actual.verifyTraceability>) => coreMocks.verifyTraceability(...args),
+    verifyTasksGovernance: (...args: Parameters<typeof actual.verifyTasksGovernance>) => coreMocks.verifyTasksGovernance(...args),
+    verifyTestingCoverage: (...args: Parameters<typeof actual.verifyTestingCoverage>) => coreMocks.verifyTestingCoverage(...args),
+    verifyLicenses: (...args: Parameters<typeof actual.verifyLicenses>) => coreMocks.verifyLicenses(...args),
+    verifyLicensesAsync: (...args: Parameters<typeof actual.verifyLicensesAsync>) => coreMocks.verifyLicensesAsync(...args),
+    verifyPdacGraph: (...args: Parameters<typeof actual.verifyPdacGraph>) => coreMocks.verifyPdacGraph(...args),
+    verifyArtifactsSchemas: (...args: Parameters<typeof actual.verifyArtifactsSchemas>) => coreMocks.verifyArtifactsSchemas(...args),
+    verifyProgressiveFriction: (...args: Parameters<typeof actual.verifyProgressiveFriction>) => coreMocks.verifyProgressiveFriction(...args),
+    verifyArtifactDuplicates: (...args: Parameters<typeof actual.verifyArtifactDuplicates>) => coreMocks.verifyArtifactDuplicates(...args),
+    verifySecrets: (...args: Parameters<typeof actual.verifySecrets>) => coreMocks.verifySecrets(...args),
+    verifySast: (...args: Parameters<typeof actual.verifySast>) => coreMocks.verifySast(...args),
+    verifySastAsync: (...args: Parameters<typeof actual.verifySastAsync>) => coreMocks.verifySastAsync(...args),
+    checkGherkinInSync: (...args: Parameters<typeof actual.checkGherkinInSync>) => coreMocks.checkGherkinInSync(...args),
+    verifyPrivacy: (...args: Parameters<typeof actual.verifyPrivacy>) => coreMocks.verifyPrivacy(...args),
+    verifySkillsIntegrity: (...args: Parameters<typeof actual.verifySkillsIntegrity>) => coreMocks.verifySkillsIntegrity(...args),
+    verifySkillExecutionEvidence: (...args: Parameters<typeof actual.verifySkillExecutionEvidence>) => coreMocks.verifySkillExecutionEvidence(...args),
+    generateSuppressionsAuditReport: (
+      suppressions: Parameters<typeof actual.generateSuppressionsAuditReport>[0]
+    ) => coreMocks.generateSuppressionsAuditReport(suppressions),
   };
 });
 
@@ -218,7 +220,7 @@ describe('CLI verify orchestrator error & edge branches', () => {
   });
 
   afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     vi.restoreAllMocks();
   });
 
@@ -353,7 +355,7 @@ describe('CLI verify orchestrator error & edge branches', () => {
 
   it('runVerifySast & runVerifySastAsync handle SarifIngestionError, unknown errors, and warnings', async () => {
     coreMocks.verifySast.mockImplementationOnce(() => {
-      throw new SarifIngestionError('Malformed SARIF payload');
+      throw new SarifIngestionError('ERR_SARIF_MALFORMED', 'Malformed SARIF payload');
     });
     expect(runVerifySast({ root: tmpDir })).toBe(false);
 
@@ -362,7 +364,7 @@ describe('CLI verify orchestrator error & edge branches', () => {
     });
     expect(() => runVerifySast({ root: tmpDir })).toThrow('Unexpected SAST crash');
 
-    coreMocks.verifySastAsync.mockRejectedValueOnce(new SarifIngestionError('Async bad SARIF'));
+    coreMocks.verifySastAsync.mockRejectedValueOnce(new SarifIngestionError('ERR_SARIF_MALFORMED', 'Async bad SARIF'));
     expect(await runVerifySastAsync({ root: tmpDir })).toBe(false);
 
     coreMocks.verifySastAsync.mockRejectedValueOnce(new Error('Async SAST crash'));

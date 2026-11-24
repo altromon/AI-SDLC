@@ -2,6 +2,7 @@
  * AI-SDLC CLI: Doctor Command (FR-052-CLI-DOCTOR-001)
  */
 
+import { InvalidArgumentError } from 'commander';
 import { DoctorService, DoctorReporter, DoctorOptions, DoctorReport } from '@aisdlc/core';
 
 export interface DoctorCommandOptions {
@@ -13,7 +14,19 @@ export interface DoctorCommandOptions {
   timeout?: number;
 }
 
-function printReport(report: DoctorReport, reporter: DoctorReporter, asJson: boolean): void {
+export function parseDoctorTimeout(value: string): number {
+  const trimmed = value.trim();
+  if (!/^\d+$/.test(trimmed)) {
+    throw new InvalidArgumentError(`Invalid --timeout value: "${value}". Must be a positive integer in milliseconds.`);
+  }
+  const parsed = Number(trimmed);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+    throw new InvalidArgumentError(`Invalid --timeout value: "${value}". Must be a positive integer in milliseconds.`);
+  }
+  return parsed;
+}
+
+export function printReport(report: DoctorReport, reporter: DoctorReporter, asJson: boolean): void {
   if (asJson) {
     console.log(reporter.formatJson(report));
     return;
@@ -32,7 +45,7 @@ export async function runDoctor(opts: DoctorCommandOptions = {}): Promise<number
     json: opts.json,
     fix: opts.fix,
     strict: opts.strict,
-    offline: opts.offline || process.env.AI_SDLC_OFFLINE === '1',
+    offline: opts.offline ?? (process.env.AI_SDLC_OFFLINE === '1'),
     timeout: opts.timeout,
   };
 

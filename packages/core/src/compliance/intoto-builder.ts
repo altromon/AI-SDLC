@@ -5,26 +5,30 @@
 
 import { InTotoStatementV1, InTotoSubject } from '../types/regulatory-compliance.js';
 
+const NON_JSON_TYPES = new Set(['undefined', 'function', 'symbol']);
+
 /**
  * RFC 8785 JSON Canonicalization Scheme (JCS)
  * Recursively canonicalizes object keys in lexicographical order.
  */
 export function canonicalizeJson(val: unknown): string {
+  if (NON_JSON_TYPES.has(typeof val)) {
+    return 'null';
+  }
   if (val === null || typeof val !== 'object') {
     return JSON.stringify(val);
   }
-
+  const withToJson = val as { toJSON?: () => unknown };
+  if (typeof withToJson.toJSON === 'function') {
+    return canonicalizeJson(withToJson.toJSON());
+  }
   if (Array.isArray(val)) {
     const items = val.map((item) => canonicalizeJson(item));
     return `[${items.join(',')}]`;
   }
-
-  const keys = Object.keys(val as Record<string, unknown>).sort();
-  const pairs = keys.map((key) => {
-    const serializedVal = canonicalizeJson((val as Record<string, unknown>)[key]);
-    return `${JSON.stringify(key)}:${serializedVal}`;
-  });
-
+  const record = val as Record<string, unknown>;
+  const keys = Object.keys(record).sort().filter((k) => !NON_JSON_TYPES.has(typeof record[k]));
+  const pairs = keys.map((key) => `${JSON.stringify(key)}:${canonicalizeJson(record[key])}`);
   return `{${pairs.join(',')}}`;
 }
 

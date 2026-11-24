@@ -1,3 +1,7 @@
+/**
+ * Cites: FR-046-NATIVE-SDK-CLI-AST-001, FR-040-RELEASE-SUPPLY-CHAIN-PROVENANCE-001
+ * Tag: @FR-046-NATIVE-SDK-CLI-AST-001 @FR-040-RELEASE-SUPPLY-CHAIN-PROVENANCE-001
+ */
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';

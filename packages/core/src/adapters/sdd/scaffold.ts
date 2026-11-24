@@ -17,6 +17,7 @@ import { walkMdFiles } from '../../utils/fs.js';
 import { extractGherkinBlock } from '../../verifiers/gherkin.js';
 import { computeCanonicalSha256 } from '../../verifiers/pdac-graph.js';
 import { validateArtifactSchema } from '../../verifiers/schemas.js';
+import { searchSpecifications } from '../../verifiers/semantic-similarity.js';
 import { parseFrontmatter } from '../../verifiers/traceability.js';
 import { depositProductHandoffSidecar, getSddAdapter } from './index.js';
 
@@ -1021,7 +1022,23 @@ function renderAndCollectArtifactFiles(
   return { specFmObj, tasksFm };
 }
 
+function findSimilarExistingSpecs(rootDir: string, name: string, citedIds: Set<string>) {
+  const searchRes = searchSpecifications(name, { rootDir, limit: 5, minScore: 0.25 });
+  return searchRes.matches
+    .filter((m) => !citedIds.has(m.id))
+    .slice(0, 3)
+    .map((m) => ({
+      id: m.id,
+      title: m.title,
+      type: m.type,
+      filePath: m.filePath,
+      score: m.score,
+    }));
+}
+
 function buildScaffoldSuccess(
+  rootDir: string,
+  name: string,
   slug: string,
   canonicalId: string,
   profile: ChangeProfile,
@@ -1030,6 +1047,8 @@ function buildScaffoldSuccess(
   citations: CitationsCollection,
   errors: string[]
 ): SddChangeScaffoldResult {
+  const citedSet = new Set(citations.citedArtifacts.map((c) => c.id));
+  const similarArtifacts = findSimilarExistingSpecs(rootDir, name, citedSet);
   return {
     success: errors.length === 0,
     changeId: slug,
@@ -1039,6 +1058,7 @@ function buildScaffoldSuccess(
     createdFiles,
     productArtifactCreated: citations.productArtifactCreated,
     citedArtifacts: citations.citedArtifacts,
+    ...(similarArtifacts.length > 0 ? { similarArtifacts } : {}),
     errors,
   };
 }
@@ -1065,7 +1085,7 @@ function executeStandardScaffolding(
   createdFiles.push(depositedPath);
 
   const errors = validateScaffoldedArtifacts(rootDir, changeDir, adapter, specFmObj, tasksFm, handoff);
-  return buildScaffoldSuccess(slug, canonicalId, profile, changeDir, createdFiles, citations, errors);
+  return buildScaffoldSuccess(rootDir, name, slug, canonicalId, profile, changeDir, createdFiles, citations, errors);
 }
 
 function normalizeScaffoldOptions(options: SddChangeScaffoldOptions) {

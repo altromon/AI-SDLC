@@ -39,7 +39,7 @@ const AGENT_ENV_MAPPINGS: Array<{ envKey: string; defaultModel: string; source: 
 
 const BOT_NAME_REGEX = /\b(bot|agent|copilot|assistant|llm|claude|gpt|cortex|gemini)\b/i;
 
-function getGitConfigValue(key: string, cwd: string): string | undefined {
+export function getGitConfigValue(key: string, cwd: string): string | undefined {
   try {
     const val = execFileSync('git', ['config', '--get', key], {
       cwd,
@@ -52,7 +52,7 @@ function getGitConfigValue(key: string, cwd: string): string | undefined {
   }
 }
 
-interface TelemetrySessionData {
+export interface TelemetrySessionData {
   model?: string;
   reasoningEffort?: string;
   promptTokens?: number;
@@ -60,7 +60,7 @@ interface TelemetrySessionData {
   activeTimeSeconds?: number;
 }
 
-function readSessionTelemetry(cwd: string): TelemetrySessionData | null {
+export function readSessionTelemetry(cwd: string): TelemetrySessionData | null {
   const possiblePaths = [
     path.join(cwd, '.ai-sdlc', 'session-telemetry.json'),
     path.join(cwd, '.ai-sdlc', 'agent-session.json'),
@@ -69,7 +69,10 @@ function readSessionTelemetry(cwd: string): TelemetrySessionData | null {
     if (fs.existsSync(p)) {
       try {
         const raw = fs.readFileSync(p, 'utf-8');
-        return JSON.parse(raw) as TelemetrySessionData;
+        const parsed: unknown = JSON.parse(raw);
+        if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return parsed as TelemetrySessionData;
+        }
       } catch {
         // Ignore parsing errors
       }
@@ -78,7 +81,7 @@ function readSessionTelemetry(cwd: string): TelemetrySessionData | null {
   return null;
 }
 
-function resolveModelFromBotString(str: string): string {
+export function resolveModelFromBotString(str: string): string {
   if (/claude/i.test(str)) return 'claude-3-7-sonnet';
   if (/gpt/i.test(str)) return 'gpt-4o';
   if (/copilot/i.test(str)) return 'github-copilot';
@@ -87,7 +90,7 @@ function resolveModelFromBotString(str: string): string {
   return 'agent-developer';
 }
 
-function detectFromEnvOverride(env: NodeJS.ProcessEnv): AuthorIdentity | null {
+export function detectFromEnvOverride(env: NodeJS.ProcessEnv): AuthorIdentity | null {
   const explicitEnv = env.AI_SDLC_AUTHOR_TYPE || env.AUTHOR_TYPE;
   if (explicitEnv === 'human' || explicitEnv === 'agent') {
     const model = explicitEnv === 'agent' ? (env.AI_MODEL || 'agent-developer') : 'n/a';
@@ -104,7 +107,7 @@ function detectFromEnvOverride(env: NodeJS.ProcessEnv): AuthorIdentity | null {
   return null;
 }
 
-function detectFromGitConfig(cwd: string): AuthorIdentity | null {
+export function detectFromGitConfig(cwd: string): AuthorIdentity | null {
   const gitConfigType = getGitConfigValue('ai-sdlc.author-type', cwd);
   if (gitConfigType === 'human' || gitConfigType === 'agent') {
     const gitConfigModel = getGitConfigValue('ai-sdlc.model', cwd) || (gitConfigType === 'agent' ? 'agent-developer' : 'n/a');
@@ -121,7 +124,7 @@ function detectFromGitConfig(cwd: string): AuthorIdentity | null {
   return null;
 }
 
-function detectFromTelemetry(
+export function detectFromTelemetry(
   cwd: string,
   env: NodeJS.ProcessEnv,
   preloaded?: TelemetrySessionData | null
@@ -142,15 +145,15 @@ function detectFromTelemetry(
   return null;
 }
 
-function parseEnvInt(val?: string): number {
+export function parseEnvInt(val?: string): number {
   return val ? (parseInt(val, 10) || 0) : 0;
 }
 
-function isEnvActive(val?: string): boolean {
+export function isEnvActive(val?: string): boolean {
   return Boolean(val && val !== '0' && val !== 'false');
 }
 
-function detectFromAgentEnv(env: NodeJS.ProcessEnv): AuthorIdentity | null {
+export function detectFromAgentEnv(env: NodeJS.ProcessEnv): AuthorIdentity | null {
   for (const mapping of AGENT_ENV_MAPPINGS) {
     const envVal = env[mapping.envKey];
     if (!isEnvActive(envVal)) continue;
@@ -168,7 +171,7 @@ function detectFromAgentEnv(env: NodeJS.ProcessEnv): AuthorIdentity | null {
   return null;
 }
 
-function detectFromSignature(env: NodeJS.ProcessEnv, cwd: string): AuthorIdentity | null {
+export function detectFromSignature(env: NodeJS.ProcessEnv, cwd: string): AuthorIdentity | null {
   const authorName = env.GIT_AUTHOR_NAME || getGitConfigValue('user.name', cwd) || '';
   const authorEmail = env.GIT_AUTHOR_EMAIL || getGitConfigValue('user.email', cwd) || '';
 
@@ -187,7 +190,7 @@ function detectFromSignature(env: NodeJS.ProcessEnv, cwd: string): AuthorIdentit
   return null;
 }
 
-function resolveAgentReasoningEffort(
+export function resolveAgentReasoningEffort(
   cwd: string,
   env: NodeJS.ProcessEnv,
   telemetry?: TelemetrySessionData | null

@@ -816,7 +816,7 @@ export function resolveAgentTargets(agents?: string | boolean | string[]): Set<s
   return result;
 }
 
-function appendHierarchicalAgentsMd(dirs: string[], files: { relPath: string; content: string }[]): void {
+export function appendHierarchicalAgentsMd(dirs: string[], files: { relPath: string; content: string }[]): void {
   dirs.push('specs', 'src', 'tests');
   files.push(
     { relPath: 'specs/AGENTS.md', content: STARTER_SPECS_AGENTS_MD },
@@ -825,12 +825,13 @@ function appendHierarchicalAgentsMd(dirs: string[], files: { relPath: string; co
   );
 }
 
-function appendSkillReferenceFiles(
+export function appendSkillReferenceFiles(
   baseSkillDir: string,
   skillId: string,
   dirs: string[],
   files: { relPath: string; content: string }[]
 ): void {
+  if (!Object.prototype.hasOwnProperty.call(SKILL_REFERENCES, skillId)) return;
   const refs = SKILL_REFERENCES[skillId];
   if (!refs || refs.length === 0) return;
   const refsDir = `${baseSkillDir}/references`;
@@ -851,7 +852,7 @@ const ANTIGRAVITY_CORE_FILES: readonly { relPath: string; content: string }[] = 
   { relPath: 'scripts/guard-post-edit.cjs', content: STARTER_GUARD_POST_EDIT_CJS },
 ];
 
-function appendAntigravityFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
+export function appendAntigravityFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
   dirs.push('.agent/rules', '.agent/agents', '.agent/skills');
   files.push(...ANTIGRAVITY_CORE_FILES);
   appendHierarchicalAgentsMd(dirs, files);
@@ -865,7 +866,7 @@ function appendAntigravityFiles(dirs: string[], files: { relPath: string; conten
   }
 }
 
-function appendCursorFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
+export function appendCursorFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
   dirs.push('.cursor/rules');
   files.push(
     { relPath: '.cursor/rules/ai-sdlc-core.mdc', content: STARTER_CURSOR_CORE_RULES },
@@ -881,7 +882,7 @@ function appendCursorFiles(dirs: string[], files: { relPath: string; content: st
   }
 }
 
-function appendClaudeFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
+export function appendClaudeFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
   dirs.push('.claude/agents', '.claude/skills');
   files.push({ relPath: 'CLAUDE.md', content: STARTER_CLAUDE_RULES });
   appendHierarchicalAgentsMd(dirs, files);
@@ -900,7 +901,7 @@ function appendClaudeFiles(dirs: string[], files: { relPath: string; content: st
   }
 }
 
-function appendCopilotFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
+export function appendCopilotFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
   dirs.push('.github', '.github/agents');
   files.push({ relPath: '.github/copilot-instructions.md', content: STARTER_COPILOT_RULES });
   for (const agent of SPECIALIZED_AGENT_TEMPLATES) {
@@ -911,11 +912,11 @@ function appendCopilotFiles(dirs: string[], files: { relPath: string; content: s
   }
 }
 
-function isTargetIncluded(targets: Set<string>, name: string): boolean {
+export function isTargetIncluded(targets: Set<string>, name: string): boolean {
   return targets.has('all') || targets.has(name);
 }
 
-function appendMcpFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
+export function appendMcpFiles(dirs: string[], files: { relPath: string; content: string }[]): void {
   dirs.push('.cursor', '.vscode');
   files.push(
     { relPath: '.cursor/mcp.json', content: STARTER_CURSOR_MCP },
@@ -946,12 +947,30 @@ export function collectAgentFiles(targets: Set<string>): {
   return { dirs: Array.from(new Set(dirs)), files: uniqueFiles };
 }
 
-function recordDryRunFile(exists: boolean, canOverwrite: boolean, relPath: string, results: { filesCreated: string[]; filesUpdated: string[] }): void {
+export function resolveSafeTargetPath(destDir: string, relPath: string, allowRoot = false): string {
+  if (typeof relPath !== 'string' || relPath.includes('\0')) {
+    throw new Error(`Invalid target path: '${String(relPath)}'`);
+  }
+  const trimmed = relPath.trim();
+  if (path.isAbsolute(trimmed) || /^[a-zA-Z]:/.test(trimmed)) {
+    throw new Error(`Absolute target path is not allowed: '${relPath}'`);
+  }
+  const resolvedRoot = path.resolve(destDir);
+  const resolvedTarget = path.resolve(resolvedRoot, trimmed);
+  const relative = path.relative(resolvedRoot, resolvedTarget);
+  const isEscaping = relative.startsWith('..') || path.isAbsolute(relative);
+  if (isEscaping || (!relative && !allowRoot)) {
+    throw new Error(`Path traversal detected outside destination root: '${relPath}'`);
+  }
+  return resolvedTarget;
+}
+
+export function recordDryRunFile(exists: boolean, canOverwrite: boolean, relPath: string, results: { filesCreated: string[]; filesUpdated: string[] }): void {
   if (exists && canOverwrite) results.filesUpdated.push(relPath);
   else if (!exists) results.filesCreated.push(relPath);
 }
 
-function persistFileToDisk(fullFilePath: string, content: string, exists: boolean, relPath: string, results: { filesCreated: string[]; filesUpdated: string[] }): void {
+export function persistFileToDisk(fullFilePath: string, content: string, exists: boolean, relPath: string, results: { filesCreated: string[]; filesUpdated: string[] }): void {
   const parentDir = path.dirname(fullFilePath);
   if (!fs.existsSync(parentDir)) fs.mkdirSync(parentDir, { recursive: true });
   fs.writeFileSync(fullFilePath, content, 'utf-8');
@@ -959,7 +978,7 @@ function persistFileToDisk(fullFilePath: string, content: string, exists: boolea
   else results.filesCreated.push(relPath);
 }
 
-function writeSingleFile(
+export function writeSingleFile(
   fullFilePath: string,
   content: string,
   relPath: string,
@@ -967,7 +986,8 @@ function writeSingleFile(
   results: { filesCreated: string[]; filesUpdated: string[] }
 ): void {
   const exists = fs.existsSync(fullFilePath);
-  const canOverwrite = Boolean(opts.force && !PROTECTED_CODING_RULES_FILES.includes(relPath));
+  const normalizedRel = relPath.replace(/\\/g, '/').replace(/^\.\//, '');
+  const canOverwrite = Boolean(opts.force && !PROTECTED_CODING_RULES_FILES.includes(normalizedRel));
   if (opts.dryRun) {
     recordDryRunFile(exists, canOverwrite, relPath, results);
     return;
@@ -975,7 +995,7 @@ function writeSingleFile(
   if (!exists || canOverwrite) persistFileToDisk(fullFilePath, content, exists, relPath, results);
 }
 
-function writeProjectFiles(
+export function writeProjectFiles(
   destDir: string,
   files: { relPath: string; content: string }[],
   dryRun?: boolean,
@@ -983,13 +1003,13 @@ function writeProjectFiles(
 ): { filesCreated: string[]; filesUpdated: string[] } {
   const results = { filesCreated: [] as string[], filesUpdated: [] as string[] };
   for (const f of files) {
-    const fullFilePath = path.join(destDir, f.relPath);
+    const fullFilePath = resolveSafeTargetPath(destDir, f.relPath, false);
     writeSingleFile(fullFilePath, f.content, f.relPath, { dryRun, force }, results);
   }
   return results;
 }
 
-function validateCiProvider(ci?: string): { valid: boolean; provider?: SupportedCiProvider; error?: string } {
+export function validateCiProvider(ci?: string): { valid: boolean; provider?: SupportedCiProvider; error?: string } {
   if (!ci) return { valid: true };
   const normalized = ci.trim().toLowerCase();
   if (normalized === 'none') return { valid: true };
@@ -1002,7 +1022,7 @@ function validateCiProvider(ci?: string): { valid: boolean; provider?: Supported
   return { valid: true, provider: normalized as SupportedCiProvider };
 }
 
-function validateArchitectureGranularity(arch?: unknown): { valid: boolean; granularity: ArchitectureGranularity; error?: string } {
+export function validateArchitectureGranularity(arch?: unknown): { valid: boolean; granularity: ArchitectureGranularity; error?: string } {
   if (arch === undefined || arch === null) return { valid: true, granularity: 'minimal' };
   const rawArch = String(arch).trim().toLowerCase();
   if (!VALID_ARCHITECTURE_GRANULARITIES.includes(rawArch as ArchitectureGranularity)) {
@@ -1044,7 +1064,7 @@ const BASE_DIRECTORIES: readonly string[] = [
   'tests/features',
 ];
 
-function getBaseDirectories(ciProvider?: SupportedCiProvider): string[] {
+export function getBaseDirectories(ciProvider?: SupportedCiProvider): string[] {
   const dirs = [...BASE_DIRECTORIES, '.cursor', '.vscode'];
   if (ciProvider === 'github' || !ciProvider) {
     dirs.push('.github', '.github/workflows');
@@ -1052,7 +1072,7 @@ function getBaseDirectories(ciProvider?: SupportedCiProvider): string[] {
   return dirs;
 }
 
-function getCiWorkflowFiles(ciProvider?: SupportedCiProvider): { relPath: string; content: string }[] {
+export function getCiWorkflowFiles(ciProvider?: SupportedCiProvider): { relPath: string; content: string }[] {
   if (ciProvider === 'gitlab') return [{ relPath: '.gitlab-ci.yml', content: STARTER_GITLAB_CI }];
   if (ciProvider === 'azure') return [{ relPath: 'azure-pipelines.yml', content: STARTER_AZURE_PIPELINES }];
   if (ciProvider === 'bitbucket') return [{ relPath: 'bitbucket-pipelines.yml', content: STARTER_BITBUCKET_PIPELINES }];
@@ -1067,16 +1087,17 @@ function getCiWorkflowFiles(ciProvider?: SupportedCiProvider): { relPath: string
   return [];
 }
 
-function createDirectoriesOnDisk(destDir: string, directories: string[], dryRun?: boolean): string[] {
+export function createDirectoriesOnDisk(destDir: string, directories: string[], dryRun?: boolean): string[] {
   const created: string[] = [];
   for (const d of directories) {
-    if (!dryRun) fs.mkdirSync(path.join(destDir, d), { recursive: true });
+    const safeDir = resolveSafeTargetPath(destDir, d, false);
+    if (!dryRun) fs.mkdirSync(safeDir, { recursive: true });
     created.push(d);
   }
   return created;
 }
 
-function collectPolicyAndSchemaFiles(): { relPath: string; content: string }[] {
+export function collectPolicyAndSchemaFiles(): { relPath: string; content: string }[] {
   return [
     { relPath: 'quality-policy.yaml', content: STARTER_QUALITY_POLICY },
     { relPath: 'license-policy.yaml', content: STARTER_LICENSE_POLICY },
@@ -1087,14 +1108,14 @@ function collectPolicyAndSchemaFiles(): { relPath: string; content: string }[] {
   ];
 }
 
-function collectArchitectureTemplateFiles(archGranularity: ArchitectureGranularity): { relPath: string; content: string }[] {
+export function collectArchitectureTemplateFiles(archGranularity: ArchitectureGranularity): { relPath: string; content: string }[] {
   return getArchitectureTemplates(archGranularity).map((t) => ({
     relPath: path.join('templates', 'architecture', t.filename).replace(/\\/g, '/'),
     content: t.content,
   }));
 }
 
-function collectStarterFiles(
+export function collectStarterFiles(
   ciProvider?: SupportedCiProvider,
   agentFiles: { relPath: string; content: string }[] = [],
   archGranularity: ArchitectureGranularity = 'minimal',
@@ -1124,7 +1145,7 @@ const STANDARD_AISDLC_SCRIPTS: Record<string, string> = {
   'change:new': 'aisdlc change new',
 };
 
-function injectMissingScripts(scripts: Record<string, string>): boolean {
+export function injectMissingScripts(scripts: Record<string, string>): boolean {
   let modified = false;
   for (const [key, val] of Object.entries(STANDARD_AISDLC_SCRIPTS)) {
     if (!scripts[key]) {
@@ -1135,15 +1156,32 @@ function injectMissingScripts(scripts: Record<string, string>): boolean {
   return modified;
 }
 
-function updateConsumerPackageJson(destDir: string, dryRun?: boolean): boolean {
+export function parsePackageJsonObject(raw: string): Record<string, unknown> | null {
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return null;
+    }
+    const pkg = parsed as Record<string, unknown>;
+    if (pkg.scripts != null && (typeof pkg.scripts !== 'object' || Array.isArray(pkg.scripts))) {
+      return null;
+    }
+    return pkg;
+  } catch {
+    return null;
+  }
+}
+
+export function updateConsumerPackageJson(destDir: string, dryRun?: boolean): boolean {
   const pkgPath = path.join(destDir, 'package.json');
   if (!fs.existsSync(pkgPath)) return false;
 
   try {
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-    if (!pkg || typeof pkg !== 'object') return false;
-    pkg.scripts = pkg.scripts || {};
-    const modified = injectMissingScripts(pkg.scripts);
+    const pkg = parsePackageJsonObject(fs.readFileSync(pkgPath, 'utf-8'));
+    if (!pkg) return false;
+    const scripts = (pkg.scripts as Record<string, string>) || {};
+    pkg.scripts = scripts;
+    const modified = injectMissingScripts(scripts);
     if (modified && !dryRun) {
       fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf-8');
     }
@@ -1153,20 +1191,26 @@ function updateConsumerPackageJson(destDir: string, dryRun?: boolean): boolean {
   }
 }
 
-function tryInstallGitHook(destDir: string, dryRun?: boolean): boolean {
-  if (!dryRun && fs.existsSync(path.join(destDir, '.git'))) {
+export function tryInstallGitHook(destDir: string, dryRun?: boolean): boolean {
+  if (dryRun) return false;
+  const gitDir = path.join(destDir, '.git');
+  try {
+    if (!fs.existsSync(gitDir) || !fs.statSync(gitDir).isDirectory()) {
+      return false;
+    }
     return installGitHooks(destDir).success;
+  } catch {
+    return false;
   }
-  return false;
 }
 
-function formatAgentsConfigured(targets: Set<string>): string[] {
+export function formatAgentsConfigured(targets: Set<string>): string[] {
   const configured = Array.from(targets).filter((t) => t !== 'all');
   if (targets.has('all')) configured.unshift('all');
   return configured;
 }
 
-function buildInitError(targetDir: string, error?: string): InitProjectResult {
+export function buildInitError(targetDir: string, error?: string): InitProjectResult {
   return {
     success: false,
     targetDir,
@@ -1179,15 +1223,11 @@ function buildInitError(targetDir: string, error?: string): InitProjectResult {
   };
 }
 
-function mergeDirectories(base: string[], extra: string[]): string[] {
-  const result = [...base];
-  for (const d of extra) {
-    if (!result.includes(d)) result.push(d);
-  }
-  return result;
+export function mergeDirectories(base: string[], extra: string[]): string[] {
+  return Array.from(new Set([...base, ...extra]));
 }
 
-function buildInitSuccessResult(
+export function buildInitSuccessResult(
   destDir: string,
   directoriesCreated: string[],
   filesCreated: string[],
@@ -1212,7 +1252,7 @@ function buildInitSuccessResult(
   };
 }
 
-function validateInitOptions(options: InitProjectOptions): {
+export function validateInitOptions(options: InitProjectOptions): {
   valid: boolean;
   ciProvider?: SupportedCiProvider;
   archGranularity: ArchitectureGranularity;
@@ -1225,7 +1265,7 @@ function validateInitOptions(options: InitProjectOptions): {
   return { valid: true, ciProvider: ciRes.provider, archGranularity: archRes.granularity };
 }
 
-function assembleScaffoldingPlan(
+export function assembleScaffoldingPlan(
   ciProvider: SupportedCiProvider | undefined,
   agents: string | boolean | string[] | undefined,
   archGranularity: ArchitectureGranularity,
@@ -1242,7 +1282,7 @@ function assembleScaffoldingPlan(
   return { agentTargets, directories, starterFiles };
 }
 
-function executeScaffoldingOnDisk(
+export function executeScaffoldingOnDisk(
   destDir: string,
   options: InitProjectOptions,
   ciProvider: SupportedCiProvider | undefined,
@@ -1273,5 +1313,9 @@ export function initProject(options: InitProjectOptions = {}): InitProjectResult
   if (!validated.valid) return buildInitError(destDir, validated.error);
   const stackRes = resolveCodingRuleStacks(options.stack, destDir);
   if (!stackRes.valid) return buildInitError(destDir, stackRes.error);
-  return executeScaffoldingOnDisk(destDir, options, validated.ciProvider, validated.archGranularity, stackRes.stacks);
+  try {
+    return executeScaffoldingOnDisk(destDir, options, validated.ciProvider, validated.archGranularity, stackRes.stacks);
+  } catch (err) {
+    return buildInitError(destDir, err instanceof Error ? err.message : String(err));
+  }
 }

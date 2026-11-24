@@ -6,7 +6,7 @@ import { CategoryReport, DiagnosticFinding, DoctorOptions, IProcessRunner } from
 import { SafeProcessRunnerAdapter } from './process-runner.js';
 import { sanitizeDlpText } from '../security/dlp-sanitizer.js';
 
-async function checkLocalKey(
+export async function checkLocalKey(
   runner: IProcessRunner,
   rootDir: string
 ): Promise<DiagnosticFinding> {
@@ -34,7 +34,7 @@ async function checkLocalKey(
   };
 }
 
-async function checkRemoteEndpoint(
+export async function checkRemoteEndpoint(
   runner: IProcessRunner,
   rootDir: string,
   timeoutMs: number
@@ -61,7 +61,7 @@ async function checkRemoteEndpoint(
   }
 }
 
-function sanitizeFinding(f: DiagnosticFinding): void {
+export function sanitizeFinding(f: DiagnosticFinding): void {
   f.message = sanitizeDlpText(f.message).sanitizedText;
   if (!f.details) return;
   for (const [k, v] of Object.entries(f.details)) {
@@ -79,16 +79,15 @@ export class SignatureReadinessCheck {
   }
 
   public async inspect(options: DoctorOptions): Promise<CategoryReport> {
-    const findings: DiagnosticFinding[] = [];
     const rootDir = options.rootDir || process.cwd();
     const isOffline = options.offline || process.env.AI_SDLC_OFFLINE === '1';
 
-    findings.push(await checkLocalKey(this.runner, rootDir));
+    const [localFinding, remoteFinding] = await Promise.all([
+      checkLocalKey(this.runner, rootDir),
+      isOffline ? Promise.resolve(null) : checkRemoteEndpoint(this.runner, rootDir, options.timeout ?? 2000),
+    ]);
 
-    if (!isOffline) {
-      const remoteFinding = await checkRemoteEndpoint(this.runner, rootDir, options.timeout ?? 2000);
-      if (remoteFinding) findings.push(remoteFinding);
-    }
+    const findings: DiagnosticFinding[] = remoteFinding ? [localFinding, remoteFinding] : [localFinding];
 
     for (const f of findings) {
       sanitizeFinding(f);

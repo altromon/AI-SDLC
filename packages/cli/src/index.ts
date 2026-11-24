@@ -21,10 +21,12 @@ import { runMcpServer } from './commands/mcp.js';
 import { runReportCompliance, runReportDashboard, runReportQuality } from './commands/report.js';
 import { runReviewSubmit } from './commands/review.js';
 import { runInspect } from './commands/inspect.js';
-import { runDoctor } from './commands/doctor.js';
+import { runSearch } from './commands/search.js';
+import { parseDoctorTimeout, runDoctor } from './commands/doctor.js';
 import { runMigrate } from './commands/migrate.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
 import {
+  isJsonOutput,
   runVerifyAllAsync,
   runVerifyDuplicates,
   runVerifyFriction,
@@ -50,7 +52,7 @@ program
   .description('AI-SDLC: Spec-Driven Development, Governance & Quality Gates for AI & Humans')
   .version(formatAisdlcVersionOutput());
 
-// --- check command (unified pre-flight with auto-fix) ---
+// --- doctor command ---
 program
   .command('doctor')
   .description('Comprehensive environment, toolchain, git-hooks, and security health diagnostics')
@@ -59,7 +61,7 @@ program
   .option('--json', 'Emit diagnostics report in structured JSON format')
   .option('--strict', 'Fail with non-zero exit code on warnings as well as critical failures')
   .option('--offline', 'Skip remote external network probes (e.g. for air-gapped environments)')
-  .option('--timeout <ms>', 'Maximum timeout in milliseconds for subprocess execution', parseInt)
+  .option('--timeout <ms>', 'Maximum timeout in milliseconds for subprocess execution', parseDoctorTimeout)
   .action(async (opts) => {
     const exitCode = await runDoctor({
       rootDir: opts.root,
@@ -85,6 +87,7 @@ program
     const passed = runCheck({
       fix: opts.fix,
       root: opts.root,
+      vuln: opts.vuln,
       json: opts.json,
       format: opts.format,
     });
@@ -731,6 +734,7 @@ sddCommand
   .command('integrate')
   .description('Integrate and synchronize implemented SDD changes into canonical specification (product, requirements, and architecture)')
   .option('-c, --change <id>', 'Change identifier (e.g. chg-001-telemetry)')
+  .option('--all', 'Integrate all completed SDD changes into canonical specifications')
   .option('--auto', 'Automatically detect active change to integrate based on branch, PR, or diff')
   .option('--head-ref <ref>', 'Source branch for automatic resolution')
   .option('--pr-title <title>', 'Pull Request title for automatic resolution')
@@ -744,6 +748,7 @@ sddCommand
     const passed = runSddIntegrate({
       root: opts.root,
       change: opts.change,
+      all: opts.all,
       auto: opts.auto,
       headRef: opts.headRef,
       prTitle: opts.prTitle,
@@ -772,6 +777,28 @@ program
     process.exit(passed ? 0 : 1);
   });
 
+// --- search command ---
+program
+  .command('search <query>')
+  .description('Semantic search across specifications (UC-*, FR-*, SEC-REQ-*, PRIV-REQ-*, BR-*, CMP-*, ADR-*) using TF-IDF, stemming, N-grams, and Gherkin steps')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-l, --limit <number>', 'Maximum number of top matches to return', '5')
+  .option('-m, --min-score <number>', 'Minimum semantic similarity score (0.0 to 1.0)', '0.12')
+  .option('-t, --type <types...>', 'Filter by artifact type or ID prefix (e.g. requirement, use-case, FR-, UC-)')
+  .option('--json', 'Structured JSON format output')
+  .option('-F, --format <format>', 'Output format: text or json')
+  .action((query, opts) => {
+    const passed = runSearch(query, {
+      root: opts.root,
+      limit: opts.limit,
+      minScore: opts.minScore,
+      type: opts.type,
+      json: opts.json,
+      format: opts.format,
+    });
+    process.exit(passed ? 0 : 1);
+  });
+
 // --- init command ---
 program
   .command('init [directory]')
@@ -788,7 +815,7 @@ program
     let agents = opts.agents;
     let arch = opts.architecture || opts.arch;
     let ci = opts.ci;
-    const isJson = opts.json || opts.format === 'json' || process.env.AISDLC_FORMAT === 'json' || process.env.AISDLC_OUTPUT === 'json';
+    const isJson = isJsonOutput({ json: opts.json, format: opts.format });
     if (ci === undefined && process.stdin.isTTY && !opts.dryRun && !isJson) {
       ci = await promptForCi();
     }

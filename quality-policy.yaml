@@ -4,6 +4,7 @@
 version: "1.0"
 project: "Standard AI-SDLC Project"
 enforcement_mode: "STRICT"
+ratchet_mode: true
 
 scope:
   target_directories:
@@ -44,5 +45,5 @@ thresholds:
   function_length:
     max_function_lines: 40
   test_enforcement:
-    require_function_unit_tests: false
+    require_function_unit_tests: true
     require_ui_component_tests: true

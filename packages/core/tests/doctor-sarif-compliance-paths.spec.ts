@@ -21,16 +21,20 @@ describe('DoctorService, SARIF Helpers & Async Compliance Bundle (Happy / Sad / 
   });
 
   afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    try {
+      fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    } catch {
+      // Ignore transient Windows EPERM lock during temp dir cleanup
+    }
   });
 
   it('DoctorService.diagnose: returns structured DoctorReport for workspace (happy/boundary)', async () => {
     const svc = new DoctorService();
-    const report = await svc.diagnose({ rootDir: tmpDir });
+    const report = await svc.diagnose({ rootDir: tmpDir, offline: true });
     expect(report.categories.length).toBeGreaterThan(0);
     expect(['pass', 'warn', 'fail']).toContain(report.overallStatus);
     expect(typeof report.exitCode).toBe('number');
-  });
+  }, 15000);
 
   it('SARIF helpers: normalizeUri, severity mapping, CWE/OWASP resolution, and compact serialization (happy/boundary)', () => {
     expect(normalizeUri('src\\a\\b.ts')).toBe('src/a/b.ts');
@@ -44,7 +48,7 @@ describe('DoctorService, SARIF Helpers & Async Compliance Bundle (Happy / Sad / 
     expect(Array.isArray(resolveSastCwe('UNKNOWN-RULE'))).toBe(true);
     expect(Array.isArray(resolveSastOwasp('UNKNOWN-RULE'))).toBe(true);
 
-    const doc = generateSecuritySarifReport({ rootDir: tmpDir });
+    const doc = generateSecuritySarifReport({});
     const compact = serializeSarifDocument(doc, false);
     const pretty = serializeSarifDocument(doc, true);
     expect(compact.includes('\n')).toBe(false);
@@ -58,11 +62,10 @@ describe('DoctorService, SARIF Helpers & Async Compliance Bundle (Happy / Sad / 
 
     const bundle = await generateComplianceEvidenceBundle({
       rootDir: tmpDir,
-      version: '1.0.0',
       outputPath: path.join(tmpDir, 'reports', 'compliance-bundle.json'),
     });
     expect(bundle.success).toBe(true);
     expect(bundle.bundleDigest).toMatch(/^[0-9a-f]{64}$/);
     expect(fs.existsSync(bundle.outputPath)).toBe(true);
-  });
+  }, 15000);
 });

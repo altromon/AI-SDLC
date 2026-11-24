@@ -34,7 +34,7 @@ import {
   type ToolInstallSpec,
 } from '@aisdlc/core';
 
-function createTtyConfirmInstall() {
+export function createTtyConfirmInstall() {
   return async (spec: ToolInstallSpec): Promise<boolean> => {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     try {
@@ -46,6 +46,20 @@ function createTtyConfirmInstall() {
       rl.close();
     }
   };
+}
+
+export function parseOptionalFiniteNumber(
+  value: number | string | undefined,
+  optionName: string
+): number | undefined {
+  if (value === undefined || (typeof value === 'string' && value.trim() === '')) {
+    return undefined;
+  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    throw new Error(`Invalid numeric value for ${optionName}: ${String(value)}`);
+  }
+  return parsed;
 }
 
 export interface VerifyBaseOptions {
@@ -71,6 +85,9 @@ export function isJsonOutput(options: VerifyBaseOptions = {}): boolean {
 export function isSarifOutput(options: VerifyBaseOptions = {}): boolean {
   if (options.format !== undefined) {
     return options.format.trim().toLowerCase() === "sarif";
+  }
+  if (options.json) {
+    return false;
   }
   const env = process.env.AISDLC_FORMAT?.trim().toLowerCase() ||
               process.env.AISDLC_OUTPUT?.trim().toLowerCase();
@@ -99,7 +116,7 @@ export interface QualityVerifyOptions extends VerifyBaseOptions {
   requireCoverageReport?: boolean;
 }
 
-function buildFunctionMetricViolations(results: ReturnType<typeof verifyQualityGate>['results']) {
+export function buildFunctionMetricViolations(results: ReturnType<typeof verifyQualityGate>['results']) {
   return results
     .filter((r) => r.status === 'FAIL')
     .flatMap((r) =>
@@ -113,7 +130,7 @@ function buildFunctionMetricViolations(results: ReturnType<typeof verifyQualityG
     );
 }
 
-function buildQualityViolations(result: ReturnType<typeof verifyQualityGate>) {
+export function buildQualityViolations(result: ReturnType<typeof verifyQualityGate>) {
   const fnViolations = buildFunctionMetricViolations(result.results);
   const untested = (result.untestedFunctions || []).map((u) => ({
     file: u.file,
@@ -131,7 +148,7 @@ function buildQualityViolations(result: ReturnType<typeof verifyQualityGate>) {
   return [...fnViolations, ...untested, ...untestedUi, ...cov];
 }
 
-function emitQualityJson(result: ReturnType<typeof verifyQualityGate>): void {
+export function emitQualityJson(result: ReturnType<typeof verifyQualityGate>): void {
   const violations = buildQualityViolations(result);
   const payload: VerifyJsonPayload = {
     gate: 'quality',
@@ -155,7 +172,7 @@ function emitQualityJson(result: ReturnType<typeof verifyQualityGate>): void {
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printQualityFailingDetails(failing: ReturnType<typeof verifyQualityGate>['results'], isPermissive: boolean): void {
+export function printQualityFailingDetails(failing: ReturnType<typeof verifyQualityGate>['results'], isPermissive: boolean): void {
   const colorFn = isPermissive ? pc.yellow : pc.red;
   const label = isPermissive ? '\n  Detected warnings (PERMISSIVE mode):' : '\n  Detected violations:';
   console.log(colorFn(label));
@@ -168,27 +185,32 @@ function printQualityFailingDetails(failing: ReturnType<typeof verifyQualityGate
   }
 }
 
-function printQualityTestAndCoverageGaps(result: ReturnType<typeof verifyQualityGate>): void {
-  const untested = result.untestedFunctions || [];
-  if (untested.length > 0) {
-    console.log(pc.red('\n  Functions lacking unit tests:'));
-    for (const u of untested.slice(0, 15)) {
-      console.log(`    ${pc.red('✖')} ${pc.bold(u.file)} [${u.functionName}]`);
-    }
+export function printCappedGapList(
+  heading: string,
+  items: Array<{ file: string; label: string }>,
+  maxToShow = 15
+): void {
+  if (items.length === 0) return;
+  console.log(pc.red(heading));
+  for (const item of items.slice(0, maxToShow)) {
+    console.log(`    ${pc.red('✖')} ${pc.bold(item.file)} [${item.label}]`);
   }
-  const untestedUi = result.untestedUiComponents || [];
-  if (untestedUi.length > 0) {
-    console.log(pc.red('\n  UI components lacking UI/E2E tests:'));
-    for (const c of untestedUi.slice(0, 15)) {
-      console.log(`    ${pc.red('✖')} ${pc.bold(c.file)} [${c.componentName}]`);
-    }
+  if (items.length > maxToShow) {
+    console.log(pc.red(`    ... and ${items.length - maxToShow} more`));
   }
+}
+
+export function printQualityTestAndCoverageGaps(result: ReturnType<typeof verifyQualityGate>): void {
+  const untested = (result.untestedFunctions || []).map((u) => ({ file: u.file, label: u.functionName }));
+  printCappedGapList('\n  Functions lacking unit tests:', untested);
+  const untestedUi = (result.untestedUiComponents || []).map((c) => ({ file: c.file, label: c.componentName }));
+  printCappedGapList('\n  UI components lacking UI/E2E tests:', untestedUi);
   for (const cv of result.coverageViolations || []) {
     console.log(`    ${pc.red('✖')} ${cv}`);
   }
 }
 
-function printQualitySummary(result: ReturnType<typeof verifyQualityGate>, isPermissive: boolean): void {
+export function printQualitySummary(result: ReturnType<typeof verifyQualityGate>, isPermissive: boolean): void {
   console.log(`  Analyzed files:         ${pc.bold(String(result.totalFiles))}`);
   console.log(`  Evaluated functions:    ${pc.bold(String(result.totalFunctions))}`);
   console.log(`  Compliant functions:    ${pc.green(String(result.passCount))}`);
@@ -199,7 +221,7 @@ function printQualitySummary(result: ReturnType<typeof verifyQualityGate>, isPer
   console.log(`  Failing functions:      ${failStr}`);
 }
 
-function printQualityConsole(result: ReturnType<typeof verifyQualityGate>): void {
+export function printQualityConsole(result: ReturnType<typeof verifyQualityGate>): void {
   const isPermissive = result.policy.enforce_mode === "PERMISSIVE";
   console.log(
     `  Active thresholds:      CC <= ${result.policy.max_cyclomatic} | Cognitive <= ${result.policy.max_cognitive} | MI >= ${result.policy.min_maintainability} | Lines <= ${result.policy.max_function_lines} | Mode: ${result.policy.enforce_mode}`
@@ -213,12 +235,12 @@ function printQualityConsole(result: ReturnType<typeof verifyQualityGate>): void
   console.log(result.success ? pc.green(`\n✔ Release Gate PASSED${tag}\n`) : pc.red("\n✖ Release Gate BLOCKED\n"));
 }
 
-function buildQualityThresholds(options: QualityVerifyOptions) {
+export function buildQualityThresholds(options: QualityVerifyOptions) {
   return {
-    max_cyclomatic: options.maxCyclomatic !== undefined ? Number(options.maxCyclomatic) : undefined,
-    max_cognitive: options.maxCognitive !== undefined ? Number(options.maxCognitive) : undefined,
-    min_maintainability: options.minMaintainability !== undefined ? Number(options.minMaintainability) : undefined,
-    max_function_lines: options.maxLines !== undefined ? Number(options.maxLines) : undefined,
+    max_cyclomatic: parseOptionalFiniteNumber(options.maxCyclomatic, '--max-cyclomatic'),
+    max_cognitive: parseOptionalFiniteNumber(options.maxCognitive, '--max-cognitive'),
+    min_maintainability: parseOptionalFiniteNumber(options.minMaintainability, '--min-maintainability'),
+    max_function_lines: parseOptionalFiniteNumber(options.maxLines, '--max-lines'),
     enforce_mode: options.enforceMode,
   };
 }
@@ -250,7 +272,7 @@ export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
 
 export interface TraceabilityVerifyOptions extends VerifyBaseOptions {}
 
-function buildTraceabilityViolations(result: ReturnType<typeof verifyTraceability>) {
+export function buildTraceabilityViolations(result: ReturnType<typeof verifyTraceability>) {
   const orphanViolations = result.orphans.map((o) => ({
     id: o.id,
     title: o.title,
@@ -270,7 +292,7 @@ function buildTraceabilityViolations(result: ReturnType<typeof verifyTraceabilit
   return [...orphanViolations, ...contractViolations];
 }
 
-function emitTraceabilityJson(result: ReturnType<typeof verifyTraceability>): void {
+export function emitTraceabilityJson(result: ReturnType<typeof verifyTraceability>): void {
   const payload: VerifyJsonPayload = {
     gate: 'traceability',
     success: result.success,
@@ -286,7 +308,7 @@ function emitTraceabilityJson(result: ReturnType<typeof verifyTraceability>): vo
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printMissingContractAudits(result: ReturnType<typeof verifyTraceability>): void {
+export function printMissingContractAudits(result: ReturnType<typeof verifyTraceability>): void {
   const failingContracts = (result.contractAudits || []).filter((c) => c.status !== 'COMPLIANT');
   if (failingContracts.length === 0) return;
   console.log(pc.red('\n  Unfulfilled design contracts (design.md -> src/ & tests/):'));
@@ -295,7 +317,7 @@ function printMissingContractAudits(result: ReturnType<typeof verifyTraceability
   }
 }
 
-function printTraceabilityConsole(result: ReturnType<typeof verifyTraceability>): void {
+export function printTraceabilityConsole(result: ReturnType<typeof verifyTraceability>): void {
   console.log(`  Total requirements:     ${pc.bold(String(result.totalRequirements))}`);
   console.log(`  Compliant requirements: ${pc.green(String(result.totalRequirements - result.orphanCount))}`);
   console.log(`  Orphan requirements:    ${result.orphanCount > 0 ? pc.red(String(result.orphanCount)) : pc.green('0')}`);
@@ -330,7 +352,7 @@ export function runVerifyTraceability(options: TraceabilityVerifyOptions = {}): 
   return result.success;
 }
 
-function emitGovernanceJson(result: ReturnType<typeof verifyTasksGovernance>): void {
+export function emitGovernanceJson(result: ReturnType<typeof verifyTasksGovernance>): void {
   const payload: VerifyJsonPayload = {
     gate: 'governance',
     success: result.success,
@@ -347,7 +369,7 @@ function emitGovernanceJson(result: ReturnType<typeof verifyTasksGovernance>): v
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printGovernanceConsole(result: ReturnType<typeof verifyTasksGovernance>): void {
+export function printGovernanceConsole(result: ReturnType<typeof verifyTasksGovernance>): void {
   console.log(`  Total audited tasks:    ${pc.bold(String(result.totalTasks))}`);
   console.log(`  Tasks with verification: ${pc.green(String(result.verifiedCount))}`);
   console.log(`  Tasks without verif.:   ${result.unverifiedCount > 0 ? pc.red(String(result.unverifiedCount)) : pc.green('0')}`);
@@ -390,14 +412,14 @@ export function runVerifyGovernance(options: GovernanceVerifyOptions = {}): bool
 
 export interface TestingVerifyOptions extends VerifyBaseOptions {}
 
-function formatReqTestingViolationMsg(r: ReturnType<typeof verifyTestingCoverage>['requirements'][number]): string {
+export function formatReqTestingViolationMsg(r: ReturnType<typeof verifyTestingCoverage>['requirements'][number]): string {
   if (r.missingVariants && r.missingVariants.length > 0) {
     return `Requirement [${r.id}] missing BDD variant categories: ${r.missingVariants.join(', ')}`;
   }
   return `Requirement without verifiable test [${r.id}]`;
 }
 
-function mapReqViolations(requirements: ReturnType<typeof verifyTestingCoverage>['requirements']) {
+export function mapReqViolations(requirements: ReturnType<typeof verifyTestingCoverage>['requirements']) {
   return requirements
     .filter((r) => r.status !== 'VERIFICADO_CON_PRUEBA')
     .map((r) => ({
@@ -410,7 +432,7 @@ function mapReqViolations(requirements: ReturnType<typeof verifyTestingCoverage>
     }));
 }
 
-function mapTaskViolations(tasks: ReturnType<typeof verifyTestingCoverage>['tasks']) {
+export function mapTaskViolations(tasks: ReturnType<typeof verifyTestingCoverage>['tasks']) {
   return tasks
     .filter((t) => t.status !== 'VERIFICADO_CON_PRUEBA')
     .map((t) => ({
@@ -422,7 +444,7 @@ function mapTaskViolations(tasks: ReturnType<typeof verifyTestingCoverage>['task
     }));
 }
 
-function buildTestingViolations(result: ReturnType<typeof verifyTestingCoverage>) {
+export function buildTestingViolations(result: ReturnType<typeof verifyTestingCoverage>) {
   const flowViolations = (result.useCaseFlows || [])
     .filter((u) => u.status !== 'VERIFICADO_CON_PRUEBA')
     .map((u) => ({
@@ -432,11 +454,22 @@ function buildTestingViolations(result: ReturnType<typeof verifyTestingCoverage>
       missingFlows: u.missingFlows,
       message: `Use Case [${u.id}] missing tests for flows: ${u.missingFlows.join(', ')}`,
     }));
+  const cucumber = result.cucumberExecution;
+  const cucumberViolations = cucumber && !cucumber.passed
+    ? [{
+        type: 'CUCUMBER_EXECUTION',
+        failedScenarios: cucumber.failedScenarios,
+        attestationErrors: cucumber.attestationErrors,
+        message: cucumber.attestationErrors?.length
+          ? `Cucumber execution/attestation failed: ${cucumber.attestationErrors.join('; ')}`
+          : `Cucumber execution failed (${cucumber.failedScenarios} failed scenarios)`,
+      }]
+    : [];
 
-  return [...mapReqViolations(result.requirements), ...mapTaskViolations(result.tasks), ...flowViolations];
+  return [...mapReqViolations(result.requirements), ...mapTaskViolations(result.tasks), ...flowViolations, ...cucumberViolations];
 }
 
-function emitTestingJson(result: ReturnType<typeof verifyTestingCoverage>): void {
+export function emitTestingJson(result: ReturnType<typeof verifyTestingCoverage>): void {
   const payload: VerifyJsonPayload = {
     gate: 'testing',
     success: result.success,
@@ -455,7 +488,7 @@ function emitTestingJson(result: ReturnType<typeof verifyTestingCoverage>): void
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printTestingFailures(result: ReturnType<typeof verifyTestingCoverage>): void {
+export function printTestingFailures(result: ReturnType<typeof verifyTestingCoverage>): void {
   for (const r of result.requirements.filter((req) => req.status !== 'VERIFICADO_CON_PRUEBA')) {
     const varHint = r.missingVariants?.length ? ` [Missing BDD variants: ${r.missingVariants.join(', ')}]` : '';
     console.log(`    ${pc.red('✖')} [Requirement: ${r.id}] ${r.title} (${r.file})${varHint}`);
@@ -466,13 +499,19 @@ function printTestingFailures(result: ReturnType<typeof verifyTestingCoverage>):
   for (const u of (result.useCaseFlows || []).filter((uc) => uc.status !== 'VERIFICADO_CON_PRUEBA')) {
     console.log(`    ${pc.red('✖')} [Use Case Flows: ${u.id}] Missing tests for: ${u.missingFlows.join(', ')} (${u.file})`);
   }
+  if (result.cucumberExecution && !result.cucumberExecution.passed) {
+    const errs = result.cucumberExecution.attestationErrors?.join('; ');
+    const detail = errs ? ` (${errs})` : ` (${result.cucumberExecution.failedScenarios} failed scenarios)`;
+    console.log(`    ${pc.red('✖')} [Cucumber Execution] BDD execution failed${detail}`);
+  }
 }
 
-function printTestingConsole(result: ReturnType<typeof verifyTestingCoverage>): void {
+export function printTestingConsole(result: ReturnType<typeof verifyTestingCoverage>): void {
   console.log(`  Verified requirements:  ${pc.green(`${result.passedRequirements}/${result.totalRequirements}`)}`);
   console.log(`  Verified tasks:         ${pc.green(`${result.passedTasks}/${result.totalTasks}`)}`);
 
-  if (result.failedRequirements > 0 || result.failedTasks > 0 || (result.failedUseCaseFlows || 0) > 0) {
+  const cucumberFailed = Boolean(result.cucumberExecution && !result.cucumberExecution.passed);
+  if (result.failedRequirements > 0 || result.failedTasks > 0 || (result.failedUseCaseFlows || 0) > 0 || cucumberFailed) {
     console.log(pc.red('\n  Items lacking executable tests:'));
     printTestingFailures(result);
   }
@@ -514,32 +553,57 @@ export interface LicenseVerifyOptions extends VerifyBaseOptions {
   ci?: boolean;
 }
 
-function emitLicensesJson(result: ReturnType<typeof verifyLicenses>): void {
+export function buildLicenseVulnerabilityViolations(result: ReturnType<typeof verifyLicenses>) {
+  if (result.success) return [];
+  const vulnViolations = (result.vulnerabilities || []).map((v) => ({
+    package: v.packageName,
+    version: v.installedVersion,
+    vulnerabilityId: v.id,
+    severity: v.severity,
+    category: 'VULNERABILITY',
+    message: `[${v.severity}] ${v.id} in ${v.packageName}@${v.installedVersion}`,
+  }));
+  if (result.violations.length === 0 && vulnViolations.length === 0) {
+    return (result.warnings || []).map((w) => ({
+      category: 'TOOL_OR_POLICY',
+      message: w,
+    }));
+  }
+  return vulnViolations;
+}
+
+export function buildLicensesSummary(result: ReturnType<typeof verifyLicenses>) {
+  return {
+    totalEvaluated: result.totalEvaluated,
+    permittedCount: result.permittedCount,
+    violationsCount: result.violations.length,
+    ...(result.vulnerabilities !== undefined ? { vulnerabilitiesCount: result.vulnerabilities.length } : {}),
+    ...(result.vulnerabilitiesSkipped !== undefined ? { vulnerabilitiesSkipped: result.vulnerabilitiesSkipped } : {}),
+  };
+}
+
+export function emitLicensesJson(result: ReturnType<typeof verifyLicenses>): void {
+  const licenseViolations = result.violations.map((v) => ({
+    package: v.packageName,
+    version: v.version,
+    license: v.license,
+    category: v.category,
+    message: v.reason,
+  }));
   const payload: VerifyJsonPayload = {
     gate: 'licenses',
     success: result.success,
     exitCode: result.success ? 0 : 1,
-    summary: {
-      totalEvaluated: result.totalEvaluated,
-      permittedCount: result.permittedCount,
-      violationsCount: result.violations.length,
-    },
-    violations: result.violations.map((v) => ({
-      package: v.packageName,
-      version: v.version,
-      license: v.license,
-      category: v.category,
-      message: v.reason,
-    })),
-    artifacts: {
-      sbomPath: result.sbomPath,
-      noticesPath: result.noticesPath,
-    },
+    summary: buildLicensesSummary(result),
+    violations: [...licenseViolations, ...buildLicenseVulnerabilityViolations(result)],
+    ...(result.vulnerabilities?.length ? { vulnerabilities: result.vulnerabilities } : {}),
+    ...(result.warnings?.length ? { warnings: result.warnings } : {}),
+    artifacts: { sbomPath: result.sbomPath, noticesPath: result.noticesPath },
   };
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printDetectedVulnerabilities(vulnerabilities?: Array<{ severity: string; id: string; packageName: string; installedVersion: string; cvssV3Score?: number; primaryUrl?: string }>): void {
+export function printDetectedVulnerabilities(vulnerabilities?: Array<{ severity: string; id: string; packageName: string; installedVersion: string; cvssV3Score?: number; primaryUrl?: string }>): void {
   if (!vulnerabilities || vulnerabilities.length === 0) return;
   console.log(pc.yellow('\n  Detected package vulnerabilities (CVE/GHSA):'));
   for (const v of vulnerabilities) {
@@ -547,12 +611,12 @@ function printDetectedVulnerabilities(vulnerabilities?: Array<{ severity: string
   }
 }
 
-function printLicenseArtifacts(sbomPath?: string, noticesPath?: string): void {
+export function printLicenseArtifacts(sbomPath?: string, noticesPath?: string): void {
   if (sbomPath) console.log(`  CycloneDX SBOM generated: ${pc.cyan(sbomPath)}`);
   if (noticesPath) console.log(`  Legal notices generated:  ${pc.cyan(noticesPath)}`);
 }
 
-function printLicenseViolations(violations: Array<{ category: string; packageName: string; license: string; reason: string }>): void {
+export function printLicenseViolations(violations: Array<{ category: string; packageName: string; license: string; reason: string }>): void {
   if (violations.length === 0) return;
   console.log(pc.red('\n  Detected license violations:'));
   for (const v of violations) {
@@ -560,7 +624,7 @@ function printLicenseViolations(violations: Array<{ category: string; packageNam
   }
 }
 
-function printLicensesConsole(result: ReturnType<typeof verifyLicenses>): void {
+export function printLicensesConsole(result: ReturnType<typeof verifyLicenses>): void {
   console.log(`  Evaluated dependencies:   ${pc.bold(String(result.totalEvaluated))}`);
   console.log(`  Compliant dependencies:   ${pc.green(String(result.permittedCount))}`);
   console.log(`  License violations:       ${result.violations.length > 0 ? pc.red(String(result.violations.length)) : pc.green('0')}`);
@@ -574,7 +638,17 @@ function printLicensesConsole(result: ReturnType<typeof verifyLicenses>): void {
   console.log(result.success ? pc.green('\n✔ OSS License Governance COMPLIANT\n') : pc.red('\n✖ OSS License Governance BLOCKED\n'));
 }
 
-function buildLicenseVerifyInput(options: LicenseVerifyOptions, rootDir: string) {
+export function resolveOptionalArtifactFlag(
+  flag: boolean | string | undefined
+): { enabled?: boolean; filePath?: string } {
+  if (flag === undefined) return {};
+  const filePath = typeof flag === 'string' && flag.trim().length > 0 ? flag : undefined;
+  return { enabled: Boolean(filePath || flag === true), filePath };
+}
+
+export function buildLicenseVerifyInput(options: LicenseVerifyOptions, rootDir: string) {
+  const sbom = resolveOptionalArtifactFlag(options.sbom);
+  const notices = resolveOptionalArtifactFlag(options.notices);
   return {
     rootDir,
     policyPath: options.policy,
@@ -582,11 +656,11 @@ function buildLicenseVerifyInput(options: LicenseVerifyOptions, rootDir: string)
     dynamic: options.dynamic,
     tool: options.tool,
     depth: options.depth,
-    generateSbom: options.sbom !== undefined ? Boolean(options.sbom) : undefined,
-    sbomPath: typeof options.sbom === 'string' ? options.sbom : undefined,
+    generateSbom: sbom.enabled,
+    sbomPath: sbom.filePath,
     sbomInputPath: options.sbomInput,
-    generateNotices: options.notices !== undefined ? Boolean(options.notices) : undefined,
-    noticesPath: typeof options.notices === 'string' ? options.notices : undefined,
+    generateNotices: notices.enabled,
+    noticesPath: notices.filePath,
     scanVulnerabilities: options.vuln !== undefined ? Boolean(options.vuln) : undefined,
     nonInteractive: options.nonInteractive,
     noInstallPrompt: options.noInstallPrompt,
@@ -595,7 +669,7 @@ function buildLicenseVerifyInput(options: LicenseVerifyOptions, rootDir: string)
   };
 }
 
-function finalizeLicensesOutput(
+export function finalizeLicensesOutput(
   result: ReturnType<typeof verifyLicenses>,
   options: LicenseVerifyOptions,
   useJson: boolean
@@ -635,7 +709,7 @@ export async function runVerifyLicensesAsync(options: LicenseVerifyOptions = {})
 
 export interface PdacVerifyOptions extends VerifyBaseOptions {}
 
-function buildPdacViolations(result: ReturnType<typeof verifyPdacGraph>) {
+export function buildPdacViolations(result: ReturnType<typeof verifyPdacGraph>) {
   const drifts = result.drifts.map((d) => ({
     sourceId: d.sourceId,
     targetId: d.targetId,
@@ -659,7 +733,7 @@ function buildPdacViolations(result: ReturnType<typeof verifyPdacGraph>) {
   return [...drifts, ...unresolved, ...anchors];
 }
 
-function emitPdacJson(result: ReturnType<typeof verifyPdacGraph>): void {
+export function emitPdacJson(result: ReturnType<typeof verifyPdacGraph>): void {
   const payload: VerifyJsonPayload = {
     gate: 'pdac',
     success: result.success,
@@ -676,7 +750,7 @@ function emitPdacJson(result: ReturnType<typeof verifyPdacGraph>): void {
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printDrifts(drifts: ReturnType<typeof verifyPdacGraph>['drifts']): void {
+export function printDrifts(drifts: ReturnType<typeof verifyPdacGraph>['drifts']): void {
   if (drifts.length === 0) return;
   console.log(pc.red('\n  Detected drifts (Status: STALE):'));
   for (const d of drifts) {
@@ -684,7 +758,7 @@ function printDrifts(drifts: ReturnType<typeof verifyPdacGraph>['drifts']): void
   }
 }
 
-function printUnresolved(unresolved: ReturnType<typeof verifyPdacGraph>['unresolvedCitations']): void {
+export function printUnresolved(unresolved: ReturnType<typeof verifyPdacGraph>['unresolvedCitations']): void {
   if (!unresolved || unresolved.length === 0) return;
   console.log(pc.red('\n  Unresolved citations:'));
   for (const u of unresolved) {
@@ -692,7 +766,7 @@ function printUnresolved(unresolved: ReturnType<typeof verifyPdacGraph>['unresol
   }
 }
 
-function printInvalidAnchors(anchors: ReturnType<typeof verifyPdacGraph>['invalidAnchors']): void {
+export function printInvalidAnchors(anchors: ReturnType<typeof verifyPdacGraph>['invalidAnchors']): void {
   if (!anchors || anchors.length === 0) return;
   console.log(pc.red('\n  Invalid anchors:'));
   for (const a of anchors) {
@@ -700,7 +774,7 @@ function printInvalidAnchors(anchors: ReturnType<typeof verifyPdacGraph>['invali
   }
 }
 
-function printPdacConsole(result: ReturnType<typeof verifyPdacGraph>): void {
+export function printPdacConsole(result: ReturnType<typeof verifyPdacGraph>): void {
   console.log(`  PDaC baseline nodes:    ${pc.bold(String(result.totalNodes))}`);
   console.log(`  Evaluated citations:    ${pc.bold(String(result.totalEdges))}`);
   console.log(`  Cryptographic drifts:   ${result.drifts.length > 0 ? pc.red(String(result.drifts.length)) : pc.green('0')}`);
@@ -742,7 +816,7 @@ export interface SchemasVerifyOptions extends VerifyBaseOptions {
   path?: string;
 }
 
-function emitSchemasJson(result: ReturnType<typeof verifyArtifactsSchemas>): void {
+export function emitSchemasJson(result: ReturnType<typeof verifyArtifactsSchemas>): void {
   const payload: VerifyJsonPayload = {
     gate: 'schemas',
     success: result.success,
@@ -763,7 +837,7 @@ function emitSchemasJson(result: ReturnType<typeof verifyArtifactsSchemas>): voi
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printSchemasConsole(result: ReturnType<typeof verifyArtifactsSchemas>): void {
+export function printSchemasConsole(result: ReturnType<typeof verifyArtifactsSchemas>): void {
   console.log(`  Evaluated artifacts:    ${pc.bold(String(result.totalEvaluated))}`);
   console.log(`  Compliant artifacts:    ${pc.green(String(result.validCount))}`);
   console.log(`  Schema violations:      ${result.invalidCount > 0 ? pc.red(String(result.invalidCount)) : pc.green('0')}`);
@@ -802,7 +876,7 @@ export interface FrictionVerifyOptions extends VerifyBaseOptions {
   diffFiles?: string[];
 }
 
-function emitFrictionJson(result: ReturnType<typeof verifyProgressiveFriction>): void {
+export function emitFrictionJson(result: ReturnType<typeof verifyProgressiveFriction>): void {
   const violations = [
     ...result.bypassedRules.map((rule) => ({ type: 'ANTI_BYPASS', message: rule })),
     ...result.errors.map((err) => ({ type: 'PROFILE_ERROR', message: err })),
@@ -821,7 +895,7 @@ function emitFrictionJson(result: ReturnType<typeof verifyProgressiveFriction>):
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printFrictionConsole(result: ReturnType<typeof verifyProgressiveFriction>): void {
+export function printFrictionConsole(result: ReturnType<typeof verifyProgressiveFriction>): void {
   console.log(`  Detected profile:        ${pc.magenta(result.profile)}`);
   console.log(`  Evaluated files:         ${pc.bold(String(result.evaluatedFiles.length))}`);
   if (result.bypassedRules.length > 0) {
@@ -871,7 +945,7 @@ export interface DuplicatesVerifyOptions extends VerifyBaseOptions {
   similarity?: number | string;
 }
 
-function emitDuplicatesJson(result: ReturnType<typeof verifyArtifactDuplicates>): void {
+export function emitDuplicatesJson(result: ReturnType<typeof verifyArtifactDuplicates>): void {
   const payload: VerifyJsonPayload = {
     gate: 'duplicates',
     success: result.success,
@@ -893,7 +967,7 @@ function emitDuplicatesJson(result: ReturnType<typeof verifyArtifactDuplicates>)
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printDuplicatesConsole(result: ReturnType<typeof verifyArtifactDuplicates>): void {
+export function printDuplicatesConsole(result: ReturnType<typeof verifyArtifactDuplicates>): void {
   console.log(`  Evaluated requirements:  ${pc.bold(String(result.totalRequirements))}`);
   console.log(`  Duplication errors:      ${result.errorCount > 0 ? pc.red(String(result.errorCount)) : pc.green('0')}`);
   console.log(`  Warnings:                ${result.warningCount > 0 ? pc.yellow(String(result.warningCount)) : pc.green('0')}`);
@@ -915,7 +989,7 @@ function printDuplicatesConsole(result: ReturnType<typeof verifyArtifactDuplicat
 
 export function runVerifyDuplicates(options: DuplicatesVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  const similarityThreshold = options.similarity !== undefined ? Number(options.similarity) : undefined;
+  const similarityThreshold = parseOptionalFiniteNumber(options.similarity, '--similarity');
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
 
@@ -945,7 +1019,7 @@ export interface SecretVerifyCliOptions extends VerifyBaseOptions {
   entropy?: number | string;
 }
 
-function emitSecretsJson(result: ReturnType<typeof verifySecrets>): void {
+export function emitSecretsJson(result: ReturnType<typeof verifySecrets>): void {
   const payload: VerifyJsonPayload = {
     gate: 'secrets',
     success: result.success,
@@ -967,7 +1041,7 @@ function emitSecretsJson(result: ReturnType<typeof verifySecrets>): void {
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printSecretsConsole(result: ReturnType<typeof verifySecrets>): void {
+export function printSecretsConsole(result: ReturnType<typeof verifySecrets>): void {
   console.log(`  Analyzed files:          ${pc.bold(String(result.totalFilesScanned))}`);
   console.log(`  Credential leaks:        ${result.findingsCount > 0 ? pc.red(String(result.findingsCount)) : pc.green('0')}`);
   console.log(`  Native Gitleaks engine:  ${result.scannedWithGitleaks ? pc.cyan('Active / Integrated') : pc.dim('Deterministic Scanner (@aisdlc/core)')}`);
@@ -981,7 +1055,7 @@ function printSecretsConsole(result: ReturnType<typeof verifySecrets>): void {
   console.log(result.success ? pc.green('\n✔ Secrets Detection COMPLIANT (0 Credential Leaks)\n') : pc.red('\n✖ Secrets Detection BLOCKED (Exit Code 4: Exposed Secret)\n'));
 }
 
-function emitSecretsSarif(result: ReturnType<typeof verifySecrets>, output?: string): void {
+export function emitSecretsSarif(result: ReturnType<typeof verifySecrets>, output?: string): void {
   const doc = generateSecuritySarifReport({ secretsResult: result });
   if (output) {
     writeSecuritySarifReport(output, doc);
@@ -990,7 +1064,7 @@ function emitSecretsSarif(result: ReturnType<typeof verifySecrets>, output?: str
   }
 }
 
-function handleSecretsOutput(
+export function handleSecretsOutput(
   result: ReturnType<typeof verifySecrets>,
   options: SecretVerifyCliOptions,
   useSarif: boolean,
@@ -1012,7 +1086,7 @@ function handleSecretsOutput(
 
 export function runVerifySecrets(options: SecretVerifyCliOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
-  const entropyThreshold = options.entropy !== undefined ? Number(options.entropy) : undefined;
+  const entropyThreshold = parseOptionalFiniteNumber(options.entropy, '--entropy');
   const useJson = isJsonOutput(options);
   const useSarif = isSarifOutput(options);
 
@@ -1041,7 +1115,7 @@ export interface SastVerifyCliOptions extends VerifyBaseOptions {
   ci?: boolean;
 }
 
-function emitSastJson(result: ReturnType<typeof verifySast>): void {
+export function emitSastJson(result: ReturnType<typeof verifySast>): void {
   const payload: VerifyJsonPayload = {
     gate: 'sast',
     success: result.success,
@@ -1063,7 +1137,7 @@ function emitSastJson(result: ReturnType<typeof verifySast>): void {
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printSastConsole(result: ReturnType<typeof verifySast>): void {
+export function printSastConsole(result: ReturnType<typeof verifySast>): void {
   console.log(`  Evaluated files:         ${pc.bold(String(result.totalFilesScanned))}`);
   console.log(`  SAST vulnerabilities:    ${result.violationsCount > 0 ? pc.red(String(result.violationsCount)) : pc.green('0')}`);
 
@@ -1076,7 +1150,7 @@ function printSastConsole(result: ReturnType<typeof verifySast>): void {
   console.log(result.success ? pc.green('\n✔ SAST Analysis COMPLIANT (0 Critical Vulnerabilities)\n') : pc.red('\n✖ SAST Analysis BLOCKED (Vulnerabilities Detected)\n'));
 }
 
-function emitSastSarif(result: ReturnType<typeof verifySast>, output?: string): void {
+export function emitSastSarif(result: ReturnType<typeof verifySast>, output?: string): void {
   const doc = generateSecuritySarifReport({ sastResult: result });
   if (output) {
     writeSecuritySarifReport(output, doc);
@@ -1085,7 +1159,7 @@ function emitSastSarif(result: ReturnType<typeof verifySast>, output?: string): 
   }
 }
 
-function handleSastOutput(
+export function handleSastOutput(
   result: ReturnType<typeof verifySast>,
   options: SastVerifyCliOptions,
   useSarif: boolean,
@@ -1108,7 +1182,7 @@ function handleSastOutput(
   return result.success;
 }
 
-function executeSastWithGuard(
+export function executeSastWithGuard(
   rootDir: string,
   options: SastVerifyCliOptions,
   useSarif: boolean,
@@ -1142,7 +1216,7 @@ export function runVerifySast(options: SastVerifyCliOptions = {}): boolean {
   return executeSastWithGuard(rootDir, options, useSarif, useJson);
 }
 
-function buildSastAsyncInput(rootDir: string, options: SastVerifyCliOptions) {
+export function buildSastAsyncInput(rootDir: string, options: SastVerifyCliOptions) {
   return {
     rootDir,
     semgrep: options.semgrep,
@@ -1188,7 +1262,19 @@ export interface SecurityVerifyCliOptions extends VerifyBaseOptions {
   ci?: boolean;
 }
 
-function buildSecurityViolations(
+export function buildExpiredSuppressionViolations(suppressions: SecuritySuppression[]) {
+  return suppressions
+    .filter((s) => s.status === 'expired')
+    .map((s) => ({
+      type: 'EXPIRED_SUPPRESSION',
+      ruleId: s.ruleId || 'SUPPRESSION',
+      file: s.filePath,
+      line: s.lineNumber,
+      message: `Expired security suppression (${s.expires || 'unknown date'}): ${s.reason || 'no reason'}`,
+    }));
+}
+
+export function buildSecurityViolations(
   resultSecrets: ReturnType<typeof verifySecrets>,
   resultSast: ReturnType<typeof verifySast>
 ) {
@@ -1207,10 +1293,14 @@ function buildSecurityViolations(
     severity: v.severity,
     message: v.message,
   }));
-  return [...secretViolations, ...sastViolations];
+  const expiredViolations = buildExpiredSuppressionViolations([
+    ...(resultSecrets.suppressions || []),
+    ...(resultSast.suppressions || []),
+  ]);
+  return [...secretViolations, ...sastViolations, ...expiredViolations];
 }
 
-function emitSecurityJson(
+export function emitSecurityJson(
   resultSecrets: ReturnType<typeof verifySecrets>,
   resultSast: ReturnType<typeof verifySast>,
   isOk: boolean
@@ -1227,17 +1317,18 @@ function emitSecurityJson(
       sastViolations: resultSast.violationsCount,
     },
     violations: buildSecurityViolations(resultSecrets, resultSast),
+    ...(resultSast.warnings?.length ? { warnings: resultSast.warnings } : {}),
   };
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function writeSuppressionsAuditReport(rootDir: string, suppressions: SecuritySuppression[]): void {
+export function writeSuppressionsAuditReport(rootDir: string, suppressions: SecuritySuppression[]): void {
   const targetPath = path.join(rootDir, 'reports', 'SUPPRESSIONS_AUDIT.md');
   writeReportFileIfChanged(targetPath, generateSuppressionsAuditReport(suppressions));
 }
 
-function executeSecurityVerifiers(rootDir: string, options: SecurityVerifyCliOptions) {
-  const entropyThreshold = options.entropy !== undefined ? Number(options.entropy) : undefined;
+export function executeSecurityVerifiers(rootDir: string, options: SecurityVerifyCliOptions) {
+  const entropyThreshold = parseOptionalFiniteNumber(options.entropy, '--entropy');
   const resultSecrets = verifySecrets({
     rootDir,
     diff: options.diff,
@@ -1255,8 +1346,8 @@ function executeSecurityVerifiers(rootDir: string, options: SecurityVerifyCliOpt
   return { resultSecrets, resultSast };
 }
 
-async function executeSecurityVerifiersAsync(rootDir: string, options: SecurityVerifyCliOptions) {
-  const entropyThreshold = options.entropy !== undefined ? Number(options.entropy) : undefined;
+export async function executeSecurityVerifiersAsync(rootDir: string, options: SecurityVerifyCliOptions) {
+  const entropyThreshold = parseOptionalFiniteNumber(options.entropy, '--entropy');
   const resultSecrets = verifySecrets({
     rootDir,
     diff: options.diff,
@@ -1268,7 +1359,7 @@ async function executeSecurityVerifiersAsync(rootDir: string, options: SecurityV
   return { resultSecrets, resultSast };
 }
 
-function printSecurityConsoleSummary(silent: boolean | undefined, hasExpired: boolean): void {
+export function printSecurityConsoleSummary(silent: boolean | undefined, hasExpired: boolean): void {
   if (silent) return;
   console.log(`  Audit exceptions report: ${pc.cyan('reports/SUPPRESSIONS_AUDIT.md')}`);
   if (hasExpired) {
@@ -1276,7 +1367,7 @@ function printSecurityConsoleSummary(silent: boolean | undefined, hasExpired: bo
   }
 }
 
-function persistSecuritySarif(
+export function persistSecuritySarif(
   rootDir: string,
   resultSecrets: ReturnType<typeof verifySecrets>,
   resultSast: ReturnType<typeof verifySast>,
@@ -1290,7 +1381,7 @@ function persistSecuritySarif(
   writeSecuritySarifReport(targetPath, doc);
 }
 
-function printSecurityConsole(
+export function printSecurityConsole(
   resultSecrets: ReturnType<typeof verifySecrets>,
   resultSast: ReturnType<typeof verifySast>,
   silent: boolean | undefined,
@@ -1308,7 +1399,7 @@ function printSecurityConsole(
   printSecurityConsoleSummary(silent, hasExpired);
 }
 
-function handleSecurityOutput(
+export function handleSecurityOutput(
   options: SecurityVerifyCliOptions,
   resultSecrets: ReturnType<typeof verifySecrets>,
   resultSast: ReturnType<typeof verifySast>,
@@ -1338,7 +1429,9 @@ export function runVerifySecurity(options: SecurityVerifyCliOptions = {}): boole
   const { resultSecrets, resultSast } = executeSecurityVerifiers(rootDir, options);
   const allSuppressions = [...(resultSecrets.suppressions || []), ...(resultSast.suppressions || [])];
   writeSuppressionsAuditReport(rootDir, allSuppressions);
-  persistSecuritySarif(rootDir, resultSecrets, resultSast, options.output);
+  if (!isSarifOutput(options) || Boolean(options.output)) {
+    persistSecuritySarif(rootDir, resultSecrets, resultSast, options.output);
+  }
   const hasExpired = allSuppressions.some((s) => s.status === 'expired');
   const isOk = resultSecrets.success && resultSast.success && !hasExpired;
   return handleSecurityOutput(options, resultSecrets, resultSast, isOk, hasExpired);
@@ -1349,13 +1442,15 @@ export async function runVerifySecurityAsync(options: SecurityVerifyCliOptions =
   const { resultSecrets, resultSast } = await executeSecurityVerifiersAsync(rootDir, options);
   const allSuppressions = [...(resultSecrets.suppressions || []), ...(resultSast.suppressions || [])];
   writeSuppressionsAuditReport(rootDir, allSuppressions);
-  persistSecuritySarif(rootDir, resultSecrets, resultSast, options.output);
+  if (!isSarifOutput(options) || Boolean(options.output)) {
+    persistSecuritySarif(rootDir, resultSecrets, resultSast, options.output);
+  }
   const hasExpired = allSuppressions.some((s) => s.status === 'expired');
   const isOk = resultSecrets.success && resultSast.success && !hasExpired;
   return handleSecurityOutput(options, resultSecrets, resultSast, isOk, hasExpired);
 }
 
-function buildGherkinViolations(result: ReturnType<typeof checkGherkinInSync>) {
+export function buildGherkinViolations(result: ReturnType<typeof checkGherkinInSync>) {
   const orphans = result.orphanFeatureFiles ?? [];
   const missingSteps = result.missingStepFiles ?? [];
   return [
@@ -1370,7 +1465,7 @@ function buildGherkinViolations(result: ReturnType<typeof checkGherkinInSync>) {
   ];
 }
 
-function emitGherkinVerifyJson(result: ReturnType<typeof checkGherkinInSync>): void {
+export function emitGherkinVerifyJson(result: ReturnType<typeof checkGherkinInSync>): void {
   const orphans = result.orphanFeatureFiles ?? [];
   const missingSteps = result.missingStepFiles ?? [];
   const payload: VerifyJsonPayload = {
@@ -1389,14 +1484,14 @@ function emitGherkinVerifyJson(result: ReturnType<typeof checkGherkinInSync>): v
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printGherkinIssueList(items: string[], tag: string, suffix = ''): void {
+export function printGherkinIssueList(items: string[], tag: string, suffix = ''): void {
   for (const f of items) {
     const extra = suffix ? suffix.replace('{file}', f) : '';
     console.log(`    ${pc.red('✖')} [${tag}] ${f}${extra}`);
   }
 }
 
-function printGherkinVerifyConsole(result: ReturnType<typeof checkGherkinInSync>): void {
+export function printGherkinVerifyConsole(result: ReturnType<typeof checkGherkinInSync>): void {
   const orphans = result.orphanFeatureFiles ?? [];
   const missingSteps = result.missingStepFiles ?? [];
   const totalOut = result.missingFiles.length + result.outOfSyncFiles.length + orphans.length + missingSteps.length;
@@ -1437,7 +1532,7 @@ export interface PrivacyVerifyCliOptions extends VerifyBaseOptions {
   minSeverity?: string;
 }
 
-function emitPrivacyJson(result: ReturnType<typeof verifyPrivacy>): void {
+export function emitPrivacyJson(result: ReturnType<typeof verifyPrivacy>): void {
   const payload: VerifyJsonPayload = {
     gate: 'privacy',
     success: result.success,
@@ -1459,7 +1554,7 @@ function emitPrivacyJson(result: ReturnType<typeof verifyPrivacy>): void {
   console.log(JSON.stringify(payload, null, 2));
 }
 
-function printPrivacyConsole(result: ReturnType<typeof verifyPrivacy>): void {
+export function printPrivacyConsole(result: ReturnType<typeof verifyPrivacy>): void {
   console.log(`  Scanned source files:    ${pc.bold(String(result.totalFilesScanned))}`);
   console.log(`  Data assets (DATA-ASSET):${pc.bold(String(result.dataAssetsCount))}`);
   console.log(`  ROPA records (Art. 30):  ${pc.bold(String(result.ropaRecordsCount))}`);
@@ -1477,18 +1572,15 @@ function printPrivacyConsole(result: ReturnType<typeof verifyPrivacy>): void {
   console.log(result.success ? pc.green('\n✔ Data Protection & Privacy COMPLIANT\n') : pc.red('\n✖ Data Protection & Privacy BLOCKED (Exit Code 5)\n'));
 }
 
-function buildPrivacyVerifyInput(options: PrivacyVerifyCliOptions, rootDir: string) {
+export function buildPrivacyVerifyInput(options: PrivacyVerifyCliOptions, rootDir: string) {
+  const ropa = resolveOptionalArtifactFlag(options.ropaReport);
+  const report = resolveOptionalArtifactFlag(options.report);
   return {
     rootDir,
     policyPath: options.policy,
-    generateRopa: options.ropaReport !== undefined ? Boolean(options.ropaReport) : undefined,
-    ropaOutputPath: typeof options.ropaReport === 'string' ? options.ropaReport : undefined,
-    reportOutputPath:
-      typeof options.report === 'string'
-        ? options.report
-        : options.report
-          ? 'reports/PRIVACY_SCAN_REPORT.md'
-          : undefined,
+    generateRopa: options.ropaReport !== undefined ? Boolean(ropa.enabled) : undefined,
+    ropaOutputPath: ropa.filePath,
+    reportOutputPath: report.filePath ?? (report.enabled ? 'reports/PRIVACY_SCAN_REPORT.md' : undefined),
   };
 }
 
@@ -1513,7 +1605,7 @@ export function runVerifyPrivacy(options: PrivacyVerifyCliOptions = {}): boolean
   return result.success;
 }
 
-function collectSyncNonAsyncGates(options: QualityVerifyOptions, root: string, isSilent: boolean) {
+export function collectSyncNonAsyncGates(options: QualityVerifyOptions, root: string, isSilent: boolean) {
   return {
     quality: { success: runVerifyQuality({ ...options, root, silent: isSilent, json: false }) },
     traceability: { success: runVerifyTraceability({ root, silent: isSilent, json: false }) },
@@ -1528,7 +1620,7 @@ function collectSyncNonAsyncGates(options: QualityVerifyOptions, root: string, i
   };
 }
 
-function collectAllGates(options: QualityVerifyOptions, root: string, isSilent: boolean) {
+export function collectAllGates(options: QualityVerifyOptions, root: string, isSilent: boolean) {
   return {
     ...collectSyncNonAsyncGates(options, root, isSilent),
     licenses: { success: runVerifyLicenses({ root, silent: isSilent, json: false }) },
@@ -1536,7 +1628,7 @@ function collectAllGates(options: QualityVerifyOptions, root: string, isSilent: 
   };
 }
 
-async function collectAllGatesAsync(options: QualityVerifyOptions, root: string, isSilent: boolean) {
+export async function collectAllGatesAsync(options: QualityVerifyOptions, root: string, isSilent: boolean) {
   return {
     ...collectSyncNonAsyncGates(options, root, isSilent),
     licenses: { success: await runVerifyLicensesAsync({ root, silent: isSilent, json: false }) },
@@ -1544,14 +1636,14 @@ async function collectAllGatesAsync(options: QualityVerifyOptions, root: string,
   };
 }
 
-function resolveVerifyAllExitCode(allPassed: boolean, gatesSummary: Record<string, { success: boolean }>): number {
+export function resolveVerifyAllExitCode(allPassed: boolean, gatesSummary: Record<string, { success: boolean }>): number {
   if (allPassed) return 0;
-  if (!gatesSummary.security?.success) return 4;
-  if (!gatesSummary.privacy?.success) return 5;
+  if (gatesSummary.security?.success === false) return 4;
+  if (gatesSummary.privacy?.success === false) return 5;
   return 1;
 }
 
-function emitVerifyAllJson(gatesSummary: Record<string, { success: boolean }>, allPassed: boolean): void {
+export function emitVerifyAllJson(gatesSummary: Record<string, { success: boolean }>, allPassed: boolean): void {
   const totalGates = Object.keys(gatesSummary).length;
   const passedCount = Object.values(gatesSummary).filter((g) => g.success).length;
   const failedCount = totalGates - passedCount;
@@ -1587,7 +1679,7 @@ const VERIFY_ALL_GATES_LIST: Array<{ key: string; title: string }> = [
   { key: 'privacy', title: '  12. Data Protection & Privacy (GDPR/PII-SAST): ' },
 ];
 
-function printVerifyAllSummaryTable(gatesSummary: Record<string, { success: boolean }>, allPassed: boolean): void {
+export function printVerifyAllSummaryTable(gatesSummary: Record<string, { success: boolean }>, allPassed: boolean): void {
   console.log(pc.bold(pc.magenta('================================================================')));
   console.log(pc.bold('CI/CD EVALUATION SUMMARY:'));
   for (const item of VERIFY_ALL_GATES_LIST) {
@@ -1596,14 +1688,15 @@ function printVerifyAllSummaryTable(gatesSummary: Record<string, { success: bool
   }
   console.log(pc.bold(pc.magenta('================================================================')));
 
+  const exitCode = resolveVerifyAllExitCode(allPassed, gatesSummary);
   if (allPassed) {
-    console.log(pc.bold(pc.green('\n✨ FINAL VERDICT: REPOSITORY COMPLIANT WITH AI-SDLC STANDARD (EXIT 0)\n')));
+    console.log(pc.bold(pc.green(`\n✨ FINAL VERDICT: REPOSITORY COMPLIANT WITH AI-SDLC STANDARD (EXIT ${exitCode})\n`)));
   } else {
-    console.log(pc.bold(pc.red('\n⛔ FINAL VERDICT: BLOCKED BY DETECTED VIOLATIONS (EXIT 1)\n')));
+    console.log(pc.bold(pc.red(`\n⛔ FINAL VERDICT: BLOCKED BY DETECTED VIOLATIONS (EXIT ${exitCode})\n`)));
   }
 }
 
-function finalizeVerifyAll(
+export function finalizeVerifyAll(
   gatesSummary: Record<string, { success: boolean }>,
   options: QualityVerifyOptions,
   useJson: boolean
@@ -1645,7 +1738,7 @@ export async function runVerifyAllAsync(options: QualityVerifyOptions = {}): Pro
   return finalizeVerifyAll(gatesSummary, options, useJson);
 }
 
-function printSkillsIntegrityOutput(
+export function printSkillsIntegrityOutput(
   integrity: ReturnType<typeof verifySkillsIntegrity>,
   evidence: ReturnType<typeof verifySkillExecutionEvidence> | undefined,
   success: boolean

@@ -11,7 +11,7 @@ import {
   detectAuthorIdentity,
 } from '@aisdlc/core';
 
-function printInvalidBranchError(error?: string): void {
+export function printInvalidBranchError(error?: string): void {
   console.error(pc.red(`\n✖ [NAMING ERROR] ${error || 'Invalid pattern'}`));
   console.error(pc.yellow('\nAllowed patterns:'));
   console.error('  Tier 1: main');
@@ -21,7 +21,7 @@ function printInvalidBranchError(error?: string): void {
 }
 
 export function runGitValidate(branchName: string): boolean {
-  if (!branchName) {
+  if (!branchName || !branchName.trim()) {
     console.error(pc.red('\n[ERROR] Branch name to validate must be specified.\n'));
     return false;
   }
@@ -38,18 +38,21 @@ export function runGitValidate(branchName: string): boolean {
   return false;
 }
 
-export function runGitPlan(options: { version?: string; feature?: string; tasks?: string }): boolean {
+export function runGitPlan(options: { version?: string; feature?: string; tasks?: string } = {}): boolean {
   const version = options.version || 'v1.1.0';
   const feature = options.feature || 'CHG-001-telemetry';
-  const rawTasks = options.tasks || 'TSK-001-dto,TSK-002-gateway';
-  const tasks = rawTasks.split(',').map((t) => t.trim());
+  const parsedTasks = (options.tasks || '')
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const tasks = parsedTasks.length > 0 ? parsedTasks : ['TSK-001-dto', 'TSK-002-gateway'];
 
   const plan = generateBranchHierarchyPlan(version, feature, tasks);
   console.log(pc.cyan('\n' + plan.planText));
   return true;
 }
 
-function printCheckoutFailure(result: ReturnType<typeof checkoutTaskBranch>): void {
+export function printCheckoutFailure(result: ReturnType<typeof checkoutTaskBranch>): void {
   console.error(pc.red(`\n✖ [ERROR] ${result.error}`));
   if (result.availableTasks && result.availableTasks.length > 0) {
     console.log(pc.yellow('\nAvailable tasks in active changes:'));
@@ -60,7 +63,7 @@ function printCheckoutFailure(result: ReturnType<typeof checkoutTaskBranch>): vo
   console.log();
 }
 
-function printCheckoutSuccess(result: ReturnType<typeof checkoutTaskBranch>): void {
+export function printCheckoutSuccess(result: ReturnType<typeof checkoutTaskBranch>): void {
   console.log(`  - Detected change:   ${pc.bold(result.changeId || 'N/A')}`);
   console.log(`  - Release Branch:    ${pc.green(result.releaseBranch || '')} (Tier 2)`);
   console.log(`  - Feature Branch:    ${pc.green(result.featureBranch || '')} (Tier 3)`);
@@ -79,7 +82,7 @@ function printCheckoutSuccess(result: ReturnType<typeof checkoutTaskBranch>): vo
 }
 
 export function runGitCheckout(taskId: string, options: { root?: string; silent?: boolean } = {}): boolean {
-  if (!taskId) {
+  if (!taskId || !taskId.trim()) {
     if (!options.silent) {
       console.error(pc.red('\n[ERROR] Task identifier to navigate must be specified (e.g. TSK-001).\n'));
     }

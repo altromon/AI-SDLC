@@ -72,7 +72,7 @@ export class BddStepRegistry {
 const STEP_PREFIX_RE = /^(Given|When|Then|And|But|Dado|Cuando|Entonces|Y|Pero)\s+(.+)$/i;
 const SCENARIO_HEADER_RE = /^(Scenario|Escenario|Scenario Outline|Esquema del escenario):\s*(.+)$/i;
 
-function parseTableRowCells(line: string): string[] {
+export function parseTableRowCells(line: string): string[] {
   return line
     .trim()
     .replace(/^\|/, '')
@@ -81,13 +81,13 @@ function parseTableRowCells(line: string): string[] {
     .map((c) => c.trim());
 }
 
-function attachStepTableRow(lastStep: ParsedStepItem | undefined, cells: string[]): void {
+export function attachStepTableRow(lastStep: ParsedStepItem | undefined, cells: string[]): void {
   if (!lastStep || cells.length < 2) return;
   if (!lastStep.table) lastStep.table = {};
   lastStep.table[cells[0]] = cells[1];
 }
 
-function attachExampleRow(
+export function attachExampleRow(
   scenario: ParsedScenarioBlock | null,
   headers: string[],
   cells: string[]
@@ -102,7 +102,7 @@ function attachExampleRow(
   return headers;
 }
 
-interface FeatureParseState {
+export interface FeatureParseState {
   featureName: string;
   featureTags: string[];
   pendingTags: string[];
@@ -114,7 +114,7 @@ interface FeatureParseState {
   exampleHeaders: string[];
 }
 
-function createInitialParseState(): FeatureParseState {
+export function createInitialParseState(): FeatureParseState {
   return {
     featureName: 'Unnamed Feature',
     featureTags: [],
@@ -128,7 +128,7 @@ function createInitialParseState(): FeatureParseState {
   };
 }
 
-function handleStructuralHeaderLine(line: string, state: FeatureParseState): boolean {
+export function handleStructuralHeaderLine(line: string, state: FeatureParseState): boolean {
   if (/^(Feature|Caracter[ií]stica):/i.test(line)) {
     state.featureName = line.replace(/^(Feature|Caracter[ií]stica):\s*/i, '').trim();
     state.featureTags.push(...state.pendingTags);
@@ -149,7 +149,7 @@ function handleStructuralHeaderLine(line: string, state: FeatureParseState): boo
   return false;
 }
 
-function startScenarioBlock(scenMatch: RegExpMatchArray, state: FeatureParseState): void {
+export function startScenarioBlock(scenMatch: RegExpMatchArray, state: FeatureParseState): void {
   state.inBackground = false;
   state.inExamples = false;
   const block: ParsedScenarioBlock = {
@@ -164,7 +164,7 @@ function startScenarioBlock(scenMatch: RegExpMatchArray, state: FeatureParseStat
   state.currentScenario = block;
 }
 
-function appendParsedStep(stepMatch: RegExpMatchArray, state: FeatureParseState): void {
+export function appendParsedStep(stepMatch: RegExpMatchArray, state: FeatureParseState): void {
   const step: ParsedStepItem = { keyword: stepMatch[1], text: stepMatch[2].trim() };
   if (state.inBackground) {
     state.backgroundSteps.push(step);
@@ -173,7 +173,7 @@ function appendParsedStep(stepMatch: RegExpMatchArray, state: FeatureParseState)
   }
 }
 
-function handleScenarioOrStepLine(line: string, state: FeatureParseState): void {
+export function handleScenarioOrStepLine(line: string, state: FeatureParseState): void {
   const scenMatch = line.match(SCENARIO_HEADER_RE);
   if (scenMatch) {
     startScenarioBlock(scenMatch, state);
@@ -185,7 +185,7 @@ function handleScenarioOrStepLine(line: string, state: FeatureParseState): void 
   }
 }
 
-function processFeatureLine(rawLine: string, state: FeatureParseState): void {
+export function processFeatureLine(rawLine: string, state: FeatureParseState): void {
   const line = rawLine.trim();
   if (!line || line.startsWith('#')) return;
 
@@ -224,15 +224,15 @@ export function parseFeatureDocument(content: string): ParsedFeatureDocument {
   };
 }
 
-function interpolatePlaceholders(text: string, row: Record<string, string>): string {
+export function interpolatePlaceholders(text: string, row: Record<string, string>): string {
   let out = text;
   for (const [k, v] of Object.entries(row)) {
-    out = out.replace(new RegExp(`<${k}>`, 'g'), v);
+    out = out.split(`<${k}>`).join(v);
   }
   return out;
 }
 
-function expandScenarioOutlines(scenarios: ParsedScenarioBlock[]): ParsedScenarioBlock[] {
+export function expandScenarioOutlines(scenarios: ParsedScenarioBlock[]): ParsedScenarioBlock[] {
   const expanded: ParsedScenarioBlock[] = [];
   for (const sc of scenarios) {
     if (!sc.isOutline || sc.examples.length === 0) {
@@ -256,7 +256,7 @@ function expandScenarioOutlines(scenarios: ParsedScenarioBlock[]): ParsedScenari
   return expanded;
 }
 
-function matchStepDefinition(
+export function matchStepDefinition(
   text: string,
   definitions: StepDefinitionEntry[]
 ): { entry: StepDefinitionEntry; args: string[] } | null {
@@ -264,14 +264,18 @@ function matchStepDefinition(
     if (typeof entry.pattern === 'string') {
       if (entry.pattern === text) return { entry, args: [] };
     } else {
-      const m = text.match(entry.pattern);
+      const re =
+        entry.pattern.global || entry.pattern.sticky
+          ? new RegExp(entry.pattern.source, entry.pattern.flags.replace(/[gy]/g, ''))
+          : entry.pattern;
+      const m = text.match(re);
       if (m) return { entry, args: m.slice(1) };
     }
   }
   return null;
 }
 
-async function executeSingleStep(
+export async function executeSingleStep(
   step: ParsedStepItem,
   definitions: StepDefinitionEntry[]
 ): Promise<BddStepExecution> {
@@ -295,7 +299,7 @@ async function executeSingleStep(
   }
 }
 
-async function executeScenarioSteps(
+export async function executeScenarioSteps(
   allSteps: ParsedStepItem[],
   definitions: StepDefinitionEntry[]
 ): Promise<{ stepResults: BddStepExecution[]; status: BddScenarioExecution['status'] }> {
@@ -316,7 +320,7 @@ async function executeScenarioSteps(
   return { stepResults, status };
 }
 
-async function runAllExpandedScenarios(
+export async function runAllExpandedScenarios(
   parsed: ParsedFeatureDocument,
   definitions: StepDefinitionEntry[]
 ): Promise<BddScenarioExecution[]> {
@@ -373,7 +377,7 @@ export async function executeBddFeature(
   return report;
 }
 
-function mapStepToCucumberJson(st: BddStepExecution) {
+export function mapStepToCucumberJson(st: BddStepExecution) {
   return {
     keyword: `${st.keyword} `,
     name: st.text,
@@ -385,7 +389,7 @@ function mapStepToCucumberJson(st: BddStepExecution) {
   };
 }
 
-function buildBaseCucumberFeature(r: BddFeatureExecutionReport) {
+export function buildBaseCucumberFeature(r: BddFeatureExecutionReport) {
   return {
     uri: r.uri,
     name: r.featureName,
@@ -399,7 +403,7 @@ function buildBaseCucumberFeature(r: BddFeatureExecutionReport) {
   };
 }
 
-function computeAttestationSignature(
+export function computeAttestationSignature(
   uri: string,
   featureSha256: string,
   commitSha: string | null,
@@ -408,16 +412,17 @@ function computeAttestationSignature(
   return computeLfSha256([uri, featureSha256, commitSha ?? 'no-git', reportDigestSha256].join(':'));
 }
 
-function resolveFeatureHashForReport(r: BddFeatureExecutionReport, rootDir: string): string {
+export function resolveFeatureHashForReport(r: BddFeatureExecutionReport, rootDir: string): string {
   if (r.featureSha256) return r.featureSha256;
+  if (typeof r.uri !== 'string' || r.uri.length === 0) return computeLfSha256('');
   const fullPath = path.join(rootDir, r.uri);
-  if (fs.existsSync(fullPath)) {
+  if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
     return computeLfSha256(fs.readFileSync(fullPath, 'utf-8'));
   }
   return computeLfSha256('');
 }
 
-function mapFeatureToCucumberJson(r: BddFeatureExecutionReport, rootDir: string) {
+export function mapFeatureToCucumberJson(r: BddFeatureExecutionReport, rootDir: string) {
   const base = buildBaseCucumberFeature(r);
   const reportDigestSha256 = computeLfSha256(JSON.stringify(base));
   const featureSha256 = resolveFeatureHashForReport(r, rootDir);
@@ -448,9 +453,13 @@ export function writeCucumberJsonReport(
   fs.writeFileSync(outputPath, payload, 'utf-8');
 }
 
-function verifyFeatureDiskSha256(rootDir: string, uri: string, expectedSha: string, errors: string[]): void {
+export function verifyFeatureDiskSha256(rootDir: string, uri: string, expectedSha: string, errors: string[]): void {
+  if (typeof uri !== 'string' || uri.length === 0) {
+    errors.push(`BDD attested feature file missing on disk: ${String(uri ?? '')}`);
+    return;
+  }
   const fullPath = path.join(rootDir, uri);
-  if (!uri || !fs.existsSync(fullPath)) {
+  if (!fs.existsSync(fullPath) || !fs.statSync(fullPath).isFile()) {
     errors.push(`BDD attested feature file missing on disk: ${uri}`);
     return;
   }
@@ -460,7 +469,7 @@ function verifyFeatureDiskSha256(rootDir: string, uri: string, expectedSha: stri
   }
 }
 
-function verifyCommitBinding(
+export function verifyCommitBinding(
   att: BddAttestationRecord,
   uri: string,
   expectedCommit: string | null,
@@ -473,7 +482,7 @@ function verifyCommitBinding(
   }
 }
 
-function verifyReportDigestAndSig(
+export function verifyReportDigestAndSig(
   entry: Record<string, unknown>,
   att: BddAttestationRecord,
   uri: string,
@@ -490,13 +499,14 @@ function verifyReportDigestAndSig(
   }
 }
 
-function verifySingleFeatureAttestation(
-  entry: Record<string, unknown>,
+export function verifySingleFeatureAttestation(
+  entry: Record<string, unknown> | null | undefined,
   rootDir: string,
   expectedCommit: string | null,
   requireCurrentCommit: boolean,
   errors: string[]
 ): boolean {
+  if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return false;
   const att = entry.attestation as BddAttestationRecord | undefined;
   if (!att || typeof att !== 'object') return false;
   const uri = String(entry.uri ?? '');
@@ -506,7 +516,29 @@ function verifySingleFeatureAttestation(
   return true;
 }
 
-function loadCucumberReportArray(reportPath: string): { entries?: Array<Record<string, unknown>>; error?: string } {
+export function verifyAttestationEntry(
+  item: unknown,
+  rootDir: string,
+  expectedCommit: string | null,
+  requireCommit: boolean,
+  requireAttestation: boolean,
+  errors: string[]
+): boolean {
+  if (!item || typeof item !== 'object' || Array.isArray(item)) {
+    errors.push('Malformed non-object feature entry in cucumber-report.json');
+    return false;
+  }
+  const entry = item as Record<string, unknown>;
+  if (verifySingleFeatureAttestation(entry, rootDir, expectedCommit, requireCommit, errors)) {
+    return true;
+  }
+  if (requireAttestation) {
+    errors.push(`Missing SHA-256 attestation for feature ${String(entry.uri ?? 'unknown')}`);
+  }
+  return false;
+}
+
+export function loadCucumberReportArray(reportPath: string): { entries?: Array<Record<string, unknown>>; error?: string } {
   if (!fs.existsSync(reportPath)) return { error: `Missing BDD report: ${reportPath}` };
   try {
     const raw = JSON.parse(fs.readFileSync(reportPath, 'utf-8'));
@@ -529,16 +561,15 @@ export function verifyBddReportAttestation(
   const errors: string[] = [];
   let attestedCount = 0;
   const requireCommit = Boolean(options.requireCurrentCommit);
+  const requireAtt = Boolean(options.requireAttestation);
   const expectedCommit = requireCommit ? resolveCurrentGitCommit(rootDir) : null;
 
   for (const item of loaded.entries) {
-    if (verifySingleFeatureAttestation(item, rootDir, expectedCommit, requireCommit, errors)) {
+    if (verifyAttestationEntry(item, rootDir, expectedCommit, requireCommit, requireAtt, errors)) {
       attestedCount++;
-    } else if (options.requireAttestation) {
-      errors.push(`Missing SHA-256 attestation for feature ${String(item.uri ?? 'unknown')}`);
     }
   }
 
-  const allAttested = !options.requireAttestation || attestedCount === loaded.entries.length;
+  const allAttested = !requireAtt || attestedCount === loaded.entries.length;
   return { valid: errors.length === 0 && allAttested, hasAttestation: attestedCount > 0, errors, verifiedFeatures: attestedCount };
 }

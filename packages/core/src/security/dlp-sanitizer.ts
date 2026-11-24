@@ -85,18 +85,20 @@ export function createDefaultDlpPolicy(): DlpPolicy {
   };
 }
 
-function normalizeParsedRule(raw: Record<string, unknown>, idx: number): DlpRule | null {
-  if (typeof raw.pattern !== 'string' || !raw.pattern) return null;
+export function normalizeParsedRule(raw: unknown, idx: number): DlpRule | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const record = raw as Record<string, unknown>;
+  if (typeof record.pattern !== 'string' || !record.pattern) return null;
   return {
-    id: typeof raw.id === 'string' ? raw.id : `DLP-CUSTOM-${idx + 1}`,
-    description: typeof raw.description === 'string' ? raw.description : 'Custom DLP rule',
-    pattern: raw.pattern,
-    replacement: typeof raw.replacement === 'string' ? raw.replacement : '[REDACTED]',
-    enabled: raw.enabled !== false,
+    id: typeof record.id === 'string' ? record.id : `DLP-CUSTOM-${idx + 1}`,
+    description: typeof record.description === 'string' ? record.description : 'Custom DLP rule',
+    pattern: record.pattern,
+    replacement: typeof record.replacement === 'string' ? record.replacement : '[REDACTED]',
+    enabled: record.enabled !== false,
   };
 }
 
-function parseDlpDoc(yamlContent: string): Record<string, unknown> {
+export function parseDlpDoc(yamlContent: string): Record<string, unknown> {
   let doc: unknown;
   try {
     doc = yaml.load(yamlContent);
@@ -142,7 +144,7 @@ export function loadDlpPolicy(rootDir?: string, customPolicyPath?: string): DlpP
   return parseDlpPolicy(fs.readFileSync(filePath, 'utf-8'));
 }
 
-function applySingleDlpRule(text: string, rule: DlpRule): { output: string; matches: number } {
+export function applySingleDlpRule(text: string, rule: DlpRule): { output: string; matches: number } {
   if (rule.enabled === false) return { output: text, matches: 0 };
   try {
     const regex = new RegExp(rule.pattern, 'g');
@@ -182,16 +184,49 @@ export function sanitizeDlpText(text: string, policy: DlpPolicy = createDefaultD
   };
 }
 
+export function sanitizePlainDlpObject(
+  record: Record<string, unknown>,
+  policy: DlpPolicy,
+  seen: WeakMap<object, unknown>
+): Record<string, unknown> {
+  const out: Record<string, unknown> = Object.getPrototypeOf(record) === null ? Object.create(null) : {};
+  seen.set(record, out);
+  for (const [key, entryValue] of Object.entries(record)) {
+    Object.defineProperty(out, key, {
+      value: sanitizeDlpValue(entryValue, policy, seen),
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+  }
+  return out;
+}
+
+export function sanitizeDlpValue(
+  value: unknown,
+  policy: DlpPolicy,
+  seen: WeakMap<object, unknown>
+): unknown {
+  if (typeof value === 'string') return sanitizeDlpText(value, policy).sanitizedText;
+  if (!value || typeof value !== 'object') return value;
+  if (seen.has(value)) return seen.get(value);
+
+  if (Array.isArray(value)) {
+    const arr: unknown[] = [];
+    seen.set(value, arr);
+    for (const item of value) arr.push(sanitizeDlpValue(item, policy, seen));
+    return arr;
+  }
+
+  const proto = Object.getPrototypeOf(value);
+  if (proto !== Object.prototype && proto !== null) return value;
+  return sanitizePlainDlpObject(value as Record<string, unknown>, policy, seen);
+}
+
 export function sanitizeDlpPayload<T>(payload: T, policy: DlpPolicy = createDefaultDlpPolicy()): T {
   if (!policy.enabled || payload === null || payload === undefined) return payload;
   if (typeof payload === 'string') {
     return sanitizeDlpText(payload, policy).sanitizedText as unknown as T;
   }
-  const serialized = JSON.stringify(payload);
-  const { sanitizedText } = sanitizeDlpText(serialized, policy);
-  try {
-    return JSON.parse(sanitizedText) as T;
-  } catch {
-    return payload;
-  }
+  return sanitizeDlpValue(payload, policy, new WeakMap<object, unknown>()) as T;
 }
