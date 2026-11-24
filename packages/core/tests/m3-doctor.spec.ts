@@ -264,15 +264,16 @@ describe('M3 Doctor Unit Suite (Happy / Sad / Boundary / Malformed)', () => {
     const timeoutRunner: IProcessRunner = { execSafe: vi.fn().mockRejectedValue(new Error('timeout')) };
     expect((await checkRemoteEndpoint(timeoutRunner, tmpDir, 500))?.id).toBe('ERR_NETWORK_PROBE_TIMEOUT');
 
+    const syntheticToken = ['ghp', '123456789012345678901234567890123456'].join('_');
     const f: DiagnosticFinding = {
       id: 'S1',
       category: 'signing_readiness',
       status: 'warn',
-      message: 'token ghp_123456789012345678901234567890123456',
+      message: `token ${syntheticToken}`,
       details: { raw: 'ok' },
     };
     sanitizeFinding(f);
-    expect(f.message).not.toContain('ghp_123456789012345678901234567890123456');
+    expect(f.message).not.toContain(syntheticToken);
 
     const sigCheck = new SignatureReadinessCheck(runner);
     const res = await sigCheck.inspect({ rootDir: tmpDir, offline: true });

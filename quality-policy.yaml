@@ -4,6 +4,7 @@
 version: "1.0"
 project: "Standard AI-SDLC Project"
 enforcement_mode: "STRICT"
+ratchet_mode: true
 
 scope:
   target_directories:
