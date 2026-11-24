@@ -9,6 +9,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CODE_GRAPH_LIMITS, type CodeGraphDocument } from '../src/code-graph/types.js';
 import { assertConfinedPath, FsCodeGraphCache } from '../src/code-graph/cache/fs-code-graph-cache.js';
 
+vi.mock('fs', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('fs')>();
+  return { ...mod };
+});
+
 describe('TSK-065001: CodeGraphCachePort & FS-Jail (code-graph-cache.spec.ts)', () => {
   const tmpDirs: string[] = [];
 
