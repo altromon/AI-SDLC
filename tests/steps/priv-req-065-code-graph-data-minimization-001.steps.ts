@@ -83,7 +83,7 @@ export function registerSteps(registry: BddStepRegistry): void {
     fs.mkdirSync(path.join(root, 'src'), { recursive: true });
     fs.writeFileSync(
       path.join(root, 'src', 'auth.ts'),
-      '/** @author dev@example.com */\nexport function login(token = "ghp_123456789012345678901234567890123456"): void {}\n',
+      '/** @author dev@example.com */\nexport function login(token = "' + 'ghp_' + '123456789012345678901234567890123456"): void {}\n',
       'utf-8'
     );
   });
@@ -98,7 +98,7 @@ export function registerSteps(registry: BddStepRegistry): void {
     );
     fs.writeFileSync(
       path.join(repoRoot, 'product', 'requirements', 'FR-065-PII.md'),
-      '---\nid: FR-065-PII\ntype: fr\ntitle: Contact admin@example.com\nstatus: approved\n---\nContact admin@example.com with ghp_123456789012345678901234567890123456.\n',
+      '---\nid: FR-065-PII\ntype: fr\ntitle: Contact admin@example.com\nstatus: approved\n---\nContact admin@example.com with ' + 'ghp_' + '123456789012345678901234567890123456.\n',
       'utf-8'
     );
   });
@@ -113,7 +113,7 @@ export function registerSteps(registry: BddStepRegistry): void {
     const combined = cacheRaw + JSON.stringify(queryRes) + JSON.stringify(taskPayload);
     assert.equal(combined.includes('dev@example.com'), false);
     assert.equal(combined.includes('admin@example.com'), false);
-    assert.equal(combined.includes('ghp_123456789012345678901234567890123456'), false);
+    assert.equal(combined.includes('ghp_' + '123456789012345678901234567890123456'), false);
     fs.rmSync(repoRoot, { recursive: true, force: true });
   });
 

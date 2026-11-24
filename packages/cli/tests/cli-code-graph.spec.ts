@@ -9,7 +9,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { runGraphQuery } from '../src/commands/graph.js';
 import { runContextPack } from '../src/commands/context.js';
 
-describe('TSK-065006: CLI graph query & context pack (cli-code-graph.spec.ts)', () => {
+describe('TSK-065006: CliCodeGraphCommands — CLI graph query & context pack (cli-code-graph.spec.ts)', () => {
   const tmpDirs: string[] = [];
 
   function makeTmpRepo(): string {

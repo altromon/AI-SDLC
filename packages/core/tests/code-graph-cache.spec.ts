@@ -172,7 +172,7 @@ describe('TSK-065001: CodeGraphCachePort & FS-Jail (code-graph-cache.spec.ts)', 
   it('redacts PII, incidental emails, secrets, and host paths before persisting cache', async () => {
     const repoRoot = makeTmpDir('aisdlc-cg-redact-');
     const cache = new FsCodeGraphCache();
-    const secretToken = 'ghp_1234567890abcdef1234567890abcdef1234';
+    const secretToken = 'ghp_' + '1234567890abcdef1234567890abcdef1234';
 
     const doc: CodeGraphDocument = {
       version: '1.0',

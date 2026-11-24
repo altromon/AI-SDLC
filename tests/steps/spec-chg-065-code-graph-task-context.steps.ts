@@ -209,7 +209,7 @@ export function registerSteps(registry: BddStepRegistry): void {
     const root = resetRepo();
     fs.mkdirSync(path.join(root, 'src'), { recursive: true });
     fs.writeFileSync(path.join(root, 'src', 'sec.ts'), '/** @author dev@example.com */\nexport function fn(): void { const x = "BODY"; }\n', 'utf-8');
-    fs.writeFileSync(path.join(root, '.env'), 'SECRET=ghp_123456789012345678901234567890123456\n', 'utf-8');
+    fs.writeFileSync(path.join(root, '.env'), 'SECRET=' + 'ghp_' + '123456789012345678901234567890123456\n', 'utf-8');
   });
 
   registry.when('"query_code_graph" and "get_task_context" return payloads and update the cache', async () => {

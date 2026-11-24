@@ -70,7 +70,7 @@ describe('TSK-065004: TaskContextPacker (task-context-packer.spec.ts)', () => {
         'status: approved',
         '---',
         '# FR-001-DEMO',
-        'Summary line for dev@example.com with secret ghp_1234567890abcdef1234567890abcdef1234.',
+        'Summary line for dev@example.com with secret ' + 'ghp_' + '1234567890abcdef1234567890abcdef1234.',
       ].join('\n'),
       'utf-8'
     );
@@ -149,7 +149,7 @@ describe('TSK-065004: TaskContextPacker (task-context-packer.spec.ts)', () => {
 
     const serialized = JSON.stringify(payload);
     expect(serialized).not.toContain('dev@example.com');
-    expect(serialized).not.toContain('ghp_1234567890abcdef1234567890abcdef1234');
+    expect(serialized).not.toContain('ghp_' + '1234567890abcdef1234567890abcdef1234');
     expect(serialized).not.toContain(repoRoot);
   });
 

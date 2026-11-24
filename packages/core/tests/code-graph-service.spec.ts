@@ -143,7 +143,7 @@ describe('TSK-065003: CodeGraphService incremental indexing & bounded k-hop quer
   it('redacts tokens, emails, and host paths on cold-cache Run 1 across indexRepository, query, and queryMultiple', async () => {
     const repoRoot = makeTmpDir('aisdlc-cgs-cold-redact-');
     fs.mkdirSync(path.join(repoRoot, 'src'), { recursive: true });
-    const token = 'ghp_1234567890abcdef1234567890abcdef1234';
+    const token = 'ghp_' + '1234567890abcdef1234567890abcdef1234';
     fs.writeFileSync(
       path.join(repoRoot, 'src', 'secret.ts'),
       `export function auth(email = "admin@example.com", token = "${token}", root = "${repoRoot}"): void {}\n`,

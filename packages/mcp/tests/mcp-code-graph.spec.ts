@@ -20,7 +20,7 @@ function toolText(result: unknown): string {
   return (result as { content: Array<{ text: string }> }).content[0].text;
 }
 
-describe('TSK-065005: MCP Code Graph Tools (mcp-code-graph.spec.ts)', () => {
+describe('TSK-065005: McpCodeGraphTools — MCP Code Graph Tools (mcp-code-graph.spec.ts)', () => {
   const tmpDirs: string[] = [];
   let client: Client;
   let server: ReturnType<typeof createMcpServer>;
