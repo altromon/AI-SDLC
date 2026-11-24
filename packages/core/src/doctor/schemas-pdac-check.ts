@@ -6,7 +6,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { CategoryReport, DiagnosticFinding, DoctorOptions } from '../types/doctor.js';
 
-function hasArtifacts(dirPath: string): boolean {
+export function hasArtifacts(dirPath: string): boolean {
   return fs.existsSync(dirPath) && fs.readdirSync(dirPath).length > 0;
 }
 

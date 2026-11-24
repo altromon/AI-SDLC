@@ -9,7 +9,7 @@ import { AISDLC_MANIFEST_FILENAME, getAisdlcVersion, readAisdlcManifest } from '
 
 const CATEGORY_TITLE = 'AI-SDLC Repository Version (.aisdlc.json)';
 
-function makeFinding(
+export function makeFinding(
   id: string,
   status: DoctorStatus,
   message: string,
@@ -19,7 +19,7 @@ function makeFinding(
   return { id, category: 'aisdlc_version', status, message, remediation, details };
 }
 
-function compareManifestVersion(repoVersion: string, installedVersion: string): DiagnosticFinding {
+export function compareManifestVersion(repoVersion: string, installedVersion: string): DiagnosticFinding {
   if (repoVersion === installedVersion) {
     return makeFinding(
       'PASS_AISDLC_VERSION_MATCH',
@@ -37,7 +37,7 @@ function compareManifestVersion(repoVersion: string, installedVersion: string): 
   );
 }
 
-function evaluateVersionFinding(rootDir: string, installedVersion: string): DiagnosticFinding {
+export function evaluateVersionFinding(rootDir: string, installedVersion: string): DiagnosticFinding {
   const manifestPath = path.join(rootDir, AISDLC_MANIFEST_FILENAME);
   if (!fs.existsSync(manifestPath)) {
     return makeFinding(

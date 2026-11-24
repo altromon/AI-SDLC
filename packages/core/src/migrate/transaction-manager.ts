@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import type { ITransactionManager } from '../types/migrate.js';
 
-function copyFileSafeSync(src: string, dest: string): void {
+export function copyFileSafeSync(src: string, dest: string): void {
   const destDir = path.dirname(dest);
   if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
@@ -16,7 +16,7 @@ function copyFileSafeSync(src: string, dest: string): void {
   fs.copyFileSync(src, dest);
 }
 
-function restoreFromManifestSync(backupPath: string, resolvedRoot: string): void {
+export function restoreFromManifestSync(backupPath: string, resolvedRoot: string): void {
   const manifestFile = path.join(backupPath, 'manifest.json');
   if (!fs.existsSync(manifestFile)) return;
   try {
@@ -33,7 +33,7 @@ function restoreFromManifestSync(backupPath: string, resolvedRoot: string): void
   }
 }
 
-function restoreDirRecursiveSync(dir: string, resolvedRoot: string, baseBackupDir: string): void {
+export function restoreDirRecursiveSync(dir: string, resolvedRoot: string, baseBackupDir: string): void {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);

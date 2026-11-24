@@ -5,11 +5,11 @@
 import { CategoryReport, DiagnosticFinding, DoctorOptions, IProcessRunner } from '../types/doctor.js';
 import { SafeProcessRunnerAdapter } from './process-runner.js';
 
-function isProtectedBranch(b: string): boolean {
+export function isProtectedBranch(b: string): boolean {
   return b === 'main' || b === 'master' || b.startsWith('release/');
 }
 
-function evaluateBranch(branch: string): DiagnosticFinding | null {
+export function evaluateBranch(branch: string): DiagnosticFinding | null {
   if (!isProtectedBranch(branch)) return null;
   return {
     id: 'ERR_PROTECTED_BRANCH_ACTIVE',
@@ -21,7 +21,7 @@ function evaluateBranch(branch: string): DiagnosticFinding | null {
   };
 }
 
-async function queryActiveBranch(runner: IProcessRunner, rootDir: string): Promise<string> {
+export async function queryActiveBranch(runner: IProcessRunner, rootDir: string): Promise<string> {
   const res = await runner.execSafe('git', ['symbolic-ref', '--short', 'HEAD'], { cwd: rootDir });
   return (res.stdout || '').trim();
 }

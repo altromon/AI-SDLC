@@ -9,7 +9,7 @@ import { PRE_COMMIT_SCRIPT, PREPARE_COMMIT_MSG_SCRIPT } from '../git/hook-instal
 
 type HookName = 'pre-commit' | 'prepare-commit-msg';
 
-function isSymlink(targetPath: string): boolean {
+export function isSymlink(targetPath: string): boolean {
   try {
     return fs.lstatSync(targetPath).isSymbolicLink();
   } catch {
@@ -17,18 +17,18 @@ function isSymlink(targetPath: string): boolean {
   }
 }
 
-function checkPreCommitIntegrity(content: string): boolean {
+export function checkPreCommitIntegrity(content: string): boolean {
   const hasHeader = content.includes('# AI-SDLC: Universal Protected Branches Guard');
   const hasBranch = content.includes('main') && content.includes('master') && content.includes('release');
   return hasHeader && hasBranch && content.includes('exit 1');
 }
 
-function checkPrepareCommitMsgIntegrity(content: string): boolean {
+export function checkPrepareCommitMsgIntegrity(content: string): boolean {
   const hasHeader = content.includes('# AI-SDLC: Automated Commit Trailers Injection Hook');
   return hasHeader && (content.includes('Task-ID') || content.includes('TASK_ID'));
 }
 
-function checkMissingHook(hookPath: string, name: HookName): DiagnosticFinding | null {
+export function checkMissingHook(hookPath: string, name: HookName): DiagnosticFinding | null {
   if (fs.existsSync(hookPath)) return null;
   return {
     id: 'ERR_HOOKS_NOT_INSTALLED',
@@ -39,7 +39,7 @@ function checkMissingHook(hookPath: string, name: HookName): DiagnosticFinding |
   };
 }
 
-function checkSymlinkOrEmpty(hookPath: string, name: HookName): DiagnosticFinding | null {
+export function checkSymlinkOrEmpty(hookPath: string, name: HookName): DiagnosticFinding | null {
   if (isSymlink(hookPath)) {
     return {
       id: 'ERR_HOOKS_SYMLINK_REJECTED',
@@ -61,11 +61,11 @@ function checkSymlinkOrEmpty(hookPath: string, name: HookName): DiagnosticFindin
   return null;
 }
 
-function checkFileStat(hookPath: string, name: HookName): DiagnosticFinding | null {
+export function checkFileStat(hookPath: string, name: HookName): DiagnosticFinding | null {
   return checkMissingHook(hookPath, name) || checkSymlinkOrEmpty(hookPath, name);
 }
 
-function checkFileContent(hookPath: string, name: HookName): DiagnosticFinding | null {
+export function checkFileContent(hookPath: string, name: HookName): DiagnosticFinding | null {
   const content = fs.readFileSync(hookPath, 'utf-8');
   const ok = name === 'pre-commit' ? checkPreCommitIntegrity(content) : checkPrepareCommitMsgIntegrity(content);
   return ok ? null : {
@@ -77,12 +77,12 @@ function checkFileContent(hookPath: string, name: HookName): DiagnosticFinding |
   };
 }
 
-function inspectHook(hooksDir: string, name: HookName): DiagnosticFinding | null {
+export function inspectHook(hooksDir: string, name: HookName): DiagnosticFinding | null {
   const hookPath = path.join(hooksDir, name);
   return checkFileStat(hookPath, name) || checkFileContent(hookPath, name);
 }
 
-function overwriteHook(hooksDir: string, name: HookName, script: string, stamp: number): void {
+export function overwriteHook(hooksDir: string, name: HookName, script: string, stamp: number): void {
   const target = path.join(hooksDir, name);
   if (fs.existsSync(target) || isSymlink(target)) {
     if (isSymlink(target)) {

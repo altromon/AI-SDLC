@@ -6,7 +6,7 @@ import { CategoryReport, DiagnosticFinding, DoctorOptions, IProcessRunner } from
 import { SafeProcessRunnerAdapter } from './process-runner.js';
 import { sanitizeDlpText } from '../security/dlp-sanitizer.js';
 
-async function checkLocalKey(
+export async function checkLocalKey(
   runner: IProcessRunner,
   rootDir: string
 ): Promise<DiagnosticFinding> {
@@ -34,7 +34,7 @@ async function checkLocalKey(
   };
 }
 
-async function checkRemoteEndpoint(
+export async function checkRemoteEndpoint(
   runner: IProcessRunner,
   rootDir: string,
   timeoutMs: number
@@ -61,7 +61,7 @@ async function checkRemoteEndpoint(
   }
 }
 
-function sanitizeFinding(f: DiagnosticFinding): void {
+export function sanitizeFinding(f: DiagnosticFinding): void {
   f.message = sanitizeDlpText(f.message).sanitizedText;
   if (!f.details) return;
   for (const [k, v] of Object.entries(f.details)) {

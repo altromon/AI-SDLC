@@ -28,12 +28,12 @@ const SECURITY_TOOLS: readonly SecurityToolProbe[] = [
   { name: 'gitleaks', flag: 'version' },
 ];
 
-function sanitizeFindingText(text: string, rootDir: string): string {
+export function sanitizeFindingText(text: string, rootDir: string): string {
   const redacted = redactSensitiveDiagnostics(text, rootDir);
   return sanitizeDlpText(redacted).sanitizedText;
 }
 
-function buildMissingFinding(
+export function buildMissingFinding(
   toolName: SecurityToolProbe['name'],
   platform: NodeJS.Platform
 ): DiagnosticFinding {
@@ -47,7 +47,7 @@ function buildMissingFinding(
   };
 }
 
-function buildIssueFinding(
+export function buildIssueFinding(
   toolName: SecurityToolProbe['name'],
   platform: NodeJS.Platform,
   rootDir: string,
