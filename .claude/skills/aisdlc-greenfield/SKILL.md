@@ -61,7 +61,8 @@ Across Phase 0 and Inception, quality auditing and adversarial stress-testing ar
 ### Checkpoint 1 (Inception Design Checkpoint): `agent-auditor` $\parallel$ `agent-adversary`
 1. Concurrently invoke `agent-auditor` (evaluating YAGNI, architecture bloat, interface contracts) and `agent-adversary` (simulating SPOFs, race conditions, unhandled threat scenarios) in isolated context windows over all Phase 0 deliverables.
 2. Consolidate findings and remediate in authoring agents (max 2 correction rounds), committing and pushing (`git push`) updates to the Draft PR.
-3. **Human Approval Gate**: Mark the Inception Draft PR/MR ready (`gh pr ready` / `glab mr update --ready`) and present the comprehensive Inception model for Human PO & Tech Lead sign-off.
+3. **Mandatory Checkpoint 1 Deterministic Verification**: Always execute `pnpm run verify:checkpoint-1 -- --with-licenses` (`tsx scripts/verify-checkpoint-1.ts --with-licenses`) to verify Gates 8 (`schemas`), 9 (`duplicates`), 7 (`pdac`), 3 (`governance`), 10 (`friction`), 12 (`privacy`), 11 (`secrets`), and 6 (`licenses`) pass with exit code `0` before requesting human approval.
+4. **Human Approval Gate**: Mark the Inception Draft PR/MR ready (`gh pr ready` / `glab mr update --ready`) and present the comprehensive Inception model for Human PO & Tech Lead sign-off.
 
 ### Step 5: Release Milestone & Topological Wave SDD Plan (`1 UC-* = 1 CHG-*`)
 1. **Open Release Milestone (`Tier 2: release/v1.0.0` or Streamlined `main`)**: Group approved MVP Use Cases (`UC-001`, `UC-002`, ...) and visualize execution plan.
