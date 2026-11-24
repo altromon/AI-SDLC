@@ -462,6 +462,14 @@ export interface ChangeNewCliOptions {
   format?: string;
 }
 
+function printSimilarArtifacts(similar: ReturnType<typeof scaffoldSddChange>['similarArtifacts']): void {
+  if (!similar || similar.length === 0) return;
+  console.log(pc.yellow(`  ℹ Semantically related existing artifacts:`));
+  for (const sim of similar) {
+    console.log(`    - [${pc.yellow(sim.id)}] ${sim.title} (${Math.round(sim.score * 100)}% similarity - ${sim.filePath})`);
+  }
+}
+
 function printChangeNewSuccess(result: ReturnType<typeof scaffoldSddChange>): void {
   console.log(`  ${pc.green('✔')} Change directory:    ${pc.bold(result.changeDir)}`);
   console.log(`  ${pc.green('✔')} SDD Change ID:       ${pc.cyan(result.canonicalId)} (${result.changeId})`);
@@ -473,6 +481,7 @@ function printChangeNewSuccess(result: ReturnType<typeof scaffoldSddChange>): vo
   for (const cite of result.citedArtifacts) {
     console.log(`    - [${pc.cyan(cite.id)}] ${cite.digest.substring(0, 19)}... (${cite.title || 'Untitled'})`);
   }
+  printSimilarArtifacts(result.similarArtifacts);
   console.log(`  ${pc.green('✔')} Generated files:     ${result.createdFiles.length}`);
   console.log(pc.green('\n✔ SDD change successfully initialized and validated.\n'));
 }
@@ -496,6 +505,7 @@ function emitChangeNewJson(name: string, result: ReturnType<typeof scaffoldSddCh
     createdFiles: result.createdFiles,
     productArtifactCreated: result.productArtifactCreated,
     citedArtifacts: result.citedArtifacts,
+    ...(result.similarArtifacts ? { similarArtifacts: result.similarArtifacts } : {}),
     errors: result.errors,
   };
   console.log(JSON.stringify(payload, null, 2));

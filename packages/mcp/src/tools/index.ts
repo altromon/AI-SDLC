@@ -43,6 +43,8 @@ import {
   verifyTraceability,
   inspectElement,
   formatInspectResultMarkdown,
+  searchSpecifications,
+  formatSemanticSearchMarkdown,
   writeReleaseKpiReport,
   resolveDeterministicDate,
   type SastSeverity,
@@ -808,6 +810,27 @@ function registerInspectElementTool(server: McpServer, options: RegisterToolsOpt
   );
 }
 
+const SEARCH_SPECS_DESCRIPTION =
+  'Performs deterministic semantic search across specifications (UC-*, FR-*, SEC-REQ-*, PRIV-REQ-*, BR-*, CMP-*, ADR-*) using TF-IDF, stemming, character N-grams, and BDD Gherkin steps to prevent duplicate requirements and save context.';
+
+const SEARCH_SPECS_SCHEMA = {
+  query: z.string().describe('Natural language description, requirement text, or domain keywords to search'),
+  limit: z.number().optional().describe('Maximum number of top matches to return (default: 5)'),
+  minScore: z.number().optional().describe('Minimum semantic similarity score from 0.0 to 1.0 (default: 0.12)'),
+  types: z.array(z.string()).optional().describe('Optional filter by artifact types or ID prefixes (e.g. ["FR-", "UC-"])'),
+  root: z.string().optional().describe('Project root directory'),
+};
+
+function registerSearchSpecsTool(server: McpServer, options: RegisterToolsOptions): void {
+  server.tool('search_specs', SEARCH_SPECS_DESCRIPTION, SEARCH_SPECS_SCHEMA, async (params) =>
+    executeSecuredTool('search_specs', params, options, (root) => {
+      const { query, limit, minScore, types } = params;
+      const result = searchSpecifications(query, { rootDir: root, limit, minScore, types });
+      return { data: { ...result, markdown: formatSemanticSearchMarkdown(result) }, isError: false, root };
+    })
+  );
+}
+
 function registerVerifyTraceabilityTool(server: McpServer, options: RegisterToolsOptions): void {
   server.tool('verify_traceability', 'Audits the 360° inverted traceability matrix.', { root: z.string().optional() }, async (params) => {
     return executeSecuredTool('verify_traceability', params, options, (root) => {
@@ -1061,6 +1084,7 @@ function registerLifecycleAndSddTools(server: McpServer, options: RegisterToolsO
 
 function registerVerificationTools(server: McpServer, options: RegisterToolsOptions): void {
   registerInspectElementTool(server, options);
+  registerSearchSpecsTool(server, options);
   registerVerifyQualityTool(server, options);
   registerVerifySchemasTool(server, options);
   registerVerifySecurityTool(server, options);

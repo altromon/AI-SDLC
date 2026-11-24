@@ -24,6 +24,7 @@ export * from './verifiers/schemas.js';
 export * from './verifiers/progressive-friction.js';
 export * from './verifiers/manuals.js';
 export * from './verifiers/duplicates.js';
+export * from './verifiers/semantic-similarity.js';
 export * from './verifiers/secrets.js';
 export * from './verifiers/sast.js';
 export * from './verifiers/tool-installer.js';

@@ -23,6 +23,12 @@ import {
   DuplicateVerifierResult,
 } from '../types/index.js';
 import { walkMdFiles } from '../utils/fs.js';
+import {
+  computeIdfMap,
+  computePairwiseSemanticScore,
+  extractGherkinStepsText,
+  extractSemanticTokens,
+} from './semantic-similarity.js';
 
 const STOP_WORDS = new Set([
   // Spanish
@@ -63,6 +69,10 @@ export interface ScannedRequirement {
   cucumberTags: string[];
   canonicalHash: string;
   normalizedNormativeText: string;
+  gherkinText?: string;
+  titleSemanticTokens?: string[];
+  bodySemanticTokens?: string[];
+  gherkinSemanticTokens?: string[];
 }
 
 export function computeSha256(content: string): string {
@@ -94,13 +104,14 @@ export function calculateJaccardSimilarity(setA: Set<string>, setB: Set<string>)
 }
 
 export function extractNormativeText(body: string): string {
-  const secMatch = body.match(/##\s+1\.\s+([^\n]+)\r?\n([\s\S]*?)(?=\r?\n---|\r?\n##|$)/);
+  const withoutGherkin = body.replace(/```[\s\S]*?```/g, ' ');
+  const secMatch = withoutGherkin.match(/##\s+1\.\s+([^\n]+)\r?\n([\s\S]*?)(?=\r?\n---|\r?\n##\s+2\.|\r?\n##|$)/);
   if (secMatch) {
     return secMatch[2].trim().toLowerCase().replace(/\s+/g, ' ');
   }
-  const paragraphs = body
+  const paragraphs = withoutGherkin
     .split(/\r?\n\r?\n/)
-    .filter((p) => !p.startsWith('#') && p.trim().length > 0);
+    .filter((p) => !p.trim().startsWith('#') && p.trim().length > 0);
   return (paragraphs[0] || '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
@@ -144,6 +155,14 @@ function extractParsedFrontmatter(content: string): { fm: ArtifactFrontmatter; m
   }
 }
 
+function buildSemanticTokensForReq(title: string, normative: string, gherkin: string) {
+  return {
+    titleSemanticTokens: extractSemanticTokens(title),
+    bodySemanticTokens: extractSemanticTokens(normative),
+    gherkinSemanticTokens: extractSemanticTokens(gherkin),
+  };
+}
+
 function buildRequirementObject(
   content: string,
   fm: ArtifactFrontmatter,
@@ -151,18 +170,23 @@ function buildRequirementObject(
   filePath: string,
   relFile: string
 ): ScannedRequirement {
+  const title = String(fm.title || '').trim();
+  const normalizedNormativeText = extractNormativeText(body);
+  const gherkinText = extractGherkinStepsText(body);
   return {
     id: String(fm.id).trim(),
     file: filePath,
     relFile,
-    title: String(fm.title || '').trim(),
+    title,
     version: String(fm.version || '1.0.0').trim(),
     type: fm.type ? String(fm.type) : undefined,
     category: fm.category ? String(fm.category) : undefined,
     derivesFrom: extractFrontmatterDerives(fm['derives-from']),
     cucumberTags: extractCucumberTags(fm['cucumber-tags']),
     canonicalHash: computeSha256(content),
-    normalizedNormativeText: extractNormativeText(body),
+    normalizedNormativeText,
+    gherkinText,
+    ...buildSemanticTokensForReq(title, normalizedNormativeText, gherkinText),
   };
 }
 
@@ -247,7 +271,7 @@ function checkTitleSimilarity(
   tokensA: Set<string>,
   threshold: number,
   issues: DuplicateIssue[]
-): void {
+): boolean {
   const tokensB = tokenizeTitle(b.title);
   const similarity = calculateJaccardSimilarity(tokensA, tokensB);
   if (similarity >= threshold && tokensA.size > 0 && tokensB.size > 0) {
@@ -261,6 +285,56 @@ function checkTitleSimilarity(
       similarityScore: Math.round(similarity * 100) / 100,
       message: `Titles with high lexical redundancy (${Math.round(similarity * 100)}% similarity) between '${a.id}' ("${a.title}") and '${b.id}' ("${b.title}").`,
     });
+    return true;
+  }
+  return false;
+}
+
+function buildSemanticIssue(
+  a: ScannedRequirement,
+  b: ScannedRequirement,
+  combined: number,
+  isError: boolean
+): DuplicateIssue {
+  const pct = Math.round(combined * 100);
+  return {
+    type: isError ? 'SEMANTIC_DUPLICATE' : 'SEMANTIC_OVERLAP',
+    severity: isError ? 'ERROR' : 'WARNING',
+    id: a.id,
+    file: a.relFile,
+    conflictingId: b.id,
+    conflictingFile: b.relFile,
+    similarityScore: Math.round(combined * 100) / 100,
+    message: isError
+      ? `High semantic duplication (${pct}% TF-IDF/Gherkin similarity) between '${a.id}' and '${b.id}'.`
+      : `Semantic overlap (${pct}% TF-IDF/Gherkin similarity) detected between '${a.id}' and '${b.id}'.`,
+  };
+}
+
+function toTokenBundle(req: ScannedRequirement) {
+  return {
+    titleTokens: req.titleSemanticTokens || [],
+    bodyTokens: req.bodySemanticTokens || [],
+    gherkinTokens: req.gherkinSemanticTokens || [],
+  };
+}
+
+function checkSemanticDuplicateOrOverlap(
+  a: ScannedRequirement,
+  b: ScannedRequirement,
+  idf: Map<string, number>,
+  errorThreshold: number,
+  warningThreshold: number,
+  issues: DuplicateIssue[]
+): void {
+  const bundleA = toTokenBundle(a);
+  const bundleB = toTokenBundle(b);
+  if (bundleA.bodyTokens.length < 4 || bundleB.bodyTokens.length < 4) return;
+  const sim = computePairwiseSemanticScore(bundleA, bundleB, idf);
+  if (sim.combined >= errorThreshold) {
+    issues.push(buildSemanticIssue(a, b, sim.combined, true));
+  } else if (sim.combined >= warningThreshold) {
+    issues.push(buildSemanticIssue(a, b, sim.combined, false));
   }
 }
 
@@ -302,49 +376,70 @@ function checkSharedBusinessRules(a: ScannedRequirement, b: ScannedRequirement, 
   }
 }
 
+interface PairwiseThresholds {
+  titleThreshold: number;
+  semanticErrorThreshold: number;
+  semanticWarningThreshold: number;
+  idf: Map<string, number>;
+}
+
 function compareRequirementPair(
   a: ScannedRequirement,
   b: ScannedRequirement,
   tokensA: Set<string>,
-  threshold: number,
+  cfg: PairwiseThresholds,
   issues: DuplicateIssue[]
 ): void {
   if (a.id === b.id) return;
   if (checkExactContentCollision(a, b, issues)) return;
-  checkTitleSimilarity(a, b, tokensA, threshold, issues);
+  const hasTitleCollision = checkTitleSimilarity(a, b, tokensA, cfg.titleThreshold, issues);
+  if (!hasTitleCollision) {
+    checkSemanticDuplicateOrOverlap(a, b, cfg.idf, cfg.semanticErrorThreshold, cfg.semanticWarningThreshold, issues);
+  }
   checkBddTagCollision(a, b, issues);
   checkSharedBusinessRules(a, b, issues);
 }
 
 function checkCrossComparisons(
   requirements: ScannedRequirement[],
-  threshold: number,
+  cfg: PairwiseThresholds,
   issues: DuplicateIssue[]
 ): void {
   for (let i = 0; i < requirements.length; i++) {
     const a = requirements[i];
     const tokensA = tokenizeTitle(a.title);
     for (let j = i + 1; j < requirements.length; j++) {
-      compareRequirementPair(a, requirements[j], tokensA, threshold, issues);
+      compareRequirementPair(a, requirements[j], tokensA, cfg, issues);
     }
   }
+}
+
+function buildDuplicateThresholds(requirements: ScannedRequirement[], options: DuplicateVerifierOptions): PairwiseThresholds {
+  const corpus = requirements.map((r) => [
+    ...(r.titleSemanticTokens || []),
+    ...(r.bodySemanticTokens || []),
+    ...(r.gherkinSemanticTokens || []),
+  ]);
+  return {
+    titleThreshold: options.titleSimilarityThreshold ?? 0.85,
+    semanticErrorThreshold: options.semanticErrorThreshold ?? 0.78,
+    semanticWarningThreshold: options.semanticWarningThreshold ?? 0.65,
+    idf: computeIdfMap(corpus),
+  };
 }
 
 export function verifyArtifactDuplicates(
   options: DuplicateVerifierOptions = {}
 ): DuplicateVerifierResult {
   const rootDir = options.rootDir || process.cwd();
-  const threshold = options.titleSimilarityThreshold ?? 0.85;
-
   const requirements = collectRequirements(rootDir);
   const issues: DuplicateIssue[] = [];
 
   checkIdCollisions(requirements, issues);
-  checkCrossComparisons(requirements, threshold, issues);
+  checkCrossComparisons(requirements, buildDuplicateThresholds(requirements, options), issues);
 
   const errorCount = issues.filter((i) => i.severity === 'ERROR').length;
   const warningCount = issues.filter((i) => i.severity === 'WARNING').length;
-
   const result: DuplicateVerifierResult = {
     success: errorCount === 0,
     totalRequirements: requirements.length,
@@ -352,7 +447,6 @@ export function verifyArtifactDuplicates(
     warningCount,
     issues,
   };
-
   result.reportMarkdown = generateDuplicatesReportMarkdown(result);
   return result;
 }

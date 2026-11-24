@@ -3,10 +3,25 @@ import * as os from 'os';
 import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import {
+  buildTfIdfVector,
   calculateJaccardSimilarity,
+  computeIdfMap,
+  computePairwiseSemanticScore,
+  cosineSimilarity,
+  extractGherkinStepsText,
+  extractNormativeSection,
+  extractNormativeText,
+  extractSemanticTokens,
+  formatSemanticSearchMarkdown,
+  indexWorkspaceSpecs,
+  isRequirementArtifact,
+  normalizeText,
+  parseRequirementFile,
+  searchSpecifications,
+  stemToken,
   tokenizeTitle,
   verifyArtifactDuplicates,
-} from '../src/verifiers/duplicates.js';
+} from '../src/index.js';
 
 describe('AI-SDLC Duplicate Requirements Verifier Suite', () => {
   it('should pass with 0 errors on the canonical workspace', () => {
@@ -339,5 +354,114 @@ Cuerpo secundario.
     expect(brIssue?.severity).toBe('WARNING');
 
     fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it('should detect SEMANTIC_DUPLICATE when titles differ but normative body and Gherkin scenarios match semantically', () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-dup-sem-'));
+    const specsDir = path.join(tempDir, 'specs', 'product');
+    fs.mkdirSync(specsDir, { recursive: true });
+
+    fs.writeFileSync(
+      path.join(specsDir, 'FR-SEM-A.md'),
+      `---
+id: FR-SEM-A
+type: requirement
+title: Bloqueo de Credenciales en Perímetro
+status: active
+version: 1.0.0
+category: functional
+derives-from:
+  - UC-001
+---
+## 1. Enunciado Normativo
+El escáner de licencias CycloneDX SBOM debe codificar los identificadores PURL de paquetes Maven y Python sin heredar la licencia raíz del pom.xml.
+
+## 2. Criterios de Aceptación en Formato Gherkin (Cucumber)
+\`\`\`gherkin
+Feature: Maven PURL license validation
+  Scenario: Dependency without license in pom.xml
+    Given a pom.xml declaring root Apache-2.0 and a maven dependency without license
+    When the CycloneDX SBOM scan executes
+    Then the dependency license is UNKNOWN and purl uses pkg:maven
+\`\`\`
+`
+    );
+
+    fs.writeFileSync(
+      path.join(specsDir, 'FR-SEM-B.md'),
+      `---
+id: FR-SEM-B
+type: requirement
+title: Atribución de Paquetes en Manifiesto
+status: active
+version: 1.0.0
+category: functional
+derives-from:
+  - UC-002
+---
+## 1. Enunciado Normativo
+Durante el escaneo de licencias CycloneDX SBOM, los identificadores PURL para dependencias Maven y Python se codifican sin heredar la licencia del proyecto raíz en pom.xml.
+
+## 2. Criterios de Aceptación en Formato Gherkin (Cucumber)
+\`\`\`gherkin
+Feature: PURL and Maven license attribution
+  Scenario: Maven dependency does not inherit pom.xml license
+    Given a pom.xml with root Apache-2.0 and a maven dependency lacking license
+    When the CycloneDX SBOM scan runs
+    Then the dependency license is UNKNOWN and the purl is pkg:maven
+\`\`\`
+`
+    );
+
+    const result = verifyArtifactDuplicates({ rootDir: tempDir });
+
+    expect(result.success).toBe(false);
+    const semIssue = result.issues.find((i) => i.type === 'SEMANTIC_DUPLICATE');
+    expect(semIssue).toBeDefined();
+    expect(semIssue?.severity).toBe('ERROR');
+    expect(semIssue?.similarityScore).toBeGreaterThanOrEqual(0.78);
+
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it('should rank relevant requirements via searchSpecifications using TF-IDF, stemming, N-grams, and Gherkin steps', () => {
+    const rootDir = path.resolve(__dirname, '../../..');
+    const searchRes = searchSpecifications('resolución offline de licencias maven purl sbom cyclonedx', {
+      rootDir,
+      limit: 5,
+    });
+
+    expect(searchRes.totalIndexed).toBeGreaterThan(10);
+    expect(searchRes.matches.length).toBeGreaterThan(0);
+    const topIds = searchRes.matches.map((m) => m.id);
+    expect(
+      topIds.some((id) => id.includes('FR-054') || id.includes('FR-055') || id.includes('FR-056'))
+    ).toBe(true);
+
+    const md = formatSemanticSearchMarkdown(searchRes);
+    expect(md).toContain('Búsqueda Semántica de Especificaciones');
+    expect(md).toContain(searchRes.matches[0].id);
+
+    expect(normalizeText('  Validación Áéíóú  ')).toBe('validacion aeiou');
+    expect(stemToken('validaciones')).toBe('valid');
+    expect(extractSemanticTokens('autenticacion')).toContain('autentic');
+    expect(extractGherkinStepsText('```gherkin\nGiven a user\nWhen login\nThen ok\n```')).toContain('a user');
+    expect(extractNormativeSection('## 1. Enunciado\nEl sistema valida.\n## 2. Gherkin')).toContain('El sistema valida.');
+    expect(extractNormativeText('## 1. Enunciado\nEl sistema valida.')).toContain('el sistema valida.');
+    expect(isRequirementArtifact({ id: 'FR-001', title: 'Test' })).toBe(true);
+    expect(parseRequirementFile('non-existent.md', rootDir)).toBeNull();
+
+    const idf = computeIdfMap([['maven', 'purl'], ['maven', 'sbom']]);
+    const vecA = buildTfIdfVector(['maven', 'purl'], idf);
+    const vecB = buildTfIdfVector(['maven', 'sbom'], idf);
+    expect(cosineSimilarity(vecA, vecB)).toBeGreaterThan(0);
+    expect(
+      computePairwiseSemanticScore(
+        { titleTokens: ['maven'], bodyTokens: ['purl'], gherkinTokens: ['sbom'] },
+        { titleTokens: ['maven'], bodyTokens: ['purl'], gherkinTokens: ['sbom'] },
+        idf
+      ).combined
+    ).toBeCloseTo(1, 2);
+    expect(indexWorkspaceSpecs(rootDir, ['FR-']).length).toBeGreaterThan(0);
   });
 });

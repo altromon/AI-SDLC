@@ -327,6 +327,7 @@ export interface SddChangeScaffoldResult {
   createdFiles: string[];
   productArtifactCreated?: string;
   citedArtifacts: Array<{ id: string; digest: string; title?: string; comment?: string }>;
+  similarArtifacts?: Array<{ id: string; title: string; type: string; filePath: string; score: number }>;
   errors: string[];
 }
 
@@ -1016,6 +1017,8 @@ export type DuplicateIssueType =
   | 'ID_COLLISION'
   | 'EXACT_CONTENT'
   | 'TITLE_SIMILARITY'
+  | 'SEMANTIC_DUPLICATE'
+  | 'SEMANTIC_OVERLAP'
   | 'BDD_TAG_COLLISION'
   | 'SHARED_BUSINESS_RULE';
 
@@ -1035,7 +1038,38 @@ export interface DuplicateVerifierOptions {
   specsDir?: string;
   examplesDir?: string;
   titleSimilarityThreshold?: number; // default: 0.85
+  semanticErrorThreshold?: number; // default: 0.82
+  semanticWarningThreshold?: number; // default: 0.65
   allowWarnings?: boolean;
+}
+
+export interface SemanticSearchMatch {
+  id: string;
+  title: string;
+  type: string;
+  category?: string;
+  status?: string;
+  filePath: string;
+  score: number;
+  titleScore: number;
+  normativeScore: number;
+  gherkinScore: number;
+  matchedTerms: string[];
+  summary: string;
+  derivesFrom: string[];
+}
+
+export interface SemanticSearchOptions {
+  rootDir?: string;
+  limit?: number;
+  minScore?: number;
+  types?: string[];
+}
+
+export interface SemanticSearchResult {
+  query: string;
+  totalIndexed: number;
+  matches: SemanticSearchMatch[];
 }
 
 export interface DuplicateVerifierResult {

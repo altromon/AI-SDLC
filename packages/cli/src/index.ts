@@ -21,6 +21,7 @@ import { runMcpServer } from './commands/mcp.js';
 import { runReportCompliance, runReportDashboard, runReportQuality } from './commands/report.js';
 import { runReviewSubmit } from './commands/review.js';
 import { runInspect } from './commands/inspect.js';
+import { runSearch } from './commands/search.js';
 import { runDoctor } from './commands/doctor.js';
 import { runMigrate } from './commands/migrate.js';
 import { runChangeNew, runSddDeposit, runSddIntegrate, runSddVerify } from './commands/sdd.js';
@@ -766,6 +767,28 @@ program
   .action((element, opts) => {
     const passed = runInspect(element, {
       root: opts.root,
+      json: opts.json,
+      format: opts.format,
+    });
+    process.exit(passed ? 0 : 1);
+  });
+
+// --- search command ---
+program
+  .command('search <query>')
+  .description('Semantic search across specifications (UC-*, FR-*, SEC-REQ-*, PRIV-REQ-*, BR-*, CMP-*, ADR-*) using TF-IDF, stemming, N-grams, and Gherkin steps')
+  .option('-r, --root <path>', 'Project root directory')
+  .option('-l, --limit <number>', 'Maximum number of top matches to return', '5')
+  .option('-m, --min-score <number>', 'Minimum semantic similarity score (0.0 to 1.0)', '0.12')
+  .option('-t, --type <types...>', 'Filter by artifact type or ID prefix (e.g. requirement, use-case, FR-, UC-)')
+  .option('--json', 'Structured JSON format output')
+  .option('-F, --format <format>', 'Output format: text or json')
+  .action((query, opts) => {
+    const passed = runSearch(query, {
+      root: opts.root,
+      limit: opts.limit,
+      minScore: opts.minScore,
+      type: opts.type,
       json: opts.json,
       format: opts.format,
     });
