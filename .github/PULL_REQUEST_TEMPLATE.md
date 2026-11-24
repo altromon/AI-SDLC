@@ -2,10 +2,10 @@
 
 - **SDD Change Specification**: `specs/changes/active/<change-id>/` <!-- Link to active change directory -->
 - **PDaC Handoff Sidecar**: `specs/changes/active/<change-id>/handoff.yaml` <!-- ID: HOF-* -->
-- **Git Hierarchy Tier (4 Tiers)**:
-  - [ ] Tier 4: `task/<PARENT-ID>/<TSK-ID>-<slug>` ➔ `feat/<PARENT-ID>-<slug>`
-  - [ ] Tier 3: `feat/<FEAT-ID>-<slug>` ➔ `release/vX.Y.Z`
-  - [ ] Tier 2: `release/vX.Y.Z` ➔ `main`
+- **Branching Model (Streamlined 2-Tier & Extensions)**:
+  - [ ] Streamlined PR (Default): `feat/<CHG-ID>-<slug>` / `fix/<CHG-ID>-<slug>` ➔ `main`
+  - [ ] Milestone PR (Optional): `release/vX.Y.Z` ➔ `main` (or `feat/<CHG-ID>-<slug>` ➔ `release/vX.Y.Z`)
+  - [ ] Parallel Task Worktree (Optional): `task/<PARENT-ID>/<TSK-ID>-<slug>` ➔ `feat/<PARENT-ID>-<slug>`
 - **Linked Issues**: Closes #... / Refs #...
 
 ---
