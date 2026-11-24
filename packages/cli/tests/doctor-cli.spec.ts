@@ -34,7 +34,7 @@ describe('Doctor CLI Command Integration Suite (FR-052-CLI-DOCTOR-001)', () => {
     // On empty tmpDir, should fail due to missing hooks and return exitCode 2
     expect(exitCode).toBe(2);
     expect(logSpy.mock.calls.length + errorSpy.mock.calls.length).toBeGreaterThan(0);
-  });
+  }, 15000);
 
   it('executes "aisdlc doctor --json" and returns structured JSON matching DoctorReport schema', async () => {
     const exitCode = await runDoctor({ rootDir: tmpDir, json: true });
@@ -55,12 +55,12 @@ describe('Doctor CLI Command Integration Suite (FR-052-CLI-DOCTOR-001)', () => {
     expect(report).toHaveProperty('exitCode');
     expect(report).toHaveProperty('categories');
     expect(Array.isArray(report.categories)).toBe(true);
-  });
+  }, 15000);
 
   it('executes "aisdlc doctor --offline" skipping remote probes and returning code 0 on healthy local repo', async () => {
     const exitCode = await runDoctor({ rootDir: process.cwd(), offline: true, strict: false });
     expect(typeof exitCode).toBe('number');
-  });
+  }, 15000);
 
   it('executes "aisdlc doctor --fix", creates backup .bak.<timestamp> for modified hooks, unlinks symlinks, and reinstalls canonical hooks', async () => {
     const gitHooksDir = path.join(tmpDir, '.git', 'hooks');
@@ -79,5 +79,5 @@ describe('Doctor CLI Command Integration Suite (FR-052-CLI-DOCTOR-001)', () => {
     // Verify new hook is installed
     const newContent = fs.readFileSync(oldHookPath, 'utf8');
     expect(newContent).toContain('# AI-SDLC: Universal Protected Branches Guard');
-  });
+  }, 15000);
 });

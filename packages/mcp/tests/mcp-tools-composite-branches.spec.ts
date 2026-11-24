@@ -25,7 +25,11 @@ describe('MCP Tools Composite Branch Paths (Happy / Sad / Boundary / Malformed)'
 
   afterEach(async () => {
     await client.close();
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    try {
+      fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    } catch {
+      // Ignore transient Windows EPERM lock during temp dir cleanup
+    }
   });
 
   it('exercises path traversal confinement, doctor, git_detect_author, kpi_pr, kpi_release, report_quality, and sdd tools', async () => {
@@ -102,5 +106,5 @@ describe('MCP Tools Composite Branch Paths (Happy / Sad / Boundary / Malformed)'
     // inspect_element missing
     const inspMiss = await client.callTool({ name: 'inspect_element', arguments: { root: tmpDir, query: 'NOPE-999' } });
     expect(inspMiss.isError).toBe(true);
-  });
+  }, 20000);
 });

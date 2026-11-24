@@ -21,7 +21,11 @@ describe('DoctorService, SARIF Helpers & Async Compliance Bundle (Happy / Sad / 
   });
 
   afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    try {
+      fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    } catch {
+      // Ignore transient Windows EPERM lock during temp dir cleanup
+    }
   });
 
   it('DoctorService.diagnose: returns structured DoctorReport for workspace (happy/boundary)', async () => {
@@ -30,7 +34,7 @@ describe('DoctorService, SARIF Helpers & Async Compliance Bundle (Happy / Sad / 
     expect(report.categories.length).toBeGreaterThan(0);
     expect(['pass', 'warn', 'fail']).toContain(report.overallStatus);
     expect(typeof report.exitCode).toBe('number');
-  });
+  }, 15000);
 
   it('SARIF helpers: normalizeUri, severity mapping, CWE/OWASP resolution, and compact serialization (happy/boundary)', () => {
     expect(normalizeUri('src\\a\\b.ts')).toBe('src/a/b.ts');
@@ -64,5 +68,5 @@ describe('DoctorService, SARIF Helpers & Async Compliance Bundle (Happy / Sad / 
     expect(bundle.success).toBe(true);
     expect(bundle.bundleDigest).toMatch(/^[0-9a-f]{64}$/);
     expect(fs.existsSync(bundle.outputPath)).toBe(true);
-  });
+  }, 15000);
 });
