@@ -40,7 +40,8 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 ### Checkpoint 1: Specification & Design Checkpoint (`agent-auditor` $\parallel$ `agent-adversary`)
 1. Concurrently invoke `agent-auditor` (evaluating YAGNI, interface bloat, and task completeness) and `agent-adversary` (probing contradictions, race conditions, and architecture SPOFs) in clean, isolated context windows over the combined upstream deliverables.
 2. Consolidate findings and remediate any blocking defects (max 2 correction rounds), committing and pushing updates (`git push`) to the open Draft PR.
-3. **Human Approval Gate 1**: Present the specification and architectural design (reviewable directly in the Draft PR) for Human Tech Lead / PO sign-off before proceeding to code.
+3. **Mandatory Checkpoint 1 Deterministic Verification**: Always execute `pnpm run verify:checkpoint-1` (`tsx scripts/verify-checkpoint-1.ts`, adding `-- --with-licenses` if new dependencies or stack changes are introduced in `design.md` / `ADR-*`) to verify Gates 8 (`schemas`), 9 (`duplicates`), 7 (`pdac`), 3 (`governance`), 10 (`friction`), 12 (`privacy`), and 11 (`secrets`) pass with exit code `0` before requesting human approval.
+4. **Human Approval Gate 1**: Present the specification and architectural design (reviewable directly in the Draft PR) for Human Tech Lead / PO sign-off before proceeding to code.
 
 ### Step 3: Streamlined Git Branch Navigation & Multi-Agent Parallelism
 1. Confirm you are on the working branch via `npx aisdlc git checkout <TSK-ID>` (`pnpm run git:checkout <TSK-ID>`).
