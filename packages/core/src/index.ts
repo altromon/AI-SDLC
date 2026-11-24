@@ -877,3 +877,4 @@ export {
   writeAisdlcManifest,
 } from './version.js';
 export type { AisdlcRepoManifest } from './version.js';
+export * from './code-graph/index.js';
