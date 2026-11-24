@@ -18,8 +18,9 @@ import { ParsedFeatureDocument, ParsedStepItem, parseFeatureDocument } from './b
 const SUPPORTED_LANGUAGES: ReadonlySet<string> = new Set(['ts', 'py', 'go', 'rs', 'cs']);
 
 export function featureStem(featurePath: string): string {
-  return path
-    .basename(featurePath, path.extname(featurePath))
+  const normalized = featurePath.replace(/\\/g, '/');
+  return path.posix
+    .basename(normalized, path.posix.extname(normalized))
     .replace(/[^a-zA-Z0-9_-]/g, '_');
 }
 
