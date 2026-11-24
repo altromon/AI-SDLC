@@ -37,13 +37,13 @@ citations:
     digest: sha256:058a6b24d247f73bca48a2340cc922154b8fc4cc58011eae004efee990dc85f2
     comment: Control de seguridad FS-Jail en repoRoot e integridad de caché
   - id: SEC-REQ-065-CODE-GRAPH-SAFE-EXEC-001
-    digest: sha256:67c1cb1ed9abc23ba6153030b6a546306f434b07e590607aaca2133220015657
+    digest: sha256:aae4b17055da1d5648ba1b4452bd725308dbd91a963f64d29633e6ede385baa2
     comment: Control de seguridad para ejecución segura de toolchains nativos
   - id: PRIV-REQ-065-CODE-GRAPH-DATA-MINIMIZATION-001
     digest: sha256:bfd23a3c70a469921bb6243265426000870839926c7887d29dd99a49c869ccfb
     comment: Control de privacidad y minimización de datos AST/especificaciones
   - id: CMP-065-CODE-GRAPH-CONTEXT-ENGINE
-    digest: sha256:23bd80f03a1009ad0a7c221f3bfd872810b0badd7d91ca8a2b5d8da17031c68e
+    digest: sha256:45ca68dd086cdfcf4ce24f1b46c18e7ad5b83aa2a5712319842495f09b87e932
     comment: Componente arquitectónico hexagonal del motor de Code Graph
   - id: CMP-MCP-SERVER
     digest: sha256:db18fac8cec5598f2002bbf3f9a9b1acb3c70e01557261625372362d977a3104
