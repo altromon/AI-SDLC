@@ -13,10 +13,14 @@ describe('PR Template and Weak Points Governance Suite', () => {
     expect(fs.existsSync(githubPrTemplatePath)).toBe(true);
     const content = fs.readFileSync(githubPrTemplatePath, 'utf-8');
 
-    // Section 1: SDD Traceability & Branch Tier
+    // Section 1: SDD Traceability & Streamlined 2-Tier Branching Model
     expect(content).toMatch(/specs\/changes\/active/i);
     expect(content).toMatch(/handoff\.yaml/i);
     expect(content).toMatch(/HOF-/i);
+    expect(content).toMatch(/Streamlined 2-Tier/i);
+    expect(content).toMatch(/feat\/<CHG-ID>-<slug>/);
+    expect(content).toMatch(/fix\/<CHG-ID>-<slug>/);
+    expect(content).not.toMatch(/Git Hierarchy Tier \(4 Tiers\)/i);
 
     // Section 2: Matriz X vs O with exhaustive items rule
     expect(content).toMatch(/Plan Execution Matrix|Matriz de Ejecución del Plan/i);
@@ -52,6 +56,10 @@ describe('PR Template and Weak Points Governance Suite', () => {
     expect(fs.existsSync(sddPrTemplatePath)).toBe(true);
     const content = fs.readFileSync(sddPrTemplatePath, 'utf-8');
 
+    expect(content).toMatch(/Streamlined 2-Tier/i);
+    expect(content).toMatch(/feat\/<CHG-ID>-<slug>/);
+    expect(content).toMatch(/fix\/<CHG-ID>-<slug>/);
+    expect(content).not.toMatch(/Git Hierarchy Tier \(4 Tiers\)/i);
     expect(content).toMatch(/Plan Execution Matrix|Matriz de Ejecución del Plan/i);
     expect(content).toMatch(/\[X\]/);
     expect(content).toMatch(/\[O\]/);

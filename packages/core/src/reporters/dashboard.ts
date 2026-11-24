@@ -201,7 +201,7 @@ function collectGitPrefixedBranches(rootDir: string): string[] {
     return raw
       .split('\n')
       .map((s) => s.trim())
-      .filter((b) => b.startsWith('feat/') || b.startsWith('bug/') || b.startsWith('task/') || b.startsWith('release/'));
+      .filter((b) => b.startsWith('feat/') || b.startsWith('fix/') || b.startsWith('bug/') || b.startsWith('task/') || b.startsWith('release/'));
   } catch {
     return [];
   }
@@ -225,7 +225,7 @@ function addCommitTrailerBranches(allRepoCommits: CommitKpiRecord[] | undefined,
   if (!allRepoCommits) return;
   for (const c of allRepoCommits) {
     const pRef = c.trailers?.parentRef;
-    if (pRef && /^(feat|bug|task|release)\//i.test(pRef)) {
+    if (pRef && /^(feat|fix|bug|task|release)\//i.test(pRef)) {
       branchSet.add(pRef);
     }
   }
@@ -281,7 +281,7 @@ function fetchMergedBranchKpi(
   allRepoCommits?: CommitKpiRecord[]
 ): PrKpiAggregation | null {
   if (!allRepoCommits || allRepoCommits.length === 0) return null;
-  const branchBase = branch.replace(/^(feat|bug|task|release)\//i, '');
+  const branchBase = branch.replace(/^(feat|fix|bug|task|release)\//i, '');
   const matched = allRepoCommits.filter((c) => isCommitMatchingBranch(c, branch, branchBase));
   return matched.length > 0 ? aggregateCommitKpiRecords(matched, 'main', branch) : null;
 }
