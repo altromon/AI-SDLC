@@ -16,12 +16,12 @@ const ALLOWED_TOOLS = new Set<string>(['node', 'pnpm', 'git', 'semgrep', 'trivy'
 const DANGEROUS_KEYS = ['NODE_OPTIONS', 'NODE_PATH', 'LD_PRELOAD', 'DYLD_INSERT_LIBRARIES', 'GIT_EXEC_PATH'];
 const SAFE_KEYS = ['PATH', 'Path', 'SYSTEMROOT', 'SystemRoot', 'TMP', 'TEMP', 'HOME', 'USERPROFILE', 'ComSpec', 'COMSPEC'];
 
-function normalizePathKey(target: string): string {
+export function normalizePathKey(target: string): string {
   const resolved = path.resolve(target);
   return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
 }
 
-function sanitizePathValue(rawPath: string, cwd?: string): string {
+export function sanitizePathValue(rawPath: string, cwd?: string): string {
   const normalizedCwd = cwd ? normalizePathKey(cwd) : undefined;
   return rawPath
     .split(path.delimiter)
@@ -47,18 +47,18 @@ export function buildSafeEnvironment(cwd?: string): NodeJS.ProcessEnv {
   return env;
 }
 
-function truncateBuffer(output: unknown, limit: number): string {
+export function truncateBuffer(output: unknown, limit: number): string {
   const text = typeof output === 'string' ? output : (output ? String(output) : '');
   return text.length > limit ? text.slice(0, limit) : text;
 }
 
-function resolveExitCode(error: unknown): number | null {
+export function resolveExitCode(error: unknown): number | null {
   if (!error) return 0;
   const err = error as { killed?: boolean; code?: number };
   return err.killed ? null : (typeof err.code === 'number' ? err.code : 1);
 }
 
-function runSpawn(
+export function runSpawn(
   file: string,
   args: string[],
   cwd: string,

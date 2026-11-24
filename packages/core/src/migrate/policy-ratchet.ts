@@ -36,7 +36,7 @@ interface PolicyPayload {
   [key: string]: unknown;
 }
 
-function mergeCoverage(localCov: CoveragePolicy | undefined, upstreamCov: CoveragePolicy | undefined, allowDowngrade?: boolean): CoveragePolicy | undefined {
+export function mergeCoverage(localCov: CoveragePolicy | undefined, upstreamCov: CoveragePolicy | undefined, allowDowngrade?: boolean): CoveragePolicy | undefined {
   if (!localCov && !upstreamCov) return undefined;
   const result: CoveragePolicy = { ...upstreamCov };
   const localMin = localCov?.min;
@@ -53,7 +53,7 @@ function mergeCoverage(localCov: CoveragePolicy | undefined, upstreamCov: Covera
   return result;
 }
 
-function mergeComplexity(localComp: ComplexityPolicy | undefined, upstreamComp: ComplexityPolicy | undefined): ComplexityPolicy | undefined {
+export function mergeComplexity(localComp: ComplexityPolicy | undefined, upstreamComp: ComplexityPolicy | undefined): ComplexityPolicy | undefined {
   if (!localComp && !upstreamComp) return undefined;
   const result: ComplexityPolicy = { ...upstreamComp };
   const localCyclo = localComp?.maxCyclomatic;
@@ -67,7 +67,7 @@ function mergeComplexity(localComp: ComplexityPolicy | undefined, upstreamComp: 
   return result;
 }
 
-function mergeLicenses(localLicenses: LicenseSection | undefined, upstreamLicenses: LicenseSection | undefined): LicenseSection | undefined {
+export function mergeLicenses(localLicenses: LicenseSection | undefined, upstreamLicenses: LicenseSection | undefined): LicenseSection | undefined {
   if (!localLicenses?.blocked && !upstreamLicenses?.blocked) return upstreamLicenses;
   const upstreamBlocked = (upstreamLicenses?.blocked || []).map((l: string) => l.toUpperCase());
   const localBlocked = (localLicenses?.blocked || []).map((l: string) => l.toUpperCase());
@@ -77,7 +77,7 @@ function mergeLicenses(localLicenses: LicenseSection | undefined, upstreamLicens
   };
 }
 
-function mergeDlpRules(localRules: DlpRule[] | undefined, upstreamRules: DlpRule[] | undefined): DlpRule[] | undefined {
+export function mergeDlpRules(localRules: DlpRule[] | undefined, upstreamRules: DlpRule[] | undefined): DlpRule[] | undefined {
   if (!localRules) return upstreamRules;
   const mergedRules = [...(upstreamRules || [])];
   const existingIds = new Set(mergedRules.map(r => r.id));
@@ -90,7 +90,7 @@ function mergeDlpRules(localRules: DlpRule[] | undefined, upstreamRules: DlpRule
   return mergedRules;
 }
 
-function validateNumericField(val: unknown, fieldName: string): void {
+export function validateNumericField(val: unknown, fieldName: string): void {
   if (val !== undefined && (typeof val !== 'number' || Number.isNaN(val))) {
     throw new Error(`ERR_INVALID_POLICY_FORMAT: ${fieldName} must be a valid number`);
   }
