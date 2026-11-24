@@ -10,15 +10,18 @@ import type { RegisterToolsOptions } from './security.js';
 import { registerLifecycleAndSddTools } from './lifecycle.js';
 import { registerVerificationTools } from './verification.js';
 import { registerReportingAndKpiTools } from './reporting.js';
+import { registerCodeGraphTools } from './code-graph.js';
 
 export * from './security.js';
 export * from './composite-gates.js';
 export * from './lifecycle.js';
 export * from './verification.js';
 export * from './reporting.js';
+export * from './code-graph.js';
 
 export function registerAllTools(server: McpServer, options: RegisterToolsOptions = {}): void {
   registerLifecycleAndSddTools(server, options);
   registerVerificationTools(server, options);
   registerReportingAndKpiTools(server, options);
+  registerCodeGraphTools(server, options);
 }
