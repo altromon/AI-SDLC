@@ -110,20 +110,20 @@ rules:
       });
     });
 
-    it('handles null, undefined, string, and malformed JSON-breaking replacement in sanitizeDlpPayload (boundary/malformed)', () => {
+    it('handles null, undefined, string, and quote-containing replacement without failing open in sanitizeDlpPayload (boundary/malformed)', () => {
       const defaultPolicy = createDefaultDlpPolicy();
       expect(sanitizeDlpPayload(null, defaultPolicy)).toBeNull();
       expect(sanitizeDlpPayload(undefined, defaultPolicy)).toBeUndefined();
       expect(sanitizeDlpPayload('user@acme.io', defaultPolicy)).toBe('[REDACTED:EMAIL]');
 
-      const breakingPolicy = parseDlpPolicy(`
+      const quotePolicy = parseDlpPolicy(`
 rules:
-  - id: BREAK-JSON
+  - id: QUOTE-REPLACE
     pattern: "foo"
     replacement: '"'
 `);
       const original = { key: 'foo' };
-      expect(sanitizeDlpPayload(original, breakingPolicy)).toEqual(original);
+      expect(sanitizeDlpPayload(original, quotePolicy)).toEqual({ key: '"' });
     });
   });
 });

@@ -4,6 +4,7 @@
  * with strict Fail-Closed enforcement for configured toolchain stacks.
  */
 
+import * as path from 'path';
 import { spawnSync } from 'child_process';
 import { LanguageAstReport } from '../../types/index.js';
 import { extractFunctionsTypeScriptAst } from './typescript-ast.js';
@@ -24,14 +25,14 @@ export function isCliInstalled(bin: string): boolean {
   }
 }
 
-function assertRequiredStack(stack?: string): void {
+export function assertRequiredStack(stack?: string): void {
   if (!stack) return;
   if (!isCliInstalled(stack)) {
     throw new Error(`[AI-SDLC Fail-Closed] Required toolchain CLI '${stack}' is not installed in the environment`);
   }
 }
 
-function analyzeTypeScript(content: string, filePath: string): LanguageAstReport {
+export function analyzeTypeScript(content: string, filePath: string): LanguageAstReport {
   return {
     language: 'typescript',
     filePath,
@@ -41,7 +42,7 @@ function analyzeTypeScript(content: string, filePath: string): LanguageAstReport
   };
 }
 
-function analyzePolyglot(content: string, filePath: string, ext: string): LanguageAstReport {
+export function analyzePolyglot(content: string, filePath: string, ext: string): LanguageAstReport {
   return {
     language: ext.replace(/^\./, ''),
     filePath,
@@ -57,7 +58,7 @@ export function orchestrateNativeAstAnalysis(
   options: NativeAstOptions = {}
 ): LanguageAstReport {
   assertRequiredStack(options.requiredStack);
-  const ext = filePath.substring(filePath.lastIndexOf('.')).toLowerCase();
+  const ext = path.extname(filePath).toLowerCase();
   if (['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'].includes(ext)) {
     return analyzeTypeScript(content, filePath);
   }

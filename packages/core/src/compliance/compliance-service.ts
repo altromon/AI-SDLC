@@ -22,11 +22,14 @@ import { canonicalizeJson, InTotoAttestationBuilder } from './intoto-builder.js'
 import { DlpSanitizer } from './dlp-sanitizer.js';
 
 // Retrieve Git HEAD commit SHA or fallback
-function getGitHeadSha(rootDir: string): string {
+export function getGitHeadSha(rootDir: string): string {
+  if (!rootDir || !fs.existsSync(rootDir)) {
+    return '0000000000000000000000000000000000000000';
+  }
   // Execute git rev-parse HEAD safely
   try {
     const out = execSync('git rev-parse HEAD', { cwd: rootDir, stdio: ['ignore', 'pipe', 'ignore'] });
-    return out.toString().trim();
+    return out.toString().trim() || '0000000000000000000000000000000000000000';
   } catch {
     // Return mock SHA for non-git environments
     return '0000000000000000000000000000000000000000';
@@ -34,13 +37,34 @@ function getGitHeadSha(rootDir: string): string {
 }
 
 // Compute SHA-256 hexadecimal string
-function computeSha256(content: string): string {
+export function computeSha256(content: string): string {
   // Create standard sha256 hash
   return crypto.createHash('sha256').update(content, 'utf-8').digest('hex');
 }
 
+// Normalize and validate parsed gate report JSON (fail closed on malformed payloads)
+export function normalizeParsedGateReport(
+  gate: QualityGateId,
+  parsed: unknown,
+  currentSha: string
+): GateEvidenceReport | null {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return null;
+  }
+  const record = parsed as Record<string, unknown>;
+  const verdict = typeof record.verdict === 'string' && record.verdict ? record.verdict : 'PASS';
+  const commitSha = typeof record.commitSha === 'string' && record.commitSha ? record.commitSha : currentSha;
+  return {
+    gateId: gate,
+    verdict: verdict as GateEvidenceReport['verdict'],
+    commitSha,
+    findings: Array.isArray(record.findings) ? (record.findings as GateEvidenceReport['findings']) : [],
+    diagnostics: Array.isArray(record.diagnostics) ? (record.diagnostics as string[]) : [],
+  };
+}
+
 // Read gate report file from disk
-function readGateReportFile(reportsDir: string, gate: QualityGateId, currentSha: string): GateEvidenceReport | null {
+export function readGateReportFile(reportsDir: string, gate: QualityGateId, currentSha: string): GateEvidenceReport | null {
   // Construct absolute file path
   const reportPath = path.join(reportsDir, `${gate}-report.json`);
   if (!fs.existsSync(reportPath)) {
@@ -50,24 +74,17 @@ function readGateReportFile(reportsDir: string, gate: QualityGateId, currentSha:
   // Try reading and parsing report json
   try {
     const content = fs.readFileSync(reportPath, 'utf-8');
-    const parsed = JSON.parse(content);
-    return {
-      gateId: gate,
-      verdict: parsed.verdict || 'PASS',
-      commitSha: parsed.commitSha || currentSha,
-      findings: parsed.findings || [],
-      diagnostics: parsed.diagnostics || [],
-    };
+    return normalizeParsedGateReport(gate, JSON.parse(content), currentSha);
   } catch {
-    // Fallback on read error
-    return { gateId: gate, verdict: 'PASS', commitSha: currentSha };
+    // Fail closed on corrupt or unreadable report files
+    return null;
   }
 }
 
 // Resolve evidence reports from options or file system
-function resolveEvidenceReports(options: ComplianceBundleOptions, currentSha: string): GateEvidenceReport[] {
-  // Check if caller passed in-memory evidence reports
-  if (options.evidenceReports && options.evidenceReports.length > 0) {
+export function resolveEvidenceReports(options: ComplianceBundleOptions, currentSha: string): GateEvidenceReport[] {
+  // Check if caller passed in-memory evidence reports (including explicit empty array)
+  if (Array.isArray(options.evidenceReports)) {
     return options.evidenceReports;
   }
   // Base reports directory
@@ -89,7 +106,7 @@ function resolveEvidenceReports(options: ComplianceBundleOptions, currentSha: st
 }
 
 // Validate freshness against git HEAD and completeness of 12 gates
-function validateReportsFreshnessAndCompleteness(
+export function validateReportsFreshnessAndCompleteness(
   reports: GateEvidenceReport[],
   currentSha: string,
   strict?: boolean
@@ -116,7 +133,7 @@ function validateReportsFreshnessAndCompleteness(
 }
 
 // Populate Oscal findings and results
-function populateOscal(
+export function populateOscal(
   reports: GateEvidenceReport[],
   sanitizer: DlpSanitizer,
   builder: OscalAssessmentBuilder
@@ -125,7 +142,8 @@ function populateOscal(
   let total = 0;
   for (const report of reports) {
     // Sanitize finding objects
-    const clean = sanitizer.sanitizeObject(report.findings || []);
+    const rawFindings = Array.isArray(report.findings) ? report.findings : [];
+    const clean = sanitizer.sanitizeObject(rawFindings);
     total += clean.length;
     builder.addResult({ gateId: report.gateId, verdict: report.verdict, findings: clean });
   }
@@ -133,7 +151,7 @@ function populateOscal(
 }
 
 // Configure in-toto attestation builder
-function configureInToto(
+export function configureInToto(
   builder: InTotoAttestationBuilder,
   count: number,
   currentSha: string
@@ -148,7 +166,7 @@ function configureInToto(
 }
 
 // Construct compliance payload
-function createBundlePayload(
+export function createBundlePayload(
   oscalBuilder: OscalAssessmentBuilder,
   inTotoBuilder: InTotoAttestationBuilder,
   mapper: RegulatoryControlMapper
@@ -180,7 +198,7 @@ function createBundlePayload(
 }
 
 // Persist canonical JSON bundle to filesystem
-function writeBundleToDisk(outputPath: string, content: string): void {
+export function writeBundleToDisk(outputPath: string, content: string): void {
   // Ensure target folder exists
   const parentDir = path.dirname(outputPath);
   if (!fs.existsSync(parentDir)) {

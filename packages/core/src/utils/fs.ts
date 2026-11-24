@@ -87,10 +87,17 @@ export function stripVolatileReportMetadata(content: string, _ext = ''): string 
   return normalized.trim();
 }
 
-function areCycloneDxSbomsEqual(existingContent: string, newContent: string): boolean {
+export function isPlainJsonObject(val: unknown): val is Record<string, unknown> {
+  if (typeof val !== 'object' || val === null || Array.isArray(val)) return false;
+  const proto = Object.getPrototypeOf(val);
+  return proto === Object.prototype || proto === null;
+}
+
+export function areCycloneDxSbomsEqual(existingContent: string, newContent: string): boolean {
   try {
-    const a = JSON.parse(existingContent);
-    const b = JSON.parse(newContent);
+    const a: unknown = JSON.parse(existingContent);
+    const b: unknown = JSON.parse(newContent);
+    if (!isPlainJsonObject(a) || !isPlainJsonObject(b)) return false;
     return (
       a.serialNumber === b.serialNumber &&
       JSON.stringify(a.components) === JSON.stringify(b.components) &&
@@ -101,11 +108,14 @@ function areCycloneDxSbomsEqual(existingContent: string, newContent: string): bo
   }
 }
 
-function areSarifReportsEqual(existingContent: string, newContent: string): boolean {
+export function areSarifReportsEqual(existingContent: string, newContent: string): boolean {
   try {
-    const a = JSON.parse(existingContent);
-    const b = JSON.parse(newContent);
-    return JSON.stringify(a.runs?.[0]?.results || []) === JSON.stringify(b.runs?.[0]?.results || []);
+    const a: unknown = JSON.parse(existingContent);
+    const b: unknown = JSON.parse(newContent);
+    if (!isPlainJsonObject(a) || !isPlainJsonObject(b)) return false;
+    const aRuns = Array.isArray(a.runs) ? (a.runs as Array<{ results?: unknown[] }>) : [];
+    const bRuns = Array.isArray(b.runs) ? (b.runs as Array<{ results?: unknown[] }>) : [];
+    return JSON.stringify(aRuns[0]?.results || []) === JSON.stringify(bRuns[0]?.results || []);
   } catch {
     return false;
   }
@@ -134,7 +144,7 @@ export function isReportContentSemanticallyEqual(
   return stripVolatileReportMetadata(existingContent, ext) === stripVolatileReportMetadata(newContent, ext);
 }
 
-function atomicWriteFile(filePath: string, content: string): void {
+export function atomicWriteFile(filePath: string, content: string): void {
   const tempPath = `${filePath}.${process.pid}.${Math.random().toString(36).substring(2)}.tmp`;
   try {
     fs.writeFileSync(tempPath, content, 'utf-8');
@@ -149,6 +159,12 @@ function atomicWriteFile(filePath: string, content: string): void {
     }
   } catch {
     fs.writeFileSync(filePath, content, 'utf-8');
+  } finally {
+    try {
+      fs.rmSync(tempPath, { force: true });
+    } catch {
+      // Ignore cleanup errors
+    }
   }
 }
 

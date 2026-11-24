@@ -16,7 +16,7 @@ export const BRANCH_PATTERNS = {
   TASK: /^task\/([a-zA-Z0-9]+-[a-zA-Z0-9-]+)\/([a-zA-Z0-9]+-[a-zA-Z0-9-]+)$/,
 } as const;
 
-function classifyTier1And2(branchName: string): BranchClassificationResult | null {
+export function classifyTier1And2(branchName: string): BranchClassificationResult | null {
   if (BRANCH_PATTERNS.MAIN.test(branchName)) {
     return {
       valid: true,
@@ -44,7 +44,7 @@ const TIER_3_CONFIGS = [
   { regex: BRANCH_PATTERNS.PATCH, tierName: 'Patch (Parche Rápido)', parentReq: 'Debe originarse desde una rama release/vX.Y.Z activa o main según criticidad', merge: 'release/vX.Y.Z o main' },
 ];
 
-function classifyTier3(branchName: string): BranchClassificationResult | null {
+export function classifyTier3(branchName: string): BranchClassificationResult | null {
   for (const cfg of TIER_3_CONFIGS) {
     const m = branchName.match(cfg.regex);
     if (m) {
@@ -61,7 +61,7 @@ function classifyTier3(branchName: string): BranchClassificationResult | null {
   return null;
 }
 
-function classifyTier4(branchName: string): BranchClassificationResult | null {
+export function classifyTier4(branchName: string): BranchClassificationResult | null {
   const taskMatch = branchName.match(BRANCH_PATTERNS.TASK);
   if (taskMatch) {
     return {
@@ -90,7 +90,7 @@ export function classifyBranch(branchName: string): BranchClassificationResult {
   );
 }
 
-function buildTaskBranchLines(feature: string, tasks: string[], fBranch: string): string[] {
+export function buildTaskBranchLines(feature: string, tasks: string[], fBranch: string): string[] {
   const lines: string[] = [];
   const parentSlug = feature.split('-').slice(0, 2).join('-');
   for (const t of tasks) {
@@ -103,7 +103,7 @@ function buildTaskBranchLines(feature: string, tasks: string[], fBranch: string)
 
 const PLAN_BANNER = '================================================================';
 
-function buildPlanHeader(vBranch: string, fBranch: string): string[] {
+export function buildPlanHeader(vBranch: string, fBranch: string): string[] {
   return [
     PLAN_BANNER,
     'AI-SDLC: Plan de Ramificación Jerárquico',
@@ -120,7 +120,8 @@ export function generateBranchHierarchyPlan(
   feature: string,
   tasks: string[]
 ): BranchHierarchyPlan {
-  const vBranch = `release/${version}`;
+  const v = version.startsWith('v') ? version : `v${version}`;
+  const vBranch = `release/${v}`;
   const fBranch = `feat/${feature}`;
 
   const header = buildPlanHeader(vBranch, fBranch);

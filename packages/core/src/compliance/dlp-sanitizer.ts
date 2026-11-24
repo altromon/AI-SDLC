@@ -5,9 +5,9 @@
 
 export class DlpSanitizer {
   private uriCredsRegex = /:\/\/[^:/@\s]+:[^/@\s]+@/g;
-  private bearerTokenRegex = /Bearer\s+[A-Za-z0-9\-._~+/]+=*/g;
+  private bearerTokenRegex = /Bearer\s+[A-Za-z0-9\-._~+/]+=*/gi;
   private pemKeyRegex = /-----BEGIN\s+(?:[A-Z0-9_-]+\s+)?PRIVATE KEY-----[\s\S]*?-----END\s+(?:[A-Z0-9_-]+\s+)?PRIVATE KEY-----/g;
-  private emailRegex = /\b[A-Za-z0-9._%+-]+@(?!example\.com|localhost|test\.local)[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
+  private emailRegex = /\b[A-Za-z0-9._%+-]+@(?!(?:example\.com|localhost|test\.local)(?![A-Za-z0-9.-]))[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
 
   sanitizeText(text: string): string {
     if (!text || typeof text !== 'string') return text;

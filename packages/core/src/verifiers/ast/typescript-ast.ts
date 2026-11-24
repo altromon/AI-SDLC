@@ -4,7 +4,7 @@
  */
 
 import * as path from 'path';
-import { Node, Project, SyntaxKind } from 'ts-morph';
+import { Node, Project, SourceFile, SyntaxKind } from 'ts-morph';
 import { FunctionMetrics } from '../../types/index.js';
 
 const CYCLOMATIC_KINDS = new Set<SyntaxKind>([
@@ -27,7 +27,7 @@ const LOGICAL_BINARY_OPS = new Set<SyntaxKind>([
 
 let sharedProject: Project | null = null;
 
-function getSharedProject(): Project {
+export function getSharedProject(): Project {
   if (!sharedProject) {
     sharedProject = new Project({
       useInMemoryFileSystem: true,
@@ -37,7 +37,7 @@ function getSharedProject(): Project {
   return sharedProject;
 }
 
-function resolveDeclarationName(node: Node): string | null {
+export function resolveDeclarationName(node: Node): string | null {
   if (
     Node.isFunctionDeclaration(node) ||
     Node.isMethodDeclaration(node) ||
@@ -51,7 +51,7 @@ function resolveDeclarationName(node: Node): string | null {
   return null;
 }
 
-function resolveExpressionParentName(parent: Node): string {
+export function resolveExpressionParentName(parent: Node): string {
   if (Node.isVariableDeclaration(parent) || Node.isPropertyAssignment(parent)) {
     return parent.getName();
   }
@@ -65,7 +65,7 @@ function resolveExpressionParentName(parent: Node): string {
   return 'anonymous';
 }
 
-function resolveFunctionName(node: Node): string {
+export function resolveFunctionName(node: Node): string {
   const declName = resolveDeclarationName(node);
   if (declName) return declName;
 
@@ -73,7 +73,7 @@ function resolveFunctionName(node: Node): string {
   return parent ? resolveExpressionParentName(parent) : 'anonymous';
 }
 
-function isBranchNode(kind: SyntaxKind, child: Node): boolean {
+export function isBranchNode(kind: SyntaxKind, child: Node): boolean {
   if (CYCLOMATIC_KINDS.has(kind)) return true;
   if (kind === SyntaxKind.BinaryExpression) {
     const binExpr = child.asKind(SyntaxKind.BinaryExpression);
@@ -82,10 +82,13 @@ function isBranchNode(kind: SyntaxKind, child: Node): boolean {
   return false;
 }
 
-function computeCyclomaticFromAst(node: Node): number {
+export function computeCyclomaticFromAst(node: Node): number {
   let complexity = 1;
-  node.forEachDescendant((child) => {
-    if (isNestedFunctionBoundary(child, node)) return;
+  node.forEachDescendant((child, traversal) => {
+    if (isNestedFunctionBoundary(child, node)) {
+      traversal.skip();
+      return;
+    }
     if (isBranchNode(child.getKind(), child)) {
       complexity++;
     }
@@ -93,7 +96,7 @@ function computeCyclomaticFromAst(node: Node): number {
   return complexity;
 }
 
-function isNestedFunctionBoundary(child: Node, root: Node): boolean {
+export function isNestedFunctionBoundary(child: Node, root: Node): boolean {
   if (child === root) return false;
   return (
     Node.isFunctionDeclaration(child) ||
@@ -102,7 +105,7 @@ function isNestedFunctionBoundary(child: Node, root: Node): boolean {
   );
 }
 
-function computeCognitiveFromAst(node: Node, currentNesting = 0): number {
+export function computeCognitiveFromAst(node: Node, currentNesting = 0): number {
   let cognitive = 0;
   for (const child of node.getChildren()) {
     const kind = child.getKind();
@@ -120,7 +123,7 @@ function computeCognitiveFromAst(node: Node, currentNesting = 0): number {
   return cognitive;
 }
 
-function calculateLocAndHalstead(fullText: string, cyclomatic: number): { loc: number; mi: number } {
+export function calculateLocAndHalstead(fullText: string, cyclomatic: number): { loc: number; mi: number } {
   const allLines = fullText.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0);
   const commentLines = allLines.filter((l) => l.startsWith('//') || l.startsWith('/*') || l.startsWith('*')).length;
   const loc = Math.max(1, allLines.length - commentLines);
@@ -144,11 +147,11 @@ const TEST_FILE_PATTERN = /(?:^|\/)(?:tests|__tests__|fixtures)\/|\.(?:spec|test
 const EMPTY_UI_HANDLER_PATTERN = /\bon[A-Z]\w*\s*=\s*\{\s*(?:\([^)]*\)\s*=>\s*\{\s*\}|function\s*\([^)]*\)\s*\{\s*\})\s*\}/;
 const FAKE_WIRING_STUB_PATTERN = /(?:\/\/\s*T[O]DO:\s*(?:connect|wire|integrate)\b|\b(?:m[o]ckData|F[A]KE_DATA)\b)/i;
 
-function isProductionFile(filePath: string): boolean {
+export function isProductionFile(filePath: string): boolean {
   return !TEST_FILE_PATTERN.test(filePath.replace(/\\/g, '/'));
 }
 
-function detectAstCodeSmells(node: Node, fullText: string, filePath: string): string[] {
+export function detectAstCodeSmells(node: Node, fullText: string, filePath: string): string[] {
   const smells: string[] = [];
   if (node.getDescendantsOfKind(SyntaxKind.AnyKeyword).length > 0) {
     smells.push('Uso prohibido de "any"');
@@ -167,7 +170,7 @@ function detectAstCodeSmells(node: Node, fullText: string, filePath: string): st
   return smells;
 }
 
-function isDeclarationFunction(node: Node): boolean {
+export function isDeclarationFunction(node: Node): boolean {
   return (
     Node.isFunctionDeclaration(node) ||
     Node.isMethodDeclaration(node) ||
@@ -177,7 +180,7 @@ function isDeclarationFunction(node: Node): boolean {
   );
 }
 
-function isAnalyzableArrowOrExpr(node: Node): boolean {
+export function isAnalyzableArrowOrExpr(node: Node): boolean {
   if (!Node.isArrowFunction(node) && !Node.isFunctionExpression(node)) return false;
   const parent = node.getParent();
   if (!parent) return false;
@@ -188,11 +191,11 @@ function isAnalyzableArrowOrExpr(node: Node): boolean {
   return false;
 }
 
-function isAnalyzableFunction(node: Node): boolean {
+export function isAnalyzableFunction(node: Node): boolean {
   return isDeclarationFunction(node) || isAnalyzableArrowOrExpr(node);
 }
 
-function buildNodeMetrics(node: Node, filePath: string): FunctionMetrics {
+export function buildNodeMetrics(node: Node, filePath: string): FunctionMetrics {
   const functionName = resolveFunctionName(node);
   const cyclomatic = computeCyclomaticFromAst(node);
   const cognitive = computeCognitiveFromAst(node);
@@ -205,13 +208,13 @@ function buildNodeMetrics(node: Node, filePath: string): FunctionMetrics {
 }
 
 
-function createTempSourceFile(project: Project, content: string, filePath: string) {
+export function createTempSourceFile(project: Project, content: string, filePath: string): SourceFile {
   const ext = path.extname(filePath).toLowerCase() || '.ts';
   const fileName = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}${ext}`;
   return project.createSourceFile(fileName, content, { overwrite: true });
 }
 
-function createFallbackModuleMetrics(filePath: string, smells: string[]): FunctionMetrics[] {
+export function createFallbackModuleMetrics(filePath: string, smells: string[]): FunctionMetrics[] {
   return [
     {
       functionName: 'main_module',

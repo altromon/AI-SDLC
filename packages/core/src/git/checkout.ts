@@ -14,7 +14,7 @@ import {
   GitCheckoutTaskResult,
 } from '../types/index.js';
 
-interface RawTasksFrontmatter {
+export interface RawTasksFrontmatter {
   id?: string;
   'change-id'?: string;
   changeId?: string;
@@ -36,23 +36,30 @@ export interface TaskLocateResult {
   error?: string;
 }
 
-function resolveVersionFromProposal(changeDir: string): string {
+export function resolveVersionFromProposal(changeDir: string): string {
   const proposalFile = path.join(changeDir, 'proposal.md');
   if (!fs.existsSync(proposalFile)) return '1.0.0';
-  const propContent = fs.readFileSync(proposalFile, 'utf-8');
-  const propFm = propContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!propFm) return '1.0.0';
-  const parsedProp = yaml.load(propFm[1]) as Record<string, unknown>;
-  return parsedProp?.version ? String(parsedProp.version) : '1.0.0';
+  try {
+    const propContent = fs.readFileSync(proposalFile, 'utf-8');
+    const propFm = propContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!propFm) return '1.0.0';
+    const parsedProp = yaml.load(propFm[1]) as Record<string, unknown>;
+    const rawVersion = String(parsedProp?.version ?? '').trim();
+    return rawVersion || '1.0.0';
+  } catch {
+    return '1.0.0';
+  }
 }
 
-function resolveChangeVersion(fm: RawTasksFrontmatter, changeDir: string): string {
-  if (fm.version) return String(fm.version);
-  if (fm['target-release'] || fm.release) return String(fm['target-release'] || fm.release);
+export function resolveChangeVersion(fm: RawTasksFrontmatter, changeDir: string): string {
+  const explicit = String(fm.version ?? '').trim();
+  if (explicit) return explicit;
+  const target = String(fm['target-release'] ?? '').trim() || String(fm.release ?? '').trim();
+  if (target) return target;
   return resolveVersionFromProposal(changeDir);
 }
 
-function isTaskMatchingId(currentId: string, cleanTaskId: string): boolean {
+export function isTaskMatchingId(currentId: string, cleanTaskId: string): boolean {
   const targetLower = cleanTaskId.toLowerCase();
   const currentLower = currentId.toLowerCase();
   return (
@@ -62,7 +69,7 @@ function isTaskMatchingId(currentId: string, cleanTaskId: string): boolean {
   );
 }
 
-function parseTasksFrontmatter(tasksFile: string): RawTasksFrontmatter | null {
+export function parseTasksFrontmatter(tasksFile: string): RawTasksFrontmatter | null {
   if (!fs.existsSync(tasksFile)) return null;
   try {
     const content = fs.readFileSync(tasksFile, 'utf-8');
@@ -75,11 +82,11 @@ function parseTasksFrontmatter(tasksFile: string): RawTasksFrontmatter | null {
   }
 }
 
-function resolveRawChangeId(fm: RawTasksFrontmatter, entryName: string): string {
+export function resolveRawChangeId(fm: RawTasksFrontmatter, entryName: string): string {
   return String(fm['change-id'] || fm.changeId || entryName.replace(/^(chg|CHG)-/i, 'CHG-').toUpperCase());
 }
 
-function buildTaskMatch(currentId: string, currentTitle: string, rawChangeId: string, changeDir: string, versionStr: string): ActiveTaskMatch {
+export function buildTaskMatch(currentId: string, currentTitle: string, rawChangeId: string, changeDir: string, versionStr: string): ActiveTaskMatch {
   return {
     taskId: currentId,
     taskTitle: currentTitle,
@@ -89,7 +96,7 @@ function buildTaskMatch(currentId: string, currentTitle: string, rawChangeId: st
   };
 }
 
-function inspectChangeTasks(
+export function inspectChangeTasks(
   changeDir: string,
   entryName: string,
   cleanTaskId: string,
@@ -103,8 +110,8 @@ function inspectChangeTasks(
 
   let match: ActiveTaskMatch | undefined;
   for (const t of fm.tasks) {
-    if (!t?.id) continue;
-    const currentId = String(t.id).trim();
+    const currentId = typeof t?.id === 'string' ? t.id.trim() : '';
+    if (!currentId) continue;
     const currentTitle = String(t.title || '').trim();
     availableTasks.push({ id: currentId, title: currentTitle, changeId: rawChangeId });
 
@@ -157,38 +164,43 @@ export function locateTaskInActiveChanges(
   };
 }
 
-function getGitBranchList(rootDir: string): string[] {
+export function getGitBranchList(rootDir: string): string[] {
   try {
     const out = execFileSync('git', ['branch', '-a'], {
       cwd: rootDir,
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'ignore'],
     });
-    return out.split('\n').map((l) => l.trim().replace(/^[*+]\s+/, '').replace(/^remotes\/origin\//, ''));
+    return out
+      .split('\n')
+      .map((l) => l.trim().replace(/^[*+]\s+/, '').replace(/^remotes\/origin\//, ''))
+      .filter(Boolean);
   } catch {
     return [];
   }
 }
 
-function detectExistingReleaseBranch(branches: string[], cleanVersion: string): string {
+export function detectExistingReleaseBranch(branches: string[], cleanVersion: string): string {
   const candidate = `release/v${cleanVersion}`;
+  const exactMatch = branches.find((b) => b === candidate && classifyBranch(b).valid);
+  if (exactMatch) return exactMatch;
   const existing = branches.find((b) => b.startsWith('release/v') && classifyBranch(b).valid);
   return existing || candidate;
 }
 
-function detectExistingFeatureBranch(branches: string[], dirName: string, changeId: string, changeSlug: string): string {
-  const existing = branches.find(
-    (b) =>
-      b.startsWith('feat/') &&
-      (b.toLowerCase().includes(dirName.toLowerCase()) || b.toLowerCase().includes(changeId.toLowerCase())) &&
-      classifyBranch(b).valid
-  );
+export function detectExistingFeatureBranch(branches: string[], dirName: string, changeId: string, changeSlug: string): string {
+  const existing = branches.find((b) => {
+    if (!b.startsWith('feat/')) return false;
+    const parsed = classifyBranch(b);
+    if (!parsed.valid || !parsed.id) return false;
+    return isTaskMatchingId(parsed.id, changeId) || isTaskMatchingId(parsed.id, dirName);
+  });
   if (existing) return existing;
   const normalizedName = slugify(changeSlug).replace(/^(chg|bug|feat)-(\d+)/i, (_, p, n) => `${p.toUpperCase()}-${n}`);
   return `feat/${normalizedName}`;
 }
 
-function buildDefaultTaskSuffix(taskId: string, taskTitle?: string): string {
+export function buildDefaultTaskSuffix(taskId: string, taskTitle?: string): string {
   let taskSuffix = taskId.toLowerCase();
   const hasSlug = taskSuffix.includes('-') && taskSuffix.split('-').length > 2;
   if (!hasSlug && taskTitle) {
@@ -200,10 +212,14 @@ function buildDefaultTaskSuffix(taskId: string, taskTitle?: string): string {
   return taskSuffix;
 }
 
-function detectExistingTaskBranch(branches: string[], parentId: string, taskId: string, taskTitle?: string): string {
+export function detectExistingTaskBranch(branches: string[], parentId: string, taskId: string, taskTitle?: string): string {
   const prefix = `task/${parentId}/`;
+  const prefixLower = prefix.toLowerCase();
   const existing = branches.find(
-    (b) => b.startsWith(prefix) && b.toLowerCase().includes(taskId.toLowerCase()) && classifyBranch(b).valid
+    (b) =>
+      b.toLowerCase().startsWith(prefixLower) &&
+      isTaskMatchingId(b.slice(prefix.length), taskId) &&
+      classifyBranch(b).valid
   );
   if (existing) return existing;
   return `task/${parentId}/${buildDefaultTaskSuffix(taskId, taskTitle)}`;
@@ -241,7 +257,7 @@ export function resolveBranchHierarchy(
   return { baseBranch, releaseBranch, featureBranch, taskBranch };
 }
 
-function branchExistsLocally(branch: string, rootDir: string): boolean {
+export function branchExistsLocally(branch: string, rootDir: string): boolean {
   try {
     execFileSync('git', ['show-ref', '--verify', '--quiet', `refs/heads/${branch}`], {
       cwd: rootDir,
@@ -253,7 +269,7 @@ function branchExistsLocally(branch: string, rootDir: string): boolean {
   }
 }
 
-function branchExistsRemotely(branch: string, rootDir: string): boolean {
+export function branchExistsRemotely(branch: string, rootDir: string): boolean {
   try {
     execFileSync('git', ['show-ref', '--verify', '--quiet', `refs/remotes/origin/${branch}`], {
       cwd: rootDir,
@@ -265,7 +281,7 @@ function branchExistsRemotely(branch: string, rootDir: string): boolean {
   }
 }
 
-function ensureBranchInCascade(branch: string, parentBranch: string, rootDir: string): boolean {
+export function ensureBranchInCascade(branch: string, parentBranch: string, rootDir: string): boolean {
   if (branchExistsLocally(branch, rootDir)) return false;
   if (branchExistsRemotely(branch, rootDir)) {
     execFileSync('git', ['branch', '--track', branch, `origin/${branch}`], { cwd: rootDir, stdio: ['pipe', 'pipe', 'pipe'] });
@@ -279,11 +295,11 @@ function ensureBranchInCascade(branch: string, parentBranch: string, rootDir: st
  * Creates missing branches in cascade (Tier 1 -> Tier 2 -> Tier 3 -> Tier 4)
  * and switches to the Tier 4 task branch automatically.
  */
-function switchBranch(branch: string, rootDir: string): void {
+export function switchBranch(branch: string, rootDir: string): void {
   execFileSync('git', ['checkout', branch], { cwd: rootDir, stdio: ['pipe', 'pipe', 'pipe'] });
 }
 
-function cascadeBranchCheckout(
+export function cascadeBranchCheckout(
   hierarchy: { baseBranch: string; releaseBranch: string; featureBranch: string; taskBranch: string },
   rootDir: string,
   created: string[],
@@ -305,7 +321,7 @@ function cascadeBranchCheckout(
  * Creates missing branches in cascade (Tier 1 -> Tier 2 -> Tier 3 -> Tier 4)
  * and switches to the Tier 4 task branch (or Tier 3 feature branch if streamlined).
  */
-function buildCheckoutErrorResult(
+export function buildCheckoutErrorResult(
   match: ActiveTaskMatch,
   hierarchy: { releaseBranch: string; featureBranch: string; taskBranch: string },
   created: string[],
@@ -324,7 +340,7 @@ function buildCheckoutErrorResult(
   };
 }
 
-function buildLocateFailureResult(taskId: string, locateRes: TaskLocateResult): GitCheckoutTaskResult {
+export function buildLocateFailureResult(taskId: string, locateRes: TaskLocateResult): GitCheckoutTaskResult {
   return {
     success: false,
     taskId,
@@ -334,7 +350,7 @@ function buildLocateFailureResult(taskId: string, locateRes: TaskLocateResult): 
   };
 }
 
-function buildCheckoutSuccessResult(
+export function buildCheckoutSuccessResult(
   match: ActiveTaskMatch,
   hierarchy: { releaseBranch: string; featureBranch: string; taskBranch: string },
   created: string[],

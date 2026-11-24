@@ -5,7 +5,6 @@ import { spawnSync } from 'child_process';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   detectProjectStacks,
-  getCodingRulesFilesForStacks,
   initProject,
   isProtectedCodingRulesFile,
   PRE_COMMIT_SCRIPT,

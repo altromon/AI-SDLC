@@ -36,7 +36,7 @@ export class OscalAssessmentBuilder {
     findings?: OscalFinding[];
     [key: string]: unknown;
   }): void {
-    const rawFindings = result.findings ? [...result.findings] : [];
+    const rawFindings = Array.isArray(result.findings) ? [...result.findings] : [];
     // Deterministic sorting of findings: by id, then ruleId
     const sortedFindings = rawFindings.sort((a, b) => {
       const idComp = (a.id || '').localeCompare(b.id || '');

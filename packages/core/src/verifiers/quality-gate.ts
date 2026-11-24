@@ -86,7 +86,7 @@ export function createDefaultQualityPolicy(): QualityPolicy {
   };
 }
 
-function appendUniqueStrings(target: string[], raw: unknown): void {
+export function appendUniqueStrings(target: string[], raw: unknown): void {
   if (!Array.isArray(raw)) return;
   for (const pat of raw) {
     const p = String(pat);
@@ -94,21 +94,21 @@ function appendUniqueStrings(target: string[], raw: unknown): void {
   }
 }
 
-function appendTestPatterns(policy: QualityPolicy, raw: unknown): void {
+export function appendTestPatterns(policy: QualityPolicy, raw: unknown): void {
   if (!Array.isArray(raw)) return;
   const existing = policy.test_patterns ?? [];
   appendUniqueStrings(existing, raw);
   policy.test_patterns = existing;
 }
 
-function applyScopeSection(policy: QualityPolicy, scope: Record<string, unknown>): void {
+export function applyScopeSection(policy: QualityPolicy, scope: Record<string, unknown>): void {
   if (Array.isArray(scope.target_directories)) policy.target_directories = scope.target_directories.map(String);
   if (Array.isArray(scope.supported_extensions)) policy.supported_extensions = scope.supported_extensions.map(String);
   appendUniqueStrings(policy.exclude_patterns, scope.exclude_patterns);
   appendTestPatterns(policy, scope.test_patterns);
 }
 
-function applyDocScope(policy: QualityPolicy, doc: Record<string, unknown>): void {
+export function applyDocScope(policy: QualityPolicy, doc: Record<string, unknown>): void {
   if (typeof doc.enforcement_mode === 'string') policy.enforce_mode = doc.enforcement_mode;
   if (typeof doc.ratchet_mode === 'boolean') policy.ratchet_mode = doc.ratchet_mode;
   const testDiscovery = doc.test_discovery as Record<string, unknown> | undefined;
@@ -118,7 +118,7 @@ function applyDocScope(policy: QualityPolicy, doc: Record<string, unknown>): voi
   }
 }
 
-function applyCoverageThresholds(policy: QualityPolicy, covRaw: unknown): void {
+export function applyCoverageThresholds(policy: QualityPolicy, covRaw: unknown): void {
   if (!covRaw || typeof covRaw !== 'object') return;
   const cov = covRaw as Record<string, unknown>;
   if (cov.min_line_coverage_percent !== undefined) policy.min_line_coverage = Number(cov.min_line_coverage_percent);
@@ -128,7 +128,7 @@ function applyCoverageThresholds(policy: QualityPolicy, covRaw: unknown): void {
   }
 }
 
-function applyTestEnforcement(policy: QualityPolicy, raw: unknown): void {
+export function applyTestEnforcement(policy: QualityPolicy, raw: unknown): void {
   if (!raw || typeof raw !== 'object') return;
   const enf = raw as Record<string, unknown>;
   if (typeof enf.require_function_unit_tests === 'boolean') {
@@ -148,7 +148,7 @@ function applyTestEnforcement(policy: QualityPolicy, raw: unknown): void {
   }
 }
 
-function applySectionThresholds(policy: QualityPolicy, s: Record<string, unknown>): void {
+export function applySectionThresholds(policy: QualityPolicy, s: Record<string, unknown>): void {
   const cc = (s.cyclomatic_complexity as Record<string, unknown>)?.max_per_function;
   const cog = (s.cognitive_complexity as Record<string, unknown>)?.max_per_function;
   const mi = (s.maintainability_index as Record<string, unknown>)?.min_acceptable_score;
@@ -162,7 +162,7 @@ function applySectionThresholds(policy: QualityPolicy, s: Record<string, unknown
   applyTestEnforcement(policy, s.test_enforcement);
 }
 
-function applyDocThresholds(policy: QualityPolicy, doc: Record<string, unknown>): void {
+export function applyDocThresholds(policy: QualityPolicy, doc: Record<string, unknown>): void {
   const sections = [doc.release_thresholds, doc.thresholds].filter(
     (s): s is Record<string, unknown> => Boolean(s && typeof s === 'object')
   );
@@ -179,7 +179,7 @@ function applyDocThresholds(policy: QualityPolicy, doc: Record<string, unknown>)
   }
 }
 
-function applyEnvThresholds(policy: QualityPolicy): void {
+export function applyEnvThresholds(policy: QualityPolicy): void {
   if (typeof process === 'undefined' || !process.env) return;
   const env = process.env;
 
@@ -190,7 +190,7 @@ function applyEnvThresholds(policy: QualityPolicy): void {
   if (env.AI_SDLC_ENFORCE_MODE) policy.enforce_mode = env.AI_SDLC_ENFORCE_MODE;
 }
 
-function applyOptionOverrides(policy: QualityPolicy, overrides?: QualityThresholds): void {
+export function applyOptionOverrides(policy: QualityPolicy, overrides?: QualityThresholds): void {
   if (!overrides) return;
   if (overrides.max_cyclomatic !== undefined) policy.max_cyclomatic = Number(overrides.max_cyclomatic);
   if (overrides.max_cognitive !== undefined) policy.max_cognitive = Number(overrides.max_cognitive);
@@ -199,7 +199,7 @@ function applyOptionOverrides(policy: QualityPolicy, overrides?: QualityThreshol
   if (overrides.enforce_mode !== undefined) policy.enforce_mode = overrides.enforce_mode;
 }
 
-function parsePolicyYaml(content: string): Record<string, unknown> {
+export function parsePolicyYaml(content: string): Record<string, unknown> {
   let doc: unknown;
   try {
     doc = yaml.load(content);
@@ -260,7 +260,7 @@ export function calculateMetrics(fnBody: string, fnName: string, filePath: strin
   };
 }
 
-function isExcludedFile(file: string, normalized: string, excludePatterns: readonly string[]): boolean {
+export function isExcludedFile(file: string, normalized: string, excludePatterns: readonly string[]): boolean {
   return excludePatterns.some(
     (pattern) =>
       file === pattern ||
@@ -292,7 +292,7 @@ export function walkDir(
   return results;
 }
 
-function resolvePolicy(rootDir: string, options: QualityGateOptions): QualityPolicy {
+export function resolvePolicy(rootDir: string, options: QualityGateOptions): QualityPolicy {
   const policyFile = options.policyPath || path.join(rootDir, 'quality-policy.yaml');
   if (options.policy) {
     const policy = { ...options.policy };
@@ -305,7 +305,7 @@ function resolvePolicy(rootDir: string, options: QualityGateOptions): QualityPol
   return parseQualityPolicy('', options.thresholds);
 }
 
-function isPathExcluded(targetPath: string, rootDir: string, excludePatterns: readonly string[]): boolean {
+export function isPathExcluded(targetPath: string, rootDir: string, excludePatterns: readonly string[]): boolean {
   const rel = path.relative(rootDir, targetPath).replace(/\\/g, '/');
   const base = path.basename(targetPath);
   return excludePatterns.some(
@@ -319,7 +319,7 @@ function isPathExcluded(targetPath: string, rootDir: string, excludePatterns: re
   );
 }
 
-function scanContainerSubdir(
+export function scanContainerSubdir(
   containerDir: string,
   subdirName: string,
   targetDir: string,
@@ -336,7 +336,7 @@ function scanContainerSubdir(
   }
 }
 
-function scanMonorepoContainer(
+export function scanMonorepoContainer(
   rootDir: string,
   container: string,
   targetDir: string,
@@ -358,7 +358,7 @@ function scanMonorepoContainer(
   }
 }
 
-function scanDirectTarget(rootDir: string, targetDir: string, policy: QualityPolicy, files: Set<string>): void {
+export function scanDirectTarget(rootDir: string, targetDir: string, policy: QualityPolicy, files: Set<string>): void {
   const fullDir = path.join(rootDir, targetDir);
   if (fs.existsSync(fullDir) && !isPathExcluded(fullDir, rootDir, policy.exclude_patterns)) {
     for (const f of walkDir(fullDir, policy.supported_extensions, policy.exclude_patterns)) {
@@ -385,7 +385,7 @@ export const UNIT_TEST_SUFFIXES = [
   '_test.rs',
 ];
 
-function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
+export function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
   const files = new Set<string>();
   const monorepoContainers = ['packages', 'apps', 'libs', 'modules', 'services'];
 
@@ -402,7 +402,7 @@ function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
   });
 }
 
-function evaluateViolations(fn: FunctionMetrics, policy: QualityPolicy): string[] {
+export function evaluateViolations(fn: FunctionMetrics, policy: QualityPolicy): string[] {
   const violations: string[] = [];
   if (fn.cyclomatic > policy.max_cyclomatic) {
     violations.push(`Cyclomatic Complexity ${fn.cyclomatic} exceeds threshold of ${policy.max_cyclomatic}`);
@@ -422,7 +422,7 @@ function evaluateViolations(fn: FunctionMetrics, policy: QualityPolicy): string[
   return violations;
 }
 
-function evaluateFileQuality(file: string, rootDir: string, policy: QualityPolicy): AnalysisResult[] {
+export function evaluateFileQuality(file: string, rootDir: string, policy: QualityPolicy): AnalysisResult[] {
   const content = fs.readFileSync(file, 'utf-8');
   const fns = extractFunctions(content, file);
   return fns.map((fn) => {
@@ -484,6 +484,7 @@ const REGEX_ALLOW_PUNCT = new Set([
   '(',
   '[',
   '{',
+  '}',
   ',',
   ';',
   ':',
@@ -502,6 +503,7 @@ const REGEX_ALLOW_PUNCT = new Set([
   '<',
   '>',
 ]);
+const UPDATE_OPERATORS = new Set(['++', '--']);
 const CANDIDATE_LITERAL_RE = /^[#.]?[A-Za-z_$][\w$]*(?:\(\))?$/;
 
 export function isTargetIdentifierLiteral(inner: string, fnName: string): boolean {
@@ -669,7 +671,8 @@ export function stepPunctToken(state: ScanState): boolean {
   state.out.push(ch);
   state.index++;
   if (!/\s/.test(ch)) {
-    state.allowRegex = ch === '}' || REGEX_ALLOW_PUNCT.has(ch);
+    const isUpdate = UPDATE_OPERATORS.has(state.src.slice(Math.max(0, state.index - 2), state.index));
+    state.allowRegex = !isUpdate && REGEX_ALLOW_PUNCT.has(ch);
   }
   return false;
 }
@@ -879,7 +882,7 @@ const UI_TEST_EXTENSIONS: readonly string[] = [
   '.yml',
 ];
 
-function collectUiTestFiles(rootDir: string, customPatterns?: readonly string[]): Array<{ relPath: string; content: string }> {
+export function collectUiTestFiles(rootDir: string, customPatterns?: readonly string[]): Array<{ relPath: string; content: string }> {
   const allFiles = walkDir(rootDir, UI_TEST_EXTENSIONS, DEFAULT_EXCLUDES);
   const uiTests: Array<{ relPath: string; content: string }> = [];
   for (const tf of allFiles) {
@@ -899,7 +902,7 @@ export function extractUiComponentName(relPath: string): string {
   return base.replace(/\.(?:a?xaml\.cs|component\.ts|razor|cshtml|a?xaml|vue|svelte|tsx?|jsx?|py|cs|java|kt|swift|dart)$/i, '');
 }
 
-function buildComponentNameVariants(componentName: string): string[] {
+export function buildComponentNameVariants(componentName: string): string[] {
   const kebab = componentName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
   const snake = kebab.replace(/-/g, '_');
   return Array.from(new Set([componentName, kebab, snake]));
@@ -923,7 +926,7 @@ export function isUiComponentTested(
   });
 }
 
-function auditUiComponents(
+export function auditUiComponents(
   rootDir: string,
   policy: QualityPolicy,
   verifyDriverOverride?: boolean
@@ -946,13 +949,13 @@ function auditUiComponents(
   return untested;
 }
 
-function checkCoverageThreshold(label: string, actual: number, min: number, out: string[]): void {
+export function checkCoverageThreshold(label: string, actual: number, min: number, out: string[]): void {
   if (actual < min) {
     out.push(`${label} coverage ${actual}% is below minimum threshold of ${min}%`);
   }
 }
 
-function evaluateCoverageThresholds(
+export function evaluateCoverageThresholds(
   rootDir: string,
   policy: QualityPolicy,
   requireReport?: boolean
@@ -1053,7 +1056,7 @@ export function extractBaselineEntriesFromResults(results: AnalysisResult[]): Qu
   return entries;
 }
 
-function applyRatchetToFunctionResult(
+export function applyRatchetToFunctionResult(
   r: AnalysisResult,
   baselineMap: Map<string, QualityBaselineEntry>
 ): { tolerated: number; newViolations: number } {
@@ -1094,13 +1097,13 @@ export function applyRatchetMode(
   return { toleratedCount, newViolationsCount };
 }
 
-function resolveBaselineFilePath(rootDir: string, options: QualityGateOptions): string {
+export function resolveBaselineFilePath(rootDir: string, options: QualityGateOptions): string {
   if (options.baselinePath) return options.baselinePath;
   if (typeof options.baseline === "string") return options.baseline;
   return path.join(rootDir, "quality-baseline.json");
 }
 
-function isRatchetModeActive(
+export function isRatchetModeActive(
   policy: QualityPolicy,
   options: QualityGateOptions,
   baselineExists: boolean
@@ -1110,7 +1113,7 @@ function isRatchetModeActive(
   return Boolean(policy.ratchet_mode || (options.baseline && baselineExists));
 }
 
-function evaluateRatchetIfActive(
+export function evaluateRatchetIfActive(
   results: AnalysisResult[],
   baselineFile: string,
   isActive: boolean
@@ -1130,7 +1133,7 @@ function evaluateRatchetIfActive(
   };
 }
 
-interface BaselineAuditMeta {
+export interface BaselineAuditMeta {
   baselineUpdated?: boolean;
   baselineViolationsCount?: number;
   toleratedViolationsCount?: number;
@@ -1138,7 +1141,7 @@ interface BaselineAuditMeta {
   untestedUiComponents?: UntestedUiComponentItem[];
 }
 
-function computeGateSummaryCounts(
+export function computeGateSummaryCounts(
   results: AnalysisResult[],
   coverageViolations: string[],
   untestedUi: UntestedUiComponentItem[],
@@ -1156,7 +1159,7 @@ function computeGateSummaryCounts(
   return { failCount, passCount, violationsCount, success };
 }
 
-function buildQualityGateResult(
+export function buildQualityGateResult(
   results: AnalysisResult[],
   totalFiles: number,
   policy: QualityPolicy,

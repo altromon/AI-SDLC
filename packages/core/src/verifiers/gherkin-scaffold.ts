@@ -17,7 +17,7 @@ import { ParsedFeatureDocument, ParsedStepItem, parseFeatureDocument } from './b
 
 const SUPPORTED_LANGUAGES: ReadonlySet<string> = new Set(['ts', 'py', 'go', 'rs', 'cs']);
 
-function featureStem(featurePath: string): string {
+export function featureStem(featurePath: string): string {
   return path
     .basename(featurePath, path.extname(featurePath))
     .replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -86,7 +86,7 @@ export const GHERKIN_GENERATOR_SPECS: Record<GherkinScaffoldLanguage, GherkinGen
   },
 };
 
-function defaultExec(cmd: string, args: string[]): GherkinScaffoldExecResult {
+export function defaultExec(cmd: string, args: string[]): GherkinScaffoldExecResult {
   const res = spawnSync(cmd, args, { encoding: 'utf-8', timeout: 15000, shell: false });
   return {
     status: res.status ?? null,
@@ -115,18 +115,18 @@ export function normalizeScaffoldLanguages(raw: string | string[]): {
   return { valid: true, langs: deduped };
 }
 
-function escapeDoubleQuotes(text: string): string {
+export function escapeDoubleQuotes(text: string): string {
   return text.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
-function mapStepKeyword(keyword: string): 'given' | 'when' | 'then' {
+export function mapStepKeyword(keyword: string): 'given' | 'when' | 'then' {
   const lower = keyword.toLowerCase();
   if (lower === 'when' || lower === 'cuando') return 'when';
   if (lower === 'then' || lower === 'entonces') return 'then';
   return 'given';
 }
 
-function collectUniqueSteps(doc: ParsedFeatureDocument): ParsedStepItem[] {
+export function collectUniqueSteps(doc: ParsedFeatureDocument): ParsedStepItem[] {
   const seen = new Set<string>();
   const unique: ParsedStepItem[] = [];
   const allSteps = [...doc.backgroundSteps, ...doc.scenarios.flatMap((s) => s.steps)];
@@ -140,7 +140,7 @@ function collectUniqueSteps(doc: ParsedFeatureDocument): ParsedStepItem[] {
   return unique;
 }
 
-function renderTsFallback(relFeature: string, steps: ParsedStepItem[]): string {
+export function renderTsFallback(relFeature: string, steps: ParsedStepItem[]): string {
   const entries = steps.map((st) => `  ['${mapStepKeyword(st.keyword)}', "${escapeDoubleQuotes(st.text)}"],`);
   return [
     `// AUTO-GENERATED RED BDD STEP DEFINITIONS (${relFeature})`,
@@ -161,7 +161,7 @@ function renderTsFallback(relFeature: string, steps: ParsedStepItem[]): string {
   ].join('\n');
 }
 
-function renderPyFallback(relFeature: string, steps: ParsedStepItem[]): string {
+export function renderPyFallback(relFeature: string, steps: ParsedStepItem[]): string {
   const lines = [
     `# AUTO-GENERATED RED BDD STEP DEFINITIONS (${relFeature})`,
     `from pytest_bdd import given, when, then, scenarios`,
@@ -178,7 +178,7 @@ function renderPyFallback(relFeature: string, steps: ParsedStepItem[]): string {
   return lines.join('\n');
 }
 
-function renderGoFallback(relFeature: string, steps: ParsedStepItem[]): string {
+export function renderGoFallback(relFeature: string, steps: ParsedStepItem[]): string {
   const lines = [
     `// AUTO-GENERATED RED BDD STEP DEFINITIONS (${relFeature})`,
     `package steps`,
@@ -195,7 +195,7 @@ function renderGoFallback(relFeature: string, steps: ParsedStepItem[]): string {
   return lines.join('\n');
 }
 
-function renderRsFallback(relFeature: string, steps: ParsedStepItem[]): string {
+export function renderRsFallback(relFeature: string, steps: ParsedStepItem[]): string {
   const lines = [
     `// AUTO-GENERATED RED BDD STEP DEFINITIONS (${relFeature})`,
     `use cucumber::{given, when, then, World};`,
@@ -214,7 +214,7 @@ function renderRsFallback(relFeature: string, steps: ParsedStepItem[]): string {
   return lines.join('\n');
 }
 
-function renderCsFallback(relFeature: string, steps: ParsedStepItem[]): string {
+export function renderCsFallback(relFeature: string, steps: ParsedStepItem[]): string {
   const lines = [
     `// AUTO-GENERATED RED BDD STEP DEFINITIONS (${relFeature})`,
     `using Reqnroll;`,
@@ -238,7 +238,7 @@ function renderCsFallback(relFeature: string, steps: ParsedStepItem[]): string {
   return lines.join('\n');
 }
 
-function buildFallbackTemplate(
+export function buildFallbackTemplate(
   lang: GherkinScaffoldLanguage,
   relFeature: string,
   steps: ParsedStepItem[]
@@ -253,7 +253,7 @@ function buildFallbackTemplate(
   return renderers[lang]();
 }
 
-function resolveValidatedFeaturePath(rootDir: string, featurePath: string): string | null {
+export function resolveValidatedFeaturePath(rootDir: string, featurePath: string): string | null {
   if (!featurePath || featurePath.includes('\0') || featurePath.trim().startsWith('-')) {
     return null;
   }
@@ -262,7 +262,8 @@ function resolveValidatedFeaturePath(rootDir: string, featurePath: string): stri
     ? path.resolve(featurePath)
     : path.resolve(absRoot, featurePath);
 
-  if (!path.isAbsolute(featurePath) && !fullPath.startsWith(absRoot)) {
+  const relFirst = path.relative(absRoot, fullPath).split(path.sep)[0];
+  if (!path.isAbsolute(featurePath) && relFirst === '..') {
     return null;
   }
   if (!fs.existsSync(fullPath) || !fs.statSync(fullPath).isFile()) {
@@ -271,7 +272,7 @@ function resolveValidatedFeaturePath(rootDir: string, featurePath: string): stri
   return fullPath;
 }
 
-function buildErrorResult(
+export function buildErrorResult(
   lang: string,
   featureFile: string,
   errorCode: 'ERR_FEATURE_NOT_FOUND' | 'ERR_UNSUPPORTED_LANGUAGE' | 'ERR_INSTALL_FAILED'
@@ -287,7 +288,7 @@ function buildErrorResult(
   };
 }
 
-interface SingleLangContext {
+export interface SingleLangContext {
   rootDir: string;
   fullFeaturePath: string;
   relFeature: string;
@@ -297,7 +298,7 @@ interface SingleLangContext {
   execFn: (cmd: string, args: string[]) => GherkinScaffoldExecResult;
 }
 
-function resolveTargetOutput(
+export function resolveTargetOutput(
   ctx: SingleLangContext,
   spec: GherkinGeneratorSpec,
   isMulti: boolean
@@ -310,12 +311,12 @@ function resolveTargetOutput(
   return spec.resolveOutputPath(ctx.rootDir, ctx.fullFeaturePath);
 }
 
-function writeScaffoldFile(outFile: string, content: string): void {
+export function writeScaffoldFile(outFile: string, content: string): void {
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
   fs.writeFileSync(outFile, content, 'utf-8');
 }
 
-function checkAndPrepareBinary(
+export function checkAndPrepareBinary(
   spec: GherkinGeneratorSpec,
   ctx: SingleLangContext
 ): boolean {
@@ -326,7 +327,7 @@ function checkAndPrepareBinary(
   return instRes.status === 0 && !instRes.error;
 }
 
-function buildMissingGeneratorResult(
+export function buildMissingGeneratorResult(
   lang: GherkinScaffoldLanguage,
   spec: GherkinGeneratorSpec,
   ctx: SingleLangContext,
@@ -346,7 +347,7 @@ function buildMissingGeneratorResult(
   };
 }
 
-function buildCompletedResult(
+export function buildCompletedResult(
   status: 'GENERATED_NATIVE' | 'GENERATED_FALLBACK',
   lang: GherkinScaffoldLanguage,
   spec: GherkinGeneratorSpec,
@@ -373,14 +374,14 @@ function buildCompletedResult(
   };
 }
 
-function resolveNativeCommandString(spec: GherkinGeneratorSpec, lang: GherkinScaffoldLanguage): string {
+export function resolveNativeCommandString(spec: GherkinGeneratorSpec, lang: GherkinScaffoldLanguage): string {
   const nativeArgs = spec
     .scaffoldArgs('<feature>')
     .filter((a) => a !== '--no-install' && !(lang === 'ts' && a === '<feature>'));
   return `${spec.generatorBin} ${nativeArgs.join(' ')}`;
 }
 
-function generateLanguageStepContent(
+export function generateLanguageStepContent(
   binaryReady: boolean,
   spec: GherkinGeneratorSpec,
   ctx: SingleLangContext,
@@ -394,7 +395,7 @@ function generateLanguageStepContent(
   return { status: 'GENERATED_NATIVE', content };
 }
 
-function scaffoldSingleLanguage(
+export function scaffoldSingleLanguage(
   lang: GherkinScaffoldLanguage,
   ctx: SingleLangContext,
   isMulti: boolean
@@ -416,7 +417,7 @@ function scaffoldSingleLanguage(
   return buildCompletedResult(status, lang, spec, ctx, nativeCmdStr, relOut, content);
 }
 
-function resolveMultiStatus(
+export function resolveMultiStatus(
   missingCount: number,
   results: GherkinScaffoldResult[]
 ): 'GENERATOR_MISSING' | 'GENERATED_NATIVE' | 'GENERATED_FALLBACK' {
@@ -424,7 +425,7 @@ function resolveMultiStatus(
   return results.every((r) => r.status === 'GENERATED_NATIVE') ? 'GENERATED_NATIVE' : 'GENERATED_FALLBACK';
 }
 
-function aggregateMultiResults(
+export function aggregateMultiResults(
   langs: GherkinScaffoldLanguage[],
   results: GherkinScaffoldResult[]
 ): GherkinScaffoldResult {
@@ -449,7 +450,7 @@ function aggregateMultiResults(
   };
 }
 
-function createSingleLangContext(
+export function createSingleLangContext(
   rootDir: string,
   fullFeaturePath: string,
   options: GherkinScaffoldOptions

@@ -13,7 +13,7 @@ import {
 import { canonicalSort, walkMdFiles } from '../utils/fs.js';
 import { GHERKIN_GENERATOR_SPECS } from './gherkin-scaffold.js';
 
-interface MarkdownFrontmatter {
+export interface MarkdownFrontmatter {
   id?: string;
   version?: string;
   'cucumber-feature-file'?: string;
@@ -91,7 +91,9 @@ export function resolveFeatureFilePath(
   if (fs.existsSync(candidateSecurity)) return candidateSecurity;
   if (fs.existsSync(candidatePrivacy)) return candidatePrivacy;
   if (fs.existsSync(candidateRoot)) return candidateRoot;
-  const subDir = filePath.includes('security') ? 'security' : filePath.includes('privacy') ? 'privacy' : '';
+  const relCandidate = path.relative(path.resolve(rootDir), path.resolve(filePath)).replace(/\\/g, '/');
+  const relPath = relCandidate.startsWith('..') ? filePath.replace(/\\/g, '/') : relCandidate;
+  const subDir = relPath.includes('security') ? 'security' : relPath.includes('privacy') ? 'privacy' : '';
   return path.join(baseDir, subDir, `${id.toLowerCase()}.feature`);
 }
 
@@ -116,7 +118,7 @@ export function buildFeatureFileContent(
   return banner + gherkinBlocks.join('\n\n') + '\n';
 }
 
-function countScenarios(gherkinBlocks: string[]): number {
+export function countScenarios(gherkinBlocks: string[]): number {
   let count = 0;
   for (const block of gherkinBlocks) {
     const matches = block.match(/\b(Scenario|Escenario|Scenario Outline|Esquema del escenario):/g);
@@ -163,7 +165,7 @@ export function extractGherkinFeatures(
   return { success: true, features, totalScenarios };
 }
 
-function walkFeatureFiles(dir: string, fileList: string[] = []): string[] {
+export function walkFeatureFiles(dir: string, fileList: string[] = []): string[] {
   if (!fs.existsSync(dir)) return fileList;
   for (const entry of fs.readdirSync(dir).sort(canonicalSort)) {
     const fullPath = path.join(dir, entry);
@@ -176,14 +178,14 @@ function walkFeatureFiles(dir: string, fileList: string[] = []): string[] {
   return fileList;
 }
 
-function hasDeterministicStepFile(rootDir: string, featureFullPath: string): boolean {
+export function hasDeterministicStepFile(rootDir: string, featureFullPath: string): boolean {
   return Object.values(GHERKIN_GENERATOR_SPECS).some((spec) => {
     const stepPath = spec.resolveOutputPath(rootDir, featureFullPath);
     return fs.existsSync(stepPath) && fs.statSync(stepPath).size > 0;
   });
 }
 
-function findOrphanFeatureFiles(rootDir: string, expectedRelPaths: Set<string>): string[] {
+export function findOrphanFeatureFiles(rootDir: string, expectedRelPaths: Set<string>): string[] {
   const featuresDir = path.join(rootDir, 'tests', 'features');
   const orphans: string[] = [];
   for (const fp of walkFeatureFiles(featuresDir)) {
@@ -195,7 +197,7 @@ function findOrphanFeatureFiles(rootDir: string, expectedRelPaths: Set<string>):
   return orphans;
 }
 
-interface SyncCheckState {
+export interface SyncCheckState {
   outOfSyncFiles: string[];
   missingFiles: string[];
   missingStepFiles: string[];
@@ -203,7 +205,7 @@ interface SyncCheckState {
   totalFeatures: number;
 }
 
-function verifyExistingFeatureFile(
+export function verifyExistingFeatureFile(
   rootDir: string,
   targetPath: string,
   expectedContent: string,
@@ -219,7 +221,7 @@ function verifyExistingFeatureFile(
   }
 }
 
-function checkSingleMarkdownFeatureSync(rootDir: string, filePath: string, state: SyncCheckState): void {
+export function checkSingleMarkdownFeatureSync(rootDir: string, filePath: string, state: SyncCheckState): void {
   const { frontmatter, body } = parseMarkdownFrontmatter(fs.readFileSync(filePath, 'utf-8'));
   const gherkinBlocks = extractGherkinBlock(body);
   if (gherkinBlocks.length === 0) return;

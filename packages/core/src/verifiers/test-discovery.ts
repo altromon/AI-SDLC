@@ -140,12 +140,13 @@ export const DEFAULT_UI_TEST_PATTERNS: readonly string[] = [
   '**/*_cli_test.py',
 ];
 
-function escapeRegexChars(raw: string): string {
-  return raw.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+export function escapeRegexChars(raw: string): string {
+  return raw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function globToRegex(pattern: string): RegExp {
+export function globToRegex(pattern: string): RegExp {
   const norm = pattern.replace(/\\/g, '/').trim();
+  if (!norm) return /^(?!)$/;
   if (!norm.includes('*') && !norm.includes('/') && !norm.includes('?')) {
     return new RegExp(`${escapeRegexChars(norm)}$`);
   }
@@ -283,12 +284,12 @@ const DEFAULT_UI_COMPONENT_MATCHER = compilePatternList(DEFAULT_UI_COMPONENT_PAT
 const DEFAULT_UI_TEST_MATCHER = compilePatternList(DEFAULT_UI_TEST_PATTERNS);
 const QUOTE_CHARS = new Set(["'", '"', '`']);
 
-function isHashCommentStart(line: string, idx: number): boolean {
+export function isHashCommentStart(line: string, idx: number): boolean {
   if (line[idx] !== '#') return false;
   return idx === 0 || line[idx - 1] === ' ' || line[idx - 1] === '\t';
 }
 
-function stripLineHashComment(line: string): string {
+export function stripLineHashComment(line: string): string {
   let quote = '';
   for (let i = 0; i < line.length; i++) {
     const ch = line[i];
