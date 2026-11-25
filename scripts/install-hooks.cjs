@@ -191,10 +191,25 @@ fi
 exit 0
 `;
 
+const POST_COMMIT_SCRIPT = `#!/usr/bin/env bash
+# ==============================================================================
+# AI-SDLC: Incremental Code Graph Refresh Hook (post-commit)
+# ==============================================================================
+
+if [ -f "packages/cli/bin/aisdlc.js" ]; then
+  node packages/cli/bin/aisdlc.js graph index >/dev/null 2>&1 || true
+elif command -v aisdlc >/dev/null 2>&1; then
+  aisdlc graph index >/dev/null 2>&1 || true
+fi
+
+exit 0
+`;
+
 try {
   fs.writeFileSync(path.join(hooksDir, 'pre-commit'), PRE_COMMIT_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
   fs.writeFileSync(path.join(hooksDir, 'prepare-commit-msg'), PREPARE_COMMIT_MSG_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
   fs.writeFileSync(path.join(hooksDir, 'pre-push'), PRE_PUSH_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
+  fs.writeFileSync(path.join(hooksDir, 'post-commit'), POST_COMMIT_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
 } catch {
   // Fail safely without breaking npm/pnpm install
 }

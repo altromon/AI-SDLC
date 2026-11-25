@@ -58,6 +58,7 @@ ENV/
 reports/*.jsonl
 reports/QUALITY_REPORT.md
 reports/dashboard.html
+.aisdlc/
 logs/
 *.log
 npm-debug.log*

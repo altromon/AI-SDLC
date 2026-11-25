@@ -71,7 +71,7 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 1. **Functional Validation (`agent-expert-user`)**: Validate live runtime behavior against `UC-*` and `FR-*` criteria (including `0` browser `console.error`/`pageerror` on UI changes).
 2. Concurrently invoke `agent-auditor` (verifying Clean Code, SOLID, DRY, AST thresholds, and eliminating unnecessary abstractions) and `agent-adversary` (performing conceptual test mutation to verify QA tests catch defects, and attacking boundary inputs with concrete PoC breaks).
 3. Consolidate findings and remediate in `agent-developer` (max 2 correction rounds), committing and pushing (`git push`) fixes to the Draft PR.
-4. Run `npx aisdlc verify all` to confirm final green status, then run `report_quality` (`npx aisdlc report quality`) and `report_dashboard` (`npx aisdlc report dashboard`) to compute local reports and the interactive dashboard for review (**do NOT stage or commit global `reports/*` files on `feat/CHG-*` branches** to prevent merge conflicts across parallel PRs).
+4. Run `npx aisdlc verify all` to confirm final green status, run `npx aisdlc graph index` to refresh the incremental `.aisdlc/cache/code-graph.json` cache, then run `report_quality` (`npx aisdlc report quality`) and `report_dashboard` (`npx aisdlc report dashboard`) to compute local reports and the interactive dashboard for review (**do NOT stage or commit global `reports/*` files on `feat/CHG-*` branches** to prevent merge conflicts across parallel PRs).
 
 ### Step 6: Human PR Sign-Off, Baseline Integration & Release Closure
 1. **Ready for Review & Feature Merge (`feat/CHG-*` ➔ `main` or `release/vX.Y.Z`)**:

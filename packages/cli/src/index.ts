@@ -22,7 +22,7 @@ import { runReportCompliance, runReportDashboard, runReportQuality } from './com
 import { runReviewSubmit } from './commands/review.js';
 import { runInspect } from './commands/inspect.js';
 import { runSearch } from './commands/search.js';
-import { runGraphQuery } from './commands/graph.js';
+import { runGraphIndex, runGraphQuery } from './commands/graph.js';
 import { runContextPack } from './commands/context.js';
 import { parseDoctorTimeout, runDoctor } from './commands/doctor.js';
 import { runMigrate } from './commands/migrate.js';
@@ -926,6 +926,15 @@ program
 
 // --- graph & context commands ---
 const graphCmd = program.command('graph').description('Code graph repository map commands');
+graphCmd
+  .command('index')
+  .description('Incrementally index repository source files into .aisdlc/cache/code-graph.json')
+  .option('-r, --root <path>', 'Repository root directory')
+  .option('--json', 'Output result as deterministic JSON')
+  .action(async (opts) => {
+    const code = await runGraphIndex({ root: opts.root, json: opts.json });
+    process.exit(code);
+  });
 graphCmd
   .command('query <target>')
   .description('Query bounded k-hop code graph around a file path or symbol')

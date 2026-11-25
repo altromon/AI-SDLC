@@ -11,6 +11,30 @@ export interface GraphQueryCliOptions {
   json?: boolean;
 }
 
+export interface GraphIndexCliOptions {
+  root?: string;
+  json?: boolean;
+}
+
+export async function runGraphIndex(options: GraphIndexCliOptions = {}): Promise<number> {
+  const root = options.root || process.cwd();
+  const service = new DefaultCodeGraphService();
+  try {
+    const doc = await service.indexRepository(root);
+    const indexedFiles = Object.keys(doc.nodes).length;
+    if (options.json) {
+      console.log(JSON.stringify({ indexedFiles, generatedAt: doc.generatedAt }, null, 2));
+    } else {
+      console.log(`Code Graph indexed: ${indexedFiles} files cached in .aisdlc/cache/code-graph.json`);
+    }
+    return 0;
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(options.json ? JSON.stringify({ error: message }) : message);
+    return 1;
+  }
+}
+
 export async function runGraphQuery(
   target: string,
   options: GraphQueryCliOptions = {}

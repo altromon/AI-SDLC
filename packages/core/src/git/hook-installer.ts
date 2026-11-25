@@ -225,8 +225,22 @@ fi
 exit 0
 `;
 
+export const POST_COMMIT_SCRIPT = `#!/usr/bin/env bash
+# ==============================================================================
+# AI-SDLC: Incremental Code Graph Refresh Hook (post-commit)
+# ==============================================================================
+
+if [ -f "packages/cli/bin/aisdlc.js" ]; then
+  node packages/cli/bin/aisdlc.js graph index >/dev/null 2>&1 || true
+elif command -v aisdlc >/dev/null 2>&1; then
+  aisdlc graph index >/dev/null 2>&1 || true
+fi
+
+exit 0
+`;
+
 /**
- * Installs the AI-SDLC Git hooks (pre-commit, prepare-commit-msg & pre-push) in .git/hooks.
+ * Installs the AI-SDLC Git hooks (pre-commit, prepare-commit-msg, pre-push & post-commit) in .git/hooks.
  */
 export function installGitHooks(rootDir: string = process.cwd()): HookInstallResult {
   const gitDir = path.join(rootDir, '.git');
@@ -245,15 +259,17 @@ export function installGitHooks(rootDir: string = process.cwd()): HookInstallRes
   const prepareCommitMsgPath = path.join(hooksDir, 'prepare-commit-msg');
   const preCommitPath = path.join(gitDir, 'hooks', 'pre-commit');
   const prePushPath = path.join(hooksDir, 'pre-push');
+  const postCommitPath = path.join(hooksDir, 'post-commit');
 
   try {
     fs.writeFileSync(prepareCommitMsgPath, PREPARE_COMMIT_MSG_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
     fs.writeFileSync(preCommitPath, PRE_COMMIT_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
     fs.writeFileSync(prePushPath, PRE_PUSH_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
+    fs.writeFileSync(postCommitPath, POST_COMMIT_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
     return {
       success: true,
       hookPath: prepareCommitMsgPath,
-      installedHooks: [prepareCommitMsgPath, preCommitPath, prePushPath],
+      installedHooks: [prepareCommitMsgPath, preCommitPath, prePushPath, postCommitPath],
     };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
