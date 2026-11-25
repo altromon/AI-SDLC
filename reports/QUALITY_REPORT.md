@@ -1,6 +1,6 @@
 # 📊 Formal Quality and Release Gate Report (AI-SDLC)
 
-> **Generation Date:** 2026-11-24T23:29:25.000Z
+> **Generation Date:** 2026-11-25T07:45:20.000Z
 > **Release Gate Verdict:** 🔴 BLOCKED (VIOLATIONS DETECTED)
 > **Global Rating:** **`B`** (MI Index: 61.6/100, Average CC: 3.9)
 
@@ -25,7 +25,7 @@
 
 ## 2. AI Agent Performance KPIs (SWE-bench & DORA AI)
 
-> **Evaluated Tasks:** `13` | **Commits:** `329` | **Audited Trailer Coverage:** `30.4%`
+> **Evaluated Tasks:** `13` | **Commits:** `331` | **Audited Trailer Coverage:** `30.2%`
 
 | KPI | Measured Value | Benchmark / Target |
 | :--- | :---: | :---: |
