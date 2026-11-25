@@ -7,7 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
-import { ChangeProfile, ProductHandoff, SddValidationResult, SddWorkspaceInfo } from '../../types/index.js';
+import { ChangeProfile, ProductHandoff, SddValidationResult, SddWorkspaceInfo, VALID_CHANGE_PROFILES } from '../../types/index.js';
 import { extractGherkinBlock } from '../../verifiers/gherkin.js';
 import { SddAdapter } from './types.js';
 
@@ -21,18 +21,27 @@ function normalizeHandoffPayload(handoff: ProductHandoff, changeId: string): Pro
 }
 
 function parseChangeProfile(specFile: string): ChangeProfile {
-  if (!fs.existsSync(specFile)) return 'standard';
-  try {
-    const rawSpec = fs.readFileSync(specFile, 'utf-8').replace(/^\uFEFF/, '');
-    const match = rawSpec.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-    if (match) {
-      const parsedFm = yaml.load(match[1]) as Record<string, unknown> | null;
-      if (parsedFm?.profile && ['patch', 'standard', 'critical'].includes(String(parsedFm.profile))) {
-        return parsedFm.profile as ChangeProfile;
+  if (!fs.existsSync(specFile)) return 'minor';
+  const rawSpec = fs.readFileSync(specFile, 'utf-8').replace(/^\uFEFF/, '');
+  const match = rawSpec.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (match) {
+    let parsedFm: Record<string, unknown> | null = null;
+    try {
+      parsedFm = yaml.load(match[1]) as Record<string, unknown> | null;
+    } catch {
+      // Ignore parse failure, fallback to default
+    }
+    if (parsedFm && parsedFm.profile !== undefined && parsedFm.profile !== null) {
+      const rawProfile = String(parsedFm.profile).trim();
+      if (rawProfile !== '') {
+        if ((VALID_CHANGE_PROFILES as readonly string[]).includes(rawProfile)) {
+          return rawProfile as ChangeProfile;
+        }
+        throw new Error(`Invalid change profile '${rawProfile}' in '${specFile}'. Expected one of: ${VALID_CHANGE_PROFILES.join(', ')}.`);
       }
     }
-  } catch {}
-  return 'standard';
+  }
+  return 'minor';
 }
 
 function checkSpecGherkinFormat(parsedFm: Record<string, unknown>, rawSpec: string, changeWorkspaceDir: string, errors: string[]): void {

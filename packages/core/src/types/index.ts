@@ -229,8 +229,8 @@ export interface ProductHandoff {
 
 export type SddFramework = 'openspec' | 'speckit';
 
-export type ChangeProfile = 'patch' | 'standard' | 'critical';
-export const VALID_CHANGE_PROFILES: readonly ChangeProfile[] = ['patch', 'standard', 'critical'] as const;
+export type ChangeProfile = 'patch' | 'minor' | 'major';
+export const VALID_CHANGE_PROFILES: readonly ChangeProfile[] = ['patch', 'minor', 'major'] as const;
 
 export interface SddWorkspaceInfo {
   framework: SddFramework;

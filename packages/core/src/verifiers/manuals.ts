@@ -1,7 +1,7 @@
 /**
  * AI-SDLC: Operational Manuals (MAN-USER & MAN-PROD) Coverage & Progressive Gate Verifier
  * Audits presence and coverage of User Manuals (JRN-*, UC-*) and Production Manuals (CMP-*, SEC-ENC-*).
- * Enforces non-blocking ADVISORY warnings during daily development and STRICT blocking on release/* or critical changes.
+ * Enforces non-blocking ADVISORY warnings during daily development and STRICT blocking on release/* or major changes.
  */
 
 import { execFileSync } from 'child_process';
@@ -244,18 +244,18 @@ function detectCurrentGitBranch(rootDir: string): string {
 
 function resolveActiveChangeProfile(rootDir: string): ChangeProfile {
   const activeRoot = path.join(rootDir, 'specs', 'changes', 'active');
-  if (!fs.existsSync(activeRoot)) return 'standard';
+  if (!fs.existsSync(activeRoot)) return 'minor';
   try {
     const dirs = fs
       .readdirSync(activeRoot, { withFileTypes: true })
       .filter((d) => d.isDirectory())
       .map((d) => path.join(activeRoot, d.name));
     const profiles = dirs.map((d) => detectProfileFromChange(d));
-    if (profiles.includes('critical')) return 'critical';
+    if (profiles.includes('major')) return 'major';
     if (profiles.includes('patch') && profiles.length === 1) return 'patch';
-    return 'standard';
+    return 'minor';
   } catch {
-    return 'standard';
+    return 'minor';
   }
 }
 
@@ -300,7 +300,7 @@ function buildFindingsList(
 
 function isStrictEnforcement(options: ManualsVerificationOptions, branch: string, profile: ChangeProfile): boolean {
   if (options.strict !== undefined) return Boolean(options.strict);
-  return /^release\//i.test(branch) || profile === 'critical';
+  return /^release\//i.test(branch) || profile === 'major';
 }
 
 function assembleManualsResult(

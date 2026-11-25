@@ -2,7 +2,7 @@
 id: SPEC-CHG-045-PDAC-SCHEMA-FAIL-CLOSED
 type: delivery-spec
 change-id: CHG-045-PDAC-SCHEMA-FAIL-CLOSED
-profile: critical
+profile: major
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-045-PDAC-SCHEMA-FAIL-CLOSED"

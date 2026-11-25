@@ -3,7 +3,7 @@ id: SPEC-CHG-029-EXPERT-USER-AGENT
 type: delivery-spec
 change-id: CHG-029-EXPERT-USER-AGENT
 title: "Formalización de agent-expert-user y plantilla estandarizada de feedback"
-profile: standard
+profile: minor
 status: approved
 verification:
   method: automated-unit-test

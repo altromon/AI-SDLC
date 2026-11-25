@@ -2,7 +2,7 @@
 id: SPEC-CHG-030-INIT-AGENT-SCAFFOLDING
 type: delivery-spec
 change-id: CHG-030-INIT-AGENT-SCAFFOLDING
-profile: standard
+profile: minor
 ---
 
 # Especificación de Entrega: CHG-030-INIT-AGENT-SCAFFOLDING

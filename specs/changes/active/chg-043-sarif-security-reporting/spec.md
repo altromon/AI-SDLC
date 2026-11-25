@@ -2,7 +2,7 @@
 id: SPEC-CHG-043-SARIF-SECURITY-REPORTING
 type: delivery-spec
 change-id: CHG-043-SARIF-SECURITY-REPORTING
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-043-SARIF-SECURITY-REPORTING"

@@ -2,7 +2,7 @@
 id: SPEC-CHG-028-NATIVE-MCP-SERVER
 type: delivery-spec
 change-id: CHG-028-NATIVE-MCP-SERVER
-profile: standard
+profile: minor
 ---
 
 # Especificación de Entrega: CHG-028-NATIVE-MCP-SERVER

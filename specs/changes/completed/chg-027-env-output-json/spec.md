@@ -2,7 +2,7 @@
 id: SPEC-CHG-027-ENV-OUTPUT-JSON
 type: delivery-spec
 change-id: CHG-027-ENV-OUTPUT-JSON
-profile: standard
+profile: minor
 ---
 
 # Especificación de Entrega: CHG-027-ENV-OUTPUT-JSON

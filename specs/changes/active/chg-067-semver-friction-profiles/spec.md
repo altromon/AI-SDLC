@@ -2,7 +2,7 @@
 id: SPEC-CHG-067-SEMVER-FRICTION-PROFILES
 type: delivery-spec
 change-id: CHG-067-SEMVER-FRICTION-PROFILES
-profile: critical
+profile: major
 handoff: HOF-CHG-067-SEMVER-FRICTION-PROFILES
 acceptance-format: gherkin
 cucumber-tags:

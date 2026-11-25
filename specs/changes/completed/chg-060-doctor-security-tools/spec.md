@@ -2,7 +2,7 @@
 id: SPEC-CHG-060-DOCTOR-SECURITY-TOOLS
 type: delivery-spec
 change-id: CHG-060-DOCTOR-SECURITY-TOOLS
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - '@CHG-060-DOCTOR-SECURITY-TOOLS'

@@ -30,8 +30,8 @@
       "type": "string",
       "enum": [
         "patch",
-        "standard",
-        "critical"
+        "minor",
+        "major"
       ],
       "description": "Risk and governance profile of the change."
     },

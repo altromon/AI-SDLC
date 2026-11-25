@@ -2,7 +2,7 @@
 id: SPEC-CHG-026-AGENT-NATIVE-CONFIGS
 type: delivery-spec
 change-id: CHG-026-AGENT-NATIVE-CONFIGS
-profile: standard
+profile: minor
 ---
 
 # Especificación de Entrega: CHG-026-AGENT-NATIVE-CONFIGS

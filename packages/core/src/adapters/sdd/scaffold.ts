@@ -9,6 +9,7 @@ import * as path from 'path';
 import yaml from 'js-yaml';
 import {
   ChangeProfile,
+  VALID_CHANGE_PROFILES,
   ProductHandoff,
   SddChangeScaffoldOptions,
   SddChangeScaffoldResult,
@@ -1093,12 +1094,20 @@ function normalizeScaffoldOptions(options: SddChangeScaffoldOptions) {
     rootDir: options.rootDir || process.cwd(),
     framework: (options.framework || 'openspec') as 'openspec' | 'speckit',
     author: options.author || 'agent-developer / human-dev',
-    profile: (options.profile || 'standard') as ChangeProfile,
+    profile: (options.profile || 'minor') as ChangeProfile,
     name: options.name.trim(),
   };
 }
 
+export function validateScaffoldProfile(profile: unknown): string | undefined {
+  if (profile === undefined) return undefined;
+  if ((VALID_CHANGE_PROFILES as readonly string[]).includes(String(profile))) return undefined;
+  return `Invalid change profile '${profile}'. Expected one of: ${VALID_CHANGE_PROFILES.join(', ')}.`;
+}
+
 export function scaffoldSddChange(options: SddChangeScaffoldOptions): SddChangeScaffoldResult {
+  const profileError = validateScaffoldProfile(options.profile);
+  if (profileError) return buildScaffoldFailure('minor', profileError);
   const { rootDir, framework, author, profile, name } = normalizeScaffoldOptions(options);
   const dateStr = new Date().toISOString().split('T')[0];
 

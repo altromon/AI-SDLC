@@ -2,7 +2,7 @@
 id: SPEC-CHG-051-GHERKIN-POLYGLOT-SCAFFOLD
 type: delivery-spec
 change-id: CHG-051-GHERKIN-POLYGLOT-SCAFFOLD
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-051-GHERKIN-POLYGLOT-SCAFFOLD"

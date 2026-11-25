@@ -2,7 +2,7 @@
 id: SPEC-CHG-025-STRUCTURED-JSON-VERIFY
 type: delivery-spec
 change-id: CHG-025-STRUCTURED-JSON-VERIFY
-profile: standard
+profile: minor
 ---
 
 # Especificación de Entrega: CHG-025-STRUCTURED-JSON-VERIFY

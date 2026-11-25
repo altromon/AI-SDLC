@@ -186,18 +186,18 @@ Release gates adapt governance friction according to the `profile` field declare
         • Exempt from formal STRIDE threat modeling.
         • Exempt from updating MAN-USER-* and MAN-PROD-* manuals.
 
- 2. STANDARD PROFILE (Nominal Friction / Standard Business Use Cases)
-    ├── Frontmatter: profile: standard in spec.md
+ 2. MINOR PROFILE (Nominal Friction / Standard Business Use Cases)
+    ├── Frontmatter: profile: minor in spec.md
     └── Mandatory Gates:
         • Full CI/CD suite: Linters, typing, and unit tests.
         • Code quality: CC <= 10, MI >= 50, Duplication <= 3%, Coverage >= 85%.
         • 360° RTM Compliant (reverse lookup across HOF-*, arc42, and .feature).
         • All tasks in tasks.md in COMPLETED state.
 
- 3. CRITICAL PROFILE (High Friction / Cryptography, Secrets, and Enclaves)
-    ├── Frontmatter: profile: critical in spec.md
+ 3. MAJOR PROFILE (High Friction / Cryptography, Secrets, and Enclaves)
+    ├── Frontmatter: profile: major in spec.md
     └── Mandatory Gates:
-        • 100% of Standard Profile gates.
+        • 100% of Minor Profile gates.
         • Approved formal STRIDE / OWASP ASVS threat model.
         • Formally approved Architecture Decision Record (ADR-*).
         • Zero Trust enclave verification (SEC-ENC-*).

@@ -2,7 +2,7 @@
 id: SPEC-CHG-034-OPTIMIZE-QA-AGENT-WITH-MANDATORY-E2E-AND-UI-TESTING
 type: delivery-spec
 change-id: CHG-034-OPTIMIZE-QA-AGENT-WITH-MANDATORY-E2E-AND-UI-TESTING
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-034-OPTIMIZE-QA-AGENT-WITH-MANDATORY-E2E-AND-UI-TESTING"

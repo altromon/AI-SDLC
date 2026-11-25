@@ -2,7 +2,7 @@
 id: SPEC-CHG-031-WORKFLOW-AGENT-HANDOFF
 type: delivery-spec
 change-id: CHG-031-WORKFLOW-AGENT-HANDOFF
-profile: standard
+profile: minor
 ---
 
 # Especificación de Entrega: CHG-031-WORKFLOW-AGENT-HANDOFF

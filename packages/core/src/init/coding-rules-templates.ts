@@ -422,11 +422,11 @@ function detectChangeDirProfile(changeDir) {
     if (!fs.existsSync(fullPath)) continue;
     try {
       const content = fs.readFileSync(fullPath, 'utf-8');
-      const match = content.match(/^\\s*profile:\\s*['"]?(patch|standard|critical)['"]?\\s*$/m);
+      const match = content.match(/^\\s*profile:\\s*['"]?([A-Za-z0-9_-]+)['"]?\\s*$/m);
       if (match) return match[1];
     } catch {}
   }
-  return 'standard';
+  return 'minor';
 }
 
 function extractBranchChangePrefix(branch) {
@@ -458,17 +458,31 @@ function isSatisfiedChangeDir(changeDir, requiresFullSdd) {
   if (profile === 'patch') {
     return !requiresFullSdd && fs.existsSync(path.join(changeDir, 'spec.md'));
   }
+  if (profile !== 'minor' && profile !== 'major') {
+    return false;
+  }
   return STANDARD_SDD_ARTIFACTS.every((f) => fs.existsSync(path.join(changeDir, f)));
 }
 
 function validateProtectedBypassOnly(candidateDirs, relTargetPath) {
+  const invalidDir = candidateDirs.find((dir) => {
+    const profile = detectChangeDirProfile(dir);
+    return profile !== 'patch' && profile !== 'minor' && profile !== 'major';
+  });
+  if (invalidDir) {
+    const invalidProfile = detectChangeDirProfile(invalidDir);
+    return {
+      valid: false,
+      reason: \`❌ [AI-SDLC SDD Increment Guard] BLOCKED: Active SDD increment declares invalid profile '\${invalidProfile}'. Expected one of: patch, minor, major.\`,
+    };
+  }
   const hasPatchCandidate = candidateDirs.some(
     (dir) => detectChangeDirProfile(dir) === 'patch'
   );
   if (hasPatchCandidate) {
     return {
       valid: false,
-      reason: \`❌ [AI-SDLC Anti-Bypass Guard] BLOCKED: Active SDD increment uses 'patch' profile, but '\${relTargetPath}' is a protected Anti-Bypass path. Protected paths require a 'standard' or 'critical' SDD increment in specs/changes/active/ (run aisdlc-increment).\`,
+      reason: \`❌ [AI-SDLC Anti-Bypass Guard] BLOCKED: Active SDD increment uses 'patch' profile, but '\${relTargetPath}' is a protected Anti-Bypass path. Protected paths require a 'minor' or 'major' SDD increment in specs/changes/active/ (run aisdlc-increment).\`,
     };
   }
   return { valid: true };
@@ -488,12 +502,12 @@ function validateSourceOrTestEdit(candidateDirs, branchPrefix, relTargetPath, is
   if (isBypass) {
     return {
       valid: false,
-      reason: \`❌ [AI-SDLC Anti-Bypass Guard] BLOCKED: Protected Anti-Bypass path '\${relTargetPath}' cannot be modified under a 'patch' increment. A 'standard' or 'critical' SDD increment with spec.md, design.md, tasks.md, and handoff.yaml in specs/changes/active/ is required (aisdlc-increment).\`,
+      reason: \`❌ [AI-SDLC Anti-Bypass Guard] BLOCKED: Protected Anti-Bypass path '\${relTargetPath}' cannot be modified under a 'patch' increment. A 'minor' or 'major' SDD increment with spec.md, design.md, tasks.md, and handoff.yaml in specs/changes/active/ is required (aisdlc-increment).\`,
     };
   }
   return {
     valid: false,
-    reason: \`❌ [AI-SDLC SDD Increment Guard] BLOCKED: Active SDD increment in specs/changes/active/ is incomplete for standard/critical profile (requires spec.md, design.md, tasks.md, and handoff.yaml) before editing '\${relTargetPath}'. Complete SDD scaffolding via aisdlc-increment first.\`,
+    reason: \`❌ [AI-SDLC SDD Increment Guard] BLOCKED: Active SDD increment in specs/changes/active/ is incomplete or uses an invalid profile (expected 'patch', 'minor', or 'major'; minor/major requires spec.md, design.md, tasks.md, and handoff.yaml) before editing '\${relTargetPath}'. Complete SDD scaffolding via aisdlc-increment first.\`,
   };
 }
 

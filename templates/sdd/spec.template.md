@@ -2,7 +2,7 @@
 id: SPEC-CHG-NAME-001
 type: delivery-spec
 change-id: CHG-NAME-001
-profile: standard # standard, patch, critical
+profile: minor # patch, minor, major
 handoff: HOF-CHG-NAME-001
 acceptance-format: gherkin
 cucumber-tags:

@@ -2,7 +2,7 @@
 id: SPEC-CHG-058-POLYGLOT-PII-LOGGING
 type: delivery-spec
 change-id: CHG-058-POLYGLOT-PII-LOGGING
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-058-POLYGLOT-PII-LOGGING"

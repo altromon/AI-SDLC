@@ -2,7 +2,7 @@
 id: SPEC-CHG-044-REPRODUCIBILITY-CANONICAL-ORDERING
 type: delivery-spec
 change-id: CHG-044-REPRODUCIBILITY-CANONICAL-ORDERING
-profile: critical
+profile: major
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-044-REPRODUCIBILITY-CANONICAL-ORDERING"

@@ -2,7 +2,7 @@
 id: SPEC-CHG-054-SCA-MAVEN-LICENSE-AND-PURL-FIX
 type: delivery-spec
 change-id: CHG-054-SCA-MAVEN-LICENSE-AND-PURL-FIX
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-054-SCA-MAVEN-LICENSE-AND-PURL-FIX"

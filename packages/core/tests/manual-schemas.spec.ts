@@ -187,7 +187,7 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
     expect(res.coverage.productionCoveragePct).toBe(100);
   });
 
-  it('should emit ADVISORY warning in daily dev and BLOCK in release/* or critical profile when manuals are missing', () => {
+  it('should emit ADVISORY warning in daily dev and BLOCK in release/* or major profile when manuals are missing', () => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sdlc-manuals-gate-'));
     try {
       const ucDir = path.join(tempDir, 'product', 'use-cases');
@@ -206,19 +206,19 @@ describe('Manuals Schemas & Templates Compliance Suite', () => {
         'utf-8'
       );
 
-      const advisoryRes = verifyManuals({ rootDir: tempDir, branch: 'task/CHG-001/TSK-001', profile: 'standard' });
+      const advisoryRes = verifyManuals({ rootDir: tempDir, branch: 'task/CHG-001/TSK-001', profile: 'minor' });
       expect(advisoryRes.success).toBe(true);
       expect(advisoryRes.status).toBe('WARNING');
       expect(advisoryRes.enforcementMode).toBe('ADVISORY');
       expect(advisoryRes.warnings.length).toBeGreaterThanOrEqual(2);
 
-      const releaseRes = verifyManuals({ rootDir: tempDir, branch: 'release/v1.0.0', profile: 'standard' });
+      const releaseRes = verifyManuals({ rootDir: tempDir, branch: 'release/v1.0.0', profile: 'minor' });
       expect(releaseRes.success).toBe(false);
       expect(releaseRes.status).toBe('FAILED');
       expect(releaseRes.enforcementMode).toBe('STRICT_RELEASE');
       expect(releaseRes.violations.length).toBeGreaterThanOrEqual(2);
 
-      const criticalRes = verifyManuals({ rootDir: tempDir, branch: 'feat/CHG-001', profile: 'critical' });
+      const criticalRes = verifyManuals({ rootDir: tempDir, branch: 'feat/CHG-001', profile: 'major' });
       expect(criticalRes.success).toBe(false);
       expect(criticalRes.status).toBe('FAILED');
       expect(criticalRes.enforcementMode).toBe('STRICT_RELEASE');

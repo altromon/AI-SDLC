@@ -2,7 +2,7 @@
 id: SPEC-CHG-050-IDE-AGENT-TOOLS-MCP
 type: delivery-spec
 change-id: CHG-050-IDE-AGENT-TOOLS-MCP
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-050-IDE-AGENT-TOOLS-MCP"

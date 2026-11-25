@@ -2,7 +2,7 @@
 id: SPEC-CHG-064-REASONING-EFFORT-TRAILER
 type: delivery-spec
 change-id: CHG-064-REASONING-EFFORT-TRAILER
-profile: standard
+profile: minor
 handoff: HOF-CHG-064-REASONING-EFFORT-TRAILER
 acceptance-format: gherkin
 cucumber-tags:

@@ -16,6 +16,8 @@ import {
   verifyProgressiveFriction,
 } from '../src/index.js';
 import { LIFECYCLE_SKILL_TEMPLATES } from '../src/init/index.js';
+import { validateScaffoldProfile } from '../src/adapters/sdd/scaffold.js';
+import { parseSpecFrontmatter } from '../src/verifiers/progressive-friction.js';
 
 const repoRoot = path.resolve(__dirname, '../../..');
 const specSchemaPath = path.join(repoRoot, 'schemas', 'sdd', 'spec.schema.json');
@@ -85,6 +87,10 @@ describe('CHG-067: SemVer Friction Profiles (patch | minor | major)', () => {
       expect(res.valid, `Expected schema to accept profile '${validProfile}'`).toBe(true);
     }
 
+    expect(validateScaffoldProfile(undefined)).toBeUndefined();
+    expect(validateScaffoldProfile('minor')).toBeUndefined();
+    expect(validateScaffoldProfile('standard')).toMatch(/Invalid change profile/);
+
     for (const legacyProfile of ['standard', 'critical']) {
       const res = validateArtifactSchema(
         {
@@ -126,9 +132,14 @@ describe('CHG-067: SemVer Friction Profiles (patch | minor | major)', () => {
     const omittedDir = writeChangeFiles(ws, 'chg-067-omitted', {
       'spec.md': '---\nid: SPEC-CHG-067-OMITTED\n---\n# Spec\n',
     });
+    expect(parseSpecFrontmatter(path.join(omittedDir, 'spec.md'))).toEqual({ id: 'SPEC-CHG-067-OMITTED' });
     expect(detectProfileFromChange(omittedDir)).toBe('minor');
 
     // Legacy profiles must fail closed (no silent fallback to 'minor')
+    expect(validateScaffoldProfile(undefined)).toBeUndefined();
+    expect(validateScaffoldProfile('minor')).toBeUndefined();
+    expect(validateScaffoldProfile('standard')).toMatch(/Invalid change profile/);
+
     for (const legacyProfile of ['standard', 'critical']) {
       const legacyDir = writeChangeFiles(ws, `chg-067-${legacyProfile}`, {
         'spec.md': `---\nprofile: ${legacyProfile}\n---\n# Spec\n`,
@@ -205,6 +216,10 @@ describe('CHG-067: SemVer Friction Profiles (patch | minor | major)', () => {
     expect(guard.detectChangeDirProfile(omittedDir)).toBe('minor');
 
     // Legacy standard / critical must be denied (no silent fallback to 'minor')
+    expect(validateScaffoldProfile(undefined)).toBeUndefined();
+    expect(validateScaffoldProfile('minor')).toBeUndefined();
+    expect(validateScaffoldProfile('standard')).toMatch(/Invalid change profile/);
+
     for (const legacyProfile of ['standard', 'critical']) {
       const wsLegacy = trackTempDir(initTempGitWorkspace('feat/CHG-067-legacy'));
       writeChangeFiles(wsLegacy, 'chg-067-legacy', {
@@ -242,6 +257,10 @@ describe('CHG-067: SemVer Friction Profiles (patch | minor | major)', () => {
     });
     expect(defaultRes.success).toBe(true);
     expect(defaultRes.profile).toBe('minor');
+
+    expect(validateScaffoldProfile(undefined)).toBeUndefined();
+    expect(validateScaffoldProfile('minor')).toBeUndefined();
+    expect(validateScaffoldProfile('standard')).toMatch(/Invalid change profile/);
 
     for (const legacyProfile of ['standard', 'critical']) {
       const wsLegacy = trackTempDir(fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-scaffold-067-')));

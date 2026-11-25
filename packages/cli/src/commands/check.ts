@@ -383,7 +383,7 @@ export function auditFrictionGate(rootDir: string): PreflightGateSummary {
     name: 'Progressive Friction & Anti-Bypass Guardrails',
     status: 'FAILED',
     message: firstViolation,
-    remediation: "Reclassify change profile to 'standard' or 'critical', or revert protected path changes.",
+    remediation: "Reclassify change profile to 'minor' or 'major', or revert protected path changes.",
   };
 }
 

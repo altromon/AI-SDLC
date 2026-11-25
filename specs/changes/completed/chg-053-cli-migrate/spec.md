@@ -2,7 +2,7 @@
 id: SPEC-CHG-053-CLI-MIGRATE
 type: delivery-spec
 change-id: CHG-053-CLI-MIGRATE
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-053-CLI-MIGRATE"

@@ -143,7 +143,7 @@ AI-SDLC structures its `specs/` directory connecting to established Spec-Driven 
 
 4. **Operational CLI Commands**:
    - `npx aisdlc check [--fix] [--json]`: Executes the consolidated pre-flight suite across all Quality Gates with optional non-destructive auto-fix.
-   - `npx aisdlc change new "<name>" [--from <id>] [--profile <patch|standard|critical>] [--json]`: Generates complete scaffolding for a new SDD change with the 4 templates and `handoff.yaml` sidecar.
+   - `npx aisdlc change new "<name>" [--from <id>] [--profile <patch|minor|major>] [--json]`: Generates complete scaffolding for a new SDD change with the 4 templates and `handoff.yaml` sidecar.
    - `npx aisdlc sdd new "<name>"`: Convenient alias for `change new`.
    - `npx aisdlc sdd deposit --change <id> [--framework <openspec|speckit>] [--requirements <reqs>] [--json]`: Deposits the `handoff.yaml` sidecar into the active change.
    - `npx aisdlc sdd verify [--json]`: Audits conformity of all workspaces and handoff sidecars, running the duplicate pre-flight gate.

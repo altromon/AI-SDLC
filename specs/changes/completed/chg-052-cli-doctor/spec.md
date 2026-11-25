@@ -2,7 +2,7 @@
 id: SPEC-CHG-052-CLI-DOCTOR
 type: delivery-spec
 change-id: CHG-052-CLI-DOCTOR
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-052-CLI-DOCTOR"

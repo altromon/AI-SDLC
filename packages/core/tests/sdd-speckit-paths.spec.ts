@@ -60,7 +60,7 @@ describe('SpecKitAdapter Paths (Happy / Sad / Boundary / Malformed)', () => {
     fs.mkdirSync(wsDir, { recursive: true });
     fs.writeFileSync(
       path.join(wsDir, 'spec.md'),
-      '---\nprofile: standard\nacceptance-format: markdown\n---\n# Spec\n',
+      '---\nprofile: minor\nacceptance-format: markdown\n---\n# Spec\n',
       'utf-8'
     );
     const resInvalidFmt = adapter.validateWorkspace(wsDir);

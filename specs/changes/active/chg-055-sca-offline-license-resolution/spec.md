@@ -2,7 +2,7 @@
 id: SPEC-CHG-055-SCA-OFFLINE-LICENSE-RESOLUTION
 type: delivery-spec
 change-id: CHG-055-SCA-OFFLINE-LICENSE-RESOLUTION
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-055-SCA-OFFLINE-LICENSE-RESOLUTION"

@@ -30,7 +30,7 @@ describe('SDD Scaffold, MigrationService & GitHooksHealthCheck Paths (Happy / Sa
     expect(getNextCorrelativeNumber(tmpDir)).toBe(13);
   });
 
-  it('scaffoldSddChange: scaffolds patch and standard profiles and handles duplicate change error (happy/sad/boundary)', () => {
+  it('scaffoldSddChange: scaffolds patch and minor profiles and handles duplicate change error (happy/sad/boundary)', () => {
     const patchRes = scaffoldSddChange({
       rootDir: tmpDir,
       name: 'Fix typo in logger',
@@ -42,7 +42,7 @@ describe('SDD Scaffold, MigrationService & GitHooksHealthCheck Paths (Happy / Sa
     const stdRes = scaffoldSddChange({
       rootDir: tmpDir,
       name: 'Add audit export',
-      profile: 'standard',
+      profile: 'minor',
     });
     expect(stdRes.success).toBe(true);
 
@@ -50,7 +50,7 @@ describe('SDD Scaffold, MigrationService & GitHooksHealthCheck Paths (Happy / Sa
       rootDir: tmpDir,
       changeId: stdRes.changeId,
       name: 'Duplicate change',
-      profile: 'standard',
+      profile: 'minor',
     });
     expect(dupRes.success).toBe(false);
   });

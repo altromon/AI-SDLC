@@ -2,7 +2,7 @@
 id: SPEC-CHG-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
 type: delivery-spec
 change-id: CHG-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
-profile: standard
+profile: minor
 handoff: HOF-CHG-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
 acceptance-format: gherkin
 cucumber-tags:

@@ -373,7 +373,7 @@ describe('CLI check.ts helper and gate auditor unit suite (100% function coverag
     fs.writeFileSync(path.join(tmpDir, 'quality-policy.yaml'), 'enforce_mode: PERMISSIVE\n', 'utf-8');
     const fric = auditFrictionGate(tmpDir);
     expect(fric.status).toBe('FAILED');
-    expect(fric.remediation).toContain('standard');
+    expect(fric.remediation).toContain('minor');
 
     // Sanity check canonical SHA-256 format
     expect(computeCanonicalSha256(frText)).toMatch(/^[0-9a-f]{64}$/);
