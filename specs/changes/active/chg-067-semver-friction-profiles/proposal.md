@@ -23,9 +23,9 @@ Renombrar de forma estricta (cambio incompatible / perfil `major`) los perfiles 
 
 ### Alcance del Cambio (Hard Rename sin Alias Retrocompatibles)
 - **Esquemas JSON**: `schemas/sdd/spec.schema.json` (`profile.enum` pasa a `["patch", "minor", "major"]`).
-- **Core (`@aisdlc/core`)**: `ChangeProfile` / `VALID_CHANGE_PROFILES` en `packages/core/src/types/index.ts`, `progressive-friction.ts`, `manuals.ts`, adaptadores SDD (`openspec.ts`, `speckit.ts`, `scaffold.ts`), y plantillas de inicialización (`starter-schemas.ts`, `starter-templates.ts`, `coding-rules-templates.ts`).
-- **CLI (`@aisdlc/cli`) y MCP (`@aisdlc/mcp`)**: Opciones `--profile <patch|minor|major>` con valor por defecto `minor` y rechazo estricto de `standard` / `critical` en `packages/cli/src/` y `packages/mcp/src/tools/lifecycle.ts`.
-- **Hooks y Plantillas**: `scripts/guard-branch.cjs`, `templates/sdd/spec.template.md`, documentación `process/`, `specs/changes/` (`profile:` en specs existentes y el propio `chg-067/spec.md` de `critical` -> `major`), y suite de pruebas unitarias y BDD.
+- **Core (`@aisdlc/core`)**: `ChangeProfile` / `VALID_CHANGE_PROFILES` en `packages/core/src/types/index.ts`, `progressive-friction.ts`, `manuals.ts`, adaptadores SDD (`openspec.ts`, `speckit.ts`, `scaffold.ts`), y plantillas de inicialización (`agent-templates.ts` incluyendo `LIFECYCLE_SKILL_TEMPLATES` como `aisdlc-increment` y `aisdlc-release-compliance`, `starter-schemas.ts`, `starter-templates.ts`, `coding-rules-templates.ts`).
+- **CLI (`@aisdlc/cli`) y MCP (`@aisdlc/mcp`)**: Opciones `--profile <patch|minor|major>` con valor por defecto `minor` y rechazo estricto de `standard` / `critical` en `packages/cli/src/index.ts`, `packages/cli/src/commands/sdd.ts`, `packages/cli/src/commands/check.ts` (mensajes de reclasificación a `'minor' or 'major'`), y `packages/mcp/src/tools/lifecycle.ts`.
+- **Hooks, Plantillas, Specs y Pruebas**: `scripts/guard-branch.cjs`, `templates/sdd/spec.template.md`, documentación `process/`, todos los archivos `specs/changes/active/*/spec.md` y `specs/changes/completed/*/spec.md` (~38 archivos) que declaran `profile: standard` o `profile: critical` (incluyendo el propio `chg-067/spec.md` de `critical` -> `major`), y las suites de pruebas existentes en `packages/core/tests/`, `packages/cli/tests/`, `packages/mcp/tests/` y `tests/`.
 
 ## 2. Dependencias Externas Evaluadas
 - Ninguna dependencia externa nueva incorporada. Se cumplen íntegramente las restricciones de `license-policy.yaml`.

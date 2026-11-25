@@ -79,7 +79,7 @@ superseded-by: null
 - **ID**: `TSK-067-02`
 - **Asignado a**: `agent-developer`
 - **Modo**: `AUTONOMOUS` 🟢
-- **Descripción**: Renombrado estricto en `schemas/sdd/spec.schema.json`, `packages/core/src/`, `packages/cli/src/`, `packages/mcp/src/`, `scripts/guard-branch.cjs`, `templates/sdd/spec.template.md`, `process/`, campos `profile:` en `specs/changes/` (incluyendo `chg-067` `spec.md` de `critical` a `major`), y actualización de pruebas existentes que asertan sobre `standard`/`critical`.
+- **Descripción**: Renombrado estricto (fail-closed cuando `profile` está presente y no es `patch | minor | major`, reservando `'minor'` solo para omisión) en `schemas/sdd/spec.schema.json`, `packages/core/src/` (incluyendo `types/index.ts`, `progressive-friction.ts`, `manuals.ts`, `adapters/sdd/*`, `init/agent-templates.ts` con `aisdlc-increment` y `aisdlc-release-compliance`, `init/coding-rules-templates.ts`, `init/starter-schemas.ts`, `init/starter-templates.ts`), `packages/cli/src/` (incluyendo `commands/check.ts`, `commands/sdd.ts`, `index.ts`), `packages/mcp/src/tools/lifecycle.ts`, `scripts/guard-branch.cjs`, `templates/sdd/spec.template.md`, `process/`, todos los `specs/changes/{active,completed}/*/spec.md` (~38 archivos, incluyendo `chg-067/spec.md` de `critical` a `major`), y las pruebas existentes en `packages/core/tests/`, `packages/cli/tests/`, `packages/mcp/tests/` y `tests/`.
 - **Verificación**: `npx vitest run packages/core/tests/semver-friction-profiles.spec.ts`
 
 ### Fase 3: Sync & Full Verification (`TSK-067-03`)
