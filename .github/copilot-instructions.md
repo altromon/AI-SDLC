@@ -9,7 +9,7 @@ You operate as an assistant agent in the **AI-SDLC** repository. You are not a s
 
 ---
 
-## 1. The 5 Unbreakable Commandments of Agents | Los 5 Mandamientos Inquebrantables de los Agentes
+## 1. The 6 Unbreakable Commandments of Agents | Los 6 Mandamientos Inquebrantables de los Agentes
 
 1. **FORBIDDEN TO AUTO-APPROVE OR AUTO-MERGE | PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**:
    - Never execute PR approvals or direct merges to stable branches (`main`, `release/*`). Approval is an exclusive human prerogative.
@@ -21,6 +21,8 @@ You operate as an assistant agent in the **AI-SDLC** repository. You are not a s
    - All code must enforce least privilege, sanitize external inputs, protect PII according to `privacy-policy.yaml`, and include mitigation tests (`SEC-TEST-*`, `@privacy`). Suppressing types (`any`), linters, or tests to force a green pipeline is prohibited.
 5. **MANDATORY CRYPTOGRAPHIC CITATION**:
    - Every specification, design, or sidecar must reference canonical identifiers and their Unix LF-normalized SHA-256 digests.
+6. **MANDATORY CLEAN CONTEXT WINDOW ISOLATION PER SPECIALIST AGENT**:
+   - Never execute two distinct specialist roles in the same conversation context window. Always spawn each specialist in a fresh isolated subagent context (or open a New Chat / `/clear` in single-thread IDEs) reading state strictly from disk (`specs/`, `handoff.yaml`, `get_active_handoff`).
 
 ---
 
@@ -34,9 +36,10 @@ When proposing or creating branches, respect the strict hierarchical structure:
 
 ---
 
-## 3. Pre-Flight Commands and Quality Gates
+## 3. Pre-Flight Commands, Context Budget & Quality Gates
 
 Before concluding any intervention or suggesting a commit:
+- **Context Budget Rule (MCP-First)**: Hydrate task context via `get_task_context` (`npx aisdlc context pack <TSK-ID>`), explore code with `query_code_graph`, and search specs with `search_specs` first. Treat `process/*.md` as on-demand reference only — never bulk-read them upfront.
 - **Unified pre-flight with auto-fix**: `pnpm run check:fix` (or `npx aisdlc check --fix`).
 - **Complete Quality Gates verification**: `pnpm run verify:all` (or `npx aisdlc verify all`).
 - **Unit test suite**: `pnpm test`.

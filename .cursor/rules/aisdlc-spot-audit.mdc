@@ -40,14 +40,14 @@ Execute deterministic verifiers matching the element's layer before invoking spe
 > **MANDATORY CLEAN CONTEXT WINDOW ISOLATION (Commandment #6):**
 > Never role-play `agent-auditor` and `agent-adversary` inside the same context window. In subagent-capable IDEs (Antigravity `invoke_subagent`, Claude Code `Task`, Copilot `@agent-*`), spawn two isolated subagents in parallel passing the target file path, SHA-256 digest, and upstream/downstream context from Steps 1–2.
 
-1. **Branch A — [`agent-auditor`](../agent-auditor/SKILL.md) (Constructive Quality, YAGNI & Compliance Audit):**
+1. **Branch A — [`agent-auditor`](../../agents/agent-auditor.md) (Constructive Quality, YAGNI & Compliance Audit):**
    - **Product (`UC-*`, `FR-*`, `BR-*`):** Check for ambiguity, missing `@nominal`/`@boundary`/`@invalid` Gherkin scenarios, and enforce End-to-End MVP Completeness (rejecting library-only MVPs when human actors `ACT-*` exist, verifying UI modality and master-data CRUD prerequisites).
    - **Architecture (`CMP-*`, `ADR-*`):** Enforce Hexagonal Architecture (Ports & Adapters), YAGNI, Contract-First shared schemas, and persistent `CMP-OBSERVABILITY` (`OBS_STORAGE_PATH`, `flush()`, `ITelemetryExporter`).
    - **Source Code (`src/**`):** Enforce `quality-policy.yaml` thresholds ($CC \le 10$, $Cognitive \le 15$, $MI \ge 50$, $Lines \le 40$), SOLID/DRY, 1:1 method unit test (`tests/unit/`) and UI component test (`tests/e2e/` or `tests/ui/`) coverage, zero fake-wiring, all 4 UI states (`Loading`, `Empty`, `Error`, `Nominal`), modern visual aesthetics (Bootstrap 5 / modern Desktop / rich ANSI Console), and SPDX license compliance.
    - **Tests (`tests/**`):** Verify deterministic Gherkin extraction/scaffolding and per-interactive-element Happy/Sad/Boundary coverage.
    - **Classification:** Label every finding as `[BLOCKING_DEFECT]`, `[SIMPLIFICATION]`, or `[ADVISORY]`.
 
-2. **Branch B — [`agent-adversary`](../agent-adversary/SKILL.md) (Red Team, Chaos & Proof-of-Break Audit):**
+2. **Branch B — [`agent-adversary`](../../agents/agent-adversary.md) (Red Team, Chaos & Proof-of-Break Audit):**
    - **Product (`UC-*`, `FR-*`, `BR-*`):** Uncover contradictory business rules, unreachable states, logic traps, and unmodeled abuse paths.
    - **Architecture (`CMP-*`, `ADR-*`):** Simulate race conditions, cascading failures, resource exhaustion, Single Points of Failure (SPOFs), and enclave boundary bypasses.
    - **Tests (`tests/**`):** Perform **Conceptual Mutation Testing** — provide concrete mutant production code showing how a broken or empty implementation would falsely pass the test suite green.

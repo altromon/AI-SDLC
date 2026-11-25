@@ -6,17 +6,20 @@ This repository implements the **AI-SDLC** framework (Spec-Driven Development, d
 
 ---
 
-## 1. The 5 Unbreakable Commandments of Agents | Los 5 Mandamientos Inquebrantables de los Agentes
+## 1. The 6 Unbreakable Commandments of Agents | Los 6 Mandamientos Inquebrantables de los Agentes
 
 1. **FORBIDDEN TO AUTO-APPROVE OR AUTO-MERGE | PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: Never approve PRs or merge directly to `main` or protected branches. Approval is exclusively a human prerogative.
 2. **FORBIDDEN TO INVENT PRODUCT OR ARCHITECTURE DECISIONS**: When facing ambiguous requirements, formulate open questions (`open-questions`). Never assume undocumented behaviors.
 3. **FORBIDDEN TO INTRODUCE DEPENDENCIES WITHOUT LICENSE INSPECTION**: Always validate the SPDX identifier against `license-policy.yaml`. Viral libraries (`GPL`/`AGPL`) or paid commercial libraries (`BSL`/`SSPL`) are strictly forbidden without formal human approval.
 4. **FORBIDDEN TO IGNORE CYBERSECURITY & PRIVACY (SECURITY-BY-DEFAULT & PRIVACY-BY-DEFAULT)**: Validate inputs, sanitize data, protect PII according to `privacy-policy.yaml`, and include mitigation tests (`SEC-TEST-*`, `@privacy`). Disabling linters or suppressing typing errors (`any`, `@ts-ignore`) is prohibited.
 5. **MANDATORY CRYPTOGRAPHIC CITATION**: Every spec or sidecar must cite immutable identifiers and Unix LF-normalized SHA-256 digests.
+6. **MANDATORY CLEAN CONTEXT WINDOW ISOLATION PER SPECIALIST AGENT**: Never execute two distinct specialist roles in the same conversation context window. Always spawn each specialist in a fresh isolated subagent context (or open a New Chat / `/clear` in single-thread IDEs) reading state strictly from disk (`specs/`, `handoff.yaml`, `get_active_handoff`).
 
 ---
 
-## 2. Essential Execution and Pre-Flight Commands
+## 2. Essential Execution, Context Budget & Pre-Flight Commands
+
+- **Context Budget Rule (MCP-First)**: Hydrate task context via `get_task_context` (`npx aisdlc context pack <TSK-ID>`), explore code with `query_code_graph`, and search specs with `search_specs` first. Treat `process/*.md` as on-demand reference only — never bulk-read them upfront.
 
 ```bash
 # 1. Pre-flight with deterministic auto-fix (Gherkin & SHA-256 digests)
