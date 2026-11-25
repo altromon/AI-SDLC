@@ -373,7 +373,7 @@ describe('verify.ts Licenses, Prompt, PDaC, Schemas, Friction, Duplicates & Priv
       const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
       const passFriction: ProgressiveFrictionResult = {
         success: true,
-        profile: 'standard',
+        profile: 'minor',
         bypassed: false,
         violations: [],
         bypassedRules: [],
@@ -390,7 +390,7 @@ describe('verify.ts Licenses, Prompt, PDaC, Schemas, Friction, Duplicates & Priv
       logSpy.mockClear();
       const failFriction: ProgressiveFrictionResult = {
         success: false,
-        profile: 'critical',
+        profile: 'major',
         bypassed: true,
         violations: ['bypass'],
         bypassedRules: ['Skipped security review'],

@@ -13,8 +13,8 @@ import {
 describe('SDD Mandatory Gherkin Formatting Specification Suite', () => {
   const tmpBaseDir = path.join(process.cwd(), 'scratch', 'test-sdd-mandatory-gherkin');
 
-  it('should scaffold a standard SDD change with mandatory Gherkin formatting in spec.md', () => {
-    const tmpDir = path.join(tmpBaseDir, 'standard');
+  it('should scaffold a minor SDD change with mandatory Gherkin formatting in spec.md', () => {
+    const tmpDir = path.join(tmpBaseDir, 'minor');
     if (fs.existsSync(tmpDir)) fs.rmSync(tmpDir, { recursive: true, force: true });
 
     const result = scaffoldSddChange({
@@ -126,7 +126,7 @@ describe('SDD Mandatory Gherkin Formatting Specification Suite', () => {
 id: SPEC-CHG-INVALID-001
 type: delivery-spec
 change-id: CHG-INVALID-001
-profile: standard
+profile: minor
 acceptance-format: declarative-prose
 ---
 # Spec Invalida
@@ -143,7 +143,7 @@ acceptance-format: declarative-prose
 id: SPEC-CHG-INVALID-002
 type: delivery-spec
 change-id: CHG-INVALID-002
-profile: standard
+profile: minor
 acceptance-format: gherkin
 ---
 # Spec Sin Bloque
@@ -172,7 +172,7 @@ acceptance-format: gherkin
       id: 'SPEC-CHG-001-TELEMETRY',
       type: 'delivery-spec',
       'change-id': 'CHG-001-TELEMETRY',
-      profile: 'standard',
+      profile: 'minor',
       'acceptance-format': 'gherkin',
       'cucumber-tags': ['@CHG-001-TELEMETRY', '@automated'],
     };
@@ -185,7 +185,7 @@ acceptance-format: gherkin
       id: 'SPEC-CHG-001-TELEMETRY',
       type: 'delivery-spec',
       'change-id': 'CHG-001-TELEMETRY',
-      profile: 'standard',
+      profile: 'minor',
       'acceptance-format': 'declarative-prose', // not allowed by enum
     };
 

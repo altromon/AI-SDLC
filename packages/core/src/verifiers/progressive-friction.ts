@@ -13,6 +13,7 @@ import {
   ChangeProfile,
   ProgressiveFrictionOptions,
   ProgressiveFrictionResult,
+  VALID_CHANGE_PROFILES,
 } from '../types/index.js';
 
 export const PROTECTED_BYPASS_PATTERNS: RegExp[] = [
@@ -29,30 +30,32 @@ export const PROTECTED_BYPASS_PATTERNS: RegExp[] = [
   /^\.github[\\/]CODEOWNERS$/i,
 ];
 
-export function detectProfileFromChange(changeDir: string): ChangeProfile {
-  if (!fs.existsSync(changeDir)) return 'standard';
-
-  const specFile = path.join(changeDir, 'spec.md');
-  if (fs.existsSync(specFile)) {
-    try {
-      const rawSpec = fs.readFileSync(specFile, 'utf-8').replace(/^\uFEFF/, '');
-      const match = rawSpec.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-      if (match) {
-        const parsedFm = yaml.load(match[1]) as Record<string, unknown> | null;
-        if (
-          parsedFm &&
-          parsedFm.profile &&
-          ['patch', 'standard', 'critical'].includes(String(parsedFm.profile))
-        ) {
-          return parsedFm.profile as ChangeProfile;
-        }
-      }
-    } catch {
-      // Ignore parse failure, fallback
-    }
+export function parseSpecFrontmatter(specFile: string): Record<string, unknown> | null {
+  const rawSpec = fs.readFileSync(specFile, 'utf-8').replace(/^\uFEFF/, '');
+  const match = rawSpec.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return null;
+  try {
+    return yaml.load(match[1]) as Record<string, unknown> | null;
+  } catch {
+    return null;
   }
+}
 
-  return 'standard';
+export function detectProfileFromChange(changeDir: string): ChangeProfile {
+  const specFile = path.join(changeDir, 'spec.md');
+  if (!fs.existsSync(changeDir) || !fs.existsSync(specFile)) return 'minor';
+
+  const parsedFm = parseSpecFrontmatter(specFile);
+  if (!parsedFm || parsedFm.profile === undefined || parsedFm.profile === null) return 'minor';
+
+  const rawProfile = String(parsedFm.profile).trim();
+  if (!rawProfile) return 'minor';
+  if ((VALID_CHANGE_PROFILES as readonly string[]).includes(rawProfile)) {
+    return rawProfile as ChangeProfile;
+  }
+  throw new Error(
+    `Invalid change profile '${rawProfile}' in '${specFile}'. Expected one of: ${VALID_CHANGE_PROFILES.join(', ')}.`
+  );
 }
 
 export function isPathProtectedFromPatch(filePath: string): boolean {
@@ -158,7 +161,7 @@ function collectPatchViolations(rootDir: string, modifiedFiles: string[]): strin
     const relPath = path.isAbsolute(rawFile) ? path.relative(rootDir, rawFile) : rawFile;
     if (isPathProtectedFromPatch(relPath)) {
       violations.push(
-        `[ANTI-PATCH-BYPASS] File '${relPath}' is a protected path (security, schemas, architectural decisions, or master policies). Changes with 'patch' profile are strictly prohibited from modifying these paths. Must be reclassified to 'standard' or 'critical'.`
+        `[ANTI-PATCH-BYPASS] File '${relPath}' is a protected path (security, schemas, architectural decisions, or master policies). Changes with 'patch' profile are strictly prohibited from modifying these paths. Must be reclassified to 'minor' or 'major'.`
       );
     }
   }
@@ -199,7 +202,7 @@ export function verifyProgressiveFriction(
 ): ProgressiveFrictionResult {
   const rootDir = options.rootDir || process.cwd();
   const changeDir = resolveChangeDirectory(rootDir, options);
-  const profile: ChangeProfile = changeDir ? detectProfileFromChange(changeDir) : 'standard';
+  const profile: ChangeProfile = changeDir ? detectProfileFromChange(changeDir) : 'minor';
 
   const modifiedFiles =
     options.diffFiles ||

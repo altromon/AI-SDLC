@@ -12,12 +12,12 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 
 ## End-to-End Execution Playbook
 
-### Step 0: Branch-Before-Change, Pre-Change Draft PR & Scope Triage (`patch | standard | critical`)
+### Step 0: Branch-Before-Change, Pre-Change Draft PR & Scope Triage (`patch | minor | major`)
 1. **Branch-Before-Change & Pre-Change Draft PR/MR**: Verify the active branch (`git branch --show-current`). If currently on a protected branch (`main`, `master`, `release/*`), create and switch to a dedicated working branch (`feat/<CHG-ID>-<slug>` or `fix/<CHG-ID>-<slug>`) **before** modifying or creating any files. Whenever a remote repository is configured (`git remote`), check if an open PR/MR already exists for the branch (`gh pr view` / `gh pr list --head <branch>` on GitHub; `glab mr view` / `glab mr list --source-branch <branch>` on GitLab); if none exists, create an empty bootstrap commit (`git commit --allow-empty -m "chore(<CHG-ID>): open draft PR"`), push (`git push -u origin <branch>`), and open a **Draft PR/MR** (`gh pr create --draft` on GitHub; `glab mr create --draft` or `git push -o merge_request.create -o merge_request.draft` on GitLab) before making any changes (if no remote exists, work locally). Run `npx aisdlc doctor` (MCP tool `doctor`) at increment start to verify Git hooks and toolchain health.
-2. Before editing any files or running `sdd_change_new`, inspect if the user explicitly specified the friction profile (`patch`, `standard`, or `critical`). If not, analyze the requested scope and ask the user via interactive question (`ask_question`) with the recommended option first (`(Recommended)`):
+2. Before editing any files or running `sdd_change_new`, inspect if the user explicitly specified the friction profile (`patch`, `minor`, or `major`). If not, analyze the requested scope and ask the user via interactive question (`ask_question`) with the recommended option first (`(Recommended)`):
    - **`patch`**: low-risk isolated bugfixes ($\le 2$ source files, zero Anti-Bypass paths), typos, or linter fixes on `patch/*` or `fix/*` branches (`npx aisdlc change new "<Title>" --id <chg-id> --profile patch` generates `spec.md` with `profile: patch` and `verification` block only, omitting `design.md`, `tasks.md`, and `handoff.yaml`; fast-track directly to Step 3 -> Step 4 -> Step 5 -> Step 6).
-   - **`standard`**: functional increments, new/updated `UC-*` or `FR-*`, or contract changes (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml`).
-   - **`critical`**: changes touching security enclaves (`SEC-ENC-*`), sensitive PII (`SPECIAL_CATEGORY` / `DPIA-*`), schemas, or migrations (full `standard` artifacts + `ADR-*` + mandatory STRIDE modeling and dual human approval).
+   - **`minor`**: functional increments, new/updated `UC-*` or `FR-*`, or contract changes (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml`).
+   - **`major`**: changes touching security enclaves (`SEC-ENC-*`), sensitive PII (`SPECIAL_CATEGORY` / `DPIA-*`), schemas, or migrations (full `minor` artifacts + `ADR-*` + mandatory STRIDE modeling and dual human approval).
 2. **Anti-Bypass Rule**: Never recommend or allow `patch` when the change touches protected paths (`schemas/`, `specs/security/`, `specs/privacy/`, `packages/security/`, `SEC-ENC-*`, `09_decisions/`, `migrations/`, or `*-policy.yaml`).
 
 ### Step 1: Upstream Product, Security & Privacy Delta (`agent-product-analyst`, `agent-threat-modeler` & `agent-privacy-officer`)
@@ -30,7 +30,7 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 3. **Mandatory Pre-Architecture Validation**: Run `sdd_check_fix` (`npx aisdlc check --fix`) together with `verify_duplicates` (`npx aisdlc verify duplicates`) to sync Gherkin `.feature` files and validate schemas/collisions before proceeding to Step 2 (`agent-system-architect`).
 
 ### Step 2: SDD Change Scaffolding & Architectural Design (`agent-system-architect`)
-1. Scaffold the bounded change package and its cryptographic `handoff.yaml` sidecar (`HOF-*`) targeting **a single Use Case (`1 UC-* = 1 CHG-*`)** using MCP tool `sdd_change_new` (or CLI `npx aisdlc change new "<Title>" --from <UC-ID> --profile <patch|standard|critical>`).
+1. Scaffold the bounded change package and its cryptographic `handoff.yaml` sidecar (`HOF-*`) targeting **a single Use Case (`1 UC-* = 1 CHG-*`)** using MCP tool `sdd_change_new` (or CLI `npx aisdlc change new "<Title>" --from <UC-ID> --profile <patch|minor|major>`).
 2. Use [`agent-system-architect`](../../agents/agent-system-architect.md) to complete `specs/changes/active/<chg-id>/design.md` and `specs/architecture/CMP-*.md` (run `query_code_graph` / `npx aisdlc graph query <target>` Read-First on affected modules to inspect existing imports, symbols, and coupling before designing):
    - Structure `CMP-*` and `design.md` around **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports) and define **Contract-First** shared interfaces/DTOs/schemas when spanning Frontend and Backend.
    - Map 100% of `handoff.yaml` requirements and components to atomic tasks (`TSK-*`) in `tasks.md` with explicit `autonomy-mode` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `HIGH_RISK_MANUAL`, `AMBIGUOUS`).
@@ -79,9 +79,9 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 3. **Semantic Versioning Promotion**:
    - **Profile-Driven SemVer Mapping**: Bump the version of the software under development according to the increment's friction profile:
      - `patch` -> bump **Patch** digit (`x.y.Z`)
-     - `standard` -> bump **Minor** digit (`x.Y.0`)
-     - `critical` -> bump **Major** digit (`X.0.0`)
-   - **Highest-Precedence Consolidation (Multiple Pending Increments)**: When multiple pending increments exist in the active branch or release batch being integrated, apply **ONLY a single version bump corresponding to the highest rank** (`critical` / Major > `standard` / Minor > `patch` / Patch), ignoring unrelated historical directories.
+     - `minor` -> bump **Minor** digit (`x.Y.0`)
+     - `major` -> bump **Major** digit (`X.0.0`)
+   - **Highest-Precedence Consolidation (Multiple Pending Increments)**: When multiple pending increments exist in the active branch or release batch being integrated, apply **ONLY a single version bump corresponding to the highest rank** (`major` / Major > `minor` / Minor > `patch` / Patch), ignoring unrelated historical directories.
    - Tag the merge with the computed SemVer bump (`patch`, `minor`, `major`) and refresh the interactive dashboard (`report_dashboard`).
 
 ## Non-Negotiable Guardrails
@@ -93,8 +93,8 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 
 ## Friction Profiles & Anti-Bypass Paths
 - `patch`: <= 2 source files, zero Anti-Bypass paths (`spec.md` only).
-- `standard`: Functional increments, new/updated `UC-*` / `FR-*` (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.yaml`).
-- `critical`: Security enclaves (`SEC-ENC-*`), special-category PII (`DPIA-*`), schemas, migrations.
+- `minor`: Functional increments, new/updated `UC-*` / `FR-*` (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.yaml`).
+- `major`: Security enclaves (`SEC-ENC-*`), special-category PII (`DPIA-*`), schemas, migrations.
 - **Anti-Bypass Paths** (never `patch`): `schemas/`, `specs/security/`, `specs/privacy/`, `packages/security/`, `SEC-ENC-*`, `09_decisions/`, `migrations/`, `*-policy.yaml`.
 
 ## 4-Tier Git Hierarchy & Trailers

@@ -2,7 +2,7 @@
 id: SPEC-CHG-009-RUNTIME-OBSERVABILITY
 type: delivery-spec
 change-id: CHG-009-RUNTIME-OBSERVABILITY
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-009-RUNTIME-OBSERVABILITY"

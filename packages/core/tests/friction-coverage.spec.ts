@@ -21,7 +21,7 @@ describe('Progressive Friction & Anti-Bypass Branch Coverage Suite', () => {
   });
 
   it('detects profiles, protected paths, and anti-patch-bypass violations across git and options', () => {
-    expect(detectProfileFromChange(path.join(tempDir, 'missing'))).toBe('standard');
+    expect(detectProfileFromChange(path.join(tempDir, 'missing'))).toBe('minor');
 
     const chgPatch = path.join(tempDir, 'specs', 'changes', 'active', 'chg-101');
     fs.mkdirSync(chgPatch, { recursive: true });
@@ -31,7 +31,7 @@ describe('Progressive Friction & Anti-Bypass Branch Coverage Suite', () => {
     const chgBad = path.join(tempDir, 'specs', 'changes', 'active', 'chg-bad');
     fs.mkdirSync(chgBad, { recursive: true });
     fs.writeFileSync(path.join(chgBad, 'spec.md'), '---\n: : [\n---\n# Bad', 'utf-8');
-    expect(detectProfileFromChange(chgBad)).toBe('standard');
+    expect(detectProfileFromChange(chgBad)).toBe('minor');
 
     expect(isPathProtectedFromPatch('schemas/product/req.schema.json')).toBe(true);
     expect(isPathProtectedFromPatch('src/app.ts')).toBe(false);

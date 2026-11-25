@@ -2,7 +2,7 @@
 id: SPEC-CHG-038-SECURITY-SUPPRESSION-AUDIT
 type: delivery-spec
 change-id: CHG-038-SECURITY-SUPPRESSION-AUDIT
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-038-SECURITY-SUPPRESSION-AUDIT"

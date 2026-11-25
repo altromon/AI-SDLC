@@ -146,7 +146,7 @@ export function registerReportTool(server: McpServer, options: RegisterToolsOpti
 const SDD_CHANGE_NEW_SCHEMA = {
   name: z.string(),
   id: z.string().optional(),
-  profile: z.enum(['patch', 'standard', 'critical']).optional(),
+  profile: z.enum(['patch', 'minor', 'major']).optional(),
   framework: z.enum(['openspec', 'speckit']).optional(),
   author: z.string().optional(),
   from: z.array(z.string()).optional(),

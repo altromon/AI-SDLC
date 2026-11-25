@@ -2,7 +2,7 @@
 id: SPEC-CHG-056-SCA-SBOM-INGESTION
 type: delivery-spec
 change-id: CHG-056-SCA-SBOM-INGESTION
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-056-SCA-SBOM-INGESTION"

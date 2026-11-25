@@ -2,7 +2,7 @@
 id: SPEC-CHG-046-NATIVE-SDK-CLI-AST
 type: delivery-spec
 change-id: CHG-046-NATIVE-SDK-CLI-AST
-profile: critical
+profile: major
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-046-NATIVE-SDK-CLI-AST"

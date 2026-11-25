@@ -23,7 +23,7 @@ describe('SDD Scaffold & Integration Remaining Composite Branches (Happy / Sad /
     const res = scaffoldSddChange({
       rootDir: tmpDir,
       name: 'Multi-citation feature',
-      profile: 'standard',
+      profile: 'minor',
       citations: ['FR-100', 'UC-100', 'SEC-REQ-100', 'PRIV-REQ-100', 'CMP-100'],
       scaffoldMissingSpecs: true,
     } as never);

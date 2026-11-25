@@ -2,7 +2,7 @@
 id: SPEC-CHG-059-POLYGLOT-CLI-ORCHESTRATION
 type: delivery-spec
 change-id: CHG-059-POLYGLOT-CLI-ORCHESTRATION
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-059-POLYGLOT-CLI-ORCHESTRATION"

@@ -2,7 +2,7 @@
 id: SPEC-CHG-049-NODE-LTS-RUNTIME-AND-CI
 type: delivery-spec
 change-id: CHG-049-NODE-LTS-RUNTIME-AND-CI
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-049-NODE-LTS-RUNTIME-AND-CI"

@@ -2,7 +2,7 @@
 id: SPEC-CHG-036-QUALITY-BASELINE-RATCHET
 type: delivery-spec
 change-id: CHG-036-QUALITY-BASELINE-RATCHET
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-036-QUALITY-BASELINE-RATCHET"

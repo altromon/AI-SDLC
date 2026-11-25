@@ -529,7 +529,7 @@ export function printSimilarArtifacts(similar: ReturnType<typeof scaffoldSddChan
 export function printChangeNewSuccess(result: ReturnType<typeof scaffoldSddChange>): void {
   console.log(`  ${pc.green('✔')} Change directory:    ${pc.bold(result.changeDir)}`);
   console.log(`  ${pc.green('✔')} SDD Change ID:       ${pc.cyan(result.canonicalId)} (${result.changeId})`);
-  console.log(`  ${pc.green('✔')} Risk profile:        ${pc.magenta(result.profile || 'standard')}`);
+  console.log(`  ${pc.green('✔')} Risk profile:        ${pc.magenta(result.profile || 'minor')}`);
   if (result.productArtifactCreated) {
     console.log(`  ${pc.green('✔')} Product artifact:    ${pc.bold(result.productArtifactCreated)} (status: draft)`);
   }
@@ -588,7 +588,7 @@ export function buildFailedScaffoldResult(
     success: false,
     changeId: options.id || '',
     canonicalId: '',
-    profile: options.profile || 'standard',
+    profile: options.profile || 'minor',
     changeDir: '',
     createdFiles: [],
     citedArtifacts: [],

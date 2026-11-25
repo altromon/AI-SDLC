@@ -49,7 +49,7 @@ Every Pull Request submitted by a human engineer or an AI agent must pass the fo
   └─► Audits new requirements for collisions in IDs, identical normative text, or duplicate titles.
 
  [GATE 10: PROGRESSIVE FRICTION AND ANTI-BYPASS] (aisdlc verify friction)
-  └─► Enforces risk-profile guardrails (patch, standard, critical) and prevents patch changes from touching protected paths.
+  └─► Enforces risk-profile guardrails (patch, minor, major) and prevents patch changes from touching protected paths.
 
  [GATE 11: SHIFT-LEFT SECURITY: SECRETS AND SAST] (aisdlc verify security)
   └─► Zero-tolerance for credentials, API keys, or tokens (Gitleaks Gate) and deterministic

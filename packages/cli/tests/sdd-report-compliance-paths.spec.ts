@@ -42,7 +42,7 @@ describe('CLI sdd & report compliance commands (Happy / Sad / Boundary / Malform
     expect(runChangeNew({ root: tmpDir, name: '', silent: false })).toBe(false);
     expect(logSpy.mock.calls.length + errSpy.mock.calls.length).toBeGreaterThan(0);
 
-    expect(runChangeNew({ root: tmpDir, name: 'Add telemetry', profile: 'standard', json: true })).toBe(true);
+    expect(runChangeNew({ root: tmpDir, name: 'Add telemetry', profile: 'minor', json: true })).toBe(true);
     const changePayload = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0]));
     expect(changePayload.command).toBe('change:new');
     expect(changePayload.success).toBe(true);

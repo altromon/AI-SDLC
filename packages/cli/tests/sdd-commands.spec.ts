@@ -31,7 +31,7 @@ describe('CLI SDD & Change Commands Coverage Suite', () => {
       root: tempDir,
       name: 'Sample Increment',
       id: 'chg-001-sample-increment',
-      profile: 'standard',
+      profile: 'minor',
       framework: 'openspec',
     });
     expect(created).toBe(true);

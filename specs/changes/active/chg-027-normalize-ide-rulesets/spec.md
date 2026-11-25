@@ -2,7 +2,7 @@
 id: SPEC-CHG-027-NORMALIZE-IDE-RULESETS
 type: delivery-spec
 change-id: CHG-027-NORMALIZE-IDE-RULESETS
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-027-NORMALIZE-IDE-RULESETS"

@@ -2,7 +2,7 @@
 id: SPEC-CHG-051-REGULATORY-COMPLIANCE-BUNDLE
 type: delivery-spec
 change-id: CHG-051-REGULATORY-COMPLIANCE-BUNDLE
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-051-REGULATORY-COMPLIANCE-BUNDLE"

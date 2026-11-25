@@ -2,7 +2,7 @@
 id: SPEC-CHG-047-MCP-SERVER-HARDENING-DLP
 type: delivery-spec
 change-id: CHG-047-MCP-SERVER-HARDENING-DLP
-profile: critical
+profile: major
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-047-MCP-SERVER-HARDENING-DLP"

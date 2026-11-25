@@ -77,7 +77,7 @@ function writeChangeFiles(
 }
 
 describe('CHG-061: Step 0 & Step 6 in LIFECYCLE_SKILL_TEMPLATES and Deployed IDE Skills', () => {
-  it('includes Step 0 interactive friction profile triage (patch | standard | critical) and (Recommended) prompt rule', () => {
+  it('includes Step 0 interactive friction profile triage (patch | minor | major) and (Recommended) prompt rule', () => {
     const template = LIFECYCLE_SKILL_TEMPLATES.find((s) => s.id === 'aisdlc-increment');
     expect(template).toBeDefined();
 
@@ -92,8 +92,8 @@ describe('CHG-061: Step 0 & Step 6 in LIFECYCLE_SKILL_TEMPLATES and Deployed IDE
 
     for (const src of sources) {
       expect(src.content, `${src.label} must define ### Step 0:`).toMatch(/### Step 0:/);
-      expect(src.content, `${src.label} must list patch | standard | critical`).toMatch(
-        /patch\s*\|\s*standard\s*\|\s*critical/i
+      expect(src.content, `${src.label} must list patch | minor | major`).toMatch(
+        /patch\s*\|\s*minor\s*\|\s*major/i
       );
       expect(src.content, `${src.label} must require (Recommended) option when asking user`).toContain(
         '(Recommended)'
@@ -101,7 +101,7 @@ describe('CHG-061: Step 0 & Step 6 in LIFECYCLE_SKILL_TEMPLATES and Deployed IDE
     }
   });
 
-  it('documents Anti-Bypass protected paths and fast-track patch vs standard/critical SDD artifact rules in Step 0', () => {
+  it('documents Anti-Bypass protected paths and fast-track patch vs minor/major SDD artifact rules in Step 0', () => {
     const template = LIFECYCLE_SKILL_TEMPLATES.find((s) => s.id === 'aisdlc-increment');
     expect(template).toBeDefined();
 
@@ -128,7 +128,7 @@ describe('CHG-061: Step 0 & Step 6 in LIFECYCLE_SKILL_TEMPLATES and Deployed IDE
     }
   });
 
-  it('documents Step 6 profile-to-SemVer mapping and highest-precedence consolidation rule (critical > standard > patch)', () => {
+  it('documents Step 6 profile-to-SemVer mapping and highest-precedence consolidation rule (major > minor > patch)', () => {
     const template = LIFECYCLE_SKILL_TEMPLATES.find((s) => s.id === 'aisdlc-increment');
     expect(template).toBeDefined();
 
@@ -143,7 +143,7 @@ describe('CHG-061: Step 0 & Step 6 in LIFECYCLE_SKILL_TEMPLATES and Deployed IDE
       expect(content).toMatch(/x\.y\.Z/);
       expect(content).toMatch(/x\.Y\.0/);
       expect(content).toMatch(/X\.0\.0/);
-      expect(content).toMatch(/critical.*>.*standard.*>.*patch|Major.*>.*Minor.*>.*Patch/is);
+      expect(content).toMatch(/major.*>.*minor.*>.*patch|Major.*>.*Minor.*>.*Patch/is);
     }
   });
 });
@@ -184,7 +184,7 @@ describe('CHG-061: Deterministic SDD Increment Guard in scripts/guard-branch.cjs
   it('2. denies editing src/app.ts on feat/CHG-999-new when specs/changes/active/ only contains an unrelated historical folder chg-009-old', () => {
     tempWorkspace = initTempGitWorkspace('feat/CHG-999-new', true);
     writeChangeFiles(tempWorkspace, 'chg-009-old', {
-      'spec.md': '---\nprofile: standard\n---\n',
+      'spec.md': '---\nprofile: minor\n---\n',
       'design.md': '# Design\n',
       'tasks.md': '# Tasks\n',
       'handoff.yaml': 'id: HOF-CHG-009-OLD\n',
@@ -195,22 +195,22 @@ describe('CHG-061: Deterministic SDD Increment Guard in scripts/guard-branch.cjs
     expect(decision.reason).toMatch(/chg-999|specs\/changes\/active\//i);
   });
 
-  it('3. denies editing src/app.ts on feat/CHG-061-sample when specs/changes/active/chg-061-sample has profile: standard but is missing design.md, tasks.md, or handoff.yaml', () => {
+  it('3. denies editing src/app.ts on feat/CHG-061-sample when specs/changes/active/chg-061-sample has profile: minor but is missing design.md, tasks.md, or handoff.yaml', () => {
     tempWorkspace = initTempGitWorkspace('feat/CHG-061-sample', true);
     writeChangeFiles(tempWorkspace, 'chg-061-sample', {
-      'spec.md': '---\nprofile: standard\n---\n# Spec\n',
+      'spec.md': '---\nprofile: minor\n---\n# Spec\n',
       'design.md': '# Design\n',
     });
 
     const decision = runGuardHook(tempWorkspace, 'src/app.ts');
     expect(decision.decision).toBe('deny');
-    expect(decision.reason).toMatch(/tasks\.md|handoff\.yaml|standard/i);
+    expect(decision.reason).toMatch(/tasks\.md|handoff\.yaml|minor/i);
   });
 
-  it('4. allows editing src/app.ts and tests/app.spec.ts on feat/CHG-061-sample when profile: standard has all 4 required artifacts', () => {
+  it('4. allows editing src/app.ts and tests/app.spec.ts on feat/CHG-061-sample when profile: minor has all 4 required artifacts', () => {
     tempWorkspace = initTempGitWorkspace('feat/CHG-061-sample', true);
     writeChangeFiles(tempWorkspace, 'chg-061-sample', {
-      'spec.md': '---\nprofile: standard\n---\n# Spec\n',
+      'spec.md': '---\nprofile: minor\n---\n# Spec\n',
       'design.md': '# Design\n',
       'tasks.md': '# Tasks\n',
       'handoff.yaml': 'id: HOF-CHG-061-SAMPLE\n',
@@ -248,7 +248,7 @@ describe('CHG-061: Deterministic SDD Increment Guard in scripts/guard-branch.cjs
     ]) {
       const res = runGuardHook(tempWorkspace, protectedPath);
       expect(res.decision, `Expected deny on ${protectedPath} under patch profile`).toBe('deny');
-      expect(res.reason).toMatch(/standard|critical|Anti-Bypass|patch/i);
+      expect(res.reason).toMatch(/minor|major|Anti-Bypass|patch/i);
     }
   });
 
@@ -290,8 +290,8 @@ describe('CHG-061: Deterministic SDD Increment Guard in scripts/guard-branch.cjs
     expect(guard.isProtectedBypassPath('migrations/001_init.sql')).toBe(true);
     expect(guard.isProtectedBypassPath('README.md')).toBe(false);
 
-    // detectChangeDirProfile defaults to 'standard' for non-existent dir
-    expect(guard.detectChangeDirProfile(path.join(os.tmpdir(), 'non-existent-chg-dir-061'))).toBe('standard');
+    // detectChangeDirProfile defaults to 'minor' for non-existent dir
+    expect(guard.detectChangeDirProfile(path.join(os.tmpdir(), 'non-existent-chg-dir-061'))).toBe('minor');
 
     // hasValidActiveSddIncrement with empty or parent-relative target path
     tempWorkspace = initTempGitWorkspace('feat/CHG-061-unit', true);

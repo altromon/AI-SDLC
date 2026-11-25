@@ -2,7 +2,7 @@
 id: SPEC-CHG-065-CODE-GRAPH-TASK-CONTEXT
 type: delivery-spec
 change-id: CHG-065-CODE-GRAPH-TASK-CONTEXT
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-065-CODE-GRAPH-TASK-CONTEXT"

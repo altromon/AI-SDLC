@@ -24,7 +24,7 @@ Use this skill when **closing a release milestone (`release/vX.Y.Z`), preparing 
 ### Step 3: Release KPIs, Reports & Highest-Precedence SemVer
 1. Compute release KPIs and DIR/rework metrics via MCP tool `kpi_release` (`npx aisdlc kpi release --release release/vX.Y.Z --base main`).
 2. Regenerate canonical reports (`report_quality`, `report_dashboard`) on the release branch.
-3. **Highest-Precedence SemVer Rule**: When consolidating multiple increments in a single release/PR, apply **ONLY one version bump** matching the highest friction profile (`critical` = Major, `standard` = Minor, `patch` = Patch).
+3. **Highest-Precedence SemVer Rule**: When consolidating multiple increments in a single release/PR, apply **ONLY one version bump** matching the highest friction profile (`major > minor > patch` -> Major / Minor / Patch).
 4. Open the Release PR for human Tech Lead approval and SemVer tagging (never auto-approve or auto-merge).
 # Release Compliance & SemVer Reference
 
@@ -33,5 +33,5 @@ Use this skill when **closing a release milestone (`release/vX.Y.Z`), preparing 
 
 ## Highest-Precedence SemVer Rule
 When consolidating multiple increments in a single release or PR, apply **only one** version bump matching the highest friction profile:
-`critical` (Major `X.0.0`) > `standard` (Minor `x.Y.0`) > `patch` (Patch `x.y.Z`).
+`major` (Major `X.0.0`) > `minor` (Minor `x.Y.0`) > `patch` (Patch `x.y.Z`).
 

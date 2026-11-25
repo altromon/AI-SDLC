@@ -5,7 +5,7 @@ title: "bounded-contexts-and-docs"
 version: 1.0.0
 schema-version: "1.0"
 status: draft
-profile: standard
+profile: minor
 change-id: CHG-042-BOUNDED-CONTEXTS-AND-DOCS
 impacts:
   - architecture: CMP-CORE

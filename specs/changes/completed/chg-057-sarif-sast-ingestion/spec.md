@@ -2,7 +2,7 @@
 id: SPEC-CHG-057-SARIF-SAST-INGESTION
 type: delivery-spec
 change-id: CHG-057-SARIF-SAST-INGESTION
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-057-SARIF-SAST-INGESTION"

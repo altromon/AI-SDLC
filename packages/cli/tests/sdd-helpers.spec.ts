@@ -435,7 +435,7 @@ describe('CLI sdd.ts helper and runner unit suite (100% function coverage)', () 
       success: true,
       changeId: 'chg-001',
       canonicalId: 'CHG-001',
-      profile: 'standard',
+      profile: 'minor',
       changeDir: 'specs/changes/active/chg-001',
       createdFiles: ['proposal.md'],
       productArtifactCreated: 'specs/product/FR-001.md',

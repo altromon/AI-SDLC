@@ -52,7 +52,7 @@ describe('MCP Tools Composite Branch Paths (Happy / Sad / Boundary / Malformed)'
   it('exercises SDD lifecycle tools (sdd_change_new, get_active_handoff, sdd_deposit, sdd_check_fix, sdd_integrate)', async () => {
     const newChg = await client.callTool({
       name: 'sdd_change_new',
-      arguments: { root: tmpDir, name: 'Add MCP branch test', profile: 'standard' },
+      arguments: { root: tmpDir, name: 'Add MCP branch test', profile: 'minor' },
     });
     expect(newChg.isError).toBeFalsy();
     const newChgContent = newChg.content as Array<{ text: string }>;

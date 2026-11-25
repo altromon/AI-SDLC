@@ -2,7 +2,7 @@
 id: SPEC-CHG-066-CONTEXT-BUDGET-AND-RULES-CONSISTENCY
 type: delivery-spec
 change-id: CHG-066-CONTEXT-BUDGET-AND-RULES-CONSISTENCY
-profile: standard
+profile: minor
 acceptance-format: gherkin
 cucumber-tags:
   - "@CHG-066-CONTEXT-BUDGET-AND-RULES-CONSISTENCY"

@@ -2,7 +2,7 @@
 id: SPEC-CHG-063-UI-E2E-MODALITY-GATE
 type: delivery-spec
 change-id: CHG-063-UI-E2E-MODALITY-GATE
-profile: standard
+profile: minor
 handoff: HOF-CHG-063-UI-E2E-MODALITY-GATE
 acceptance-format: gherkin
 cucumber-tags:

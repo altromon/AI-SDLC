@@ -402,7 +402,7 @@ unknown-extra-property: "disallowed"
       id: 'SPEC-CHG-001-TELEMETRY',
       type: 'delivery-spec',
       'change-id': 'CHG-001-TELEMETRY',
-      profile: 'standard',
+      profile: 'minor',
       title: 'Especificación de Entrega',
       version: '1.0.0',
       status: 'active',

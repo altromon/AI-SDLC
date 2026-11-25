@@ -2,7 +2,7 @@
 id: SPEC-CHG-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
 type: delivery-spec
 change-id: CHG-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
-profile: standard
+profile: minor
 handoff: HOF-CHG-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
 acceptance-format: gherkin
 cucumber-tags:
@@ -12,10 +12,10 @@ cucumber-tags:
   - "@increment-profile-semver"
 citations:
   - id: UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
-    digest: sha256:a4d5eaf42eec48f9e80ee55f77d53616bb189d546969b9b639f03199c079b64b
+    digest: sha256:a90e64f7894d0950babec5f6db93e7c0ee61ec38ad00ff8ae45ed80aea1d5796
     comment: Caso de uso que gobierna la selección de perfil, SemVer por precedencia y guardián SDD
   - id: FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001
-    digest: sha256:639eaa8e6f460283def54b05093020fa537e2e4fd2b872e0af5c87d9c8526243
+    digest: sha256:5ed9934c532217af1f5840417ecd22e1265b106b57f3942b68b528aed15fe582
     comment: Requisito funcional en el catálogo canónico
   - id: CMP-CORE
     digest: sha256:694456d7048a95af19287c58451b108fc97d2c99dbac1b029ad4ce7ef1ae14a6

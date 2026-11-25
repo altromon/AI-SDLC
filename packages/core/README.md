@@ -113,7 +113,7 @@ This separation allows the core functionality to be reused by different interfac
 | **Change Integration & Promotion** | Promotes approved requirements to the active baseline, links architecture components, applies proposals, and archives change workspaces. | `integrateSddChange`, `verifySddIntegration`, `detectActiveChangeForIntegration` |
 | **SDD Framework Adapters** | Polymorphic abstraction layer supporting multiple SDD specification formats (OpenSpec and SpecKit) seamlessly. | `getSddAdapter`, `OpenSpecAdapter`, `SpecKitAdapter` |
 | **PDaC Graph & Cryptographic Drift** | Constructs the Product Definition as Code graph and audits SHA-256 digests across specifications to detect out-of-sync drift. | `verifyPdacGraph`, `syncPdacDigests`, `computeCanonicalSha256`, `extractCitations` |
-| **Progressive Friction & Anti-Bypass** | Enforces governance gates based on change risk profile (`patch`, `standard`, `critical`) and prevents unauthorized modifications to protected core paths. | `verifyProgressiveFriction`, `detectProfileFromChange`, `isPathProtectedFromPatch` |
+| **Progressive Friction & Anti-Bypass** | Enforces governance gates based on change risk profile (`patch`, `minor`, `major`) and prevents unauthorized modifications to protected core paths. | `verifyProgressiveFriction`, `detectProfileFromChange`, `isPathProtectedFromPatch` |
 
 ### 2. Quality Gates & AST Code Metrics
 
