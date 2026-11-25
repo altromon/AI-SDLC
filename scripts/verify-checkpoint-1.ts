@@ -13,6 +13,7 @@ interface GateStep {
 const CORE_GATES: GateStep[] = [
   { gate: 8, subcommand: 'schemas', label: 'Schema & Graph Validation' },
   { gate: 9, subcommand: 'duplicates', label: 'Duplicate & Collision Pre-Flight' },
+  { gate: 4, subcommand: 'gherkin', label: 'BDD Gherkin Extraction Sync' },
   { gate: 7, subcommand: 'pdac', label: 'Cryptographic Integrity & PDaC Drift' },
   { gate: 3, subcommand: 'governance', label: 'Task Governance & Autonomy' },
   { gate: 10, subcommand: 'friction', label: 'Progressive Friction & Anti-Bypass' },
