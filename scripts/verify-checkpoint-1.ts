@@ -44,11 +44,7 @@ function parseArgs(argv: string[]): { root?: string; withLicenses: boolean } {
   return { root, withLicenses };
 }
 
-function runGate(step: GateStep, cliEntry: string, useLocalCli: boolean, root?: string): boolean {
-  console.log(`\n▶ [Checkpoint 1 | Gate ${step.gate}] ${step.label} (verify ${step.subcommand})`);
-
-  const cliArgs = ['verify', step.subcommand, ...(root ? ['--root', root] : [])];
-
+function runCliCommand(cliArgs: string[], cliEntry: string, useLocalCli: boolean): boolean {
   if (useLocalCli) {
     const require = createRequire(import.meta.url);
     const tsxCli = require.resolve('tsx/cli');
@@ -64,6 +60,12 @@ function runGate(step: GateStep, cliEntry: string, useLocalCli: boolean, root?: 
   });
 
   return result.status === 0;
+}
+
+function runGate(step: GateStep, cliEntry: string, useLocalCli: boolean, root?: string): boolean {
+  console.log(`\n▶ [Checkpoint 1 | Gate ${step.gate}] ${step.label} (verify ${step.subcommand})`);
+  const cliArgs = ['verify', step.subcommand, ...(root ? ['--root', root] : [])];
+  return runCliCommand(cliArgs, cliEntry, useLocalCli);
 }
 
 function main(): void {
@@ -94,6 +96,8 @@ function main(): void {
   }
 
   console.log(`✔ All ${gates.length} Checkpoint 1 gates PASSED.`);
+  console.log('\n▶ [Checkpoint 1 | Post-Check] Refreshing incremental Code Graph cache (graph index)...');
+  runCliCommand(['graph', 'index', ...(root ? ['--root', root] : [])], cliEntry, useLocalCli);
 }
 
 main();

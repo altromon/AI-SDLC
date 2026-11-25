@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { runGraphQuery } from '../src/commands/graph.js';
+import { runGraphIndex, runGraphQuery } from '../src/commands/graph.js';
 import { runContextPack } from '../src/commands/context.js';
 
 describe('TSK-065006: CliCodeGraphCommands — CLI graph query & context pack (cli-code-graph.spec.ts)', () => {
@@ -60,5 +60,17 @@ describe('TSK-065006: CliCodeGraphCommands — CLI graph query & context pack (c
 
     const errCode = await runContextPack('TSK-999-UNKNOWN', { root: repoRoot, depth: 1, json: true });
     expect(errCode).not.toBe(0);
+  });
+
+  it('runs graph index with --json and caches .aisdlc/cache/code-graph.json', async () => {
+    const repoRoot = makeTmpRepo();
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const exitCode = await runGraphIndex({ root: repoRoot, json: true });
+    expect(exitCode).toBe(0);
+
+    const parsed = JSON.parse(String(consoleSpy.mock.calls.at(-1)?.[0]));
+    expect(parsed.indexedFiles).toBe(1);
+    expect(fs.existsSync(path.join(repoRoot, '.aisdlc', 'cache', 'code-graph.json'))).toBe(true);
   });
 });
