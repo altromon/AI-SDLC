@@ -1,5 +1,5 @@
 ---
-description: Global canonical directives, 5 unbreakable commandments, and AI-SDLC pre-flight
+description: Global canonical directives, 6 unbreakable commandments, and AI-SDLC pre-flight
 globs: *
 alwaysApply: true
 ---
@@ -8,16 +8,18 @@ alwaysApply: true
 
 Canonical Reference: [`process/09_agent_protocols.md`](process/09_agent_protocols.md) and [`process/01_governance_and_roles.md`](process/01_governance_and_roles.md).
 
-## 1. The 5 Unbreakable Commandments of Agents | Los 5 Mandamientos Inquebrantables de los Agentes
+## 1. The 6 Unbreakable Commandments of Agents | Los 6 Mandamientos Inquebrantables de los Agentes
 Every agent operating in this repository must strictly observe the following guardrails:
 1. **FORBIDDEN TO AUTO-APPROVE OR AUTO-MERGE | PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: Do not approve PRs or execute direct merges to protected branches (`main`, `release/*`). Approval is exclusively reserved for human reviewers.
 2. **FORBIDDEN TO INVENT PRODUCT OR ARCHITECTURE DECISIONS**: When facing ambiguity, formulate open questions (`open-questions`). Never assume undocumented requirements.
 3. **FORBIDDEN TO INTRODUCE DEPENDENCIES WITHOUT LICENSE INSPECTION**: Always verify `license-policy.yaml`. Viral dependencies (GPL/AGPL) or commercial paid dependencies (BSL/SSPL) are strictly forbidden without explicit human approval.
 4. **FORBIDDEN TO IGNORE CYBERSECURITY & PRIVACY (SECURITY-BY-DEFAULT & PRIVACY-BY-DEFAULT)**: Validate inputs, apply least privilege, protect PII according to `privacy-policy.yaml`, and accompany every change with security and privacy tests (`SEC-TEST-*`, `@privacy`). Suppressing linters or tests to force a green pipeline is prohibited.
 5. **MANDATORY CRYPTOGRAPHIC CITATION**: Link specifications using immutable identifiers and Unix LF-normalized SHA-256 hashes.
+6. **MANDATORY CLEAN CONTEXT WINDOW ISOLATION PER SPECIALIST AGENT**: Never execute two distinct specialist roles in the same conversation context window. Always spawn each specialist in a fresh isolated subagent context (or open a New Chat / `/clear` in single-thread IDEs) reading state strictly from disk (`specs/`, `handoff.yaml`, `get_active_handoff`).
 
-## 2. Pre-Flight Verification Commands
+## 2. Pre-Flight Verification Commands & Context Budget Rule
 Before finalizing changes or proposing commits:
+- **Context Budget Rule (MCP-First)**: Hydrate task context via `get_task_context` (`npx aisdlc context pack <TSK-ID>`), explore code with `query_code_graph`, and search specs with `search_specs` first. Treat `process/*.md` as on-demand reference only — never bulk-read them upfront.
 - Pre-flight with auto-fix: `pnpm run check:fix` (or `npx aisdlc check --fix`)
 - Full verification: `pnpm run verify:all` (or `npx aisdlc verify all`)
 - Unit tests: `pnpm test`

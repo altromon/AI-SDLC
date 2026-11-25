@@ -12,7 +12,7 @@ Use this skill when starting a **brand-new software project from scratch (Greenf
 
 ## Consolidated Inception Quality & Adversarial Checkpoint
 Across Phase 0 and Inception, quality auditing and adversarial stress-testing are concentrated at the completion of Inception design (or after product shaping):
-- **Concurrent Inspection**: Concurrently invoke [`agent-auditor`](../agent-auditor/SKILL.md) (evaluating YAGNI, structural debt, and simplification) and [`agent-adversary`](../agent-adversary/SKILL.md) (stress-testing logic traps, SPOFs, attack vectors, or broken invariants) in clean, isolated context windows.
+- **Concurrent Inspection**: Concurrently invoke [`agent-auditor`](../../agents/agent-auditor.md) (evaluating YAGNI, structural debt, and simplification) and [`agent-adversary`](../../agents/agent-adversary.md) (stress-testing logic traps, SPOFs, attack vectors, or broken invariants) in clean, isolated context windows.
 - **Non-Invasive Review**: Neither auditor nor adversary modifies deliverables directly; both deliver structured reports citing canonical IDs and SHA-256 digests.
 - **Consolidated Remediation**: Consolidate findings and emit the Workflow Handoff back to authoring agents to resolve blocking defects and apply simplifications (max 2 correction rounds).
 - **Anti-Ping-Pong Guardrail**: Bounded strictly to maximum **1 correction round**. If non-blocking advisories remain, proceed to the downstream phase; if blocking defects persist, escalate immediately to the Human Tech Lead.
@@ -27,7 +27,7 @@ Across Phase 0 and Inception, quality auditing and adversarial stress-testing ar
 5. Commit and push (`git push`) Phase 0 Inception artifacts (`ARCH-INTRO-001`, ProductShape, Threat/Privacy, Architecture) incrementally to the open Draft PR.
 
 ### Step 2: Phase 0 Product Inception (`agent-product-analyst` — `/grill-me` Socratic Decision-Tree Interview)
-1. Delegate to or adopt [`agent-product-analyst`](../agent-product-analyst/SKILL.md).
+1. Delegate to or adopt [`agent-product-analyst`](../../agents/agent-product-analyst.md).
 2. **Socratic Decision-Tree Discovery Interview (`/grill-me` Mode — Up to 15 Questions or Until Product Scope is 100% Clear)**: Before generating artifacts, interview the human Product Owner relentlessly like `/grill-me` by walking down the decision tree **one branch at a time (1–2 focused questions per turn, up to 15 questions total)**, exploring the repository first (Read-First Rule), presenting opinionated `(Recommended)` options via `ask_question` when available, challenging vague assumptions/edge cases, and enforcing the **No-Premature-Drafting Gate** (no spec files written until all branches are resolved and the user confirms the Decision Blueprint Summary):
    - Core mission statement and business problem.
    - Primary actors (`ACT-*`) and external systems.
@@ -42,18 +42,18 @@ Across Phase 0 and Inception, quality auditing and adversarial stress-testing ar
    - Actors (`ACT-*`), User Journeys (`JRN-*`), Use Cases (`UC-*`), Business Rules (`BR-*`), Functional Requirements (`FR-*` with mandatory `@nominal`, `@boundary`, `@invalid` Gherkin blocks), and Quality Requirements (`QR-*`).
    - **Vertical Slice Completeness Rule**: Every human-triggered `UC-*` in the MVP must specify observable user interaction through the agreed presentation modality and state persistence.
 5. **Mandatory Pre-Architecture Validation**: Run MCP tool `verify_duplicates` (`npx aisdlc verify duplicates`) AND `sdd_check_fix` (`npx aisdlc check --fix`) to block collisions, sync Gherkin `.feature` files, and validate schemas before Step 3/4.
-6. **Mandatory Upstream UX & MVP Boundary Gate (`agent-expert-user`)**: Invoke [`agent-expert-user`](../agent-expert-user/SKILL.md) in **Design Mode** to stress-test the proposed workflows, enforce strict MVP boundaries, reject any headless/library-only MVP when human actors exist, verify master-data CRUD prerequisites, and separate core MVP `UC-*` from future roadmap backlog.
+6. **Mandatory Upstream UX & MVP Boundary Gate (`agent-expert-user`)**: Invoke [`agent-expert-user`](../../agents/agent-expert-user.md) in **Design Mode** to stress-test the proposed workflows, enforce strict MVP boundaries, reject any headless/library-only MVP when human actors exist, verify master-data CRUD prerequisites, and separate core MVP `UC-*` from future roadmap backlog.
 
 ### Step 3: Shift-Left Cybersecurity & Privacy-by-Design (`agent-threat-modeler` ➔ `agent-privacy-officer`)
-1. Delegate to or adopt [`agent-threat-modeler`](../agent-threat-modeler/SKILL.md).
+1. Delegate to or adopt [`agent-threat-modeler`](../../agents/agent-threat-modeler.md).
 2. Analyze every `UC-*` and `FR-*` using STRIDE and OWASP ASVS to create in `specs/security/`:
    - Threat Actors (`ACT-THREAT-*`), Abuse Cases (`ABUSE-*` targeting `UC-*`), and Security Requirements (`SEC-REQ-*` with `@security @mitigation` negative Gherkin scenarios and `SEC-ENC-*` Zero Trust enclave bindings).
-3. Hand off to [`agent-privacy-officer`](../agent-privacy-officer/SKILL.md) to apply LINDDUN and GDPR/LOPDGDD/ISO 27701 in `specs/privacy/`:
+3. Hand off to [`agent-privacy-officer`](../../agents/agent-privacy-officer.md) to apply LINDDUN and GDPR/LOPDGDD/ISO 27701 in `specs/privacy/`:
    - Personal Data Assets (`DATA-ASSET-*`), GDPR Art. 30 Records of Processing (`PRIV-ROPA-*`), and Privacy Requirements (`PRIV-REQ-*` with `@privacy @gdpr` Gherkin scenarios).
 4. Run `verify_schemas` and `verify_privacy` (`npx aisdlc verify privacy`).
 
 ### Step 4: Modular Systems Architecture (`agent-system-architect`)
-1. Delegate to or adopt [`agent-system-architect`](../agent-system-architect/SKILL.md).
+1. Delegate to or adopt [`agent-system-architect`](../../agents/agent-system-architect.md).
 2. Define building blocks (`CMP-*`), Deployment Topology (`ARCH-DEP-001` translating the delivery model into execution nodes `RES-*` and enclaves `SEC-ENC-*`), and Architectural Decision Records (`ADR-*`) in `specs/architecture/` using `templates/architecture/`, ensuring every `CMP-*` cites `implements-use-cases` (`UC-*`) and `satisfies-requirements` (`FR-*`, `QR-*`, `SEC-REQ-*`, `PRIV-REQ-*`).
 3. Inspect third-party stack choices against `license-policy.yaml` via `verify_licenses` and subprocessors against `privacy-policy.yaml` via `verify_privacy`.
 4. **Technical Security & Privacy Feedback Loop**: If new infrastructure, persistence, LLM, or auth decisions introduce attack vectors or PII flows, return to `agent-threat-modeler` ➔ `agent-privacy-officer` to add technical mitigations before coding.
@@ -67,7 +67,7 @@ Across Phase 0 and Inception, quality auditing and adversarial stress-testing ar
 ### Step 5: Release Milestone & Topological Wave SDD Plan (`1 UC-* = 1 CHG-*`)
 1. **Open Release Milestone (`Tier 2: release/v1.0.0` or Streamlined `main`)**: Group approved MVP Use Cases (`UC-001`, `UC-002`, ...) and visualize execution plan.
 2. **Decompose into Topological Waves (DAG Parallelism)**:
-   - **Wave 0 — Foundational Core, Executable Presentation Host & CI/CD (`agent-devops`) (Sequential)**: Scaffold `CHG-001` via [`aisdlc-increment`](../aisdlc-increment/SKILL.md) to establish domain core, shared contracts, auth/config, and the runnable presentation host. Invoke [`agent-devops`](../agent-devops/SKILL.md) to clarify the technical CI/CD & packaging strategy (CI Quality Gates, Docker/GHCR, package registry, or PaaS/Cloud) and scaffold `.github/workflows/` and container manifests without modifying `src/`.
+   - **Wave 0 — Foundational Core, Executable Presentation Host & CI/CD (`agent-devops`) (Sequential)**: Scaffold `CHG-001` via [`aisdlc-increment`](../aisdlc-increment/SKILL.md) to establish domain core, shared contracts, auth/config, and the runnable presentation host. Invoke [`agent-devops`](../../agents/agent-devops.md) to clarify the technical CI/CD & packaging strategy (CI Quality Gates, Docker/GHCR, package registry, or PaaS/Cloud) and scaffold `.github/workflows/` and container manifests without modifying `src/`.
    - **Waves 1..N — Orthogonal End-to-End Vertical Slices (Parallel Multi-Agent)**: Once Wave 0 contracts are merged, execute independent `CHG-*` increments (`1 UC-* = 1 CHG-*`) in parallel across isolated branches/worktrees (`feat/CHG-002`, `feat/CHG-003`, ...).
 3. **Release Consolidation (`agent-devops`)**: Once all MVP increments are integrated (`sdd_integrate`), run `verify` (`npx aisdlc verify all`), generate SBOM, compute release KPIs (`kpi_release`), regenerate canonical reports and dashboard (`report_quality`, `report_dashboard`), verify release/publishing workflows via `agent-devops`, and open the Release PR for final human approval and SemVer tagging (`v1.0.0`). Individual `feat/CHG-*` PRs must compute reports locally without committing global `reports/` files to avoid merge conflicts.
 

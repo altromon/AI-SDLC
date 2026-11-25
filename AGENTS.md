@@ -6,7 +6,7 @@ This file provides universal instructions and guardrails for all AI pair program
 
 ---
 
-## 1. The 5 Unbreakable Commandments of Agents
+## 1. The 6 Unbreakable Commandments of Agents
 
 1. **FORBIDDEN TO OPERATE, COMMIT, OR MODIFY ON PROTECTED BRANCHES (`main`, `master`, `release/*`)**:
    - Direct file edits, commits, or auto-merges on protected branches are strictly forbidden.
@@ -42,6 +42,8 @@ pnpm run git:hook:install
 ---
 
 ## 3. Essential Pre-Flight Commands
+
+- **Context Budget Rule (MCP-First)**: Hydrate task context via `get_task_context` (`npx aisdlc context pack <TSK-ID>`), explore code with `query_code_graph`, and search specs with `search_specs` first. Treat `process/*.md` as on-demand reference only — never bulk-read them upfront.
 
 ```bash
 # 1. Pre-flight auto-fix for Gherkin and citation digests

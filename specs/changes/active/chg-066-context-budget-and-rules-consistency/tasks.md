@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-qa-engineer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-066-CONTEXT-BUDGET-AND-RULES-CONSISTENCY
     satisfies-requirements: &ref_0
@@ -35,7 +35,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-066-CONTEXT-BUDGET-AND-RULES-CONSISTENCY
     satisfies-requirements: *ref_0
@@ -48,7 +48,7 @@ tasks:
       method: quality-gate
       command-or-criteria: pnpm run sync:agents && pnpm test && pnpm run typecheck && npx aisdlc verify all
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-066-CONTEXT-BUDGET-AND-RULES-CONSISTENCY
     satisfies-requirements: *ref_0
