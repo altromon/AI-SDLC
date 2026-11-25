@@ -23,15 +23,15 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 ### Step 1: Upstream Product, Security & Privacy Delta (`agent-product-analyst`, `agent-threat-modeler` & `agent-privacy-officer`)
 1. Inspect active changes via MCP tool `get_active_handoff` and verify whether the target Use Case (`UC-*`) or Requirement (`FR-*`) already exists in `specs/product/`.
 2. If the increment introduces new behavior or modifies business rules:
-   - Use [`agent-product-analyst`](../agent-product-analyst/SKILL.md) (running a `/grill-me` Socratic Decision-Tree interview of 1–2 focused questions per turn with `(Recommended)` options and Read-First codebase exploration whenever design branches are open) to create or update the `UC-*`, `BR-*`, and `FR-*` (with `@nominal`, `@boundary`, `@invalid` Gherkin scenarios).
+   - Use [`agent-product-analyst`](../../agents/agent-product-analyst.md) (running a `/grill-me` Socratic Decision-Tree interview of 1–2 focused questions per turn with `(Recommended)` options and Read-First codebase exploration whenever design branches are open) to create or update the `UC-*`, `BR-*`, and `FR-*` (with `@nominal`, `@boundary`, `@invalid` Gherkin scenarios).
    - Run MCP tool `verify_duplicates` (`npx aisdlc verify duplicates`) to block lexical or functional collisions early.
-   - Use [`agent-threat-modeler`](../agent-threat-modeler/SKILL.md) to model any new `ABUSE-*` and `SEC-REQ-*` mitigations.
-   - Hand off to [`agent-privacy-officer`](../agent-privacy-officer/SKILL.md) to model any personal data assets (`DATA-ASSET-*`), GDPR Art. 30 processing activities (`PRIV-ROPA-*`), and privacy requirements (`PRIV-REQ-*`).
+   - Use [`agent-threat-modeler`](../../agents/agent-threat-modeler.md) to model any new `ABUSE-*` and `SEC-REQ-*` mitigations.
+   - Hand off to [`agent-privacy-officer`](../../agents/agent-privacy-officer.md) to model any personal data assets (`DATA-ASSET-*`), GDPR Art. 30 processing activities (`PRIV-ROPA-*`), and privacy requirements (`PRIV-REQ-*`).
 3. **Mandatory Pre-Architecture Validation**: Run `sdd_check_fix` (`npx aisdlc check --fix`) together with `verify_duplicates` (`npx aisdlc verify duplicates`) to sync Gherkin `.feature` files and validate schemas/collisions before proceeding to Step 2 (`agent-system-architect`).
 
 ### Step 2: SDD Change Scaffolding & Architectural Design (`agent-system-architect`)
 1. Scaffold the bounded change package and its cryptographic `handoff.yaml` sidecar (`HOF-*`) targeting **a single Use Case (`1 UC-* = 1 CHG-*`)** using MCP tool `sdd_change_new` (or CLI `npx aisdlc change new "<Title>" --from <UC-ID> --profile <patch|standard|critical>`).
-2. Use [`agent-system-architect`](../agent-system-architect/SKILL.md) to complete `specs/changes/active/<chg-id>/design.md` and `specs/architecture/CMP-*.md` (run `query_code_graph` / `npx aisdlc graph query <target>` Read-First on affected modules to inspect existing imports, symbols, and coupling before designing):
+2. Use [`agent-system-architect`](../../agents/agent-system-architect.md) to complete `specs/changes/active/<chg-id>/design.md` and `specs/architecture/CMP-*.md` (run `query_code_graph` / `npx aisdlc graph query <target>` Read-First on affected modules to inspect existing imports, symbols, and coupling before designing):
    - Structure `CMP-*` and `design.md` around **Modular & Hexagonal Architecture (Ports & Adapters)** (Domain/Application Core + Inbound/Outbound Ports) and define **Contract-First** shared interfaces/DTOs/schemas when spanning Frontend and Backend.
    - Map 100% of `handoff.yaml` requirements and components to atomic tasks (`TSK-*`) in `tasks.md` with explicit `autonomy-mode` (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, `HIGH_RISK_MANUAL`, `AMBIGUOUS`).
 3. Run `verify_governance` and `verify_friction` to validate task governance, 100% design/handoff scope coverage, and anti-monolith limits (`maxUseCasesPerChange = 1`).
@@ -51,16 +51,16 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
    - When concurrent multi-agent implementation is configured (e.g. Backend adapter $\parallel$ Frontend UI), `aisdlc git checkout <TSK-ID> --parallel` creates isolated worktrees (`task/<PARENT-ID>/<TSK-ID>-<slug>`).
 
 ### Step 4: Red Phase — Failing Test Suites (`agent-qa-engineer`)
-1. Delegate to or adopt [`agent-qa-engineer`](../agent-qa-engineer/SKILL.md), running `get_task_context` (`npx aisdlc context pack <TSK-ID>`) Read-First for each task to hydrate cited spec summaries and the k-hop code subgraph before writing tests.
+1. Delegate to or adopt [`agent-qa-engineer`](../../agents/agent-qa-engineer.md), running `get_task_context` (`npx aisdlc context pack <TSK-ID>`) Read-First for each task to hydrate cited spec summaries and the k-hop code subgraph before writing tests.
 2. Run `npx aisdlc gherkin extract` (`sdd_check_fix`) to deterministically extract `.feature` files from Markdown specifications, and run `npx aisdlc gherkin scaffold <feature-file> --lang <lang> --fallback` to scaffold RED step definitions in `tests/steps/` (never hand-author `.feature` or step skeletons).
 3. Author FAILING (red) assertions inside the scaffolded step definitions, plus integration/contract tests and mandatory E2E/UI tests (evaluating Happy Path, Sad Path, and Boundary Values for every interactive UI element, plus `UC-*` alternative/exception flows) in `tests/`.
 4. Commit failing test suites with trailer `Task-ID: TSK-YYY` and push (`git push`) to the Draft PR (CI workflows skip heavy checks while the PR is in `draft` state).
 5. Run `npx aisdlc verify gherkin` and `verify_testing` (`npx aisdlc verify testing`) to confirm deterministic Gherkin/step sync and requirement test coverage before writing production code.
 
 ### Step 5: Green & Refactor Phase — Surgical Implementation (`agent-developer` / `agent-devops`)
-1. Delegate application tasks (`src/`, `tests/`) to [`agent-developer`](../agent-developer/SKILL.md), running `get_task_context` (`npx aisdlc context pack <TSK-ID>`) Read-First before opening or editing source files. For tasks (`TSK-*`) targeting CI/CD workflows (`.github/workflows/`), `Dockerfile*`, IaC manifests, or support scripts (`scripts/`), delegate to [`agent-devops`](../agent-devops/SKILL.md) under its strict non-invasion guardrail on `src/`.
-2. Execute the **Mandatory 4-Step Implementation Order**:
-   - (1) Modular & Hexagonal Architecture (Ports & Adapters) boundaries, (2) Inter-module interfaces/ports first, (3) Concrete component implementation (zero fake-wiring; all 4 UI states `Loading`, `Empty`, `Error`, `Nominal`), (4) Exhaustive per-function unit tests in `tests/unit/` (Happy Path, Sad Path, Boundary, Null/Empty).
+1. Delegate application tasks (`src/`, `tests/`) to [`agent-developer`](../../agents/agent-developer.md), running `get_task_context` (`npx aisdlc context pack <TSK-ID>`) Read-First before opening or editing source files. For tasks (`TSK-*`) targeting CI/CD workflows (`.github/workflows/`), `Dockerfile*`, IaC manifests, or support scripts (`scripts/`), delegate to [`agent-devops`](../../agents/agent-devops.md) under its strict non-invasion guardrail on `src/`.
+2. Execute the **Mandatory 5-Step Implementation Order**:
+   - (1) Modular & Hexagonal Architecture (Ports & Adapters) boundaries, (2) Inter-module interfaces/ports first, (3) Concrete component implementation (zero fake-wiring; all 4 UI states `Loading`, `Empty`, `Error`, `Nominal`), (4) Exhaustive per-function unit tests in `tests/unit/` (Happy Path, Sad Path, Boundary Values, and Unexpected/Null/Empty values), (5) Per-component UI/E2E tests.
 3. Commit implementations with trailer `Task-ID: TSK-YYY` and push (`git push`) incrementally to the Draft PR.
 4. Verify any new dependency against `license-policy.yaml` via `verify_licenses` and PII handling against `privacy-policy.yaml` via `verify_privacy`.
 5. Run `sdd_check_fix` (`npx aisdlc check --fix`) and `verify_quality` (`npx aisdlc verify quality`) until Cyclomatic Complexity $\le 10$, Cognitive $\le 15$, Maintainability $\ge 50$, and Function Length $\le 40$ lines pass with zero violations.

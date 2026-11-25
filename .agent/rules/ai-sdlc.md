@@ -6,13 +6,14 @@ This file defines the operational rules and specialized role mappings for Google
 
 ---
 
-## 1. The 5 Unbreakable Commandments of Agents | Los 5 Mandamientos Inquebrantables de los Agentes
+## 1. The 6 Unbreakable Commandments of Agents | Los 6 Mandamientos Inquebrantables de los Agentes
 
 1. **FORBIDDEN TO AUTO-APPROVE OR AUTO-MERGE | PROHIBIDO AUTO-APROBAR O AUTO-FUSIONAR**: No agent may auto-approve PRs or perform direct merges to protected branches (`main`, `release/*`). Only a human engineer may approve or merge.
 2. **FORBIDDEN TO INVENT PRODUCT OR ARCHITECTURE DECISIONS**: When facing ambiguous requirements, formulate clarifying questions (`open-questions`). Never assume unspecified intentions.
 3. **FORBIDDEN TO INTRODUCE DEPENDENCIES WITHOUT LICENSE INSPECTION**: Always consult `license-policy.yaml`. Dependencies with viral licenses (`GPL`/`AGPL`) or commercial paid licenses (`BSL`/`SSPL`) are strictly forbidden without authorization.
 4. **FORBIDDEN TO IGNORE CYBERSECURITY & PRIVACY (SECURITY-BY-DEFAULT & PRIVACY-BY-DEFAULT)**: Validate inputs, sanitize data, protect PII according to `privacy-policy.yaml`, and add mitigation tests (`SEC-TEST-*`, `@privacy`). Disabling linters or suppressing typing errors is prohibited.
 5. **MANDATORY CRYPTOGRAPHIC CITATION**: Every derived artifact must cite upstream artifacts using canonical identifiers and their Unix LF-normalized SHA-256 cryptographic hashes.
+6. **MANDATORY CLEAN CONTEXT WINDOW ISOLATION PER SPECIALIST AGENT**: Never execute two distinct specialist roles in the same conversation context window. Always spawn each specialist in a fresh isolated subagent context (or open a New Chat / `/clear` in single-thread IDEs) reading state strictly from disk (`specs/`, `handoff.yaml`, `get_active_handoff`).
 
 ---
 
@@ -53,9 +54,14 @@ This file defines the operational rules and specialized role mappings for Google
 
 ---
 
-## 4. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
+## 5. Workflow Handoff Protocol and Human Action Window | Ventana de Acción Humana
 - **Clean Context Window Isolation per Specialist Agent (Cross-IDE)**: Never execute two distinct specialist roles in the same conversation context window. In subagent-capable IDEs (Antigravity `invoke_subagent`, Claude Code `Task` / `.claude/agents/`, GitHub Copilot `@agent-*`), always delegate each specialist phase to a fresh isolated subagent context that hydrates state strictly from disk (`specs/`, `handoff.yaml`, `get_active_handoff`). In chat-based IDEs (Cursor, Windsurf, Aider), persist all artifacts to disk, emit the Workflow Handoff block, and instruct the user to open a **New Chat** (or `/clear`) before running the next specialist.
 - **Conditional Activation Rule by Autonomy**:
   - 🟢 **`AUTONOMOUS`** (or exclusive final supervision in PR/CI): **OMITTED**. Do not request or emit interactive handoff to avoid interrupting unattended execution.
   - 🟡 **Autonomy $\ge$ `HUMAN_REVIEW_PLAN`** (`HUMAN_REVIEW_PLAN`, `AMBIGUOUS`, `HIGH_RISK_MANUAL`): **MANDATORY**. Emit the Workflow Handoff block compliant with [`templates/workflow/agent-handoff.template.md`](../../templates/workflow/agent-handoff.template.md) and **STOP**.
 - **Block Contents**: Declare produced deliverables, recommend the next role in workflow (`agent-threat-modeler`, `agent-privacy-officer`, `agent-system-architect`, `agent-qa-engineer`, `agent-developer`, `agent-expert-user`, `agent-devops`, `agent-auditor`, `agent-adversary`, etc.), provide suggested invocation prompt, and keep **the Human Action Window open at all times for the human user to take action** (review, edit by hand, pause/reroute, or delegate).
+
+---
+
+## 6. Context Budget Rule (MCP-First)
+- Hydrate task context via `get_task_context` (`npx aisdlc context pack <TSK-ID>`), explore code with `query_code_graph`, and search specs with `search_specs` first. Treat `process/*.md` as on-demand reference only — never bulk-read them upfront.
