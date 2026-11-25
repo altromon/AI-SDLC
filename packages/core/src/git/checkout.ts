@@ -281,12 +281,31 @@ export function branchExistsRemotely(branch: string, rootDir: string): boolean {
   }
 }
 
+export function resolveFreshBaseRef(parentBranch: string, rootDir: string): string {
+  const isBaseBranch =
+    parentBranch === 'main' || parentBranch === 'master' || parentBranch.startsWith('release/');
+  if (!isBaseBranch) return parentBranch;
+
+  try {
+    execFileSync('git', ['fetch', 'origin', parentBranch, '--quiet'], {
+      cwd: rootDir,
+      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: 10000,
+    });
+  } catch {
+    // Offline or no remote configured; fall back cleanly to local refs
+  }
+
+  return branchExistsRemotely(parentBranch, rootDir) ? `origin/${parentBranch}` : parentBranch;
+}
+
 export function ensureBranchInCascade(branch: string, parentBranch: string, rootDir: string): boolean {
   if (branchExistsLocally(branch, rootDir)) return false;
   if (branchExistsRemotely(branch, rootDir)) {
     execFileSync('git', ['branch', '--track', branch, `origin/${branch}`], { cwd: rootDir, stdio: ['pipe', 'pipe', 'pipe'] });
   } else {
-    execFileSync('git', ['branch', branch, parentBranch], { cwd: rootDir, stdio: ['pipe', 'pipe', 'pipe'] });
+    const startPoint = resolveFreshBaseRef(parentBranch, rootDir);
+    execFileSync('git', ['branch', branch, startPoint], { cwd: rootDir, stdio: ['pipe', 'pipe', 'pipe'] });
   }
   return true;
 }

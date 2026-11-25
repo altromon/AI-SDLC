@@ -63,11 +63,6 @@ jobs:
         run: |
           node packages/cli/bin/aisdlc.js sdd integrate --auto || true
 
-      - name: Refresh Canonical Reports and Interactive Dashboard
-        run: |
-          node packages/cli/bin/aisdlc.js report quality || true
-          node packages/cli/bin/aisdlc.js report dashboard || true
-
       - name: Commit and Push Canonical Baseline Changes
         run: |
           git config user.name "github-actions[bot]"
@@ -100,3 +95,19 @@ jobs:
           else
             echo "ℹ No se generaron modificaciones pendientes en el working tree."
           fi
+
+      - name: Refresh Canonical Reports and Interactive Dashboard
+        run: |
+          node packages/cli/bin/aisdlc.js report quality || true
+          node packages/cli/bin/aisdlc.js report dashboard || true
+
+      - name: Upload Quality Reports Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quality-reports
+          path: |
+            reports/QUALITY_REPORT.md
+            reports/dashboard.html
+          if-no-files-found: ignore
+          retention-days: 30
