@@ -32,5 +32,5 @@ Use this skill when **closing a release milestone (`release/vX.Y.Z`), preparing 
 
 ## Highest-Precedence SemVer Rule
 When consolidating multiple increments in a single release or PR, apply **only one** version bump matching the highest friction profile:
-`critical` (Major `X.0.0`) > `standard` (Minor `x.Y.0`) > `patch` (Patch `x.y.Z`).
+`major` (Major `X.0.0`) > `minor` (Minor `x.Y.0`) > `patch` (Patch `x.y.Z`).
 

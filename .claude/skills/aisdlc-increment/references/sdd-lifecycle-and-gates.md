@@ -2,8 +2,8 @@
 
 ## Friction Profiles & Anti-Bypass Paths
 - `patch`: <= 2 source files, zero Anti-Bypass paths (`spec.md` only).
-- `standard`: Functional increments, new/updated `UC-*` / `FR-*` (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.yaml`).
-- `critical`: Security enclaves (`SEC-ENC-*`), special-category PII (`DPIA-*`), schemas, migrations.
+- `minor`: Functional increments, new/updated `UC-*` / `FR-*` (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.yaml`).
+- `major`: Security enclaves (`SEC-ENC-*`), special-category PII (`DPIA-*`), schemas, migrations.
 - **Anti-Bypass Paths** (never `patch`): `schemas/`, `specs/security/`, `specs/privacy/`, `packages/security/`, `SEC-ENC-*`, `09_decisions/`, `migrations/`, `*-policy.yaml`.
 
 ## 4-Tier Git Hierarchy & Trailers

@@ -16,6 +16,7 @@ import {
   verifyProgressiveFriction,
 } from '../src/index.js';
 import { LIFECYCLE_SKILL_TEMPLATES } from '../src/init/index.js';
+import { SKILL_REFERENCES } from '../src/init/skill-references.js';
 import { validateScaffoldProfile } from '../src/adapters/sdd/scaffold.js';
 import { parseSpecFrontmatter } from '../src/verifiers/progressive-friction.js';
 
@@ -297,5 +298,21 @@ describe('CHG-067: SemVer Friction Profiles (patch | minor | major)', () => {
     expect(releaseTpl).toBeDefined();
     expect(releaseTpl!.body).toMatch(/major\s*>\s*minor\s*>\s*patch/i);
     expect(releaseTpl!.body).not.toMatch(/critical.*>.*standard.*>.*patch/i);
+
+    const refContents = [
+      ...(SKILL_REFERENCES['aisdlc-increment'] || []).map((r) => r.content),
+      ...(SKILL_REFERENCES['aisdlc-release-compliance'] || []).map((r) => r.content),
+      fs.readFileSync(
+        path.join(repoRoot, '.agent', 'skills', 'aisdlc-increment', 'references', 'sdd-lifecycle-and-gates.md'),
+        'utf-8'
+      ),
+      fs.readFileSync(
+        path.join(repoRoot, '.agent', 'skills', 'aisdlc-release-compliance', 'references', 'regulatory-bundles-and-semver.md'),
+        'utf-8'
+      ),
+    ];
+    for (const content of refContents) {
+      expect(content).not.toMatch(/\b(standard|critical)\b/i);
+    }
   });
 });

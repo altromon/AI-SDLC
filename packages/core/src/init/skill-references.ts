@@ -49,8 +49,8 @@ export const SKILL_REFERENCES: Record<string, readonly SkillReferenceFile[]> = {
 
 ## Friction Profiles & Anti-Bypass Paths
 - \`patch\`: <= 2 source files, zero Anti-Bypass paths (\`spec.md\` only).
-- \`standard\`: Functional increments, new/updated \`UC-*\` / \`FR-*\` (\`proposal.md\`, \`spec.md\`, \`design.md\`, \`tasks.md\`, \`handoff.yaml\`).
-- \`critical\`: Security enclaves (\`SEC-ENC-*\`), special-category PII (\`DPIA-*\`), schemas, migrations.
+- \`minor\`: Functional increments, new/updated \`UC-*\` / \`FR-*\` (\`proposal.md\`, \`spec.md\`, \`design.md\`, \`tasks.md\`, \`handoff.yaml\`).
+- \`major\`: Security enclaves (\`SEC-ENC-*\`), special-category PII (\`DPIA-*\`), schemas, migrations.
 - **Anti-Bypass Paths** (never \`patch\`): \`schemas/\`, \`specs/security/\`, \`specs/privacy/\`, \`packages/security/\`, \`SEC-ENC-*\`, \`09_decisions/\`, \`migrations/\`, \`*-policy.yaml\`.
 
 ## 4-Tier Git Hierarchy & Trailers
@@ -110,7 +110,7 @@ Always render the full technical report (Header, File Location, Summary, Semanti
 
 ## Highest-Precedence SemVer Rule
 When consolidating multiple increments in a single release or PR, apply **only one** version bump matching the highest friction profile:
-\`critical\` (Major \`X.0.0\`) > \`standard\` (Minor \`x.Y.0\`) > \`patch\` (Patch \`x.y.Z\`).
+\`major\` (Major \`X.0.0\`) > \`minor\` (Minor \`x.Y.0\`) > \`patch\` (Patch \`x.y.Z\`).
 `,
     },
   ],
