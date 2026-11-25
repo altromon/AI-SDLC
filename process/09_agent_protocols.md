@@ -705,6 +705,7 @@ Every formal handoff adopts the structure in [`templates/workflow/agent-handoff.
   CHECKPOINT 1: SPECIFICATION & DESIGN CHECKPOINT (Transversal Review)
    ├── agent-auditor: Audits for YAGNI, overengineering, interface bloat, task coverage.
    ├── agent-adversary: Probes contradictions, edge states, architecture SPOFs, and race conditions.
+   ├── Deterministic Gates: 'pnpm run verify:checkpoint-1' (Gates 8, 9, 4 gherkin, 7, 3, 10, 12, 11; + Gate 6 with '--with-licenses').
    └── Remediation: Consolidated handoff to authoring agents (max 1 correction round).
  ═════════════════════════════════════════════════════════════════════════
           │
@@ -715,11 +716,13 @@ Every formal handoff adopts the structure in [`templates/workflow/agent-handoff.
           ▼
  [PHASE 2: TDD IMPLEMENTATION & CODE QUALITY]
   5. agent-qa-engineer (QA / SDET — Failing Tests in Red)
+     ├── Read-First: 'get_task_context' ('aisdlc context pack <TSK-ID>') for cited specs + k-hop code subgraph
      ├── Translates FR-*, SEC-REQ-*, PRIV-REQ-*, and QR-* into failing BDD/Gherkin and E2E/UI suites (red)
      └── Suggested handoff: agent-developer
           │
           ▼
   6. agent-developer (Coder / SDD Implementation)
+     ├── Read-First: 'get_task_context' ('aisdlc context pack <TSK-ID>') before opening/editing source files
      ├── Executes 4-step implementation (Ports/Adapters -> Interfaces -> Components -> Unit Tests)
      └── Produces green builds satisfying complexity thresholds (CC <= 10, MI >= 50)
           │

@@ -26,7 +26,7 @@ Use this skill whenever a user or upstream workflow (including a handoff from [`
 2. Run MCP tool `inspect_element` (`{"query": "<target-id-or-path>"}`) or CLI `npx aisdlc inspect "<target-id-or-path>" --json` to hydrate:
    - Canonical ID, layer (`product`, `architecture`, `security`, `privacy`, `code`, `test`, `governance`), file path, and Unix LF SHA-256 citation digest.
    - Traceability status (`COMPLIANT`, `ORPHAN`, `DRIFT`) and immediate upstream (↗️) and downstream (↘️) neighbors.
-3. Read the target file and its directly connected artifacts from disk.
+3. Read the target file and its directly connected artifacts from disk; for `CMP-*`, `TSK-*`, or source code (`src/**`, `packages/**`), also run `query_code_graph` (`npx aisdlc graph query <path-or-symbol>`) to inspect k-hop code dependencies.
 
 ### Step 2: Layer-Specific Deterministic Pre-Audit Gates
 Execute deterministic verifiers matching the element's layer before invoking specialist subagents:

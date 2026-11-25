@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI-SDLC v4.0 — Industrial-grade software lifecycle for humans & AI agents</title>
-  <meta name="description" content="AI-SDLC v4.4: a deterministic, spec-driven development and governance framework where humans and 10 AI agents collaborate with 2-checkpoint transversal verification, 2-tier streamlined Git topology, task rework KPIs, and 12 quality gates.">
+  <meta name="description" content="AI-SDLC v4.14: a deterministic, spec-driven development and governance framework where humans and 10 AI agents collaborate with 2-checkpoint transversal verification, 2-tier streamlined Git topology, task rework KPIs, and 12 quality gates.">
   <meta property="og:title" content="AI-SDLC v4.0 — Hybrid Software Lifecycle for Humans and AI Agents">
   <meta property="og:description" content="Spec-driven delivery, 10 specialized agents, 2-checkpoint transversal verification, streamlined 2-tier Git topology with commit trailers, task rework KPIs, and 12 deterministic quality gates.">
   <meta name="theme-color" content="#07080d">
@@ -619,7 +619,7 @@
             <div class="duo">
               <div class="duo-box auditor">
                 <h4><span>🔍</span> agent-auditor</h4>
-                <p>Verifies strict YAGNI, detects overengineering, ensures JSON Schema compliance and checks bidirectional upstream citations.</p>
+                <p>Verifies strict YAGNI, detects overengineering, ensures JSON Schema compliance and runs <code>verify:checkpoint-1</code> (schemas, duplicates, gherkin, pdac, governance, friction, privacy, secrets).</p>
               </div>
               <div class="duo-box adversary">
                 <h4><span>🗡️</span> agent-adversary</h4>
@@ -1277,9 +1277,9 @@
           ]},
           { title: 'Architecture & Checkpoint 1', sub: 'agent-system-architect · auditor ∥ adversary', badge: 'Gate 1', lines: [
             ['cy', '▸ agent-system-architect → CMP-*, ARCH-DEP-001, ADR-*'],
-            ['ok', '✔ npx aisdlc verify licenses — 0 GPL/AGPL/SSPL violations'],
+            ['cmd', 'pnpm run verify:checkpoint-1 -- --with-licenses'],
             ['am', '⚡ Checkpoint 1: agent-auditor ∥ agent-adversary (isolated contexts)'],
-            ['ok', '✔ 0 blocking defects · gh pr ready → Human PO/Tech Lead sign-off'],
+            ['ok', '✔ 8/8 Checkpoint 1 gates passed · gh pr ready → Human sign-off'],
           ]},
           { title: 'Topological Wave Delivery', sub: '1 UC-* = 1 CHG-* · Wave 0 → Waves 1..N', badge: 'Step 5', lines: [
             ['dim', '  Wave 0 (seq): CHG-001 Core + Presentation Host + agent-devops CI'],
@@ -1305,7 +1305,7 @@
           ]},
           { title: 'Bounded Retro-Inception', sub: 'ARCH-INTRO-001 · CMP-* · UC-* / FR-*', badge: 'Step 3', lines: [
             ['cy', '▸ agent-product-analyst → ARCH-INTRO-001 + characterization UC-*/FR-*'],
-            ['cy', '▸ agent-system-architect → CMP-* & ADR-* (target domain only)'],
+            ['cy', '▸ agent-system-architect: query_code_graph → CMP-* & ADR-*'],
             ['cy', '▸ agent-threat-modeler → agent-privacy-officer (SEC-ENC-* / ROPA)'],
             ['am', '⚡ Retro-Inception Checkpoint: agent-auditor ∥ agent-adversary'],
           ]},
@@ -1324,24 +1324,24 @@
       increment: {
         steps: [
           { title: 'Branch, Draft PR & Scope Triage', sub: 'patch | standard | critical · Anti-Bypass', badge: 'Step 0', lines: [
-            ['cmd', 'git checkout -b feat/CHG-052-real-time-alerts && gh pr create --draft'],
+            ['cmd', 'git checkout -b feat/CHG-052-real-time-alerts && npx aisdlc doctor'],
             ['am', '  ? Friction profile: standard (Anti-Bypass: touches src/ & specs/)'],
-            ['ok', '✔ Profile standard selected → full SDD + handoff.yaml'],
+            ['ok', '✔ Hooks & toolchain healthy · Profile standard → full SDD'],
           ]},
           { title: 'Delta, Design & Checkpoint 1', sub: '1 UC-* = 1 CHG-* · auditor ∥ adversary', badge: 'Gate 1', lines: [
             ['cmd', 'npx aisdlc verify duplicates && npx aisdlc check --fix'],
-            ['cmd', 'npx aisdlc change new "Real-Time Alerts" --from UC-STREAM-TELEMETRY'],
-            ['cy', '▸ agent-system-architect: Hexagonal CMP-* + 100% tasks.md coverage'],
-            ['am', '⚡ Checkpoint 1: agent-auditor ∥ agent-adversary → Human Gate 1'],
+            ['cy', '▸ agent-system-architect: query_code_graph → Hexagonal CMP-* + tasks.md'],
+            ['cmd', 'pnpm run verify:checkpoint-1'],
+            ['am', '⚡ Checkpoint 1: 8/8 gates + auditor ∥ adversary → Human Gate 1'],
           ]},
           { title: 'Red Phase — Failing Tests', sub: 'agent-qa-engineer · gherkin scaffold', badge: 'Step 4', lines: [
-            ['cmd', 'npx aisdlc git checkout TSK-001'],
+            ['cmd', 'npx aisdlc git checkout TSK-001 && npx aisdlc context pack TSK-001'],
             ['cy', '▸ agent-qa-engineer: gherkin extract && gherkin scaffold --lang ts'],
             ['bad', '  ✕ RED: tests/steps/fr-052.steps.ts + E2E UI specs failing'],
             ['ok', '✔ npx aisdlc verify testing — 100% reqs have failing tests'],
           ]},
           { title: 'Green & Refactor (4-Step Order)', sub: 'agent-developer · 12/12 Quality Gates', badge: 'Step 5', lines: [
-            ['cy', '▸ agent-developer: Ports → Interfaces → Impl (4 UI states) → Unit'],
+            ['cy', '▸ agent-developer: get_task_context → Ports → Impl (4 UI states) → Unit'],
             ['dim', '  git commit -m "feat(TSK-001): alert engine" (Task-ID trailer)'],
             ['cmd', 'npx aisdlc check --fix && npx aisdlc verify all'],
             ['ok', '✔ 12/12 Quality Gates passed · CC ≤ 10 · MI ≥ 50 · exit 0'],

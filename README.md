@@ -204,6 +204,9 @@ npx aisdlc sdd integrate --auto
 |---|---|---|---|
 | `npx aisdlc init [dir] [options]` | - | **Repository Initialization** | Bootstraps repository with all 34 JSON schemas (Draft 2020-12), 38 canonical starter templates, Pull Request templates, policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`), and AI agent rules (13 specialized agents). Unconditionally generates universal MCP configs (`antigravity.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Injects standard npm scripts into consumer `package.json`. Interactive TTY wizard prompts for CI/CD provider, Architecture granularity, and AI Agents. Supports `--dry-run`, `--json`, and `-F, --format <format>` |
 | `npx aisdlc git hook install` | `pnpm run git:hook:install` | **Git Telemetry Setup** | Installs `prepare-commit-msg` hook for zero-friction commit trailer injection |
+| `npx aisdlc doctor` | - | **Environment & Hooks Check** | Verifies Git hooks, toolchain, and security/analysis binaries at session or increment start |
+| `npx aisdlc graph query <target>` | - | **Code Graph (k-hop)** | Queries bounded k-hop import/symbol subgraph (`query_code_graph` MCP tool) for Read-First architecture & impact analysis |
+| `npx aisdlc context pack <TSK-ID>` | - | **Task Context Packer** | Packs minimal cited spec summaries and k-hop code subgraph (`get_task_context` MCP tool) for QA/Dev Read-First execution |
 | `npx aisdlc mcp` / `npx @aisdlc/mcp` | `pnpm run mcp` | **Native MCP Server** | Launches Model Context Protocol server over `stdio` with 24 typed tools (including `new`, `verify`, `verify_privacy`, `report`) and 6 canonical resources |
 | `npx aisdlc change new <name>` | `pnpm run change:new -- <name>` | **SDD Scaffolding** | Generates `proposal.md`, `spec.md`, `design.md`, `tasks.md`, and `handoff.yaml` sidecar (`HOF-*`) with SHA-256 digests |
 | `npx aisdlc verify duplicates [--json]` | - | **Anti-Redundancy** | Audits lexical collisions and requirement overlaps before coding (`--json`) |
@@ -226,6 +229,7 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc verify licenses [options]` | `pnpm run verify:licenses` | **IP / OSS Governance & SCA** | Dynamic dependency scan, CycloneDX 1.5 SBOM, vulnerability threshold audit (`--vuln`), and legal attribution against `license-policy.yaml` (`--json`) |
 | `npx aisdlc sdd verify` | - | **SDD Compliance** | Audits active changes for specification compliance and valid sidecars |
 | `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 12 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
+| `npx tsx scripts/verify-checkpoint-1.ts [--with-licenses]` | `pnpm run verify:checkpoint-1` | **Checkpoint 1 Pre-Code Gates** | Runs shift-left deterministic gates before coding: `schemas` (8), `duplicates` (9), `gherkin` (4), `pdac` (7), `governance` (3), `friction` (10), `privacy` (12), `secrets` (11), and optional `licenses` (6) |
 | `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship, and task-level rework & churn breakdown) for PRs (supports `--json`) |
 | `npx aisdlc sdd integrate [--auto]` | - | **Baseline Promotion** | Promotes requirements to `active`, links architecture, marks proposal `applied`, and archives change |
 | `npx aisdlc kpi release --release <branch>` | `pnpm run kpi:release` | **Release Summary** | Computes DIR per model/human, defect density, rework costs, and granular task rework stats (`RELEASE_KPIS_<release>.md`, supports `--json`) |
@@ -473,7 +477,7 @@ Generate the SDD delivery package in a single automated step:
 ### Phase 6: Implementation with TDD and Test Audit
 
 1. **Surgical Context Injection**:
-   The developer or agent (`agent-developer`) receives strictly `spec.md`, `design.md`, and `license-policy.yaml`.
+   The developer or agent (`agent-developer`) runs `get_task_context` (`npx aisdlc context pack <TSK-ID>`) Read-First to receive cited `spec.md`, `design.md`, `license-policy.yaml`, and the k-hop code subgraph.
 2. **Test-Driven Development (TDD)**:
    Unit tests and mitigation tests (`SEC-TEST-*`) are authored in `tests/` before or alongside logic in `src/`.
 3. **Audit Total Test Coverage**:
