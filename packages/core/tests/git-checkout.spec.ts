@@ -6,6 +6,7 @@ import { execFileSync } from 'child_process';
 import {
   locateTaskInActiveChanges,
   resolveBranchHierarchy,
+  resolveFreshBaseRef,
   checkoutTaskBranch,
   classifyBranch,
 } from '../src/index.js';
@@ -231,5 +232,11 @@ tasks:
       encoding: 'utf-8',
     }).trim();
     expect(currentBranch).toBe('feat/CHG-042-auth-gateway');
+  });
+
+  it('should resolveFreshBaseRef to parentBranch when no remote exists and keep non-base branches unchanged', () => {
+    execFileSync('git', ['init'], { cwd: tmpDir, stdio: 'pipe' });
+    expect(resolveFreshBaseRef('main', tmpDir)).toBe('main');
+    expect(resolveFreshBaseRef('feat/custom-parent', tmpDir)).toBe('feat/custom-parent');
   });
 });

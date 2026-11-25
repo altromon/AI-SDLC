@@ -535,7 +535,7 @@ export {
   readCodeCoverageSummary,
 } from './reporters/quality-report.js';
 export { BRANCH_PATTERNS, classifyBranch, generateBranchHierarchyPlan } from './git/workflow.js';
-export { checkoutTaskBranch, locateTaskInActiveChanges, resolveBranchHierarchy } from './git/checkout.js';
+export { checkoutTaskBranch, locateTaskInActiveChanges, resolveBranchHierarchy, resolveFreshBaseRef } from './git/checkout.js';
 export type { TaskLocateResult } from './git/checkout.js';
 export {
   extractAllRepoCommitKpis,
@@ -549,7 +549,7 @@ export {
 export type { CommitKpiRecord, CommitTrailers, ReasoningEffort } from './git/trailers.js';
 export { detectAuthorIdentity } from './git/agent-detector.js';
 export type { AuthorIdentity } from './git/agent-detector.js';
-export { PREPARE_COMMIT_MSG_SCRIPT, PRE_COMMIT_SCRIPT, installGitHooks } from './git/hook-installer.js';
+export { PREPARE_COMMIT_MSG_SCRIPT, PRE_COMMIT_SCRIPT, PRE_PUSH_SCRIPT, installGitHooks } from './git/hook-installer.js';
 export type { HookInstallResult } from './git/hook-installer.js';
 export {
   KPI_SUMMARY_END_TAG,

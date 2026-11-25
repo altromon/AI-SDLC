@@ -149,9 +149,52 @@ if [ -f "$TELEMETRY_FILE" ]; then
 fi
 `;
 
+const PRE_PUSH_SCRIPT = `#!/usr/bin/env bash
+# ==============================================================================
+# AI-SDLC: Branch Freshness & Merged-PR Reuse Guard (pre-push)
+# ==============================================================================
+
+CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+
+if [ -z "$CURRENT_BRANCH" ] || [ "$CURRENT_BRANCH" = "HEAD" ]; then
+  exit 0
+fi
+
+if echo "$CURRENT_BRANCH" | grep -qE "^(main|master|release/.*)$"; then
+  exit 0
+fi
+
+if command -v gh >/dev/null 2>&1; then
+  MERGED_COUNT=$(gh pr list --head "$CURRENT_BRANCH" --state merged --json number --jq 'length' 2>/dev/null || echo "0")
+  if [ -n "$MERGED_COUNT" ] && [ "$MERGED_COUNT" -gt 0 ] 2>/dev/null; then
+    echo "" >&2
+    echo "❌ [AI-SDLC Merge Guard] BLOCKED: Branch '$CURRENT_BRANCH' already has $MERGED_COUNT merged PR(s)." >&2
+    echo "Create a fresh branch from origin/main instead:" >&2
+    echo "   git fetch origin main && git checkout -b feat/<new-slug> origin/main" >&2
+    echo "" >&2
+    exit 1
+  fi
+fi
+
+git fetch origin main --quiet 2>/dev/null || true
+if git rev-parse --verify --quiet refs/remotes/origin/main >/dev/null 2>&1; then
+  if ! git merge-base --is-ancestor origin/main HEAD 2>/dev/null; then
+    echo "" >&2
+    echo "❌ [AI-SDLC Merge Guard] BLOCKED: Branch '$CURRENT_BRANCH' is behind 'origin/main'." >&2
+    echo "Sync with origin/main before pushing:" >&2
+    echo "   git fetch origin main && git rebase origin/main" >&2
+    echo "" >&2
+    exit 1
+  fi
+fi
+
+exit 0
+`;
+
 try {
   fs.writeFileSync(path.join(hooksDir, 'pre-commit'), PRE_COMMIT_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
   fs.writeFileSync(path.join(hooksDir, 'prepare-commit-msg'), PREPARE_COMMIT_MSG_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
+  fs.writeFileSync(path.join(hooksDir, 'pre-push'), PRE_PUSH_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
 } catch {
   // Fail safely without breaking npm/pnpm install
 }

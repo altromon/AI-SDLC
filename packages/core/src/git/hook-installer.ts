@@ -178,8 +178,55 @@ if [ -f "$TELEMETRY_FILE" ]; then
 fi
 `;
 
+export const PRE_PUSH_SCRIPT = `#!/usr/bin/env bash
+# ==============================================================================
+# AI-SDLC: Branch Freshness & Merged-PR Reuse Guard (pre-push)
+# ==============================================================================
+
+CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+
+if [ -z "$CURRENT_BRANCH" ] || [ "$CURRENT_BRANCH" = "HEAD" ]; then
+  exit 0
+fi
+
+# Skip protected branches
+if echo "$CURRENT_BRANCH" | grep -qE "^(main|master|release/.*)$"; then
+  exit 0
+fi
+
+# 1. Block pushing to a branch that already has a MERGED PR (prevents squash-merge reuse conflicts)
+if command -v gh >/dev/null 2>&1; then
+  MERGED_COUNT=$(gh pr list --head "$CURRENT_BRANCH" --state merged --json number --jq 'length' 2>/dev/null || echo "0")
+  if [ -n "$MERGED_COUNT" ] && [ "$MERGED_COUNT" -gt 0 ] 2>/dev/null; then
+    echo "" >&2
+    echo "❌ [AI-SDLC Merge Guard] BLOCKED: Branch '$CURRENT_BRANCH' already has $MERGED_COUNT merged PR(s)." >&2
+    echo "Reusing a branch after a squash merge causes severe Git conflicts." >&2
+    echo "Create a fresh branch from origin/main instead:" >&2
+    echo "   git fetch origin main && git checkout -b feat/<new-slug> origin/main" >&2
+    echo "" >&2
+    exit 1
+  fi
+fi
+
+# 2. Block pushing if branch is behind origin/main
+git fetch origin main --quiet 2>/dev/null || true
+if git rev-parse --verify --quiet refs/remotes/origin/main >/dev/null 2>&1; then
+  if ! git merge-base --is-ancestor origin/main HEAD 2>/dev/null; then
+    echo "" >&2
+    echo "❌ [AI-SDLC Merge Guard] BLOCKED: Branch '$CURRENT_BRANCH' is behind 'origin/main'." >&2
+    echo "Sync with origin/main before pushing to avoid GitHub merge conflicts:" >&2
+    echo "   git fetch origin main && git rebase origin/main" >&2
+    echo "   (or: git merge origin/main)" >&2
+    echo "" >&2
+    exit 1
+  fi
+fi
+
+exit 0
+`;
+
 /**
- * Installs the AI-SDLC Git hooks (pre-commit & prepare-commit-msg) in .git/hooks.
+ * Installs the AI-SDLC Git hooks (pre-commit, prepare-commit-msg & pre-push) in .git/hooks.
  */
 export function installGitHooks(rootDir: string = process.cwd()): HookInstallResult {
   const gitDir = path.join(rootDir, '.git');
@@ -197,14 +244,16 @@ export function installGitHooks(rootDir: string = process.cwd()): HookInstallRes
 
   const prepareCommitMsgPath = path.join(hooksDir, 'prepare-commit-msg');
   const preCommitPath = path.join(gitDir, 'hooks', 'pre-commit');
+  const prePushPath = path.join(hooksDir, 'pre-push');
 
   try {
     fs.writeFileSync(prepareCommitMsgPath, PREPARE_COMMIT_MSG_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
     fs.writeFileSync(preCommitPath, PRE_COMMIT_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
+    fs.writeFileSync(prePushPath, PRE_PUSH_SCRIPT, { encoding: 'utf-8', mode: 0o755 });
     return {
       success: true,
       hookPath: prepareCommitMsgPath,
-      installedHooks: [prepareCommitMsgPath, preCommitPath],
+      installedHooks: [prepareCommitMsgPath, preCommitPath, prePushPath],
     };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);

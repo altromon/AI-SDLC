@@ -54,8 +54,10 @@ ENV/
 *.pem
 *.key
 
-# Logs
+# Logs & Generated Reports
 reports/*.jsonl
+reports/QUALITY_REPORT.md
+reports/dashboard.html
 logs/
 *.log
 npm-debug.log*

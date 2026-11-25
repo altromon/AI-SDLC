@@ -4,6 +4,9 @@ import * as path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   BranchSafetyCheck,
+  buildBehindMainFinding,
+  buildBranchSafetyReport,
+  checkBranchFreshness,
   evaluateBranch,
   isProtectedBranch,
   queryActiveBranch,
@@ -90,6 +93,21 @@ describe('M3 Doctor Unit Suite (Happy / Sad / Boundary / Malformed)', () => {
     const check = new BranchSafetyCheck(mockRunner);
     const report = await check.inspect({ rootDir: tmpDir });
     expect(report.status).toBe('pass');
+
+    const behindRunner: IProcessRunner = {
+      execSafe: vi.fn().mockImplementation(async (_cmd: string, args: string[]) => {
+        if (args[0] === 'symbolic-ref') return { stdout: 'feat/behind\n', stderr: '', exitCode: 0 };
+        if (args[0] === 'rev-parse') return { stdout: 'abc123\n', stderr: '', exitCode: 0 };
+        if (args[0] === 'merge-base') return { stdout: '', stderr: '', exitCode: 1 };
+        return { stdout: '', stderr: '', exitCode: 0 };
+      }),
+    };
+    const behindReport = await new BranchSafetyCheck(behindRunner).inspect({ rootDir: tmpDir });
+    expect(behindReport.status).toBe('warn');
+    expect(behindReport.findings[0]?.id).toBe('WARN_BRANCH_BEHIND_MAIN');
+    expect(await checkBranchFreshness(behindRunner, tmpDir, '')).toBeNull();
+    expect(buildBehindMainFinding('feat/x').id).toBe('WARN_BRANCH_BEHIND_MAIN');
+    expect(buildBranchSafetyReport([]).status).toBe('pass');
   });
 
   it('doctor-service: collectRemediations deduplicates remediations and handles pass/warn/fail', async () => {
