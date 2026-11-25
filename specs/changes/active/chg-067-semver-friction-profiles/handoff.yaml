@@ -1,0 +1,23 @@
+id: HOF-CHG-067-SEMVER-FRICTION-PROFILES
+type: handoff
+title: Handoff Canónico de Arquitectura para SemVer Friction Profiles (patch, minor, major)
+changeId: CHG-067-SEMVER-FRICTION-PROFILES
+version: 1.0.0
+createdAt: '2026-11-25T13:36:39.222Z'
+subgraph:
+  requirements:
+    - FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001
+  useCases:
+    - UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
+  components:
+    - CMP-CORE
+citations:
+  - id: UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
+    digest: sha256:a90e64f7894d0950babec5f6db93e7c0ee61ec38ad00ff8ae45ed80aea1d5796
+    comment: Citación de use-case (Selección interactiva de perfil de fricción, versionado SemVer por precedencia en aisdlc-increment y bloqueo determinista SDD en guard-branch.cjs)
+  - id: FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001
+    digest: sha256:5ed9934c532217af1f5840417ecd22e1265b106b57f3942b68b528aed15fe582
+    comment: Requisito derivado de UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
+  - id: CMP-CORE
+    digest: sha256:694456d7048a95af19287c58451b108fc97d2c99dbac1b029ad4ce7ef1ae14a6
+    comment: Componente arquitectónico central (@aisdlc/core)

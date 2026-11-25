@@ -7,10 +7,10 @@ author: agent-system-architect
 handoff: HOF-CHG-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
 citations:
   - id: UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
-    digest: sha256:a4d5eaf42eec48f9e80ee55f77d53616bb189d546969b9b639f03199c079b64b
+    digest: sha256:a90e64f7894d0950babec5f6db93e7c0ee61ec38ad00ff8ae45ed80aea1d5796
     comment: Caso de uso de selección interactiva de perfil de fricción, versionado SemVer por precedencia y bloqueo SDD en guard-branch.cjs
   - id: FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001
-    digest: sha256:639eaa8e6f460283def54b05093020fa537e2e4fd2b872e0af5c87d9c8526243
+    digest: sha256:5ed9934c532217af1f5840417ecd22e1265b106b57f3942b68b528aed15fe582
     comment: Requisito funcional para triaje interactivo de perfil, SemVer por precedencia y guardián SDD en guard-branch.cjs
 ---
 

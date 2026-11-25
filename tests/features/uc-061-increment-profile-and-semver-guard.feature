@@ -2,7 +2,7 @@
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
 # Origen: specs/product/UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD.md
 # ID Requerimiento: UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
-# Versión: 0.1.0
+# Versión: 0.2.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.
 # ==============================================================================
 
@@ -28,13 +28,13 @@ Feature: Deterministic SDD increment profile triage, SemVer precedence bump, and
     And the target version is "<target_version>"
 
     Examples:
-      | base_version | profiles                   | effective_profile | target_version |
-      | 3.2.0        | patch                      | patch             | 3.2.1          |
-      | 3.2.0        | patch, patch               | patch             | 3.2.1          |
-      | 3.2.0        | standard                   | standard          | 3.3.0          |
-      | 3.2.0        | patch, standard            | standard          | 3.3.0          |
-      | 3.2.0        | critical                   | critical          | 4.0.0          |
-      | 3.2.0        | patch, standard, critical  | critical          | 4.0.0          |
+      | base_version | profiles             | effective_profile | target_version |
+      | 3.2.0        | patch                | patch             | 3.2.1          |
+      | 3.2.0        | patch, patch         | patch             | 3.2.1          |
+      | 3.2.0        | minor                | minor             | 3.3.0          |
+      | 3.2.0        | patch, minor         | minor             | 3.3.0          |
+      | 3.2.0        | major                | major             | 4.0.0          |
+      | 3.2.0        | patch, minor, major  | major             | 4.0.0          |
 
   @invalid
   Scenario: Guard denies editing source or test files when no active SDD increment exists in specs/changes/active
@@ -43,3 +43,15 @@ Feature: Deterministic SDD increment profile triage, SemVer precedence bump, and
     When "guard-branch.cjs" evaluates a file edit on "packages/core/src/init/coding-rules-templates.ts"
     Then the hook output decision is "deny"
     And the denial reason references "specs/changes/active/" and "aisdlc-increment"
+
+  @invalid
+  Scenario Outline: Legacy profile names are strictly rejected without backward-compatible aliases
+    Given a user or agent specifies the legacy profile "<legacy_profile>"
+    When the profile is validated by JSON Schema, CLI, MCP, or progressive-friction
+    Then the profile is rejected as invalid
+    And the error indicates allowed values "patch", "minor", "major"
+
+    Examples:
+      | legacy_profile |
+      | standard       |
+      | critical       |
