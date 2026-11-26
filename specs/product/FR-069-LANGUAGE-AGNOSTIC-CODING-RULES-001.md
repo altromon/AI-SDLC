@@ -29,7 +29,7 @@ superseded-by: null
    - Los proyectos cuyos manifiestos residan en rutas anidadas (como `src/App/App.csproj`, `services/api/go.mod`, `crates/core/Cargo.toml`, `backend/pom.xml`, `frontend/tsconfig.json`, `mobile/build.gradle.kts`, `native/CMakeLists.txt`) DEBEN ser detectados para que `aisdlc init` y `aisdlc migrate` desplieguen automáticamente sus archivos estrictos de `STACK_FILE_MAP`.
 2. **Detección de ausencia de reglas estrictas en verificación (`packages/core/src/verifiers/coding-rules-bypass.ts`)**:
    - `collectCodingRulesBypassViolations(rootDir)` NO DEBE retornar `[]` silenciosamente cuando `Directory.Build.props` o `tsconfig.strict.json` no existan en `rootDir` si en el proyecto existe algún stack soportado detectado por `detectProjectStacks(rootDir)`.
-   - Cuando `detectProjectStacks(rootDir)` detecte uno o más stacks soportados, `collectCodingRulesBypassViolations(rootDir)` DEBE verificar mediante `STACK_FILE_MAP` / `getCodingRulesFilesForStacks` que cada archivo de reglas estrictas requerido exista en `rootDir`, emitiendo una violación `[CODING-RULES-BYPASS]` por cada archivo faltante (cubriendo también repositorios inicializados en Fase 0 antes de existir código).
+   - Cuando `detectProjectStacks(rootDir)` detecte uno o más stacks soportados, `collectCodingRulesBypassViolations(rootDir)` DEBE verificar mediante `STACK_FILE_MAP` / `getCodingRulesFilesForStacks` que cada archivo de reglas estrictas requerido exista en `rootDir`, emitiendo una violación `[CODING-RULES-MISSING]` por cada archivo faltante (cubriendo también repositorios inicializados en Fase 0 antes de existir código).
 3. **Uniformidad agnóstica al lenguaje en todos los `CodingRuleStack`**:
    - Tanto la detección de stacks (`detectProjectStacks`) como la verificación de despliegue y anti-bypass (`collectCodingRulesBypassViolations`) DEBEN operar de forma uniforme e independiente del lenguaje sobre los 10 valores de `VALID_CODING_RULE_STACKS` (`dotnet`, `typescript`, `javascript`, `angular`, `java`, `kotlin`, `rust`, `go`, `c`, `cpp`) utilizando `STACK_FILE_MAP` / `getCodingRulesFilesForStacks`, manteniendo además las comprobaciones existentes de debilitamiento en archivos MSBuild y `tsconfig*.json`.
 
@@ -59,7 +59,7 @@ Feature: Language-Agnostic Nested Coding Rules Detection and Bypass Verification
     Given a repository containing only the nested manifest "<nested_manifest>" for stack "<stack>" without its strict coding-rules files
     When "detectProjectStacks" and "collectCodingRulesBypassViolations" run on the repository root
     Then "detectProjectStacks" includes "<stack>"
-    And "collectCodingRulesBypassViolations" reports a "[CODING-RULES-BYPASS]" violation referencing "<required_rule_file>"
+    And "collectCodingRulesBypassViolations" reports a "[CODING-RULES-MISSING]" violation referencing "<required_rule_file>"
 
     Examples:
       | stack      | nested_manifest               | required_rule_file                          |
@@ -71,7 +71,7 @@ Feature: Language-Agnostic Nested Coding Rules Detection and Bypass Verification
       | kotlin     | mobile/build.gradle.kts       | config/detekt/detekt.yml                    |
       | rust       | crates/core/Cargo.toml        | .cargo/config.toml                          |
       | go         | services/api/go.mod           | .golangci.yml                               |
-      | c          | native/CMakeLists.txt         | .clang-tidy                                 |
+      | c          | native/main.c                 | .clang-tidy                                 |
       | cpp        | engine/CMakeLists.txt         | cmake/AisdlcStrictCompiler.cmake            |
 
   @invalid
@@ -79,7 +79,7 @@ Feature: Language-Agnostic Nested Coding Rules Detection and Bypass Verification
     Given a repository initialized in Phase 0 before code existed that later added "backend/pom.xml" and "crates/core/Cargo.toml" without deploying strict rules
     When "collectCodingRulesBypassViolations" runs on the repository root
     Then it does not silently return an empty list
-    And it reports "[CODING-RULES-BYPASS]" violations for the missing strict coding-rules files of "java" and "rust"
+    And it reports "[CODING-RULES-MISSING]" violations for the missing strict coding-rules files of "java" and "rust"
 ```
 
 ---

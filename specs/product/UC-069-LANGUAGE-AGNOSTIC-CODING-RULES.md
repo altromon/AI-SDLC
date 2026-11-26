@@ -25,7 +25,7 @@ To garantizar que ningún proyecto (monorepo, estructura `src/`, `services/`, `c
 ### Incremento (chg-069-language-agnostic-coding-rules)
 1. **Detección recursiva de stacks (`detectProjectStacks`)**: Extender `detectProjectStacks(targetDir)` en `packages/core/src/init/coding-rules-templates.ts` para inspeccionar recursivamente subdirectorios del proyecto (excluyendo directorios de artefactos/dependencias como `node_modules`, `.git`, `bin`, `obj`, `dist`, `build`, `target`, `reports`, `templates`), detectando manifiestos anidados como `src/App/App.csproj`, `services/api/go.mod`, `crates/core/Cargo.toml`, `backend/pom.xml`, `frontend/tsconfig.json`, entre otros.
 2. **Despliegue de reglas estrictas en `init` / `migrate`**: Garantizar que `aisdlc init` y `aisdlc migrate` desplieguen los archivos definidos en `STACK_FILE_MAP` para todos los stacks detectados en el árbol del proyecto, incluso si residen en subdirectorios anidados.
-3. **Verificación obligatoria de presencia y anti-bypass (`collectCodingRulesBypassViolations`)**: Modificar `collectCodingRulesBypassViolations(rootDir)` en `packages/core/src/verifiers/coding-rules-bypass.ts` para que, cuando `detectProjectStacks(rootDir)` detecte uno o más stacks soportados sin sus archivos estrictos desplegados en `rootDir`, reporte violaciones `[CODING-RULES-BYPASS]` en lugar de retornar `[]` silenciosamente.
+3. **Verificación obligatoria de presencia y anti-bypass (`collectCodingRulesBypassViolations`)**: Modificar `collectCodingRulesBypassViolations(rootDir)` en `packages/core/src/verifiers/coding-rules-bypass.ts` para que, cuando `detectProjectStacks(rootDir)` detecte uno o más stacks soportados sin sus archivos estrictos desplegados en `rootDir`, reporte violaciones `[CODING-RULES-MISSING]` en lugar de retornar `[]` silenciosamente.
 4. **Uniformidad agnóstica al lenguaje**: Aplicar tanto la detección como la verificación de despliegue de forma uniforme mediante `STACK_FILE_MAP` / `getCodingRulesFilesForStacks` / `detectProjectStacks` sobre los 10 `CodingRuleStack` soportados (`dotnet`, `typescript`, `javascript`, `angular`, `java`, `kotlin`, `rust`, `go`, `c`, `cpp`).
 
 ## 2. Precondiciones
@@ -42,7 +42,7 @@ To garantizar que ningún proyecto (monorepo, estructura `src/`, `services/`, `c
 - **Flujo Alternativo A (Proyecto políglota multi-stack en monorepo)**:
   - Un repositorio combina múltiples stacks en subdirectorios distintos (p. ej. `frontend/tsconfig.json` y `services/api/go.mod`); `detectProjectStacks` retorna todos los stacks detectados y se despliegan y verifican las reglas estrictas de cada uno.
 - **Flujo de Excepción B (Proyecto con stack detectado pero sin archivos estrictos desplegados)**:
-  - Si el proyecto fue inicializado en Fase 0 antes de existir código o si se eliminaron los archivos de reglas estrictas, `collectCodingRulesBypassViolations(rootDir)` detecta el stack en el árbol del proyecto, comprueba la ausencia de los archivos esperados según `STACK_FILE_MAP` y reporta una violación `[CODING-RULES-BYPASS]` por cada archivo faltante, haciendo fallar la verificación.
+  - Si el proyecto fue inicializado en Fase 0 antes de existir código o si se eliminaron los archivos de reglas estrictas, `collectCodingRulesBypassViolations(rootDir)` detecta el stack en el árbol del proyecto, comprueba la ausencia de los archivos esperados según `STACK_FILE_MAP` y reporta una violación `[CODING-RULES-MISSING]` por cada archivo faltante, haciendo fallar la verificación.
 - **Flujo de Excepción C (Repositorio vacío sin manifiestos de stack)**:
   - Si `detectProjectStacks(rootDir)` no detecta ningún stack soportado en el árbol del proyecto, `collectCodingRulesBypassViolations(rootDir)` retorna `[]` sin falsos positivos.
 
@@ -72,7 +72,7 @@ Feature: Language-Agnostic Recursive Coding Rules Detection and Verification
     Given a repository with a nested "<manifest_path>" manifest for stack "<stack>"
     When "detectProjectStacks" inspects the repository and "collectCodingRulesBypassViolations" checks strict rule presence
     Then "<stack>" is included in the detected stacks
-    And missing "<expected_rule_file>" causes a "[CODING-RULES-BYPASS]" violation
+    And missing "<expected_rule_file>" causes a "[CODING-RULES-MISSING]" violation
 
     Examples:
       | stack      | manifest_path                 | expected_rule_file                          |
@@ -84,14 +84,14 @@ Feature: Language-Agnostic Recursive Coding Rules Detection and Verification
       | kotlin     | mobile/build.gradle.kts       | config/detekt/detekt.yml                    |
       | rust       | crates/core/Cargo.toml        | .cargo/config.toml                          |
       | go         | services/api/go.mod           | .golangci.yml                               |
-      | c          | native/CMakeLists.txt         | .clang-tidy                                 |
+      | c          | native/main.c                 | .clang-tidy                                 |
       | cpp        | engine/CMakeLists.txt         | cmake/AisdlcStrictCompiler.cmake            |
 
   @invalid
   Scenario: Verification fails when a supported stack is detected without its strict coding-rules files
     Given a repository initialized in Phase 0 that now contains "crates/core/Cargo.toml" without ".cargo/config.toml" or ".clippy.toml"
     When "collectCodingRulesBypassViolations" runs on the repository root
-    Then it returns "[CODING-RULES-BYPASS]" violations instead of an empty list
+    Then it returns "[CODING-RULES-MISSING]" violations instead of an empty list
 ```
 
 ## Historial de Revisiones

@@ -15,10 +15,10 @@ contracts:
   - "collectCodingRulesBypassViolations(rootDir: string): string[]"
 citations:
   - id: UC-069-LANGUAGE-AGNOSTIC-CODING-RULES
-    digest: sha256:d192abfbb205fbaa3b87fcd9ca1bf237b07ffabab2f96ababe7ee1a7230f19c4
+    digest: sha256:df1c6dcc016a36bedc7bf1607b205b5ade86dfbe04602fbefc9e51164c654007
     comment: Citación de use-case (Detección recursiva y cumplimiento agnóstico al lenguaje de reglas estrictas de codificación)
   - id: FR-069-LANGUAGE-AGNOSTIC-CODING-RULES-001
-    digest: sha256:926644c991c08f15cdd1dd56675b551551b34ab1f44f44e8c1553e9c3622e670
+    digest: sha256:f6ee806ee8b46f4e627e93b00487b487ee51af67ce41f29176a73178b011ba77
     comment: Requerimiento derivado de UC-069-LANGUAGE-AGNOSTIC-CODING-RULES
 ---
 
@@ -59,13 +59,13 @@ sequenceDiagram
 - **`detectProjectStacks(targetDir: string, maxDepth = 3): CodingRuleStack[]`**:
   - Recorre `targetDir` de forma recursiva y acotada hasta `maxDepth` (nivel `0` = `targetDir`, hasta `depth <= maxDepth`), usando `fs.readdirSync(dir, { withFileTypes: true })`.
   - Omite explícitamente entradas donde `entry.isSymbolicLink()` sea `true` y directorios cuyo nombre pertenezca a `IGNORED_STACK_SCAN_DIRS`.
-  - Recolecta los nombres de archivo encontrados y aplica las reglas de detección sobre `dotnet`, `angular`, `typescript`, `javascript`, `java`, `kotlin`, `rust`, `go`, `c` y `cpp` (asegurando que `CMakeLists.txt` / `Makefile` o archivos `.c` cubran tanto `c` como `cpp`).
+  - Evalúa las reglas de detección **por cada directorio visitado** (evitando que `angular.json` en `client/` oculte `tsconfig.json` en `services/api/` o `package.json` en `scripts/` en monorepos). Para `c` y `cpp`: archivos `.c` (sin `.cpp`/`.cc`/`.cxx`) detectan `c`; archivos `.cpp`/`.cc`/`.cxx`/`.hpp` o `CMakeLists.txt` (cuando no hay `.c` exclusivo) detectan `cpp`; un `Makefile` aislado sin fuentes C/C++ no dispara `c` ni `cpp`.
 - **`getRequiredCodingRulesFiles(stack: CodingRuleStack): string[]`**:
   - Expone de forma limpia las rutas relativas (`relPath`) definidas en `STACK_FILE_MAP[stack] ?? []`.
   - Reexportar `getRequiredCodingRulesFiles` desde `packages/core/src/init/index.ts` y `packages/core/src/index.ts`.
 - **Integración con `aisdlc migrate` (`packages/core/src/migrate/service.ts`)**:
   - `MigrationService.discoverGovernedFiles(root)` invoca `detectProjectStacks(root)` y `getCodingRulesFilesForStacks(stacks)`.
-  - Para cada archivo de reglas estrictas requerido que **no exista** en `root`, lo incorpora como `GovernedItem` con `currentContent: ''`, `baseContent: ''`, `targetContent: f.content` (clasificado como `CLEAN_UPDATE`), desplegándolo sin sobrescribir archivos de reglas ya existentes o personalizados por humanos.
+  - Para cada archivo de reglas estrictas requerido que **no exista** en `root`, lo incorpora como `GovernedItem` (`category: 'policy'`) con `currentContent: ''`, `baseContent: ''`, `targetContent: f.content` (clasificado como `CLEAN_UPDATE`), desplegándolo sin sobrescribir archivos de reglas ya existentes o personalizados por humanos.
 
 ### 2.2 `packages/core/src/verifiers/coding-rules-bypass.ts` (`TSK-069-02`)
 - **`collectCodingRulesBypassViolations(rootDir: string): string[]`**:

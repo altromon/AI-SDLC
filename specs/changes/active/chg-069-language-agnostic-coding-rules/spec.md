@@ -44,7 +44,7 @@ Feature: Language-Agnostic Coding Rules Detection and Verification
       | kotlin     | mobile/build.gradle.kts       | config/detekt/detekt.yml                    |
       | rust       | crates/core/Cargo.toml        | .cargo/config.toml                          |
       | go         | services/api/go.mod           | .golangci.yml                               |
-      | c          | native/CMakeLists.txt         | .clang-tidy                                 |
+      | c          | native/main.c                 | .clang-tidy                                 |
       | cpp        | engine/CMakeLists.txt         | cmake/AisdlcStrictCompiler.cmake            |
 
   @invalid
