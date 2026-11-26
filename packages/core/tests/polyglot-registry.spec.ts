@@ -11,13 +11,23 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import * as core from '../src/index.js';
 import {
   checkFeatureStepLanguageParity,
+  featureSnakeStem,
   getPresentStepLanguages,
+  getSupportedScaffoldLanguages,
   resolveFeatureTargetLanguages,
   scaffoldGherkinSteps,
   verifyLicenses,
   type GherkinScaffoldLanguage,
+  type PolyglotLanguageSpec,
   type SyncCheckState,
 } from '../src/index.js';
+import {
+  escapeKotlinString,
+  renderCFallback,
+  renderCppFallback,
+  renderJavaFallback,
+  renderKtFallback,
+} from '../src/verifiers/gherkin-scaffold.js';
 
 const ALL_9_LANGUAGES: readonly GherkinScaffoldLanguage[] = [
   'ts',
@@ -151,7 +161,7 @@ describe('@FR-072-POLYGLOT-REGISTRY-BDD-JVM-CPP-001 @CHG-072-POLYGLOT-REGISTRY-B
       expect(javaRes.success).toBe(true);
       expect(javaRes.license).toBe('MIT');
       expect(javaRes.outputFile).toMatch(/Steps\.java$/);
-      expect(fs.readFileSync(javaRes.outputFile!, 'utf-8')).toContain('public class');
+      expect(fs.readFileSync(path.join(tmpDir, javaRes.outputFile!), 'utf-8')).toContain('public class');
 
       const ktRes = scaffoldGherkinSteps({
         rootDir: tmpDir,
@@ -163,7 +173,7 @@ describe('@FR-072-POLYGLOT-REGISTRY-BDD-JVM-CPP-001 @CHG-072-POLYGLOT-REGISTRY-B
       expect(ktRes.lang).toBe('kt');
       expect(ktRes.license).toBe('MIT');
       expect(ktRes.outputFile).toMatch(/Steps\.kt$/);
-      const ktContent = fs.readFileSync(ktRes.outputFile!, 'utf-8');
+      const ktContent = fs.readFileSync(path.join(tmpDir, ktRes.outputFile!), 'utf-8');
       expect(ktContent).toContain('\\${System.exit(1)}');
       expect(ktContent).toContain('\\$USER');
 
@@ -175,7 +185,7 @@ describe('@FR-072-POLYGLOT-REGISTRY-BDD-JVM-CPP-001 @CHG-072-POLYGLOT-REGISTRY-B
       });
       expect(cRes.success).toBe(true);
       expect(cRes.outputFile).toMatch(/_steps\.c$/);
-      const cContent = fs.readFileSync(cRes.outputFile!, 'utf-8');
+      const cContent = fs.readFileSync(path.join(tmpDir, cRes.outputFile!), 'utf-8');
       expect(cContent).toMatch(/void step_[a-z0-9_]+_\d+\(void\)/);
       expect(cContent).toContain('RED: Step not implemented');
 
@@ -188,7 +198,7 @@ describe('@FR-072-POLYGLOT-REGISTRY-BDD-JVM-CPP-001 @CHG-072-POLYGLOT-REGISTRY-B
       expect(cppRes.success).toBe(true);
       expect(cppRes.license).toBe('BSL-1.0');
       expect(cppRes.outputFile).toMatch(/_steps\.cpp$/);
-      const cppContent = fs.readFileSync(cppRes.outputFile!, 'utf-8');
+      const cppContent = fs.readFileSync(path.join(tmpDir, cppRes.outputFile!), 'utf-8');
       expect(cppContent).toContain('SCENARIO(');
       expect(cppContent).toContain('FAIL("RED: Step not implemented:');
     });
@@ -270,7 +280,7 @@ describe('@FR-072-POLYGLOT-REGISTRY-BDD-JVM-CPP-001 @CHG-072-POLYGLOT-REGISTRY-B
         JSON.stringify({
           evaluated_dependencies: [
             { package: 'catch2', version: '3.7.1', spdx_license: 'BSL-1.0', status: 'APPROVED' },
-            { package: 'bsl11-pkg', version: '1.0.0', spdx_license: 'BSL-1.1', status: 'DENIED' },
+            { package: 'bsl11-pkg', version: '1.0.0', spdx_license: 'BSL-1.1', status: 'APPROVED' },
           ],
         }),
         'utf-8'
@@ -280,6 +290,29 @@ describe('@FR-072-POLYGLOT-REGISTRY-BDD-JVM-CPP-001 @CHG-072-POLYGLOT-REGISTRY-B
       const violatedPackages = result.violations.map((v) => v.packageName);
       expect(violatedPackages).not.toContain('catch2');
       expect(violatedPackages).toContain('bsl11-pkg');
+    });
+  });
+
+  describe('Polyglot helpers and JVM/C/C++ fallback renderers', () => {
+    it('covers PolyglotLanguageSpec, featureSnakeStem, getSupportedScaffoldLanguages, escapeKotlinString, and fallback renderers', () => {
+      const langs = getSupportedScaffoldLanguages();
+      expect(langs).toEqual(expect.arrayContaining(ALL_9_LANGUAGES));
+
+      const registry = (core as Record<string, unknown>).POLYGLOT_LANGUAGE_REGISTRY as Record<
+        GherkinScaffoldLanguage,
+        PolyglotLanguageSpec
+      >;
+      const cppSpec: PolyglotLanguageSpec = registry.cpp;
+      expect(cppSpec.primaryManifests).toContain('CMakeLists.txt');
+
+      expect(featureSnakeStem('tests/features/01-My-Feature.feature')).toBe('01_my_feature');
+      expect(escapeKotlinString('a "b" $c')).toBe('a \\"b\\" \\$c');
+
+      const steps = [{ keyword: 'Given', text: 'a $val step' }];
+      expect(renderJavaFallback('tests/a.feature', steps)).toContain('public class ASteps');
+      expect(renderKtFallback('tests/a.feature', steps)).toContain('\\$val');
+      expect(renderCFallback('tests/a.feature', steps)).toContain('void step_a_0(void)');
+      expect(renderCppFallback('tests/a.feature', steps)).toContain('SCENARIO(');
     });
   });
 });

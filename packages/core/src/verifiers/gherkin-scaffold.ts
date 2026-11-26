@@ -15,91 +15,23 @@ import {
 } from '../types/index.js';
 import { ParsedFeatureDocument, ParsedStepItem, parseFeatureDocument } from './bdd-runner.js';
 import { escapeRegExp } from './gherkin-language-resolver.js';
+import {
+  POLYGLOT_LANGUAGE_REGISTRY,
+  featurePascalStem,
+  featureSnakeStem,
+  featureStem,
+  getSupportedScaffoldLanguages,
+  normalizeScaffoldLanguage,
+} from './polyglot-registry.js';
 
-const SUPPORTED_LANGUAGES: ReadonlySet<string> = new Set(['ts', 'py', 'go', 'rs', 'cs']);
+export { featurePascalStem, featureSnakeStem, featureStem };
 
-export function featureStem(featurePath: string): string {
-  const normalized = featurePath.replace(/\\/g, '/');
-  return path.posix
-    .basename(normalized, path.posix.extname(normalized))
-    .replace(/[^a-zA-Z0-9_-]/g, '_');
-}
+const SUPPORTED_LANGUAGES: ReadonlySet<string> = new Set(getSupportedScaffoldLanguages());
 
-export function featurePascalStem(featurePath: string): string {
-  const parts = featureStem(featurePath)
-    .split(/[-_]+/)
-    .filter(Boolean);
-  const pascal = parts
-    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-    .join('');
-  if (!pascal) return 'Generated';
-  return /^[0-9]/.test(pascal) ? `_${pascal}` : pascal;
-}
-
-export const GHERKIN_GENERATOR_SPECS: Record<GherkinScaffoldLanguage, GherkinGeneratorSpec> = {
-  ts: {
-    lang: 'ts',
-    generatorBin: 'npx',
-    versionArgs: ['--no-install', 'cucumber-js', '--version'],
-    scaffoldArgs: (fp) => ['--no-install', 'cucumber-js', fp, '--dry-run', '--format', 'snippets'],
-    installCommand: 'pnpm add -D @cucumber/cucumber',
-    installCmd: 'pnpm',
-    installArgs: ['add', '-D', '@cucumber/cucumber'],
-    license: 'MIT',
-    resolveOutputPath: (rootDir, fp) =>
-      path.join(rootDir, 'tests', 'steps', `${featureStem(fp)}.steps.ts`),
-  },
-  py: {
-    lang: 'py',
-    generatorBin: 'pytest-bdd',
-    versionArgs: ['--version'],
-    scaffoldArgs: (fp) => ['generate', fp],
-    installCommand: 'pip install pytest-bdd',
-    installCmd: 'pip',
-    installArgs: ['install', 'pytest-bdd'],
-    license: 'MIT',
-    resolveOutputPath: (rootDir, fp) =>
-      path.join(rootDir, 'tests', 'steps', `test_${featureStem(fp).replace(/-/g, '_')}_steps.py`),
-  },
-  go: {
-    lang: 'go',
-    generatorBin: 'godog',
-    versionArgs: ['version'],
-    scaffoldArgs: (fp) => [fp],
-    installCommand: 'go install github.com/cucumber/godog/cmd/godog@latest',
-    installCmd: 'go',
-    installArgs: ['install', 'github.com/cucumber/godog/cmd/godog@latest'],
-    license: 'MIT',
-    resolveOutputPath: (rootDir, fp) =>
-      path.join(rootDir, 'tests', 'steps', `${featureStem(fp).replace(/-/g, '_')}_steps_test.go`),
-  },
-  rs: {
-    lang: 'rs',
-    generatorBin: 'cargo',
-    versionArgs: ['--version'],
-    scaffoldArgs: () => ['test', '--test', 'cucumber'],
-    installCommand: 'cargo add --dev cucumber',
-    installCmd: 'cargo',
-    installArgs: ['add', '--dev', 'cucumber'],
-    license: 'MIT OR Apache-2.0',
-    emitsSourceStdout: false,
-    resolveOutputPath: (rootDir, fp) =>
-      path.join(rootDir, 'tests', 'steps', `${featureStem(fp).replace(/-/g, '_')}_steps.rs`),
-  },
-  cs: {
-    lang: 'cs',
-    generatorBin: 'dotnet',
-    versionArgs: ['--version'],
-    scaffoldArgs: () => ['build'],
-    installCommand: 'dotnet add package Reqnroll',
-    installCmd: 'dotnet',
-    installArgs: ['add', 'package', 'Reqnroll'],
-    license: 'BSD-3-Clause',
-    emitsSourceStdout: false,
-    resolveOutputPath: (rootDir, fp) =>
-      path.join(rootDir, 'tests', 'steps', `${featureStem(fp)}Steps.cs`),
-  },
-};
+export const GHERKIN_GENERATOR_SPECS: Record<GherkinScaffoldLanguage, GherkinGeneratorSpec> =
+  Object.fromEntries(
+    getSupportedScaffoldLanguages().map((lang) => [lang, POLYGLOT_LANGUAGE_REGISTRY[lang].generatorSpec])
+  ) as Record<GherkinScaffoldLanguage, GherkinGeneratorSpec>;
 
 export function defaultExec(cmd: string, args: string[]): GherkinScaffoldExecResult {
   const res = spawnSync(cmd, args, { encoding: 'utf-8', timeout: 15000, shell: false });
@@ -123,9 +55,9 @@ export function normalizeScaffoldLanguages(raw: string | string[]): {
   if (items.length === 0) return { valid: false, langs: [] };
   const deduped: GherkinScaffoldLanguage[] = [];
   for (const item of items) {
-    if (!SUPPORTED_LANGUAGES.has(item)) return { valid: false, langs: [] };
-    const typed = item as GherkinScaffoldLanguage;
-    if (!deduped.includes(typed)) deduped.push(typed);
+    const normalized = normalizeScaffoldLanguage(item);
+    if (!normalized || !SUPPORTED_LANGUAGES.has(normalized)) return { valid: false, langs: [] };
+    if (!deduped.includes(normalized)) deduped.push(normalized);
   }
   return { valid: true, langs: deduped };
 }
@@ -265,6 +197,95 @@ export function renderCsFallback(relFeature: string, steps: ParsedStepItem[]): s
   return lines.join('\n');
 }
 
+export function escapeKotlinString(text: string): string {
+  return escapeDoubleQuotes(text).replace(/\$/g, '\\$');
+}
+
+export function renderJavaFallback(relFeature: string, steps: ParsedStepItem[]): string {
+  const className = `${featurePascalStem(relFeature)}Steps`;
+  const lines = [
+    `// AUTO-GENERATED RED BDD STEP DEFINITIONS (${relFeature})`,
+    `import io.cucumber.java.en.Given;`,
+    `import io.cucumber.java.en.When;`,
+    `import io.cucumber.java.en.Then;`,
+    ``,
+    `public class ${className} {`,
+  ];
+  steps.forEach((st, idx) => {
+    const kw = mapStepKeyword(st.keyword);
+    const attr = kw === 'when' ? 'When' : kw === 'then' ? 'Then' : 'Given';
+    const escaped = escapeDoubleQuotes(st.text);
+    lines.push(`    @${attr}("${escaped}")`);
+    lines.push(`    public void step${idx + 1}() {`);
+    lines.push(`        throw new io.cucumber.java.PendingException("RED: Step not implemented: ${escaped}");`);
+    lines.push(`    }`);
+  });
+  lines.push(`}`, ``);
+  return lines.join('\n');
+}
+
+export function renderKtFallback(relFeature: string, steps: ParsedStepItem[]): string {
+  const className = `${featurePascalStem(relFeature)}Steps`;
+  const lines = [
+    `// AUTO-GENERATED RED BDD STEP DEFINITIONS (${relFeature})`,
+    `import io.cucumber.java.en.Given`,
+    `import io.cucumber.java.en.When`,
+    `import io.cucumber.java.en.Then`,
+    ``,
+    `class ${className} {`,
+  ];
+  steps.forEach((st, idx) => {
+    const kw = mapStepKeyword(st.keyword);
+    const attr = kw === 'when' ? 'When' : kw === 'then' ? 'Then' : 'Given';
+    const escaped = escapeKotlinString(st.text);
+    lines.push(`    @${attr}("${escaped}")`);
+    lines.push(`    fun step${idx + 1}() {`);
+    lines.push(`        TODO("RED: Step not implemented: ${escaped}")`);
+    lines.push(`    }`);
+  });
+  lines.push(`}`, ``);
+  return lines.join('\n');
+}
+
+export function renderCFallback(relFeature: string, steps: ParsedStepItem[]): string {
+  const stem = featureSnakeStem(relFeature);
+  const lines = [
+    `// AUTO-GENERATED RED BDD STEP DEFINITIONS (${relFeature})`,
+    `#include <stdio.h>`,
+    `#include <stdlib.h>`,
+    ``,
+  ];
+  steps.forEach((st, idx) => {
+    const escaped = escapeDoubleQuotes(st.text);
+    lines.push(`/* ${st.keyword} ${st.text} */`);
+    lines.push(`void step_${stem}_${idx}(void) {`);
+    lines.push(`    fprintf(stderr, "RED: Step not implemented: %s\\n", "${escaped}");`);
+    lines.push(`    abort();`);
+    lines.push(`}`, ``);
+  });
+  return lines.join('\n');
+}
+
+export function renderCppFallback(relFeature: string, steps: ParsedStepItem[]): string {
+  const lines = [
+    `// AUTO-GENERATED RED BDD STEP DEFINITIONS (${relFeature})`,
+    `#include <catch2/catch_test_macros.hpp>`,
+    ``,
+    `SCENARIO("${escapeDoubleQuotes(relFeature)}", "[bdd]") {`,
+  ];
+  if (steps.length === 0) {
+    lines.push(`    FAIL("RED: Step not implemented: ${escapeDoubleQuotes(relFeature)}");`);
+  } else {
+    for (const st of steps) {
+      const escaped = escapeDoubleQuotes(st.text);
+      lines.push(`    // ${st.keyword} ${st.text}`);
+      lines.push(`    FAIL("RED: Step not implemented: ${escaped}");`);
+    }
+  }
+  lines.push(`}`, ``);
+  return lines.join('\n');
+}
+
 export function buildFallbackTemplate(
   lang: GherkinScaffoldLanguage,
   relFeature: string,
@@ -276,6 +297,10 @@ export function buildFallbackTemplate(
     go: () => renderGoFallback(relFeature, steps),
     rs: () => renderRsFallback(relFeature, steps),
     cs: () => renderCsFallback(relFeature, steps),
+    java: () => renderJavaFallback(relFeature, steps),
+    kt: () => renderKtFallback(relFeature, steps),
+    c: () => renderCFallback(relFeature, steps),
+    cpp: () => renderCppFallback(relFeature, steps),
   };
   return renderers[lang]();
 }

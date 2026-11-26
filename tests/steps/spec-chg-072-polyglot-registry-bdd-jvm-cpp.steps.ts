@@ -110,7 +110,7 @@ export function registerSteps(registry: BddStepRegistry): void {
       fs.mkdirSync(path.dirname(fp), { recursive: true });
       fs.writeFileSync(fp, 'Feature: San\n  Scenario: S\n    Given a step\n', 'utf-8');
       const cRes = scaffoldGherkinSteps({ rootDir: root, featurePath: fp, lang: 'c' as GherkinScaffoldLanguage, allowFallback: true });
-      expect(fs.readFileSync(cRes.outputFile!, 'utf-8')).toMatch(/void step_[a-zA-Z_][a-zA-Z0-9_]*_0\(void\)/);
+      expect(fs.readFileSync(path.join(root, cRes.outputFile!), 'utf-8')).toMatch(/void step_[a-zA-Z_][a-zA-Z0-9_]*_0\(void\)/);
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
@@ -123,7 +123,7 @@ export function registerSteps(registry: BddStepRegistry): void {
       fs.mkdirSync(path.dirname(fp), { recursive: true });
       fs.writeFileSync(fp, 'Feature: KtEsc\n  Scenario: S\n    Given payload ${System.exit(1)}\n', 'utf-8');
       const ktRes = scaffoldGherkinSteps({ rootDir: root, featurePath: fp, lang: 'kt' as GherkinScaffoldLanguage, allowFallback: true });
-      expect(fs.readFileSync(ktRes.outputFile!, 'utf-8')).toContain('\\${System.exit(1)}');
+      expect(fs.readFileSync(path.join(root, ktRes.outputFile!), 'utf-8')).toContain('\\${System.exit(1)}');
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }

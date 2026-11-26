@@ -6,6 +6,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { POLYGLOT_EXCLUDED_DIR_SET } from '../verifiers/polyglot-registry.js';
 
 export const VALID_CODING_RULE_STACKS = [
   'dotnet',
@@ -647,20 +648,7 @@ export function getReferenceCodingRulesTemplates(): { relPath: string; content: 
   ];
 }
 
-export const IGNORED_STACK_SCAN_DIRS = new Set([
-  'node_modules',
-  '.git',
-  'bin',
-  'obj',
-  'dist',
-  'build',
-  'target',
-  '.venv',
-  'venv',
-  '__pycache__',
-  'reports',
-  'templates',
-]);
+export const IGNORED_STACK_SCAN_DIRS = POLYGLOT_EXCLUDED_DIR_SET;
 
 function hasFileMatching(entries: string[], suffixOrName: string): boolean {
   return entries.some((e) => e === suffixOrName || e.endsWith(suffixOrName));

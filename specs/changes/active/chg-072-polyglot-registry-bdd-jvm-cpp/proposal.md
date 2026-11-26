@@ -12,7 +12,7 @@ citations:
     digest: sha256:5c6f94849015be752f70b204dfed7e1fad7e634769e1f485b90973ab5b05c56b
     comment: Requerimiento derivado de UC-072-POLYGLOT-REGISTRY-BDD-JVM-CPP
   - id: CMP-072-POLYGLOT-REGISTRY-BDD-JVM-CPP
-    digest: sha256:fc63bbd771c0d4a2c5bd770b24a45e73a7d4b6642d4dd7ec59e274122100b954
+    digest: sha256:567916992ce77aea52dcc8f0f9d5a439a8242ccfd1efe387bc7eccd73d8753a2
     comment: Componente arquitectónico que materializa el registro políglota unificado y el soporte BDD para Java, Kotlin, C y C++
 ---
 

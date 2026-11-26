@@ -523,7 +523,7 @@ describe('@FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001 @CHG-051-GHERKIN-POLYGLOT-SCAFFO
   });
 
   describe('Invalid & Security Scenarios (@invalid & @security)', () => {
-    it('rejects unsupported languages ("ruby", "ts,java") with ERR_UNSUPPORTED_LANGUAGE', () => {
+    it('rejects unsupported languages ("ruby", "ts,fortran") with ERR_UNSUPPORTED_LANGUAGE', () => {
       const scaffoldGherkinSteps = getScaffoldGherkinSteps();
 
       const resSingle = scaffoldGherkinSteps({
@@ -538,7 +538,7 @@ describe('@FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001 @CHG-051-GHERKIN-POLYGLOT-SCAFFO
       const resMulti = scaffoldGherkinSteps({
         rootDir: tmpDir,
         featurePath: sampleFeaturePath,
-        lang: 'ts,java',
+        lang: 'ts,fortran',
       });
       expect(resMulti.success).toBe(false);
       expect(resMulti.status).toBe('ERROR');

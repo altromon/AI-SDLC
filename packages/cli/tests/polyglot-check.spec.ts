@@ -8,7 +8,16 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { detectDefaultScaffoldLanguage, normalizeScaffoldLanguage } from '../src/commands/check.js';
+import {
+  detectAuxiliaryLanguageInDir,
+  detectDefaultScaffoldLanguage,
+  detectPrimaryLanguageInDir,
+  disambiguateCMake,
+  disambiguateGradleKts,
+  hasSubtreeExtension,
+  matchesSubtreeEntry,
+  normalizeScaffoldLanguage,
+} from '../src/commands/check.js';
 
 describe('@FR-072-POLYGLOT-REGISTRY-BDD-JVM-CPP-001 @CHG-072-POLYGLOT-REGISTRY-BDD-JVM-CPP: CLI Polyglot Stack Detection', () => {
   let tmpDir: string;
@@ -95,5 +104,23 @@ describe('@FR-072-POLYGLOT-REGISTRY-BDD-JVM-CPP-001 @CHG-072-POLYGLOT-REGISTRY-B
     fs.writeFileSync(path.join(excludedDir, 'coverage', 'go.mod'), 'module x', 'utf-8');
 
     expect(detectDefaultScaffoldLanguage(excludedDir)).toBeNull();
+  });
+
+  it('exposes modular helper functions for subtree extension matching, manifest disambiguation, and primary/auxiliary detection', () => {
+    const helperDir = path.join(tmpDir, 'helper-dir');
+    fs.mkdirSync(path.join(helperDir, 'src'), { recursive: true });
+    fs.writeFileSync(path.join(helperDir, 'requirements.txt'), 'pytest\n', 'utf-8');
+    fs.writeFileSync(path.join(helperDir, 'src', 'app.cpp'), 'int main() { return 0; }\n', 'utf-8');
+
+    expect(detectPrimaryLanguageInDir(helperDir)).toBeNull();
+    expect(detectAuxiliaryLanguageInDir(helperDir)).toBe('py');
+    expect(hasSubtreeExtension(helperDir, ['.cpp'])).toBe(true);
+    expect(hasSubtreeExtension(helperDir, ['.rs'])).toBe(false);
+
+    const entries = fs.readdirSync(path.join(helperDir, 'src'), { withFileTypes: true });
+    expect(entries.some((e) => matchesSubtreeEntry(path.join(helperDir, 'src'), e, ['.cpp'], [], 0))).toBe(true);
+
+    expect(disambiguateCMake(helperDir)).toBe('cpp');
+    expect(disambiguateGradleKts(helperDir)).toBe('kt');
   });
 });

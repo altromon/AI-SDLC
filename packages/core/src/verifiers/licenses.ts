@@ -84,6 +84,7 @@ const DEFAULT_PERMITTED = [
   'CC-BY-3.0',
   'CC-BY-4.0',
   'MS-PL',
+  'BSL-1.0',
 ];
 
 const DEFAULT_RESTRICTED = [
