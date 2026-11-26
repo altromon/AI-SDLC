@@ -10,8 +10,8 @@ architecture-component: "CMP-068-LANGUAGE-AGNOSTIC-TEST-STACK"
 enclave: "SEC-ENC-DMZ"
 status: draft
 contracts:
-  - "detectDefaultScaffoldLanguage(rootDir: string): GherkinScaffoldLanguage | null"
-  - "MODALITY_DRIVER_SIGNATURES.web: RegExp"
+  - "detectDefaultScaffoldLanguage"
+  - "hasModalityDriverSignature"
 citations:
   - id: UC-068-LANGUAGE-AGNOSTIC-TEST-STACK
     digest: sha256:4dc7ca58a5ca06c4d0eb8b6dd786a6671d3f0beb95baf5f5f20c31566e3ac098

@@ -26,17 +26,25 @@ import {
   auditTraceabilityGate,
   autoScaffoldMissingSteps,
   buildGherkinFailedGate,
+  collectManifestDirs,
   collectPreflightGates,
   detectDefaultScaffoldLanguage,
+  detectLanguageInDir,
   emitCheckJson,
+  enqueueChildDirs,
   executePreflightCheck,
   formatLicenseFailure,
   formatNonMetricQualityFailure,
   formatQualityGateFailure,
   formatSecurityErrors,
+  hasAnyFile,
   hasDotnetProjectFiles,
+  normalizeScaffoldLanguage,
   printDashboardFooter,
   printDashboardHeader,
+  readConfiguredScaffoldLanguage,
+  readJsonConfigLanguage,
+  readYamlPolicyLanguage,
   renderDashboard,
   renderGateBadge,
   renderRemediations,
@@ -544,5 +552,38 @@ describe('CLI check.ts helper and gate auditor unit suite (100% function coverag
     fs.mkdirSync(invalidCfgDir, { recursive: true });
     fs.writeFileSync(path.join(invalidCfgDir, '.aisdlc.json'), JSON.stringify({ testing: { language: 'java' } }), 'utf-8');
     expect(detectDefaultScaffoldLanguage(invalidCfgDir)).toBeNull();
+  });
+
+  it('normalizeScaffoldLanguage, readJsonConfigLanguage, readYamlPolicyLanguage, readConfiguredScaffoldLanguage, collectManifestDirs, enqueueChildDirs, hasAnyFile, and detectLanguageInDir handle edge cases (FR-068)', () => {
+    expect(normalizeScaffoldLanguage(' TS ')).toBe('ts');
+    expect(normalizeScaffoldLanguage('ruby')).toBeNull();
+    expect(normalizeScaffoldLanguage(123)).toBeNull();
+
+    const malformedDir = path.join(tmpDir, 'malformed-cfg');
+    fs.mkdirSync(malformedDir, { recursive: true });
+    fs.writeFileSync(path.join(malformedDir, '.aisdlc.json'), '{bad json', 'utf-8');
+    expect(readJsonConfigLanguage(malformedDir)).toBeNull();
+    expect(readYamlPolicyLanguage(malformedDir)).toBeNull();
+    expect(readConfiguredScaffoldLanguage(malformedDir)).toBeNull();
+
+    fs.writeFileSync(path.join(malformedDir, 'quality-policy.yaml'), 'other:\n  language: py\ntesting:\n  language: go\n', 'utf-8');
+    expect(readYamlPolicyLanguage(malformedDir)).toBe('go');
+    expect(readConfiguredScaffoldLanguage(malformedDir)).toBe('go');
+
+    const missingRoot = path.join(tmpDir, 'no-such-dir');
+    expect(collectManifestDirs(missingRoot, 3)).toEqual([]);
+
+    const scanDir = path.join(tmpDir, 'scan-dir');
+    fs.mkdirSync(path.join(scanDir, 'sub'), { recursive: true });
+    fs.mkdirSync(path.join(scanDir, 'node_modules'), { recursive: true });
+    const queue: Array<{ dir: string; depth: number }> = [];
+    enqueueChildDirs(scanDir, 1, queue);
+    expect(queue).toEqual([{ dir: path.join(scanDir, 'sub'), depth: 1 }]);
+
+    fs.writeFileSync(path.join(scanDir, 'tsconfig.json'), '{}', 'utf-8');
+    expect(hasAnyFile(scanDir, ['tsconfig.json'])).toBe(true);
+    expect(hasAnyFile(scanDir, ['Cargo.toml'])).toBe(false);
+    expect(detectLanguageInDir(scanDir)).toBe('ts');
+    expect(detectLanguageInDir(path.join(scanDir, 'sub'))).toBeNull();
   });
 });
