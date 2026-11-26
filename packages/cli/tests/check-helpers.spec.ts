@@ -1,6 +1,6 @@
 /**
- * Cites: FR-025-STRUCTURED-JSON-VERIFY-001, FR-027-ENV-OUTPUT-JSON-001, FR-038-SECURITY-SUPPRESSION-AUDIT-001, FR-039-SCA-VULNERABILITY-DETECTION-001, FR-046-NATIVE-SDK-CLI-AST-001, FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001, FR-063-UI-E2E-MODALITY-GATE-001
- * Tag: @FR-025-STRUCTURED-JSON-VERIFY-001 @FR-027-ENV-OUTPUT-JSON-001 @FR-038-SECURITY-SUPPRESSION-AUDIT-001 @FR-039-SCA-VULNERABILITY-DETECTION-001 @FR-046-NATIVE-SDK-CLI-AST-001 @FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001 @FR-063-UI-E2E-MODALITY-GATE-001
+ * Cites: FR-025-STRUCTURED-JSON-VERIFY-001, FR-027-ENV-OUTPUT-JSON-001, FR-038-SECURITY-SUPPRESSION-AUDIT-001, FR-039-SCA-VULNERABILITY-DETECTION-001, FR-046-NATIVE-SDK-CLI-AST-001, FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001, FR-063-UI-E2E-MODALITY-GATE-001, FR-068-LANGUAGE-AGNOSTIC-TEST-STACK-001
+ * Tag: @FR-025-STRUCTURED-JSON-VERIFY-001 @FR-027-ENV-OUTPUT-JSON-001 @FR-038-SECURITY-SUPPRESSION-AUDIT-001 @FR-039-SCA-VULNERABILITY-DETECTION-001 @FR-046-NATIVE-SDK-CLI-AST-001 @FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001 @FR-063-UI-E2E-MODALITY-GATE-001 @FR-068-LANGUAGE-AGNOSTIC-TEST-STACK-001
  */
 import { execFileSync } from 'child_process';
 import * as fs from 'fs';
@@ -56,10 +56,10 @@ describe('CLI check.ts helper and gate auditor unit suite (100% function coverag
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('hasDotnetProjectFiles & detectDefaultScaffoldLanguage detect py, go, rs, cs, and fallback ts', () => {
+  it('hasDotnetProjectFiles & detectDefaultScaffoldLanguage detect py, go, rs, cs, and return null when missing', () => {
     const missingDir = path.join(tmpDir, 'does-not-exist');
     expect(hasDotnetProjectFiles(missingDir)).toBe(false);
-    expect(detectDefaultScaffoldLanguage(missingDir)).toBe('ts');
+    expect(detectDefaultScaffoldLanguage(missingDir)).toBeNull();
 
     const csDir = path.join(tmpDir, 'cs-app');
     fs.mkdirSync(csDir, { recursive: true });
@@ -458,5 +458,91 @@ describe('CLI check.ts helper and gate auditor unit suite (100% function coverag
     expect(runJson.command).toBe('check');
     expect(runJson.success).toBe(true);
     expect(runJson.gates).toHaveLength(12);
+  });
+
+  it('detectDefaultScaffoldLanguage supports nested manifests (depth <= 3), skips artifact dirs, honors Phase 0 config, and avoids silent ts fallback (FR-068)', () => {
+    // 1. Empty directory returns null and autoScaffoldMissingSteps skips without emitting .ts files
+    const emptyDir = path.join(tmpDir, 'empty-proj');
+    fs.mkdirSync(path.join(emptyDir, 'tests', 'features'), { recursive: true });
+    fs.writeFileSync(
+      path.join(emptyDir, 'tests', 'features', 'sample.feature'),
+      'Feature: Sample\n  Scenario: S\n    Given a\n    Then b\n',
+      'utf-8'
+    );
+    expect(detectDefaultScaffoldLanguage(emptyDir)).toBeNull();
+    expect(autoScaffoldMissingSteps(emptyDir)).toBe(0);
+    expect(fs.existsSync(path.join(emptyDir, 'tests', 'steps', 'sample.steps.ts'))).toBe(false);
+
+    // 2. Nested manifests up to depth 3
+    const nestedCases: Array<{ manifestPath: string; expected: 'cs' | 'py' | 'go' | 'rs' | 'ts' }> = [
+      { manifestPath: 'src/App/App.csproj', expected: 'cs' },
+      { manifestPath: 'backend/pyproject.toml', expected: 'py' },
+      { manifestPath: 'services/api/go.mod', expected: 'go' },
+      { manifestPath: 'crates/core/Cargo.toml', expected: 'rs' },
+      { manifestPath: 'frontend/package.json', expected: 'ts' },
+    ];
+    for (const tc of nestedCases) {
+      const caseDir = path.join(tmpDir, `nested-${tc.expected}`);
+      const fullManifest = path.join(caseDir, tc.manifestPath);
+      fs.mkdirSync(path.dirname(fullManifest), { recursive: true });
+      fs.writeFileSync(fullManifest, '{}', 'utf-8');
+      expect(detectDefaultScaffoldLanguage(caseDir)).toBe(tc.expected);
+    }
+
+    // 3. Skips dependency/build/cache directories
+    const skippedDirs = [
+      'node_modules',
+      '.git',
+      'bin',
+      'obj',
+      'dist',
+      'build',
+      'target',
+      '.venv',
+      'venv',
+      '__pycache__',
+    ];
+    for (const skip of skippedDirs) {
+      const skipRoot = path.join(tmpDir, `skip-${skip.replace('.', 'dot-')}`);
+      const hiddenManifest = path.join(skipRoot, skip, 'pyproject.toml');
+      fs.mkdirSync(path.dirname(hiddenManifest), { recursive: true });
+      fs.writeFileSync(hiddenManifest, '[project]\nname="ignored"\n', 'utf-8');
+      expect(detectDefaultScaffoldLanguage(skipRoot)).toBeNull();
+    }
+
+    // 4. Depth > 3 boundary is not detected
+    const deepDir = path.join(tmpDir, 'too-deep');
+    const deepManifest = path.join(deepDir, 'a', 'b', 'c', 'd', 'pyproject.toml');
+    fs.mkdirSync(path.dirname(deepManifest), { recursive: true });
+    fs.writeFileSync(deepManifest, '[project]\nname="deep"\n', 'utf-8');
+    expect(detectDefaultScaffoldLanguage(deepDir)).toBeNull();
+
+    // 5. Phase 0 explicit config in .aisdlc.json (testing.language & stack.language)
+    const jsonTestingDir = path.join(tmpDir, 'cfg-json-testing');
+    fs.mkdirSync(jsonTestingDir, { recursive: true });
+    fs.writeFileSync(path.join(jsonTestingDir, '.aisdlc.json'), JSON.stringify({ testing: { language: 'cs' } }), 'utf-8');
+    expect(detectDefaultScaffoldLanguage(jsonTestingDir)).toBe('cs');
+
+    const jsonStackDir = path.join(tmpDir, 'cfg-json-stack');
+    fs.mkdirSync(jsonStackDir, { recursive: true });
+    fs.writeFileSync(path.join(jsonStackDir, '.aisdlc.json'), JSON.stringify({ stack: { language: 'go' } }), 'utf-8');
+    expect(detectDefaultScaffoldLanguage(jsonStackDir)).toBe('go');
+
+    // 6. Phase 0 explicit config in quality-policy.yaml (testing.language & stack.language)
+    const yamlTestingDir = path.join(tmpDir, 'cfg-yaml-testing');
+    fs.mkdirSync(yamlTestingDir, { recursive: true });
+    fs.writeFileSync(path.join(yamlTestingDir, 'quality-policy.yaml'), 'testing:\n  language: py\n', 'utf-8');
+    expect(detectDefaultScaffoldLanguage(yamlTestingDir)).toBe('py');
+
+    const yamlStackDir = path.join(tmpDir, 'cfg-yaml-stack');
+    fs.mkdirSync(yamlStackDir, { recursive: true });
+    fs.writeFileSync(path.join(yamlStackDir, 'quality-policy.yaml'), 'stack:\n  language: rs\n', 'utf-8');
+    expect(detectDefaultScaffoldLanguage(yamlStackDir)).toBe('rs');
+
+    // 7. Invalid language config is rejected (returns null)
+    const invalidCfgDir = path.join(tmpDir, 'cfg-invalid');
+    fs.mkdirSync(invalidCfgDir, { recursive: true });
+    fs.writeFileSync(path.join(invalidCfgDir, '.aisdlc.json'), JSON.stringify({ testing: { language: 'java' } }), 'utf-8');
+    expect(detectDefaultScaffoldLanguage(invalidCfgDir)).toBeNull();
   });
 });
