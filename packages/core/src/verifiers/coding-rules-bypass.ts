@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { detectProjectStacks, getRequiredCodingRulesFiles } from '../init/coding-rules-templates.js';
 
 const IGNORED_DIRS = new Set(['node_modules', '.git', 'bin', 'obj', 'dist', 'build', 'target', 'reports', 'templates']);
 
@@ -47,11 +48,31 @@ function checkFile(rel: string, content: string, hasDotnetRules: boolean, hasTsR
   return [];
 }
 
+export function collectMissingCodingRuleViolations(rootDir: string): string[] {
+  const detectedStacks = detectProjectStacks(rootDir);
+  const seen = new Set<string>();
+  const violations: string[] = [];
+  for (const stack of detectedStacks) {
+    for (const relPath of getRequiredCodingRulesFiles(stack)) {
+      if (seen.has(relPath)) continue;
+      seen.add(relPath);
+      if (!fs.existsSync(path.join(rootDir, relPath))) {
+        violations.push(
+          `[CODING-RULES-MISSING] Stack '${stack}' detected, but required strict coding-rules file '${relPath}' is missing in '${rootDir}'. Run 'aisdlc init' or 'aisdlc migrate' to deploy it.`
+        );
+      }
+    }
+  }
+  return violations;
+}
+
 export function collectCodingRulesBypassViolations(rootDir: string): string[] {
+  const missing = collectMissingCodingRuleViolations(rootDir);
   const hasDotnetRules = fs.existsSync(path.join(rootDir, 'Directory.Build.props'));
   const hasTsRules = fs.existsSync(path.join(rootDir, 'tsconfig.strict.json'));
-  if (!hasDotnetRules && !hasTsRules) return [];
-  return walkFiles(rootDir, rootDir, []).flatMap((rel) =>
+  if (!hasDotnetRules && !hasTsRules) return missing;
+  const bypasses = walkFiles(rootDir, rootDir, []).flatMap((rel) =>
     checkFile(rel, fs.readFileSync(path.join(rootDir, rel), 'utf-8'), hasDotnetRules, hasTsRules)
   );
+  return [...missing, ...bypasses];
 }
