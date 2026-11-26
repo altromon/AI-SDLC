@@ -257,7 +257,7 @@ export function renderCFallback(relFeature: string, steps: ParsedStepItem[]): st
   ];
   steps.forEach((st, idx) => {
     const escaped = escapeDoubleQuotes(st.text);
-    lines.push(`/* ${st.keyword} ${st.text} */`);
+    lines.push(`// ${st.keyword} ${st.text}`);
     lines.push(`void step_${stem}_${idx}(void) {`);
     lines.push(`    fprintf(stderr, "RED: Step not implemented: %s\\n", "${escaped}");`);
     lines.push(`    abort();`);

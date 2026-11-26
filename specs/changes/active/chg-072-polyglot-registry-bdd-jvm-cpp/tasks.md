@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-072-POLYGLOT-REGISTRY-BDD-JVM-CPP
     satisfies-requirements: &ref_0
@@ -41,7 +41,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-072-POLYGLOT-REGISTRY-BDD-JVM-CPP
     satisfies-requirements: *ref_0
@@ -57,7 +57,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test && pnpm run typecheck
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-072-POLYGLOT-REGISTRY-BDD-JVM-CPP
     satisfies-requirements: *ref_0
@@ -74,7 +74,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test && pnpm run verify:all
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-072-POLYGLOT-REGISTRY-BDD-JVM-CPP
     satisfies-requirements: *ref_0
