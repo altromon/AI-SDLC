@@ -10,7 +10,7 @@ import * as path from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import * as core from '../src/index.js';
 import * as gherkinScaffold from '../src/verifiers/gherkin-scaffold.js';
-import { BddStepRegistry, executeBddFeature } from '../src/index.js';
+import { BddStepRegistry, executeBddFeature, type GherkinGeneratorSpec } from '../src/index.js';
 
 type ScaffoldFn = (options: {
   rootDir?: string;
@@ -699,6 +699,27 @@ describe('@FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001 @CHG-051-GHERKIN-POLYGLOT-SCAFFO
       expect(rendered).toContain('panic!("RED: Step not implemented: {}",');
       expect(rendered).not.toContain('todo!(');
       expect(rendered).toContain('{\\"key\\": \\"value\\"}');
+    });
+
+    it('GherkinGeneratorSpec, featurePascalStem, formatGoRawRegexLiteral, and resolveFallbackReason satisfy CHG-071 contracts', () => {
+      const csSpec: GherkinGeneratorSpec = gherkinScaffold.GHERKIN_GENERATOR_SPECS.cs;
+      const rsSpec: GherkinGeneratorSpec = gherkinScaffold.GHERKIN_GENERATOR_SPECS.rs;
+      const tsSpec: GherkinGeneratorSpec = gherkinScaffold.GHERKIN_GENERATOR_SPECS.ts;
+
+      expect(csSpec.emitsSourceStdout).toBe(false);
+      expect(rsSpec.emitsSourceStdout).toBe(false);
+      expect(tsSpec.emitsSourceStdout).toBeUndefined();
+
+      expect(gherkinScaffold.featurePascalStem('alpha-flow.feature')).toBe('AlphaFlow');
+      expect(gherkinScaffold.featurePascalStem('order_create.feature')).toBe('OrderCreate');
+      expect(gherkinScaffold.featurePascalStem('01-login.feature')).toBe('_01Login');
+      expect(gherkinScaffold.featurePascalStem('---.feature')).toBe('Generated');
+
+      expect(gherkinScaffold.formatGoRawRegexLiteral('^simple$')).toBe('`^simple$`');
+      expect(gherkinScaffold.formatGoRawRegexLiteral('^run `cmd`$')).toBe('`^run ` + "`" + `cmd` + "`" + `$`');
+
+      expect(gherkinScaffold.resolveFallbackReason(csSpec)).toContain('does not emit step-definition source code');
+      expect(gherkinScaffold.resolveFallbackReason(tsSpec)).toContain('not installed');
     });
   });
 });

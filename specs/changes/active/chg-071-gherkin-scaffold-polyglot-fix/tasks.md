@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX
     satisfies-requirements: &ref_0
@@ -44,7 +44,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX
     satisfies-requirements: *ref_0

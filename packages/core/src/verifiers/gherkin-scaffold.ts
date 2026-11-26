@@ -14,6 +14,7 @@ import {
   GherkinScaffoldResult,
 } from '../types/index.js';
 import { ParsedFeatureDocument, ParsedStepItem, parseFeatureDocument } from './bdd-runner.js';
+import { escapeRegExp } from './gherkin-language-resolver.js';
 
 const SUPPORTED_LANGUAGES: ReadonlySet<string> = new Set(['ts', 'py', 'go', 'rs', 'cs']);
 
@@ -22,6 +23,17 @@ export function featureStem(featurePath: string): string {
   return path.posix
     .basename(normalized, path.posix.extname(normalized))
     .replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
+export function featurePascalStem(featurePath: string): string {
+  const parts = featureStem(featurePath)
+    .split(/[-_]+/)
+    .filter(Boolean);
+  const pascal = parts
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join('');
+  if (!pascal) return 'Generated';
+  return /^[0-9]/.test(pascal) ? `_${pascal}` : pascal;
 }
 
 export const GHERKIN_GENERATOR_SPECS: Record<GherkinScaffoldLanguage, GherkinGeneratorSpec> = {
@@ -70,6 +82,7 @@ export const GHERKIN_GENERATOR_SPECS: Record<GherkinScaffoldLanguage, GherkinGen
     installCmd: 'cargo',
     installArgs: ['add', '--dev', 'cucumber'],
     license: 'MIT OR Apache-2.0',
+    emitsSourceStdout: false,
     resolveOutputPath: (rootDir, fp) =>
       path.join(rootDir, 'tests', 'steps', `${featureStem(fp).replace(/-/g, '_')}_steps.rs`),
   },
@@ -82,6 +95,7 @@ export const GHERKIN_GENERATOR_SPECS: Record<GherkinScaffoldLanguage, GherkinGen
     installCmd: 'dotnet',
     installArgs: ['add', 'package', 'Reqnroll'],
     license: 'BSD-3-Clause',
+    emitsSourceStdout: false,
     resolveOutputPath: (rootDir, fp) =>
       path.join(rootDir, 'tests', 'steps', `${featureStem(fp)}Steps.cs`),
   },
@@ -118,6 +132,16 @@ export function normalizeScaffoldLanguages(raw: string | string[]): {
 
 export function escapeDoubleQuotes(text: string): string {
   return text.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+export function formatGoRawRegexLiteral(pattern: string): string {
+  if (!pattern.includes('`')) {
+    return `\`${pattern}\``;
+  }
+  return pattern
+    .split('`')
+    .map((part) => `\`${part}\``)
+    .join(' + "`" + ');
 }
 
 export function mapStepKeyword(keyword: string): 'given' | 'when' | 'then' {
@@ -180,17 +204,18 @@ export function renderPyFallback(relFeature: string, steps: ParsedStepItem[]): s
 }
 
 export function renderGoFallback(relFeature: string, steps: ParsedStepItem[]): string {
+  const fnName = `Initialize${featurePascalStem(relFeature)}Scenario`;
   const lines = [
     `// AUTO-GENERATED RED BDD STEP DEFINITIONS (${relFeature})`,
     `package steps`,
     ``,
     `import "github.com/cucumber/godog"`,
     ``,
-    `func InitializeScenario(ctx *godog.ScenarioContext) {`,
+    `func ${fnName}(ctx *godog.ScenarioContext) {`,
   ];
   for (const st of steps) {
-    const escaped = escapeDoubleQuotes(st.text);
-    lines.push(`	ctx.Step(\`^${escaped}$\`, func() error { return godog.ErrPending })`);
+    const expr = formatGoRawRegexLiteral(`^${escapeRegExp(st.text)}$`);
+    lines.push(`	ctx.Step(${expr}, func() error { return godog.ErrPending })`);
   }
   lines.push(`}`, ``);
   return lines.join('\n');
@@ -210,18 +235,19 @@ export function renderRsFallback(relFeature: string, steps: ParsedStepItem[]): s
     const escaped = escapeDoubleQuotes(st.text);
     lines.push(`#[${macro}(expr = "${escaped}")]`);
     lines.push(`fn step_${idx + 1}(_world: &mut FeatureWorld) {`);
-    lines.push(`    todo!("RED: Step not implemented: ${escaped}");`, `}`, ``);
+    lines.push(`    panic!("RED: Step not implemented: {}", "${escaped}");`, `}`, ``);
   });
   return lines.join('\n');
 }
 
 export function renderCsFallback(relFeature: string, steps: ParsedStepItem[]): string {
+  const className = `${featurePascalStem(relFeature)}Steps`;
   const lines = [
     `// AUTO-GENERATED RED BDD STEP DEFINITIONS (${relFeature})`,
     `using Reqnroll;`,
     ``,
     `[Binding]`,
-    `public class GeneratedSteps`,
+    `public class ${className}`,
     `{`,
   ];
   steps.forEach((st, idx) => {
@@ -348,6 +374,13 @@ export function buildMissingGeneratorResult(
   };
 }
 
+export function resolveFallbackReason(spec: GherkinGeneratorSpec): string {
+  if (spec.emitsSourceStdout === false) {
+    return `Native tool '${spec.generatorBin}' does not emit step-definition source code on stdout; used deterministic RED template.`;
+  }
+  return `Native generator '${spec.generatorBin}' not installed; used deterministic RED template.`;
+}
+
 export function buildCompletedResult(
   status: 'GENERATED_NATIVE' | 'GENERATED_FALLBACK',
   lang: GherkinScaffoldLanguage,
@@ -357,7 +390,6 @@ export function buildCompletedResult(
   relOut: string,
   content: string
 ): GherkinScaffoldResult {
-  const isFallback = status === 'GENERATED_FALLBACK';
   return {
     success: true,
     status,
@@ -368,7 +400,7 @@ export function buildCompletedResult(
     nativeCommand: nativeCmdStr,
     installCommand: spec.installCommand,
     license: spec.license,
-    fallbackReason: isFallback ? `Native generator '${spec.generatorBin}' not installed; used deterministic RED template.` : undefined,
+    fallbackReason: status === 'GENERATED_FALLBACK' ? resolveFallbackReason(spec) : undefined,
     content,
     scenariosCount: ctx.doc.scenarios.length,
     stepsCount: ctx.uniqueSteps.length,
@@ -388,7 +420,7 @@ export function generateLanguageStepContent(
   ctx: SingleLangContext,
   fallbackContent: string
 ): { status: 'GENERATED_NATIVE' | 'GENERATED_FALLBACK'; content: string } {
-  if (!binaryReady) {
+  if (!binaryReady || spec.emitsSourceStdout === false) {
     return { status: 'GENERATED_FALLBACK', content: fallbackContent };
   }
   const genRes = ctx.execFn(spec.generatorBin, spec.scaffoldArgs(ctx.fullFeaturePath));
