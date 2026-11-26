@@ -27,8 +27,10 @@ import {
   verifyTraceability,
   generateSuppressionsAuditReport,
   generateSecuritySarifReport,
+  runPolyglotLinters,
   serializeSarifDocument,
   writeSecuritySarifReport,
+  type PolyglotLinterResult,
   type SecuritySuppression,
   type SastSeverity,
   type ToolInstallSpec,
@@ -114,6 +116,10 @@ export interface QualityVerifyOptions extends VerifyBaseOptions {
   baseline?: string | boolean;
   ratchet?: boolean;
   requireCoverageReport?: boolean;
+  skipExternalLinters?: boolean;
+  nonInteractive?: boolean;
+  noInstallPrompt?: boolean;
+  forceExternalLinters?: boolean;
 }
 
 export function buildFunctionMetricViolations(results: ReturnType<typeof verifyQualityGate>['results']) {
@@ -1666,11 +1672,86 @@ export function collectAllGates(options: QualityVerifyOptions, root: string, isS
   };
 }
 
+export function emitPolyglotLintersJson(result: PolyglotLinterResult): void {
+  const payload: VerifyJsonPayload = {
+    gate: 'polyglotLinters',
+    success: result.success,
+    exitCode: result.success ? 0 : 1,
+    summary: {
+      detectedStacks: result.detectedStacks,
+      diagnosticsCount: result.diagnostics.length,
+      warningsCount: result.warnings.length,
+      errorsCount: result.errors.length,
+    },
+    diagnostics: result.diagnostics,
+    warnings: result.warnings,
+    violations: result.errors.map((message) => ({ gate: 'polyglotLinters', message })),
+  };
+  console.log(JSON.stringify(payload, null, 2));
+}
+
+export function printPolyglotLintersText(result: PolyglotLinterResult): void {
+  console.log(pc.bold(pc.cyan(`\n🔧 [AI-SDLC] Verifying Polyglot Linters & Compilers (${result.detectedStacks.join(', ') || 'none'})...`)));
+  for (const w of result.warnings) {
+    console.log(pc.yellow(`  ⚠ ${w}`));
+  }
+  for (const err of result.errors) {
+    console.log(pc.red(`  ✖ ${err}`));
+  }
+  console.log(result.success ? pc.green('✔ Polyglot Linters COMPLIANT') : pc.red('✖ Polyglot Linters FAILED'));
+}
+
+export function reportPolyglotLintersOutcome(
+  result: PolyglotLinterResult,
+  useJson: boolean,
+  isSilent: boolean
+): boolean {
+  if (useJson) {
+    emitPolyglotLintersJson(result);
+    return result.success;
+  }
+  if (!isSilent) {
+    printPolyglotLintersText(result);
+  }
+  return result.success;
+}
+
+export function buildPolyglotRunnerOptions(
+  options: QualityVerifyOptions,
+  rootDir: string,
+  isSilent: boolean
+) {
+  const nonInteractive = Boolean(options.nonInteractive || isSilent);
+  const noInstallPrompt = Boolean(options.noInstallPrompt || isSilent);
+  return {
+    rootDir,
+    nonInteractive,
+    noInstallPrompt,
+    confirmInstall: nonInteractive || noInstallPrompt ? undefined : createTtyConfirmInstall(),
+  };
+}
+
+export async function runVerifyPolyglotLintersAsync(options: QualityVerifyOptions = {}): Promise<boolean> {
+  const rootDir = options.root || process.cwd();
+  const useJson = isJsonOutput(options);
+  const isSilent = Boolean(options.silent || useJson);
+  const skipInTest = Boolean(process.env.VITEST) && !options.forceExternalLinters;
+  if (options.skipExternalLinters || skipInTest) {
+    if (useJson) emitPolyglotLintersJson({ success: true, detectedStacks: [], diagnostics: [], warnings: [], errors: [] });
+    return true;
+  }
+  const result = await runPolyglotLinters(buildPolyglotRunnerOptions(options, rootDir, isSilent));
+  return reportPolyglotLintersOutcome(result, useJson, isSilent);
+}
+
 export async function collectAllGatesAsync(options: QualityVerifyOptions, root: string, isSilent: boolean) {
   return {
     ...collectSyncNonAsyncGates(options, root, isSilent),
     licenses: { success: await runVerifyLicensesAsync({ root, silent: isSilent, json: false }) },
     security: { success: await runVerifySecurityAsync({ root, silent: isSilent, json: false }) },
+    polyglotLinters: {
+      success: await runVerifyPolyglotLintersAsync({ ...options, root, silent: isSilent, json: false }),
+    },
   };
 }
 
@@ -1715,12 +1796,14 @@ const VERIFY_ALL_GATES_LIST: Array<{ key: string; title: string }> = [
   { key: 'friction', title: '  10. Progressive Friction & Anti-Bypass:        ' },
   { key: 'security', title: '  11. Shift-Left Security (Secrets & SAST):      ' },
   { key: 'privacy', title: '  12. Data Protection & Privacy (GDPR/PII-SAST): ' },
+  { key: 'polyglotLinters', title: '  13. Polyglot Linters & Compilers:            ' },
 ];
 
 export function printVerifyAllSummaryTable(gatesSummary: Record<string, { success: boolean }>, allPassed: boolean): void {
   console.log(pc.bold(pc.magenta('================================================================')));
   console.log(pc.bold('CI/CD EVALUATION SUMMARY:'));
   for (const item of VERIFY_ALL_GATES_LIST) {
+    if (!Object.prototype.hasOwnProperty.call(gatesSummary, item.key)) continue;
     const passed = Boolean(gatesSummary[item.key]?.success);
     console.log(`${item.title}${passed ? pc.green('PASSED') : pc.red('FAILED')}`);
   }

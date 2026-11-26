@@ -130,40 +130,43 @@ describe('CHG-060-DOCTOR-SECURITY-TOOLS: Doctor Optional Security CLIs (@FR-060-
     });
 
     it('@boundary SafeProcessRunnerAdapter.execSafe handles Windows .cmd/.bat shims via ComSpec with shell: false and rejects metacharacters', async () => {
-      const trustedDir = path.join(tmpDir, 'win-bin');
-      fs.mkdirSync(trustedDir, { recursive: true });
-      const shimPath = path.join(trustedDir, 'trivy.cmd');
-      fs.writeFileSync(shimPath, '@echo off\r\necho 0.50.0\r\n');
+      const trustedDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-win-bin-'));
+      try {
+        const shimPath = path.join(trustedDir, 'trivy.cmd');
+        fs.writeFileSync(shimPath, '@echo off\r\necho 0.50.0\r\n');
 
-      vi.stubEnv('PATH', trustedDir);
-      vi.stubEnv('ComSpec', 'C:\\Windows\\System32\\cmd.exe');
+        vi.stubEnv('PATH', trustedDir);
+        vi.stubEnv('ComSpec', 'C:\\Windows\\System32\\cmd.exe');
 
-      const execFileMock = vi.mocked(child_process.execFile);
-      execFileMock.mockImplementation(((_file: unknown, _args: unknown, _opts: unknown, cb?: unknown) => {
-        const callback = (typeof _opts === 'function' ? _opts : cb) as (
-          err: Error | null,
-          stdout: string,
-          stderr: string
-        ) => void;
-        callback(null, '0.50.0\n', '');
-        return {} as child_process.ChildProcess;
-      }) as typeof child_process.execFile);
+        const execFileMock = vi.mocked(child_process.execFile);
+        execFileMock.mockImplementation(((_file: unknown, _args: unknown, _opts: unknown, cb?: unknown) => {
+          const callback = (typeof _opts === 'function' ? _opts : cb) as (
+            err: Error | null,
+            stdout: string,
+            stderr: string
+          ) => void;
+          callback(null, '0.50.0\n', '');
+          return {} as child_process.ChildProcess;
+        }) as typeof child_process.execFile);
 
-      const runner = new SafeProcessRunnerAdapter();
+        const runner = new SafeProcessRunnerAdapter();
 
-      if (process.platform === 'win32') {
-        const res = await runner.execSafe('trivy', ['--version'], { cwd: tmpDir });
-        expect(res.exitCode).toBe(0);
-        const [invokedFile, invokedArgs, invokedOpts] = execFileMock.mock.calls[0];
-        expect(String(invokedFile).toLowerCase()).toContain('cmd.exe');
-        expect(invokedArgs).toEqual(['/d', '/s', '/c', shimPath, '--version']);
-        expect((invokedOpts as child_process.ExecFileOptions).shell).toBe(false);
+        if (process.platform === 'win32') {
+          const res = await runner.execSafe('trivy', ['--version'], { cwd: tmpDir });
+          expect(res.exitCode).toBe(0);
+          const [invokedFile, invokedArgs, invokedOpts] = execFileMock.mock.calls[0];
+          expect(String(invokedFile).toLowerCase()).toContain('cmd.exe');
+          expect(invokedArgs).toEqual(['/d', '/s', '/c', shimPath, '--version']);
+          expect((invokedOpts as child_process.ExecFileOptions).shell).toBe(false);
 
-        // Metacharacters in args must be rejected for .cmd/.bat shims
-        await expect(runner.execSafe('trivy', ['--version&whoami'], { cwd: tmpDir })).rejects.toThrow();
-      } else {
-        // On non-win32 platforms, verify metacharacter rejection or direct non-shell execution contract
-        expect(runner).toBeDefined();
+          // Metacharacters in args must be rejected for .cmd/.bat shims
+          await expect(runner.execSafe('trivy', ['--version&whoami'], { cwd: tmpDir })).rejects.toThrow();
+        } else {
+          // On non-win32 platforms, verify metacharacter rejection or direct non-shell execution contract
+          expect(runner).toBeDefined();
+        }
+      } finally {
+        fs.rmSync(trustedDir, { recursive: true, force: true });
       }
     });
   });

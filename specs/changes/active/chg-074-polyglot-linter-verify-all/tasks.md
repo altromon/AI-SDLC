@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-074-POLYGLOT-LINTER-VERIFY-ALL
     satisfies-requirements: &ref_0
@@ -35,7 +35,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-074-POLYGLOT-LINTER-VERIFY-ALL
     satisfies-requirements: *ref_0
@@ -48,7 +48,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test && pnpm run typecheck
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-074-POLYGLOT-LINTER-VERIFY-ALL
     satisfies-requirements: *ref_0

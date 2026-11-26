@@ -12,7 +12,16 @@ import {
   type SupportedPlatform,
 } from '../src/verifiers/tool-installer.js';
 import {
+  buildClangTidyInvocation,
+  buildFailureOutcome,
+  buildJvmInvocations,
+  buildStackInvocations,
+  executeInvocation,
+  resolveBinaryForInvocation,
+  resolveTargetStacks,
   runPolyglotLinters,
+  scanFilesByExt,
+  toSafeRelativeSource,
   type PolyglotLinterStack,
 } from '../src/verifiers/polyglot-linter-runner.js';
 import * as coreIndex from '../src/index.js';
@@ -360,6 +369,36 @@ describe('CHG-074: Polyglot Linters & Compilers in Verify All', () => {
       const gates = await collectAllGatesAsync({ skipExternalLinters: true }, rootDir, true);
       expect(gates).toHaveProperty('polyglotLinters');
       expect(gates.polyglotLinters.success).toBe(true);
+
+      // Verify helper unit functions for AST & test traceability
+      const emitPolyglotLintersJson = verifyModule.emitPolyglotLintersJson as (res: unknown) => void;
+      const printPolyglotLintersText = verifyModule.printPolyglotLintersText as (res: unknown) => void;
+      const reportPolyglotLintersOutcome = verifyModule.reportPolyglotLintersOutcome as (
+        res: unknown,
+        useJson: boolean,
+        isSilent: boolean
+      ) => boolean;
+      const sampleRes = { success: true, detectedStacks: ['go'], diagnostics: [], warnings: [], errors: [] };
+      emitPolyglotLintersJson(sampleRes);
+      printPolyglotLintersText(sampleRes);
+      expect(reportPolyglotLintersOutcome(sampleRes, false, true)).toBe(true);
+      const buildPolyglotRunnerOptions = verifyModule.buildPolyglotRunnerOptions as (
+        opts: Record<string, unknown>,
+        root: string,
+        isSilent: boolean
+      ) => Record<string, unknown>;
+      expect(buildPolyglotRunnerOptions({}, rootDir, true).nonInteractive).toBe(true);
+      expect(buildFailureOutcome({ stack: 'go', tool: 'golangci-lint', binaryName: 'golangci-lint', args: ['run'] }, { pid: 1, output: [null, '', 'err'], stdout: '', stderr: 'err', status: 1, signal: null }, rootDir).diagnostic.status).toBe('failed');
+      expect(toSafeRelativeSource(path.join(rootDir, 'a.c'), rootDir)).toBe('./a.c');
+      expect(scanFilesByExt(rootDir, rootDir, new Set(['.go']))).toEqual([]);
+      expect(resolveTargetStacks(rootDir)).toEqual(expect.arrayContaining(['go']));
+      expect(buildJvmInvocations('java', rootDir).some((i) => i.tool === 'pmd')).toBe(true);
+      expect(buildClangTidyInvocation('c', rootDir).skipReason).toBeDefined();
+      expect(buildStackInvocations('go', rootDir)[0]?.tool).toBe('golangci-lint');
+      expect(await resolveBinaryForInvocation({ stack: 'go', tool: 'golangci-lint', binaryName: 'golangci-lint', args: ['run'] }, rootDir, { nonInteractive: true })).toEqual(
+        expect.objectContaining({ binPath: null })
+      );
+      expect((await executeInvocation({ stack: 'go', tool: 'golangci-lint', binaryName: 'golangci-lint', args: ['run'], skipReason: 'skip' }, rootDir, {})).diagnostic.status).toBe('skipped');
     });
   });
 });

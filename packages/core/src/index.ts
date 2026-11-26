@@ -898,3 +898,10 @@ export {
   normalizeScaffoldLanguage,
 } from './verifiers/polyglot-registry.js';
 export type { PolyglotLanguageSpec } from './verifiers/polyglot-registry.js';
+export { runPolyglotLinters } from './verifiers/polyglot-linter-runner.js';
+export type {
+  PolyglotLinterDiagnostic,
+  PolyglotLinterOptions,
+  PolyglotLinterResult,
+  PolyglotLinterStack,
+} from './verifiers/polyglot-linter-runner.js';
