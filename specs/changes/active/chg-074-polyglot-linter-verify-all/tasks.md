@@ -73,7 +73,7 @@ superseded-by: null
 
 ### Fase 1: Extensión de Allowlist Segura (`TSK-074-01`)
 - **ID**: `TSK-074-01`
-- **Descripción**: Extender `InstallableTool` y `TOOL_INSTALL_ALLOWLIST` en `packages/core/src/verifiers/tool-installer.ts` para `tsc`, `mypy`, `golangci-lint`, `clippy`, `pmd`, `detekt`, `mvn`, `gradle`, `clang-tidy` (reutilizando `eslint`, `ruff`, `dotnet`) con resolución CWE-426 y especificaciones deep-frozen. Ajustar `argMap` en `sast-orchestrator.ts` a `Partial<Record<InstallableTool, string[]>>` si es necesario.
+- **Descripción**: Extender `InstallableTool` y `TOOL_INSTALL_ALLOWLIST` en `packages/core/src/verifiers/tool-installer.ts` para `tsc` (paquete npm `typescript`), `mypy`, `golangci-lint`, `clippy` (`rustup component add clippy`), `pmd`, `detekt`, `mvn`, `gradle`, `clang-tidy` (reutilizando `eslint`, `ruff`, `dotnet`), reforzar `isUntrustedPathEntry` para subdirectorios de `rootDir` (CWE-426) y `ComSpec`, actualizar `argMap` en `sast-orchestrator.ts` a `Partial<Record<InstallableTool, string[]>>` con guarda explícita, y cubrir todas las entradas en `tool-installer.spec.ts`.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm test`
 
@@ -85,7 +85,7 @@ superseded-by: null
 
 ### Fase 3: Integración en CLI `verify all` (`TSK-074-03`)
 - **ID**: `TSK-074-03`
-- **Descripción**: Exportar `runPolyglotLinters` desde `packages/core/src/index.ts` e integrar `runVerifyPolyglotLintersAsync` en `collectAllGatesAsync`, `runVerifyAllAsync` y `VERIFY_ALL_GATES_LIST` en `packages/cli/src/commands/verify.ts`, respetando `options.skipExternalLinters` y guardas contra recursión infinita en pruebas unitarias.
+- **Descripción**: Exportar `runPolyglotLinters` desde `packages/core/src/index.ts`, añadir `--skip-external-linters` y `--no-install-prompt` en `packages/cli/src/index.ts` y `QualityVerifyOptions`, e integrar `runVerifyPolyglotLintersAsync` en `collectAllGatesAsync`, `runVerifyAllAsync` y `VERIFY_ALL_GATES_LIST` en `packages/cli/src/commands/verify.ts` (forzando `nonInteractive: true` en `--json`/`silent`, filtrando `VERIFY_ALL_GATES_LIST` en modo síncrono y respetando la guarda `VITEST`).
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm test && pnpm run typecheck`
 

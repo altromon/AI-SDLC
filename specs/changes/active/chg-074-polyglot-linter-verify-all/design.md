@@ -11,15 +11,17 @@ enclave: "SEC-ENC-DMZ"
 status: draft
 contracts:
   - "packages/core/src/verifiers/tool-installer.ts"
+  - "packages/core/src/verifiers/sast-orchestrator.ts"
   - "packages/core/src/verifiers/polyglot-linter-runner.ts"
   - "packages/core/src/index.ts"
   - "packages/cli/src/commands/verify.ts"
+  - "packages/cli/src/index.ts"
 citations:
   - id: UC-074-POLYGLOT-LINTER-VERIFY-ALL
     digest: sha256:017cb92741768ff7dc91c0df5f5660d036c132db7bbf130f27c5680f962b9f94
     comment: Citación de use-case (Polyglot Native Linter and Compiler Execution in aisdlc verify all)
   - id: FR-074-POLYGLOT-LINTER-VERIFY-ALL-001
-    digest: sha256:a9de1c1763035b78efcaae191a1afb49d5fdff16b3fc9de6e87ab4606748a8bf
+    digest: sha256:f728653efaf3ef1aa1117a2d1ccec72da7362d91f68d4a29954c095bda7a0e92
     comment: Requerimiento derivado de UC-074-POLYGLOT-LINTER-VERIFY-ALL
 ---
 
@@ -29,8 +31,9 @@ citations:
 El componente `CMP-074-POLYGLOT-LINTER-VERIFY-ALL` opera en `SEC-ENC-DMZ` siguiendo **Hexagonal Architecture (Ports & Adapters)** y **Simplicity First (YAGNI)**:
 - **Extensión de Allowlist Segura (`packages/core/src/verifiers/tool-installer.ts`)**:
   - Se amplía `InstallableTool` con `'tsc' | 'mypy' | 'golangci-lint' | 'clippy' | 'pmd' | 'detekt' | 'mvn' | 'gradle' | 'clang-tidy'`, manteniendo `'eslint' | 'ruff' | 'dotnet'` existentes.
-  - Cada herramienta nueva se registra en `TOOL_INSTALL_ALLOWLIST` mediante `freezePlatforms` (especificaciones inmutables por `win32`, `darwin`, `linux`, sin `sudo` ni metacaracteres de shell).
-  - Nota de compatibilidad de tipos: en `packages/core/src/verifiers/sast-orchestrator.ts`, `argMap` debe tiparse como `Partial<Record<InstallableTool, string[]>>` para no romper compilación al ampliar `InstallableTool`.
+  - Cada herramienta nueva se registra en `TOOL_INSTALL_ALLOWLIST` mediante `freezePlatforms` (especificaciones inmutables por `win32`, `darwin`, `linux`, sin `sudo` ni metacaracteres de shell). En concreto, `tsc` instala el paquete `typescript` (`['npm', ['install', '-g', 'typescript']]`, nunca `tsc`), y `clippy` instala `rustup component add clippy` resolviendo `cargo` en `PATH`.
+  - Se refuerza CWE-426 en `isUntrustedPathEntry` rechazando cualquier entrada de `PATH` que resida dentro de `rootDir` (no solo igualdad exacta) y validando `ComSpec` en `resolveWinCmdSpawn`.
+  - Nota de compatibilidad de tipos: en `packages/core/src/verifiers/sast-orchestrator.ts`, `argMap` debe tiparse como `Partial<Record<InstallableTool, string[]>>` con guarda explícita si `argMap[tool]` es `undefined`.
 - **Motor Políglota (`packages/core/src/verifiers/polyglot-linter-runner.ts`)**:
   - Detecta stacks del repositorio reutilizando `detectProjectStacks(rootDir)` (`coding-rules-templates.ts`) más detección de Python (`pyproject.toml`, `requirements.txt`, `setup.py`, `Pipfile`, `.py`).
   - Mapea cada stack detectado a sus comandos nativos concretos:
@@ -40,13 +43,14 @@ El componente `CMP-074-POLYGLOT-LINTER-VERIFY-ALL` opera en `SEC-ENC-DMZ` siguie
     - `dotnet`: `dotnet build --no-restore` (o `dotnet build`)
     - `java`: `mvn` (`compile` / `pmd:check`) o `gradle` (`check`) según manifiesto (`pom.xml` vs `build.gradle*`), más `pmd`
     - `kotlin`: `detekt` (y `gradle check` si aplica)
-    - `rust`: `clippy` (`cargo clippy -- -D warnings`, resolviendo `cargo` o `clippy` según disponibilidad)
+    - `rust`: `clippy` (verifica `cargo` en `PATH` y `cargo clippy -- -D warnings`)
     - `go`: `golangci-lint run`
-    - `c` / `cpp`: `clang-tidy` solo si existe `compile_commands.json` en `rootDir`; si está ausente, emite warning y omite sin fallar.
+    - `c` / `cpp`: `clang-tidy` solo si existe `compile_commands.json` en `rootDir` (pasando `-p <dir> -- ./<relPath>` con rutas validadas); si está ausente, emite warning y omite sin fallar.
   - Verifica disponibilidad con `ensureToolAvailable(tool, options)` y ejecuta cada herramienta instalada con `resolveTrustedBinaryPath` + `spawnTrustedBinary(..., { shell: false })`.
-- **Adaptador CLI (`packages/cli/src/commands/verify.ts`)**:
-  - Añade `runVerifyPolyglotLintersAsync` e integra el gate en `collectAllGatesAsync`, `runVerifyAllAsync` y `VERIFY_ALL_GATES_LIST`.
-  - Respeta `options.skipExternalLinters` y evita recursión infinita cuando `process.env.VITEST` está activo salvo invocación explícita en pruebas dedicadas.
+- **Adaptador CLI (`packages/cli/src/commands/verify.ts` y `packages/cli/src/index.ts`)**:
+  - Añade `runVerifyPolyglotLintersAsync` e integra el gate en `collectAllGatesAsync`, `runVerifyAllAsync` y `VERIFY_ALL_GATES_LIST` (filtrando `VERIFY_ALL_GATES_LIST` por claves presentes en `gatesSummary` para no afectar `runVerifyAll` síncrono).
+  - Cuando `useJson` o `options.silent` están activos, fuerza `nonInteractive: true` y `noInstallPrompt: true` para no colgar `stdout` con prompts interactivos.
+  - Expone `--skip-external-linters` y `--no-install-prompt` en `packages/cli/src/index.ts` (`verify all`) y `QualityVerifyOptions`, y evita recursión infinita cuando `process.env.VITEST` está activo salvo `forceExternalLinters: true`.
 
 ## 2. Contratos de Datos e Interfaces
 - `PolyglotLinterStack`: `'typescript' | 'javascript' | 'angular' | 'python' | 'dotnet' | 'java' | 'kotlin' | 'rust' | 'go' | 'c' | 'cpp'`

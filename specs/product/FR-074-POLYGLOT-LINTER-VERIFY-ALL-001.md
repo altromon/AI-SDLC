@@ -21,7 +21,7 @@ superseded-by: null
 
 # FR-074-POLYGLOT-LINTER-VERIFY-ALL-001: polyglot-linter-verify-all
 
-> **Upstream Citation**: `UC-074-POLYGLOT-LINTER-VERIFY-ALL` (`specs/product/UC-074-POLYGLOT-LINTER-VERIFY-ALL.md`, Unix LF SHA-256: `0000000000000000000000000000000000000000000000000000000000000000`)
+> **Upstream Citation**: `UC-074-POLYGLOT-LINTER-VERIFY-ALL` (`specs/product/UC-074-POLYGLOT-LINTER-VERIFY-ALL.md`, Unix LF SHA-256: `017cb92741768ff7dc91c0df5f5660d036c132db7bbf130f27c5680f962b9f94`)
 
 ## 1. Normative Statement
 1. **Polyglot Stack Detection and Native Strict Execution**:
