@@ -8,9 +8,12 @@ import {
   ExtractedFeature,
   GherkinExtractionOptions,
   GherkinExtractionResult,
+  GherkinScaffoldLanguage,
+  GherkinStepLanguageMismatch,
   GherkinSyncCheckResult,
 } from '../types/index.js';
 import { canonicalSort, walkMdFiles } from '../utils/fs.js';
+import { resolveFeatureTargetLanguages } from './gherkin-language-resolver.js';
 import { GHERKIN_GENERATOR_SPECS } from './gherkin-scaffold.js';
 
 export interface MarkdownFrontmatter {
@@ -178,11 +181,22 @@ export function walkFeatureFiles(dir: string, fileList: string[] = []): string[]
   return fileList;
 }
 
-export function hasDeterministicStepFile(rootDir: string, featureFullPath: string): boolean {
-  return Object.values(GHERKIN_GENERATOR_SPECS).some((spec) => {
+export function getPresentStepLanguages(
+  rootDir: string,
+  featureFullPath: string
+): GherkinScaffoldLanguage[] {
+  const present: GherkinScaffoldLanguage[] = [];
+  for (const spec of Object.values(GHERKIN_GENERATOR_SPECS)) {
     const stepPath = spec.resolveOutputPath(rootDir, featureFullPath);
-    return fs.existsSync(stepPath) && fs.statSync(stepPath).size > 0;
-  });
+    if (fs.existsSync(stepPath) && fs.statSync(stepPath).size > 0) {
+      present.push(spec.lang);
+    }
+  }
+  return present.sort(canonicalSort) as GherkinScaffoldLanguage[];
+}
+
+export function hasDeterministicStepFile(rootDir: string, featureFullPath: string): boolean {
+  return getPresentStepLanguages(rootDir, featureFullPath).length > 0;
 }
 
 export function findOrphanFeatureFiles(rootDir: string, expectedRelPaths: Set<string>): string[] {
@@ -201,8 +215,41 @@ export interface SyncCheckState {
   outOfSyncFiles: string[];
   missingFiles: string[];
   missingStepFiles: string[];
+  stepLanguageMismatches: GherkinStepLanguageMismatch[];
   expectedRelPaths: Set<string>;
   totalFeatures: number;
+  featuresOnly: boolean;
+}
+
+export function checkFeatureStepLanguageParity(
+  rootDir: string,
+  targetPath: string,
+  relTarget: string,
+  state: SyncCheckState
+): void {
+  const presentLangs = getPresentStepLanguages(rootDir, targetPath);
+  const expectedLangs = resolveFeatureTargetLanguages(rootDir, targetPath);
+
+  if (expectedLangs.length === 0) {
+    if (presentLangs.length === 0) {
+      state.missingStepFiles.push(relTarget);
+    }
+    return;
+  }
+
+  const missingLangs = expectedLangs.filter((lang) => !presentLangs.includes(lang));
+  if (missingLangs.length === 0) return;
+
+  if (presentLangs.length > 0) {
+    state.stepLanguageMismatches.push({
+      featureFile: relTarget,
+      expectedLanguages: expectedLangs,
+      foundLanguages: presentLangs,
+      missingLanguages: missingLangs,
+    });
+  } else {
+    state.missingStepFiles.push(relTarget);
+  }
 }
 
 export function verifyExistingFeatureFile(
@@ -216,8 +263,8 @@ export function verifyExistingFeatureFile(
   if (actualContent.replace(/\r\n/g, '\n') !== expectedContent.replace(/\r\n/g, '\n')) {
     state.outOfSyncFiles.push(relTarget);
   }
-  if (!hasDeterministicStepFile(rootDir, targetPath)) {
-    state.missingStepFiles.push(relTarget);
+  if (!state.featuresOnly) {
+    checkFeatureStepLanguageParity(rootDir, targetPath, relTarget, state);
   }
 }
 
@@ -249,8 +296,10 @@ export function checkGherkinInSync(
     outOfSyncFiles: [],
     missingFiles: [],
     missingStepFiles: [],
+    stepLanguageMismatches: [],
     expectedRelPaths: new Set<string>(),
     totalFeatures: 0,
+    featuresOnly: Boolean(options.featuresOnly),
   };
 
   for (const filePath of targetFiles) {
@@ -266,7 +315,8 @@ export function checkGherkinInSync(
     state.missingFiles.length === 0 &&
     state.outOfSyncFiles.length === 0 &&
     orphanFeatureFiles.length === 0 &&
-    state.missingStepFiles.length === 0;
+    state.missingStepFiles.length === 0 &&
+    state.stepLanguageMismatches.length === 0;
 
   return {
     inSync,
@@ -274,9 +324,11 @@ export function checkGherkinInSync(
     missingFiles: state.missingFiles,
     orphanFeatureFiles,
     missingStepFiles: state.missingStepFiles,
+    stepLanguageMismatches: state.stepLanguageMismatches,
     totalFeatures: state.totalFeatures,
   };
 }
 
+export * from './gherkin-language-resolver.js';
 export * from './gherkin-scaffold.js';
 

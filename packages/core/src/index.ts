@@ -95,6 +95,7 @@ export type {
   GherkinScaffoldOptions,
   GherkinScaffoldResult,
   GherkinScaffoldStatus,
+  GherkinStepLanguageMismatch,
   GherkinSyncCheckResult,
   GitCheckoutTaskOptions,
   GitCheckoutTaskResult,
@@ -336,6 +337,7 @@ export {
   normalizeScaffoldLanguages,
   parseMarkdownFrontmatter,
   resolveFeatureFilePath,
+  resolveFeatureTargetLanguages,
   resolveTargetFiles,
   scaffoldGherkinSteps,
 } from './verifiers/gherkin.js';

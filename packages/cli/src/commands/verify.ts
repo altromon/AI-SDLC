@@ -1450,9 +1450,27 @@ export async function runVerifySecurityAsync(options: SecurityVerifyCliOptions =
   return handleSecurityOutput(options, resultSecrets, resultSast, isOk, hasExpired);
 }
 
+export interface VerifyGherkinCliOptions extends VerifyBaseOptions {
+  featuresOnly?: boolean;
+}
+
+export function mapLanguageMismatchViolation(m: NonNullable<ReturnType<typeof checkGherkinInSync>['stepLanguageMismatches']>[number]) {
+  return {
+    type: 'STEP_LANGUAGE_MISMATCH',
+    code: 'STEP_LANGUAGE_MISMATCH',
+    rule: 'STEP_LANGUAGE_MISMATCH',
+    file: m.featureFile,
+    expectedLanguages: m.expectedLanguages,
+    foundLanguages: m.foundLanguages,
+    missingLanguages: m.missingLanguages,
+    message: `Step language mismatch for ${m.featureFile}: expected [${m.expectedLanguages.join(', ')}], found [${m.foundLanguages.join(', ')}], missing [${m.missingLanguages.join(', ')}].`,
+  };
+}
+
 export function buildGherkinViolations(result: ReturnType<typeof checkGherkinInSync>) {
   const orphans = result.orphanFeatureFiles ?? [];
   const missingSteps = result.missingStepFiles ?? [];
+  const mismatches = result.stepLanguageMismatches ?? [];
   return [
     ...result.missingFiles.map((f) => ({ type: 'MISSING_FEATURE', file: f, message: `Missing .feature file: ${f}` })),
     ...result.outOfSyncFiles.map((f) => ({ type: 'OUT_OF_SYNC_FEATURE', file: f, message: `Out-of-sync .feature file: ${f}` })),
@@ -1462,12 +1480,14 @@ export function buildGherkinViolations(result: ReturnType<typeof checkGherkinInS
       file: f,
       message: `Missing deterministic step definition file in tests/steps/ for: ${f}. Run 'aisdlc gherkin scaffold ${f} --lang <lang> --fallback'.`,
     })),
+    ...mismatches.map(mapLanguageMismatchViolation),
   ];
 }
 
 export function emitGherkinVerifyJson(result: ReturnType<typeof checkGherkinInSync>): void {
   const orphans = result.orphanFeatureFiles ?? [];
   const missingSteps = result.missingStepFiles ?? [];
+  const mismatches = result.stepLanguageMismatches ?? [];
   const payload: VerifyJsonPayload = {
     gate: 'gherkin',
     success: result.inSync,
@@ -1478,6 +1498,7 @@ export function emitGherkinVerifyJson(result: ReturnType<typeof checkGherkinInSy
       outOfSyncCount: result.outOfSyncFiles.length,
       orphanFeatureCount: orphans.length,
       missingStepFileCount: missingSteps.length,
+      stepLanguageMismatchCount: mismatches.length,
     },
     violations: buildGherkinViolations(result),
   };
@@ -1491,20 +1512,37 @@ export function printGherkinIssueList(items: string[], tag: string, suffix = '')
   }
 }
 
+export function printLanguageMismatchList(
+  mismatches: NonNullable<ReturnType<typeof checkGherkinInSync>['stepLanguageMismatches']>
+): void {
+  for (const m of mismatches) {
+    console.log(
+      `    ${pc.red('✖')} [STEP_LANGUAGE_MISMATCH] ${m.featureFile} (expected: ${m.expectedLanguages.join(',')}; found: ${m.foundLanguages.join(',')}; missing: ${m.missingLanguages.join(',')})`
+    );
+  }
+}
+
 export function printGherkinVerifyConsole(result: ReturnType<typeof checkGherkinInSync>): void {
   const orphans = result.orphanFeatureFiles ?? [];
   const missingSteps = result.missingStepFiles ?? [];
-  const totalOut = result.missingFiles.length + result.outOfSyncFiles.length + orphans.length + missingSteps.length;
+  const mismatches = result.stepLanguageMismatches ?? [];
+  const totalOut =
+    result.missingFiles.length +
+    result.outOfSyncFiles.length +
+    orphans.length +
+    missingSteps.length +
+    mismatches.length;
   console.log(`  Evaluated features:      ${pc.bold(String(result.totalFeatures))}`);
   console.log(`  Violations / missing:    ${totalOut > 0 ? pc.red(String(totalOut)) : pc.green('0')}`);
   printGherkinIssueList(result.missingFiles, 'MISSING');
   printGherkinIssueList(result.outOfSyncFiles, 'OUT_OF_SYNC');
   printGherkinIssueList(orphans, 'ORPHAN_FEATURE');
   printGherkinIssueList(missingSteps, 'MISSING_STEP_FILE', ' (run: aisdlc gherkin scaffold {file} --lang <lang> --fallback)');
+  printLanguageMismatchList(mismatches);
   console.log(result.inSync ? pc.green('\n✔ BDD Synchronization COMPLIANT\n') : pc.red('\n✖ BDD Synchronization BLOCKED\n'));
 }
 
-export function runVerifyGherkin(options: VerifyBaseOptions = {}): boolean {
+export function runVerifyGherkin(options: VerifyGherkinCliOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
   const useJson = isJsonOutput(options);
   const isSilent = Boolean(options.silent || useJson);
@@ -1513,7 +1551,7 @@ export function runVerifyGherkin(options: VerifyBaseOptions = {}): boolean {
     console.log(pc.bold(pc.cyan('\n🥒 [AI-SDLC] Verifying BDD Synchronization (Gherkin -> .feature)...')));
   }
 
-  const result = checkGherkinInSync({ rootDir });
+  const result = checkGherkinInSync({ rootDir, featuresOnly: options.featuresOnly });
 
   if (useJson) {
     emitGherkinVerifyJson(result);

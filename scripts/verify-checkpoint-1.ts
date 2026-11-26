@@ -8,12 +8,13 @@ interface GateStep {
   gate: number;
   subcommand: string;
   label: string;
+  extraArgs?: string[];
 }
 
 const CORE_GATES: GateStep[] = [
   { gate: 8, subcommand: 'schemas', label: 'Schema & Graph Validation' },
   { gate: 9, subcommand: 'duplicates', label: 'Duplicate & Collision Pre-Flight' },
-  { gate: 4, subcommand: 'gherkin', label: 'BDD Gherkin Extraction Sync' },
+  { gate: 4, subcommand: 'gherkin', label: 'BDD Gherkin Extraction Sync', extraArgs: ['--features-only'] },
   { gate: 7, subcommand: 'pdac', label: 'Cryptographic Integrity & PDaC Drift' },
   { gate: 3, subcommand: 'governance', label: 'Task Governance & Autonomy' },
   { gate: 10, subcommand: 'friction', label: 'Progressive Friction & Anti-Bypass' },
@@ -64,7 +65,7 @@ function runCliCommand(cliArgs: string[], cliEntry: string, useLocalCli: boolean
 
 function runGate(step: GateStep, cliEntry: string, useLocalCli: boolean, root?: string): boolean {
   console.log(`\n▶ [Checkpoint 1 | Gate ${step.gate}] ${step.label} (verify ${step.subcommand})`);
-  const cliArgs = ['verify', step.subcommand, ...(root ? ['--root', root] : [])];
+  const cliArgs = ['verify', step.subcommand, ...(step.extraArgs ?? []), ...(root ? ['--root', root] : [])];
   return runCliCommand(cliArgs, cliEntry, useLocalCli);
 }
 

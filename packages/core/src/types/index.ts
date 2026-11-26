@@ -524,6 +524,7 @@ export interface GherkinExtractionOptions {
   rootDir?: string;
   targetPath?: string;
   all?: boolean;
+  featuresOnly?: boolean;
 }
 
 export interface GherkinExtractionResult {
@@ -532,12 +533,20 @@ export interface GherkinExtractionResult {
   totalScenarios: number;
 }
 
+export interface GherkinStepLanguageMismatch {
+  featureFile: string;
+  expectedLanguages: GherkinScaffoldLanguage[];
+  foundLanguages: GherkinScaffoldLanguage[];
+  missingLanguages: GherkinScaffoldLanguage[];
+}
+
 export interface GherkinSyncCheckResult {
   inSync: boolean;
   outOfSyncFiles: string[];
   missingFiles: string[];
   orphanFeatureFiles?: string[];
   missingStepFiles?: string[];
+  stepLanguageMismatches?: GherkinStepLanguageMismatch[];
   totalFeatures: number;
 }
 
