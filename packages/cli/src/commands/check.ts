@@ -13,6 +13,7 @@ import {
   PreflightCheckOptions,
   PreflightCheckResult,
   PreflightGateSummary,
+  resolveFeatureTargetLanguages,
   scaffoldGherkinSteps,
   syncPdacDigests,
   verifyArtifactDuplicates,
@@ -156,19 +157,52 @@ export function detectDefaultScaffoldLanguage(rootDir: string): GherkinScaffoldL
   return null;
 }
 
-export function autoScaffoldMissingSteps(rootDir: string): number {
-  const sync = checkGherkinInSync({ rootDir });
-  const missing = sync.missingStepFiles ?? [];
-  if (missing.length === 0) return 0;
-  const lang = detectDefaultScaffoldLanguage(rootDir);
-  if (!lang) return 0;
+export function scaffoldMissingStepFiles(
+  rootDir: string,
+  missing: string[],
+  fallbackLang: GherkinScaffoldLanguage | null
+): number {
   let count = 0;
   for (const fp of missing) {
+    const resolved = resolveFeatureTargetLanguages(rootDir, fp);
+    const lang = resolved.length > 0 ? resolved : fallbackLang;
+    if (!lang) continue;
     if (scaffoldGherkinSteps({ rootDir, featurePath: fp, lang, allowFallback: true }).success) {
       count++;
     }
   }
   return count;
+}
+
+export function scaffoldLanguageMismatches(
+  rootDir: string,
+  mismatches: Array<{ featureFile: string; missingLanguages: GherkinScaffoldLanguage[] }>
+): number {
+  let count = 0;
+  for (const mismatch of mismatches) {
+    if (mismatch.missingLanguages.length === 0) continue;
+    const res = scaffoldGherkinSteps({
+      rootDir,
+      featurePath: mismatch.featureFile,
+      lang: mismatch.missingLanguages,
+      allowFallback: true,
+    });
+    if (res.success) count++;
+  }
+  return count;
+}
+
+export function autoScaffoldMissingSteps(rootDir: string): number {
+  const sync = checkGherkinInSync({ rootDir });
+  const missing = sync.missingStepFiles ?? [];
+  const mismatches = sync.stepLanguageMismatches ?? [];
+  if (missing.length === 0 && mismatches.length === 0) return 0;
+
+  const fallbackLang = detectDefaultScaffoldLanguage(rootDir);
+  return (
+    scaffoldMissingStepFiles(rootDir, missing, fallbackLang) +
+    scaffoldLanguageMismatches(rootDir, mismatches)
+  );
 }
 
 export function runAutoFix(rootDir: string, silent?: boolean): { gherkinCount: number; digestsCount: number } {
@@ -191,10 +225,16 @@ export function runAutoFix(rootDir: string, silent?: boolean): { gherkinCount: n
   return { gherkinCount: gherkinRes.features.length, digestsCount: pdacRes.syncedCount };
 }
 
-export function buildGherkinFailedGate(totalOut: number, hasMissingSteps: boolean): PreflightGateSummary {
-  const remediation = hasMissingSteps
-    ? "Run 'aisdlc gherkin scaffold <feature-file> --lang <lang> --fallback' to generate step definitions in tests/steps/."
-    : "Run 'aisdlc check --fix' to extract and regenerate .feature files, and remove orphan manual .feature files.";
+export function buildGherkinFailedGate(
+  totalOut: number,
+  hasMissingSteps: boolean,
+  hasLanguageMismatch = false
+): PreflightGateSummary {
+  const remediation = hasLanguageMismatch
+    ? "STEP_LANGUAGE_MISMATCH: Run 'aisdlc gherkin scaffold <feature-file> --lang <expected> --fallback' or 'aisdlc check --fix' to generate matching step definitions."
+    : hasMissingSteps
+      ? "Run 'aisdlc gherkin scaffold <feature-file> --lang <lang> --fallback' to generate step definitions in tests/steps/."
+      : "Run 'aisdlc check --fix' to extract and regenerate .feature files, and remove orphan manual .feature files.";
   return {
     name: 'BDD Synchronization (Gherkin -> .feature & steps)',
     status: 'FAILED',
@@ -207,10 +247,16 @@ export function auditGherkinGate(rootDir: string, wasAutoFixed: boolean): Prefli
   const syncCheck = checkGherkinInSync({ rootDir });
   const orphans = syncCheck.orphanFeatureFiles ?? [];
   const missingSteps = syncCheck.missingStepFiles ?? [];
+  const mismatches = syncCheck.stepLanguageMismatches ?? [];
 
   if (!syncCheck.inSync) {
-    const totalOut = syncCheck.missingFiles.length + syncCheck.outOfSyncFiles.length + orphans.length + missingSteps.length;
-    return buildGherkinFailedGate(totalOut, missingSteps.length > 0);
+    const totalOut =
+      syncCheck.missingFiles.length +
+      syncCheck.outOfSyncFiles.length +
+      orphans.length +
+      missingSteps.length +
+      mismatches.length;
+    return buildGherkinFailedGate(totalOut, missingSteps.length > 0, mismatches.length > 0);
   }
   return {
     name: 'BDD Synchronization (Gherkin -> .feature & steps)',

@@ -202,10 +202,16 @@ verifyCommand
   .command('gherkin')
   .description('Verify BDD synchronization between Markdown Gherkin blocks and .feature files')
   .option('-r, --root <path>', 'Project root directory')
+  .option('--features-only', 'Verify only Markdown-to-.feature synchronization without checking tests/steps/')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text or json')
   .action((opts) => {
-    const passed = runVerifyGherkin({ root: opts.root, json: opts.json, format: opts.format });
+    const passed = runVerifyGherkin({
+      root: opts.root,
+      featuresOnly: opts.featuresOnly,
+      json: opts.json,
+      format: opts.format,
+    });
     process.exit(passed ? 0 : 1);
   });
 
@@ -509,7 +515,7 @@ gherkinCommand
 gherkinCommand
   .command('scaffold <feature-file>')
   .description('Scaffold failing RED BDD step definitions across target languages (ts, py, go, rs, cs)')
-  .requiredOption('--lang <langs...>', 'Target language(s): ts, py, go, rs, cs (comma-separated or multiple)')
+  .option('--lang <langs...>', 'Target language(s): ts, py, go, rs, cs (comma-separated or multiple; auto-inferred if omitted)')
   .option('-o, --output <path>', 'Explicit output file path for generated step definitions')
   .option('--install', 'Automatically install missing native BDD generator')
   .option('--fallback', 'Use deterministic RED fallback template if native generator is missing')

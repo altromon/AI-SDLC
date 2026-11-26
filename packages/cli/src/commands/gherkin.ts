@@ -8,8 +8,10 @@ import {
   extractGherkinFeatures,
   GherkinScaffoldExecFn,
   GherkinScaffoldResult,
+  resolveFeatureTargetLanguages,
   scaffoldGherkinSteps,
 } from '@aisdlc/core';
+import { detectDefaultScaffoldLanguage } from './check.js';
 import { isJsonOutput } from './verify.js';
 
 export interface GherkinExtractCliOptions {
@@ -23,7 +25,7 @@ export interface GherkinExtractCliOptions {
 
 export interface GherkinScaffoldCliOptions {
   root?: string;
-  lang: string | string[];
+  lang?: string | string[];
   output?: string;
   install?: boolean;
   fallback?: boolean;
@@ -132,16 +134,18 @@ export async function handleInteractiveMissing(
   initialResult: GherkinScaffoldResult,
   featurePath: string,
   options: GherkinScaffoldCliOptions,
-  rootDir: string
+  rootDir: string,
+  resolvedLang?: string | string[]
 ): Promise<GherkinScaffoldResult> {
   const ask = options.promptFn || defaultConfirmInstall;
   const confirmed = await ask(
     `Native BDD generator is not installed (${initialResult.installCommand}, license: ${initialResult.license}). Install now? [y/N]: `
   );
+  const lang = resolvedLang ?? resolveScaffoldLang(rootDir, featurePath, options.lang);
   return scaffoldGherkinSteps({
     rootDir,
     featurePath,
-    lang: options.lang,
+    lang,
     outputPath: options.output,
     installMissing: confirmed,
     allowFallback: !confirmed,
@@ -161,6 +165,17 @@ export function emitScaffoldOutput(
   }
 }
 
+export function resolveScaffoldLang(
+  rootDir: string,
+  featurePath: string,
+  rawLang?: string | string[]
+): string | string[] {
+  if (typeof rawLang === 'string' && rawLang.trim().length > 0) return rawLang;
+  if (Array.isArray(rawLang) && rawLang.some((item) => item.trim().length > 0)) return rawLang;
+  const inferred = resolveFeatureTargetLanguages(rootDir, featurePath);
+  return inferred.length > 0 ? inferred : (detectDefaultScaffoldLanguage(rootDir) ?? '');
+}
+
 export async function runGherkinScaffold(
   featurePath: string,
   options: GherkinScaffoldCliOptions
@@ -168,11 +183,12 @@ export async function runGherkinScaffold(
   const rootDir = options.root || process.cwd();
   const useJson = isJsonOutput(options);
   const isInteractive = Boolean(process.stdin.isTTY && process.stdout.isTTY && !useJson && !options.silent);
+  const resolvedLang = resolveScaffoldLang(rootDir, featurePath, options.lang);
 
   let result = scaffoldGherkinSteps({
     rootDir,
     featurePath,
-    lang: options.lang,
+    lang: resolvedLang,
     outputPath: options.output,
     installMissing: options.install,
     allowFallback: options.fallback,
@@ -180,7 +196,7 @@ export async function runGherkinScaffold(
   });
 
   if (result.status === 'GENERATOR_MISSING' && (isInteractive || options.promptFn)) {
-    result = await handleInteractiveMissing(result, featurePath, options, rootDir);
+    result = await handleInteractiveMissing(result, featurePath, options, rootDir, resolvedLang);
   }
 
   emitScaffoldOutput(result, options, useJson);
