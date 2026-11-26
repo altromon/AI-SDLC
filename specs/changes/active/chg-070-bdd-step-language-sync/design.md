@@ -23,7 +23,7 @@ citations:
     digest: sha256:4072400548b46fc8e47b7f002d2f37d4d480c67bd79b24ec119b993ee2c1ac13
     comment: Citación de use-case (Separación BDD declarativo vs ejecutable e inferencia estricta de lenguaje de step definitions por feature)
   - id: FR-070-BDD-STEP-LANGUAGE-SYNC-001
-    digest: sha256:6e8f08ecf57678b220cada1701dca0464a55c3bfbc757403988e2e742a9d8e2a
+    digest: sha256:135ce82b6d4b92aeaed329362a01c4c11bbf0f8a60111080c19f526cc7246e41
     comment: Requerimiento derivado de UC-070-BDD-STEP-LANGUAGE-SYNC
   - id: CMP-070-BDD-STEP-LANGUAGE-SYNC
     digest: sha256:1581749ff535fbd245df2989cc4735c19ed04577f2329618ad5749095fc154e2
@@ -52,10 +52,10 @@ El cambio materializa `CMP-070-BDD-STEP-LANGUAGE-SYNC` dentro del núcleo `@aisd
 
 ### 2.2 `resolveFeatureTargetLanguages(rootDir: string, featurePath: string): GherkinScaffoldLanguage[]`
 Ubicado en `packages/core/src/verifiers/gherkin-language-resolver.ts` y re-exportado desde `packages/core/src/verifiers/gherkin.ts` y `packages/core/src/index.ts`:
-1. Lee el archivo `.feature` y extrae `# ID Requerimiento:` y `@tags` (normalizados sin `@`).
-2. Localiza cambios `CHG-*` / tareas `TSK-*` asociados al requerimiento en `specs/changes/` (vía `citations`, `satisfies-requirements` o texto) y extrae símbolos declarados en `contracts` de `design.md`.
+1. Lee el archivo `.feature` y extrae `# ID Requerimiento:` y `@tags` filtrados exclusivamente al patrón canónico de IDs de especificación/cambio (`/^(?:UC|FR|QR|BR|CON|SEC-REQ|SAF-REQ|PRIV-REQ|CHG|TSK)-[A-Z0-9-]+$/i`), ignorando etiquetas genéricas (`@automated`, `@regression`, `@functional`, `@nominal`, `@boundary`, `@invalid`, `@security`, `@mitigation`).
+2. Localiza cambios `CHG-*` / tareas `TSK-*` asociados al requerimiento en `specs/changes/` (vía `citations` o `satisfies-requirements` en frontmatter YAML) y extrae símbolos declarados en `contracts` de `design.md`.
 3. Recorre archivos fuente de producción bajo `rootDir` excluyendo `tests/`, `node_modules/`, `.git/`, `bin/`, `obj/`, `dist/`, `build/`, `target/`, `.venv/`, `venv/`, `templates/`, `reports/` y omitiendo symlinks (`lstatSync`).
-4. Selecciona archivos de producción que citen los IDs asociados (`<REQ-ID>`, `CHG-*`, `TSK-*`) o definan los símbolos de `contracts`.
+4. Selecciona archivos de producción que citen los IDs asociados (`<REQ-ID>`, `CHG-*`, `TSK-*`) o contengan los símbolos de `contracts` con límite de palabra (`\b<symbol>\b`, mínimo 4 caracteres).
 5. Mapea extensiones a `GherkinScaffoldLanguage` de forma determinista y ordenada:
    - `.cs` -> `cs`
    - `.py` -> `py`
@@ -74,7 +74,9 @@ Ubicado en `packages/core/src/verifiers/gherkin-language-resolver.ts` y re-expor
 - `packages/cli/src/index.ts` & `packages/cli/src/commands/verify.ts`: añade `--features-only` a `aisdlc verify gherkin` (`runVerifyGherkin`) y reporta `STEP_LANGUAGE_MISMATCH` en JSON (`stepLanguageMismatchCount`, `violations`) y consola.
 - `scripts/verify-checkpoint-1.ts`: Gate 4 (`verify gherkin`) pasa `'--features-only'`.
 - `packages/cli/src/index.ts` & `packages/cli/src/commands/gherkin.ts`: `--lang` pasa a ser opcional en `aisdlc gherkin scaffold <feature-file>`; cuando se omite, `runGherkinScaffold` infiere vía `resolveFeatureTargetLanguages(rootDir, featurePath)` y hace fallback a `detectDefaultScaffoldLanguage(rootDir)` si resulta vacío.
-- `packages/cli/src/commands/check.ts`: `autoScaffoldMissingSteps(rootDir)` resuelve primero `resolveFeatureTargetLanguages(rootDir, fp)` por cada `.feature` faltante y solo usa `detectDefaultScaffoldLanguage(rootDir)` cuando no existen archivos de producción asociados.
+- `packages/cli/src/commands/check.ts`:
+  - `autoScaffoldMissingSteps(rootDir)` procesa tanto `sync.missingStepFiles` (resolviendo primero `resolveFeatureTargetLanguages(rootDir, fp)` por cada `.feature` y usando `detectDefaultScaffoldLanguage(rootDir)` solo si resulta vacío) como `sync.stepLanguageMismatches` (generando cada lenguaje en `mismatch.missingLanguages`).
+  - `auditGherkinGate(rootDir, wasAutoFixed)` incluye `(syncCheck.stepLanguageMismatches ?? []).length` en `totalOut` y reporta una remediación específica de `STEP_LANGUAGE_MISMATCH` (`aisdlc gherkin scaffold <feature> --lang <expected> --fallback` o `aisdlc check --fix`) cuando existan discrepancias de lenguaje.
 
 ## 3. Protocolos de Manejo de Errores y Mitigación
 - Archivos `.feature` inexistentes o ilegibles devuelven `[]` en `resolveFeatureTargetLanguages` sin lanzar excepciones no controladas.

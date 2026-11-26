@@ -74,7 +74,7 @@ superseded-by: null
 - **Requerimiento**: `FR-070-BDD-STEP-LANGUAGE-SYNC-001`
 - **Descripción**:
   - Crear `packages/core/src/verifiers/gherkin-language-resolver.ts` con `resolveFeatureTargetLanguages(rootDir: string, featurePath: string): GherkinScaffoldLanguage[]` y re-exportar desde `packages/core/src/verifiers/gherkin.ts` y `packages/core/src/index.ts`.
-  - Parsear `# ID Requerimiento:` y `@tags` del `.feature`, resolver `CHG-*`/`TSK-*` y símbolos `contracts` en `design.md`, escanear archivos fuente de producción (excluyendo `tests/`, `node_modules/`, `.git/`, `bin/`, `obj/`, `dist/`, `build/`, `target/`, `.venv/`, `venv/`, `templates/`, `reports/`, y symlinks) que citen dichos IDs o definan dichos símbolos, y mapear extensiones (`.cs` -> `cs`, `.py` -> `py`, `.go` -> `go`, `.rs` -> `rs`, `.ts/.tsx/.js/.jsx/.mjs/.cjs` -> `ts`) deterministamente.
+  - Parsear `# ID Requerimiento:` y `@tags` canónicos (`/^(?:UC|FR|QR|BR|CON|SEC-REQ|SAF-REQ|PRIV-REQ|CHG|TSK)-[A-Z0-9-]+$/i`, ignorando etiquetas genéricas como `@automated`/`@regression`) del `.feature`, resolver `CHG-*`/`TSK-*` y símbolos `contracts` en `design.md`, escanear archivos fuente de producción (excluyendo `tests/`, `node_modules/`, `.git/`, `bin/`, `obj/`, `dist/`, `build/`, `target/`, `.venv/`, `venv/`, `templates/`, `reports/`, y symlinks) que citen dichos IDs o contengan dichos símbolos (`\b<symbol>\b`), y mapear extensiones (`.cs` -> `cs`, `.py` -> `py`, `.go` -> `go`, `.rs` -> `rs`, `.ts/.tsx/.js/.jsx/.mjs/.cjs` -> `ts`) deterministamente.
   - Actualizar `packages/core/src/types/index.ts` y `packages/core/src/verifiers/gherkin.ts` (`checkGherkinInSync`) para soportar `featuresOnly?: boolean` en `GherkinExtractionOptions` y `stepLanguageMismatches?: GherkinStepLanguageMismatch[]` en `GherkinSyncCheckResult`, omitiendo step-files en modo `featuresOnly: true` y exigiendo paridad por cada lenguaje resuelto (`STEP_LANGUAGE_MISMATCH`) en modo `featuresOnly: false`.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm test`
@@ -87,7 +87,7 @@ superseded-by: null
   - En `packages/cli/src/commands/verify.ts` y `packages/cli/src/index.ts`, añadir `--features-only` a `aisdlc verify gherkin` y emitir `STEP_LANGUAGE_MISMATCH` en JSON y consola.
   - Actualizar `scripts/verify-checkpoint-1.ts` Gate 4 para pasar `'--features-only'`.
   - En `packages/cli/src/index.ts` y `packages/cli/src/commands/gherkin.ts`, hacer `--lang` opcional en `aisdlc gherkin scaffold <feature-file>`, auto-infiriendo vía `resolveFeatureTargetLanguages` con fallback a `detectDefaultScaffoldLanguage(rootDir)`.
-  - En `packages/cli/src/commands/check.ts`, actualizar `autoScaffoldMissingSteps(rootDir)` para resolver lenguajes por feature vía `resolveFeatureTargetLanguages(rootDir, fp)` antes de recurrir a `detectDefaultScaffoldLanguage(rootDir)`.
+  - En `packages/cli/src/commands/check.ts`, actualizar `autoScaffoldMissingSteps(rootDir)` y `auditGherkinGate(rootDir)` para incluir `stepLanguageMismatches` en `totalOut`, mostrar remediación `STEP_LANGUAGE_MISMATCH`, scaffoldar `mismatch.missingLanguages`, y resolver lenguajes por feature vía `resolveFeatureTargetLanguages(rootDir, fp)` antes de recurrir a `detectDefaultScaffoldLanguage(rootDir)`.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm test`
 

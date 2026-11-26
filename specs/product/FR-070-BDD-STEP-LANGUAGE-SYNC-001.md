@@ -21,7 +21,7 @@ superseded-by: null
 
 # FR-070-BDD-STEP-LANGUAGE-SYNC-001: bdd-step-language-sync
 
-> **Upstream Citation**: `UC-070-BDD-STEP-LANGUAGE-SYNC` (`specs/product/UC-070-BDD-STEP-LANGUAGE-SYNC.md`, Unix LF SHA-256: `pending-check-fix`)
+> **Upstream Citation**: `UC-070-BDD-STEP-LANGUAGE-SYNC` (`specs/product/UC-070-BDD-STEP-LANGUAGE-SYNC.md`, Unix LF SHA-256: `4072400548b46fc8e47b7f002d2f37d4d480c67bd79b24ec119b993ee2c1ac13`)
 
 ## 1. Enunciado Normativo
 1. **Separación BDD Declarativo vs Ejecutable (`--features-only`)**:
