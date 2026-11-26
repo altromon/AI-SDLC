@@ -721,5 +721,48 @@ describe('@FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001 @CHG-051-GHERKIN-POLYGLOT-SCAFFO
       expect(gherkinScaffold.resolveFallbackReason(csSpec)).toContain('does not emit step-definition source code');
       expect(gherkinScaffold.resolveFallbackReason(tsSpec)).toContain('not installed');
     });
+
+    it('discards compiler stdout for cs and rs even when allowFallback is omitted, and handles malformed/empty inputs & edge backticks', () => {
+      const scaffoldGherkinSteps = getScaffoldGherkinSteps();
+
+      for (const lang of ['cs', 'rs'] as const) {
+        const res = scaffoldGherkinSteps({
+          rootDir: tmpDir,
+          featurePath: sampleFeaturePath,
+          lang,
+          execFn: () => ({ status: 0, stdout: 'Compiler output noise', stderr: '' }),
+        });
+        expect(res.success).toBe(true);
+        expect(res.status).toBe('GENERATED_FALLBACK');
+        expect(res.content).not.toContain('Compiler output noise');
+      }
+
+      expect(gherkinScaffold.formatGoRawRegexLiteral('')).toBe('``');
+      expect(gherkinScaffold.formatGoRawRegexLiteral('`abc')).toBe('`` + "`" + `abc`');
+      expect(gherkinScaffold.formatGoRawRegexLiteral('abc`')).toBe('`abc` + "`" + ``');
+      expect(gherkinScaffold.formatGoRawRegexLiteral('a``b')).toBe('`a` + "`" + `` + "`" + `b`');
+
+      const emptyFeatureRes = scaffoldGherkinSteps({ rootDir: tmpDir, featurePath: '', lang: 'ts' });
+      expect(emptyFeatureRes.success).toBe(false);
+      expect(emptyFeatureRes.status).toBe('ERROR');
+
+      const emptyLangRes = scaffoldGherkinSteps({ rootDir: tmpDir, featurePath: sampleFeaturePath, lang: '' });
+      expect(emptyLangRes.success).toBe(false);
+      expect(emptyLangRes.errorCode).toBe('ERR_UNSUPPORTED_LANGUAGE');
+
+      const malformedFeature = path.join(tmpDir, 'tests', 'features', 'malformed-empty.feature');
+      fs.writeFileSync(malformedFeature, 'Not a valid gherkin header\nRandom garbage text\n', 'utf-8');
+      const malformedRes = scaffoldGherkinSteps({
+        rootDir: tmpDir,
+        featurePath: malformedFeature,
+        lang: 'go',
+        allowFallback: true,
+        execFn: () => ({ status: 127, stdout: '', stderr: 'missing' }),
+      });
+      expect(malformedRes.success).toBe(true);
+      expect(malformedRes.scenariosCount).toBe(0);
+      expect(malformedRes.stepsCount).toBe(0);
+      expect(malformedRes.content).toContain('func InitializeMalformedEmptyScenario');
+    });
   });
 });
