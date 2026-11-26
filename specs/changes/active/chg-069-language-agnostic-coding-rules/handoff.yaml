@@ -1,0 +1,24 @@
+id: HOF-CHG-069-LANGUAGE-AGNOSTIC-CODING-RULES
+type: handoff
+title: Handoff Canónico de Arquitectura para Language-Agnostic Coding Rules Detection and Verification
+changeId: CHG-069-LANGUAGE-AGNOSTIC-CODING-RULES
+version: 1.0.0
+createdAt: '2026-11-26T09:02:34.850Z'
+autonomyMode: AUTONOMOUS
+subgraph:
+  requirements:
+    - FR-069-LANGUAGE-AGNOSTIC-CODING-RULES-001
+  useCases:
+    - UC-069-LANGUAGE-AGNOSTIC-CODING-RULES
+  components:
+    - CMP-069-LANGUAGE-AGNOSTIC-CODING-RULES
+  tasks:
+    - TSK-069-01
+    - TSK-069-02
+citations:
+  - id: UC-069-LANGUAGE-AGNOSTIC-CODING-RULES
+    digest: sha256:d192abfbb205fbaa3b87fcd9ca1bf237b07ffabab2f96ababe7ee1a7230f19c4
+    comment: Citación de use-case (Detección recursiva y cumplimiento agnóstico al lenguaje de reglas estrictas de codificación)
+  - id: FR-069-LANGUAGE-AGNOSTIC-CODING-RULES-001
+    digest: sha256:926644c991c08f15cdd1dd56675b551551b34ab1f44f44e8c1553e9c3622e670
+    comment: Requerimiento derivado de UC-069-LANGUAGE-AGNOSTIC-CODING-RULES
