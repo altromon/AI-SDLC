@@ -307,7 +307,7 @@ export function resolveWinCmdSpawn(
   const comSpec =
     rawComSpec && path.isAbsolute(rawComSpec) && !WIN_CMD_META_RE.test(rawComSpec)
       ? rawComSpec
-      : 'cmd.exe';
+      : path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'cmd.exe');
   return { command: comSpec, args: ['/d', '/s', '/c', binPath, ...args] };
 }
 
@@ -339,6 +339,18 @@ export function spawnTrustedBinary(
 }
 
 export function isToolInstalled(toolName: string, rootDir?: string): boolean {
+  if (toolName === 'clippy') {
+    if (resolveTrustedBinaryPath('cargo-clippy', rootDir) !== null) {
+      return true;
+    }
+    const cargoBin = resolveTrustedBinaryPath('cargo', rootDir);
+    if (!cargoBin) return false;
+    const res = spawnTrustedBinary(cargoBin, ['clippy', '--version'], {
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    return !res.error && res.status === 0;
+  }
   return resolveTrustedBinaryPath(toolName, rootDir) !== null;
 }
 

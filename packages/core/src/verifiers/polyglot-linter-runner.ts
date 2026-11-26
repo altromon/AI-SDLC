@@ -12,6 +12,7 @@ import { detectProjectStacks } from '../init/coding-rules-templates.js';
 import {
   WIN_CMD_META_RE,
   ensureToolAvailable,
+  isToolInstalled,
   redactSensitiveDiagnostics,
   resolveTrustedBinaryPath,
   spawnTrustedBinary,
@@ -128,14 +129,20 @@ export function resolveTargetStacks(rootDir: string, explicitStacks?: PolyglotLi
 export function buildJvmInvocations(stack: 'java' | 'kotlin', rootDir: string): LinterInvocation[] {
   const hasGradle = fs.existsSync(path.join(rootDir, 'build.gradle')) || fs.existsSync(path.join(rootDir, 'build.gradle.kts'));
   if (stack === 'kotlin') {
-    const list: LinterInvocation[] = [{ stack, tool: 'detekt', binaryName: 'detekt', args: ['--config', 'config/detekt/detekt.yml'] }];
+    const detektArgs = fs.existsSync(path.join(rootDir, 'config/detekt/detekt.yml'))
+      ? ['--config', 'config/detekt/detekt.yml']
+      : [];
+    const list: LinterInvocation[] = [{ stack, tool: 'detekt', binaryName: 'detekt', args: detektArgs }];
     if (hasGradle) list.push({ stack, tool: 'gradle', binaryName: 'gradle', args: ['check'] });
     return list;
   }
   const list: LinterInvocation[] = [];
   if (fs.existsSync(path.join(rootDir, 'pom.xml'))) list.push({ stack, tool: 'mvn', binaryName: 'mvn', args: ['compile'] });
   if (hasGradle) list.push({ stack, tool: 'gradle', binaryName: 'gradle', args: ['check'] });
-  list.push({ stack, tool: 'pmd', binaryName: 'pmd', args: ['check', '-d', '.', '-R', 'config/pmd/aisdlc-ruleset.xml'] });
+  const pmdArgs = fs.existsSync(path.join(rootDir, 'config/pmd/aisdlc-ruleset.xml'))
+    ? ['check', '-d', '.', '-R', 'config/pmd/aisdlc-ruleset.xml']
+    : ['check', '-d', '.'];
+  list.push({ stack, tool: 'pmd', binaryName: 'pmd', args: pmdArgs });
   return list;
 }
 
@@ -148,7 +155,7 @@ export function buildClangTidyInvocation(stack: 'c' | 'cpp', rootDir: string): L
   if (files.length === 0) {
     return { stack, tool: 'clang-tidy', binaryName: 'clang-tidy', args: [], skipReason: `Skipping clang-tidy for ${stack}: no source files found.` };
   }
-  return { stack, tool: 'clang-tidy', binaryName: 'clang-tidy', args: ['-p', '.', '--', ...files] };
+  return { stack, tool: 'clang-tidy', binaryName: 'clang-tidy', args: ['-p', '.', ...files] };
 }
 
 export function buildStackInvocations(stack: PolyglotLinterStack, rootDir: string): LinterInvocation[] {
@@ -167,7 +174,12 @@ export async function resolveBinaryForInvocation(
   rootDir: string,
   options: PolyglotLinterOptions
 ): Promise<{ binPath: string | null; warning?: string }> {
-  const existing = resolveTrustedBinaryPath(inv.binaryName, rootDir);
+  const existing =
+    inv.tool === 'clippy'
+      ? isToolInstalled('clippy', rootDir)
+        ? resolveTrustedBinaryPath(inv.binaryName, rootDir)
+        : null
+      : resolveTrustedBinaryPath(inv.binaryName, rootDir);
   if (existing) return { binPath: existing };
   const ensured = await ensureToolAvailable(inv.tool, { ...options, rootDir });
   if (!ensured.available) return { binPath: null, warning: ensured.missingError || ensured.warning };
@@ -206,6 +218,23 @@ export async function executeInvocation(
   return buildFailureOutcome(inv, res, rootDir);
 }
 
+export function collectUniqueInvocations(
+  detectedStacks: PolyglotLinterStack[],
+  rootDir: string
+): LinterInvocation[] {
+  const seen = new Set<string>();
+  const unique: LinterInvocation[] = [];
+  for (const stack of detectedStacks) {
+    for (const inv of buildStackInvocations(stack, rootDir)) {
+      const dedupeKey = `${inv.tool}:${inv.args.join(' ')}`;
+      if (seen.has(dedupeKey)) continue;
+      seen.add(dedupeKey);
+      unique.push(inv);
+    }
+  }
+  return unique;
+}
+
 export async function runPolyglotLinters(
   options: PolyglotLinterOptions = {}
 ): Promise<PolyglotLinterResult> {
@@ -217,13 +246,11 @@ export async function runPolyglotLinters(
   const diagnostics: PolyglotLinterDiagnostic[] = [];
   const warnings: string[] = [];
   const errors: string[] = [];
-  for (const stack of detectedStacks) {
-    for (const inv of buildStackInvocations(stack, rootDir)) {
-      const outcome = await executeInvocation(inv, rootDir, options);
-      diagnostics.push(outcome.diagnostic);
-      if (outcome.warning) warnings.push(outcome.warning);
-      if (outcome.error) errors.push(outcome.error);
-    }
+  for (const inv of collectUniqueInvocations(detectedStacks, rootDir)) {
+    const outcome = await executeInvocation(inv, rootDir, options);
+    diagnostics.push(outcome.diagnostic);
+    if (outcome.warning) warnings.push(outcome.warning);
+    if (outcome.error) errors.push(outcome.error);
   }
   return { success: errors.length === 0, detectedStacks, diagnostics, warnings, errors };
 }

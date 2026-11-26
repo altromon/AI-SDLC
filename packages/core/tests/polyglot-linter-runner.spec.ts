@@ -8,6 +8,7 @@ import {
   getToolInstallSpec,
   isToolInstalled,
   resolveTrustedBinaryPath,
+  resolveWinCmdSpawn,
   type InstallableTool,
   type SupportedPlatform,
 } from '../src/verifiers/tool-installer.js';
@@ -16,6 +17,7 @@ import {
   buildFailureOutcome,
   buildJvmInvocations,
   buildStackInvocations,
+  collectUniqueInvocations,
   executeInvocation,
   resolveBinaryForInvocation,
   resolveTargetStacks,
@@ -202,9 +204,133 @@ describe('CHG-074: Polyglot Linters & Compilers in Verify All', () => {
       }
 
       for (const stack of ALL_11_STACKS) {
+        if (stack === 'javascript' || stack === 'angular') {
+          // Deduplicated against typescript (tsc --noEmit and eslint .)
+          continue;
+        }
         const stackDiags = result.diagnostics.filter((d) => d.stack === stack);
         expect(stackDiags.length).toBeGreaterThan(0);
         expect(stackDiags.every((d) => d.status === 'passed')).toBe(true);
+      }
+      expect(result.diagnostics.filter((d) => d.tool === 'eslint')).toHaveLength(1);
+    });
+
+    it('deduplicates eslint and tsc across typescript, javascript, and angular', async () => {
+      const rootDir = makeTmpDir('aisdlc-polyglot-dedup-');
+      const trustedDir = makeTmpDir('aisdlc-polyglot-dedup-bin-');
+      createFakeExecutable(trustedDir, 'tsc');
+      createFakeExecutable(trustedDir, 'eslint');
+      vi.stubEnv('PATH', trustedDir);
+
+      const spawnSpy = vi.spyOn(child_process, 'spawnSync').mockReturnValue({
+        status: 0,
+        stdout: 'ok',
+        stderr: '',
+        pid: 123,
+        output: [null, 'ok', ''],
+        signal: null,
+      });
+
+      const result = await runPolyglotLinters({
+        rootDir,
+        stacks: ['typescript', 'javascript', 'angular'],
+        nonInteractive: true,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.diagnostics).toHaveLength(2);
+      expect(spawnSpy).toHaveBeenCalledTimes(2);
+      expect(collectUniqueInvocations(['typescript', 'javascript', 'angular'], rootDir)).toHaveLength(2);
+    });
+
+    it('passes exact clang-tidy args without -- and validates toSafeRelativeSource negative cases', () => {
+      const rootDir = makeTmpDir('aisdlc-polyglot-clang-');
+      fs.writeFileSync(path.join(rootDir, 'compile_commands.json'), '[]');
+      fs.writeFileSync(path.join(rootDir, 'main.c'), 'int main(void) { return 0; }\n');
+
+      const inv = buildClangTidyInvocation('c', rootDir);
+      expect(inv.skipReason).toBeUndefined();
+      expect(inv.args).toEqual(['-p', '.', './main.c']);
+      expect(inv.args).not.toContain('--');
+
+      expect(toSafeRelativeSource(path.join(rootDir, '-foo.c'), rootDir)).toBe('./-foo.c');
+      expect(toSafeRelativeSource(path.join(rootDir, 'bad;file.c'), rootDir)).toBeNull();
+      expect(toSafeRelativeSource(path.join(rootDir, 'bad|file.c'), rootDir)).toBeNull();
+      expect(toSafeRelativeSource(path.join(rootDir, 'bad&file.c'), rootDir)).toBeNull();
+      expect(toSafeRelativeSource(rootDir, rootDir)).toBeNull();
+    });
+
+    it('conditionally includes pmd and detekt config flags only when config files exist', () => {
+      const rootDir = makeTmpDir('aisdlc-polyglot-jvm-cfg-');
+
+      const javaWithoutCfg = buildJvmInvocations('java', rootDir).find((i) => i.tool === 'pmd');
+      expect(javaWithoutCfg?.args).toEqual(['check', '-d', '.']);
+
+      const kotlinWithoutCfg = buildJvmInvocations('kotlin', rootDir).find((i) => i.tool === 'detekt');
+      expect(kotlinWithoutCfg?.args).toEqual([]);
+
+      fs.mkdirSync(path.join(rootDir, 'config', 'pmd'), { recursive: true });
+      fs.mkdirSync(path.join(rootDir, 'config', 'detekt'), { recursive: true });
+      fs.writeFileSync(path.join(rootDir, 'config', 'pmd', 'aisdlc-ruleset.xml'), '<ruleset/>');
+      fs.writeFileSync(path.join(rootDir, 'config', 'detekt', 'detekt.yml'), 'build:\n');
+
+      const javaWithCfg = buildJvmInvocations('java', rootDir).find((i) => i.tool === 'pmd');
+      expect(javaWithCfg?.args).toEqual(['check', '-d', '.', '-R', 'config/pmd/aisdlc-ruleset.xml']);
+
+      const kotlinWithCfg = buildJvmInvocations('kotlin', rootDir).find((i) => i.tool === 'detekt');
+      expect(kotlinWithCfg?.args).toEqual(['--config', 'config/detekt/detekt.yml']);
+    });
+
+    it('checks cargo-clippy / cargo clippy --version for clippy and prompts/skips when absent', async () => {
+      const rootDir = makeTmpDir('aisdlc-polyglot-clippy-');
+      const trustedDir = makeTmpDir('aisdlc-polyglot-clippy-bin-');
+      const cargoBin = createFakeExecutable(trustedDir, 'cargo');
+      vi.stubEnv('PATH', trustedDir);
+
+      const spawnSpy = vi.spyOn(child_process, 'spawnSync').mockReturnValue({
+        status: 1,
+        stdout: '',
+        stderr: 'error: no such subcommand: `clippy`',
+        pid: 1,
+        output: [null, '', 'error: no such subcommand: `clippy`'],
+        signal: null,
+      });
+
+      expect(isToolInstalled('clippy', rootDir)).toBe(false);
+      const missingRes = await resolveBinaryForInvocation(
+        { stack: 'rust', tool: 'clippy', binaryName: 'cargo', args: ['clippy', '--', '-D', 'warnings'] },
+        rootDir,
+        { nonInteractive: true }
+      );
+      expect(missingRes.binPath).toBeNull();
+      expect(missingRes.warning).toContain('rustup component add clippy');
+
+      spawnSpy.mockReturnValue({
+        status: 0,
+        stdout: 'clippy 0.1.78',
+        stderr: '',
+        pid: 2,
+        output: [null, 'clippy 0.1.78', ''],
+        signal: null,
+      });
+
+      expect(isToolInstalled('clippy', rootDir)).toBe(true);
+      const okRes = await resolveBinaryForInvocation(
+        { stack: 'rust', tool: 'clippy', binaryName: 'cargo', args: ['clippy', '--', '-D', 'warnings'] },
+        rootDir,
+        { nonInteractive: true }
+      );
+      expect(okRes.binPath).toBe(cargoBin);
+    });
+
+    it('uses absolute System32 cmd.exe fallback in resolveWinCmdSpawn when ComSpec is relative or unset', () => {
+      vi.stubEnv('ComSpec', 'cmd.exe');
+      const res = resolveWinCmdSpawn('C:\\tools\\eslint.cmd', ['.']);
+      if (process.platform === 'win32') {
+        expect(path.isAbsolute(res.command)).toBe(true);
+        expect(res.command.toLowerCase()).toMatch(/system32[\\/]cmd\.exe$/);
+      } else {
+        expect(res.command).toBe('C:\\tools\\eslint.cmd');
       }
     });
 
@@ -399,6 +525,45 @@ describe('CHG-074: Polyglot Linters & Compilers in Verify All', () => {
         expect.objectContaining({ binPath: null })
       );
       expect((await executeInvocation({ stack: 'go', tool: 'golangci-lint', binaryName: 'golangci-lint', args: ['run'], skipReason: 'skip' }, rootDir, {})).diagnostic.status).toBe('skipped');
+    });
+
+    it('propagates polyglotLinters failure to runVerifyAllAsync', async () => {
+      const rootDir = makeTmpDir('aisdlc-polyglot-verifyall-fail-');
+      const trustedDir = makeTmpDir('aisdlc-polyglot-verifyall-bin-');
+      createFakeExecutable(trustedDir, 'golangci-lint');
+      fs.writeFileSync(path.join(rootDir, 'go.mod'), 'module example.com/test\n');
+      vi.stubEnv('PATH', trustedDir);
+
+      vi.spyOn(child_process, 'spawnSync').mockReturnValue({
+        status: 1,
+        stdout: '',
+        stderr: 'lint failure',
+        pid: 789,
+        output: [null, '', 'lint failure'],
+        signal: null,
+      });
+
+      const verifyModule = cliVerify as Record<string, unknown>;
+      const collectAllGatesAsync = verifyModule.collectAllGatesAsync as (
+        options: Record<string, unknown>,
+        root: string,
+        isSilent: boolean
+      ) => Promise<Record<string, { success: boolean }>>;
+      const runVerifyAllAsync = verifyModule.runVerifyAllAsync as (
+        options: Record<string, unknown>
+      ) => Promise<boolean>;
+
+      const gates = await collectAllGatesAsync({ forceExternalLinters: true }, rootDir, true);
+      expect(gates.polyglotLinters.success).toBe(false);
+
+      const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const verifyAllOk = await runVerifyAllAsync({
+        root: rootDir,
+        json: true,
+        forceExternalLinters: true,
+      });
+      expect(verifyAllOk).toBe(false);
+      expect(logSpy).toHaveBeenCalled();
     });
   });
 });
