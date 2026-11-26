@@ -52,8 +52,8 @@ Feature: Polyglot Gherkin Step Definition Scaffolding CLI
     Examples:
       | feature         | lang    | error                    |
       | missing.feature | ts      | ERR_FEATURE_NOT_FOUND    |
-      | valid.feature   | java    | ERR_UNSUPPORTED_LANGUAGE |
-      | valid.feature   | ts,java | ERR_UNSUPPORTED_LANGUAGE |
+      | valid.feature   | fortran    | ERR_UNSUPPORTED_LANGUAGE |
+      | valid.feature   | ts,fortran | ERR_UNSUPPORTED_LANGUAGE |
 ```
 
 ---

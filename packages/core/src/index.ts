@@ -331,9 +331,11 @@ export type {
 export {
   GHERKIN_GENERATOR_SPECS,
   buildFeatureFileContent,
+  checkFeatureStepLanguageParity,
   checkGherkinInSync,
   extractGherkinBlock,
   extractGherkinFeatures,
+  getPresentStepLanguages,
   normalizeScaffoldLanguages,
   parseMarkdownFrontmatter,
   resolveFeatureFilePath,
@@ -881,3 +883,13 @@ export {
 } from './version.js';
 export type { AisdlcRepoManifest } from './version.js';
 export * from './code-graph/index.js';
+export {
+  POLYGLOT_EXCLUDED_DIRS,
+  POLYGLOT_EXCLUDED_DIR_SET,
+  POLYGLOT_LANGUAGE_REGISTRY,
+  buildExtToLangMap,
+  featureSnakeStem,
+  getSupportedScaffoldLanguages,
+  normalizeScaffoldLanguage,
+} from './verifiers/polyglot-registry.js';
+export type { PolyglotLanguageSpec } from './verifiers/polyglot-registry.js';

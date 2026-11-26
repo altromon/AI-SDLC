@@ -550,7 +550,7 @@ describe('CLI check.ts helper and gate auditor unit suite (100% function coverag
     // 7. Invalid language config is rejected (returns null)
     const invalidCfgDir = path.join(tmpDir, 'cfg-invalid');
     fs.mkdirSync(invalidCfgDir, { recursive: true });
-    fs.writeFileSync(path.join(invalidCfgDir, '.aisdlc.json'), JSON.stringify({ testing: { language: 'java' } }), 'utf-8');
+    fs.writeFileSync(path.join(invalidCfgDir, '.aisdlc.json'), JSON.stringify({ testing: { language: 'fortran' } }), 'utf-8');
     expect(detectDefaultScaffoldLanguage(invalidCfgDir)).toBeNull();
   });
 

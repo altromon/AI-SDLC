@@ -352,7 +352,7 @@ describe('M4.2 gherkin & gherkin-scaffold unit suite', () => {
       expect(normalizeScaffoldLanguages('')).toEqual({ valid: false, langs: [] });
       expect(normalizeScaffoldLanguages([])).toEqual({ valid: false, langs: [] });
       expect(normalizeScaffoldLanguages('ruby')).toEqual({ valid: false, langs: [] });
-      expect(normalizeScaffoldLanguages('ts,java')).toEqual({ valid: false, langs: [] });
+      expect(normalizeScaffoldLanguages('ts,fortran')).toEqual({ valid: false, langs: [] });
       expect(normalizeScaffoldLanguages(null as unknown as string)).toEqual({ valid: false, langs: [] });
     });
 
@@ -432,8 +432,12 @@ describe('M4.2 gherkin & gherkin-scaffold unit suite', () => {
         go: 'godog',
         rs: 'FeatureWorld',
         cs: 'Reqnroll',
+        java: 'io.cucumber.java.en',
+        kt: 'io.cucumber.java.en',
+        c: 'RED: Step not implemented',
+        cpp: 'SCENARIO(',
       };
-      for (const lang of ['ts', 'py', 'go', 'rs', 'cs'] as const) {
+      for (const lang of ['ts', 'py', 'go', 'rs', 'cs', 'java', 'kt', 'c', 'cpp'] as const) {
         const rendered = buildFallbackTemplate(lang, 'tests/a.feature', steps);
         expect(rendered).toContain(expectedMarkers[lang]);
         expect(buildFallbackTemplate(lang, 'tests/a.feature', [])).toContain('tests/a.feature');

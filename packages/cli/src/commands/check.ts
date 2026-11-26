@@ -7,9 +7,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import pc from 'picocolors';
 import {
+  POLYGLOT_EXCLUDED_DIR_SET,
+  POLYGLOT_LANGUAGE_REGISTRY,
   checkGherkinInSync,
   extractGherkinFeatures,
   GherkinScaffoldLanguage,
+  normalizeScaffoldLanguage,
   PreflightCheckOptions,
   PreflightCheckResult,
   PreflightGateSummary,
@@ -31,26 +34,15 @@ import {
 } from '@aisdlc/core';
 import { isJsonOutput } from './verify.js';
 
+export { normalizeScaffoldLanguage };
+
 export interface CheckCommandOptions extends PreflightCheckOptions {
   json?: boolean;
   format?: string;
   vuln?: boolean;
 }
 
-const SUPPORTED_SCAFFOLD_LANGUAGES = new Set<GherkinScaffoldLanguage>(['ts', 'py', 'go', 'rs', 'cs']);
-const SKIP_MANIFEST_DIRS = new Set([
-  'node_modules',
-  '.git',
-  'bin',
-  'obj',
-  'dist',
-  'build',
-  'target',
-  '.venv',
-  'venv',
-  '__pycache__',
-  '.pytest_cache',
-]);
+const SKIP_MANIFEST_DIRS = POLYGLOT_EXCLUDED_DIR_SET;
 
 export function hasDotnetProjectFiles(rootDir: string): boolean {
   if (!fs.existsSync(rootDir)) return false;
@@ -59,12 +51,6 @@ export function hasDotnetProjectFiles(rootDir: string): boolean {
   } catch {
     return false;
   }
-}
-
-export function normalizeScaffoldLanguage(raw: unknown): GherkinScaffoldLanguage | null {
-  if (typeof raw !== 'string') return null;
-  const norm = raw.trim().toLowerCase() as GherkinScaffoldLanguage;
-  return SUPPORTED_SCAFFOLD_LANGUAGES.has(norm) ? norm : null;
 }
 
 export function readJsonConfigLanguage(rootDir: string): GherkinScaffoldLanguage | null {
@@ -138,21 +124,87 @@ export function hasAnyFile(dir: string, files: readonly string[]): boolean {
   return files.some((file) => fs.existsSync(path.join(dir, file)));
 }
 
-export function detectLanguageInDir(dir: string): GherkinScaffoldLanguage | null {
-  if (hasAnyFile(dir, ['pyproject.toml', 'requirements.txt', 'setup.py'])) return 'py';
-  if (hasAnyFile(dir, ['go.mod'])) return 'go';
-  if (hasAnyFile(dir, ['Cargo.toml'])) return 'rs';
+export function matchesSubtreeEntry(
+  dir: string,
+  entry: fs.Dirent,
+  exts: readonly string[],
+  excludedFiles: readonly string[],
+  depth: number
+): boolean {
+  if (entry.isSymbolicLink()) return false;
+  if (entry.isFile()) {
+    return !excludedFiles.includes(entry.name) && exts.some((ext) => entry.name.endsWith(ext));
+  }
+  if (entry.isDirectory() && !SKIP_MANIFEST_DIRS.has(entry.name)) {
+    return hasSubtreeExtension(path.join(dir, entry.name), exts, excludedFiles, depth + 1);
+  }
+  return false;
+}
+
+export function hasSubtreeExtension(
+  dir: string,
+  exts: readonly string[],
+  excludedFiles: readonly string[] = [],
+  depth = 0
+): boolean {
+  if (depth > 3) return false;
+  try {
+    return fs
+      .readdirSync(dir, { withFileTypes: true })
+      .some((entry) => matchesSubtreeEntry(dir, entry, exts, excludedFiles, depth));
+  } catch {
+    return false;
+  }
+}
+
+export function disambiguateGradleKts(dir: string): GherkinScaffoldLanguage {
+  const hasKt = hasSubtreeExtension(dir, POLYGLOT_LANGUAGE_REGISTRY.kt.sourceExtensions, [
+    'build.gradle.kts',
+    'settings.gradle.kts',
+  ]);
+  if (hasKt) return 'kt';
+  if (hasSubtreeExtension(dir, POLYGLOT_LANGUAGE_REGISTRY.java.sourceExtensions)) return 'java';
+  return 'kt';
+}
+
+export function disambiguateCMake(dir: string): GherkinScaffoldLanguage {
+  if (hasSubtreeExtension(dir, POLYGLOT_LANGUAGE_REGISTRY.cpp.sourceExtensions)) return 'cpp';
+  if (hasSubtreeExtension(dir, ['.c'])) return 'c';
+  return 'cpp';
+}
+
+export function detectPrimaryLanguageInDir(dir: string): GherkinScaffoldLanguage | null {
+  if (hasAnyFile(dir, POLYGLOT_LANGUAGE_REGISTRY.py.primaryManifests)) return 'py';
+  if (hasAnyFile(dir, POLYGLOT_LANGUAGE_REGISTRY.go.primaryManifests)) return 'go';
+  if (hasAnyFile(dir, POLYGLOT_LANGUAGE_REGISTRY.rs.primaryManifests)) return 'rs';
   if (hasDotnetProjectFiles(dir)) return 'cs';
-  if (hasAnyFile(dir, ['package.json', 'tsconfig.json'])) return 'ts';
+  if (hasAnyFile(dir, POLYGLOT_LANGUAGE_REGISTRY.java.primaryManifests)) return 'java';
+  if (hasAnyFile(dir, POLYGLOT_LANGUAGE_REGISTRY.kt.primaryManifests)) return disambiguateGradleKts(dir);
+  if (hasAnyFile(dir, POLYGLOT_LANGUAGE_REGISTRY.c.primaryManifests)) return disambiguateCMake(dir);
+  if (hasAnyFile(dir, POLYGLOT_LANGUAGE_REGISTRY.ts.primaryManifests)) return 'ts';
   return null;
+}
+
+export function detectAuxiliaryLanguageInDir(dir: string): GherkinScaffoldLanguage | null {
+  if (hasAnyFile(dir, POLYGLOT_LANGUAGE_REGISTRY.py.auxiliaryManifests)) return 'py';
+  return null;
+}
+
+export function detectLanguageInDir(dir: string): GherkinScaffoldLanguage | null {
+  return detectPrimaryLanguageInDir(dir) ?? detectAuxiliaryLanguageInDir(dir);
 }
 
 export function detectDefaultScaffoldLanguage(rootDir: string): GherkinScaffoldLanguage | null {
   const configured = readConfiguredScaffoldLanguage(rootDir);
   if (configured) return configured;
-  for (const dir of collectManifestDirs(rootDir, 3)) {
-    const detected = detectLanguageInDir(dir);
-    if (detected) return detected;
+  const dirs = collectManifestDirs(rootDir, 3);
+  for (const dir of dirs) {
+    const primary = detectPrimaryLanguageInDir(dir);
+    if (primary) return primary;
+  }
+  for (const dir of dirs) {
+    const aux = detectAuxiliaryLanguageInDir(dir);
+    if (aux) return aux;
   }
   return null;
 }

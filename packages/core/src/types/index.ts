@@ -550,7 +550,7 @@ export interface GherkinSyncCheckResult {
   totalFeatures: number;
 }
 
-export type GherkinScaffoldLanguage = 'ts' | 'py' | 'go' | 'rs' | 'cs';
+export type GherkinScaffoldLanguage = 'ts' | 'py' | 'go' | 'rs' | 'cs' | 'java' | 'kt' | 'c' | 'cpp';
 
 export interface GherkinGeneratorSpec {
   lang: GherkinScaffoldLanguage;

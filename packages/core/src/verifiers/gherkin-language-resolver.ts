@@ -7,36 +7,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { GherkinScaffoldLanguage } from '../types/index.js';
 import { canonicalSort, walkMdFiles } from '../utils/fs.js';
+import { POLYGLOT_EXCLUDED_DIR_SET, buildExtToLangMap } from './polyglot-registry.js';
 
 const CANONICAL_ID_TAG_RE = /^(?:UC|FR|QR|BR|CON|SEC-REQ|SAF-REQ|PRIV-REQ|CHG|TSK)-[A-Z0-9-]+$/i;
 
 const EXCLUDED_SCAN_DIRS: ReadonlySet<string> = new Set([
   'tests',
-  'node_modules',
-  '.git',
-  'bin',
-  'obj',
-  'dist',
-  'build',
-  'target',
-  '.venv',
-  'venv',
-  'templates',
-  'reports',
+  ...POLYGLOT_EXCLUDED_DIR_SET,
 ]);
 
-const EXT_TO_LANG: Readonly<Record<string, GherkinScaffoldLanguage>> = {
-  '.cs': 'cs',
-  '.py': 'py',
-  '.go': 'go',
-  '.rs': 'rs',
-  '.ts': 'ts',
-  '.tsx': 'ts',
-  '.js': 'ts',
-  '.jsx': 'ts',
-  '.mjs': 'ts',
-  '.cjs': 'ts',
-};
+const EXT_TO_LANG: Readonly<Record<string, GherkinScaffoldLanguage>> = buildExtToLangMap();
 
 export interface ChangeSpecMetadata {
   ids: string[];

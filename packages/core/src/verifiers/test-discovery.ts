@@ -5,33 +5,13 @@
  */
 
 import type { UiModality } from '../types/index.js';
+import { POLYGLOT_EXCLUDED_DIRS, POLYGLOT_LANGUAGE_REGISTRY } from './polyglot-registry.js';
 export type { UiModality } from '../types/index.js';
+export { POLYGLOT_EXCLUDED_DIRS };
 
-export const DEFAULT_UNIT_TEST_PATTERNS: readonly string[] = [
-  '**/*.spec.ts',
-  '**/*.test.ts',
-  '**/*.spec.tsx',
-  '**/*.test.tsx',
-  '**/*.spec.js',
-  '**/*.test.js',
-  '**/*.spec.jsx',
-  '**/*.test.jsx',
-  '**/test_*.py',
-  '**/*_test.py',
-  '**/*Test.cs',
-  '**/*Tests.cs',
-  '**/*Spec.cs',
-  '**/*Test.fs',
-  '**/*Tests.fs',
-  '**/*Test.java',
-  '**/*Tests.java',
-  '**/*IT.java',
-  '**/*Test.kt',
-  '**/*Tests.kt',
-  '**/*_test.go',
-  '**/*_test.rs',
-  'tests/**/*.rs',
-];
+export const DEFAULT_UNIT_TEST_PATTERNS: readonly string[] = Object.values(
+  POLYGLOT_LANGUAGE_REGISTRY
+).flatMap((spec) => spec.unitTestPatterns);
 
 export const DEFAULT_TEST_ARTIFACT_PATTERNS: readonly string[] = [
   '**/*.feature',
