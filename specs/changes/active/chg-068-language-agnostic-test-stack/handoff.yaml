@@ -1,0 +1,23 @@
+id: HOF-CHG-068-LANGUAGE-AGNOSTIC-TEST-STACK
+type: handoff
+title: Handoff Canónico de Arquitectura para Language-Agnostic Test Stack Alignment
+changeId: CHG-068-LANGUAGE-AGNOSTIC-TEST-STACK
+version: 1.0.0
+createdAt: '2026-11-26T08:12:51.090Z'
+subgraph:
+  requirements:
+    - FR-068-LANGUAGE-AGNOSTIC-TEST-STACK-001
+  useCases:
+    - UC-068-LANGUAGE-AGNOSTIC-TEST-STACK
+  components:
+    - CMP-068-LANGUAGE-AGNOSTIC-TEST-STACK
+citations:
+  - id: UC-068-LANGUAGE-AGNOSTIC-TEST-STACK
+    digest: sha256:26e325c4a7d3b8f67eccbe624eabf5f08d36a8d9e0416cff9f533b016e1c0d39
+    comment: Citación de use-case (Language-Agnostic Test Stack Detection, Polyglot Web E2E Driver Signatures, and Single-Runtime QA Discipline)
+  - id: FR-068-LANGUAGE-AGNOSTIC-TEST-STACK-001
+    digest: sha256:1517258b555d12dc46c77c9bb0443ba94cf0c2a527dafe9d88bc6b4e3003282b
+    comment: Requerimiento derivado de UC-068-LANGUAGE-AGNOSTIC-TEST-STACK
+  - id: CMP-068-LANGUAGE-AGNOSTIC-TEST-STACK
+    digest: sha256:6c22b1592c9bb77633815841e483cbbf6a8f53165122e08f8e923deda6aa6488
+    comment: Componente de arquitectura para alineamiento agnóstico al lenguaje
