@@ -1,0 +1,18 @@
+id: HOF-CHG-073-EXECUTABLE-STRICT-CODING-RULES
+type: handoff
+title: Handoff Canónico de Producto para Executable Strict Coding Rules Per Stack
+changeId: CHG-073-EXECUTABLE-STRICT-CODING-RULES
+version: 1.0.0
+createdAt: '2026-11-26T21:59:06.240Z'
+subgraph:
+  requirements:
+    - FR-073-EXECUTABLE-STRICT-CODING-RULES-001
+  useCases:
+    - UC-073-EXECUTABLE-STRICT-CODING-RULES
+citations:
+  - id: UC-073-EXECUTABLE-STRICT-CODING-RULES
+    digest: sha256:82750758420ddcc9c260626666d11c1c696d92a14774da4ecec6ef2bdb8121f4
+    comment: Citación de use-case (Reglas estrictas de codificación ejecutables y desacopladas por stack)
+  - id: FR-073-EXECUTABLE-STRICT-CODING-RULES-001
+    digest: sha256:d72e45ae532777d93c8f1a0b2008079f30a47b75e683d64bc8a79abfbfdc1530
+    comment: Requerimiento derivado de UC-073-EXECUTABLE-STRICT-CODING-RULES
