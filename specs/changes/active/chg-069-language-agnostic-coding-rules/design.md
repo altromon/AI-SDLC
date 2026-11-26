@@ -10,9 +10,9 @@ architecture-component: "CMP-069-LANGUAGE-AGNOSTIC-CODING-RULES"
 enclave: "SEC-ENC-DMZ"
 status: draft
 contracts:
-  - "detectProjectStacks(targetDir: string, maxDepth?: number): CodingRuleStack[]"
-  - "getRequiredCodingRulesFiles(stack: CodingRuleStack): string[]"
-  - "collectCodingRulesBypassViolations(rootDir: string): string[]"
+  - "detectProjectStacks"
+  - "getRequiredCodingRulesFiles"
+  - "collectCodingRulesBypassViolations"
 citations:
   - id: UC-069-LANGUAGE-AGNOSTIC-CODING-RULES
     digest: sha256:df1c6dcc016a36bedc7bf1607b205b5ade86dfbe04602fbefc9e51164c654007

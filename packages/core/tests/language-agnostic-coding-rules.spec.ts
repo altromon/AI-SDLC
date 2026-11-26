@@ -13,6 +13,7 @@ import {
   detectProjectStacks,
   getRequiredCodingRulesFiles,
 } from '../src/index.js';
+import { discoverMissingCodingRules } from '../src/migrate/service.js';
 
 const tempDirs: string[] = [];
 
@@ -181,5 +182,14 @@ describe('FR-069-LANGUAGE-AGNOSTIC-CODING-RULES-001: Recursive Stack Detection &
     expect(result.exitCode).not.toBe(2);
     expect(fs.existsSync(path.join(root, 'Directory.Build.props'))).toBe(true);
     expect(fs.readFileSync(path.join(root, '.golangci.yml'), 'utf-8')).toBe(customGoRules);
+  });
+
+  it('discoverMissingCodingRules returns empty for stackless workspaces and skips existing files', () => {
+    const emptyRoot = createWorkspace({});
+    expect(discoverMissingCodingRules(emptyRoot)).toEqual([]);
+
+    const goRoot = createWorkspace({ 'api/go.mod': 'module test\n' });
+    const items = discoverMissingCodingRules(goRoot);
+    expect(items.map((i) => i.relPath)).toEqual(['.golangci.yml']);
   });
 });

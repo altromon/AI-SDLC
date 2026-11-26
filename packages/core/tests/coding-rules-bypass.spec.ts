@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { CodingRuleStack } from '../src/init/coding-rules-templates.js';
-import { collectCodingRulesBypassViolations } from '../src/verifiers/coding-rules-bypass.js';
+import { collectCodingRulesBypassViolations, collectMissingCodingRuleViolations } from '../src/verifiers/coding-rules-bypass.js';
 
 let tmp = '';
 function setup(files: Record<string, string>): string {
@@ -133,7 +133,20 @@ describe('coding rules bypass scanner', () => {
   });
 
   it('flags tsconfig weakening when tsconfig.strict.json exists', () => {
-    const root = setup({ 'tsconfig.strict.json': '{}', 'tsconfig.json': '{"extends":"./tsconfig.strict.json","compilerOptions":{"strict": false}}' });
+    const root = setup({
+      'tsconfig.strict.json': '{}',
+      'eslint.config.mjs': 'export default [];\n',
+      'tsconfig.json': '{"extends":"./tsconfig.strict.json","compilerOptions":{"strict": false}}',
+    });
     expect(collectCodingRulesBypassViolations(root)).toHaveLength(1);
+  });
+
+  it('collectMissingCodingRuleViolations deduplicates shared rule files across detected stacks', () => {
+    const root = setup({
+      'frontend/tsconfig.json': '{}',
+      'web/package.json': '{}',
+    });
+    const missing = collectMissingCodingRuleViolations(root);
+    expect(missing).toHaveLength(2);
   });
 });

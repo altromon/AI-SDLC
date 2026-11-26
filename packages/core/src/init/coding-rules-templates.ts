@@ -647,8 +647,30 @@ export function getReferenceCodingRulesTemplates(): { relPath: string; content: 
   ];
 }
 
+export const IGNORED_STACK_SCAN_DIRS = new Set([
+  'node_modules',
+  '.git',
+  'bin',
+  'obj',
+  'dist',
+  'build',
+  'target',
+  '.venv',
+  'venv',
+  '__pycache__',
+  'reports',
+  'templates',
+]);
+
 function hasFileMatching(entries: string[], suffixOrName: string): boolean {
   return entries.some((e) => e === suffixOrName || e.endsWith(suffixOrName));
+}
+
+function detectCAndCppStacks(fileNames: string[], detected: Set<CodingRuleStack>): void {
+  const hasC = fileNames.some((n) => n.endsWith('.c'));
+  const hasCpp = fileNames.some((n) => /\.(cpp|cc|cxx|hpp)$/.test(n));
+  if (hasC && !hasCpp) detected.add('c');
+  if (hasCpp || (fileNames.includes('CMakeLists.txt') && !hasC)) detected.add('cpp');
 }
 
 function detectJvmAndNativeStacks(entries: string[], detected: Set<CodingRuleStack>): void {
@@ -656,34 +678,68 @@ function detectJvmAndNativeStacks(entries: string[], detected: Set<CodingRuleSta
     detected.add('java');
   }
   if (hasFileMatching(entries, 'build.gradle.kts')) {
-    detected.add('java');
     detected.add('kotlin');
   }
   if (hasFileMatching(entries, 'Cargo.toml')) detected.add('rust');
   if (hasFileMatching(entries, 'go.mod')) detected.add('go');
-  if (hasFileMatching(entries, 'CMakeLists.txt') || hasFileMatching(entries, 'Makefile')) {
-    detected.add('cpp');
-  }
+  detectCAndCppStacks(entries, detected);
 }
 
-export function detectProjectStacks(targetDir: string): CodingRuleStack[] {
-  if (!fs.existsSync(targetDir)) return [];
-  let entries: string[] = [];
+function detectDirectoryStacks(fileNames: string[], detected: Set<CodingRuleStack>): void {
+  if (hasFileMatching(fileNames, '.sln') || hasFileMatching(fileNames, '.slnx') || hasFileMatching(fileNames, '.csproj')) {
+    detected.add('dotnet');
+  }
+  if (hasFileMatching(fileNames, 'angular.json')) detected.add('angular');
+  else if (hasFileMatching(fileNames, 'tsconfig.json')) detected.add('typescript');
+  else if (hasFileMatching(fileNames, 'package.json')) detected.add('javascript');
+
+  detectJvmAndNativeStacks(fileNames, detected);
+}
+
+function scanDirectoryEntries(
+  dir: string,
+  depth: number,
+  maxDepth: number,
+  queue: { dir: string; depth: number }[]
+): string[] {
+  let entries: fs.Dirent[];
   try {
-    entries = fs.readdirSync(targetDir);
+    entries = fs.readdirSync(dir, { withFileTypes: true });
   } catch {
     return [];
   }
-  const detected = new Set<CodingRuleStack>();
-  if (hasFileMatching(entries, '.sln') || hasFileMatching(entries, '.slnx') || hasFileMatching(entries, '.csproj')) {
-    detected.add('dotnet');
+  const fileNames: string[] = [];
+  for (const entry of entries) {
+    if (entry.isSymbolicLink()) continue;
+    if (entry.isDirectory()) {
+      if (depth < maxDepth && !IGNORED_STACK_SCAN_DIRS.has(entry.name)) {
+        queue.push({ dir: path.join(dir, entry.name), depth: depth + 1 });
+      }
+    } else if (entry.isFile()) {
+      fileNames.push(entry.name);
+    }
   }
-  if (hasFileMatching(entries, 'angular.json')) detected.add('angular');
-  else if (hasFileMatching(entries, 'tsconfig.json')) detected.add('typescript');
-  else if (hasFileMatching(entries, 'package.json')) detected.add('javascript');
+  return fileNames;
+}
 
-  detectJvmAndNativeStacks(entries, detected);
+export function detectProjectStacks(targetDir: string, maxDepth = 3): CodingRuleStack[] {
+  if (!fs.existsSync(targetDir)) return [];
+  const detected = new Set<CodingRuleStack>();
+  const queue: { dir: string; depth: number }[] = [{ dir: targetDir, depth: 0 }];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current) continue;
+    const fileNames = scanDirectoryEntries(current.dir, current.depth, maxDepth, queue);
+    if (fileNames.length > 0) {
+      detectDirectoryStacks(fileNames, detected);
+    }
+  }
   return Array.from(detected);
+}
+
+export function getRequiredCodingRulesFiles(stack: CodingRuleStack): string[] {
+  return (STACK_FILE_MAP[stack] ?? []).map((f) => f.relPath);
 }
 
 const STACK_ALIASES: Record<string, CodingRuleStack> = {
