@@ -26,7 +26,7 @@ citations:
     digest: sha256:5c6f94849015be752f70b204dfed7e1fad7e634769e1f485b90973ab5b05c56b
     comment: Requerimiento derivado de UC-072-POLYGLOT-REGISTRY-BDD-JVM-CPP
   - id: CMP-072-POLYGLOT-REGISTRY-BDD-JVM-CPP
-    digest: sha256:25c8bf03988e4f506176c72a6d0f3e67e0af4df495e5352e35208c554e346ee3
+    digest: sha256:fc63bbd771c0d4a2c5bd770b24a45e73a7d4b6642d4dd7ec59e274122100b954
     comment: Componente arquitectónico que materializa el registro políglota unificado y el soporte BDD para Java, Kotlin, C y C++
 ---
 
@@ -46,7 +46,7 @@ El cambio materializa `CMP-072-POLYGLOT-REGISTRY-BDD-JVM-CPP` en `@aisdlc/core` 
   - `lang: GherkinScaffoldLanguage` (`'ts' | 'py' | 'go' | 'rs' | 'cs' | 'java' | 'kt' | 'c' | 'cpp'`)
   - `aliases: readonly string[]` (ej. `['kotlin']` para `'kt'`)
   - `sourceExtensions: readonly string[]` (ej. `['.java']`, `['.kt', '.kts']`, `['.c', '.h']`, `['.cpp', '.cc', '.cxx', '.hpp']`, `['.cs']`, `['.go']`, `['.rs']`, `['.py']`, `['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']`)
-  - `primaryManifests: readonly string[]` (ej. `pom.xml`, `build.gradle` para `java`; `build.gradle.kts` para `kt`; `CMakeLists.txt` para `cpp`; `Cargo.toml` para `rs`; `go.mod` para `go`; `.csproj`/`.sln`/`.slnx` para `cs`; `pyproject.toml`, `tsconfig.json`, `package.json`)
+  - `primaryManifests: readonly string[]` (ej. `pyproject.toml` para `py`; `go.mod` para `go`; `Cargo.toml` para `rs`; `.csproj`/`.sln`/`.slnx` para `cs`; `pom.xml`, `build.gradle` para `java`; `build.gradle.kts` para `kt`/`java` según presencia de archivos `.kt` vs `.java`; `CMakeLists.txt` para `cpp`/`c` según presencia de `.cpp`/`.cc`/`.cxx`/`.hpp` vs `.c`; `tsconfig.json`, `package.json` para `ts`)
   - `auxiliaryManifests: readonly string[]` (ej. `requirements.txt`, `setup.py` para `py`)
   - `codingRuleStacks: readonly CodingRuleStack[]`
 - Helpers puros exportados:
@@ -57,7 +57,7 @@ El cambio materializa `CMP-072-POLYGLOT-REGISTRY-BDD-JVM-CPP` en `@aisdlc/core` 
 - `GherkinScaffoldLanguage = 'ts' | 'py' | 'go' | 'rs' | 'cs' | 'java' | 'kt' | 'c' | 'cpp'`.
 - Nuevas entradas en `GHERKIN_GENERATOR_SPECS` (todas con `emitsSourceStdout: false` para emisión determinista `RED`):
   - `java`: Cucumber-JVM `*Steps.java`, `io.cucumber:cucumber-java`, licencia `'MIT'`, clase `public class <FeaturePascalStem>Steps`.
-  - `kt`: Cucumber-JVM/Kotlin `*Steps.kt`, `io.cucumber:cucumber-java`, licencia `'MIT'`, clase `class <FeaturePascalStem>Steps`.
+  - `kt`: Cucumber-JVM/Kotlin `*Steps.kt`, `io.cucumber:cucumber-java`, licencia `'MIT'`, clase `class <FeaturePascalStem>Steps`; `renderKtFallback` DEBE escapar `$` como `\$` (además de `\` y `"`) en literales de cadena Kotlin para prevenir interpolación de cadenas (`CWE-94`).
   - `c`: `*_steps.c`, licencia `'MIT'`, funciones `void step_<feature_snake>_<idx>(void)` con fallo `RED` explícito (`fprintf(stderr, ...) + abort()` / `assert(0)`).
   - `cpp`: Catch2 BDD `*_steps.cpp`, licencia `'BSL-1.0'`, `SCENARIO(...)` / `FAIL("RED: Step not implemented: ...")`.
 - `normalizeScaffoldLanguages` delega en `normalizeScaffoldLanguage` para soportar el alias `'kotlin'` → `'kt'`.
@@ -70,18 +70,21 @@ El cambio materializa `CMP-072-POLYGLOT-REGISTRY-BDD-JVM-CPP` en `@aisdlc/core` 
 
 ### 2.4 Detección de Stack en `@aisdlc/cli` (`packages/cli/src/commands/check.ts`)
 - `normalizeScaffoldLanguage` y `SKIP_MANIFEST_DIRS` se importan/derivan desde `@aisdlc/core` (`normalizeScaffoldLanguage`, `POLYGLOT_EXCLUDED_DIR_SET`).
-- `detectDefaultScaffoldLanguage(rootDir)` escanea `collectManifestDirs(rootDir, 3)` en dos pasadas (o evaluación por prioridad):
-  1. Primero busca **manifiestos primarios** (`pom.xml`, `build.gradle` → `java`; `build.gradle.kts` → `kt`; `CMakeLists.txt` → `cpp`; `Cargo.toml` → `rs`; `go.mod` → `go`; `*.csproj`/`*.sln`/`*.slnx` → `cs`; `pyproject.toml` → `py`; `tsconfig.json`/`package.json` → `ts`) en todo el árbol acotado (incluyendo `src/`).
-  2. Solo si no existe ningún manifiesto primario, recurre a **manifiestos auxiliares** (por ejemplo `requirements.txt` o `setup.py` en raíz).
+- `detectDefaultScaffoldLanguage(rootDir)` escanea `collectManifestDirs(rootDir, 3)` en dos pasadas:
+  1. Primero busca **manifiestos primarios** (`primaryManifests`) preservando el orden de precedencia retrocompatible (`pyproject.toml` → `py` antes de `go.mod` → `go`, `Cargo.toml` → `rs`, `*.csproj`/`*.sln`/`*.slnx` → `cs`, `pom.xml`/`build.gradle` → `java`, `build.gradle.kts`, `CMakeLists.txt`, `tsconfig.json`/`package.json` → `ts`) en todo el árbol acotado (incluyendo `src/`), de modo que `check-helpers.spec.ts` sea 100% retrocompatible.
+     - Desambiguación de `CMakeLists.txt`: resuelve `'cpp'` si existen archivos `.cpp`/`.cc`/`.cxx`/`.hpp` en el directorio o subárbol inmediato (en coherencia con `coding-rules-templates.ts`), o `'c'` si solo existen archivos `.c`/`.h`.
+     - Desambiguación de `build.gradle.kts`: resuelve `'kt'` si existen archivos `.kt`/`.kts` (excluyendo `build.gradle.kts`) o por defecto `'kt'`, y `'java'` si solo existen archivos `.java`.
+  2. Solo si no existe ningún manifiesto primario en todo el árbol acotado, recurre a **manifiestos auxiliares** (`auxiliaryManifests`, p. ej. `requirements.txt` o `setup.py` en raíz).
   - Resultado garantizado: un repositorio con `requirements.txt` en raíz y `src/App/App.csproj` resuelve `'cs'`, nunca `'py'`.
 
 ## 3. Protocolos de Manejo de Errores y Mitigación
 - Identificadores desconocidos en `normalizeScaffoldLanguage` / `normalizeScaffoldLanguages` retornan `null` / `{ valid: false, langs: [] }`.
 - Stems de `.feature` con guiones, puntuación o dígitos iniciales se sanean mediante `featurePascalStem` y `featureSnakeStem` antes de emitir clases Java/Kotlin o símbolos C/C++.
+- En `renderKtFallback`, todo `$` en el texto del paso o en mensajes de error se escapa como `\$` para evitar interpolación de cadenas en Kotlin (`CWE-94`).
 
 ## 4. Conformidad con la Política de Licencias (`license-policy.yaml`)
 - `io.cucumber:cucumber-java`: `MIT` (permitida en `permissive_free`).
-- `Catch2`: `BSL-1.0` (Boost Software License 1.0, licencia permisiva libre; no confundir con `BSL-1.1` de `commercial_acquisition_required`).
+- `Catch2`: `BSL-1.0` (Boost Software License 1.0, licencia permisiva libre; no confundir con `BSL-1.1` de `commercial_acquisition_required`). Como parte de `TSK-072-01`, `BSL-1.0` se registra explícitamente en `permissive_free.spdx_identifiers` en `license-policy.yaml` y `DEFAULT_PERMITTED` en `packages/core/src/verifiers/licenses.ts`.
 
 ## 5. Historial de Revisiones
 

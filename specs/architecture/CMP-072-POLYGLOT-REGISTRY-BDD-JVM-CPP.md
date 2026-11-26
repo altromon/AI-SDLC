@@ -79,9 +79,9 @@ flowchart TD
 ```
 
 ## 3. Conformidad de Licencias y Restricciones de Calidad
-- **Licencias BDD (`license-policy.yaml`)**:
+- **Licencias BDD (`license-policy.yaml` y `packages/core/src/verifiers/licenses.ts`)**:
   - `io.cucumber:cucumber-java` (`MIT`) — permitida explícitamente en `permissive_free`.
-  - `Catch2` (`BSL-1.0`, Boost Software License 1.0) — licencia permisiva libre, distinta de `BSL-1.1` (Business Source License 1.1 en `commercial_acquisition_required`).
+  - `Catch2` (`BSL-1.0`, Boost Software License 1.0) — licencia permisiva libre, distinta de `BSL-1.1` (Business Source License 1.1 en `commercial_acquisition_required`). Como parte de este incremento, `BSL-1.0` se añade a `permissive_free.spdx_identifiers` en `license-policy.yaml` y a `DEFAULT_PERMITTED` en `packages/core/src/verifiers/licenses.ts`.
 - **Sin cambios de esquema**: Ningún archivo bajo `schemas/` es modificado.
 - **Umbrales AST (`quality-policy.yaml`)**: Todas las funciones nuevas o modificadas mantienen `Cyclomatic Complexity <= 10`, `Cognitive Complexity <= 15`, `Maintainability Index >= 50` y `Lines <= 40`.
 

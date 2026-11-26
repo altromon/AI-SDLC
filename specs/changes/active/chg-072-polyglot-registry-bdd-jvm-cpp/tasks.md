@@ -108,6 +108,7 @@ superseded-by: null
 - **Descripción**:
   - Crear `packages/core/src/verifiers/polyglot-registry.ts` con `POLYGLOT_LANGUAGE_REGISTRY`, `POLYGLOT_EXCLUDED_DIRS`, `POLYGLOT_EXCLUDED_DIR_SET`, `normalizeScaffoldLanguage` y `buildExtToLangMap`, exportándolos desde `packages/core/src/index.ts`.
   - Extender `GherkinScaffoldLanguage` en `packages/core/src/types/index.ts` a `'ts' | 'py' | 'go' | 'rs' | 'cs' | 'java' | 'kt' | 'c' | 'cpp'`.
+  - Añadir `BSL-1.0` a `permissive_free.spdx_identifiers` en `license-policy.yaml` y a `DEFAULT_PERMITTED` en `packages/core/src/verifiers/licenses.ts`.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm test`
 
@@ -136,7 +137,8 @@ superseded-by: null
 - **Componente**: `CMP-072-POLYGLOT-REGISTRY-BDD-JVM-CPP`
 - **Requerimiento**: `FR-072-POLYGLOT-REGISTRY-BDD-JVM-CPP-001`
 - **Descripción**:
-  - Añadir pruebas unitarias e integración para `POLYGLOT_LANGUAGE_REGISTRY`, `POLYGLOT_EXCLUDED_DIRS`, scaffolding BDD (`java`, `kt`, `c`, `cpp`), alias `kotlin` → `kt`, y precedencia de `src/App/App.csproj` sobre `requirements.txt` en raíz.
+  - Actualizar `packages/core/tests/m4-gherkin.spec.ts` (línea 429, `Record<GherkinScaffoldLanguage, string>`) para incluir `java`, `kt`, `c` y `cpp` y mantener `pnpm run typecheck` en verde.
+  - Añadir pruebas unitarias e integración para `POLYGLOT_LANGUAGE_REGISTRY`, `POLYGLOT_EXCLUDED_DIRS`, scaffolding BDD (`java`, `kt`, `c`, `cpp`, escape `\$` en Kotlin), alias `kotlin` → `kt`, desambiguación de `CMakeLists.txt` (`c` vs `cpp`) y `build.gradle.kts` (`kt` vs `java`), y precedencia de `src/App/App.csproj` sobre `requirements.txt` en raíz (preservando la precedencia de `pyproject.toml` en `check-helpers.spec.ts`).
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm test && pnpm run verify:all`
 

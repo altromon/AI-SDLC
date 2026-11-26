@@ -42,7 +42,8 @@ Feature: Polyglot Language Registry and BDD Support for Java, Kotlin, C, and C++
 
 @CHG-072-POLYGLOT-REGISTRY-BDD-JVM-CPP @security @mitigation
 Feature: Security Mitigation for CHG-072-POLYGLOT-REGISTRY-BDD-JVM-CPP
-  Scenario: Feature stems with punctuation or leading digits cannot produce invalid Java, Kotlin, C, or C++ symbols
-    Given a ".feature" filename containing hyphens, punctuation, or a leading digit
+  Scenario: Feature stems and step texts cannot inject invalid symbols or Kotlin string interpolation
+    Given a ".feature" filename containing hyphens, punctuation, or a leading digit or a step text containing "$"
     When deterministic RED step templates are generated for "java", "kt", "c", or "cpp"
     Then class and function identifiers are sanitized into valid target-language symbols without code injection
+    And "$" in Kotlin step strings is escaped as "\$" to prevent string interpolation (CWE-94)
