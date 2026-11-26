@@ -25,6 +25,8 @@ import {
   STARTER_LICENSE_POLICY,
   STARTER_PRIVACY_POLICY,
   collectAgentFiles,
+  detectProjectStacks,
+  getCodingRulesFilesForStacks,
   resolveAgentTargets,
 } from '../init/index.js';
 import { STARTER_SCHEMAS } from '../init/starter-schemas.js';
@@ -177,6 +179,25 @@ export function createTransactionFailureResult(summary: MigrationSummary, backup
   };
 }
 
+export function discoverMissingCodingRules(root: string): GovernedItem[] {
+  const stacks = detectProjectStacks(root);
+  if (stacks.length === 0) return [];
+  const items: GovernedItem[] = [];
+  for (const ruleFile of getCodingRulesFilesForStacks(stacks)) {
+    const relPath = ruleFile.relPath.replace(/\\/g, '/');
+    if (!fs.existsSync(path.join(root, relPath))) {
+      items.push({
+        relPath,
+        category: 'policy',
+        currentContent: '',
+        targetContent: ruleFile.content,
+        baseContent: '',
+      });
+    }
+  }
+  return items;
+}
+
 export class MigrationService implements IMigrationService {
   constructor(private orchestrator: MigrationOrchestrator = new MigrationOrchestrator()) {}
 
@@ -327,6 +348,7 @@ export class MigrationService implements IMigrationService {
     }
 
     items.push(...scanSchemasDir(path.join(root, 'schemas'), canonicalMap));
+    items.push(...discoverMissingCodingRules(root));
     items.push(...this.discoverAgentFiles(root));
     return items;
   }

@@ -37,6 +37,21 @@ export interface CheckCommandOptions extends PreflightCheckOptions {
   vuln?: boolean;
 }
 
+const SUPPORTED_SCAFFOLD_LANGUAGES = new Set<GherkinScaffoldLanguage>(['ts', 'py', 'go', 'rs', 'cs']);
+const SKIP_MANIFEST_DIRS = new Set([
+  'node_modules',
+  '.git',
+  'bin',
+  'obj',
+  'dist',
+  'build',
+  'target',
+  '.venv',
+  'venv',
+  '__pycache__',
+  '.pytest_cache',
+]);
+
 export function hasDotnetProjectFiles(rootDir: string): boolean {
   if (!fs.existsSync(rootDir)) return false;
   try {
@@ -46,23 +61,112 @@ export function hasDotnetProjectFiles(rootDir: string): boolean {
   }
 }
 
-export function detectDefaultScaffoldLanguage(rootDir: string): GherkinScaffoldLanguage {
-  if (fs.existsSync(path.join(rootDir, 'pyproject.toml')) || fs.existsSync(path.join(rootDir, 'requirements.txt'))) return 'py';
-  if (fs.existsSync(path.join(rootDir, 'go.mod'))) return 'go';
-  if (fs.existsSync(path.join(rootDir, 'Cargo.toml'))) return 'rs';
-  if (hasDotnetProjectFiles(rootDir)) return 'cs';
-  return 'ts';
+export function normalizeScaffoldLanguage(raw: unknown): GherkinScaffoldLanguage | null {
+  if (typeof raw !== 'string') return null;
+  const norm = raw.trim().toLowerCase() as GherkinScaffoldLanguage;
+  return SUPPORTED_SCAFFOLD_LANGUAGES.has(norm) ? norm : null;
+}
+
+export function readJsonConfigLanguage(rootDir: string): GherkinScaffoldLanguage | null {
+  const jsonPath = path.join(rootDir, '.aisdlc.json');
+  if (!fs.existsSync(jsonPath)) return null;
+  try {
+    const parsed = JSON.parse(fs.readFileSync(jsonPath, 'utf-8')) as {
+      testing?: { language?: unknown };
+      stack?: { language?: unknown };
+    };
+    return normalizeScaffoldLanguage(parsed?.testing?.language ?? parsed?.stack?.language);
+  } catch {
+    return null;
+  }
+}
+
+export function readYamlPolicyLanguage(rootDir: string): GherkinScaffoldLanguage | null {
+  const yamlPath = path.join(rootDir, 'quality-policy.yaml');
+  if (!fs.existsSync(yamlPath)) return null;
+  try {
+    const lines = fs.readFileSync(yamlPath, 'utf-8').split(/\r?\n/);
+    let section = '';
+    for (const line of lines) {
+      const top = /^([a-zA-Z0-9_-]+)\s*:/.exec(line);
+      if (top) {
+        section = top[1];
+        continue;
+      }
+      if (section === 'testing' || section === 'stack') {
+        const match = /^\s+language\s*:\s*['"]?([a-zA-Z0-9_-]+)['"]?/.exec(line);
+        if (match) return normalizeScaffoldLanguage(match[1]);
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export function readConfiguredScaffoldLanguage(rootDir: string): GherkinScaffoldLanguage | null {
+  return readJsonConfigLanguage(rootDir) ?? readYamlPolicyLanguage(rootDir);
+}
+
+export function enqueueChildDirs(dir: string, nextDepth: number, queue: Array<{ dir: string; depth: number }>): void {
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory() || entry.isSymbolicLink() || SKIP_MANIFEST_DIRS.has(entry.name)) continue;
+      queue.push({ dir: path.join(dir, entry.name), depth: nextDepth });
+    }
+  } catch {
+    // Ignore unreadable directories during bounded scan
+  }
+}
+
+export function collectManifestDirs(rootDir: string, maxDepth = 3): string[] {
+  if (!fs.existsSync(rootDir)) return [];
+  const dirs: string[] = [];
+  const queue: Array<{ dir: string; depth: number }> = [{ dir: rootDir, depth: 0 }];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    dirs.push(current.dir);
+    if (current.depth < maxDepth) {
+      enqueueChildDirs(current.dir, current.depth + 1, queue);
+    }
+  }
+  return dirs;
+}
+
+export function hasAnyFile(dir: string, files: readonly string[]): boolean {
+  return files.some((file) => fs.existsSync(path.join(dir, file)));
+}
+
+export function detectLanguageInDir(dir: string): GherkinScaffoldLanguage | null {
+  if (hasAnyFile(dir, ['pyproject.toml', 'requirements.txt', 'setup.py'])) return 'py';
+  if (hasAnyFile(dir, ['go.mod'])) return 'go';
+  if (hasAnyFile(dir, ['Cargo.toml'])) return 'rs';
+  if (hasDotnetProjectFiles(dir)) return 'cs';
+  if (hasAnyFile(dir, ['package.json', 'tsconfig.json'])) return 'ts';
+  return null;
+}
+
+export function detectDefaultScaffoldLanguage(rootDir: string): GherkinScaffoldLanguage | null {
+  const configured = readConfiguredScaffoldLanguage(rootDir);
+  if (configured) return configured;
+  for (const dir of collectManifestDirs(rootDir, 3)) {
+    const detected = detectLanguageInDir(dir);
+    if (detected) return detected;
+  }
+  return null;
 }
 
 export function scaffoldMissingStepFiles(
   rootDir: string,
   missing: string[],
-  fallbackLang: GherkinScaffoldLanguage
+  fallbackLang: GherkinScaffoldLanguage | null
 ): number {
   let count = 0;
   for (const fp of missing) {
     const resolved = resolveFeatureTargetLanguages(rootDir, fp);
     const lang = resolved.length > 0 ? resolved : fallbackLang;
+    if (!lang) continue;
     if (scaffoldGherkinSteps({ rootDir, featurePath: fp, lang, allowFallback: true }).success) {
       count++;
     }

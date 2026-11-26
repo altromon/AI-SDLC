@@ -39,6 +39,7 @@ describe('@aisdlc/cli check command and auto-fix suite', () => {
     const changesDir = path.join(tempDir, 'specs', 'changes', 'active', 'CHG-TEST-001');
     fs.mkdirSync(productDir, { recursive: true });
     fs.mkdirSync(changesDir, { recursive: true });
+    fs.writeFileSync(path.join(tempDir, 'package.json'), '{"name":"check-test-002"}', 'utf-8');
 
     const frContent = [
       '---',
@@ -91,6 +92,7 @@ describe('@aisdlc/cli check command and auto-fix suite', () => {
     const changesDir = path.join(tempDir, 'specs', 'changes', 'active', 'CHG-TEST-002');
     fs.mkdirSync(productDir, { recursive: true });
     fs.mkdirSync(changesDir, { recursive: true });
+    fs.writeFileSync(path.join(tempDir, 'package.json'), '{"name":"check-test-002"}', 'utf-8');
 
     const frContent = [
       '---',

@@ -784,6 +784,7 @@ export {
   getArchitectureTemplates,
   getCodingRulesFilesForStacks,
   getReferenceCodingRulesTemplates,
+  getRequiredCodingRulesFiles,
   initProject,
   isProtectedCodingRulesFile,
   renderAntigravityAgentFile,

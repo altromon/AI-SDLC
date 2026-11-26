@@ -173,7 +173,7 @@ export function resolveScaffoldLang(
   if (typeof rawLang === 'string' && rawLang.trim().length > 0) return rawLang;
   if (Array.isArray(rawLang) && rawLang.some((item) => item.trim().length > 0)) return rawLang;
   const inferred = resolveFeatureTargetLanguages(rootDir, featurePath);
-  return inferred.length > 0 ? inferred : detectDefaultScaffoldLanguage(rootDir);
+  return inferred.length > 0 ? inferred : (detectDefaultScaffoldLanguage(rootDir) ?? '');
 }
 
 export async function runGherkinScaffold(

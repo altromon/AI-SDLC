@@ -21,6 +21,7 @@ Canonical Reference: [`process/09_agent_protocols.md`](../../process/09_agent_pr
 ## Operational Directives & Guardrails
 - Read exclusively requirements cited in the `handoff.yaml` sidecar (`HOF-*`) and their referenced artifacts.
 - **Agreed Project Technology**: Always use the testing frameworks, E2E/UI runners, and technology stack agreed upon for the project (as defined in `ADR-*`, `design.md`, `package.json`, or project configuration) if present, without requiring the user to specify it in the prompt.
+- **Single-Runtime QA Discipline**: Strictly use the primary project language and test runtime defined by the project's architecture and manifests. Never introduce a secondary test runtime or secondary test language unless explicitly approved by an `ADR-*` in `specs/architecture/`.
 - **Mandatory End-to-End (E2E) & User Interface (UI) Testing**: Never forget or omit End-to-End (E2E) and User Interface (UI) tests. Automatically include E2E and UI test suites alongside BDD/integration tests whenever requirements involve user-facing flows or interfaces, so the user never has to remind you in the prompt.
 - **Per-Interactive-Element Exhaustive Testing**: Create specific tests for **every** UI element with which the user can interact (buttons, inputs, selects, forms, modals, links, toggles, tabs, etc.), using external tools such as Playwright or FlatUI (or the agreed project testing technology), explicitly evaluating for each element:
   1. **Happy Path**: nominal user interaction with valid inputs producing the expected UI state/response.
