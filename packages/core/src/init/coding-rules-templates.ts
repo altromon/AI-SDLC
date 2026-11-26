@@ -117,7 +117,34 @@ export const ANGULAR_STRICT_TSCONFIG = `{
 export const JS_ESLINT_CONFIG_MJS = `// AI-SDLC: Immutable Strict Coding & Test Rules for JavaScript (ESLint 9 Native Flat Config)
 export default [
   {
+    ignores: ["**/dist/**", "**/build/**", "**/coverage/**", "**/node_modules/**", "**/.git/**"]
+  },
+  {
     files: ["**/*.js", "**/*.jsx", "**/*.mjs", "**/*.cjs"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        Buffer: "readonly",
+        URL: "readonly",
+        URLSearchParams: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+        fetch: "readonly",
+        globalThis: "readonly",
+        window: "readonly",
+        document: "readonly",
+        module: "readonly",
+        require: "readonly",
+        exports: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly"
+      }
+    },
     rules: {
       "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
       "no-undef": "error",
@@ -130,6 +157,20 @@ export default [
   },
   {
     files: ["**/*.spec.js", "**/*.test.js", "**/*.spec.mjs", "**/*.test.mjs"],
+    languageOptions: {
+      globals: {
+        describe: "readonly",
+        it: "readonly",
+        test: "readonly",
+        expect: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        beforeAll: "readonly",
+        afterAll: "readonly",
+        vi: "readonly",
+        jest: "readonly"
+      }
+    },
     rules: {
       "no-restricted-globals": [
         "error",
@@ -167,6 +208,9 @@ export const TS_ESLINT_CONFIG_MJS = `// AI-SDLC: Immutable Strict Coding & Test 
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
+  {
+    ignores: ["**/dist/**", "**/build/**", "**/coverage/**", "**/node_modules/**", "**/.git/**"],
+  },
   {
     files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
     extends: [...tseslint.configs.strictTypeChecked],

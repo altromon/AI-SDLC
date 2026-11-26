@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { ESLint } from 'eslint';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   CodingRuleStack,
@@ -8,8 +9,10 @@ import {
   getCodingRulesFilesForStacks,
   GO_GOLANGCI_YML,
   isProtectedCodingRulesFile,
+  JS_ESLINT_CONFIG_MJS,
   PROTECTED_CODING_RULES_FILES,
   resolveCodingRuleStacks,
+  TS_ESLINT_CONFIG_MJS,
   VALID_CODING_RULE_STACKS,
 } from '../src/init/coding-rules-templates.js';
 import { initProject } from '../src/init/index.js';
@@ -189,6 +192,44 @@ describe('CHG-073: Executable Strict Coding Rules Per Stack', () => {
       expect(
         Boolean(pkgJson.devDependencies?.['typescript-eslint'] ?? pkgJson.dependencies?.['typescript-eslint'])
       ).toBe(true);
+    });
+
+    it('executes ESLint with JS_ESLINT_CONFIG_MJS on src/index.js and ignores dist/index.js with 0 errors', async () => {
+      const root = setupTempRepo({
+        'eslint.config.mjs': JS_ESLINT_CONFIG_MJS,
+        'src/index.js': 'console.log(1);\nexport const a = 1;\n',
+        'dist/index.js': 'var unlinted = unknownGlobal;\n',
+      });
+
+      const eslint = new ESLint({ cwd: root });
+      const results = await eslint.lintFiles(['.']);
+      const errorCount = results.reduce((sum, r) => sum + r.errorCount, 0);
+      expect(errorCount).toBe(0);
+    });
+
+    it('executes ESLint with TS_ESLINT_CONFIG_MJS on tsconfig.json + src/index.ts and ignores dist/index.js with 0 errors', async () => {
+      const root = setupTempRepo({
+        'eslint.config.mjs': TS_ESLINT_CONFIG_MJS,
+        'tsconfig.json': JSON.stringify({
+          compilerOptions: {
+            target: 'ES2022',
+            module: 'NodeNext',
+            moduleResolution: 'NodeNext',
+            strict: true,
+          },
+          include: ['src/**/*.ts'],
+        }),
+        'src/index.ts': 'export const x: number = 1;\n',
+        'dist/index.js': 'var builtArtifact = unknownGlobal;\n',
+      });
+
+      const repoNodeModules = path.resolve(__dirname, '../../../node_modules');
+      fs.symlinkSync(repoNodeModules, path.join(root, 'node_modules'), 'junction');
+
+      const eslint = new ESLint({ cwd: root });
+      const results = await eslint.lintFiles(['.']);
+      const errorCount = results.reduce((sum, r) => sum + r.errorCount, 0);
+      expect(errorCount).toBe(0);
     });
   });
 
