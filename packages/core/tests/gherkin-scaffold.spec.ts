@@ -9,6 +9,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import * as core from '../src/index.js';
+import * as gherkinScaffold from '../src/verifiers/gherkin-scaffold.js';
 import { BddStepRegistry, executeBddFeature } from '../src/index.js';
 
 type ScaffoldFn = (options: {
@@ -451,7 +452,7 @@ describe('@FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001 @CHG-051-GHERKIN-POLYGLOT-SCAFFO
       },
       {
         lang: 'rs',
-        expectedPattern: /todo!\(/,
+        expectedPattern: /panic!\(/,
         expectedFrameworkHint: /cucumber/,
       },
       {
@@ -585,6 +586,119 @@ describe('@FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001 @CHG-051-GHERKIN-POLYGLOT-SCAFFO
       } else {
         expect(res.status).toBe('ERROR');
       }
+    });
+  });
+
+  describe('@CHG-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX @FR-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX-001: Polyglot Compiler Stdout, Symbol Uniqueness, Go Regex & Rust Clippy Fixes', () => {
+    it.each([
+      {
+        lang: 'cs' as const,
+        compilerStdout: 'MSBuild version 17.8.3+195e7f5a3 for .NET\n  Determining projects to restore...\n  Build succeeded.\n',
+        expectedTemplateMarker: /public class SampleSteps/,
+      },
+      {
+        lang: 'rs' as const,
+        compilerStdout: '   Compiling aisdlc-bdd v0.1.0\n    Finished `test` profile [unoptimized + debuginfo]\nrunning 0 tests\ntest result: ok.\n',
+        expectedTemplateMarker: /panic!\("RED: Step not implemented:/,
+      },
+    ])(
+      'discards compiler/runner stdout for $lang when execFn returns status 0 and emits GENERATED_FALLBACK with accurate fallbackReason',
+      ({ lang, compilerStdout, expectedTemplateMarker }) => {
+        const scaffoldGherkinSteps = getScaffoldGherkinSteps();
+        const res = scaffoldGherkinSteps({
+          rootDir: tmpDir,
+          featurePath: sampleFeaturePath,
+          lang,
+          allowFallback: true,
+          execFn: () => ({ status: 0, stdout: compilerStdout, stderr: '' }),
+        });
+
+        expect(res.success).toBe(true);
+        expect(res.status).toBe('GENERATED_FALLBACK');
+        expect(res.content).toBeDefined();
+        expect(res.content).not.toContain(compilerStdout.trim());
+        expect(res.content).toMatch(expectedTemplateMarker);
+        expect(res.fallbackReason).toBeDefined();
+        expect(res.fallbackReason).toMatch(/does not emit step-definition source code/i);
+        expect(res.fallbackReason).not.toMatch(/not installed/i);
+
+        const outPath = path.isAbsolute(res.outputFile!)
+          ? res.outputFile!
+          : path.join(tmpDir, res.outputFile!);
+        const diskContent = fs.readFileSync(outPath, 'utf-8');
+        expect(diskContent).not.toContain(compilerStdout.trim());
+        expect(diskContent).toMatch(expectedTemplateMarker);
+      }
+    );
+
+    it('scaffolds multiple features (including kebab-case and numeric-leading stems) across cs, go, rs, py, ts with zero symbol collisions', () => {
+      const scaffoldGherkinSteps = getScaffoldGherkinSteps();
+      const loginFeature = path.join(tmpDir, 'tests', 'features', '01-login.feature');
+      const checkoutFeature = path.join(tmpDir, 'tests', 'features', 'user-checkout.feature');
+      fs.writeFileSync(
+        loginFeature,
+        'Feature: 01 Login\n  Scenario: Login\n    Given a registered user\n',
+        'utf-8'
+      );
+      fs.writeFileSync(
+        checkoutFeature,
+        'Feature: User Checkout\n  Scenario: Checkout\n    Given a cart with items\n',
+        'utf-8'
+      );
+
+      for (const lang of ['cs', 'go', 'rs', 'py', 'ts'] as const) {
+        const loginRes = scaffoldGherkinSteps({
+          rootDir: tmpDir,
+          featurePath: loginFeature,
+          lang,
+          allowFallback: true,
+          execFn: () => ({ status: 127, stdout: '', stderr: 'not installed' }),
+        });
+        const checkoutRes = scaffoldGherkinSteps({
+          rootDir: tmpDir,
+          featurePath: checkoutFeature,
+          lang,
+          allowFallback: true,
+          execFn: () => ({ status: 127, stdout: '', stderr: 'not installed' }),
+        });
+
+        expect(loginRes.success).toBe(true);
+        expect(checkoutRes.success).toBe(true);
+        expect(loginRes.outputFile).not.toBe(checkoutRes.outputFile);
+
+        if (lang === 'cs') {
+          expect(loginRes.content).toMatch(/public class _01LoginSteps\b/);
+          expect(checkoutRes.content).toMatch(/public class UserCheckoutSteps\b/);
+        } else if (lang === 'go') {
+          expect(loginRes.content).toMatch(/func Initialize_01LoginScenario\(ctx \*godog\.ScenarioContext\)/);
+          expect(checkoutRes.content).toMatch(/func InitializeUserCheckoutScenario\(ctx \*godog\.ScenarioContext\)/);
+        }
+      }
+    });
+
+    it('renderGoFallback escapes regex metacharacters without injecting \\" and handles backticks via Go string concatenation', () => {
+      const rendered = gherkinScaffold.renderGoFallback('tests/features/go-regex.feature', [
+        { keyword: 'Given', text: 'user (admin) buys "item" [1]? + $9.99' },
+        { keyword: 'When', text: 'payload has `raw` backticks' },
+      ]);
+
+      expect(rendered).not.toContain('\\"');
+      expect(rendered).toContain('\\(admin\\)');
+      expect(rendered).toContain('buys "item"');
+      expect(rendered).toContain('\\[1\\]\\?');
+      expect(rendered).toContain('\\+');
+      expect(rendered).toContain('\\$9\\.99');
+      expect(rendered).toContain('+ "`" +');
+    });
+
+    it('renderRsFallback emits panic! instead of todo! and safely formats braces { and }', () => {
+      const rendered = gherkinScaffold.renderRsFallback('tests/features/rs-clippy.feature', [
+        { keyword: 'Given', text: 'payload {"key": "value"} is received' },
+      ]);
+
+      expect(rendered).toContain('panic!("RED: Step not implemented: {}",');
+      expect(rendered).not.toContain('todo!(');
+      expect(rendered).toContain('{\\"key\\": \\"value\\"}');
     });
   });
 });
