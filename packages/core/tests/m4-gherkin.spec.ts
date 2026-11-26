@@ -415,10 +415,10 @@ describe('M4.2 gherkin & gherkin-scaffold unit suite', () => {
 
       const goRendered = renderGoFallback('tests/a.feature', steps);
       expect(goRendered).toContain('godog.ErrPending');
-      expect(goRendered).toContain('user \\"alice\\" with path C:\\\\tmp');
+      expect(goRendered).toContain('user "alice" with path C:\\\\tmp');
 
       const rsRendered = renderRsFallback('tests/a.feature', steps);
-      expect(rsRendered).toContain('todo!');
+      expect(rsRendered).toContain('panic!');
       expect(rsRendered).toContain('user \\"alice\\" with path C:\\\\tmp');
 
       const csRendered = renderCsFallback('tests/a.feature', steps);

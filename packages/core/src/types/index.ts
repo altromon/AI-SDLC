@@ -561,6 +561,7 @@ export interface GherkinGeneratorSpec {
   installCmd: string;
   installArgs: string[];
   license: string;
+  emitsSourceStdout?: boolean;
   resolveOutputPath: (rootDir: string, featurePath: string) => string;
 }
 
