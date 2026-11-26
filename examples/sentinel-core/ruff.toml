@@ -1,0 +1,6 @@
+# AI-SDLC: Immutable Python Ruff Linter & Formatting Guardrails
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "RET", "PT", "RUF"]

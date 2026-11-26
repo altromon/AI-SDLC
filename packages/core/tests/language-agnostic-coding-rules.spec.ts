@@ -54,7 +54,7 @@ const STACK_NESTED_MANIFESTS: { stack: CodingRuleStack; manifest: string; conten
     stack: 'javascript',
     manifest: 'web/package.json',
     content: '{}',
-    requiredFiles: ['tsconfig.strict.json', 'eslint.config.mjs'],
+    requiredFiles: ['eslint.config.mjs'],
   },
   {
     stack: 'angular',

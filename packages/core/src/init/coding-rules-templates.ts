@@ -1,7 +1,7 @@
 /**
  * AI-SDLC: Polyglot Immutable Coding Rules & Test Guardrail Templates
  * Provides strict compiler, linter, and unit-test anti-tampering configurations
- * for .NET (C#), TypeScript/JavaScript, Angular, Java, Kotlin, Rust, Go, and C/C++.
+ * for .NET (C#), TypeScript/JavaScript, Angular, Python, Java, Kotlin, Rust, Go, and C/C++.
  */
 
 import * as fs from 'fs';
@@ -13,6 +13,7 @@ export const VALID_CODING_RULE_STACKS = [
   'typescript',
   'javascript',
   'angular',
+  'python',
   'java',
   'kotlin',
   'rust',
@@ -27,6 +28,8 @@ export const PROTECTED_CODING_RULES_FILES: readonly string[] = [
   'Directory.Build.props',
   'tsconfig.strict.json',
   'eslint.config.mjs',
+  'ruff.toml',
+  'mypy.ini',
   'gradle/init.d/aisdlc-strict.init.gradle.kts',
   'config/pmd/aisdlc-ruleset.xml',
   'config/detekt/detekt.yml',
@@ -79,6 +82,25 @@ export const TS_STRICT_TSCONFIG = `{
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true
+  }
+}
+`;
+
+export const ANGULAR_STRICT_TSCONFIG = `{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "strict": true,
+    "allowJs": true,
+    "checkJs": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true,
@@ -90,6 +112,55 @@ export const TS_STRICT_TSCONFIG = `{
     }
   }
 }
+`;
+
+export const JS_ESLINT_CONFIG_MJS = `// AI-SDLC: Immutable Strict Coding & Test Rules for JavaScript (ESLint 9 Native Flat Config)
+export default [
+  {
+    files: ["**/*.js", "**/*.jsx", "**/*.mjs", "**/*.cjs"],
+    rules: {
+      "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+      "no-undef": "error",
+      "no-var": "error",
+      "prefer-const": "error",
+      "eqeqeq": ["error", "always"],
+      "no-eval": "error",
+      "no-implied-eval": "error"
+    }
+  },
+  {
+    files: ["**/*.spec.js", "**/*.test.js", "**/*.spec.mjs", "**/*.test.mjs"],
+    rules: {
+      "no-restricted-globals": [
+        "error",
+        { "name": "fit", "message": "Focused tests (fit) are forbidden by AI-SDLC." },
+        { "name": "fdescribe", "message": "Focused suites (fdescribe) are forbidden by AI-SDLC." },
+        { "name": "xit", "message": "Skipped tests (xit) are forbidden by AI-SDLC." },
+        { "name": "xdescribe", "message": "Skipped suites (xdescribe) are forbidden by AI-SDLC." }
+      ]
+    }
+  }
+];
+`;
+
+export const PYTHON_RUFF_TOML = `# AI-SDLC: Immutable Python Ruff Linter & Formatting Guardrails
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "RET", "PT", "RUF"]
+`;
+
+export const PYTHON_MYPY_INI = `# AI-SDLC: Immutable Python Mypy Strict Type Checking Guardrails
+[mypy]
+python_version = 3.11
+strict = True
+disallow_any_explicit = True
+disallow_any_generics = True
+warn_unused_ignores = True
+warn_redundant_casts = True
+warn_return_any = True
+no_implicit_reexport = True
 `;
 
 export const TS_ESLINT_CONFIG_MJS = `// AI-SDLC: Immutable Strict Coding & Test Rules for TypeScript / JavaScript / Angular
@@ -201,6 +272,8 @@ allow-unwrap-in-tests = true
 `;
 
 export const GO_GOLANGCI_YML = `# AI-SDLC: Immutable Go & Testing Linter Guardrails
+version: "2"
+
 run:
   tests: true
 
@@ -218,15 +291,14 @@ linters:
     - testifylint
     - thelper
     - forbidigo
-
-linters-settings:
-  testifylint:
-    enable-all: true
-  forbidigo:
-    analyze-types: true
-    forbid:
-      - p: ^testing\\.T\\.Skip.*$
-        msg: "Skipping unit tests with t.Skip() is forbidden by AI-SDLC."
+  settings:
+    testifylint:
+      enable-all: true
+    forbidigo:
+      analyze-types: true
+      forbid:
+        - pattern: ^testing\\.T\\.Skip.*$
+          msg: "Skipping unit tests with t.Skip() is forbidden by AI-SDLC."
 `;
 
 export const CPP_CLANG_TIDY = `# AI-SDLC: Immutable C/C++ Clang-Tidy Guardrails
@@ -343,6 +415,8 @@ const PROTECTED_CODING_RULES_FILES = [
   'Directory.Build.props',
   'tsconfig.strict.json',
   'eslint.config.mjs',
+  'ruff.toml',
+  'mypy.ini',
   'gradle/init.d/aisdlc-strict.init.gradle.kts',
   'config/pmd/aisdlc-ruleset.xml',
   'config/detekt/detekt.yml',
@@ -601,13 +675,14 @@ const STACK_FILE_MAP: Record<CodingRuleStack, { relPath: string; content: string
     { relPath: 'tsconfig.strict.json', content: TS_STRICT_TSCONFIG },
     { relPath: 'eslint.config.mjs', content: TS_ESLINT_CONFIG_MJS },
   ],
-  javascript: [
-    { relPath: 'tsconfig.strict.json', content: TS_STRICT_TSCONFIG },
+  javascript: [{ relPath: 'eslint.config.mjs', content: JS_ESLINT_CONFIG_MJS }],
+  angular: [
+    { relPath: 'tsconfig.strict.json', content: ANGULAR_STRICT_TSCONFIG },
     { relPath: 'eslint.config.mjs', content: TS_ESLINT_CONFIG_MJS },
   ],
-  angular: [
-    { relPath: 'tsconfig.strict.json', content: TS_STRICT_TSCONFIG },
-    { relPath: 'eslint.config.mjs', content: TS_ESLINT_CONFIG_MJS },
+  python: [
+    { relPath: 'ruff.toml', content: PYTHON_RUFF_TOML },
+    { relPath: 'mypy.ini', content: PYTHON_MYPY_INI },
   ],
   java: [
     { relPath: 'gradle/init.d/aisdlc-strict.init.gradle.kts', content: GRADLE_STRICT_INIT_KTS },
@@ -635,8 +710,13 @@ const STACK_FILE_MAP: Record<CodingRuleStack, { relPath: string; content: string
 export function getReferenceCodingRulesTemplates(): { relPath: string; content: string }[] {
   return [
     { relPath: 'templates/coding-rules/dotnet/Directory.Build.props', content: DOTNET_DIRECTORY_BUILD_PROPS },
+    { relPath: 'templates/coding-rules/javascript/eslint.config.mjs', content: JS_ESLINT_CONFIG_MJS },
     { relPath: 'templates/coding-rules/typescript/tsconfig.strict.json', content: TS_STRICT_TSCONFIG },
     { relPath: 'templates/coding-rules/typescript/eslint.config.mjs', content: TS_ESLINT_CONFIG_MJS },
+    { relPath: 'templates/coding-rules/angular/tsconfig.strict.json', content: ANGULAR_STRICT_TSCONFIG },
+    { relPath: 'templates/coding-rules/angular/eslint.config.mjs', content: TS_ESLINT_CONFIG_MJS },
+    { relPath: 'templates/coding-rules/python/ruff.toml', content: PYTHON_RUFF_TOML },
+    { relPath: 'templates/coding-rules/python/mypy.ini', content: PYTHON_MYPY_INI },
     { relPath: 'templates/coding-rules/jvm/aisdlc-strict.init.gradle.kts', content: GRADLE_STRICT_INIT_KTS },
     { relPath: 'templates/coding-rules/java/aisdlc-ruleset.xml', content: JAVA_PMD_RULESET_XML },
     { relPath: 'templates/coding-rules/kotlin/detekt.yml', content: KOTLIN_DETEKT_YML },
@@ -655,8 +735,8 @@ function hasFileMatching(entries: string[], suffixOrName: string): boolean {
 }
 
 function detectCAndCppStacks(fileNames: string[], detected: Set<CodingRuleStack>): void {
-  const hasC = fileNames.some((n) => n.endsWith('.c'));
-  const hasCpp = fileNames.some((n) => /\.(cpp|cc|cxx|hpp)$/.test(n));
+  const hasC = fileNames.some((n) => /\.c$/i.test(n));
+  const hasCpp = fileNames.some((n) => /\.(cpp|cc|cxx|hpp|hh|hxx)$/i.test(n));
   if (hasC && !hasCpp) detected.add('c');
   if (hasCpp || (fileNames.includes('CMakeLists.txt') && !hasC)) detected.add('cpp');
 }
@@ -670,7 +750,17 @@ function detectJvmAndNativeStacks(entries: string[], detected: Set<CodingRuleSta
   }
   if (hasFileMatching(entries, 'Cargo.toml')) detected.add('rust');
   if (hasFileMatching(entries, 'go.mod')) detected.add('go');
-  detectCAndCppStacks(entries, detected);
+}
+
+function detectPythonStack(fileNames: string[], detected: Set<CodingRuleStack>): void {
+  if (
+    hasFileMatching(fileNames, 'pyproject.toml') ||
+    hasFileMatching(fileNames, 'requirements.txt') ||
+    hasFileMatching(fileNames, 'setup.py') ||
+    hasFileMatching(fileNames, '.py')
+  ) {
+    detected.add('python');
+  }
 }
 
 function detectDirectoryStacks(fileNames: string[], detected: Set<CodingRuleStack>): void {
@@ -681,6 +771,7 @@ function detectDirectoryStacks(fileNames: string[], detected: Set<CodingRuleStac
   else if (hasFileMatching(fileNames, 'tsconfig.json')) detected.add('typescript');
   else if (hasFileMatching(fileNames, 'package.json')) detected.add('javascript');
 
+  detectPythonStack(fileNames, detected);
   detectJvmAndNativeStacks(fileNames, detected);
 }
 
@@ -710,9 +801,22 @@ function scanDirectoryEntries(
   return fileNames;
 }
 
+function collectTreeFileNames(rootDir: string, maxDepth = 3): string[] {
+  if (!fs.existsSync(rootDir)) return [];
+  const allFileNames: string[] = [];
+  const queue: { dir: string; depth: number }[] = [{ dir: rootDir, depth: 0 }];
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current) continue;
+    allFileNames.push(...scanDirectoryEntries(current.dir, current.depth, maxDepth, queue));
+  }
+  return allFileNames;
+}
+
 export function detectProjectStacks(targetDir: string, maxDepth = 3): CodingRuleStack[] {
   if (!fs.existsSync(targetDir)) return [];
   const detected = new Set<CodingRuleStack>();
+  const allFileNames: string[] = [];
   const queue: { dir: string; depth: number }[] = [{ dir: targetDir, depth: 0 }];
 
   while (queue.length > 0) {
@@ -720,14 +824,44 @@ export function detectProjectStacks(targetDir: string, maxDepth = 3): CodingRule
     if (!current) continue;
     const fileNames = scanDirectoryEntries(current.dir, current.depth, maxDepth, queue);
     if (fileNames.length > 0) {
+      allFileNames.push(...fileNames);
       detectDirectoryStacks(fileNames, detected);
     }
   }
+  detectCAndCppStacks(allFileNames, detected);
   return Array.from(detected);
+}
+
+function isMavenOnlyProject(fileNames: string[]): boolean {
+  return (
+    fileNames.includes('pom.xml') &&
+    !fileNames.includes('build.gradle') &&
+    !fileNames.includes('build.gradle.kts')
+  );
+}
+
+function resolveStackEntriesForProject(
+  stack: CodingRuleStack,
+  targetDir?: string
+): { relPath: string; content: string }[] {
+  const entries = STACK_FILE_MAP[stack] ?? [];
+  if (!targetDir) return entries;
+  const fileNames = collectTreeFileNames(targetDir);
+  if (stack === 'java' && isMavenOnlyProject(fileNames)) {
+    return entries.filter((e) => e.relPath !== 'gradle/init.d/aisdlc-strict.init.gradle.kts');
+  }
+  if ((stack === 'c' || stack === 'cpp') && !fileNames.includes('CMakeLists.txt')) {
+    return entries.filter((e) => e.relPath !== 'cmake/AisdlcStrictCompiler.cmake');
+  }
+  return entries;
 }
 
 export function getRequiredCodingRulesFiles(stack: CodingRuleStack): string[] {
   return (STACK_FILE_MAP[stack] ?? []).map((f) => f.relPath);
+}
+
+export function getRequiredCodingRulesFilesForProject(rootDir: string, stack: CodingRuleStack): string[] {
+  return resolveStackEntriesForProject(stack, rootDir).map((f) => f.relPath);
 }
 
 const STACK_ALIASES: Record<string, CodingRuleStack> = {
@@ -739,11 +873,18 @@ const STACK_ALIASES: Record<string, CodingRuleStack> = {
   ts: 'typescript',
   js: 'javascript',
   ng: 'angular',
+  py: 'python',
   kt: 'kotlin',
   rs: 'rust',
   golang: 'go',
   'c++': 'cpp',
   cxx: 'cpp',
+};
+
+const STACK_PRECEDENCE: Partial<Record<CodingRuleStack, number>> = {
+  angular: 3,
+  typescript: 2,
+  javascript: 1,
 };
 
 function parseSingleStackToken(token: string, out: Set<CodingRuleStack>): boolean {
@@ -783,12 +924,16 @@ export function resolveCodingRuleStacks(
 }
 
 export function getCodingRulesFilesForStacks(
-  stacks: readonly CodingRuleStack[]
+  stacks: readonly CodingRuleStack[],
+  targetDir?: string
 ): { relPath: string; content: string }[] {
+  const ordered = [...stacks].sort(
+    (a, b) => (STACK_PRECEDENCE[b] ?? 0) - (STACK_PRECEDENCE[a] ?? 0)
+  );
   const seen = new Set<string>();
   const files: { relPath: string; content: string }[] = [];
-  for (const stack of stacks) {
-    const entries = STACK_FILE_MAP[stack] || [];
+  for (const stack of ordered) {
+    const entries = resolveStackEntriesForProject(stack, targetDir);
     for (const entry of entries) {
       if (!seen.has(entry.relPath)) {
         seen.add(entry.relPath);

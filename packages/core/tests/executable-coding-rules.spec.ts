@@ -7,12 +7,12 @@ import {
   detectProjectStacks,
   getCodingRulesFilesForStacks,
   GO_GOLANGCI_YML,
-  initProject,
   isProtectedCodingRulesFile,
   PROTECTED_CODING_RULES_FILES,
   resolveCodingRuleStacks,
   VALID_CODING_RULE_STACKS,
 } from '../src/init/coding-rules-templates.js';
+import { initProject } from '../src/init/index.js';
 import {
   collectCodingRulesBypassViolations,
   collectMissingCodingRuleViolations,
@@ -45,8 +45,8 @@ describe('CHG-073: Executable Strict Coding Rules Per Stack', () => {
     it('includes python in VALID_CODING_RULE_STACKS and resolves py alias', () => {
       expect(VALID_CODING_RULE_STACKS).toContain('python' as CodingRuleStack);
       const dir = setupTempRepo({});
-      expect(resolveCodingRuleStacks('py', dir)).toEqual(['python']);
-      expect(resolveCodingRuleStacks('python', dir)).toEqual(['python']);
+      expect(resolveCodingRuleStacks('py', dir)).toEqual({ valid: true, stacks: ['python'] });
+      expect(resolveCodingRuleStacks('python', dir)).toEqual({ valid: true, stacks: ['python'] });
     });
 
     it.each([

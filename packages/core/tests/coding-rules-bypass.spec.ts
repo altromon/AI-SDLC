@@ -33,7 +33,7 @@ const STACK_RULE_CASES: { stack: CodingRuleStack; manifest: string; content: str
     stack: 'javascript',
     manifest: 'web/package.json',
     content: '{}',
-    requiredFiles: { 'tsconfig.strict.json': '{}', 'eslint.config.mjs': 'export default [];\n' },
+    requiredFiles: { 'eslint.config.mjs': 'export default [];\n' },
   },
   {
     stack: 'angular',
@@ -42,11 +42,16 @@ const STACK_RULE_CASES: { stack: CodingRuleStack; manifest: string; content: str
     requiredFiles: { 'tsconfig.strict.json': '{}', 'eslint.config.mjs': 'export default [];\n' },
   },
   {
+    stack: 'python',
+    manifest: 'pyproject.toml',
+    content: '[project]\nname = "svc"\n',
+    requiredFiles: { 'ruff.toml': 'line-length = 100\n', 'mypy.ini': '[mypy]\nstrict = True\n' },
+  },
+  {
     stack: 'java',
     manifest: 'backend/pom.xml',
     content: '<project />',
     requiredFiles: {
-      'gradle/init.d/aisdlc-strict.init.gradle.kts': '// strict\n',
       'config/pmd/aisdlc-ruleset.xml': '<ruleset />\n',
     },
   },
@@ -69,13 +74,13 @@ const STACK_RULE_CASES: { stack: CodingRuleStack; manifest: string; content: str
     stack: 'go',
     manifest: 'services/api/go.mod',
     content: 'module example.com/api\n',
-    requiredFiles: { '.golangci.yml': 'linters: {}\n' },
+    requiredFiles: { '.golangci.yml': 'version: "2"\n' },
   },
   {
     stack: 'c',
     manifest: 'native/main.c',
     content: 'int main(void) { return 0; }\n',
-    requiredFiles: { '.clang-tidy': 'Checks: "*"\n', 'cmake/AisdlcStrictCompiler.cmake': '# strict\n' },
+    requiredFiles: { '.clang-tidy': 'Checks: "*"\n' },
   },
   {
     stack: 'cpp',

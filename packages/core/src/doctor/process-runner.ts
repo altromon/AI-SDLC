@@ -67,8 +67,7 @@ export function runSpawn(
 ): Promise<ProcessExecResult> {
   return new Promise<ProcessExecResult>((resolve) => {
     const opts = { shell: false, timeout, maxBuffer, cwd, env: buildSafeEnvironment(cwd), windowsHide: true };
-    let child: ReturnType<typeof execFile> | undefined;
-    child = execFile(file, args, opts, (err, stdout, stderr) => {
+    const child = execFile(file, args, opts, (err, stdout, stderr) => {
       if ((err as { killed?: boolean } | null)?.killed && child?.pid && process.platform === 'win32') {
         spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' });
       }
