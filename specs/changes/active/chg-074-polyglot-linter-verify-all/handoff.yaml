@@ -1,0 +1,20 @@
+id: HOF-CHG-074-POLYGLOT-LINTER-VERIFY-ALL
+type: handoff
+title: Handoff Canónico de Arquitectura para Execute Polyglot Linters and Compilers in Verify All
+changeId: CHG-074-POLYGLOT-LINTER-VERIFY-ALL
+version: 1.0.0
+createdAt: '2026-11-26T22:46:52.944Z'
+subgraph:
+  requirements:
+    - FR-074-POLYGLOT-LINTER-VERIFY-ALL-001
+  useCases:
+    - UC-074-POLYGLOT-LINTER-VERIFY-ALL
+  components:
+    - CMP-074-POLYGLOT-LINTER-VERIFY-ALL
+citations:
+  - id: UC-074-POLYGLOT-LINTER-VERIFY-ALL
+    digest: sha256:017cb92741768ff7dc91c0df5f5660d036c132db7bbf130f27c5680f962b9f94
+    comment: Citación de use-case (Polyglot Native Linter and Compiler Execution in aisdlc verify all)
+  - id: FR-074-POLYGLOT-LINTER-VERIFY-ALL-001
+    digest: sha256:a9de1c1763035b78efcaae191a1afb49d5fdff16b3fc9de6e87ab4606748a8bf
+    comment: Requerimiento derivado de UC-074-POLYGLOT-LINTER-VERIFY-ALL
