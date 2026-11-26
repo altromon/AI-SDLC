@@ -14,10 +14,10 @@ contracts:
   - "MODALITY_DRIVER_SIGNATURES.web: RegExp"
 citations:
   - id: UC-068-LANGUAGE-AGNOSTIC-TEST-STACK
-    digest: sha256:26e325c4a7d3b8f67eccbe624eabf5f08d36a8d9e0416cff9f533b016e1c0d39
+    digest: sha256:4dc7ca58a5ca06c4d0eb8b6dd786a6671d3f0beb95baf5f5f20c31566e3ac098
     comment: Citación de use-case (Language-Agnostic Test Stack Detection, Polyglot Web E2E Driver Signatures, and Single-Runtime QA Discipline)
   - id: FR-068-LANGUAGE-AGNOSTIC-TEST-STACK-001
-    digest: sha256:1517258b555d12dc46c77c9bb0443ba94cf0c2a527dafe9d88bc6b4e3003282b
+    digest: sha256:446c822244de26183cc62dbf53d9ad7c4ed9067c4490b5f116f3b04f4f90d28d
     comment: Requerimiento derivado de UC-068-LANGUAGE-AGNOSTIC-TEST-STACK
 ---
 
@@ -34,8 +34,8 @@ Materializa el componente [`CMP-068-LANGUAGE-AGNOSTIC-TEST-STACK`](../../../arch
      - Inspecciona `.aisdlc.json` (`testing?.language` o `stack?.language`) y `quality-policy.yaml` (`testing?.language` o `stack?.language`).
      - Valida que el valor normalizado pertenezca a `{'ts', 'py', 'go', 'rs', 'cs'}`.
 2. **Recorrido acotado de manifiestos**:
-   - `SKIP_MANIFEST_DIRS = new Set(['node_modules', '.git', 'bin', 'obj', 'dist', 'build', 'target', '.venv', '__pycache__', '.pytest_cache'])`.
-   - `collectManifestDirs(rootDir, maxDepth = 3)` recopila `rootDir` (profundidad 0) y subdirectorios hasta profundidad 3 usando `fs.readdirSync(..., { withFileTypes: true })`, omitiendo enlaces simbólicos y `SKIP_MANIFEST_DIRS`.
+   - `SKIP_MANIFEST_DIRS = new Set(['node_modules', '.git', 'bin', 'obj', 'dist', 'build', 'target', '.venv', 'venv', '__pycache__', '.pytest_cache'])`.
+   - `collectManifestDirs(rootDir, maxDepth = 3)` verifica `fs.existsSync(rootDir)` de forma segura (retornando `[]` si no existe) y recopila `rootDir` (profundidad 0) y subdirectorios hasta profundidad 3 usando `fs.readdirSync(..., { withFileTypes: true })`, omitiendo enlaces simbólicos y `SKIP_MANIFEST_DIRS`.
    - `detectLanguageInDir(dir): GherkinScaffoldLanguage | null` evalúa en orden determinista:
      - `'py'`: `pyproject.toml`, `requirements.txt`, `setup.py`
      - `'go'`: `go.mod`

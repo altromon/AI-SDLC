@@ -25,7 +25,7 @@ To prevent `aisdlc` from silently defaulting to TypeScript/Node.js or rejecting 
 ### Increment (chg-068-language-agnostic-test-stack)
 1. **Recursive & Spec-Aware Scaffold Language Detection (`detectDefaultScaffoldLanguage(rootDir)`)**:
    - Extend `detectDefaultScaffoldLanguage` in `packages/cli/src/commands/check.ts` beyond top-level `rootDir` checks so it inspects nested project directories (e.g., `src/`, `app/`, `apps/`, `backend/`, `frontend/`, `tests/`, excluding build/dependency caches like `node_modules`, `.git`, `bin`, `obj`, `dist`, `target`, `.venv`) for any supported language manifest (`pyproject.toml`/`requirements.txt`/`setup.py`, `go.mod`, `Cargo.toml`, `.csproj`/`.sln`/`.slnx`, `package.json`/`tsconfig.json`).
-   - In Phase 0 (before source manifests exist), consult agreed architecture/tech-stack specifications or project configuration before falling back, avoiding silent `'ts'` defaults when another stack is declared.
+   - In Phase 0 (before source manifests exist), consult explicit project configuration (`.aisdlc.json` or `quality-policy.yaml` via `testing.language` / `stack.language`), and return `null` (avoiding silent `'ts'` defaults) when no stack is detected or configured.
 2. **Polyglot Web E2E Driver Signatures (`MODALITY_DRIVER_SIGNATURES.web`)**:
    - Expand `MODALITY_DRIVER_SIGNATURES.web` in `packages/core/src/verifiers/test-discovery.ts` to uniformly recognize Web E2E browser automation bindings across all supported languages (C# `Microsoft.Playwright` PascalCase/async APIs, Python `playwright.sync_api`/`async_api` snake_case APIs, Go `playwright-go`, Rust `playwright` crate, in addition to JS/TS Playwright, Cypress, Testing Library, Angular `TestBed`, and `bUnit`).
 3. **Language-Agnostic Single-Runtime QA Discipline (`.agent/agents/agent-qa-engineer.md` and `.agent/rules/ai-sdlc-testing.md`)**:
@@ -44,7 +44,7 @@ To prevent `aisdlc` from silently defaulting to TypeScript/Node.js or rejecting 
 
 ## 4. Alternative and Exception Flows
 - **Alternative Flow A (Phase 0 Greenfield before code manifests exist)**:
-  - No language manifest exists on disk yet; `detectDefaultScaffoldLanguage` inspects agreed architecture/tech-stack specs or configuration to determine the target stack before falling back.
+  - No language manifest exists on disk yet; `detectDefaultScaffoldLanguage` inspects explicit project configuration (`.aisdlc.json` or `quality-policy.yaml` via `testing.language` / `stack.language`) to determine the target stack, or returns `null` if unconfigured.
 - **Exception Flow B (Stub Web E2E test without driver signature or unauthorized secondary runtime)**:
   - If a test file references a UI component without any valid Web E2E driver signature in `MODALITY_DRIVER_SIGNATURES.web`, `auditUiComponents()` rejects it and reports the component in `untestedUiComponents`.
   - If an agent introduces an unapproved secondary test runtime in a single-stack project, it violates the Single-Runtime QA directive in `.agent/agents/agent-qa-engineer.md` and `.agent/rules/ai-sdlc-testing.md`.

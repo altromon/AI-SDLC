@@ -6,10 +6,10 @@ status: proposed
 author: "agent-system-architect"
 citations:
   - id: UC-068-LANGUAGE-AGNOSTIC-TEST-STACK
-    digest: sha256:26e325c4a7d3b8f67eccbe624eabf5f08d36a8d9e0416cff9f533b016e1c0d39
+    digest: sha256:4dc7ca58a5ca06c4d0eb8b6dd786a6671d3f0beb95baf5f5f20c31566e3ac098
     comment: Citación de use-case (Language-Agnostic Test Stack Detection, Polyglot Web E2E Driver Signatures, and Single-Runtime QA Discipline)
   - id: FR-068-LANGUAGE-AGNOSTIC-TEST-STACK-001
-    digest: sha256:1517258b555d12dc46c77c9bb0443ba94cf0c2a527dafe9d88bc6b4e3003282b
+    digest: sha256:446c822244de26183cc62dbf53d9ad7c4ed9067c4490b5f116f3b04f4f90d28d
     comment: Requerimiento derivado de UC-068-LANGUAGE-AGNOSTIC-TEST-STACK
 ---
 

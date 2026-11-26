@@ -13,11 +13,11 @@ subgraph:
     - CMP-068-LANGUAGE-AGNOSTIC-TEST-STACK
 citations:
   - id: UC-068-LANGUAGE-AGNOSTIC-TEST-STACK
-    digest: sha256:26e325c4a7d3b8f67eccbe624eabf5f08d36a8d9e0416cff9f533b016e1c0d39
+    digest: sha256:4dc7ca58a5ca06c4d0eb8b6dd786a6671d3f0beb95baf5f5f20c31566e3ac098
     comment: Citación de use-case (Language-Agnostic Test Stack Detection, Polyglot Web E2E Driver Signatures, and Single-Runtime QA Discipline)
   - id: FR-068-LANGUAGE-AGNOSTIC-TEST-STACK-001
-    digest: sha256:1517258b555d12dc46c77c9bb0443ba94cf0c2a527dafe9d88bc6b4e3003282b
+    digest: sha256:446c822244de26183cc62dbf53d9ad7c4ed9067c4490b5f116f3b04f4f90d28d
     comment: Requerimiento derivado de UC-068-LANGUAGE-AGNOSTIC-TEST-STACK
   - id: CMP-068-LANGUAGE-AGNOSTIC-TEST-STACK
-    digest: sha256:6c22b1592c9bb77633815841e483cbbf6a8f53165122e08f8e923deda6aa6488
+    digest: sha256:04ba6e6b41942be1211212b8bb77cb89ceb71e1887564acef217645ef714f3a2
     comment: Componente de arquitectura para alineamiento agnóstico al lenguaje

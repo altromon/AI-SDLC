@@ -31,8 +31,8 @@ superseded-by: null
      * Rust (`rs`): `Cargo.toml`
      * C# / .NET (`cs`): `*.csproj`, `*.sln`, `*.slnx`
      * TypeScript / JavaScript (`ts`): `package.json`, `tsconfig.json`
-   - When no source manifests exist on disk (e.g., Phase 0 Greenfield before code is authored), `detectDefaultScaffoldLanguage(rootDir)` MUST check agreed project configuration or architecture specifications (e.g., `quality-policy.yaml` / `specs/architecture/`) for an explicit stack declaration before falling back.
-   - Only when no other stack is detected or declared should it fall back to `'ts'`.
+   - When no source manifests exist on disk (e.g., Phase 0 Greenfield before code is authored), `detectDefaultScaffoldLanguage(rootDir)` MUST check explicit project configuration (`.aisdlc.json` or `quality-policy.yaml` via `testing.language` or `stack.language`) for a declared stack before giving up.
+   - When no supported manifest or explicit configuration is found, `detectDefaultScaffoldLanguage(rootDir)` MUST return `null` instead of silently falling back to `'ts'`, and `autoScaffoldMissingSteps(rootDir)` MUST skip step generation cleanly without emitting spurious `.steps.ts` files.
 2. **Polyglot Web E2E Driver Signatures (`MODALITY_DRIVER_SIGNATURES.web` in `packages/core/src/verifiers/test-discovery.ts`)**:
    - `MODALITY_DRIVER_SIGNATURES.web` MUST uniformly recognize Web E2E browser automation bindings across all supported languages, in addition to existing JS/TS Playwright, Cypress, Testing Library, Angular `TestBed`, and `bUnit`/`RenderComponent` signatures:
      * **C# / .NET (`Microsoft.Playwright`)**: `Microsoft.Playwright`, `PageTest`, `IPage`, `GotoAsync`, `GetByRole`, `GetByText`, `GetByTestId`, `GetByLabel`, `ClickAsync`, `FillAsync`, `WaitForSelectorAsync`, `Expect(Page`, `Expect(Locator`.
