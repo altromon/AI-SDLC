@@ -3,7 +3,13 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { ToolchainHealthCheck } from '../src/doctor/toolchain-check.js';
+import {
+  addMarkerTools,
+  buildRequiredTools,
+  collectBuildMarkers,
+  probePythonToolchain,
+  ToolchainHealthCheck,
+} from '../src/doctor/toolchain-check.js';
 import type { IProcessRunner, SafeProbeExecutable } from '../src/types/doctor.js';
 
 describe('CHG-079 TSK-002: Stack-Aware ToolchainHealthCheck', () => {
@@ -158,5 +164,20 @@ describe('CHG-079 TSK-002: Stack-Aware ToolchainHealthCheck', () => {
     expect(goFinding).toBeDefined();
     expect(goFinding?.status).toBe('fail');
     expect(goFinding?.remediation).toBeTruthy();
+  });
+
+  it('collectBuildMarkers, addMarkerTools, buildRequiredTools, and probePythonToolchain work as unit helpers', async () => {
+    const rootDir = makeTmpDir('aisdlc-doc-helpers-');
+    fs.writeFileSync(path.join(rootDir, 'pom.xml'), '<project/>', 'utf-8');
+    const markers = collectBuildMarkers(rootDir, 3);
+    expect(markers.has('pom.xml')).toBe(true);
+
+    const tools = buildRequiredTools(rootDir, ['java'], markers);
+    const map = new Map(tools.map((t) => [t.name, t]));
+    addMarkerTools(map, ['java'], markers);
+    expect(map.has('mvn')).toBe(true);
+
+    const runner: IProcessRunner = { execSafe: async () => ({ exitCode: 0, stdout: 'Python 3.12', stderr: '' }) };
+    expect(await probePythonToolchain(runner, rootDir)).toBeNull();
   });
 });

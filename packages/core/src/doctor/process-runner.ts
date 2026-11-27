@@ -12,7 +12,24 @@ import {
 } from '../types/doctor.js';
 import { resolveTrustedBinaryPath, resolveWinCmdSpawn } from '../verifiers/tool-installer.js';
 
-const ALLOWED_TOOLS = new Set<string>(['node', 'pnpm', 'git', 'semgrep', 'trivy', 'gitleaks']);
+const ALLOWED_TOOLS = new Set<string>([
+  'node',
+  'pnpm',
+  'git',
+  'semgrep',
+  'trivy',
+  'gitleaks',
+  'dotnet',
+  'python',
+  'python3',
+  'go',
+  'cargo',
+  'java',
+  'mvn',
+  'gradle',
+  'cmake',
+  'clang-tidy',
+]);
 const DANGEROUS_KEYS = ['NODE_OPTIONS', 'NODE_PATH', 'LD_PRELOAD', 'DYLD_INSERT_LIBRARIES', 'GIT_EXEC_PATH'];
 const SAFE_KEYS = ['PATH', 'Path', 'SYSTEMROOT', 'SystemRoot', 'TMP', 'TEMP', 'HOME', 'USERPROFILE', 'ComSpec', 'COMSPEC'];
 

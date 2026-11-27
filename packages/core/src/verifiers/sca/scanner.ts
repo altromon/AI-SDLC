@@ -10,6 +10,13 @@ import { ScannedDependency, ScaTool, ScaVulnerability, VexStatement, Vulnerabili
 import { buildPurl } from './purl.js';
 import { parseMavenPomDependencies } from './maven-xml.js';
 import { resolveLicense } from './license-resolve.js';
+import {
+  collectCpmVersions,
+  collectManifestDirs,
+  scanDotnetDependencies,
+  scanGradleDependencies,
+  scanRequirementsTxt,
+} from './scanner-ecosystems.js';
 import { resetGlobalBudget } from './safe-exec.js';
 import { ingestSbomFile } from './sbom-ingest.js';
 import { parseIngestedSbom, parseStrictPurl, type SbomComponent } from './sbom-parse.js';
@@ -295,6 +302,7 @@ function parsePipfileSection(
 }
 
 export function scanPythonDependencies(rootDir: string, seen: Map<string, ScannedDependency>): void {
+  scanRequirementsTxt(rootDir, seen);
   const pyproject = readTextIfExists(path.join(rootDir, 'pyproject.toml')) || '';
   const directNames = extractPyprojectDirectDeps(pyproject);
 
@@ -475,6 +483,19 @@ function addMissingDirectPackageJsonDeps(
   if (!productionOnly) addMissingGroupDeps(pkg.devDependencies, installedNames, pkgPath, seen);
 }
 
+export function scanDirEcosystems(
+  dir: string,
+  cpmVersions: Map<string, string>,
+  seen: Map<string, ScannedDependency>
+): void {
+  scanPythonDependencies(dir, seen);
+  scanGoDependencies(dir, seen);
+  scanRustDependencies(dir, seen);
+  scanMavenDependencies(dir, seen);
+  scanDotnetDependencies(dir, cpmVersions, seen);
+  scanGradleDependencies(dir, seen);
+}
+
 export function scanWithNativeFs(rootDir: string, options: ScanOptions = {}): ScannedDependency[] {
   const directNames = extractDirectDepNames(rootDir, options.productionOnly);
   const seen = new Map<string, ScannedDependency>();
@@ -488,10 +509,11 @@ export function scanWithNativeFs(rootDir: string, options: ScanOptions = {}): Sc
   }
   addMissingDirectPackageJsonDeps(rootDir, options.productionOnly, seen);
 
-  scanPythonDependencies(rootDir, seen);
-  scanGoDependencies(rootDir, seen);
-  scanRustDependencies(rootDir, seen);
-  scanMavenDependencies(rootDir, seen);
+  const manifestDirs = collectManifestDirs(rootDir, 3);
+  const cpmVersions = collectCpmVersions(manifestDirs);
+  for (const dir of manifestDirs) {
+    scanDirEcosystems(dir, cpmVersions, seen);
+  }
 
   const allDeps = Array.from(seen.values());
   if (options.depth === 'direct') {

@@ -3,7 +3,25 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { scanInstalledLicenses, scanWithNativeFs } from '../src/verifiers/sca/scanner.js';
+import { scanDirEcosystems, scanInstalledLicenses, scanWithNativeFs } from '../src/verifiers/sca/scanner.js';
+import {
+  addGradleDep,
+  addNugetDep,
+  collectCpmVersions,
+  collectManifestDirs,
+  extractXmlAttr,
+  parseCsprojContent,
+  parseDirectoryPackagesProps,
+  parseGradleBuildScript,
+  parseGradleLockfile,
+  parseRequirementLine,
+  readUtf8Safe,
+  scanDotnetDependencies,
+  scanGradleDependencies,
+  scanPackagesLockJson,
+  scanRequirementsTxt,
+  stripXmlCommentsAndCdata,
+} from '../src/verifiers/sca/scanner-ecosystems.js';
 import { resolvePythonLicenseDetailed } from '../src/verifiers/sca/license-python.js';
 import type { ScannedDependency } from '../src/types/index.js';
 
@@ -362,6 +380,34 @@ empty=
       expect(resolved.find((d) => d.name === 'Newtonsoft.Json')?.spdxLicense).toBe('MIT');
       expect(resolved.find((d) => d.name === 'com.google.guava:guava')?.spdxLicense).toBe('Apache-2.0');
       expect(resolved.find((d) => d.name === 'httpx')?.spdxLicense).toBe('BSD-3-Clause');
+    });
+
+    it('exposes cohesive ecosystem parser helpers for direct unit verification', () => {
+      const rootDir = makeTmpDir('aisdlc-sca-helpers-');
+      expect(readUtf8Safe(path.join(rootDir, 'missing.txt'))).toBeNull();
+      expect(collectManifestDirs(rootDir, 3)).toContain(rootDir);
+      expect(stripXmlCommentsAndCdata('<!-- c --><a/>')).toBe('<a/>');
+      expect(extractXmlAttr('Include="Pkg" Version="1.0"', 'Include')).toBe('Pkg');
+
+      const cpm = collectCpmVersions([rootDir]);
+      parseDirectoryPackagesProps('<Project><ItemGroup><PackageVersion Include="A" Version="1.0.0" /></ItemGroup></Project>', cpm);
+      expect(cpm.get('a')).toBe('1.0.0');
+
+      const seen = new Map<string, ScannedDependency>();
+      addNugetDep('A', '1.0.0', 'a.csproj', true, seen);
+      parseCsprojContent('<Project><ItemGroup><PackageReference Include="A" /></ItemGroup></Project>', 'a.csproj', cpm, seen);
+      scanDotnetDependencies(rootDir, cpm, seen);
+      scanPackagesLockJson(rootDir, seen);
+
+      addGradleDep('g', 'a', '1.0', 'build.gradle', seen);
+      parseGradleBuildScript("dependencies { implementation 'g:b:1.0' }", 'build.gradle', seen);
+      parseGradleLockfile('g:c:1.0=compileClasspath', 'gradle.lockfile', seen);
+      scanGradleDependencies(rootDir, seen);
+
+      expect(parseRequirementLine('requests==2.31.0', 'requirements.txt')?.name).toBe('requests');
+      scanRequirementsTxt(rootDir, seen);
+      scanDirEcosystems(rootDir, cpm, seen);
+      expect(seen.size).toBeGreaterThanOrEqual(3);
     });
   });
 });

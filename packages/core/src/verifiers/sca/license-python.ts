@@ -120,9 +120,19 @@ export function resolvePythonLicenseDetailed(dep: ScannedDependency, rootDir: st
   if (!realRoot) return { reason: 'path_rejected' };
   const targetNorm = normalizePyName(dep.name);
 
-  for (const spDir of findSitePackagesDirs(rootDir, realRoot)) {
-    const found = findDistInfoMetadata(spDir, realRoot, targetNorm);
-    if (found) return { license: found, provenance: 'local-metadata' };
+  const searchRoots = [rootDir];
+  if (dep.path) {
+    const realManifestDir = safeRealpath(path.dirname(dep.path));
+    if (realManifestDir && realManifestDir !== realRoot && isPathInside(realRoot, realManifestDir)) {
+      searchRoots.unshift(realManifestDir);
+    }
+  }
+
+  for (const baseDir of searchRoots) {
+    for (const spDir of findSitePackagesDirs(baseDir, realRoot)) {
+      const found = findDistInfoMetadata(spDir, realRoot, targetNorm);
+      if (found) return { license: found, provenance: 'local-metadata' };
+    }
   }
   return resolveFromPipLicensesCli(dep, rootDir);
 }
