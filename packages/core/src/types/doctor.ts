@@ -65,7 +65,23 @@ export interface ProcessExecResult {
   exitCode: number | null;
 }
 
-export type SafeProbeExecutable = 'node' | 'pnpm' | 'git' | 'semgrep' | 'trivy' | 'gitleaks';
+export type SafeProbeExecutable =
+  | 'node'
+  | 'pnpm'
+  | 'git'
+  | 'semgrep'
+  | 'trivy'
+  | 'gitleaks'
+  | 'dotnet'
+  | 'python'
+  | 'python3'
+  | 'go'
+  | 'cargo'
+  | 'java'
+  | 'mvn'
+  | 'gradle'
+  | 'cmake'
+  | 'clang-tidy';
 
 export interface IProcessRunner {
   execSafe(

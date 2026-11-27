@@ -205,6 +205,7 @@ exit 0
 
   describe('5. ToolchainHealthCheck', () => {
     it('verifies node, pnpm, and git versions safely and returns status', async () => {
+      fs.writeFileSync(path.join(tmpDir, 'pnpm-lock.yaml'), 'lockfileVersion: 9.0\n', 'utf-8');
       const mockRunner = {
         execSafe: vi.fn().mockImplementation((tool: string) => {
           if (tool === 'node') return Promise.resolve({ stdout: 'v20.18.0\n', stderr: '', exitCode: 0 });

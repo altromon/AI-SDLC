@@ -28,10 +28,15 @@ const PATH_ECOSYSTEM_SUFFIXES: ReadonlyArray<readonly [string, string]> = [
   ['cargo.toml', 'cargo'],
   ['go.mod', 'golang'],
   ['pom.xml', 'maven'],
+  ['build.gradle', 'maven'],
+  ['build.gradle.kts', 'maven'],
+  ['gradle.lockfile', 'maven'],
   ['poetry.lock', 'pypi'],
   ['uv.lock', 'pypi'],
   ['pipfile.lock', 'pypi'],
+  ['requirements.txt', 'pypi'],
   ['.csproj', 'nuget'],
+  ['directory.packages.props', 'nuget'],
   ['packages.lock.json', 'nuget'],
 ];
 
