@@ -25,6 +25,7 @@ supersedes: null
 superseded-by: null
 ---
 
+
 # CMP-074-POLYGLOT-LINTER-VERIFY-ALL: Polyglot Native Linter and Compiler Runner for `aisdlc verify all`
 
 ## 1. Responsabilidad y Arquitectura Hexagonal (Ports & Adapters)
@@ -70,4 +71,5 @@ flowchart TD
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-27 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-074-polyglot-linter-verify-all | chg-074-polyglot-linter-verify-all |
 | **1.0.0** | 2026-11-26 | agent-system-architect | Definición arquitectónica inicial para ejecución de linters y compiladores políglotas en `aisdlc verify all` | CHG-074-POLYGLOT-LINTER-VERIFY-ALL |

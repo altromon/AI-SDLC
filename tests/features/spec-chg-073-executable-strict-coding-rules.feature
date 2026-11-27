@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-073-executable-strict-coding-rules/spec.md
+# Origen: specs/changes/completed/chg-073-executable-strict-coding-rules/spec.md
 # ID Requerimiento: SPEC-CHG-073-EXECUTABLE-STRICT-CODING-RULES
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

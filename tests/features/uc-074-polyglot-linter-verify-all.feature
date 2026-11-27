@@ -6,36 +6,37 @@
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.
 # ==============================================================================
 
-@UC-074-POLYGLOT-LINTER-VERIFY-ALL @functional @automated @regression
-Feature: Polyglot Native Linter and Compiler Execution in aisdlc verify all
-  As a QA engineer
-  I want aisdlc verify all to run native strict linters and compilers for every detected stack using tool-installer.ts
-  So that polyglot repositories enforce strict code quality while handling missing tools gracefully
+@UC-074-POLYGLOT-LINTER-VERIFY-ALL @functional @automated
+Feature: Execute Polyglot Linters and Compilers in Verify All
+  As a QA engineer or AI-SDLC user
+  I want aisdlc verify all to detect supported technology stacks and run their native strict linters and compilers via tool-installer.ts
+  So that polyglot repositories enforce strict quality without blocking CI when optional native toolchains are absent
 
   @nominal
-  Scenario: Verify all executes native linters and compilers for detected stacks and passes when clean
-    Given a repository containing supported stacks from "typescript", "javascript", "angular", "python", "dotnet", "java", "kotlin", "rust", "go", "c", and "cpp"
-    And all required native linters and compilers are installed and resolved via "ensureToolAvailable"
-    When "aisdlc verify all" executes
-    Then native strict linters and compilers run for every detected stack
+  Scenario: Detected polyglot stacks execute native strict linters and compilers cleanly
+    Given a repository containing supported stacks among "typescript", "javascript", "angular", "python", "dotnet", "java", "kotlin", "rust", "go", "c", and "cpp"
+    And each required native tool is installed and resolved via "ensureToolAvailable"
+    When "aisdlc verify all" executes the polyglot linter gate
+    Then every detected stack runs its native strict linter or compiler with exit code 0
     And "aisdlc verify all" passes with zero violations
 
   @boundary
-  Scenario Outline: Missing native tool behavior in local interactive vs CI non-interactive mode
-    Given a repository with a detected stack whose native tool is missing
+  Scenario Outline: Missing native tool or missing C/C++ compilation database handling
+    Given a repository with a detected stack whose native tool or precondition is "<condition>"
     And the execution environment has mode "<env_mode>" and user install response "<user_choice>"
-    When "aisdlc verify all" invokes "ensureToolAvailable" with "TOOL_INSTALL_ALLOWLIST"
-    Then "aisdlc verify all" <outcome>
+    When "aisdlc verify all" executes "runPolyglotLinters"
+    Then the stack check is "<outcome>"
 
     Examples:
-      | env_mode          | user_choice | outcome                                        |
-      | local-interactive | decline     | skips the missing tool check with a warning    |
-      | ci-true           | n/a         | skips the missing tool check without prompting |
-      | non-tty           | n/a         | skips the missing tool check without prompting |
+      | condition                 | env_mode          | user_choice | outcome                                        |
+      | missing-tool              | local-interactive | decline     | skipped with warning after user declination    |
+      | missing-tool              | ci-true           | n/a         | skipped with warning without prompting         |
+      | missing-tool              | non-tty           | n/a         | skipped with warning without prompting         |
+      | missing-compile-commands  | local-interactive | n/a         | skipped clang-tidy with warning                |
 
   @invalid
-  Scenario: Verify all fails when an installed native linter or compiler returns a non-zero exit code
+  Scenario: Installed native linter or compiler returning non-zero exit code fails verify all
     Given a repository with a detected stack whose native linter or compiler is installed
-    And the source code contains strict lint or compiler errors causing a non-zero exit code
-    When "aisdlc verify all" executes the native tool
+    And running the native tool returns a non-zero exit code due to lint or compiler errors
+    When "aisdlc verify all" executes the polyglot linter gate
     Then "aisdlc verify all" fails and reports the violations with redacted diagnostics
