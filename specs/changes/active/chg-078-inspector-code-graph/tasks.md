@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm --filter @aisdlc/core test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-CORE
     satisfies-requirements: &ref_0
@@ -35,7 +35,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm --filter @aisdlc/cli test && pnpm --filter @aisdlc/mcp test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-CLI
       - CMP-MCP-SERVER
@@ -49,7 +49,7 @@ tasks:
       method: quality-gate
       command-or-criteria: pnpm test && pnpm run typecheck && pnpm run verify:all
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-CORE
       - CMP-CLI

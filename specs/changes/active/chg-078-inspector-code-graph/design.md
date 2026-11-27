@@ -10,10 +10,10 @@ architecture-component: "CMP-CORE"
 enclave: "SEC-ENC-DMZ"
 status: draft
 contracts:
-  - "packages/core/src/inspector/index.ts#inspectElement"
-  - "packages/core/src/code-graph/code-graph-service.ts#DefaultCodeGraphService"
-  - "packages/mcp/src/tools/verification.ts#registerInspectElementTool"
-  - "packages/cli/src/commands/inspect.ts#runInspect"
+  - "inspectElement"
+  - "DefaultCodeGraphService"
+  - "registerInspectElementTool"
+  - "runInspect"
 citations:
   - id: UC-078-INSPECTOR-CODE-GRAPH
     digest: sha256:3e463fa12654f31007dbe2cdcf15b681c2b3bae68b808af662a0a9b0b24a72d5
