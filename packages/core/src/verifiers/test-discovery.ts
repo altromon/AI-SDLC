@@ -118,6 +118,10 @@ export const DEFAULT_UI_TEST_PATTERNS: readonly string[] = [
   '**/test_ui_*.py',
   '**/test_cli_*.py',
   '**/*_cli_test.py',
+  '**/*_e2e_test.go',
+  '**/*_ui_test.go',
+  '**/*_e2e_test.rs',
+  '**/*_ui_test.rs',
 ];
 
 export function escapeRegexChars(raw: string): string {
@@ -253,10 +257,10 @@ const MODALITY_PRECEDENCE_RULES: ReadonlyArray<{ modality: UiModality; matcher: 
   },
 ];
 
-const MODALITY_DRIVER_SIGNATURES: Readonly<Record<UiModality, RegExp>> = {
-  web: /(?:@playwright\/test|\bplaywright\b|\bpage\.(?:goto|locator|getByRole|getByText|getByTestId|getByLabel|click|fill|waitForSelector)\b|\bexpect\(\s*(?:page|locator)\b|\bcypress\b|\bcy\.(?:visit|get|contains|intercept)\b|\brender\s*\(|\bscreen\.(?:getBy|findBy|queryBy)\w*|\bfireEvent\b|\buserEvent\b|\bTestBed\b|\bbUnit\b|\bRenderComponent\b|\bMicrosoft\.Playwright\b|\bPageTest\b|\bIPage\b|\b(?:Goto|Click|Fill|WaitForSelector)Async\b|\bGetBy(?:Role|Text|TestId|Label)\b|\bExpect\(\s*(?:Page|Locator)\b|\bplaywright\.(?:sync|async)_api\b|\b(?:sync|async)_playwright\b|\bpage\.(?:get_by_role|get_by_text|get_by_test_id|get_by_label|wait_for_selector)\b|playwright-go|\bpw\.Chromium\b|\bpage\.(?:Goto|Locator|GetByRole|GetByText|GetByTestId|GetByLabel)\b|playwright::Playwright|\bgoto_builder\b|\bwait_for_selector\b)/,
+export const MODALITY_DRIVER_SIGNATURES: Readonly<Record<UiModality, RegExp>> = {
+  web: /(?:@playwright\/test|\bplaywright\b|\bpage\.(?:goto|locator|getByRole|getByText|getByTestId|getByLabel|click|fill|waitForSelector)\b|\bexpect\(\s*(?:page|locator)\b|\bcypress\b|\bcy\.(?:visit|get|contains|intercept)\b|\brender\s*\(|\bscreen\.(?:getBy|findBy|queryBy)\w*|\bfireEvent\b|\buserEvent\b|\bTestBed\b|\bbUnit\b|\bRenderComponent\b|\bMicrosoft\.Playwright\b|\bPageTest\b|\bIPage\b|\b(?:Goto|Click|Fill|WaitForSelector)Async\b|\bGetBy(?:Role|Text|TestId|Label)\b|\b[Ee]xpect\(\s*(?:[Pp]age|[Ll]ocator)\b|\bcom\.microsoft\.playwright\b|\bPlaywright\.create\s*\(|\bassertThat\s*\(\s*page\b|\bplaywright\.(?:sync|async)_api\b|\b(?:sync|async)_playwright\b|\bpage\.(?:get_by_role|get_by_text|get_by_test_id|get_by_label|wait_for_selector)\b|playwright-go|\bpw\.Chromium\b|\bpage\.(?:Goto|Locator|GetByRole|GetByText|GetByTestId|GetByLabel)\b|playwright::Playwright|\bgoto_builder\b|\bwait_for_selector\b)/,
   desktop: /(?:\bFlaUI\b|\bUIA3Automation\b|\bUIA2Automation\b|\bApplication\.Launch\b|\bFindFirstDescendant\b|\bAsButton\b|\bAsTextBox\b|\bMainWindowHandle\b|\bWinAppDriver\b|\bWindowsDriver\b|\bAvalonia\.Headless\b|\bAutomationElement\b)/,
-  console: /(?:\bspawn\b|\bspawnSync\b|\bexecFile\b|\bexecFileSync\b|\bexecSync\b|(?<!\.)\bexec\s*\(|\bchild_process\b|\bSpectre\.Console\.Testing\b|\bCommandAppTester\b|\bCliRunner\b|\bclick\.testing\b|\bnode-pty\b|\bpty\b|\bprocess\.stdout\b|\bprocess\.stderr\b|\bConsole\.SetOut\b|\bspyOn\(\s*console\s*,|\bconsole\.(?:log|error|warn)\s*=|\b(?:run|execute)[A-Z]\w*\s*\()/,
+  console: /(?:\bspawn\b|\bspawnSync\b|\bexecFile\b|\bexecFileSync\b|\bexecSync\b|(?<!\.)\bexec\s*\(|\bexec\.Command\b|\bcobra\b|\bassert_cmd\b|Command::cargo_bin|\bchild_process\b|\bSpectre\.Console\.Testing\b|\bCommandAppTester\b|\bCliRunner\b|\bclick\.testing\b|\bnode-pty\b|\bpty\b|\bprocess\.stdout\b|\bprocess\.stderr\b|\bConsole\.SetOut\b|\bspyOn\(\s*console\s*,|\bconsole\.(?:log|error|warn)\s*=|\b(?:run|execute)[A-Z]\w*\s*\()/,
   mobile: /(?:\bWidgetTester\b|\btestWidgets\b|\bfind\.by\w+\b|\btester\.(?:tap|pump|pumpWidget|enterText)\b|\bXCUIApplication\b|\bEspresso\b|\bonView\s*\(|\bcomposeTestRule\b|\bAppium\b|\bMaestro\b|\bappId\s*:|\btapOn\s*:|\bassertVisible\s*:|\bDetox\b|\bdevice\.(?:launchApp|reloadReactNative)\b|\belement\(\s*by\.)/,
 };
 
@@ -266,7 +270,7 @@ const QUOTE_CHARS = new Set(["'", '"', '`']);
 
 export function isHashCommentStart(line: string, idx: number): boolean {
   if (line[idx] !== '#') return false;
-  return idx === 0 || line[idx - 1] === ' ' || line[idx - 1] === '\t';
+  return idx === 0 || line[idx - 1] === ' ' || line[idx - 1] === '\t' || line[idx - 1] === '\n' || line[idx - 1] === '\r';
 }
 
 export function stripLineHashComment(line: string): string {
@@ -282,6 +286,72 @@ export function stripLineHashComment(line: string): string {
     if (isHashCommentStart(line, i)) return line.slice(0, i);
   }
   return line;
+}
+
+export function nextAfter(content: string, from: number, tok: string, includeTok: boolean): number {
+  const idx = content.indexOf(tok, from);
+  if (idx === -1) return content.length;
+  return includeTok ? idx + tok.length : idx;
+}
+
+export function readVerbatimString(content: string, start: number): { text: string; next: number } {
+  let j = start + 1;
+  while (j < content.length) {
+    if (content[j] === '"') {
+      if (content[j + 1] === '"') { j += 2; continue; }
+      return { text: content.slice(start, j + 1), next: j + 1 };
+    }
+    j++;
+  }
+  return { text: content.slice(start, j), next: j };
+}
+
+export function readTripleSingleQuoted(content: string, start: number): { text: string; next: number } {
+  let j = start + 3;
+  while (j < content.length) {
+    if (content[j] === '\\') { j += 2; continue; }
+    if (content.startsWith("'''", j)) return { text: content.slice(start, j + 3), next: j + 3 };
+    j++;
+  }
+  return { text: content.slice(start, j), next: j };
+}
+
+export function readSingleQuotedLiteral(content: string, start: number): { text: string; next: number } {
+  if (content.startsWith("'''", start)) return readTripleSingleQuoted(content, start);
+  let j = start + 1;
+  while (j < content.length) {
+    const ch = content[j];
+    if (ch === '\n' || ch === '\r') return { text: "'", next: start + 1 };
+    if (ch === '\\') { j += 2; continue; }
+    if (ch === "'") return { text: content.slice(start, j + 1), next: j + 1 };
+    j++;
+  }
+  return { text: "'", next: start + 1 };
+}
+
+export function readQuotedLiteral(content: string, start: number): { text: string; next: number } {
+  const quote = content[start];
+  if (quote === '"' && start > 0 && content[start - 1] === '@') {
+    return readVerbatimString(content, start);
+  }
+  if (quote === "'") {
+    return readSingleQuotedLiteral(content, start);
+  }
+  let j = start + 1;
+  while (j < content.length) {
+    if (content[j] === '\\') { j += 2; continue; }
+    if (content[j] === quote) return { text: content.slice(start, j + 1), next: j + 1 };
+    j++;
+  }
+  return { text: content.slice(start, j), next: j };
+}
+
+export function readCommentToken(content: string, i: number): { text: string; next: number } | null {
+  if (content.startsWith('/*', i)) return { text: ' ', next: nextAfter(content, i + 2, '*/', true) };
+  if (content.startsWith('<!--', i)) return { text: ' ', next: nextAfter(content, i + 4, '-->', true) };
+  if (content.startsWith('//', i) && content[i - 1] !== ':') return { text: ' ', next: nextAfter(content, i + 2, '\n', false) };
+  if (isHashCommentStart(content, i)) return { text: '', next: nextAfter(content, i + 1, '\n', false) };
+  return null;
 }
 
 export function detectUiComponentModality(filePath: string): UiModality | null {
@@ -301,11 +371,16 @@ export function inferFallbackUiModality(filePath: string): UiModality {
 }
 
 export function stripTestComments(content: string): string {
-  const withoutBlockAndSlash = content
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
-    .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/(?<!:)\/\/[^\r\n]*/g, ' ');
-  return withoutBlockAndSlash.split('\n').map(stripLineHashComment).join('\n');
+  const out: string[] = [];
+  let i = 0;
+  while (i < content.length) {
+    const seg = QUOTE_CHARS.has(content[i])
+      ? readQuotedLiteral(content, i)
+      : (readCommentToken(content, i) ?? { text: content[i], next: i + 1 });
+    out.push(seg.text);
+    i = seg.next;
+  }
+  return out.join('');
 }
 
 export function hasModalityDriverSignature(content: string, modality: UiModality): boolean {
