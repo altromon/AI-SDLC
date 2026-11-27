@@ -118,9 +118,9 @@ export function registerInspectElementTool(server: McpServer, options: RegisterT
       root: z.string().optional().describe('Project root directory'),
     },
     async (params) => {
-      return executeSecuredTool('inspect_element', params, options, (root) => {
+      return executeSecuredTool('inspect_element', params, options, async (root) => {
         assertWithinRoot(params.query, root, 'query');
-        const result = inspectElement(params.query, { rootDir: root });
+        const result = await inspectElement(params.query, { rootDir: root });
         const markdown = formatInspectResultMarkdown(result);
         return { data: { ...result, markdown }, isError: !result.found, root };
       });
