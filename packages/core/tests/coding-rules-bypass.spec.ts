@@ -37,6 +37,7 @@ import {
   collectCodingRulesBypassViolations,
   collectMissingCodingRuleViolations,
   collectSymlinkRuleViolations,
+  isSymlinkPath,
   readTsconfigExtends,
   STACK_RULE_INSPECTORS,
   stripJsonc,
@@ -185,6 +186,15 @@ describe('coding rules bypass scanner', () => {
     expect(v).toHaveLength(2);
   });
 
+  it('flags csproj weakening when MSBuild tags have Condition attributes', () => {
+    const root = setup({
+      'Directory.Build.props': DOTNET_DIRECTORY_BUILD_PROPS,
+      'src/Api/Api.csproj': '<PropertyGroup><TreatWarningsAsErrors Condition="true">false</TreatWarningsAsErrors></PropertyGroup>',
+    });
+    const v = collectCodingRulesBypassViolations(root);
+    expect(v.some((m) => m.includes('[CODING-RULES-BYPASS]') && m.includes('src/Api/Api.csproj'))).toBe(true);
+  });
+
   it('accepts nested Directory.Build.props importing the parent', () => {
     const root = setup({
       'Directory.Build.props': DOTNET_DIRECTORY_BUILD_PROPS,
@@ -263,8 +273,10 @@ describe('CHG-075: Polyglot Coding Rules Anti-Bypass Detection', () => {
       ['empty object array', 'eslint.config.mjs', 'export default [{}];\n'],
       ['empty tseslint.config()', 'eslint.config.mjs', 'export default tseslint.config();\n'],
       ['global ignores **/*', 'eslint.config.mjs', 'export default [{ ignores: ["**/*"] }];\n'],
+      ['global ignores **/* with extra', 'eslint.config.mjs', 'export default [{ ignores: ["**/*", "extra"] }];\n'],
       ['global ignores **', 'eslint.config.mjs', 'export default [{ ignores: ["**"] }];\n'],
       ['rule turned off', 'eslint.config.mjs', 'export default [{ rules: { "no-unused-vars": "off" } }];\n'],
+      ['rule turned off array syntax', 'eslint.config.mjs', 'export default [{ rules: { "no-unused-vars": ["off"] } }];\n'],
       ['wildcard .eslintignore', '.eslintignore', '*\n'],
     ])('flags [CODING-RULES-BYPASS] for ESLint weakening (%s)', (_label, relPath, content) => {
       const files: Record<string, string> = {
@@ -284,6 +296,7 @@ describe('CHG-075: Polyglot Coding Rules Anti-Bypass Detection', () => {
       ['Cargo.toml [lints.clippy] all allow', 'Cargo.toml', '[package]\nname = "x"\n[lints.clippy]\nall = "allow"\n'],
       ['.cargo/config.toml --cap-lints allow', '.cargo/config.toml', '[build]\nrustflags = ["--cap-lints", "allow"]\n'],
       ['src/lib.rs #![allow(warnings)]', 'src/lib.rs', '#![allow(warnings)]\npub fn f() {}\n'],
+      ['src/lib.rs #![allow(warnings, unused)]', 'src/lib.rs', '#![allow(warnings, unused)]\npub fn f() {}\n'],
       ['src/lib.rs whitespace-tolerant #! [ allow ( warnings ) ]', 'src/lib.rs', '#! [ allow ( warnings ) ]\npub fn f() {}\n'],
       ['src/lib.rs #![allow(clippy::all)]', 'src/lib.rs', '#![allow(clippy::all)]\npub fn f() {}\n'],
     ])('flags [CODING-RULES-BYPASS] for Rust (%s)', (_label, relPath, content) => {
@@ -300,17 +313,20 @@ describe('CHG-075: Polyglot Coding Rules Anti-Bypass Detection', () => {
 
   describe('Go anti-bypass', () => {
     it.each([
-      ['disable: all', 'version: "2"\nlinters:\n  disable: all\n'],
-      ['disable-all: true', 'version: "2"\nlinters:\n  disable-all: true\n'],
-      ['default: none without enable', 'version: "2"\nlinters:\n  default: none\n'],
-    ])('flags [CODING-RULES-BYPASS] for .golangci.yml (%s)', (_label, ymlContent) => {
+      ['disable: all', '.golangci.yml', 'version: "2"\nlinters:\n  disable: all\n'],
+      ['disable-all: true', '.golangci.yml', 'version: "2"\nlinters:\n  disable-all: true\n'],
+      ['default: none without enable', '.golangci.yml', 'version: "2"\nlinters:\n  default: none\n'],
+      ['default: none with empty enable: []', '.golangci.yml', 'version: "2"\nlinters:\n  default: none\n  enable: []\n'],
+      ['.golangci.toml disable = ["all"]', '.golangci.toml', '[linters]\ndisable = ["all"]\n'],
+      ['.golangci.toml disable-all = true', '.golangci.toml', '[linters]\ndisable-all = true\n'],
+    ])('flags [CODING-RULES-BYPASS] for %s (%s)', (_label, relPath, content) => {
       const v = collectCodingRulesBypassViolations(
         setup({
           'go.mod': 'module example.com/svc\n',
-          '.golangci.yml': ymlContent,
+          [relPath]: content,
         })
       );
-      expect(v.some((m) => m.includes('[CODING-RULES-BYPASS]') && m.includes('.golangci.yml'))).toBe(true);
+      expect(v.some((m) => m.includes('[CODING-RULES-BYPASS]') && m.includes(relPath))).toBe(true);
     });
   });
 
@@ -366,19 +382,19 @@ describe('CHG-075: Polyglot Coding Rules Anti-Bypass Detection', () => {
       expect(v.some((m) => m.includes('[CODING-RULES-BYPASS]') && m.includes(relPath))).toBe(true);
     });
 
-    it('flags [CODING-RULES-BYPASS] for .clang-tidy WarningsAsErrors empty or Checks -*', () => {
+    it('flags [CODING-RULES-BYPASS] for .clang-tidy WarningsAsErrors empty or Checks -* (including trailing comments)', () => {
       const v1 = collectCodingRulesBypassViolations(
-        setup({ 'src/main.c': 'int main(){return 0;}', '.clang-tidy': "WarningsAsErrors: ''\nChecks: '*'\n" })
+        setup({ 'src/main.c': 'int main(){return 0;}', '.clang-tidy': "WarningsAsErrors: '' # disabled\nChecks: '*'\n" })
       );
       expect(v1.some((m) => m.includes('[CODING-RULES-BYPASS]') && m.includes('.clang-tidy'))).toBe(true);
 
       const v2 = collectCodingRulesBypassViolations(
-        setup({ 'src/main.c': 'int main(){return 0;}', '.clang-tidy': "Checks: '-*'\n" })
+        setup({ 'src/main.c': 'int main(){return 0;}', '.clang-tidy': "Checks: '-*' # none\n" })
       );
       expect(v2.some((m) => m.includes('[CODING-RULES-BYPASS]') && m.includes('.clang-tidy'))).toBe(true);
     });
 
-    it('flags root CMakeLists.txt missing include(cmake/AisdlcStrictCompiler.cmake) but ignores src/CMakeLists.txt without project()', () => {
+    it('flags root CMakeLists.txt missing or commented include(cmake/AisdlcStrictCompiler.cmake) but ignores src/CMakeLists.txt without project()', () => {
       const missingInclude = setup({
         'CMakeLists.txt': 'cmake_minimum_required(VERSION 3.20)\nproject(app)\nadd_subdirectory(src)\n',
         'src/main.cpp': 'int main() { return 0; }\n',
@@ -387,6 +403,15 @@ describe('CHG-075: Polyglot Coding Rules Anti-Bypass Detection', () => {
       });
       const v = collectCodingRulesBypassViolations(missingInclude);
       expect(v.some((m) => m.includes('[CODING-RULES-BYPASS]') && m.includes('CMakeLists.txt'))).toBe(true);
+
+      const commentedInclude = setup({
+        'CMakeLists.txt': 'cmake_minimum_required(VERSION 3.20)\nproject(app)\n# include(cmake/AisdlcStrictCompiler.cmake)\n',
+        'src/main.cpp': 'int main() { return 0; }\n',
+        '.clang-tidy': CPP_CLANG_TIDY,
+        'cmake/AisdlcStrictCompiler.cmake': CPP_CMAKE_STRICT,
+      });
+      const vCommented = collectCodingRulesBypassViolations(commentedInclude);
+      expect(vCommented.some((m) => m.includes('[CODING-RULES-BYPASS]') && m.includes('CMakeLists.txt'))).toBe(true);
 
       const validWithSubdir = setup({
         'CMakeLists.txt': 'cmake_minimum_required(VERSION 3.20)\nproject(app)\ninclude(cmake/AisdlcStrictCompiler.cmake)\nadd_subdirectory(src)\n',
@@ -438,6 +463,19 @@ describe('CHG-075: Polyglot Coding Rules Anti-Bypass Detection', () => {
       );
       const v = collectCodingRulesBypassViolations(root);
       expect(v.some((m) => m.includes('[CODING-RULES-BYPASS]') && m.includes('tsconfig.strict.json'))).toBe(true);
+    });
+
+    it('flags [CODING-RULES-BYPASS] when a protected parent directory (e.g., .cargo) is a symbolic link', () => {
+      const external = setup({
+        'config.toml': '[build]\nrustflags = ["--cap-lints", "allow"]\n',
+      });
+      const root = setup({
+        'Cargo.toml': '[package]\nname = "app"\n',
+        '.clippy.toml': RUST_CLIPPY_TOML,
+      });
+      fs.symlinkSync(external, path.join(root, '.cargo'), process.platform === 'win32' ? 'junction' : 'dir');
+      const v = collectCodingRulesBypassViolations(root);
+      expect(v.some((m) => m.includes('[CODING-RULES-BYPASS]') && m.includes('.cargo'))).toBe(true);
     });
   });
 
@@ -528,6 +566,7 @@ describe('CHG-075: Polyglot Coding Rules Anti-Bypass Detection', () => {
       expect(checkRustFile('.cargo/config.toml', RUST_CARGO_CONFIG_TOML)).toEqual([]);
       expect(checkGoFile('.golangci.yml', GO_GOLANGCI_YML)).toEqual([]);
       expect(checkCppFile('.clang-tidy', CPP_CLANG_TIDY, tsRoot)).toEqual([]);
+      expect(isSymlinkPath(path.join(tsRoot, 'tsconfig.json'))).toBe(false);
       expect(collectSymlinkRuleViolations(tsRoot)).toEqual([]);
     });
   });

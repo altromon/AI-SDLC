@@ -21,9 +21,9 @@ export interface StackRuleInspector {
 }
 
 const MSBUILD_WEAKENING = [
-  /<TreatWarningsAsErrors>\s*false\s*<\/TreatWarningsAsErrors>/i,
-  /<Nullable>\s*disable\s*<\/Nullable>/i,
-  /<RunAnalyzers>\s*false\s*<\/RunAnalyzers>/i,
+  /<TreatWarningsAsErrors(?:\s+[^>]*)?>\s*false\s*<\/TreatWarningsAsErrors>/i,
+  /<Nullable(?:\s+[^>]*)?>\s*disable\s*<\/Nullable>/i,
+  /<RunAnalyzers(?:\s+[^>]*)?>\s*false\s*<\/RunAnalyzers>/i,
 ];
 
 const TSCONFIG_WEAKENING = [
@@ -36,8 +36,9 @@ const ESLINT_WEAKENING = [
   /export\s+default\s*\[\s*\]/,
   /export\s+default\s*\[\s*\{\s*\}\s*\]/,
   /export\s+default\s+tseslint\.config\s*\(\s*\)/,
-  /ignores\s*:\s*\[\s*['"]\*\*(\/\*)?['"]\s*\]/,
+  /ignores\s*:\s*\[[^\]]*['"]\*\*(\/\*)?['"]/,
   /['"][^'"]+['"]\s*:\s*(?:['"]off['"]|0)(?:\s*,|\s*\})/,
+  /['"][^'"]+['"]\s*:\s*\[\s*(?:['"]off['"]|0\b)/,
 ];
 
 const PYTHON_WEAKENING = [
@@ -68,12 +69,12 @@ const KOTLIN_GRADLE_WEAKENING = [
 ];
 
 const RUST_SOURCE_WEAKENING = [
-  /#\s*!\s*\[\s*allow\s*\(\s*(?:warnings|clippy::all)\s*\)\s*\]/,
+  /#\s*!\s*\[\s*allow\s*\([^)]*\b(?:warnings|clippy::all)\b[^)]*\)\s*\]/,
 ];
 
 const CLANG_TIDY_WEAKENING = [
-  /^\s*WarningsAsErrors\s*:\s*(?:''|"")\s*$/m,
-  /^\s*Checks\s*:\s*['"]?-\*['"]?\s*$/m,
+  /^\s*WarningsAsErrors\s*:\s*(?:''|"")\s*(?:#.*)?$/m,
+  /^\s*Checks\s*:\s*['"]?-\*['"]?\s*(?:#.*)?$/m,
 ];
 
 function walkFiles(dir: string, rootDir: string, out: string[]): string[] {
@@ -214,8 +215,14 @@ export function checkGoFile(rel: string, content: string): string[] {
   const issues = matchWeakening(rel, content, [
     /^\s*disable\s*:\s*(?:all|\[\s*all\s*\])/im,
     /^\s*disable-all\s*:\s*true\b/im,
+    /^\s*disable-all\s*=\s*true\b/im,
+    /^\s*disable\s*=\s*\[[^\]]*["']all["']/im,
   ]);
-  if (/^\s*default\s*:\s*none\b/im.test(content) && !/^\s*enable\s*:/im.test(content)) {
+  const hasDefaultNone = /^\s*default\s*[:=]\s*['"]?none['"]?\b/im.test(content);
+  const hasNonEmptyEnable =
+    /^\s*enable\s*:\s*(?:[^\S\r\n]*#[^\r\n]*)?\r?\n\s*-\s*\S+/im.test(content) ||
+    /^\s*enable\s*[:=]\s*\[[^\]]*\S[^\]]*\]/im.test(content);
+  if (hasDefaultNone && !hasNonEmptyEnable) {
     issues.push(`[CODING-RULES-BYPASS] '${rel}' weakens the strict coding rules (default: none without enable).`);
   }
   return issues;
@@ -223,10 +230,11 @@ export function checkGoFile(rel: string, content: string): string[] {
 
 export function checkCppFile(rel: string, content: string, rootDir: string): string[] {
   if (/(^|\/)\.clang-tidy$/i.test(rel)) return matchWeakening(rel, content, CLANG_TIDY_WEAKENING);
+  const stripped = content.replace(/#[^\r\n]*/g, '');
   const requiresInclude =
     fs.existsSync(path.join(rootDir, 'cmake/AisdlcStrictCompiler.cmake')) &&
-    (rel === 'CMakeLists.txt' || /\bproject\s*\(/i.test(content));
-  if (requiresInclude && !/include\s*\([^)]*AisdlcStrictCompiler\.cmake[^)]*\)/i.test(content)) {
+    (rel === 'CMakeLists.txt' || /\bproject\s*\(/i.test(stripped));
+  if (requiresInclude && !/include\s*\([^)]*AisdlcStrictCompiler\.cmake[^)]*\)/i.test(stripped)) {
     return [`[CODING-RULES-BYPASS] '${rel}' weakens the strict coding rules (missing include(cmake/AisdlcStrictCompiler.cmake)).`];
   }
   return [];
@@ -290,16 +298,26 @@ export const STACK_RULE_INSPECTORS: readonly StackRuleInspector[] = [
   },
 ];
 
+export function isSymlinkPath(fullPath: string): boolean {
+  try {
+    return fs.lstatSync(fullPath).isSymbolicLink();
+  } catch {
+    return false;
+  }
+}
+
 export function collectSymlinkRuleViolations(rootDir: string): string[] {
+  const checked = new Set<string>();
   const violations: string[] = [];
   for (const relPath of PROTECTED_CODING_RULES_FILES) {
-    const fullPath = path.join(rootDir, relPath);
-    try {
-      if (fs.lstatSync(fullPath).isSymbolicLink()) {
-        violations.push(`[CODING-RULES-BYPASS] Protected coding-rules file '${relPath}' must not be a symbolic link.`);
+    const parts = relPath.split('/');
+    for (let i = 1; i <= parts.length; i++) {
+      const prefix = parts.slice(0, i).join('/');
+      if (checked.has(prefix)) continue;
+      checked.add(prefix);
+      if (isSymlinkPath(path.join(rootDir, prefix))) {
+        violations.push(`[CODING-RULES-BYPASS] Protected coding-rules path '${prefix}' must not be a symbolic link.`);
       }
-    } catch {
-      // File not present
     }
   }
   return violations;
