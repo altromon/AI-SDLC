@@ -12,6 +12,9 @@ cucumber-tags:
 # Delivery Specification: CHG-078-INSPECTOR-CODE-GRAPH
 
 * **Architectural Scope:** `CMP-CORE`, `CMP-CLI`, `CMP-MCP-SERVER` (Security Enclave: `SEC-ENC-DMZ`)
+* **Alignment Notes:**
+  - `DefaultCodeGraphService` currently emits `kind: 'import'` (typed as `'import' | 're-export' | 'include'`); `inspectElement` maps `edge.kind` directly.
+  - `inspectDirectFile` enforces `assertConfinedPath(rootDir, trimmed)` before any `fs.existsSync` / `fs.readFileSync` and passes the confined POSIX-normalized `relFile` to `CodeGraphService`.
 
 ## 1. Functional Behavior Scenarios (BDD Gherkin)
 

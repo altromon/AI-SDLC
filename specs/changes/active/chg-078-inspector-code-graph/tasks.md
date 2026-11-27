@@ -80,8 +80,9 @@ superseded-by: null
 - **Requisito**: `FR-078-INSPECTOR-CODE-GRAPH-001`
 - **Descripción**:
   - Convertir `inspectElement(query, options)` a `async` (`Promise<InspectResult>`) y actualizar la llamada recursiva en `inspectDirectFile`.
-  - Integrar directamente `DefaultCodeGraphService` para enriquecer `source-file` y resultados semánticos de código con dependencias salientes (`import`, `re-export`, `include`), dependientes entrantes (`imported-by`) y metadatos `SymbolSignature` en `metrics.codeGraphSymbols`.
-  - Omitir `CodeGraphService` para consultas PDaC (`FR-*`, `UC-*`, `CMP-*`, `ADR-*`, `TSK-*`, `CHG-*`, `.feature`, `.md`, `STRICT_ARTIFACT_ID_QUERY_RE`) y cuando no existan archivos fuente en el repositorio (evitando escribir `.aisdlc/cache/code-graph.json` vacío).
+  - En `inspectDirectFile`, validar `assertConfinedPath(rootDir, trimmed)` (usando `realpathSync`) **antes** de `fs.existsSync` / `fs.readFileSync`, devolviendo `null` (`found: false`) ante path traversal o symlink escape, y pasar siempre el `relFile` confinado y normalizado a POSIX a `CodeGraphService`.
+  - Activar enriquecimiento con `CodeGraphService` **únicamente** cuando `adapters.some((a) => a.supports(relFile))` (omitiendo `.md` incluso sin frontmatter, `.feature` y consultas PDaC).
+  - Invocar `indexRepository(rootDir)` **una sola vez** (sin escribir `.aisdlc/cache/code-graph.json` vacío cuando `Object.keys(doc.nodes).length === 0`), usar `traverseKHop(doc, [relFile], 1)` para dependencias salientes (`edge.kind`: `'import' | 're-export' | 'include'`), escanear `doc.nodes` una vez (acotado a `CODE_GRAPH_LIMITS.MAX_EDGES = 250`) para dependientes entrantes (`imported-by`), y adjuntar metadatos `SymbolSignature` en `metrics.codeGraphSymbols`.
   - Degradar con elegancia ante caché ausente o target inexistente sin lanzar excepciones.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm --filter @aisdlc/core test`
