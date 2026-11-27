@@ -19,7 +19,7 @@ tasks:
     autonomy-mode: AUTONOMOUS
     verification:
       method: automated-unit-test
-      command-or-criteria: pnpm test packages/core/tests/coding-rules-bypass.spec.ts
+      command-or-criteria: pnpm test packages/core/tests/coding-rules-bypass.spec.ts packages/core/tests/executable-coding-rules.spec.ts
     assigned-to: agent-developer
     status: PENDING
     implements-components:
@@ -75,17 +75,17 @@ superseded-by: null
 - **ID**: `TSK-075-01`
 - **Archivos objetivo**:
   - `src`: `packages/core/src/verifiers/coding-rules-bypass.ts`
-  - `tests`: `packages/core/tests/coding-rules-bypass.spec.ts`
-- **Descripción**: Reemplazar `IGNORED_DIRS` por `POLYGLOT_EXCLUDED_DIR_SET` (`./polyglot-registry.js`), omitir explícitamente `entry.isSymbolicLink()` en `walkFiles`, e implementar el registro uniforme `StackRuleInspector` para los 11 stacks de `VALID_CODING_RULE_STACKS` (`dotnet`, `typescript`, `javascript`, `angular`, `python`, `java`, `kotlin`, `rust`, `go`, `c`, `cpp`) emitiendo `[CODING-RULES-BYPASS]`. Añadir cobertura `@nominal`, `@boundary` (symlinks + `.venv`/`venv`/`__pycache__`) y `@invalid` por stack en `packages/core/tests/coding-rules-bypass.spec.ts`.
+  - `tests`: `packages/core/tests/coding-rules-bypass.spec.ts`, `packages/core/tests/executable-coding-rules.spec.ts`
+- **Descripción**: Reemplazar `IGNORED_DIRS` por `POLYGLOT_EXCLUDED_DIR_SET` (`./polyglot-registry.js`), omitir explícitamente `entry.isSymbolicLink()` en `walkFiles`, verificar `fs.lstatSync` sobre `PROTECTED_CODING_RULES_FILES` para emitir `[CODING-RULES-BYPASS]` si alguna regla requerida es un enlace simbólico, e implementar el registro uniforme `StackRuleInspector` para los 11 stacks de `VALID_CODING_RULE_STACKS` (`dotnet`, `typescript`, `javascript`, `angular`, `python`, `java`, `kotlin`, `rust`, `go`, `c`, `cpp`) incluyendo resolución JSONC + cadena `extends` en `tsconfig*.json` y validación de `CMakeLists.txt` solo en raíz o con `project(...)`. En `packages/core/tests/executable-coding-rules.spec.ts`, actualizar los fixtures dummy existentes (`'{}'`, `'export default [];\n'`, `'<ruleset />\n'`, `'version: "2"\n'`, `'cmake_minimum_required(VERSION 3.20)\n'`) a configuraciones intactas válidas para evitar falsos fallos; añadir cobertura `@nominal`, `@boundary` (symlinks + `.venv`/`venv`/`__pycache__` + cadena `extends` monorepo + `src/CMakeLists.txt`) y `@invalid` por stack en `packages/core/tests/coding-rules-bypass.spec.ts`.
 - **Modo**: `AUTONOMOUS` 🟢
-- **Verificación**: `pnpm test packages/core/tests/coding-rules-bypass.spec.ts`
+- **Verificación**: `pnpm test packages/core/tests/coding-rules-bypass.spec.ts packages/core/tests/executable-coding-rules.spec.ts`
 
 ### Fase 2: Alineación de Rutas Protegidas en `verify friction` (`TSK-075-02`)
 - **ID**: `TSK-075-02`
 - **Archivos objetivo**:
   - `src`: `packages/core/src/verifiers/progressive-friction.ts`
   - `tests`: `packages/core/tests/progressive-friction.spec.ts`
-- **Descripción**: Importar `PROTECTED_CODING_RULES_FILES` desde `../init/coding-rules-templates.js`, añadir `^specs[\\/]privacy[\\/]`, `^packages[\\/]security[\\/]` y `privacy-policy\.ya?ml$` a `PROTECTED_BYPASS_PATTERNS`, y actualizar `isPathProtectedFromPatch` para bloquear también cualquier ruta de `PROTECTED_CODING_RULES_FILES` y `templates/coding-rules/` bajo perfil `patch` con `[ANTI-PATCH-BYPASS]`. Cubrir todas las rutas en `packages/core/tests/progressive-friction.spec.ts`.
+- **Descripción**: Importar `PROTECTED_CODING_RULES_FILES` desde `../init/coding-rules-templates.js`, añadir `^specs[\\/]privacy[\\/]`, `^packages[\\/]security[\\/]`, `privacy-policy\.ya?ml$` y `/^\.github\/CODEOWNERS$/i` a `PROTECTED_BYPASS_PATTERNS`, y actualizar `isPathProtectedFromPatch` para normalizar rutas (`path.posix.normalize`, eliminando `./` y `/` iniciales) y bloquear de forma insensible a mayúsculas/minúsculas cualquier ruta de `PROTECTED_CODING_RULES_FILES` y `templates/coding-rules/` bajo perfil `patch` con `[ANTI-PATCH-BYPASS]`. Cubrir todas las rutas (incluyendo variantes de mayúsculas/minúsculas y `./`) en `packages/core/tests/progressive-friction.spec.ts`.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm test packages/core/tests/progressive-friction.spec.ts`
 
@@ -94,7 +94,7 @@ superseded-by: null
 - **Archivos objetivo**:
   - `src`: `packages/core/src/verifiers/progressive-friction.ts`, `packages/core/src/init/coding-rules-templates.ts`, `scripts/guard-branch.cjs`
   - `tests`: `packages/core/tests/progressive-friction.spec.ts`, `packages/core/tests/coding-rules-templates.spec.ts`
-- **Descripción**: Verificar y asegurar paridad exacta de `PROTECTED_BYPASS_PATTERNS` y `PROTECTED_CODING_RULES_FILES` entre `progressive-friction.ts`, `scripts/guard-branch.cjs` y `STARTER_GUARD_BRANCH_CJS`, añadiendo aserciones automáticas de paridad en pruebas unitarias y validando el conjunto completo de pruebas y tipado estricto.
+- **Descripción**: Verificar y asegurar paridad exacta de `PROTECTED_BYPASS_PATTERNS` (`/^\.github\/CODEOWNERS$/i`) y coincidencia normalizada insensible a mayúsculas/minúsculas de `PROTECTED_CODING_RULES_FILES` entre `progressive-friction.ts`, `scripts/guard-branch.cjs` y `STARTER_GUARD_BRANCH_CJS`, añadiendo aserciones automáticas de paridad en pruebas unitarias y validando el conjunto completo de pruebas y tipado estricto.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm test && pnpm run typecheck`
 
