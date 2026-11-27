@@ -2,7 +2,7 @@
 id: CHG-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
 type: spec-change-proposal
 title: SCA Recursive Multi-Ecosystem & Doctor Native Toolchains
-status: draft
+status: applied
 author: agent-system-architect
 citations:
   - id: UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
@@ -12,6 +12,7 @@ citations:
     digest: sha256:212e9c1b9b911d9251ad3b30d886fe78b941e574e559038eaf6b1afc5040beec
     comment: Requerimiento derivado de UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
 ---
+
 
 
 # Propuesta de Cambio: CHG-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS

@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-079-sca-recursive-doctor-toolchains/spec.md
+# Origen: specs/changes/completed/chg-079-sca-recursive-doctor-toolchains/spec.md
 # ID Requerimiento: SPEC-CHG-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

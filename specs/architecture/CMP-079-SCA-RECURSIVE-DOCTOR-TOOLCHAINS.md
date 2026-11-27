@@ -25,6 +25,7 @@ superseded-by: null
 
 
 
+
 # CMP-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS: Recursive Multi-Ecosystem SCA Scanning and Stack-Aware Doctor Toolchains
 
 ## 1. Responsabilidad y Arquitectura Hexagonal (Ports & Adapters)
@@ -115,4 +116,5 @@ sequenceDiagram
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-27 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-079-sca-recursive-doctor-toolchains | chg-079-sca-recursive-doctor-toolchains |
 | **1.0.0** | 2026-11-27 | agent-system-architect | Definición arquitectónica inicial para Issue #234: escaneo SCA recursivo multi-ecosistema y `ToolchainHealthCheck` consciente del stack | CHG-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS |
