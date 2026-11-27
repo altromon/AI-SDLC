@@ -717,9 +717,32 @@ export function resolvePolicyTestPatterns(rootDir: string, options: TestingCover
   }
 }
 
+export function extractEnforceBddVariantsFromPolicyDoc(doc: unknown): boolean {
+  if (!doc || typeof doc !== 'object') return false;
+  const rec = doc as Record<string, unknown>;
+  const thresholds = rec.thresholds as Record<string, unknown> | undefined;
+  const testEnforcement = thresholds?.test_enforcement as Record<string, unknown> | undefined;
+  return testEnforcement?.enforce_bdd_variants === true || rec.enforce_bdd_variants === true;
+}
+
+export function resolvePolicyEnforceBddVariants(rootDir: string, options: TestingCoverageOptions): boolean {
+  if (options.enforceBddVariants !== undefined) return Boolean(options.enforceBddVariants);
+  const policyFile = resolvePolicyFilePath(rootDir, options.policyPath);
+  if (!fs.existsSync(policyFile)) return false;
+  try {
+    return extractEnforceBddVariantsFromPolicyDoc(yaml.load(fs.readFileSync(policyFile, 'utf-8')));
+  } catch {
+    return false;
+  }
+}
+
 export function verifyTestingCoverage(options: TestingCoverageOptions = {}): TestingCoverageResult {
   const rootDir = options.rootDir || process.cwd();
   const testPatterns = resolvePolicyTestPatterns(rootDir, options);
+  const resolvedOptions: TestingCoverageOptions = {
+    ...options,
+    enforceBddVariants: resolvePolicyEnforceBddVariants(rootDir, options),
+  };
   const allMdFiles = walkMdFiles(rootDir);
   const reqToTestsMap = scanAllTestArtifacts(rootDir, testPatterns);
   const corpus = collectTestCorpus(rootDir, allMdFiles, testPatterns);
@@ -735,14 +758,14 @@ export function verifyTestingCoverage(options: TestingCoverageOptions = {}): Tes
 
   for (const file of allMdFiles) {
     try {
-      processMdFileForCoverage(file, rootDir, reqToTestsMap, corpus, options, state);
+      processMdFileForCoverage(file, rootDir, reqToTestsMap, corpus, resolvedOptions, state);
     } catch {
       // Ignore unparseable files
     }
   }
 
   return assembleCoverageResult(
-    state.reqAudit, state.taskAudit, state.useCaseFlows, state.reqErrors, state.taskErrors, state.ucErrors, rootDir, options
+    state.reqAudit, state.taskAudit, state.useCaseFlows, state.reqErrors, state.taskErrors, state.ucErrors, rootDir, resolvedOptions
   );
 }
 

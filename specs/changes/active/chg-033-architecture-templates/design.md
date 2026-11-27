@@ -5,7 +5,7 @@ title: "Diseño Estructural de Plantillas de Arquitectura arc42 y NAF v4"
 status: draft
 citations:
   - id: FR-033-ARCHITECTURE-TEMPLATES-001
-    digest: sha256:6c3bd29d58191c964c84f10f2af7723e901acad6d2720877e52fc552a6c40f80
+    digest: sha256:bb8be59a9942b7d4d0519753c0c129536c900b7c84e65a79b337e810a2826ecb
     comment: Requerimiento funcional canónico asociado (Génesis CHG-033-ARCHITECTURE-TEMPLATES)
 ---
 

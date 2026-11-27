@@ -11,7 +11,7 @@ enclave: "SEC-ENC-DMZ"
 status: draft
 citations:
   - id: FR-025-STRUCTURED-JSON-VERIFY-001
-    digest: sha256:f28d9de1a8dc45e748611249a4a6cb9b507527425ed2326b48cad619da1b9226
+    digest: sha256:6507f87943eb7b68a1f4eabbded758135e16fc8a8af7b27e8241bb67c18589cb
     comment: Requerimiento funcional canónico asociado (Génesis CHG-025-STRUCTURED-JSON-VERIFY)
 ---
 

@@ -6,7 +6,7 @@ status: applied
 author: "agent-developer / human-dev"
 citations:
   - id: FR-026-AGENT-NATIVE-CONFIGS-001
-    digest: sha256:10515f23a2276a362b1023693c433922994ccb1ac663ce8a421542dc3bb900dd
+    digest: sha256:150eac6d377c0af3a7668f11b320d127bf3244b3da3623f3747b4c3eec358c31
     comment: Requerimiento funcional canónico asociado (Génesis CHG-026-AGENT-NATIVE-CONFIGS)
 ---
 

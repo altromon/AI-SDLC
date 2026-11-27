@@ -33,6 +33,8 @@ import { compileTestPatterns } from '../src/verifiers/test-discovery.js';
 import {
   analyzeBddVariantsForRequirement,
   assembleCoverageResult,
+  extractEnforceBddVariantsFromPolicyDoc,
+  resolvePolicyEnforceBddVariants,
   auditRequirement,
   auditSingleTask,
   auditTasks,
@@ -901,6 +903,23 @@ describe('M4.2 testing-coverage unit suite', () => {
       const badYaml = path.join(tmpDir, 'bad-policy.yaml');
       fs.writeFileSync(badYaml, 'scope: [unclosed', 'utf-8');
       expect(resolvePolicyTestPatterns(tmpDir, { policyPath: 'bad-policy.yaml' })).toBeUndefined();
+    });
+
+    it('resolves enforce_bdd_variants from quality-policy.yaml for both CLI and MCP', () => {
+      expect(extractEnforceBddVariantsFromPolicyDoc(null)).toBe(false);
+      expect(resolvePolicyEnforceBddVariants(tmpDir, {})).toBe(false);
+      expect(resolvePolicyEnforceBddVariants(tmpDir, { enforceBddVariants: true })).toBe(true);
+
+      fs.writeFileSync(
+        path.join(tmpDir, 'quality-policy.yaml'),
+        'thresholds:\n  test_enforcement:\n    enforce_bdd_variants: true\n',
+        'utf-8'
+      );
+      expect(resolvePolicyEnforceBddVariants(tmpDir, {})).toBe(true);
+      expect(resolvePolicyEnforceBddVariants(tmpDir, { enforceBddVariants: false })).toBe(false);
+
+      fs.writeFileSync(path.join(tmpDir, 'bad-policy.yaml'), 'thresholds: [unclosed', 'utf-8');
+      expect(resolvePolicyEnforceBddVariants(tmpDir, { policyPath: 'bad-policy.yaml' })).toBe(false);
     });
   });
 });

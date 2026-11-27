@@ -75,6 +75,13 @@ Feature: Generación de Logs Estructurados, Trazas y Métricas de Ejecución
     Given existen registros de telemetría persistidos en almacenamiento local
     When se invoca ITelemetryExporter con un rango temporal y formato "jsonl" o "openmetrics"
     Then se genera el artefacto exportado listo para su análisis o ingesta en Prometheus y Grafana
+
+  @invalid
+  Scenario: Rechazo de cabecera traceparent malformada y enmascaramiento de PII
+    Given una cabecera "traceparent" con formato inválido y un mensaje de log con un correo electrónico
+    When el sistema procesa el contexto y emite el evento de log
+    Then el traceparent inválido es descartado iniciando una nueva traza raíz segura
+    And el correo electrónico es enmascarado antes de persistir el evento
 ```
 
 ---

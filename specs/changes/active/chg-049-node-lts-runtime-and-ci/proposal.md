@@ -9,7 +9,7 @@ citations:
     digest: sha256:cab2aae26204d8a004f782c6a83535806d6cd9ca9aa8dc44152f136999d47f54
     comment: Citación de use-case (Scaffolding de Reglas de Agente en Inicialización de Proyecto)
   - id: FR-030-INIT-AGENT-SCAFFOLDING-001
-    digest: sha256:cc12da31168cd033ac7d4752a8eecef01736190a9a12ae600d0775169fd1f88c
+    digest: sha256:821870a5d179701d1d133519aa5ba061f0e162f143fabefd144871a3f5189aa1
     comment: Requerimiento derivado de UC-030-INIT-AGENT-SCAFFOLDING
 ---
 

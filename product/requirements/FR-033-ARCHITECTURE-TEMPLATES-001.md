@@ -35,3 +35,27 @@ El sistema DEBE suministrar en `templates/architecture/` un conjunto integral y 
   12. Glosario de Arquitectura (`glossary.template.md`)
 - **Criterio 2 (Estructura y Frontmatter Canónico)**: Cada plantilla debe contener encabezado YAML con `id`, `type`, `version`, `status` y campos de relación acordes con la especificación normativa `process/05_architecture_arc42_nafv4.md`.
 - **Criterio 3 (Verificabilidad Automatizada)**: La existencia, sintaxis y frontmatters de todas las plantillas deben ser validadas mediante pruebas unitarias automatizadas en la suite del monorepo.
+
+## 3. Escenarios BDD
+
+```gherkin
+@FR-033-ARCHITECTURE-TEMPLATES-001 @automated
+Feature: Plantillas Canónicas de Arquitectura
+  @nominal
+  Scenario: Disponibilidad y validez de las 12 plantillas arc42 y NAF v4
+    Given el directorio "templates/architecture/" del framework
+    When las pruebas automatizadas inspeccionan todas las plantillas de arquitectura
+    Then existen las plantillas de las secciones 1 a 12 con YAML frontmatter válido
+
+  @boundary
+  Scenario: Validación de campos mínimos de trazabilidad en cada plantilla
+    Given cualquier plantilla en "templates/architecture/"
+    When se analiza su cabecera YAML frontmatter
+    Then contiene "id", "type", "version" y "status" conformes con arc42 y NAF v4
+
+  @invalid
+  Scenario: Detección de plantilla faltante o con frontmatter YAML inválido
+    Given una plantilla de arquitectura ausente o con cabecera YAML malformada
+    When se ejecuta la suite de validación de plantillas
+    Then la prueba falla identificando la plantilla no conforme
+```

@@ -115,6 +115,7 @@ thresholds:
   test_enforcement:
     require_function_unit_tests: true
     require_ui_component_tests: true
+    enforce_bdd_variants: true
 `;
 
 export const STARTER_LICENSE_POLICY = `# ==============================================================================

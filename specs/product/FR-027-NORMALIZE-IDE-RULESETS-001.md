@@ -33,10 +33,23 @@ Feature: normalize-ide-rulesets
   I want to execute the capability for normalize-ide-rulesets
   So that the expected outcome and value are achieved
 
+  @nominal
   Scenario: Nominal successful flow
     Given the system is in an operational state
     When the operation for "normalize-ide-rulesets" is executed
     Then the operation completes successfully
+
+  @boundary
+  Scenario: Idempotent normalization when rulesets are already normalized
+    Given all IDE rulesets in the workspace already match canonical formatting
+    When the operation for "normalize-ide-rulesets" is executed
+    Then no spurious file modifications are produced
+
+  @invalid
+  Scenario: Handling missing or malformed ruleset targets gracefully
+    Given a target IDE ruleset directory does not exist or contains unreadable entries
+    When the operation for "normalize-ide-rulesets" is executed
+    Then the error is reported cleanly without corrupting existing rulesets
 ```
 
 ---

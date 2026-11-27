@@ -569,5 +569,21 @@ describe('CHG-075: Polyglot Coding Rules Anti-Bypass Detection', () => {
       expect(isSymlinkPath(path.join(tsRoot, 'tsconfig.json'))).toBe(false);
       expect(collectSymlinkRuleViolations(tsRoot)).toEqual([]);
     });
+
+    it('blocks AI agents from modifying quality-policy.yaml in guard-branch.cjs', () => {
+      const guard = require(guardScriptPath) as {
+        evaluateGuardDecision: (payload: { toolCall: { args: { Path: string } }; workspacePaths: string[] }) => {
+          decision: string;
+          reason?: string;
+        };
+      };
+      const root = setup({ 'quality-policy.yaml': 'version: "1.0"\n' });
+      const res = guard.evaluateGuardDecision({
+        toolCall: { args: { Path: path.join(root, 'quality-policy.yaml') } },
+        workspacePaths: [root],
+      });
+      expect(res.decision).toBe('deny');
+      expect(res.reason).toContain('Immutable Policy Guard');
+    });
   });
 });

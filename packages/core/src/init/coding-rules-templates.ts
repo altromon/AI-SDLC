@@ -684,6 +684,13 @@ function evaluateGuardDecision(payload) {
   const sddCheck = hasValidActiveSddIncrement(cwd, branch, relPath);
   if (!sddCheck.valid) return { decision: 'deny', reason: sddCheck.reason };
 
+  if (/(?:^|\\/)quality-policy\\.ya?ml$/i.test(relPath)) {
+    return {
+      decision: 'deny',
+      reason: \`❌ [AI-SDLC Immutable Policy Guard] BLOCKED: AI agents are forbidden from modifying '\${path.basename(targetPath)}'. Policy files can only be changed by a human engineer.\`,
+    };
+  }
+
   return { decision: 'allow' };
 }
 
