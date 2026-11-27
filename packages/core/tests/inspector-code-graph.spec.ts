@@ -253,6 +253,7 @@ describe('Element Inspector + CodeGraphService Integration (CHG-078)', () => {
       const base = { found: true, query: 'src/a.ts', summary: 's', upstream: [], downstream: [], relatedItems: [] };
       const enriched = await enrichWithCodeGraph(base, rootDir, 'src/a.ts', createDefaultLanguageAdapters());
       expect(Array.isArray(enriched.metrics?.codeGraphSymbols)).toBe(true);
+      expect(fs.existsSync(path.join(rootDir, '.aisdlc', 'cache', 'code-graph.json'))).toBe(false);
     });
   });
 });

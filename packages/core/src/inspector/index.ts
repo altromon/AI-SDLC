@@ -409,9 +409,8 @@ export function createNonEmptyCodeGraphCache(): CodeGraphCachePort {
   const fsCache = new FsCodeGraphCache();
   return {
     load: (repoRoot: string) => fsCache.load(repoRoot),
-    save: async (repoRoot: string, doc: CodeGraphDocument): Promise<void> => {
-      if (Object.keys(doc.nodes).length === 0) return;
-      await fsCache.save(repoRoot, doc);
+    save: async (): Promise<void> => {
+      // inspectElement is read-only and must not mutate the workspace (e.g. creating .aisdlc/cache/code-graph.json).
     },
   };
 }
