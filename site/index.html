@@ -541,12 +541,12 @@
     <!-- ================= STATS ================= -->
     <div class="stats">
       <div class="wrap stats-grid">
-        <div class="stat reveal"><b class="grad-text" data-count="13">13</b><span>Specialized AI agents</span></div>
+        <div class="stat reveal"><b class="grad-text" data-count="10">10</b><span>Specialized AI agents</span></div>
         <div class="stat reveal"><b class="grad-text" data-count="2">2</b><span>Transversal Checkpoints</span></div>
         <div class="stat reveal"><b class="grad-text" data-count="12">12</b><span>Deterministic quality gates</span></div>
-        <div class="stat reveal"><b class="grad-text" data-count="33">33</b><span>JSON Schemas (2020-12)</span></div>
-        <div class="stat reveal"><b class="grad-text" data-count="37">37</b><span>Canonical templates</span></div>
-        <div class="stat reveal"><b class="grad-text" data-count="24">24</b><span>MCP tools for your IDE</span></div>
+        <div class="stat reveal"><b class="grad-text" data-count="34">34</b><span>JSON Schemas (2020-12)</span></div>
+        <div class="stat reveal"><b class="grad-text" data-count="62">62</b><span>Canonical templates</span></div>
+        <div class="stat reveal"><b class="grad-text" data-count="31">31</b><span>MCP tools for your IDE</span></div>
       </div>
     </div>
 
@@ -753,7 +753,7 @@
         <div>
           <span class="eyebrow">Native MCP server</span>
           <h2>Full lifecycle control <span class="grad-text">from your IDE chat</span>.</h2>
-          <p class="lead">Run <code>npx @aisdlc/mcp</code> and your assistant gets 24 typed tools and 6 canonical resources. <code>aisdlc init</code> writes the MCP configs for you.</p>
+          <p class="lead">Run <code>npx @aisdlc/mcp</code> and your assistant gets 31 typed tools and 6 canonical resources. <code>aisdlc init</code> writes the MCP configs for you.</p>
           <ul class="list-check">
             <li><span><b>Scaffold</b> changes with SHA-256 handoff sidecars</span></li>
             <li><span><b>Verify</b> quality, security, privacy, licenses &amp; traceability</span></li>
@@ -771,6 +771,35 @@
             <div class="msg tool">⚙ ai-sdlc.verify({ gate: "all", json: true })<br><span class="ok">✔</span> 12/12 gates passed · exit 0</div>
             <div class="msg bot">Yes ✅ Traceability is complete, zero regressions or churn spikes, and all 12 gates pass. TSK-001 has Task-ID trailers attached and is ready for PR merge!</div>
           </div>
+        </div>
+      </div>
+
+      <div class="wrap" style="margin-top:2.5rem">
+        <div class="grid g4">
+          <article class="card reveal">
+            <div class="icon">🧠</div>
+            <h3>Code Graph &amp; Context</h3>
+            <p>Hydrate k-hop symbol subgraphs &amp; semantic spec matches without brute-force search.</p>
+            <span class="tag">query_code_graph · get_task_context · search_specs</span>
+          </article>
+          <article class="card reveal">
+            <div class="icon">📦</div>
+            <h3>SDD Lifecycle</h3>
+            <p>Scaffold projects, bounded changes, SHA-256 handoffs, reviews &amp; baseline integration.</p>
+            <span class="tag">new · migrate · sdd_* · inspect_element</span>
+          </article>
+          <article class="card reveal">
+            <div class="icon">🛡️</div>
+            <h3>12 Verification Gates</h3>
+            <p>Run the full suite or target individual AST, schema, security, privacy &amp; license gates.</p>
+            <span class="tag">verify · verify_quality · verify_security · verify_*</span>
+          </article>
+          <article class="card reveal">
+            <div class="icon">📊</div>
+            <h3>Reports, KPIs &amp; Doctor</h3>
+            <p>Compute PR &amp; release rework KPIs, HTML dashboards, authorship &amp; toolchain health.</p>
+            <span class="tag">report* · kpi_pr · kpi_release · doctor</span>
+          </article>
         </div>
       </div>
     </section>
@@ -901,28 +930,28 @@
               <div class="icon">🌐</div>
               <h3>11-Stack Polyglot Engine &amp; Linters</h3>
               <p>Unified registry across <code>dotnet</code>, <code>typescript</code>, <code>javascript</code>, <code>angular</code>, <code>python</code>, <code>java</code>, <code>kotlin</code>, <code>rust</code>, <code>go</code>, <code>c</code>, and <code>cpp</code> — with per-feature BDD scaffolding and real linter/compiler execution in <code>aisdlc verify all</code>.</p>
-              <span class="tag">CHG-068..074 · Gherkin + Linters</span>
+              <span class="tag">Polyglot BDD + Linters</span>
             </article>
             <article class="card reveal">
               <span class="num">v4.17</span>
               <div class="icon">🛡️</div>
               <h3>Polyglot Anti-Bypass &amp; Friction Sync</h3>
               <p>Deterministic <code>[CODING-RULES-BYPASS]</code> detection across all 11 stacks (transitive <code>tsconfig</code> chains, symlink-safe scanning) plus synchronized <code>PROTECTED_BYPASS_PATTERNS</code> across <code>verify friction</code> and <code>guard-branch.cjs</code>.</p>
-              <span class="tag">CHG-075 · Symlink &amp; Privacy Guard</span>
+              <span class="tag">11-Stack Anti-Bypass + Symlink Guard</span>
             </article>
             <article class="card reveal">
               <span class="num">v4.15</span>
               <div class="icon">🎚️</div>
               <h3>SemVer Friction Profiles</h3>
               <p>Explicit <code>patch</code>, <code>minor</code>, and <code>major</code> increment profiles with fail-closed branch guards, highest-precedence SemVer bumps, and fast-track Checkpoint 1 verification (<code>verify:checkpoint-1</code>).</p>
-              <span class="tag">CHG-067 · patch | minor | major</span>
+              <span class="tag">SemVer Profiles · patch | minor | major</span>
             </article>
             <article class="card reveal">
               <span class="num">v4.15</span>
               <div class="icon">🧠</div>
               <h3>Self-Maintaining Code Graph &amp; Token Savings</h3>
               <p>An incremental, self-maintaining code &amp; dependency graph (<code>.aisdlc/cache/code-graph.json</code>) automatically indexes symbols and edges so agents hydrate k-hop context via MCP (<code>get_task_context</code>, <code>query_code_graph</code>, <code>search_specs</code>) — dramatically cutting search token consumption.</p>
-              <span class="tag">CHG-065..066 · Low-Token Context Pack</span>
+              <span class="tag">MCP Context Pack · Low-Token</span>
             </article>
           </div>
         </div>
@@ -933,9 +962,9 @@
     <section id="quickstart">
       <div class="wrap">
         <div class="center">
-          <span class="eyebrow">Quickstart · 4 Framework Skills</span>
+          <span class="eyebrow">Quickstart · 9 Framework Skills</span>
           <h2>Choose your entry point. <span class="grad-text">Watch each skill execute.</span></h2>
-          <p class="lead">Requires Node.js 18+, pnpm 9+ and Git 2.30+. Select a skill to inspect its exact workflow, specialist handoffs, and quality gates.</p>
+          <p class="lead">Requires Node.js 18+, pnpm 9+ and Git 2.30+. Select one of the 4 core entry-point skills to inspect its workflow, or invoke any of the 5 specialized operational skills below.</p>
         </div>
 
         <div class="skill-tabs" id="skillTabs">
@@ -1020,7 +1049,7 @@
             <div class="skill-panel-inner">
               <div>
                 <div class="skill-meta">
-                  <span class="skill-tag">patch | standard | critical</span>
+                  <span class="skill-tag">patch | minor | major</span>
                   <span class="skill-tag cy">2 Checkpoints · 12 Gates</span>
                 </div>
                 <p class="skill-desc">Delivers bounded features and bugfixes: scope triage, upstream Product/Security/Privacy delta, Hexagonal design, Checkpoint 1, Red-Green-Refactor TDD, Checkpoint 2, and SemVer baseline integration.</p>
@@ -1072,6 +1101,39 @@
                 <div class="term-body" data-skill-term="inspector" aria-live="off"></div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div style="margin-top:2.5rem">
+          <div class="center" style="margin-bottom:1.5rem">
+            <span class="eyebrow">5 Specialized &amp; Compliance Skills</span>
+          </div>
+          <div class="grid g3">
+            <article class="card reveal">
+              <h3><code>/aisdlc-spot-audit</code></h3>
+              <p>On-demand audit of any spec, component, task, or source file combining <code>inspect_element</code> with parallel <code>agent-auditor</code> ∥ <code>agent-adversary</code>.</p>
+              <span class="tag">On-Demand Red-Team + Audit</span>
+            </article>
+            <article class="card reveal">
+              <h3><code>/aisdlc-bdd-gherkin</code></h3>
+              <p>Deterministic <code>.feature</code> extraction and polyglot RED step scaffolding across TypeScript, Python, Go, Rust, C#, Java, Kotlin, C, and C++.</p>
+              <span class="tag">Polyglot BDD Sync</span>
+            </article>
+            <article class="card reveal">
+              <h3><code>/aisdlc-security-sca-triage</code></h3>
+              <p>Triage and remediate Gate 7–12 failures (SCA licenses, PII, secrets, SAST) with native SARIF and CycloneDX SBOM ingestion.</p>
+              <span class="tag">--sarif · --sbom-input</span>
+            </article>
+            <article class="card reveal">
+              <h3><code>/aisdlc-release-compliance</code></h3>
+              <p>Consolidate release milestones, CycloneDX SBOMs, <code>THIRD_PARTY_NOTICES</code>, and EU AI Act / ISO 42001 / NIST SSDF / OSCAL / in-toto evidence bundles.</p>
+              <span class="tag">Regulatory Evidence &amp; SemVer</span>
+            </article>
+            <article class="card reveal">
+              <h3><code>/aisdlc-doctor-migrate</code></h3>
+              <p>Diagnose git hooks and security CLIs (<code>doctor</code>), synchronize IDE agent configs (<code>sync</code>), and upgrade policies safely with backup ratchet (<code>migrate</code>).</p>
+              <span class="tag">doctor · sync · migrate</span>
+            </article>
           </div>
         </div>
       </div>
@@ -1145,8 +1207,8 @@
     /* ---------- Hero terminal ---------- */
     const SCRIPT = [
       ['cmd', 'npx @aisdlc/cli init'],
-      ['ok', '✔ 33 JSON schemas · 37 templates · 3 policies'],
-      ['ok', '✔ 10 agent skills · 24 MCP tools · GitHub Actions CI'],
+      ['ok', '✔ 34 JSON schemas · 62 templates · 3 policies'],
+      ['ok', '✔ 10 agent skills · 31 MCP tools · GitHub Actions CI'],
       ['cmd', 'npx aisdlc change new "Real-Time Alerts" --from UC-STREAM-TELEMETRY'],
       ['cy', '  specs/changes/active/chg-052-real-time-alerts/'],
       ['dim', '  ├─ proposal.md  spec.md  design.md  tasks.md'],
