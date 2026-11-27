@@ -305,9 +305,9 @@ export function resolveWinCmdSpawn(
   }
   const rawComSpec = process.env.ComSpec?.trim();
   const comSpec =
-    rawComSpec && path.isAbsolute(rawComSpec) && !WIN_CMD_META_RE.test(rawComSpec)
+    rawComSpec && path.win32.isAbsolute(rawComSpec) && !WIN_CMD_META_RE.test(rawComSpec)
       ? rawComSpec
-      : path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'cmd.exe');
+      : path.win32.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'cmd.exe');
   return { command: comSpec, args: ['/d', '/s', '/c', binPath, ...args] };
 }
 
