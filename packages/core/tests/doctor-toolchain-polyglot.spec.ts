@@ -10,6 +10,7 @@ import {
   probePythonToolchain,
   ToolchainHealthCheck,
 } from '../src/doctor/toolchain-check.js';
+import { SafeProcessRunnerAdapter } from '../src/doctor/process-runner.js';
 import type { IProcessRunner, SafeProbeExecutable } from '../src/types/doctor.js';
 
 describe('CHG-079 TSK-002: Stack-Aware ToolchainHealthCheck', () => {
@@ -179,5 +180,12 @@ describe('CHG-079 TSK-002: Stack-Aware ToolchainHealthCheck', () => {
 
     const runner: IProcessRunner = { execSafe: async () => ({ exitCode: 0, stdout: 'Python 3.12', stderr: '' }) };
     expect(await probePythonToolchain(runner, rootDir)).toBeNull();
+  });
+
+  it('SafeProcessRunnerAdapter handles >1024 byte stdout without ERR_CHILD_PROCESS_STDOUT_MAXBUFFER and truncates to maxBytes', async () => {
+    const runner = new SafeProcessRunnerAdapter();
+    const res = await runner.execSafe('node', ['-e', 'process.stdout.write("x".repeat(2048))']);
+    expect(res.exitCode).toBe(0);
+    expect(res.stdout.length).toBe(1024);
   });
 });

@@ -7,6 +7,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { ScannedDependency } from '../../types/index.js';
 import { buildPurl } from './purl.js';
+import { isPathInside, readConfinedText, safeRealpath } from './safe-exec.js';
+
+const MAX_MANIFEST_BYTES = 2 * 1024 * 1024;
 
 export const SKIPPED_SCAN_DIRS = new Set([
   'node_modules',
@@ -23,7 +26,7 @@ const DISALLOWED_DTD_RE = /<!(?:DOCTYPE|ENTITY)\b/i;
 
 export function collectManifestDirs(rootDir: string, maxDepth = 3): string[] {
   const dirs: string[] = [];
-  if (!fs.existsSync(rootDir)) return [rootDir];
+  if (!fs.existsSync(rootDir)) return dirs;
   const queue: { dir: string; depth: number }[] = [{ dir: rootDir, depth: 0 }];
   while (queue.length > 0) {
     const current = queue.shift();
@@ -41,12 +44,12 @@ export function collectManifestDirs(rootDir: string, maxDepth = 3): string[] {
   return dirs;
 }
 
-export function readUtf8Safe(filePath: string): string | null {
-  try {
-    return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : null;
-  } catch {
-    return null;
-  }
+export function readUtf8Safe(filePath: string, rootDir?: string): string | null {
+  const realRoot = safeRealpath(rootDir ?? path.dirname(filePath));
+  if (!realRoot) return null;
+  const realFile = safeRealpath(filePath);
+  if (!realFile || !isPathInside(realRoot, realFile)) return null;
+  return readConfinedText(realFile, realRoot, MAX_MANIFEST_BYTES);
 }
 
 export function stripXmlCommentsAndCdata(xml: string): string {
@@ -58,26 +61,37 @@ export function extractXmlAttr(attrs: string, name: string): string | undefined 
   return match?.[1]?.trim();
 }
 
-export function parseDirectoryPackagesProps(content: string, out: Map<string, string>): void {
-  if (DISALLOWED_DTD_RE.test(content)) return;
+export function parseNugetXmlElements(
+  content: string,
+  tagName: 'PackageVersion' | 'PackageReference'
+): Array<{ include: string; version?: string }> {
+  if (DISALLOWED_DTD_RE.test(content)) return [];
   const clean = stripXmlCommentsAndCdata(content);
-  const re = /<PackageVersion\b([^>]*?)(?:\/>|>([\s\S]*?)<\/PackageVersion\s*>)/gi;
+  const re = new RegExp(`<${tagName}\\b([^>]*?)(?:\\/>|>([\\s\\S]*?)<\\/${tagName}\\s*>)`, 'gi');
+  const items: Array<{ include: string; version?: string }> = [];
   let m: RegExpExecArray | null;
   while ((m = re.exec(clean)) !== null) {
     const include = extractXmlAttr(m[1], 'Include');
+    if (!include || include.includes('$(')) continue;
     const verAttr = extractXmlAttr(m[1], 'Version');
     const verElem = m[2]?.match(/<Version\s*>([\s\S]*?)<\/Version\s*>/i)?.[1]?.trim();
-    const version = verAttr || verElem;
-    if (include && version && !include.includes('$(') && !version.includes('$(')) {
-      out.set(include.toLowerCase(), version);
+    items.push({ include, version: verAttr || verElem });
+  }
+  return items;
+}
+
+export function parseDirectoryPackagesProps(content: string, out: Map<string, string>): void {
+  for (const item of parseNugetXmlElements(content, 'PackageVersion')) {
+    if (item.version && !item.version.includes('$(')) {
+      out.set(item.include.toLowerCase(), item.version);
     }
   }
 }
 
-export function collectCpmVersions(dirs: string[]): Map<string, string> {
+export function collectCpmVersions(dirs: string[], rootDir?: string): Map<string, string> {
   const cpmVersions = new Map<string, string>();
   for (const dir of dirs) {
-    const content = readUtf8Safe(path.join(dir, 'Directory.Packages.props'));
+    const content = readUtf8Safe(path.join(dir, 'Directory.Packages.props'), rootDir);
     if (content) parseDirectoryPackagesProps(content, cpmVersions);
   }
   return cpmVersions;
@@ -108,25 +122,17 @@ export function parseCsprojContent(
   cpmVersions: Map<string, string>,
   seen: Map<string, ScannedDependency>
 ): void {
-  if (DISALLOWED_DTD_RE.test(content)) return;
-  const clean = stripXmlCommentsAndCdata(content);
-  const re = /<PackageReference\b([^>]*?)(?:\/>|>([\s\S]*?)<\/PackageReference\s*>)/gi;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(clean)) !== null) {
-    const include = extractXmlAttr(m[1], 'Include');
-    if (!include || include.includes('$(')) continue;
-    const verAttr = extractXmlAttr(m[1], 'Version');
-    const verElem = m[2]?.match(/<Version\s*>([\s\S]*?)<\/Version\s*>/i)?.[1]?.trim();
-    const version = verAttr || verElem || cpmVersions.get(include.toLowerCase());
+  for (const item of parseNugetXmlElements(content, 'PackageReference')) {
+    const version = item.version || cpmVersions.get(item.include.toLowerCase());
     if (version && !version.includes('$(')) {
-      addNugetDep(include, version, csprojPath, true, seen);
+      addNugetDep(item.include, version, csprojPath, true, seen);
     }
   }
 }
 
-export function scanPackagesLockJson(dir: string, seen: Map<string, ScannedDependency>): void {
+export function scanPackagesLockJson(dir: string, seen: Map<string, ScannedDependency>, rootDir?: string): void {
   const lockPath = path.join(dir, 'packages.lock.json');
-  const raw = readUtf8Safe(lockPath);
+  const raw = readUtf8Safe(lockPath, rootDir);
   if (!raw) return;
   try {
     const data = JSON.parse(raw) as { dependencies?: Record<string, Record<string, { type?: string; resolved?: string }>> };
@@ -145,7 +151,8 @@ export function scanPackagesLockJson(dir: string, seen: Map<string, ScannedDepen
 export function scanDotnetDependencies(
   dir: string,
   cpmVersions: Map<string, string>,
-  seen: Map<string, ScannedDependency>
+  seen: Map<string, ScannedDependency>,
+  rootDir?: string
 ): void {
   let entries: fs.Dirent[];
   try {
@@ -156,11 +163,11 @@ export function scanDotnetDependencies(
   for (const entry of entries) {
     if (entry.isFile() && entry.name.toLowerCase().endsWith('.csproj')) {
       const csprojPath = path.join(dir, entry.name);
-      const content = readUtf8Safe(csprojPath);
+      const content = readUtf8Safe(csprojPath, rootDir);
       if (content) parseCsprojContent(content, csprojPath, cpmVersions, seen);
     }
   }
-  scanPackagesLockJson(dir, seen);
+  scanPackagesLockJson(dir, seen, rootDir);
 }
 
 export function addGradleDep(
@@ -185,16 +192,20 @@ export function addGradleDep(
   });
 }
 
+export function stripGradleVersionSuffix(rawVersion: string): string {
+  return rawVersion.split(':')[0]?.split('@')[0]?.trim() ?? '';
+}
+
 export function parseGradleBuildScript(content: string, filePath: string, seen: Map<string, ScannedDependency>): void {
   const clean = content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\r\n]*/g, '$1');
   const strRe = /\b(?:implementation|api|compileOnly|runtimeOnly|testImplementation|testRuntimeOnly|annotationProcessor|kapt|ksp)\s*\(?\s*['"]([^:'"\s]+):([^:'"\s]+):([^'"\s]+)['"]\s*\)?/g;
   let m: RegExpExecArray | null;
   while ((m = strRe.exec(clean)) !== null) {
-    addGradleDep(m[1], m[2], m[3], filePath, seen);
+    addGradleDep(m[1], m[2], stripGradleVersionSuffix(m[3]), filePath, seen);
   }
   const mapRe = /\bgroup\s*:\s*['"]([^'"]+)['"]\s*,\s*name\s*:\s*['"]([^'"]+)['"]\s*,\s*version\s*:\s*['"]([^'"]+)['"]/g;
   while ((m = mapRe.exec(clean)) !== null) {
-    addGradleDep(m[1], m[2], m[3], filePath, seen);
+    addGradleDep(m[1], m[2], stripGradleVersionSuffix(m[3]), filePath, seen);
   }
 }
 
@@ -208,14 +219,14 @@ export function parseGradleLockfile(content: string, filePath: string, seen: Map
   }
 }
 
-export function scanGradleDependencies(dir: string, seen: Map<string, ScannedDependency>): void {
+export function scanGradleDependencies(dir: string, seen: Map<string, ScannedDependency>, rootDir?: string): void {
   for (const name of ['build.gradle', 'build.gradle.kts']) {
     const filePath = path.join(dir, name);
-    const content = readUtf8Safe(filePath);
+    const content = readUtf8Safe(filePath, rootDir);
     if (content) parseGradleBuildScript(content, filePath, seen);
   }
   const lockPath = path.join(dir, 'gradle.lockfile');
-  const lockContent = readUtf8Safe(lockPath);
+  const lockContent = readUtf8Safe(lockPath, rootDir);
   if (lockContent) parseGradleLockfile(lockContent, lockPath, seen);
 }
 
@@ -237,15 +248,18 @@ export function parseRequirementLine(rawLine: string, reqPath: string): ScannedD
   };
 }
 
-export function scanRequirementsTxt(dir: string, seen: Map<string, ScannedDependency>): void {
+export function scanRequirementsTxt(dir: string, seen: Map<string, ScannedDependency>, rootDir?: string): void {
   const reqPath = path.join(dir, 'requirements.txt');
-  const content = readUtf8Safe(reqPath);
+  const content = readUtf8Safe(reqPath, rootDir);
   if (!content) return;
   const joined = content.replace(/\\\r?\n/g, ' ');
   for (const line of joined.split(/\r?\n/)) {
     const dep = parseRequirementLine(line, reqPath);
-    if (dep && !seen.has(`pypi:${dep.name}@${dep.version}`)) {
-      seen.set(`pypi:${dep.name}@${dep.version}`, dep);
+    if (!dep) continue;
+    const normName = dep.name.trim().toLowerCase().replace(/[-_.]+/g, '-');
+    const key = `pypi:${normName}@${dep.version}`;
+    if (!seen.has(key)) {
+      seen.set(key, dep);
     }
   }
 }

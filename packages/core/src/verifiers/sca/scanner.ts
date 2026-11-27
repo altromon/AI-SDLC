@@ -301,8 +301,8 @@ function parsePipfileSection(
   }
 }
 
-export function scanPythonDependencies(rootDir: string, seen: Map<string, ScannedDependency>): void {
-  scanRequirementsTxt(rootDir, seen);
+export function scanPythonDependencies(rootDir: string, seen: Map<string, ScannedDependency>, baseRootDir?: string): void {
+  scanRequirementsTxt(rootDir, seen, baseRootDir);
   const pyproject = readTextIfExists(path.join(rootDir, 'pyproject.toml')) || '';
   const directNames = extractPyprojectDirectDeps(pyproject);
 
@@ -486,14 +486,15 @@ function addMissingDirectPackageJsonDeps(
 export function scanDirEcosystems(
   dir: string,
   cpmVersions: Map<string, string>,
-  seen: Map<string, ScannedDependency>
+  seen: Map<string, ScannedDependency>,
+  rootDir?: string
 ): void {
-  scanPythonDependencies(dir, seen);
+  scanPythonDependencies(dir, seen, rootDir);
   scanGoDependencies(dir, seen);
   scanRustDependencies(dir, seen);
   scanMavenDependencies(dir, seen);
-  scanDotnetDependencies(dir, cpmVersions, seen);
-  scanGradleDependencies(dir, seen);
+  scanDotnetDependencies(dir, cpmVersions, seen, rootDir);
+  scanGradleDependencies(dir, seen, rootDir);
 }
 
 export function scanWithNativeFs(rootDir: string, options: ScanOptions = {}): ScannedDependency[] {
@@ -510,9 +511,9 @@ export function scanWithNativeFs(rootDir: string, options: ScanOptions = {}): Sc
   addMissingDirectPackageJsonDeps(rootDir, options.productionOnly, seen);
 
   const manifestDirs = collectManifestDirs(rootDir, 3);
-  const cpmVersions = collectCpmVersions(manifestDirs);
+  const cpmVersions = collectCpmVersions(manifestDirs, rootDir);
   for (const dir of manifestDirs) {
-    scanDirEcosystems(dir, cpmVersions, seen);
+    scanDirEcosystems(dir, cpmVersions, seen, rootDir);
   }
 
   const allDeps = Array.from(seen.values());

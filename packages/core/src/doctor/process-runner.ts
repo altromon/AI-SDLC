@@ -80,15 +80,16 @@ export function runSpawn(
   args: string[],
   cwd: string,
   timeout: number,
-  maxBuffer: number
+  maxBytes: number
 ): Promise<ProcessExecResult> {
   return new Promise<ProcessExecResult>((resolve) => {
-    const opts = { shell: false, timeout, maxBuffer, cwd, env: buildSafeEnvironment(cwd), windowsHide: true };
+    const execMaxBuffer = Math.max(maxBytes * 16, 64 * 1024);
+    const opts = { shell: false, timeout, maxBuffer: execMaxBuffer, cwd, env: buildSafeEnvironment(cwd), windowsHide: true };
     const child = execFile(file, args, opts, (err, stdout, stderr) => {
       if ((err as { killed?: boolean } | null)?.killed && child?.pid && process.platform === 'win32') {
         spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' });
       }
-      resolve({ stdout: truncateBuffer(stdout, maxBuffer), stderr: truncateBuffer(stderr, maxBuffer), exitCode: resolveExitCode(err) });
+      resolve({ stdout: truncateBuffer(stdout, maxBytes), stderr: truncateBuffer(stderr, maxBytes), exitCode: resolveExitCode(err) });
     });
   });
 }

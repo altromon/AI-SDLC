@@ -14,12 +14,14 @@ import {
   parseDirectoryPackagesProps,
   parseGradleBuildScript,
   parseGradleLockfile,
+  parseNugetXmlElements,
   parseRequirementLine,
   readUtf8Safe,
   scanDotnetDependencies,
   scanGradleDependencies,
   scanPackagesLockJson,
   scanRequirementsTxt,
+  stripGradleVersionSuffix,
   stripXmlCommentsAndCdata,
 } from '../src/verifiers/sca/scanner-ecosystems.js';
 import { resolvePythonLicenseDetailed } from '../src/verifiers/sca/license-python.js';
@@ -388,6 +390,8 @@ empty=
       expect(collectManifestDirs(rootDir, 3)).toContain(rootDir);
       expect(stripXmlCommentsAndCdata('<!-- c --><a/>')).toBe('<a/>');
       expect(extractXmlAttr('Include="Pkg" Version="1.0"', 'Include')).toBe('Pkg');
+      expect(parseNugetXmlElements('<Project><ItemGroup><PackageReference Include="Pkg" Version="1.0" /></ItemGroup></Project>', 'PackageReference')).toEqual([{ include: 'Pkg', version: '1.0' }]);
+      expect(stripGradleVersionSuffix('1.2.3:linux-x86_64@jar')).toBe('1.2.3');
 
       const cpm = collectCpmVersions([rootDir]);
       parseDirectoryPackagesProps('<Project><ItemGroup><PackageVersion Include="A" Version="1.0.0" /></ItemGroup></Project>', cpm);
@@ -408,6 +412,45 @@ empty=
       scanRequirementsTxt(rootDir, seen);
       scanDirEcosystems(rootDir, cpm, seen);
       expect(seen.size).toBeGreaterThanOrEqual(3);
+    });
+
+    it('rejects symlinked requirements.txt outside rootDir and returns [] from collectManifestDirs for missing rootDir', () => {
+      const rootDir = makeTmpDir('aisdlc-sca-symfile-root-');
+      const outsideDir = makeTmpDir('aisdlc-sca-symfile-outside-');
+      const outsideReq = path.join(outsideDir, 'requirements.txt');
+      fs.writeFileSync(outsideReq, 'secret-symlink-pkg==9.9.9\n', 'utf-8');
+      fs.symlinkSync(outsideReq, path.join(rootDir, 'requirements.txt'), 'file');
+
+      const deps = scanWithNativeFs(rootDir);
+      expect(deps.some((d) => d.name === 'secret-symlink-pkg')).toBe(false);
+      expect(collectManifestDirs(path.join(rootDir, 'non-existent-dir'))).toEqual([]);
+    });
+
+    it('strips Gradle :classifier and @extension suffixes from version segments', () => {
+      const seen = new Map<string, ScannedDependency>();
+      parseGradleBuildScript(
+        `dependencies {
+          implementation 'io.netty:netty-transport-native-epoll:4.1.100.Final:linux-x86_64'
+          implementation("com.example:lib:1.2.3@aar")
+        }`,
+        'build.gradle.kts',
+        seen
+      );
+      const netty = Array.from(seen.values()).find((d) => d.name === 'io.netty:netty-transport-native-epoll');
+      const lib = Array.from(seen.values()).find((d) => d.name === 'com.example:lib');
+      expect(netty?.version).toBe('4.1.100.Final');
+      expect(netty?.purl).toBe('pkg:maven/io.netty/netty-transport-native-epoll@4.1.100.Final');
+      expect(lib?.version).toBe('1.2.3');
+      expect(lib?.purl).toBe('pkg:maven/com.example/lib@1.2.3');
+    });
+
+    it('deduplicates PEP 503 equivalent PyPI package names in requirements.txt', () => {
+      const rootDir = makeTmpDir('aisdlc-sca-pep503-');
+      fs.writeFileSync(path.join(rootDir, 'requirements.txt'), 'My_Pkg==1.0.0\nmy-pkg==1.0.0\n', 'utf-8');
+
+      const deps = scanWithNativeFs(rootDir);
+      const matches = deps.filter((d) => d.name.toLowerCase().replace(/[-_.]+/g, '-') === 'my-pkg');
+      expect(matches).toHaveLength(1);
     });
   });
 });
