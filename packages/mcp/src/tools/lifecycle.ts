@@ -8,6 +8,7 @@ import * as path from 'path';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import {
+  autoScaffoldMissingSteps,
   checkGherkinInSync,
   depositProductHandoffSidecar,
   detectActiveChangeForIntegration,
@@ -171,29 +172,38 @@ export function registerSddChangeNewTool(server: McpServer, options: RegisterToo
   });
 }
 
+/** Registers the `sdd_check_fix` MCP tool for synchronizing Gherkin features, steps, and PDaC digests. */
 export function registerSddCheckFixTool(server: McpServer, options: RegisterToolsOptions): void {
-  server.tool('sdd_check_fix', 'Synchronizes Gherkin features and PDaC digests.', { root: z.string().optional(), role: z.string().optional() }, async (params) => {
-    return executeSecuredTool('sdd_check_fix', params, options, (root) => {
-      const gherkinRes = extractGherkinFeatures({ rootDir: root });
-      const pdacRes = syncPdacDigests({ rootDir: root });
-      const gherkinSync = checkGherkinInSync({ rootDir: root });
-      const pdacVerify = verifyPdacGraph({ rootDir: root });
-      const success = gherkinSync.inSync && pdacVerify.success;
-      return {
-        data: {
-          success,
-          extractedFeaturesCount: gherkinRes.features.length,
-          totalScenarios: gherkinRes.totalScenarios,
-          syncedDigestsCount: pdacRes.syncedCount,
-          updatedFiles: pdacRes.updatedFiles,
-          gherkinInSync: gherkinSync.inSync,
-          pdacInSync: pdacVerify.success,
-        },
-        isError: !success,
-        root,
-      };
-    });
-  });
+  server.tool(
+    'sdd_check_fix',
+    'Synchronizes Gherkin features, missing BDD step scaffolds, and PDaC digests.',
+    { root: z.string().optional(), featuresOnly: z.boolean().optional(), role: z.string().optional() },
+    async (params) => {
+      return executeSecuredTool('sdd_check_fix', params, options, (root) => {
+        const featuresOnly = Boolean(params.featuresOnly);
+        const gherkinRes = extractGherkinFeatures({ rootDir: root });
+        const scaffoldedStepFilesCount = featuresOnly ? 0 : autoScaffoldMissingSteps(root);
+        const pdacRes = syncPdacDigests({ rootDir: root });
+        const gherkinSync = checkGherkinInSync({ rootDir: root, featuresOnly });
+        const pdacVerify = verifyPdacGraph({ rootDir: root });
+        const success = gherkinSync.inSync && pdacVerify.success;
+        return {
+          data: {
+            success,
+            extractedFeaturesCount: gherkinRes.features.length,
+            totalScenarios: gherkinRes.totalScenarios,
+            scaffoldedStepFilesCount,
+            syncedDigestsCount: pdacRes.syncedCount,
+            updatedFiles: pdacRes.updatedFiles,
+            gherkinInSync: gherkinSync.inSync,
+            pdacInSync: pdacVerify.success,
+          },
+          isError: !success,
+          root,
+        };
+      });
+    }
+  );
 }
 
 const SDD_DEPOSIT_SCHEMA = {

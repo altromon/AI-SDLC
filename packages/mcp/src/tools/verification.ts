@@ -6,6 +6,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import {
+  checkGherkinInSync,
   formatInspectResultMarkdown,
   formatSemanticSearchMarkdown,
   inspectElement,
@@ -276,6 +277,32 @@ export function registerSearchSpecsTool(server: McpServer, options: RegisterTool
   );
 }
 
+const VERIFY_GHERKIN_SCHEMA = {
+  root: z.string().optional(),
+  featuresOnly: z.boolean().optional(),
+  targetPath: z.string().optional(),
+};
+
+/** Registers the read-only `verify_gherkin` MCP tool for checking Gherkin feature and step synchronization. */
+export function registerVerifyGherkinTool(server: McpServer, options: RegisterToolsOptions): void {
+  server.tool(
+    'verify_gherkin',
+    'Verifies deterministic synchronization between Markdown Gherkin specs, .feature files, and BDD step definitions.',
+    VERIFY_GHERKIN_SCHEMA,
+    async (params) => {
+      return executeSecuredTool('verify_gherkin', params, options, (root) => {
+        const targetPath = resolveOptionalPath(params.targetPath, root, 'targetPath');
+        const result = checkGherkinInSync({
+          rootDir: root,
+          featuresOnly: Boolean(params.featuresOnly),
+          targetPath,
+        });
+        return { data: result, isError: !result.inSync, root };
+      });
+    }
+  );
+}
+
 export function registerVerificationTools(server: McpServer, options: RegisterToolsOptions): void {
   registerInspectElementTool(server, options);
   registerSearchSpecsTool(server, options);
@@ -291,4 +318,5 @@ export function registerVerificationTools(server: McpServer, options: RegisterTo
   registerVerifyFrictionTool(server, options);
   registerVerifyPdacTool(server, options);
   registerVerifyPrivacyTool(server, options);
+  registerVerifyGherkinTool(server, options);
 }

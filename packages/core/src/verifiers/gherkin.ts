@@ -331,4 +331,5 @@ export function checkGherkinInSync(
 
 export * from './gherkin-language-resolver.js';
 export * from './gherkin-scaffold.js';
+export * from './gherkin-auto-scaffold.js';
 
