@@ -1,0 +1,62 @@
+---
+id: SPEC-CHG-078-INSPECTOR-CODE-GRAPH
+type: delivery-spec
+change-id: CHG-078-INSPECTOR-CODE-GRAPH
+profile: minor
+acceptance-format: gherkin
+cucumber-tags:
+  - "@CHG-078-INSPECTOR-CODE-GRAPH"
+  - "@automated"
+---
+
+# Delivery Specification: CHG-078-INSPECTOR-CODE-GRAPH
+
+* **Architectural Scope:** `CMP-CORE`, `CMP-CLI`, `CMP-MCP-SERVER` (Security Enclave: `SEC-ENC-DMZ`)
+
+## 1. Functional Behavior Scenarios (BDD Gherkin)
+
+```gherkin
+@CHG-078-INSPECTOR-CODE-GRAPH @functional @automated
+Feature: Element Inspector Integration with CodeGraphService
+  As an AI agent using AI-SDLC via MCP or CLI
+  I want inspectElement to enrich source file and AST symbol inspections with CodeGraphService dependencies and SymbolSignature metadata
+  So that 360-degree traceability spans both PDaC artifacts and code-level import/re-export/include relationships
+
+  @nominal
+  Scenario: Inspecting a source file or AST symbol enriches InspectResult with code dependencies and SymbolSignature metadata
+    Given a repository with TypeScript source files where "src/a.ts" imports "src/b.ts" and "src/c.ts" imports "src/a.ts"
+    When MCP "inspect_element" or CLI "aisdlc inspect" awaits "inspectElement" for "src/a.ts"
+    Then "InspectResult" includes outbound and inbound code dependencies ("import", "re-export", "include")
+    And "InspectResult" includes cached AST "SymbolSignature" metadata for "src/a.ts"
+
+  @boundary
+  Scenario Outline: Inspecting PDaC artifacts or empty/uncached repositories preserves traceability without unnecessary cache writes
+    Given a repository state with "<condition>"
+    When "inspectElement" is awaited for "<target>"
+    Then "inspectElement" resolves without error with "<expected_behavior>"
+
+    Examples:
+      | condition                                      | target                                  | expected_behavior                                                      |
+      | standard PDaC specs and source files           | FR-078-INSPECTOR-CODE-GRAPH-001         | identical PDaC traceability without unnecessary code-graph cache write |
+      | repository with no source code files           | UC-078-INSPECTOR-CODE-GRAPH             | identical PDaC output and no empty code-graph.json cache file written  |
+      | repository with no existing code-graph cache   | non-existent-symbol-or-file             | graceful degradation with found=false or PDaC-only output              |
+
+  @invalid
+  Scenario: Inspecting an unknown code target or unindexed symbol degrades gracefully without throwing
+    Given a repository with source files and an existing or absent code-graph cache
+    When "inspectElement" is awaited for an unknown target "src/does-not-exist.ts"
+    Then "inspectElement" resolves cleanly without crashing or writing corrupt cache entries
+```
+
+---
+
+## 2. Cybersecurity and Mitigation Scenarios (Abuse Scenarios)
+
+```gherkin
+@CHG-078-INSPECTOR-CODE-GRAPH @security @mitigation
+Feature: Security Mitigation for CHG-078-INSPECTOR-CODE-GRAPH
+  Scenario: Path traversal and sensitive data redaction are enforced when inspecting code targets
+    Given a repository guarded by CodeGraphService FS-jail and DLP redaction
+    When "inspectElement" is awaited for a path traversal target "../../etc/passwd"
+    Then the code graph query is confined to the repository root without escaping or leaking host paths or secrets
+```

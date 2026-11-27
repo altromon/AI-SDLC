@@ -1,0 +1,31 @@
+id: HOF-CHG-078-INSPECTOR-CODE-GRAPH
+type: handoff
+title: Handoff Canónico de Arquitectura para Integrate CodeGraphService into inspectElement
+changeId: CHG-078-INSPECTOR-CODE-GRAPH
+version: 1.0.0
+createdAt: '2026-11-27T17:45:00.000Z'
+subgraph:
+  requirements:
+    - FR-078-INSPECTOR-CODE-GRAPH-001
+  useCases:
+    - UC-078-INSPECTOR-CODE-GRAPH
+  components:
+    - CMP-CORE
+    - CMP-CLI
+    - CMP-MCP-SERVER
+citations:
+  - id: UC-078-INSPECTOR-CODE-GRAPH
+    digest: sha256:3e463fa12654f31007dbe2cdcf15b681c2b3bae68b808af662a0a9b0b24a72d5
+    comment: Citación de use-case (Element Inspector Integration with CodeGraphService for Code-Level Traceability)
+  - id: FR-078-INSPECTOR-CODE-GRAPH-001
+    digest: sha256:4c5d920403968cd472473058536d4a3ce6f6c8b04e71c83432af4097d808bc18
+    comment: Requerimiento derivado de UC-078-INSPECTOR-CODE-GRAPH
+  - id: CMP-CORE
+    digest: sha256:38e69c48be04bcaf37bbcdbbda3c5900dea6e4d5acba8150fc2767986d328386
+    comment: Componente arquitectónico central (@aisdlc/core)
+  - id: CMP-CLI
+    digest: sha256:60ab9d284f392603a84c17dfa55afb53fcdd390df15f5cb4109ac562c660279e
+    comment: Adaptador primario CLI (@aisdlc/cli)
+  - id: CMP-MCP-SERVER
+    digest: sha256:e1b1e1d531224a0ca9b4237e6a39ed684241719905b04c4b7f21382359093a7b
+    comment: Adaptador primario MCP (@aisdlc/mcp)

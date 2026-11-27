@@ -18,7 +18,7 @@ citations:
     digest: sha256:5ed9934c532217af1f5840417ecd22e1265b106b57f3942b68b528aed15fe582
     comment: Requisito funcional para Paso 0, Paso 6 y guardián SDD en guard-branch.cjs
   - id: CMP-CORE
-    digest: sha256:694456d7048a95af19287c58451b108fc97d2c99dbac1b029ad4ce7ef1ae14a6
+    digest: sha256:38e69c48be04bcaf37bbcdbbda3c5900dea6e4d5acba8150fc2767986d328386
     comment: Componente arquitectónico central (@aisdlc/core)
 ---
 

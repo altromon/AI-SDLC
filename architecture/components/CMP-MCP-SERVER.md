@@ -15,6 +15,7 @@ implements-use-cases:
   - UC-052-CLI-DOCTOR
   - UC-053-CLI-MIGRATE
   - UC-065-CODE-GRAPH-CONTEXT
+  - UC-078-INSPECTOR-CODE-GRAPH
 satisfies-requirements:
   - FR-028-NATIVE-MCP-SERVER-001
   - FR-050-IDE-AGENT-TOOLS-MCP-001
@@ -37,6 +38,7 @@ satisfies-requirements:
   - SEC-REQ-065-BOUNDED-GRAPH-TRAVERSAL-001
   - SEC-REQ-065-CODE-GRAPH-FS-JAIL-001
   - PRIV-REQ-065-CODE-GRAPH-DATA-MINIMIZATION-001
+  - FR-078-INSPECTOR-CODE-GRAPH-001
 interfaces:
   - name: Stdio MCP Protocol Interface
     protocol: IPC
