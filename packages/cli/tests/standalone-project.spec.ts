@@ -27,7 +27,7 @@ describe('Standalone Unknown Project End-to-End Suite', () => {
     }
     fs.mkdirSync(tempProjectDir, { recursive: true });
 
-    // 1. Copy policies
+    // 1. Copy policies and strict coding rules
     fs.copyFileSync(
       path.join(examplesDir, 'quality-policy.yaml'),
       path.join(tempProjectDir, 'quality-policy.yaml')
@@ -35,6 +35,14 @@ describe('Standalone Unknown Project End-to-End Suite', () => {
     fs.copyFileSync(
       path.join(examplesDir, 'license-policy.yaml'),
       path.join(tempProjectDir, 'license-policy.yaml')
+    );
+    fs.copyFileSync(
+      path.join(examplesDir, 'ruff.toml'),
+      path.join(tempProjectDir, 'ruff.toml')
+    );
+    fs.copyFileSync(
+      path.join(examplesDir, 'mypy.ini'),
+      path.join(tempProjectDir, 'mypy.ini')
     );
 
     // 2. Copy product, security, architecture, compliance to root of temp project

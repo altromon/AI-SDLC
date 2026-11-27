@@ -33,8 +33,12 @@ describe('Polyglot Immutable Coding Rules & Agent Guardrails Suite', () => {
     expect(result.success).toBe(true);
 
     expect(fs.existsSync(path.join(tempDir, 'templates/coding-rules/dotnet/Directory.Build.props'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'templates/coding-rules/javascript/eslint.config.mjs'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'templates/coding-rules/typescript/tsconfig.strict.json'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'templates/coding-rules/typescript/eslint.config.mjs'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'templates/coding-rules/angular/tsconfig.strict.json'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'templates/coding-rules/python/ruff.toml'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'templates/coding-rules/python/mypy.ini'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'templates/coding-rules/jvm/aisdlc-strict.init.gradle.kts'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'templates/coding-rules/java/aisdlc-ruleset.xml'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'templates/coding-rules/kotlin/detekt.yml'))).toBe(true);
@@ -46,13 +50,14 @@ describe('Polyglot Immutable Coding Rules & Agent Guardrails Suite', () => {
   });
 
   it('deploys multiple technology stack coding rules simultaneously when stack option is comma-separated', () => {
+    fs.writeFileSync(path.join(tempDir, 'CMakeLists.txt'), 'cmake_minimum_required(VERSION 3.20)\n', 'utf-8');
     const result = initProject({
       targetDir: tempDir,
-      stack: 'dotnet,angular,rust,go,java,kotlin,cpp',
+      stack: 'dotnet,angular,python,rust,go,java,kotlin,cpp',
     });
     expect(result.success).toBe(true);
     expect(result.stacksConfigured).toEqual(
-      expect.arrayContaining(['dotnet', 'angular', 'rust', 'go', 'java', 'kotlin', 'cpp'])
+      expect.arrayContaining(['dotnet', 'angular', 'python', 'rust', 'go', 'java', 'kotlin', 'cpp'])
     );
 
     const expectedFiles = PROTECTED_CODING_RULES_FILES.filter((f) => f !== '.github/CODEOWNERS');

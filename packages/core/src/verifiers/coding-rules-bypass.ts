@@ -5,7 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { detectProjectStacks, getRequiredCodingRulesFiles } from '../init/coding-rules-templates.js';
+import { detectProjectStacks, getRequiredCodingRulesFilesForProject } from '../init/coding-rules-templates.js';
 
 const IGNORED_DIRS = new Set(['node_modules', '.git', 'bin', 'obj', 'dist', 'build', 'target', 'reports', 'templates']);
 
@@ -16,6 +16,18 @@ const MSBUILD_WEAKENING = [
 ];
 
 const TSCONFIG_WEAKENING = [/"strict"\s*:\s*false/, /"noImplicitAny"\s*:\s*false/, /"strictNullChecks"\s*:\s*false/];
+
+const PYTHON_WEAKENING = [
+  /strict\s*=\s*false/i,
+  /ignore_errors\s*=\s*true/i,
+  /disallow_any_explicit\s*=\s*false/i,
+];
+
+const MAVEN_WEAKENING = [
+  /<skip>\s*true\s*<\/skip>/i,
+  /<failOnViolation>\s*false\s*<\/failOnViolation>/i,
+  /<showWarnings>\s*false\s*<\/showWarnings>/i,
+];
 
 function walkFiles(dir: string, rootDir: string, out: string[]): string[] {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -40,10 +52,23 @@ function checkMsBuildFile(rel: string, content: string): string[] {
   return issues;
 }
 
-function checkFile(rel: string, content: string, hasDotnetRules: boolean, hasTsRules: boolean): string[] {
-  if (hasDotnetRules && /\.(csproj|props|targets)$/.test(rel)) return checkMsBuildFile(rel, content);
-  if (hasTsRules && /(^|\/)tsconfig[^/]*\.json$/.test(rel) && !rel.endsWith('tsconfig.strict.json')) {
+interface ActiveRulesFlags {
+  hasDotnetRules: boolean;
+  hasTsRules: boolean;
+  hasPythonRules: boolean;
+  hasJavaPmdRules: boolean;
+}
+
+function checkFile(rel: string, content: string, flags: ActiveRulesFlags): string[] {
+  if (flags.hasDotnetRules && /\.(csproj|props|targets)$/.test(rel)) return checkMsBuildFile(rel, content);
+  if (flags.hasTsRules && /(^|\/)tsconfig[^/]*\.json$/.test(rel) && !rel.endsWith('tsconfig.strict.json')) {
     return matchWeakening(rel, content, TSCONFIG_WEAKENING);
+  }
+  if (flags.hasPythonRules && /(^|\/)(pyproject\.toml|mypy\.ini)$/.test(rel)) {
+    return matchWeakening(rel, content, PYTHON_WEAKENING);
+  }
+  if (flags.hasJavaPmdRules && /(^|\/)pom\.xml$/i.test(rel)) {
+    return matchWeakening(rel, content, MAVEN_WEAKENING);
   }
   return [];
 }
@@ -53,7 +78,7 @@ export function collectMissingCodingRuleViolations(rootDir: string): string[] {
   const seen = new Set<string>();
   const violations: string[] = [];
   for (const stack of detectedStacks) {
-    for (const relPath of getRequiredCodingRulesFiles(stack)) {
+    for (const relPath of getRequiredCodingRulesFilesForProject(rootDir, stack)) {
       if (seen.has(relPath)) continue;
       seen.add(relPath);
       if (!fs.existsSync(path.join(rootDir, relPath))) {
@@ -68,11 +93,18 @@ export function collectMissingCodingRuleViolations(rootDir: string): string[] {
 
 export function collectCodingRulesBypassViolations(rootDir: string): string[] {
   const missing = collectMissingCodingRuleViolations(rootDir);
-  const hasDotnetRules = fs.existsSync(path.join(rootDir, 'Directory.Build.props'));
-  const hasTsRules = fs.existsSync(path.join(rootDir, 'tsconfig.strict.json'));
-  if (!hasDotnetRules && !hasTsRules) return missing;
+  const flags: ActiveRulesFlags = {
+    hasDotnetRules: fs.existsSync(path.join(rootDir, 'Directory.Build.props')),
+    hasTsRules: fs.existsSync(path.join(rootDir, 'tsconfig.strict.json')),
+    hasPythonRules:
+      fs.existsSync(path.join(rootDir, 'mypy.ini')) || fs.existsSync(path.join(rootDir, 'ruff.toml')),
+    hasJavaPmdRules: fs.existsSync(path.join(rootDir, 'config/pmd/aisdlc-ruleset.xml')),
+  };
+  if (!flags.hasDotnetRules && !flags.hasTsRules && !flags.hasPythonRules && !flags.hasJavaPmdRules) {
+    return missing;
+  }
   const bypasses = walkFiles(rootDir, rootDir, []).flatMap((rel) =>
-    checkFile(rel, fs.readFileSync(path.join(rootDir, rel), 'utf-8'), hasDotnetRules, hasTsRules)
+    checkFile(rel, fs.readFileSync(path.join(rootDir, rel), 'utf-8'), flags)
   );
   return [...missing, ...bypasses];
 }

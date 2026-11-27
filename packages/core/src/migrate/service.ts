@@ -183,7 +183,7 @@ export function discoverMissingCodingRules(root: string): GovernedItem[] {
   const stacks = detectProjectStacks(root);
   if (stacks.length === 0) return [];
   const items: GovernedItem[] = [];
-  for (const ruleFile of getCodingRulesFilesForStacks(stacks)) {
+  for (const ruleFile of getCodingRulesFilesForStacks(stacks, root)) {
     const relPath = ruleFile.relPath.replace(/\\/g, '/');
     if (!fs.existsSync(path.join(root, relPath))) {
       items.push({

@@ -3,8 +3,23 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
-    extends: [...tseslint.configs.strictTypeChecked],
+    ignores: [
+      "**/dist/**",
+      "**/coverage/**",
+      "**/node_modules/**",
+      "examples/**",
+      "templates/**",
+      "scripts/*.cjs",
+      "scripts/*.ts",
+      "packages/cli/bin/**",
+      "vitest.config.ts",
+      "tests/**",
+      "packages/*/tests/**",
+    ],
+  },
+  {
+    files: ["packages/*/src/**/*.ts"],
+    extends: [...tseslint.configs.recommended],
     languageOptions: {
       parserOptions: {
         projectService: true,

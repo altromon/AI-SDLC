@@ -1119,12 +1119,13 @@ export function collectStarterFiles(
   ciProvider?: SupportedCiProvider,
   agentFiles: { relPath: string; content: string }[] = [],
   archGranularity: ArchitectureGranularity = 'minimal',
-  stacks: readonly CodingRuleStack[] = []
+  stacks: readonly CodingRuleStack[] = [],
+  targetDir?: string
 ): { relPath: string; content: string }[] {
   const files: { relPath: string; content: string }[] = [
     { relPath: AISDLC_MANIFEST_FILENAME, content: JSON.stringify({ version: getAisdlcVersion() }, null, 2) + '\n' },
     ...collectPolicyAndSchemaFiles(),
-    ...getCodingRulesFilesForStacks(stacks),
+    ...getCodingRulesFilesForStacks(stacks, targetDir),
     ...getCiWorkflowFiles(ciProvider),
     ...agentFiles,
     ...collectArchitectureTemplateFiles(archGranularity),
@@ -1269,7 +1270,8 @@ export function assembleScaffoldingPlan(
   ciProvider: SupportedCiProvider | undefined,
   agents: string | boolean | string[] | undefined,
   archGranularity: ArchitectureGranularity,
-  stacks: readonly CodingRuleStack[] = []
+  stacks: readonly CodingRuleStack[] = [],
+  targetDir?: string
 ): {
   agentTargets: Set<string>;
   directories: string[];
@@ -1278,7 +1280,7 @@ export function assembleScaffoldingPlan(
   const agentTargets = resolveAgentTargets(agents);
   const { dirs: agentDirs, files: agentFiles } = collectAgentFiles(agentTargets);
   const directories = mergeDirectories(getBaseDirectories(ciProvider), agentDirs);
-  const starterFiles = collectStarterFiles(ciProvider, agentFiles, archGranularity, stacks);
+  const starterFiles = collectStarterFiles(ciProvider, agentFiles, archGranularity, stacks, targetDir);
   return { agentTargets, directories, starterFiles };
 }
 
@@ -1289,7 +1291,13 @@ export function executeScaffoldingOnDisk(
   archGranularity: ArchitectureGranularity,
   stacks: CodingRuleStack[]
 ): InitProjectResult {
-  const { agentTargets, directories, starterFiles } = assembleScaffoldingPlan(ciProvider, options.agents, archGranularity, stacks);
+  const { agentTargets, directories, starterFiles } = assembleScaffoldingPlan(
+    ciProvider,
+    options.agents,
+    archGranularity,
+    stacks,
+    destDir
+  );
   const dirsCreated = createDirectoriesOnDisk(destDir, directories, options.dryRun);
   const { filesCreated, filesUpdated } = writeProjectFiles(destDir, starterFiles, options.dryRun, options.force);
   if (updateConsumerPackageJson(destDir, options.dryRun)) filesCreated.push('package.json');

@@ -1,5 +1,11 @@
 {
+  "extends": "./tsconfig.strict.json",
   "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false,
     "target": "ES2022",
     "module": "commonjs",
     "moduleResolution": "node",

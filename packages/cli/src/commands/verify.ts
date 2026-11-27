@@ -270,7 +270,7 @@ export function runVerifyQuality(options: QualityVerifyOptions = {}): boolean {
   return result.success;
 }
 
-export interface TraceabilityVerifyOptions extends VerifyBaseOptions {}
+export type TraceabilityVerifyOptions = VerifyBaseOptions;
 
 export function buildTraceabilityViolations(result: ReturnType<typeof verifyTraceability>) {
   const orphanViolations = result.orphans.map((o) => ({
@@ -388,7 +388,7 @@ export function printGovernanceConsole(result: ReturnType<typeof verifyTasksGove
   console.log(result.success ? pc.green('\n✔ Tasks Governance COMPLIANT\n') : pc.red('\n✖ Tasks Governance BLOCKED\n'));
 }
 
-export interface GovernanceVerifyOptions extends VerifyBaseOptions {}
+export type GovernanceVerifyOptions = VerifyBaseOptions;
 
 export function runVerifyGovernance(options: GovernanceVerifyOptions = {}): boolean {
   const rootDir = options.root || process.cwd();
@@ -410,7 +410,7 @@ export function runVerifyGovernance(options: GovernanceVerifyOptions = {}): bool
   return result.success;
 }
 
-export interface TestingVerifyOptions extends VerifyBaseOptions {}
+export type TestingVerifyOptions = VerifyBaseOptions;
 
 export function formatReqTestingViolationMsg(r: ReturnType<typeof verifyTestingCoverage>['requirements'][number]): string {
   if (r.missingVariants && r.missingVariants.length > 0) {
@@ -707,7 +707,7 @@ export async function runVerifyLicensesAsync(options: LicenseVerifyOptions = {})
   return finalizeLicensesOutput(result, options, useJson);
 }
 
-export interface PdacVerifyOptions extends VerifyBaseOptions {}
+export type PdacVerifyOptions = VerifyBaseOptions;
 
 export function buildPdacViolations(result: ReturnType<typeof verifyPdacGraph>) {
   const drifts = result.drifts.map((d) => ({

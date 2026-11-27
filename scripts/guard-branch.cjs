@@ -14,6 +14,8 @@ const PROTECTED_CODING_RULES_FILES = [
   'Directory.Build.props',
   'tsconfig.strict.json',
   'eslint.config.mjs',
+  'ruff.toml',
+  'mypy.ini',
   'gradle/init.d/aisdlc-strict.init.gradle.kts',
   'config/pmd/aisdlc-ruleset.xml',
   'config/detekt/detekt.yml',
