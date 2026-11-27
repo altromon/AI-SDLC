@@ -22,9 +22,9 @@ describe('@aisdlc/cli inspect command suite', () => {
     vi.restoreAllMocks();
   });
 
-  it('should inspect an existing FR element and return true', () => {
+  it('should inspect an existing FR element and return true', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    const success = runInspect('FR-047-MCP-SERVER-HARDENING-DLP-001', { root: rootDir });
+    const success = await runInspect('FR-047-MCP-SERVER-HARDENING-DLP-001', { root: rootDir });
     expect(success).toBe(true);
     expect(consoleSpy).toHaveBeenCalled();
     const output = consoleSpy.mock.calls.map((c) => c.join(' ')).join('\n');
@@ -32,9 +32,9 @@ describe('@aisdlc/cli inspect command suite', () => {
     expect(output).toContain('Relaciones');
   });
 
-  it('should emit structured JSON when json option is true', () => {
+  it('should emit structured JSON when json option is true', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    const success = runInspect('CMP-CORE', { root: rootDir, json: true });
+    const success = await runInspect('CMP-CORE', { root: rootDir, json: true });
     expect(success).toBe(true);
     const output = consoleSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     const parsed = JSON.parse(output);
@@ -43,14 +43,14 @@ describe('@aisdlc/cli inspect command suite', () => {
     expect(parsed.relatedItems.length).toBeGreaterThan(0);
   });
 
-  it('should return false when element does not exist', () => {
+  it('should return false when element does not exist', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    const success = runInspect('NON_EXISTENT_ID_999999', { root: rootDir });
+    const success = await runInspect('NON_EXISTENT_ID_999999', { root: rootDir });
     expect(success).toBe(false);
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Elemento no encontrado'));
   });
 
-  it('should return false and emit not-found result for empty or whitespace queries even when workspace has graph nodes', () => {
+  it('should return false and emit not-found result for empty or whitespace queries even when workspace has graph nodes', async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisdlc-inspect-empty-'));
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     try {
@@ -61,13 +61,13 @@ describe('@aisdlc/cli inspect command suite', () => {
         'utf-8'
       );
 
-      expect(runInspect('', { root: tmpDir, json: true })).toBe(false);
+      expect(await runInspect('', { root: tmpDir, json: true })).toBe(false);
       const emptyPayload = JSON.parse(String(consoleSpy.mock.calls.at(-1)?.[0]));
       expect(emptyPayload.found).toBe(false);
       expect(emptyPayload.query).toBe('');
 
       consoleSpy.mockClear();
-      expect(runInspect('   ', { root: tmpDir })).toBe(false);
+      expect(await runInspect('   ', { root: tmpDir })).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Elemento no encontrado'));
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
@@ -103,26 +103,26 @@ describe('@aisdlc/cli inspect command suite', () => {
     }
   });
 
-  it('should respect --format json, AISDLC_FORMAT, and AISDLC_OUTPUT env vars with explicit format precedence', () => {
+  it('should respect --format json, AISDLC_FORMAT, and AISDLC_OUTPUT env vars with explicit format precedence', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-    expect(runInspect('CMP-CORE', { root: rootDir, format: ' JSON ' })).toBe(true);
+    expect(await runInspect('CMP-CORE', { root: rootDir, format: ' JSON ' })).toBe(true);
     expect(JSON.parse(String(consoleSpy.mock.calls.at(-1)?.[0])).id).toBe('CMP-CORE');
 
     consoleSpy.mockClear();
     process.env.AISDLC_FORMAT = 'json';
-    expect(runInspect('CMP-CORE', { root: rootDir })).toBe(true);
+    expect(await runInspect('CMP-CORE', { root: rootDir })).toBe(true);
     expect(JSON.parse(String(consoleSpy.mock.calls.at(-1)?.[0])).found).toBe(true);
 
     consoleSpy.mockClear();
-    expect(runInspect('CMP-CORE', { root: rootDir, format: 'text' })).toBe(true);
+    expect(await runInspect('CMP-CORE', { root: rootDir, format: 'text' })).toBe(true);
     expect(String(consoleSpy.mock.calls.at(-1)?.[0])).toContain('CMP-CORE');
     expect(() => JSON.parse(String(consoleSpy.mock.calls.at(-1)?.[0]))).toThrow();
 
     delete process.env.AISDLC_FORMAT;
     process.env.AISDLC_OUTPUT = 'json';
     consoleSpy.mockClear();
-    expect(runInspect('CMP-CORE', { root: rootDir })).toBe(true);
+    expect(await runInspect('CMP-CORE', { root: rootDir })).toBe(true);
     expect(JSON.parse(String(consoleSpy.mock.calls.at(-1)?.[0])).id).toBe('CMP-CORE');
   });
 });

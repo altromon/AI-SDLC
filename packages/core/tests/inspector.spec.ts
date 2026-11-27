@@ -9,9 +9,9 @@ import {
 describe('AI-SDLC Element Inspector Suite', () => {
   const rootDir = path.resolve(__dirname, '../../..');
 
-  it('should inspect a functional requirement (FR-*) by ID', () => {
+  it('should inspect a functional requirement (FR-*) by ID', async () => {
     // We inspect a known requirement, e.g. FR-047-MCP-SERVER-HARDENING-DLP-001 or any existing FR
-    const result = inspectElement('FR-047-MCP-SERVER-HARDENING-DLP-001', { rootDir });
+    const result = await inspectElement('FR-047-MCP-SERVER-HARDENING-DLP-001', { rootDir });
 
     expect(result.found).toBe(true);
     expect(result.id).toBe('FR-047-MCP-SERVER-HARDENING-DLP-001');
@@ -29,8 +29,8 @@ describe('AI-SDLC Element Inspector Suite', () => {
     expect(md).toContain('Relaciones');
   });
 
-  it('should inspect a component (CMP-*) by ID', () => {
-    const result = inspectElement('CMP-CORE', { rootDir });
+  it('should inspect a component (CMP-*) by ID', async () => {
+    const result = await inspectElement('CMP-CORE', { rootDir });
 
     expect(result.found).toBe(true);
     expect(result.id).toBe('CMP-CORE');
@@ -39,8 +39,8 @@ describe('AI-SDLC Element Inspector Suite', () => {
     expect(result.relatedItems.length).toBeGreaterThan(0);
   });
 
-  it('should inspect a source code file by relative path', () => {
-    const result = inspectElement('packages/mcp/src/tools/index.ts', { rootDir });
+  it('should inspect a source code file by relative path', async () => {
+    const result = await inspectElement('packages/mcp/src/tools/index.ts', { rootDir });
 
     expect(result.found).toBe(true);
     expect(result.layer).toBe('code');
@@ -52,8 +52,8 @@ describe('AI-SDLC Element Inspector Suite', () => {
     expect(hasFr).toBe(true);
   });
 
-  it('should inspect a task (TSK-*) by ID', () => {
-    const result = inspectElement('TSK-001', { rootDir });
+  it('should inspect a task (TSK-*) by ID', async () => {
+    const result = await inspectElement('TSK-001', { rootDir });
 
     expect(result.found).toBe(true);
     expect(result.type).toBe('task');
@@ -71,8 +71,8 @@ describe('AI-SDLC Element Inspector Suite', () => {
     expect(tokenizeSemanticQuery('')).toEqual([]);
   });
 
-  it('should resolve a source file by exported AST symbol name (semantic symbol search)', () => {
-    const result = inspectElement('sanitizeDlpText', { rootDir });
+  it('should resolve a source file by exported AST symbol name (semantic symbol search)', async () => {
+    const result = await inspectElement('sanitizeDlpText', { rootDir });
 
     expect(result.found).toBe(true);
     expect(result.type).toBe('source-file');
@@ -85,8 +85,8 @@ describe('AI-SDLC Element Inspector Suite', () => {
     expect(md).toContain('dlp-sanitizer.ts');
   });
 
-  it('should resolve multi-token natural-language semantic queries across AST symbols and PDaC graph', () => {
-    const result = inspectElement('dlp sanitizer policy', { rootDir });
+  it('should resolve multi-token natural-language semantic queries across AST symbols and PDaC graph', async () => {
+    const result = await inspectElement('dlp sanitizer policy', { rootDir });
 
     expect(result.found).toBe(true);
     expect(result.semanticMatches).toBeDefined();
@@ -96,8 +96,8 @@ describe('AI-SDLC Element Inspector Suite', () => {
     expect(md).toContain('Ranking Semántico y de Símbolos');
   });
 
-  it('should return found: false with suggestions when an unknown element is queried', () => {
-    const result = inspectElement('NON-EXISTENT-XYZ-12345', { rootDir });
+  it('should return found: false with suggestions when an unknown element is queried', async () => {
+    const result = await inspectElement('NON-EXISTENT-XYZ-12345', { rootDir });
 
     expect(result.found).toBe(false);
     expect(result.summary).toContain('No se encontró');

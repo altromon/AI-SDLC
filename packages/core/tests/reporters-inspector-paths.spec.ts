@@ -63,7 +63,7 @@ describe('Reporters & Inspector Unit Paths (Happy / Sad / Boundary / Malformed)'
     expect(JSON.parse(fs.readFileSync(outPath, 'utf-8')).version).toBe('2.1.0');
   });
 
-  it('dashboard-graph & inspector: handles empty workspace, unknown queries, and markdown formatting (happy/sad/boundary)', () => {
+  it('dashboard-graph & inspector: handles empty workspace, unknown queries, and markdown formatting (happy/sad/boundary)', async () => {
     const cls = classifyArtifactLayerAndType('specs/product/fr.md', { id: 'FR-001' });
     expect(cls).toBeDefined();
 
@@ -73,17 +73,17 @@ describe('Reporters & Inspector Unit Paths (Happy / Sad / Boundary / Malformed)'
     const graph = buildGraphElements(tmpDir);
     expect(Array.isArray(graph.elements)).toBe(true);
 
-    const emptyInspect = inspectElement('', { rootDir: tmpDir });
+    const emptyInspect = await inspectElement('', { rootDir: tmpDir });
     expect(emptyInspect.found).toBe(false);
     expect(formatInspectResultMarkdown(emptyInspect)).toBeTruthy();
 
-    const missingInspect = inspectElement('NONEXISTENT-ID-999', { rootDir: tmpDir });
+    const missingInspect = await inspectElement('NONEXISTENT-ID-999', { rootDir: tmpDir });
     expect(missingInspect.found).toBe(false);
     expect(formatInspectResultMarkdown(missingInspect)).toContain('NONEXISTENT-ID-999');
 
     fs.mkdirSync(path.join(tmpDir, 'src'), { recursive: true });
     fs.writeFileSync(path.join(tmpDir, 'src', 'sample.ts'), 'export const a = 1;\n', 'utf-8');
-    const fileInspect = inspectElement('src/sample.ts', { rootDir: tmpDir });
+    const fileInspect = await inspectElement('src/sample.ts', { rootDir: tmpDir });
     expect(fileInspect.found).toBe(true);
     expect(formatInspectResultMarkdown(fileInspect)).toContain('sample.ts');
   });

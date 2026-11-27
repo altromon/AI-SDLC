@@ -6,8 +6,17 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { CODE_GRAPH_LIMITS, type SymbolSignature } from '../src/code-graph/types.js';
-import { inspectElement } from '../src/inspector/index.js';
+import { CODE_GRAPH_LIMITS, type CodeGraphDocument, type SymbolSignature } from '../src/code-graph/types.js';
+import { createDefaultLanguageAdapters } from '../src/code-graph/adapters/index.js';
+import {
+  collectInboundImportedBy,
+  collectOutboundCodeEdges,
+  createNonEmptyCodeGraphCache,
+  enrichWithCodeGraph,
+  inspectElement,
+  resolveConfinedFile,
+  tryInspectMarkdownFrontmatter,
+} from '../src/inspector/index.js';
 
 describe('Element Inspector + CodeGraphService Integration (CHG-078)', () => {
   const tempDirs: string[] = [];
@@ -208,6 +217,42 @@ describe('Element Inspector + CodeGraphService Integration (CHG-078)', () => {
 
       expect(result.found).toBe(false);
       expect(JSON.stringify(result)).not.toContain('TOP_SECRET_SYMLINK_LEAK');
+    });
+  });
+
+  describe('helper unit coverage (@TSK-001)', () => {
+    it('covers createNonEmptyCodeGraphCache, collectOutboundCodeEdges, collectInboundImportedBy, enrichWithCodeGraph, resolveConfinedFile, and tryInspectMarkdownFrontmatter', async () => {
+      const rootDir = createTempDir('aisdlc-insp-helpers-');
+      fs.mkdirSync(path.join(rootDir, 'src'), { recursive: true });
+      fs.writeFileSync(path.join(rootDir, 'src', 'a.ts'), 'export const a = 1;\n', 'utf-8');
+      fs.writeFileSync(path.join(rootDir, 'README.md'), '# No frontmatter\n', 'utf-8');
+
+      const cache = createNonEmptyCodeGraphCache();
+      await cache.save(rootDir, { version: '1.0', generatedAt: new Date().toISOString(), nodes: {} });
+      expect(fs.existsSync(path.join(rootDir, '.aisdlc', 'cache', 'code-graph.json'))).toBe(false);
+
+      const doc: CodeGraphDocument = {
+        version: '1.0',
+        generatedAt: new Date().toISOString(),
+        nodes: {
+          'src/a.ts': { path: 'src/a.ts', language: 'typescript', extractor: 'ts', mtimeMs: 1, sha256: 'a', symbols: [], imports: ['./b.js'] },
+          'src/b.ts': { path: 'src/b.ts', language: 'typescript', extractor: 'ts', mtimeMs: 1, sha256: 'b', symbols: [], imports: [] },
+          'src/c.ts': { path: 'src/c.ts', language: 'typescript', extractor: 'ts', mtimeMs: 1, sha256: 'c', symbols: [], imports: ['./a.js'] },
+        },
+      };
+      expect(collectOutboundCodeEdges(doc, 'src/a.ts').map((e) => e.filePath)).toEqual(['src/b.ts']);
+      expect(collectInboundImportedBy(doc, 'src/a.ts').map((e) => e.filePath)).toEqual(['src/c.ts']);
+
+      const resolved = resolveConfinedFile(rootDir, 'src/a.ts');
+      expect(resolved?.relFile).toBe('src/a.ts');
+      expect(resolveConfinedFile(rootDir, '../../outside.ts')).toBeNull();
+
+      const mdRes = await tryInspectMarkdownFrontmatter(path.join(rootDir, 'README.md'), 'README.md', { rootDir });
+      expect(mdRes).toBeNull();
+
+      const base = { found: true, query: 'src/a.ts', summary: 's', upstream: [], downstream: [], relatedItems: [] };
+      const enriched = await enrichWithCodeGraph(base, rootDir, 'src/a.ts', createDefaultLanguageAdapters());
+      expect(Array.isArray(enriched.metrics?.codeGraphSymbols)).toBe(true);
     });
   });
 });

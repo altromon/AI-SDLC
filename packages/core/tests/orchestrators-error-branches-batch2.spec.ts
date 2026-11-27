@@ -57,7 +57,7 @@ describe('Core Orchestrator Error Branches Batch 2 (Inspector, QualityGate, Dash
     expect(qgRes.coverageViolations?.length).toBeGreaterThan(0);
   });
 
-  it('inspector & dashboard-graph: handles missing queries, corrupted frontmatter, NON_GRAPH_TYPES, long summaries, and empty bodies', () => {
+  it('inspector & dashboard-graph: handles missing queries, corrupted frontmatter, NON_GRAPH_TYPES, long summaries, and empty bodies', async () => {
     const specsDir = path.join(tmpDir, 'specs');
     const prodDir = path.join(specsDir, '02_product');
     const chgDir = path.join(specsDir, 'changes', 'active', 'CHG-100');
@@ -95,18 +95,18 @@ describe('Core Orchestrator Error Branches Batch 2 (Inspector, QualityGate, Dash
     expect(nodeIds).toContain('PRIV-REQ-1');
 
     // Not-found query with suggestions markdown
-    const notFound = inspectElement('FR-999-NONEXISTENT', { rootDir: tmpDir });
+    const notFound = await inspectElement('FR-999-NONEXISTENT', { rootDir: tmpDir });
     expect(notFound.found).toBe(false);
     const mdNotFound = formatInspectResultMarkdown(notFound);
     expect(mdNotFound).toContain('no encontrado');
 
     // Long normative summary truncation & empty body fallback
-    const foundLong = inspectElement('FR-100', { rootDir: tmpDir });
+    const foundLong = await inspectElement('FR-100', { rootDir: tmpDir });
     expect(foundLong.found).toBe(true);
     expect(foundLong.summary.endsWith('...')).toBe(true);
     expect(formatInspectResultMarkdown(foundLong)).toContain('FR-100');
 
-    const foundEmpty = inspectElement('FR-EMPTY', { rootDir: tmpDir });
+    const foundEmpty = await inspectElement('FR-EMPTY', { rootDir: tmpDir });
     expect(foundEmpty.found).toBe(true);
     expect(foundEmpty.summary).toContain('Empty Req');
   });
