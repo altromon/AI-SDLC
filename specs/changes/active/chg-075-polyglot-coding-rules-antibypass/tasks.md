@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test packages/core/tests/coding-rules-bypass.spec.ts packages/core/tests/executable-coding-rules.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-075-POLYGLOT-CODING-RULES-ANTIBYPASS
     satisfies-requirements: &ref_0
@@ -35,7 +35,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test packages/core/tests/progressive-friction.spec.ts
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-075-POLYGLOT-CODING-RULES-ANTIBYPASS
     satisfies-requirements: *ref_0
@@ -48,7 +48,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test && pnpm run typecheck
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-075-POLYGLOT-CODING-RULES-ANTIBYPASS
     satisfies-requirements: *ref_0

@@ -23,7 +23,25 @@ import {
   TS_ESLINT_CONFIG_MJS,
   TS_STRICT_TSCONFIG,
 } from '../src/init/coding-rules-templates.js';
-import { collectCodingRulesBypassViolations, collectMissingCodingRuleViolations } from '../src/verifiers/coding-rules-bypass.js';
+import {
+  checkCargoConfig,
+  checkCargoToml,
+  checkCppFile,
+  checkEslintFile,
+  checkGoFile,
+  checkJavaFile,
+  checkKotlinFile,
+  checkPythonFile,
+  checkRustFile,
+  checkTsconfigFile,
+  collectCodingRulesBypassViolations,
+  collectMissingCodingRuleViolations,
+  collectSymlinkRuleViolations,
+  readTsconfigExtends,
+  STACK_RULE_INSPECTORS,
+  stripJsonc,
+  tsconfigExtendsStrict,
+} from '../src/verifiers/coding-rules-bypass.js';
 import {
   isPathProtectedFromPatch,
   PROTECTED_BYPASS_PATTERNS,
@@ -486,6 +504,31 @@ describe('CHG-075: Polyglot Coding Rules Anti-Bypass Detection', () => {
         expect(guard.isProtectedBypassPath(sharedPath)).toBe(true);
         expect(isPathProtectedFromPatch(sharedPath)).toBe(true);
       }
+    });
+  });
+
+  describe('StackRuleInspector unit helpers', () => {
+    it('exposes declarative STACK_RULE_INSPECTORS and helper functions for all stacks', () => {
+      expect(STACK_RULE_INSPECTORS.length).toBeGreaterThanOrEqual(9);
+      expect(JSON.parse(stripJsonc('{\n// c\n"a": 1, /* b */\n}'))).toEqual({ a: 1 });
+
+      const tsRoot = setup({
+        'tsconfig.strict.json': TS_STRICT_TSCONFIG,
+        'tsconfig.json': '{"extends":"./tsconfig.strict.json"}',
+      });
+      expect(readTsconfigExtends('tsconfig.json', tsRoot)).toEqual(['./tsconfig.strict.json']);
+      expect(tsconfigExtendsStrict('tsconfig.json', tsRoot, new Set())).toBe(true);
+      expect(checkTsconfigFile('tsconfig.json', '{"extends":"./tsconfig.strict.json"}', tsRoot)).toEqual([]);
+      expect(checkEslintFile('eslint.config.mjs', JS_ESLINT_CONFIG_MJS)).toEqual([]);
+      expect(checkPythonFile('mypy.ini', PYTHON_MYPY_INI)).toEqual([]);
+      expect(checkJavaFile('config/pmd/aisdlc-ruleset.xml', JAVA_PMD_RULESET_XML)).toEqual([]);
+      expect(checkKotlinFile('config/detekt/detekt.yml', KOTLIN_DETEKT_YML)).toEqual([]);
+      expect(checkCargoToml('Cargo.toml', '[package]\nname = "x"\n')).toEqual([]);
+      expect(checkCargoConfig('.cargo/config.toml', RUST_CARGO_CONFIG_TOML)).toEqual([]);
+      expect(checkRustFile('.cargo/config.toml', RUST_CARGO_CONFIG_TOML)).toEqual([]);
+      expect(checkGoFile('.golangci.yml', GO_GOLANGCI_YML)).toEqual([]);
+      expect(checkCppFile('.clang-tidy', CPP_CLANG_TIDY, tsRoot)).toEqual([]);
+      expect(collectSymlinkRuleViolations(tsRoot)).toEqual([]);
     });
   });
 });
