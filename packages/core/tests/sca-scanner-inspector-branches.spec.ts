@@ -116,7 +116,7 @@ describe('SCA Scanner Polyglot & Inspector Composite Branches (Happy / Sad / Bou
     expect(sbomRes.dependencies.length).toBeGreaterThan(0);
   });
 
-  it('inspector: resolves FR-*, UC-*, CMP-*, TSK-*, CHG-* relationships and ambiguous matches', () => {
+  it('inspector: resolves FR-*, UC-*, CMP-*, TSK-*, CHG-* relationships and ambiguous matches', async () => {
     fs.mkdirSync(path.join(tmpDir, 'specs', 'product', 'requirements'), { recursive: true });
     fs.mkdirSync(path.join(tmpDir, 'specs', 'architecture'), { recursive: true });
     fs.mkdirSync(path.join(tmpDir, 'specs', 'changes', 'active', 'chg-001-auth'), { recursive: true });
@@ -147,11 +147,11 @@ describe('SCA Scanner Polyglot & Inspector Composite Branches (Happy / Sad / Bou
     fs.writeFileSync(path.join(tmpDir, 'tests', 'auth.spec.ts'), '// @verifies FR-001\nimport { login } from "../src/auth.js";\n', 'utf-8');
 
     for (const q of ['FR-001', 'CMP-001', 'TSK-001']) {
-      const res = inspectElement(q, { rootDir: tmpDir });
+      const res = await inspectElement(q, { rootDir: tmpDir });
       expect(res.found).toBe(true);
       expect(formatInspectResultMarkdown(res).length).toBeGreaterThan(20);
     }
-    const partialRes = inspectElement('chg-001-auth', { rootDir: tmpDir });
+    const partialRes = await inspectElement('chg-001-auth', { rootDir: tmpDir });
     expect(formatInspectResultMarkdown(partialRes).length).toBeGreaterThan(10);
   });
 });

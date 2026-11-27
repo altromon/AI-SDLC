@@ -106,7 +106,7 @@ describe('Governance & Inspector Branch Coverage Suite', () => {
     expect(res.reportMarkdown).toContain('NON-COMPLIANT');
   });
 
-  it('inspects direct files, graph nodes, tasks, partial matches, and not-found queries', () => {
+  it('inspects direct files, graph nodes, tasks, partial matches, and not-found queries', async () => {
     initProject({ targetDir: tempDir, agents: 'none', silent: true });
 
     fs.mkdirSync(path.join(tempDir, 'specs', 'product'), { recursive: true });
@@ -144,30 +144,30 @@ describe('Governance & Inspector Branch Coverage Suite', () => {
     );
 
     // 1. Direct markdown file
-    const mdRes = inspectElement('specs/product/01_req.md', { rootDir: tempDir });
+    const mdRes = await inspectElement('specs/product/01_req.md', { rootDir: tempDir });
     expect(mdRes.found).toBe(true);
     expect(formatInspectResultMarkdown(mdRes)).toContain('FR-501');
 
     // 2. Direct code file
-    const codeRes = inspectElement('src/auth.ts', { rootDir: tempDir });
+    const codeRes = await inspectElement('src/auth.ts', { rootDir: tempDir });
     expect(codeRes.found).toBe(true);
     expect(formatInspectResultMarkdown(codeRes)).toContain('auth.ts');
 
     // 3. Graph node ID
-    const nodeRes = inspectElement('FR-501', { rootDir: tempDir });
+    const nodeRes = await inspectElement('FR-501', { rootDir: tempDir });
     expect(nodeRes.found).toBe(true);
     expect(formatInspectResultMarkdown(nodeRes)).toContain('FR-501');
 
     // 4. Task ID
-    const taskRes = inspectElement('TSK-501', { rootDir: tempDir });
+    const taskRes = await inspectElement('TSK-501', { rootDir: tempDir });
     expect(taskRes.found).toBe(true);
     expect(formatInspectResultMarkdown(taskRes)).toContain('TSK-501');
 
     // 5. Partial match / not found
-    const partialRes = inspectElement('FR-50', { rootDir: tempDir });
+    const partialRes = await inspectElement('FR-50', { rootDir: tempDir });
     expect(formatInspectResultMarkdown(partialRes)).toBeTypeOf('string');
 
-    const missingRes = inspectElement('DOES-NOT-EXIST-999', { rootDir: tempDir });
+    const missingRes = await inspectElement('DOES-NOT-EXIST-999', { rootDir: tempDir });
     expect(missingRes.found).toBe(false);
     expect(formatInspectResultMarkdown(missingRes)).toContain('Elemento no encontrado');
   });

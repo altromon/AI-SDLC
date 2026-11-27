@@ -780,8 +780,8 @@ program
   .option('-r, --root <path>', 'Project root directory')
   .option('--json', 'Structured JSON format output')
   .option('-F, --format <format>', 'Output format: text or json')
-  .action((element, opts) => {
-    const passed = runInspect(element, {
+  .action(async (element, opts) => {
+    const passed = await runInspect(element, {
       root: opts.root,
       json: opts.json,
       format: opts.format,

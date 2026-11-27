@@ -96,7 +96,7 @@ Feature: Skill Eval Requirement
     expect(sync.inSync).toBe(true);
   });
 
-  it('evals aisdlc-security-sca-triage and aisdlc-inspector postconditions in isolated workspace', () => {
+  it('evals aisdlc-security-sca-triage and aisdlc-inspector postconditions in isolated workspace', async () => {
     initProject({ targetDir: tmpDir, agents: 'antigravity', ci: 'none', architecture: 'none' });
     expect(verifySkillsIntegrity(tmpDir).success).toBe(true);
 
@@ -109,7 +109,7 @@ Feature: Skill Eval Requirement
       '---\nid: FR-902-INSPECT\ntype: requirement\ntitle: Inspect Eval\nstatus: active\nversion: "1.0.0"\n---\n# Inspect Eval\n',
       'utf-8'
     );
-    const inspected = inspectElement('FR-902-INSPECT', { rootDir: tmpDir });
+    const inspected = await inspectElement('FR-902-INSPECT', { rootDir: tmpDir });
     expect(inspected.found).toBe(true);
     expect(inspected.id).toBe('FR-902-INSPECT');
   });

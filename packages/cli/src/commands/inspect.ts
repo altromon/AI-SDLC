@@ -12,11 +12,11 @@ export interface InspectCliOptions {
   format?: string;
 }
 
-export function runInspect(query: string, options: InspectCliOptions = {}): boolean {
+export async function runInspect(query: string, options: InspectCliOptions = {}): Promise<boolean> {
   const root = options.root || process.cwd();
   const trimmed = query ? query.trim() : '';
   const result: InspectResult = trimmed
-    ? inspectElement(trimmed, { rootDir: root })
+    ? await inspectElement(trimmed, { rootDir: root })
     : {
         found: false,
         query: '',

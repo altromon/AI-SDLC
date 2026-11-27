@@ -11,5 +11,5 @@ subgraph:
     - UC-027-ENV-OUTPUT-JSON
 citations:
   - id: FR-027-ENV-OUTPUT-JSON-001
-    digest: sha256:4a779fe3f7ee13509c16fea8f083ce0ba7962aad103bcf91076ff2b9192ccc71
+    digest: sha256:756fd71f1311b2746d680f9c91314a2457c35d44e424653c452807e9530c25e0
     comment: Requerimiento funcional canónico asociado (Génesis CHG-027-ENV-OUTPUT-JSON)

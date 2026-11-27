@@ -21,6 +21,15 @@ import { parseTasksDoc } from '../verifiers/governance.js';
 import { DEFAULT_EXCLUDES, DEFAULT_EXTENSIONS, walkDir } from '../verifiers/quality-gate.js';
 import { isPolyglotUnitTestFile } from '../verifiers/test-discovery.js';
 import { parseFrontmatter } from '../verifiers/traceability.js';
+import { createDefaultLanguageAdapters } from '../code-graph/adapters/index.js';
+import { assertConfinedPath, FsCodeGraphCache } from '../code-graph/cache/fs-code-graph-cache.js';
+import { DefaultCodeGraphService, resolveImportToNodePath, traverseKHop } from '../code-graph/code-graph-service.js';
+import {
+  CODE_GRAPH_LIMITS,
+  type CodeGraphCachePort,
+  type CodeGraphDocument,
+  type LanguageGraphAdapter,
+} from '../code-graph/types.js';
 
 const CITATION_REGEX =
   /\b(ARCH-INTRO|JRN|ACT-THREAT|ACT|UC|BR|BC|ABUSE|DATA-ASSET|PRIV-ROPA|HAZ|SEC-ENC|CMP|ADR|SEC-REQ|PRIV-REQ|FR|QR|CHG|TSK|HOF)-[A-Z0-9_-]+/g;
@@ -396,34 +405,137 @@ function inspectDiscoveredTask(
   };
 }
 
-function inspectDirectFile(
-  directPath: string,
+export function createNonEmptyCodeGraphCache(): CodeGraphCachePort {
+  const fsCache = new FsCodeGraphCache();
+  return {
+    load: (repoRoot: string) => fsCache.load(repoRoot),
+    save: async (): Promise<void> => {
+      // inspectElement is read-only and must not mutate the workspace (e.g. creating .aisdlc/cache/code-graph.json).
+    },
+  };
+}
+
+export function collectOutboundCodeEdges(doc: CodeGraphDocument, relFile: string): InspectRelation[] {
+  const traversal = traverseKHop(doc, [relFile], 1);
+  const outbound: InspectRelation[] = [];
+  for (const edge of traversal.edges) {
+    if (edge.from === relFile) {
+      outbound.push({
+        id: edge.to,
+        type: 'source-file',
+        direction: 'downstream',
+        relation: edge.kind,
+        filePath: edge.to,
+      });
+    }
+  }
+  return outbound;
+}
+
+export function collectInboundImportedBy(doc: CodeGraphDocument, relFile: string): InspectRelation[] {
+  const inbound: InspectRelation[] = [];
+  for (const otherPath of Object.keys(doc.nodes)) {
+    if (inbound.length >= CODE_GRAPH_LIMITS.MAX_EDGES) break;
+    if (otherPath === relFile) continue;
+    const otherNode = doc.nodes[otherPath];
+    const importsTarget = otherNode.imports.some(
+      (imp) => resolveImportToNodePath(otherNode.path, imp, doc.nodes) === relFile
+    );
+    if (importsTarget) {
+      inbound.push({
+        id: otherNode.path,
+        type: 'source-file',
+        direction: 'upstream',
+        relation: 'imported-by',
+        filePath: otherNode.path,
+      });
+    }
+  }
+  return inbound;
+}
+
+export async function enrichWithCodeGraph(
+  result: InspectResult,
   rootDir: string,
+  relFile: string,
+  adapters: readonly LanguageGraphAdapter[]
+): Promise<InspectResult> {
+  if (!adapters.some((a) => a.supports(relFile))) return result;
+  try {
+    const service = new DefaultCodeGraphService({
+      cache: createNonEmptyCodeGraphCache(),
+      adapters: [...adapters],
+    });
+    const doc = await service.indexRepository(rootDir);
+    const node = Object.hasOwn(doc.nodes, relFile) ? doc.nodes[relFile] : undefined;
+    if (!node) return result;
+
+    const outbound = collectOutboundCodeEdges(doc, relFile);
+    const inbound = collectInboundImportedBy(doc, relFile);
+    result.upstream.push(...inbound);
+    result.downstream.push(...outbound);
+    result.relatedItems = deduplicateRelations([...result.upstream, ...result.downstream]);
+    result.metrics = { ...result.metrics, codeGraphSymbols: node.symbols };
+  } catch {
+    // Graceful degradation when code graph enrichment fails
+  }
+  return result;
+}
+
+export async function tryInspectMarkdownFrontmatter(
+  confinedPath: string,
+  relFile: string,
   options: InspectOptions
-): InspectResult | null {
-  if (!fs.existsSync(directPath) || !fs.statSync(directPath).isFile()) {
+): Promise<InspectResult | null> {
+  try {
+    const rawContent = fs.readFileSync(confinedPath, 'utf-8');
+    const { frontmatter } = parseFrontmatter(rawContent);
+    if (frontmatter.id && typeof frontmatter.id === 'string') {
+      const sub = await inspectElement(frontmatter.id, options);
+      sub.filePath = relFile;
+      return sub;
+    }
+  } catch {
+    // Continue to source code inspection
+  }
+  return null;
+}
+
+export function resolveConfinedFile(
+  rootDir: string,
+  trimmed: string
+): { confinedPath: string; relFile: string } | null {
+  try {
+    const confinedPath = assertConfinedPath(rootDir, trimmed);
+    if (!fs.existsSync(confinedPath) || !fs.statSync(confinedPath).isFile()) {
+      return null;
+    }
+    const realRoot = fs.existsSync(rootDir) ? fs.realpathSync(rootDir) : path.resolve(rootDir);
+    const relFile = path.relative(realRoot, confinedPath).replace(/\\/g, '/');
+    return { confinedPath, relFile };
+  } catch {
     return null;
   }
-  const relFile = path.relative(rootDir, directPath).replace(/\\/g, '/');
-  const ext = path.extname(directPath).toLowerCase();
+}
 
-  if (ext === '.md') {
-    try {
-      const rawContent = fs.readFileSync(directPath, 'utf-8');
-      const { frontmatter } = parseFrontmatter(rawContent);
-      if (frontmatter.id && typeof frontmatter.id === 'string') {
-        const sub = inspectElement(frontmatter.id, options);
-        sub.filePath = relFile;
-        return sub;
-      }
-    } catch {
-      // Continue to source code inspection
-    }
+async function inspectDirectFile(
+  trimmed: string,
+  rootDir: string,
+  options: InspectOptions,
+  adapters: readonly LanguageGraphAdapter[]
+): Promise<InspectResult | null> {
+  const resolved = resolveConfinedFile(rootDir, trimmed);
+  if (!resolved) return null;
+
+  if (path.extname(resolved.confinedPath).toLowerCase() === '.md') {
+    const mdResult = await tryInspectMarkdownFrontmatter(resolved.confinedPath, resolved.relFile, options);
+    if (mdResult) return mdResult;
   }
 
   const graphRes = buildGraphElements(rootDir);
   const allTasks = scanAllTasks(rootDir);
-  return inspectSourceCodeFile(directPath, relFile, graphRes.elements, allTasks);
+  const sourceResult = inspectSourceCodeFile(resolved.confinedPath, resolved.relFile, graphRes.elements, allTasks);
+  return enrichWithCodeGraph(sourceResult, rootDir, resolved.relFile, adapters);
 }
 
 function findTargetNode(
@@ -772,48 +884,62 @@ function attachSemanticMatchesToResult(
   return baseResult;
 }
 
-function inspectTopSemanticCandidate(
+async function inspectTopSemanticCandidate(
   top: InspectSemanticMatch,
   trimmed: string,
+  rootDir: string,
   sourceMap: Map<string, SourceSearchEntry>,
   nodeMap: Map<string, CytoscapeNodeData>,
   allTasks: DiscoveredTask[],
   edges: CytoscapeEdgeData[],
-  graphElements: CytoscapeElement[]
-): InspectResult | null {
+  graphElements: CytoscapeElement[],
+  adapters: readonly LanguageGraphAdapter[]
+): Promise<InspectResult | null> {
   const entry = sourceMap.get(top.id);
   if (entry) {
     const res = inspectSourceCodeFile(entry.fullPath, entry.relPath, graphElements, allTasks);
     res.query = trimmed;
-    return res;
+    return enrichWithCodeGraph(res, rootDir, entry.relPath, adapters);
   }
   const topNode = nodeMap.get(top.id);
   return topNode ? inspectMatchedNode(topNode, trimmed, edges, nodeMap, allTasks) : null;
 }
 
-function resolveSemanticMatch(
+async function resolveSemanticMatch(
   trimmed: string,
   rootDir: string,
   nodeMap: Map<string, CytoscapeNodeData>,
   allTasks: DiscoveredTask[],
   edges: CytoscapeEdgeData[],
-  graphElements: CytoscapeElement[]
-): InspectResult | null {
+  graphElements: CytoscapeElement[],
+  adapters: readonly LanguageGraphAdapter[]
+): Promise<InspectResult | null> {
   const { matches, sourceMap } = findSemanticCandidates(trimmed, rootDir, nodeMap);
   if (matches.length === 0) return null;
-  const base = inspectTopSemanticCandidate(matches[0], trimmed, sourceMap, nodeMap, allTasks, edges, graphElements);
+  const base = await inspectTopSemanticCandidate(
+    matches[0],
+    trimmed,
+    rootDir,
+    sourceMap,
+    nodeMap,
+    allTasks,
+    edges,
+    graphElements,
+    adapters
+  );
   return base ? attachSemanticMatchesToResult(base, matches) : null;
 }
 
-function resolveTargetMatch(
+async function resolveTargetMatch(
   normQuery: string,
   nodeMap: Map<string, CytoscapeNodeData>,
   allTasks: DiscoveredTask[],
   edges: CytoscapeEdgeData[],
   trimmed: string,
   rootDir: string,
-  graphElements: CytoscapeElement[]
-): InspectResult {
+  graphElements: CytoscapeElement[],
+  adapters: readonly LanguageGraphAdapter[]
+): Promise<InspectResult> {
   // Check task by ID
   const matchedTask = allTasks.find(
     (dt) => dt.task.id.toLowerCase() === normQuery || `${dt.changeId}/${dt.task.id}`.toLowerCase() === normQuery
@@ -833,7 +959,7 @@ function resolveTargetMatch(
 
   // Semantic AST symbol & multi-token graph resolution (skipped for strict uppercase artifact IDs like NON-EXISTENT-123)
   if (!STRICT_ARTIFACT_ID_QUERY_RE.test(trimmed)) {
-    const semanticRes = resolveSemanticMatch(trimmed, rootDir, nodeMap, allTasks, edges, graphElements);
+    const semanticRes = await resolveSemanticMatch(trimmed, rootDir, nodeMap, allTasks, edges, graphElements, adapters);
     if (semanticRes) return semanticRes;
   }
 
@@ -843,13 +969,19 @@ function resolveTargetMatch(
 /**
  * Inspect any AI-SDLC artifact, code file, task, symbol, or natural-language concept by query.
  */
-export function inspectElement(query: string, options: InspectOptions = {}): InspectResult {
+export async function inspectElement(query: string, options: InspectOptions = {}): Promise<InspectResult> {
   const rootDir = options.rootDir || process.cwd();
   const trimmed = query.trim();
 
+  try {
+    assertConfinedPath(rootDir, trimmed);
+  } catch {
+    return buildNotFoundResult(trimmed, new Map());
+  }
+
+  const adapters = createDefaultLanguageAdapters();
   // 1. Direct file check
-  const directPath = path.isAbsolute(trimmed) ? trimmed : path.join(rootDir, trimmed);
-  const fileRes = inspectDirectFile(directPath, rootDir, options);
+  const fileRes = await inspectDirectFile(trimmed, rootDir, options, adapters);
   if (fileRes) return fileRes;
 
   // 2. Build graph elements from workspace
@@ -866,7 +998,7 @@ export function inspectElement(query: string, options: InspectOptions = {}): Ins
     .map((e) => e.data as CytoscapeEdgeData);
 
   const allTasks = scanAllTasks(rootDir);
-  return resolveTargetMatch(trimmed.toLowerCase(), nodeMap, allTasks, edges, trimmed, rootDir, graphRes.elements);
+  return resolveTargetMatch(trimmed.toLowerCase(), nodeMap, allTasks, edges, trimmed, rootDir, graphRes.elements, adapters);
 }
 
 function formatRelationsBlock(title: string, list: InspectRelation[], arrow: string): string[] {

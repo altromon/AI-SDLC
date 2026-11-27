@@ -185,7 +185,7 @@ function resetDefaultCoreMocks() {
   mocks.verifyArtifactsSchemas.mockReturnValue({ success: true, validCount: 4, totalEvaluated: 4 });
   mocks.verifySecrets.mockReturnValue({ success: true, findingsCount: 0, findings: [] });
   mocks.verifySast.mockReturnValue({ success: true, violationsCount: 0, violations: [] });
-  mocks.inspectElement.mockReturnValue({ found: true, id: 'FR-001', relatedItems: [] });
+  mocks.inspectElement.mockResolvedValue({ found: true, id: 'FR-001', relatedItems: [] });
   mocks.formatInspectResultMarkdown.mockReturnValue('# FR-001');
   mocks.verifyTraceability.mockReturnValue({ success: true, orphanCount: 0 });
   mocks.verifySkillsIntegrity.mockReturnValue({ success: true, totalSkills: 2 });
@@ -376,7 +376,7 @@ describe('MCP Tool Registrars (All 29 Individual, 3 Groups & registerAllTools)',
 
       const insp = tools.get('inspect_element')!.handler;
       expect((await insp({ query: 'FR-001' })).isError).toBe(false);
-      mocks.inspectElement.mockReturnValueOnce({ found: false });
+      mocks.inspectElement.mockResolvedValueOnce({ found: false });
       expect((await insp({ query: 'MISSING' })).isError).toBe(true);
       expect((await insp({ query: '../../secret.ts' })).isError).toBe(true);
 

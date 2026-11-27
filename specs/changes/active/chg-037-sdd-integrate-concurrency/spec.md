@@ -10,7 +10,7 @@ cucumber-tags:
   - "@automated"
 citations:
   - id: FR-037-SDD-INTEGRATE-CONCURRENCY-001
-    digest: sha256:817916bfcc3f425ac47e6e9ac279cf5325c31efbb466a0d3870779186878f6ec
+    digest: sha256:9d911427648338aaddee162b00aac4b010b1cb593d732eb98a0ac9a1b8d61d8e
     comment: Citación de requirement (sdd-integrate-concurrency-and-retry)
 verification:
   method: automated-test

@@ -41,13 +41,10 @@ jobs:
       - name: Build Monorepo Packages (@aisdlc/core & @aisdlc/cli)
         run: pnpm run build
 
-      - name: Run Vitest Unit & Integration Suites
-        run: pnpm test
-
       - name: Run Executable BDD / Cucumber Feature Suite
         run: pnpm run test:bdd
 
-      - name: Run Vitest Coverage (thresholds enforced)
+      - name: Run Vitest Unit, Integration & Coverage Suite (thresholds enforced)
         run: pnpm run test:coverage
 
       - name: Dogfooding - Run AI-SDLC Full Verification Suite

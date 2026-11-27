@@ -28,6 +28,7 @@ implements-use-cases:
   - UC-043-SARIF-SECURITY-REPORTING
   - UC-047-MCP-SERVER-HARDENING-DLP
   - UC-061-INCREMENT-PROFILE-AND-SEMVER-GUARD
+  - UC-078-INSPECTOR-CODE-GRAPH
 satisfies-requirements:
   - FR-025-STRUCTURED-JSON-VERIFY-001
   - FR-026-AGENT-NATIVE-CONFIGS-001
@@ -53,6 +54,7 @@ satisfies-requirements:
   - FR-051-GHERKIN-POLYGLOT-SCAFFOLD-001
   - FR-050-IDE-AGENT-TOOLS-MCP-001
   - FR-061-INCREMENT-PROFILE-AND-SEMVER-GUARD-001
+  - FR-078-INSPECTOR-CODE-GRAPH-001
   - SEC-REQ-DETERMINISTIC-VERIFY
 interfaces:
   - name: TypeScript API Engine
@@ -60,6 +62,7 @@ interfaces:
 supersedes: null
 superseded-by: null
 ---
+
 
 
 # CMP-CORE: Motor Central AI-SDLC
@@ -82,4 +85,5 @@ graph TD
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-27 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-078-inspector-code-graph | chg-078-inspector-code-graph |
 | **1.0.0** | 2026-11-17 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-061-increment-profile-and-semver-guard | chg-061-increment-profile-and-semver-guard |

@@ -42,10 +42,10 @@ citations:
     digest: sha256:45ca68dd086cdfcf4ce24f1b46c18e7ad5b83aa2a5712319842495f09b87e932
     comment: Componente arquitectónico hexagonal del motor de Code Graph
   - id: CMP-MCP-SERVER
-    digest: sha256:db18fac8cec5598f2002bbf3f9a9b1acb3c70e01557261625372362d977a3104
+    digest: sha256:30d517313e7f48087d5178f61e716ca72bc489eb4ed6599fc342e004e9723dd9
     comment: Puerto de entrada MCP para query_code_graph y get_task_context
   - id: CMP-CLI
-    digest: sha256:03a1041b17cd59177763a2515304881c2bfe0f74e522661210c39f4e1a1a8b2e
+    digest: sha256:8dc7d58394a3e413a15f06b2eaa6517964e41c351171bd68e6fa405c3fe538a7
     comment: Puerto de entrada CLI para graph query y context pack
 ---
 

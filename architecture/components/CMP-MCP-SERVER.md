@@ -15,6 +15,7 @@ implements-use-cases:
   - UC-052-CLI-DOCTOR
   - UC-053-CLI-MIGRATE
   - UC-065-CODE-GRAPH-CONTEXT
+  - UC-078-INSPECTOR-CODE-GRAPH
 satisfies-requirements:
   - FR-028-NATIVE-MCP-SERVER-001
   - FR-050-IDE-AGENT-TOOLS-MCP-001
@@ -37,12 +38,14 @@ satisfies-requirements:
   - SEC-REQ-065-BOUNDED-GRAPH-TRAVERSAL-001
   - SEC-REQ-065-CODE-GRAPH-FS-JAIL-001
   - PRIV-REQ-065-CODE-GRAPH-DATA-MINIMIZATION-001
+  - FR-078-INSPECTOR-CODE-GRAPH-001
 interfaces:
   - name: Stdio MCP Protocol Interface
     protocol: IPC
 supersedes: null
 superseded-by: null
 ---
+
 
 
 
@@ -67,6 +70,7 @@ graph LR
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-27 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-078-inspector-code-graph | chg-078-inspector-code-graph |
 | **1.0.0** | 2026-11-11 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-053-cli-migrate | chg-053-cli-migrate |
 | **1.0.0** | 2026-11-11 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-052-cli-doctor | chg-052-cli-doctor |
 | **1.0.0** | 2026-11-11 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-051-regulatory-compliance-bundle | chg-051-regulatory-compliance-bundle |
