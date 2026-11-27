@@ -6,10 +6,10 @@ status: draft
 author: "agent-system-architect"
 citations:
   - id: UC-077-POLYGLOT-VERIFY-PARITY
-    digest: sha256:7a29bf6021956f2e6338e9e24c8714518154df461e48aec22c1bf925ec7559a2
+    digest: sha256:8ca8bbed02f09b81ad48b093bb338aa4343d935b0539941def3a6b93694f1704
     comment: Citación de use-case (Polyglot Parity for Traceability, Quality Gate, and Test Discovery Verifiers)
   - id: FR-077-POLYGLOT-VERIFY-PARITY-001
-    digest: sha256:ad83e5210bf1d8e9134ff861a9f3542f510c82d0ded2ee7887769bb392fba2ea
+    digest: sha256:878aa480aa97704977c1d83ed2a5858e0a0dcc8362f33d87de53010b9be67b6d
     comment: Requerimiento derivado de UC-077-POLYGLOT-VERIFY-PARITY
 ---
 

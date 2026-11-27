@@ -17,7 +17,7 @@ Feature: Polyglot parity in verify traceability, verify quality, and test-discov
     Given a polyglot repository with tests like "test_auth.py", "AuthTests.cs", "AuthTest.kt", and "tests/auth_test.rs"
     When "verify traceability", "verify quality", and "test-discovery" execute
     Then polyglot unit and UI tests are indexed in "codeTestMap" and "testCorpus" rather than "prodCorpus"
-    And "DEFAULT_EXTENSIONS" and "STARTER_QUALITY_POLICY" include ".kt", ".mjs", ".cjs", ".cc", ".cxx", ".hpp", and ".fs"
+    And "DEFAULT_EXTENSIONS" and "STARTER_QUALITY_POLICY" include ".kt", ".mjs", ".cjs", ".cc", ".cxx", and ".hpp"
 
   @boundary
   Scenario Outline: Idiomatic language layouts, UI test patterns, and driver signatures are discovered

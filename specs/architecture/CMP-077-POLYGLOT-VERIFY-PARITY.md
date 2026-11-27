@@ -39,13 +39,13 @@ Siguiendo **Modular & Hexagonal Architecture (Ports & Adapters)** y **Simplicity
     - `DEFAULT_UI_TEST_PATTERNS`: añade `**/*_e2e_test.go`, `**/*_ui_test.go`, `**/*_e2e_test.rs`, `**/*_ui_test.rs`.
     - `stripTestComments`: preserva literales de cadena (`"..."`, `'...'`, `` `...` ``) al eliminar comentarios `//` para no truncar selectores XPath como `page.locator("//button[@type='submit']")`.
   - **Traceability Verifier (`packages/core/src/verifiers/traceability.ts`)**:
-    - Reemplaza `isCodeTestFile(name)` por `isPolyglotUnitTestFile(relPath)` y `isUiTestFile(relPath)` importados desde `./test-discovery.js` tanto en `scanCodeTestFiles` como en `collectCodeAndTestCorpora`.
-    - Alinea `SOURCE_CODE_EXTS` con `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.py`, `.go`, `.java`, `.kt`, `.cs`, `.fs`, `.rs`, `.c`, `.cpp`, `.cc`, `.cxx`, `.hpp`.
+    - Reemplaza `isCodeTestFile(name)` por `isPolyglotUnitTestFile(relPath)` e `isUiTestFile(relPath)` (condicionado a que `path.extname(relPath).toLowerCase()` pertenezca a `SOURCE_CODE_EXTS` para evitar que binarios/fixtures como `.png` o `.json` bajo `tests/e2e/**` contaminen `testCorpus`) importados desde `./test-discovery.js` tanto en `scanCodeTestFiles` como en `collectCodeAndTestCorpora`.
+    - Alinea `SOURCE_CODE_EXTS` con `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.py`, `.go`, `.java`, `.kt`, `.cs`, `.fs`, `.rs`, `.c`, `.cpp`, `.cc`, `.cxx`, `.hpp`, e incorpora `.venv`, `venv`, `__pycache__` y `.pytest_cache` a `SKIPPED_DIR_NAMES`.
   - **Quality Gate & Init Policy (`packages/core/src/verifiers/quality-gate.ts` y `packages/core/src/init/index.ts`)**:
-    - Añade `.kt`, `.mjs`, `.cjs`, `.cc`, `.cxx`, `.hpp`, `.fs` a `DEFAULT_EXTENSIONS` y `STARTER_QUALITY_POLICY`.
-    - Extiende `collectFilesToScan` para descubrir layouts idiomáticos: Go (`cmd`, `internal`, `pkg`), Rust workspace (`crates`), Python (`app`, `backend`) y subdirectorios .NET de nivel 1 con archivos `.csproj`.
+    - Añade `.kt`, `.mjs`, `.cjs`, `.cc`, `.cxx`, `.hpp` a `DEFAULT_EXTENSIONS` y `STARTER_QUALITY_POLICY` (difiriendo `.fs` del escaneo AST).
+    - Extiende `collectFilesToScan` para descubrir layouts idiomáticos: Go (`cmd`, `internal`, `pkg`), Rust workspace (`crates`), Python (`app`, `backend`) y subdirectorios .NET de nivel 1 con archivos `.csproj`, aplicando exclusión de tests unitarios (`!isPolyglotUnitTestFile`) y UI (`!isUiTestFile`), así como contención de enlaces simbólicos (`lstatSync` / `realpathSync` dentro de `rootDir`) en `walkDir` y los escáneres de nivel 1 (`crates`/`.csproj`).
 - **Driven Adapters (Local FS)**:
-  - Lectura determinista del árbol de archivos del repositorio excluyendo artefactos generados, `.d.ts` y archivos de prueba en el escaneo de producción.
+  - Lectura determinista del árbol de archivos del repositorio con contención estricta de enlaces simbólicos (`lstatSync` / `realpathSync` dentro de `rootDir`), excluyendo artefactos generados, `.d.ts` y archivos de prueba en el escaneo de producción.
 
 ## 2. Diagrama de Componentes (Mermaid)
 
@@ -93,8 +93,8 @@ sequenceDiagram
 
     Agent->>QG: collectFilesToScan(rootDir, policy)
     QG->>QG: Escanea target_directories + cmd/internal/pkg/crates/app/backend/*.csproj
-    QG->>TD: isPolyglotUnitTestFile(relPath)
-    TD-->>QG: Filtra tests dejando solo código de producción
+    QG->>TD: isPolyglotUnitTestFile(relPath) / isUiTestFile(relPath)
+    TD-->>QG: Filtra unit y UI tests dejando solo código de producción
     QG-->>Agent: Lista unificada de archivos fuente polyglot
 ```
 

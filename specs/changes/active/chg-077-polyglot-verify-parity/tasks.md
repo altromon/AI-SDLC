@@ -126,7 +126,7 @@ superseded-by: null
     - Hacer `Expect(page|locator)` case-insensitive en `MODALITY_DRIVER_SIGNATURES.web` y añadir firmas de Playwright Java/Kotlin (`com.microsoft.playwright`, `Playwright.create`, `assertThat(page`).
     - Añadir drivers CLI de Go (`exec.Command`, `cobra`) y Rust (`assert_cmd`, `Command::cargo_bin`) a `MODALITY_DRIVER_SIGNATURES.console`.
     - Añadir `**/*_e2e_test.go`, `**/*_ui_test.go`, `**/*_e2e_test.rs`, `**/*_ui_test.rs` a `DEFAULT_UI_TEST_PATTERNS`.
-    - Actualizar `stripTestComments` para respetar literales de cadena (`"..."`, `'...'`, `` `...` ``) al eliminar `//`.
+    - Actualizar `stripTestComments` usando un escáner de contenido completo consciente de literales de cadena (preservando `"..."`, `'...'`, y `` `...` `` multilínea) al eliminar `//`.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm test`
 
@@ -136,8 +136,8 @@ superseded-by: null
 - **Requerimiento**: `FR-077-POLYGLOT-VERIFY-PARITY-001`
 - **Descripción**:
   - En `packages/core/src/verifiers/traceability.ts`:
-    - Reemplazar `isCodeTestFile` por `isPolyglotUnitTestFile(relPath)` e `isUiTestFile(relPath)` de `./test-discovery.js` en `scanCodeTestFiles` y `collectCodeAndTestCorpora`.
-    - Alinear `SOURCE_CODE_EXTS` con todas las extensiones soportadas (`.kt`, `.c`, `.cpp`, `.cc`, `.cxx`, `.hpp`, `.fs`, `.mjs`, `.cjs`, etc.).
+    - Reemplazar `isCodeTestFile` por `isPolyglotUnitTestFile(relPath)` e `isUiTestFile(relPath)` (condicionado a que `path.extname(relPath).toLowerCase()` esté en `SOURCE_CODE_EXTS` para evitar que binarios/fixtures como `.png` o `.json` bajo `tests/e2e/**` contaminen `testCorpus`) de `./test-discovery.js` en `scanCodeTestFiles` y `collectCodeAndTestCorpora`.
+    - Alinear `SOURCE_CODE_EXTS` con todas las extensiones soportadas (`.kt`, `.c`, `.cpp`, `.cc`, `.cxx`, `.hpp`, `.fs`, `.mjs`, `.cjs`, etc.) y añadir `.venv`, `venv`, `__pycache__`, `.pytest_cache` a `SKIPPED_DIR_NAMES`.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm test`
 
@@ -146,8 +146,8 @@ superseded-by: null
 - **Componente**: `CMP-077-POLYGLOT-VERIFY-PARITY`
 - **Requerimiento**: `FR-077-POLYGLOT-VERIFY-PARITY-001`
 - **Descripción**:
-  - Añadir `.kt`, `.mjs`, `.cjs`, `.cc`, `.cxx`, `.hpp`, `.fs` a `DEFAULT_EXTENSIONS` (`quality-gate.ts`) y `STARTER_QUALITY_POLICY` (`init/index.ts`).
-  - Extender `collectFilesToScan` en `quality-gate.ts` para escanear layouts de Go (`cmd`, `internal`, `pkg`), Rust (`crates`), Python (`app`, `backend`) y subdirectorios .NET de nivel 1 con `.csproj`.
+  - Añadir `.kt`, `.mjs`, `.cjs`, `.cc`, `.cxx`, `.hpp` a `DEFAULT_EXTENSIONS` (`quality-gate.ts`) y `STARTER_QUALITY_POLICY` (`init/index.ts`), difiriendo `.fs` del escaneo AST.
+  - Extender `collectFilesToScan` en `quality-gate.ts` para escanear layouts de Go (`cmd`, `internal`, `pkg`), Rust (`crates`), Python (`app`, `backend`) y subdirectorios .NET de nivel 1 con `.csproj`, aplicando contención de symlinks (`lstatSync` / `realpathSync` dentro de `rootDir`) en `walkDir` y los escáneres de nivel 1 (`crates`/`.csproj`) y filtrando `!isUiTestFile(rel, policy.ui_test_patterns)` junto a `!isPolyglotUnitTestFile`.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm test`
 

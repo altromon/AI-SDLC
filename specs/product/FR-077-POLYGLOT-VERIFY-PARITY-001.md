@@ -26,10 +26,10 @@ superseded-by: null
 
 ## 1. Normative Specification
 1. **`verify traceability` (`packages/core/src/verifiers/traceability.ts`)**:
-   - `traceability.ts` MUST replace the hardcoded `isCodeTestFile(name)` helper with `isPolyglotUnitTestFile(relPath)` and `isUiTestFile(relPath)` imported from `./test-discovery.js` so `test_*.py` (`pytest`), `*Test.cs` / `*Tests.cs`, `*Test.java` / `*Tests.java`, `*Test.kt` / `*Tests.kt`, `*_test.rs` / `tests/**/*.rs`, and UI test files are indexed in `codeTestMap` and `testCorpus` instead of being misclassified into `prodCorpus`.
-   - `SOURCE_CODE_EXTS` MUST include all supported language extensions: `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.py`, `.go`, `.java`, `.kt`, `.cs`, `.fs`, `.rs`, `.c`, `.cpp`, `.cc`, `.cxx`, `.hpp`.
+   - `traceability.ts` MUST replace the hardcoded `isCodeTestFile(name)` helper with `isPolyglotUnitTestFile(relPath)` and `isUiTestFile(relPath)` imported from `./test-discovery.js` so `test_*.py` (`pytest`), `*Test.cs` / `*Tests.cs`, `*Test.java` / `*Tests.java`, `*Test.kt` / `*Tests.kt`, `*_test.rs` / `tests/**/*.rs`, and UI test files are indexed in `codeTestMap` and `testCorpus` instead of being misclassified into `prodCorpus`. `isUiTestFile(relPath)` classification MUST be gated on `path.extname(relPath).toLowerCase()` being present in `SOURCE_CODE_EXTS` so non-code fixtures or binaries under `tests/e2e/**` (e.g., `.png`, `.json`) do not pollute `testCorpus`.
+   - `SOURCE_CODE_EXTS` MUST include all supported language extensions: `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.py`, `.go`, `.java`, `.kt`, `.cs`, `.fs`, `.rs`, `.c`, `.cpp`, `.cc`, `.cxx`, `.hpp`. `SKIPPED_DIR_NAMES` MUST include `.venv`, `venv`, `__pycache__`, and `.pytest_cache`.
 2. **`verify quality` (`packages/core/src/verifiers/quality-gate.ts` and `packages/core/src/init/index.ts`)**:
-   - `DEFAULT_EXTENSIONS` in `packages/core/src/verifiers/quality-gate.ts` and `STARTER_QUALITY_POLICY` (`scope.supported_extensions`) in `packages/core/src/init/index.ts` MUST include `.kt`, `.mjs`, `.cjs`, `.cc`, `.cxx`, `.hpp`, and `.fs` alongside existing extensions.
+   - `DEFAULT_EXTENSIONS` in `packages/core/src/verifiers/quality-gate.ts` and `STARTER_QUALITY_POLICY` (`scope.supported_extensions`) in `packages/core/src/init/index.ts` MUST include `.kt`, `.mjs`, `.cjs`, `.cc`, `.cxx`, and `.hpp` alongside existing extensions (deferring `.fs` from AST quality scanning).
    - `collectFilesToScan` in `packages/core/src/verifiers/quality-gate.ts` MUST support idiomatic multi-language project layouts: Go (`cmd`, `internal`, `pkg`), Rust workspace container (`crates`), Python (`app`, `backend`), and .NET project subdirectories at depth 1 containing a `.csproj` file.
 3. **`test-discovery.ts` (`packages/core/src/verifiers/test-discovery.ts`)**:
    - `MODALITY_DRIVER_SIGNATURES.web` MUST match `Expect(page|locator)` case-insensitively (supporting C# `Expect(page)` / `Expect(locator)`) and MUST include official Playwright Java/Kotlin signatures (`com.microsoft.playwright`, `Playwright.create`, `assertThat(page`).
@@ -56,7 +56,7 @@ Feature: Polyglot Parity for Traceability, Quality Gate, and Test Discovery Veri
     Given a polyglot repository with tests like "test_auth.py", "AuthTests.cs", "AuthTest.kt", and "tests/auth_test.rs"
     When "verify traceability", "verify quality", and "test-discovery" execute
     Then polyglot unit and UI tests are indexed in "codeTestMap" and "testCorpus" rather than "prodCorpus"
-    And "DEFAULT_EXTENSIONS" and "STARTER_QUALITY_POLICY" include ".kt", ".mjs", ".cjs", ".cc", ".cxx", ".hpp", and ".fs"
+    And "DEFAULT_EXTENSIONS" and "STARTER_QUALITY_POLICY" include ".kt", ".mjs", ".cjs", ".cc", ".cxx", and ".hpp"
 
   @boundary
   Scenario Outline: Idiomatic language layouts, UI test patterns, and driver signatures are discovered
