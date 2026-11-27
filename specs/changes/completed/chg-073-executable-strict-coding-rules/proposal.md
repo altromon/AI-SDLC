@@ -1,17 +1,18 @@
 ---
 id: CHG-073-EXECUTABLE-STRICT-CODING-RULES
 type: spec-change-proposal
-title: "Executable Strict Coding Rules Per Stack"
-status: draft
-author: "agent-system-architect"
+title: Executable Strict Coding Rules Per Stack
+status: applied
+author: agent-system-architect
 citations:
   - id: UC-073-EXECUTABLE-STRICT-CODING-RULES
-    digest: sha256:82750758420ddcc9c260626666d11c1c696d92a14774da4ecec6ef2bdb8121f4
+    digest: sha256:992d6af2fc6c0363ddf0214988b4d7225111f63aeb953f84af018462d34a0a2d
     comment: Citación de use-case (Reglas estrictas de codificación ejecutables y desacopladas por stack)
   - id: FR-073-EXECUTABLE-STRICT-CODING-RULES-001
-    digest: sha256:53e519f7e2ca3193c25cba54a72714f6e74c410f140982f9d755641c8812b575
+    digest: sha256:27b58569eb3f5cf6024b63829f315e4c478102236586db647a15fd73d72d9651
     comment: Requerimiento derivado de UC-073-EXECUTABLE-STRICT-CODING-RULES
 ---
+
 
 # Propuesta de Cambio: CHG-073-EXECUTABLE-STRICT-CODING-RULES
 

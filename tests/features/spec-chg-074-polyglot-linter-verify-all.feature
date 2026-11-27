@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-074-polyglot-linter-verify-all/spec.md
+# Origen: specs/changes/completed/chg-074-polyglot-linter-verify-all/spec.md
 # ID Requerimiento: SPEC-CHG-074-POLYGLOT-LINTER-VERIFY-ALL
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

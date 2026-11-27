@@ -6,38 +6,38 @@
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.
 # ==============================================================================
 
-@UC-073-EXECUTABLE-STRICT-CODING-RULES @functional @automated @coding-rules
-Feature: Executable and Stack-Decoupled Strict Coding Rules
-  As an AI agent operating in an AI-SDLC managed repository
-  I want strict coding-rules templates and detection to match the exact language, framework, and build system of each project
-  So that native compilers and linters execute cleanly without schema errors, missing plugins, or false-positive bypass violations
+@UC-073-EXECUTABLE-STRICT-CODING-RULES @functional @automated
+Feature: Executable Strict Coding Rules Per Stack
+  As an AI-SDLC framework user or verifier
+  I want coding-rules templates, stack detection, and bypass checks to match each stack and build tool
+  So that native linters and compilers succeed without schema errors, missing plugins, or false positives
 
   @nominal
-  Scenario: Stack-specific strict rules deploy cleanly for Python, JavaScript, TypeScript, Angular, Maven, Go v2, and C
+  Scenario: Stack-specific strict coding rules deploy cleanly for Python, JS, TS, Angular, Maven, Go v2, and C
     Given repositories representing "python" ("pyproject.toml"), "javascript" ("package.json"), "typescript" ("tsconfig.json"), "angular" ("angular.json"), "java" Maven ("pom.xml"), "go" ("go.mod"), and "c" ("CMakeLists.txt" with "src/main.c")
-    When "detectProjectStacks" and "aisdlc init" run on each repository
-    Then "python" deploys standalone "ruff.toml" and "mypy.ini" without ignoring tests or allowing "Any"
+    When "detectProjectStacks" and "getCodingRulesFilesForStacks" run for each repository
+    Then "python" (including alias "py") deploys standalone "ruff.toml" and "mypy.ini" with strict typing, no "Any", and no test exclusions
     And "javascript" deploys native flat "eslint.config.mjs" without "typescript-eslint" or "tsconfig.strict.json"
     And "typescript" deploys "tsconfig.strict.json" without "angularCompilerOptions", while "angular" includes "angularCompilerOptions"
-    And "go" deploys ".golangci.yml" using schema "version: \"2\""
-    And the pure "c" project is classified as "c" rather than "cpp"
+    And "GO_GOLANGCI_YML" declares "version: \"2\"" for golangci-lint v2
+    And the AI-SDLC monorepo connects "tsconfig.strict.json" and "typescript-eslint" so "eslint" and "tsc" pass
 
   @boundary
-  Scenario Outline: Build-system and tree-level detection accurately scope required strict rule files
-    Given a repository with layout "<layout_description>"
-    When "detectProjectStacks" and "collectCodingRulesBypassViolations" evaluate the repository
-    Then detected stacks match "<expected_stack>"
-    And required file "<required_file>" is enforced while unapplicable file "<excluded_file>" is not required
+  Scenario Outline: Conditional build-system and tree-level C vs C++ detection avoid false positives
+    Given a repository with "<layout>"
+    When "detectProjectStacks" and "collectCodingRulesBypassViolations" run on the repository root
+    Then detected stacks include "<expected_stack>"
+    And "<required_file>" is enforced while "<excluded_file>" is not required
 
     Examples:
-      | layout_description                                | expected_stack | required_file                       | excluded_file                               |
-      | Maven project with pom.xml only                   | java           | config/pmd/aisdlc-ruleset.xml       | gradle/init.d/aisdlc-strict.init.gradle.kts |
-      | C project with src/main.c and no CMakeLists.txt   | c              | .clang-tidy                         | cmake/AisdlcStrictCompiler.cmake            |
-      | C project with CMakeLists.txt and src/main.c      | c              | cmake/AisdlcStrictCompiler.cmake    | cpp-only-override                           |
-      | Python project using py alias                     | python         | ruff.toml                           | tsconfig.strict.json                        |
+      | layout                                  | expected_stack | required_file                    | excluded_file                               |
+      | pom.xml only                            | java           | config/pmd/aisdlc-ruleset.xml    | gradle/init.d/aisdlc-strict.init.gradle.kts |
+      | CMakeLists.txt at root and src/main.c   | c              | cmake/AisdlcStrictCompiler.cmake | cpp-only-classification                     |
+      | Makefile at root and src/main.c         | c              | .clang-tidy                      | cmake/AisdlcStrictCompiler.cmake            |
+      | pyproject.toml with alias py            | python         | mypy.ini                         | tsconfig.strict.json                        |
 
   @invalid
-  Scenario: Missing strict rule files or mismatched stack artifacts fail verification
-    Given a Python repository with "src/app.py" that is missing "mypy.ini" or "ruff.toml"
+  Scenario: Missing Python strict configs or weakened Maven pom.xml configuration fails verification
+    Given a Python repository with "src/app.py" missing "ruff.toml" and "mypy.ini"
     When "collectCodingRulesBypassViolations" runs on the repository root
-    Then it reports "[CODING-RULES-MISSING]" violations for the missing Python strict configuration files
+    Then it reports "[CODING-RULES-MISSING]" for "ruff.toml" and "mypy.ini"

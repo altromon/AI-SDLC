@@ -2,7 +2,7 @@
 id: FR-074-POLYGLOT-LINTER-VERIFY-ALL-001
 type: requirement
 title: polyglot-linter-verify-all
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 category: functional
@@ -18,6 +18,7 @@ cucumber-tags:
 supersedes: null
 superseded-by: null
 ---
+
 
 # FR-074-POLYGLOT-LINTER-VERIFY-ALL-001: polyglot-linter-verify-all
 
@@ -44,38 +45,40 @@ Execute native strict linters and compilers in `aisdlc verify all` for every det
 ## 2. Acceptance Criteria in Gherkin Format (Cucumber)
 
 ```gherkin
-@FR-074-POLYGLOT-LINTER-VERIFY-ALL-001 @automated @regression
-Feature: Polyglot Native Linter and Compiler Execution in aisdlc verify all
-  As an AI-SDLC framework user
-  I want aisdlc verify all to run native strict linters and compilers for all detected stacks via tool-installer.ts
-  So that lint and compiler violations fail verification while missing tools are handled safely across interactive and CI modes
+@FR-074-POLYGLOT-LINTER-VERIFY-ALL-001 @functional @automated
+Feature: Execute Polyglot Linters and Compilers in Verify All
+  As a QA engineer or AI-SDLC user
+  I want aisdlc verify all to detect supported technology stacks and run their native strict linters and compilers via tool-installer.ts
+  So that polyglot repositories enforce strict quality without blocking CI when optional native toolchains are absent
 
   @nominal
   Scenario: Detected polyglot stacks execute native strict linters and compilers cleanly
-    Given a repository with detected stacks among "typescript", "javascript", "angular", "python", "dotnet", "java", "kotlin", "rust", "go", "c", and "cpp"
-    And each required native tool is resolved via "ensureToolAvailable" with CWE-426 safe PATH resolution
-    When "aisdlc verify all" runs the native linters and compilers
-    Then every detected stack executes its strict linter or compiler and passes with exit code 0
+    Given a repository containing supported stacks among "typescript", "javascript", "angular", "python", "dotnet", "java", "kotlin", "rust", "go", "c", and "cpp"
+    And each required native tool is installed and resolved via "ensureToolAvailable"
+    When "aisdlc verify all" executes the polyglot linter gate
+    Then every detected stack runs its native strict linter or compiler with exit code 0
+    And "aisdlc verify all" passes with zero violations
 
   @boundary
-  Scenario Outline: Missing native tool handling in local interactive vs CI non-interactive environments
-    Given a repository with a detected stack whose native tool is not installed
-    And the environment is "<mode>" with install prompt decision "<decision>"
-    When "aisdlc verify all" checks tool availability using "ensureToolAvailable" and "TOOL_INSTALL_ALLOWLIST"
-    Then the missing tool check is <result>
+  Scenario Outline: Missing native tool or missing C/C++ compilation database handling
+    Given a repository with a detected stack whose native tool or precondition is "<condition>"
+    And the execution environment has mode "<env_mode>" and user install response "<user_choice>"
+    When "aisdlc verify all" executes "runPolyglotLinters"
+    Then the stack check is "<outcome>"
 
     Examples:
-      | mode              | decision | result                                        |
-      | local-interactive | decline  | skipped with a warning after user declination |
-      | ci-true           | n/a      | skipped with a warning without prompting      |
-      | non-tty           | n/a      | skipped with a warning without prompting      |
+      | condition                 | env_mode          | user_choice | outcome                                        |
+      | missing-tool              | local-interactive | decline     | skipped with warning after user declination    |
+      | missing-tool              | ci-true           | n/a         | skipped with warning without prompting         |
+      | missing-tool              | non-tty           | n/a         | skipped with warning without prompting         |
+      | missing-compile-commands  | local-interactive | n/a         | skipped clang-tidy with warning                |
 
   @invalid
   Scenario: Installed native linter or compiler returning non-zero exit code fails verify all
-    Given a repository with a detected stack whose native tool is installed
-    And running the native strict linter or compiler returns a non-zero exit code
-    When "aisdlc verify all" executes the polyglot verification step
-    Then "aisdlc verify all" fails and reports the lint or compiler violations with redacted diagnostics
+    Given a repository with a detected stack whose native linter or compiler is installed
+    And running the native tool returns a non-zero exit code due to lint or compiler errors
+    When "aisdlc verify all" executes the polyglot linter gate
+    Then "aisdlc verify all" fails and reports the violations with redacted diagnostics
 ```
 
 ---
