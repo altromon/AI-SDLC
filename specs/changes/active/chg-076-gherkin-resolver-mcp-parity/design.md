@@ -25,7 +25,7 @@ citations:
     digest: sha256:45e9911061d280296c975622593c8cb04ea535e1bfec938aaf0e4e54ad72da2c
     comment: Requerimiento derivado de UC-076-GHERKIN-RESOLVER-MCP-PARITY
   - id: CMP-076-GHERKIN-RESOLVER-MCP-PARITY
-    digest: sha256:43b3290d24b3fd889b602b9d3585be0fa8e6c5ebaa774ed445c171d1d467fa11
+    digest: sha256:b6aea8235853d21cb11cc6e649598799b8f8e572a24cc37f15b4a04de70c3fa9
     comment: Componente arquitectónico que materializa la precisión del resolver Gherkin y paridad MCP/CLI
 ---
 

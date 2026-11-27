@@ -31,6 +31,7 @@ vi.mock('@aisdlc/core', async () => {
 });
 
 import * as mcpTools from '../src/tools/index.js';
+import { registerVerifyGherkinTool } from '../src/tools/index.js';
 import type { McpToolResponse } from '../src/tools/index.js';
 
 type SpyHandler = (params: Record<string, unknown>) => Promise<McpToolResponse>;
@@ -126,8 +127,7 @@ describe('@FR-076-GHERKIN-RESOLVER-MCP-PARITY-001: MCP sdd_check_fix & verify_gh
 
   describe('verify_gherkin', () => {
     it('is exported as registerVerifyGherkinTool and registered in registerVerificationTools', () => {
-      const registerFn = (mcpTools as Record<string, unknown>).registerVerifyGherkinTool;
-      expect(typeof registerFn).toBe('function');
+      expect(typeof registerVerifyGherkinTool).toBe('function');
 
       const { server, tools } = createSpyServer();
       mcpTools.registerVerificationTools(server, { rootDir: tmpDir, enableAuditLog: false });
@@ -135,14 +135,8 @@ describe('@FR-076-GHERKIN-RESOLVER-MCP-PARITY-001: MCP sdd_check_fix & verify_gh
     });
 
     it('accepts { root, featuresOnly, targetPath }, delegates to checkGherkinInSync, and allows READONLY_ROLES', async () => {
-      const registerFn = (mcpTools as Record<string, unknown>).registerVerifyGherkinTool as (
-        s: McpServer,
-        o: mcpTools.RegisterToolsOptions
-      ) => void;
-      expect(typeof registerFn).toBe('function');
-
       const { server, tools } = createSpyServer();
-      registerFn(server, { rootDir: tmpDir, role: 'agent-auditor', enableAuditLog: false });
+      registerVerifyGherkinTool(server, { rootDir: tmpDir, role: 'agent-auditor', enableAuditLog: false });
 
       const tool = tools.get('verify_gherkin')!;
       expect(tool.schema.root).toBeDefined();

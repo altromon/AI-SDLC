@@ -211,6 +211,7 @@ describe('@FR-076-GHERKIN-RESOLVER-MCP-PARITY-001: gherkin-language-resolver & c
 
       const productDir = path.join(tmpDir, 'specs', 'product');
       fs.mkdirSync(productDir, { recursive: true });
+      fs.writeFileSync(path.join(tmpDir, 'package.json'), '{"name":"auto-test"}', 'utf-8');
       fs.writeFileSync(
         path.join(productDir, 'FR-076-AUTO.md'),
         '---\nid: FR-076-AUTO\n---\n```gherkin\n@FR-076-AUTO\nFeature: Auto\n  Scenario: S\n    Given x\n    When y\n    Then z\n```\n',
@@ -221,6 +222,37 @@ describe('@FR-076-GHERKIN-RESOLVER-MCP-PARITY-001: gherkin-language-resolver & c
       const scaffolded = autoScaffold!(tmpDir);
       expect(scaffolded).toBe(1);
       expect(fs.existsSync(path.join(tmpDir, 'tests', 'steps', 'fr-076-auto.steps.ts'))).toBe(true);
+    });
+
+    it('covers resolver helper primitives directly (extractIdValues, contract helpers, scanner & comment helpers)', () => {
+      const ids: string[] = [];
+      resolver.extractIdValues(['FR-1', { id: 'FR-2' }, null], ids);
+      expect(ids).toEqual(['FR-1', 'FR-2']);
+
+      const contracts: string[] = [];
+      resolver.extractStringContract('Service.execute', contracts);
+      resolver.extractObjectContract({ interface: 'ISvc', methods: ['runOp', 'ab'] }, contracts);
+      resolver.extractContractEntry('DirectSym', contracts);
+      resolver.extractContractList(['ListSym'], contracts);
+      expect(contracts).toEqual(['Service.execute', 'Service', 'execute', 'ISvc', 'runOp', 'DirectSym', 'ListSym']);
+
+      const taskMeta: resolver.ChangeSpecMetadata = { ids: [], referencedIds: [], contracts: [] };
+      resolver.extractTaskMetadata([{ id: 'TSK-1', 'satisfies-requirements': ['FR-3'], 'implements-contracts': ['ContractA'] }], taskMeta);
+      expect(taskMeta).toEqual({ ids: ['TSK-1'], referencedIds: ['FR-3'], contracts: ['ContractA'] });
+
+      expect(resolver.isEligibleProductionFile(path.join(tmpDir, 'src', 'app.ts'), tmpDir)).toBe(true);
+      expect(resolver.isEligibleProductionFile(path.join(tmpDir, 'src', 'app.spec.ts'), tmpDir)).toBe(false);
+
+      expect(resolver.findLineEnd('abc\ndef', 0)).toBe(3);
+      expect(resolver.findBlockCommentEnd('/*x*/y', 0)).toBe(5);
+      expect(resolver.findQuotedStringEnd('"a\\"b"c', 0, '"')).toBe(6);
+      expect(resolver.findTripleQuoteEnd('"""doc"""x', 0, '"""')).toBe(9);
+
+      const chunks: string[] = [];
+      expect(resolver.tryConsumePyComment('# c\n', 0, chunks)).toBe(3);
+      expect(resolver.tryConsumeCLikeComment('// c\n', 0, chunks)).toBe(4);
+      expect(resolver.stepCommentOrString('x', 0, true, true, chunks)).toBe(1);
+      expect(chunks).toEqual(['x']);
     });
   });
 });
