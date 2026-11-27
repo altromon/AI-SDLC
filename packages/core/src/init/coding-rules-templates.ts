@@ -486,7 +486,7 @@ const PROTECTED_BYPASS_PATTERNS = [
   /08_security_concept\\.md$/i,
   /09_decisions\\//i,
   /migrations?\\//i,
-  /^\\.github\\/CODEOWNERS$/,
+  /^\\.github\\/CODEOWNERS$/i,
 ];
 
 const STANDARD_SDD_ARTIFACTS = ['spec.md', 'design.md', 'tasks.md', 'handoff.yaml'];
@@ -515,12 +515,13 @@ function getWorkingBranch(cwd) {
 function isProtectedCodingRulesTarget(targetPath, cwd) {
   if (!targetPath) return false;
   const resolved = path.resolve(cwd, targetPath);
-  const norm = resolved.replace(/\\\\/g, '/');
-  const rel = path.relative(cwd, resolved).replace(/\\\\/g, '/');
+  const normLower = resolved.replace(/\\\\/g, '/').toLowerCase();
+  const relLower = path.relative(cwd, resolved).replace(/\\\\/g, '/').toLowerCase();
   return (
-    PROTECTED_CODING_RULES_FILES.some(
-      (ruleFile) => rel === ruleFile || norm.endsWith('/' + ruleFile)
-    ) || rel.startsWith('templates/coding-rules/')
+    PROTECTED_CODING_RULES_FILES.some((ruleFile) => {
+      const ruleLower = ruleFile.toLowerCase();
+      return relLower === ruleLower || normLower.endsWith('/' + ruleLower);
+    }) || relLower.startsWith('templates/coding-rules/')
   );
 }
 
@@ -531,7 +532,10 @@ function isSourceOrTestTarget(relPath) {
 
 function isProtectedBypassPath(relPath) {
   if (!relPath) return false;
-  const norm = relPath.replace(/\\\\/g, '/');
+  const norm = path.posix
+    .normalize(relPath.replace(/\\\\/g, '/'))
+    .replace(/^\\.\\//, '')
+    .replace(/^\\/+/, '');
   return PROTECTED_BYPASS_PATTERNS.some((re) => re.test(norm));
 }
 

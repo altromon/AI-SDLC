@@ -4,6 +4,7 @@
 
 import { canonicalSort } from '../utils/fs.js';
 import { resolveDeterministicDate } from '../utils/time.js';
+import { PROTECTED_CODING_RULES_FILES } from '../init/coding-rules-templates.js';
 import { collectCodingRulesBypassViolations } from './coding-rules-bypass.js';
 import { execFileSync } from 'child_process';
 import * as fs from 'fs';
@@ -20,10 +21,13 @@ export const PROTECTED_BYPASS_PATTERNS: RegExp[] = [
   /^schemas[\\/]/i,
   /^examples[\\/]security[\\/]/i,
   /^specs[\\/]security[\\/]/i,
+  /^specs[\\/]privacy[\\/]/i,
+  /^packages[\\/]security[\\/]/i,
   /enclaves?[\\/]/i,
   /SEC-ENC-/i,
   /quality-policy\.ya?ml$/i,
   /license-policy\.ya?ml$/i,
+  /privacy-policy\.ya?ml$/i,
   /08_security_concept\.md$/i,
   /09_decisions[\\/]/i,
   /migrations?[\\/]/i,
@@ -59,8 +63,21 @@ export function detectProfileFromChange(changeDir: string): ChangeProfile {
 }
 
 export function isPathProtectedFromPatch(filePath: string): boolean {
-  const normalized = filePath.replace(/\\/g, '/');
-  return PROTECTED_BYPASS_PATTERNS.some((pattern) => pattern.test(normalized));
+  const normalized = path.posix
+    .normalize(filePath.replace(/\\/g, '/'))
+    .replace(/^\.\//, '')
+    .replace(/^\/+/, '');
+  if (PROTECTED_BYPASS_PATTERNS.some((pattern) => pattern.test(normalized))) {
+    return true;
+  }
+  const lower = normalized.toLowerCase();
+  if (lower.startsWith('templates/coding-rules/')) {
+    return true;
+  }
+  return PROTECTED_CODING_RULES_FILES.some((ruleFile) => {
+    const ruleLower = ruleFile.toLowerCase();
+    return lower === ruleLower || lower.endsWith(`/${ruleLower}`);
+  });
 }
 
 function detectCurrentBranch(rootDir: string): string {
