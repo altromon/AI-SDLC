@@ -25,6 +25,9 @@ import {
   nextAfter,
   readCommentToken,
   readQuotedLiteral,
+  readSingleQuotedLiteral,
+  readTripleSingleQuoted,
+  readVerbatimString,
   stripTestComments,
 } from '../../packages/core/src/verifiers/test-discovery.js';
 import { isTraceableTestFile, scanCodeTestFiles, verifyTraceability } from '../../packages/core/src/verifiers/traceability.js';
@@ -185,6 +188,33 @@ describe('@FR-077-POLYGLOT-VERIFY-PARITY-001: Polyglot Verify Parity (RED Phase)
       expect(stripped).not.toContain('inline block');
       expect(stripped).not.toContain('html comment removed');
       expect(stripped).not.toContain('python comment removed');
+    });
+
+    it('hasModalityDriverSignature ignores commented-out signatures after C# verbatim strings and inside Rust lifetime blocks', () => {
+      const csVerbatim = [
+        'var dir = @"C:\\fixtures\\";',
+        'var quoted = @"hello ""world""";',
+        '// await Expect(page).ToHaveTitleAsync("Home");',
+        '/* await Expect(locator).ToBeVisibleAsync(); */',
+      ].join('\n');
+      expect(hasModalityDriverSignature(csVerbatim, 'web')).toBe(false);
+
+      const rustLifetimes = [
+        "fn helper<'a>(s: &'a str) -> &'a str {",
+        "  let label: &'static str = \"ok\";",
+        '  // Command::cargo_bin("mycli")',
+        '  /* assert_cmd::Command */',
+        '  s',
+        '}',
+      ].join('\n');
+      expect(hasModalityDriverSignature(rustLifetimes, 'console')).toBe(false);
+
+      const rustMultilineLifetime = [
+        "fn multiline<'a>(",
+        '  // Expect(page)',
+        ') {}',
+      ].join('\n');
+      expect(hasModalityDriverSignature(rustMultilineLifetime, 'web')).toBe(false);
     });
   });
 
@@ -356,6 +386,16 @@ describe('@FR-077-POLYGLOT-VERIFY-PARITY-001: Polyglot Verify Parity (RED Phase)
       const realTmp = safeRealpath(tmpDir)!;
       expect(isSafeWithinRoot(path.join(tmpDir, 'src', 'inside.ts'), realTmp)).toBe(true);
       expect(isSafeWithinRoot(junctionTarget, realTmp)).toBe(false);
+      const siblingEvilDir = `${realTmp}-evil`;
+      fs.mkdirSync(siblingEvilDir, { recursive: true });
+      try {
+        const siblingEvilFile = path.join(siblingEvilDir, 'payload.ts');
+        fs.writeFileSync(siblingEvilFile, 'export const evil = true;\n');
+        expect(isSafeWithinRoot(siblingEvilDir, realTmp)).toBe(false);
+        expect(isSafeWithinRoot(siblingEvilFile, realTmp)).toBe(false);
+      } finally {
+        fs.rmSync(siblingEvilDir, { recursive: true, force: true });
+      }
       expect(isTraceableTestFile('tests/e2e/app.e2e.ts')).toBe(true);
       expect(DEFAULT_UI_TEST_PATTERNS).toContain('**/*_e2e_test.go');
       expect(MODALITY_DRIVER_SIGNATURES.web.test('assertThat(page)')).toBe(true);
@@ -364,6 +404,9 @@ describe('@FR-077-POLYGLOT-VERIFY-PARITY-001: Polyglot Verify Parity (RED Phase)
       expect(codeMap.size).toBe(0);
       expect(readCommentToken('// comment\n', 0)?.text).toBe(' ');
       expect(readQuotedLiteral('"a\\"b"', 0).text).toBe('"a\\"b"');
+      expect(readVerbatimString('"C:\\\\a\\\\""b"', 0).text).toBe('"C:\\\\a\\\\""b"');
+      expect(readTripleSingleQuoted("'''a\nb'''", 0).text).toBe("'''a\nb'''");
+      expect(readSingleQuotedLiteral("'a\nb", 0)).toEqual({ text: "'", next: 1 });
       expect(nextAfter('abc\ndef', 0, '\n', false)).toBe(3);
       const policy = createDefaultQualityPolicy();
       const rustFiles = new Set<string>();

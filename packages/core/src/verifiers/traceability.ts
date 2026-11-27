@@ -221,13 +221,15 @@ export function scanCodeTestFiles(
     for (const e of entries) {
       const fullPath = path.join(dir, e.name);
       if (!isSafeWithinRoot(fullPath, realRoot)) continue;
-      if (e.isDirectory() && !shouldSkipDir(e.name)) {
-        scanCodeTestFiles(fullPath, rootDir, reqIds, map, realRoot);
-      } else {
-        const relPath = path.relative(rootDir, fullPath).replace(/\\/g, '/');
-        if (isTraceableTestFile(relPath)) {
-          indexCodeTestFile(fullPath, rootDir, reqIds, map);
+      if (e.isDirectory()) {
+        if (!shouldSkipDir(e.name)) {
+          scanCodeTestFiles(fullPath, rootDir, reqIds, map, realRoot);
         }
+        continue;
+      }
+      const relPath = path.relative(rootDir, fullPath).replace(/\\/g, '/');
+      if (isTraceableTestFile(relPath)) {
+        indexCodeTestFile(fullPath, rootDir, reqIds, map);
       }
     }
   } catch {
@@ -671,8 +673,10 @@ function collectCodeAndTestCorpora(
     for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
       const fullPath = path.join(dir, e.name);
       if (!isSafeWithinRoot(fullPath, realRoot)) continue;
-      if (e.isDirectory() && !shouldSkipDir(e.name)) {
-        collectCodeAndTestCorpora(fullPath, rootDir, prodChunks, testChunks, realRoot);
+      if (e.isDirectory()) {
+        if (!shouldSkipDir(e.name)) {
+          collectCodeAndTestCorpora(fullPath, rootDir, prodChunks, testChunks, realRoot);
+        }
         continue;
       }
       const relPath = path.relative(rootDir, fullPath).replace(/\\/g, '/');

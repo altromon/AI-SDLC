@@ -294,12 +294,53 @@ export function nextAfter(content: string, from: number, tok: string, includeTok
   return includeTok ? idx + tok.length : idx;
 }
 
+export function readVerbatimString(content: string, start: number): { text: string; next: number } {
+  let j = start + 1;
+  while (j < content.length) {
+    if (content[j] === '"') {
+      if (content[j + 1] === '"') { j += 2; continue; }
+      return { text: content.slice(start, j + 1), next: j + 1 };
+    }
+    j++;
+  }
+  return { text: content.slice(start, j), next: j };
+}
+
+export function readTripleSingleQuoted(content: string, start: number): { text: string; next: number } {
+  let j = start + 3;
+  while (j < content.length) {
+    if (content[j] === '\\') { j += 2; continue; }
+    if (content.startsWith("'''", j)) return { text: content.slice(start, j + 3), next: j + 3 };
+    j++;
+  }
+  return { text: content.slice(start, j), next: j };
+}
+
+export function readSingleQuotedLiteral(content: string, start: number): { text: string; next: number } {
+  if (content.startsWith("'''", start)) return readTripleSingleQuoted(content, start);
+  let j = start + 1;
+  while (j < content.length) {
+    const ch = content[j];
+    if (ch === '\n' || ch === '\r') return { text: "'", next: start + 1 };
+    if (ch === '\\') { j += 2; continue; }
+    if (ch === "'") return { text: content.slice(start, j + 1), next: j + 1 };
+    j++;
+  }
+  return { text: "'", next: start + 1 };
+}
+
 export function readQuotedLiteral(content: string, start: number): { text: string; next: number } {
   const quote = content[start];
+  if (quote === '"' && start > 0 && content[start - 1] === '@') {
+    return readVerbatimString(content, start);
+  }
+  if (quote === "'") {
+    return readSingleQuotedLiteral(content, start);
+  }
   let j = start + 1;
   while (j < content.length) {
     if (content[j] === '\\') { j += 2; continue; }
-    if (content[j] === quote) { j++; break; }
+    if (content[j] === quote) return { text: content.slice(start, j + 1), next: j + 1 };
     j++;
   }
   return { text: content.slice(start, j), next: j };
