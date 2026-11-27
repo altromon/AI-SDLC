@@ -15,6 +15,24 @@ export function normalizePath(p: string): string {
   return p.normalize('NFC').replace(/\\/g, '/');
 }
 
+export function safeRealpath(targetPath: string): string | null {
+  try {
+    return fs.realpathSync(targetPath);
+  } catch {
+    return null;
+  }
+}
+
+export function isSafeWithinRoot(targetPath: string, realRoot: string): boolean {
+  try {
+    if (fs.lstatSync(targetPath).isSymbolicLink()) return false;
+    const realTarget = fs.realpathSync(targetPath);
+    return realTarget === realRoot || realTarget.startsWith(realRoot + path.sep);
+  } catch {
+    return false;
+  }
+}
+
 export const DEFAULT_EXCLUDE_DIRS: readonly string[] = [
   'node_modules',
   '.git',

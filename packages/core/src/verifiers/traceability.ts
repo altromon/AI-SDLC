@@ -21,7 +21,8 @@ import {
   TraceabilityResult,
   TraceabilityRow,
 } from '../types/index.js';
-import { walkMdFiles } from '../utils/fs.js';
+import { isSafeWithinRoot, safeRealpath, walkMdFiles } from '../utils/fs.js';
+import { isPolyglotUnitTestFile, isUiTestFile } from './test-discovery.js';
 
 interface ArtifactEntry {
   file: string;
@@ -130,21 +131,20 @@ const SKIPPED_DIR_NAMES = new Set([
   'examples',
   '.vs',
   '.idea',
+  '.venv',
+  'venv',
+  '__pycache__',
+  '.pytest_cache',
 ]);
 
 function shouldSkipDir(name: string): boolean {
   return SKIPPED_DIR_NAMES.has(name) || name.startsWith('temp-');
 }
 
-function isCodeTestFile(name: string): boolean {
-  return (
-    name.endsWith('.spec.ts') ||
-    name.endsWith('.spec.js') ||
-    name.endsWith('.test.ts') ||
-    name.endsWith('.test.js') ||
-    name.endsWith('_test.py') ||
-    name.endsWith('_test.go')
-  );
+export function isTraceableTestFile(relPath: string): boolean {
+  if (isPolyglotUnitTestFile(relPath)) return true;
+  const lower = relPath.toLowerCase();
+  return SOURCE_CODE_EXTS.some((ext) => lower.endsWith(ext)) && isUiTestFile(relPath);
 }
 
 function indexFeatureFile(
@@ -208,21 +208,26 @@ function indexCodeTestFile(
   }
 }
 
-function scanCodeTestFiles(
+export function scanCodeTestFiles(
   dir: string,
   rootDir: string,
   reqIds: string[],
-  map: Map<string, string[]>
+  map: Map<string, string[]>,
+  realRoot: string = safeRealpath(rootDir) ?? path.resolve(rootDir)
 ): void {
   if (!fs.existsSync(dir)) return;
   try {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     for (const e of entries) {
       const fullPath = path.join(dir, e.name);
+      if (!isSafeWithinRoot(fullPath, realRoot)) continue;
       if (e.isDirectory() && !shouldSkipDir(e.name)) {
-        scanCodeTestFiles(fullPath, rootDir, reqIds, map);
-      } else if (isCodeTestFile(e.name)) {
-        indexCodeTestFile(fullPath, rootDir, reqIds, map);
+        scanCodeTestFiles(fullPath, rootDir, reqIds, map, realRoot);
+      } else {
+        const relPath = path.relative(rootDir, fullPath).replace(/\\/g, '/');
+        if (isTraceableTestFile(relPath)) {
+          indexCodeTestFile(fullPath, rootDir, reqIds, map);
+        }
       }
     }
   } catch {
@@ -642,27 +647,38 @@ function evaluateAllRequirements(
   return { matrixRows, orphans, errorCount };
 }
 
-const SOURCE_CODE_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.py', '.go', '.java', '.cs', '.rs'];
+const SOURCE_CODE_EXTS = [
+  '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs',
+  '.py', '.go', '.java', '.kt', '.cs', '.fs',
+  '.rs', '.c', '.cpp', '.cc', '.cxx', '.hpp',
+];
 
-function isProductionSourceFile(name: string): boolean {
-  if (isCodeTestFile(name) || name.endsWith('.d.ts')) return false;
-  return SOURCE_CODE_EXTS.some((ext) => name.endsWith(ext));
+function isProductionSourceFile(relPath: string): boolean {
+  const lower = relPath.toLowerCase();
+  if (isTraceableTestFile(relPath) || lower.endsWith('.d.ts')) return false;
+  return SOURCE_CODE_EXTS.some((ext) => lower.endsWith(ext));
 }
 
 function collectCodeAndTestCorpora(
   dir: string,
+  rootDir: string = dir,
   prodChunks: string[] = [],
-  testChunks: string[] = []
+  testChunks: string[] = [],
+  realRoot: string | null = safeRealpath(rootDir)
 ): { prodCorpus: string; testCorpus: string } {
-  if (!fs.existsSync(dir)) return { prodCorpus: '', testCorpus: '' };
+  if (!realRoot) return { prodCorpus: '', testCorpus: '' };
   try {
     for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
       const fullPath = path.join(dir, e.name);
+      if (!isSafeWithinRoot(fullPath, realRoot)) continue;
       if (e.isDirectory() && !shouldSkipDir(e.name)) {
-        collectCodeAndTestCorpora(fullPath, prodChunks, testChunks);
-      } else if (isCodeTestFile(e.name) || e.name.endsWith('.feature')) {
+        collectCodeAndTestCorpora(fullPath, rootDir, prodChunks, testChunks, realRoot);
+        continue;
+      }
+      const relPath = path.relative(rootDir, fullPath).replace(/\\/g, '/');
+      if (isTraceableTestFile(relPath) || e.name.endsWith('.feature')) {
         testChunks.push(fs.readFileSync(fullPath, 'utf-8'));
-      } else if (isProductionSourceFile(e.name)) {
+      } else if (isProductionSourceFile(relPath)) {
         prodChunks.push(fs.readFileSync(fullPath, 'utf-8'));
       }
     }

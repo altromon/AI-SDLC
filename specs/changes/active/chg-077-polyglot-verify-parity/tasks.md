@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-qa-engineer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-077-POLYGLOT-VERIFY-PARITY
     satisfies-requirements: &ref_0
@@ -46,7 +46,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-077-POLYGLOT-VERIFY-PARITY
     satisfies-requirements: *ref_0
@@ -63,7 +63,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-077-POLYGLOT-VERIFY-PARITY
     satisfies-requirements: *ref_0
@@ -81,7 +81,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-077-POLYGLOT-VERIFY-PARITY
     satisfies-requirements: *ref_0

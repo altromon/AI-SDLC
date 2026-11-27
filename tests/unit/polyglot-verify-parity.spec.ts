@@ -8,18 +8,26 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { STARTER_QUALITY_POLICY } from '../../packages/core/src/init/index.js';
+import { isSafeWithinRoot, safeRealpath } from '../../packages/core/src/utils/fs.js';
 import {
   collectFilesToScan,
   createDefaultQualityPolicy,
   DEFAULT_EXTENSIONS,
+  scanDotNetProjects,
+  scanRustCrates,
   walkDir,
 } from '../../packages/core/src/verifiers/quality-gate.js';
 import {
+  DEFAULT_UI_TEST_PATTERNS,
   hasModalityDriverSignature,
   isUiTestFile,
+  MODALITY_DRIVER_SIGNATURES,
+  nextAfter,
+  readCommentToken,
+  readQuotedLiteral,
   stripTestComments,
 } from '../../packages/core/src/verifiers/test-discovery.js';
-import { verifyTraceability } from '../../packages/core/src/verifiers/traceability.js';
+import { isTraceableTestFile, scanCodeTestFiles, verifyTraceability } from '../../packages/core/src/verifiers/traceability.js';
 
 function writeFile(rootDir: string, relPath: string, content: string | Buffer): string {
   const fullPath = path.join(rootDir, relPath);
@@ -344,6 +352,26 @@ describe('@FR-077-POLYGLOT-VERIFY-PARITY-001: Polyglot Verify Parity (RED Phase)
       const traceRes = verifyTraceability({ rootDir: tmpDir });
       const audit = traceRes.contractAudits?.find((a) => a.method === 'escapedSecretSymbol');
       expect(audit?.implementedInCode).toBe(false);
+
+      const realTmp = safeRealpath(tmpDir)!;
+      expect(isSafeWithinRoot(path.join(tmpDir, 'src', 'inside.ts'), realTmp)).toBe(true);
+      expect(isSafeWithinRoot(junctionTarget, realTmp)).toBe(false);
+      expect(isTraceableTestFile('tests/e2e/app.e2e.ts')).toBe(true);
+      expect(DEFAULT_UI_TEST_PATTERNS).toContain('**/*_e2e_test.go');
+      expect(MODALITY_DRIVER_SIGNATURES.web.test('assertThat(page)')).toBe(true);
+      const codeMap = new Map<string, string[]>();
+      scanCodeTestFiles(tmpDir, tmpDir, ['FR-077-SYMLINK'], codeMap);
+      expect(codeMap.size).toBe(0);
+      expect(readCommentToken('// comment\n', 0)?.text).toBe(' ');
+      expect(readQuotedLiteral('"a\\"b"', 0).text).toBe('"a\\"b"');
+      expect(nextAfter('abc\ndef', 0, '\n', false)).toBe(3);
+      const policy = createDefaultQualityPolicy();
+      const rustFiles = new Set<string>();
+      scanRustCrates(tmpDir, policy, realTmp, rustFiles);
+      const dotnetFiles = new Set<string>();
+      scanDotNetProjects(tmpDir, policy, realTmp, dotnetFiles);
+      expect(rustFiles.size).toBe(0);
+      expect(dotnetFiles.size).toBe(0);
     });
   });
 });

@@ -7,7 +7,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'js-yaml';
-import { canonicalSort } from '../utils/fs.js';
+import { canonicalSort, isSafeWithinRoot, safeRealpath } from '../utils/fs.js';
 import { resolveDeterministicDate } from '../utils/time.js';
 import {
   AnalysisResult,
@@ -41,13 +41,19 @@ export const DEFAULT_EXTENSIONS: readonly string[] = [
   '.tsx',
   '.js',
   '.jsx',
+  '.mjs',
+  '.cjs',
   '.py',
   '.java',
+  '.kt',
   '.go',
   '.cs',
   '.rs',
   '.cpp',
+  '.cc',
+  '.cxx',
   '.c',
+  '.hpp',
 ];
 
 export const DEFAULT_EXCLUDES: readonly string[] = [
@@ -273,18 +279,18 @@ export function isExcludedFile(file: string, normalized: string, excludePatterns
 export function walkDir(
   dir: string,
   extensions: readonly string[] = DEFAULT_EXTENSIONS,
-  excludePatterns: readonly string[] = DEFAULT_EXCLUDES
+  excludePatterns: readonly string[] = DEFAULT_EXCLUDES,
+  realRoot?: string
 ): string[] {
-  if (!fs.existsSync(dir)) return [];
+  const effectiveRoot = realRoot ?? safeRealpath(dir);
+  if (!fs.existsSync(dir) || !effectiveRoot) return [];
   const results: string[] = [];
   for (const file of fs.readdirSync(dir).sort(canonicalSort)) {
     const fullPath = path.join(dir, file);
-    const normalized = fullPath.replace(/\\/g, '/');
-    if (isExcludedFile(file, normalized, excludePatterns)) continue;
-
-    const stat = fs.statSync(fullPath);
-    if (stat.isDirectory()) {
-      results.push(...walkDir(fullPath, extensions, excludePatterns));
+    if (!isSafeWithinRoot(fullPath, effectiveRoot)) continue;
+    if (isExcludedFile(file, fullPath.replace(/\\/g, '/'), excludePatterns)) continue;
+    if (fs.statSync(fullPath).isDirectory()) {
+      results.push(...walkDir(fullPath, extensions, excludePatterns, effectiveRoot));
     } else if (extensions.includes(path.extname(file).toLowerCase())) {
       results.push(fullPath);
     }
@@ -325,13 +331,15 @@ export function scanContainerSubdir(
   targetDir: string,
   rootDir: string,
   policy: QualityPolicy,
-  files: Set<string>
+  files: Set<string>,
+  realRoot?: string
 ): void {
   if (policy.exclude_patterns.includes(subdirName)) return;
   const subTarget = path.join(containerDir, subdirName, targetDir);
   if (!fs.existsSync(subTarget) || !fs.statSync(subTarget).isDirectory()) return;
+  if (realRoot && !isSafeWithinRoot(subTarget, realRoot)) return;
   if (isPathExcluded(subTarget, rootDir, policy.exclude_patterns)) return;
-  for (const f of walkDir(subTarget, policy.supported_extensions, policy.exclude_patterns)) {
+  for (const f of walkDir(subTarget, policy.supported_extensions, policy.exclude_patterns, realRoot)) {
     files.add(f);
   }
 }
@@ -341,16 +349,18 @@ export function scanMonorepoContainer(
   container: string,
   targetDir: string,
   policy: QualityPolicy,
-  files: Set<string>
+  files: Set<string>,
+  realRoot?: string
 ): void {
   const containerDir = path.join(rootDir, container);
   if (!fs.existsSync(containerDir) || !fs.statSync(containerDir).isDirectory()) return;
+  if (realRoot && !isSafeWithinRoot(containerDir, realRoot)) return;
   if (isPathExcluded(containerDir, rootDir, policy.exclude_patterns)) return;
 
   try {
     for (const subdir of fs.readdirSync(containerDir, { withFileTypes: true })) {
       if (subdir.isDirectory()) {
-        scanContainerSubdir(containerDir, subdir.name, targetDir, rootDir, policy, files);
+        scanContainerSubdir(containerDir, subdir.name, targetDir, rootDir, policy, files, realRoot);
       }
     }
   } catch {
@@ -358,10 +368,18 @@ export function scanMonorepoContainer(
   }
 }
 
-export function scanDirectTarget(rootDir: string, targetDir: string, policy: QualityPolicy, files: Set<string>): void {
+export function scanDirectTarget(
+  rootDir: string,
+  targetDir: string,
+  policy: QualityPolicy,
+  files: Set<string>,
+  realRoot?: string
+): void {
   const fullDir = path.join(rootDir, targetDir);
-  if (fs.existsSync(fullDir) && !isPathExcluded(fullDir, rootDir, policy.exclude_patterns)) {
-    for (const f of walkDir(fullDir, policy.supported_extensions, policy.exclude_patterns)) {
+  if (!fs.existsSync(fullDir)) return;
+  if (realRoot && !isSafeWithinRoot(fullDir, realRoot)) return;
+  if (!isPathExcluded(fullDir, rootDir, policy.exclude_patterns)) {
+    for (const f of walkDir(fullDir, policy.supported_extensions, policy.exclude_patterns, realRoot)) {
       files.add(f);
     }
   }
@@ -385,20 +403,58 @@ export const UNIT_TEST_SUFFIXES = [
   '_test.rs',
 ];
 
+export function scanRustCrates(rootDir: string, policy: QualityPolicy, realRoot: string, files: Set<string>): void {
+  const cratesDir = path.join(rootDir, 'crates');
+  if (!fs.existsSync(cratesDir) || !isSafeWithinRoot(cratesDir, realRoot)) return;
+  if (isPathExcluded(cratesDir, rootDir, policy.exclude_patterns)) return;
+  try {
+    for (const entry of fs.readdirSync(cratesDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const crateDir = path.join(cratesDir, entry.name);
+      if (!isSafeWithinRoot(crateDir, realRoot) || isPathExcluded(crateDir, rootDir, policy.exclude_patterns)) continue;
+      for (const f of walkDir(crateDir, policy.supported_extensions, policy.exclude_patterns, realRoot)) {
+        files.add(f);
+      }
+    }
+  } catch {
+    // ignore directory read errors
+  }
+}
+
+export function scanDotNetProjects(rootDir: string, policy: QualityPolicy, realRoot: string, files: Set<string>): void {
+  try {
+    for (const entry of fs.readdirSync(rootDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const subDir = path.join(rootDir, entry.name);
+      if (!isSafeWithinRoot(subDir, realRoot) || isPathExcluded(subDir, rootDir, policy.exclude_patterns)) continue;
+      if (!fs.readdirSync(subDir).some((name) => name.toLowerCase().endsWith('.csproj'))) continue;
+      for (const f of walkDir(subDir, policy.supported_extensions, policy.exclude_patterns, realRoot)) {
+        files.add(f);
+      }
+    }
+  } catch {
+    // ignore directory read errors
+  }
+}
+
 export function collectFilesToScan(rootDir: string, policy: QualityPolicy): string[] {
   const files = new Set<string>();
-  const monorepoContainers = ['packages', 'apps', 'libs', 'modules', 'services'];
+  const realRoot = safeRealpath(rootDir) ?? path.resolve(rootDir);
+  const containers = ['packages', 'apps', 'libs', 'modules', 'services'];
 
   for (const targetDir of policy.target_directories) {
-    scanDirectTarget(rootDir, targetDir, policy, files);
-    for (const container of monorepoContainers) {
-      scanMonorepoContainer(rootDir, container, targetDir, policy, files);
-    }
+    scanDirectTarget(rootDir, targetDir, policy, files, realRoot);
+    containers.forEach((c) => scanMonorepoContainer(rootDir, c, targetDir, policy, files, realRoot));
   }
+  for (const dirName of ['cmd', 'internal', 'pkg', 'app', 'backend']) {
+    if (!policy.target_directories.includes(dirName)) scanDirectTarget(rootDir, dirName, policy, files, realRoot);
+  }
+  scanRustCrates(rootDir, policy, realRoot, files);
+  scanDotNetProjects(rootDir, policy, realRoot, files);
 
   return Array.from(files).filter((f) => {
     const rel = path.relative(rootDir, f).replace(/\\/g, '/');
-    return !isPolyglotUnitTestFile(rel, policy.test_patterns);
+    return !isPolyglotUnitTestFile(rel, policy.test_patterns) && !isUiTestFile(rel, policy.ui_test_patterns);
   });
 }
 
