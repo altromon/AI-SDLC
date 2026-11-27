@@ -31,9 +31,10 @@ superseded-by: null
    - Traversal MUST skip symlinks and artifact/build directories (`node_modules`, `.git`, `dist`, `target`, `bin`, `obj`, `.venv`, `venv`).
    - Discovered ecosystem manifests and lockfiles across `rootDir` and nested subdirectories within `maxDepth = 3` MUST be scanned and merged into the deduplicated dependency list.
 2. **Native Multi-Ecosystem Dependency Extraction (`packages/core/src/verifiers/sca/scanner.ts`)**:
-   - **.NET**: MUST extract `<PackageReference>` dependencies from `*.csproj` and `Directory.Packages.props` as well as resolved packages from `packages.lock.json`, constructing `pkg:nuget/...` PURLs and resolving licenses via `license-dotnet.ts`.
-   - **Gradle**: MUST extract dependencies from `build.gradle`, `build.gradle.kts`, and `gradle.lockfile`, constructing `pkg:maven/...` PURLs and resolving licenses via `license-java.ts`.
-   - **Python**: MUST extract dependencies from `requirements.txt`, constructing `pkg:pypi/...` PURLs and resolving licenses via `license-python.ts`.
+   - `scanWithNativeFs` MUST extract raw `ScannedDependency` entries (with `purl` and `path` pointing to the discovered manifest/lockfile), and `scanDependencies` (`verify licenses`) MUST invoke `resolveLicense(dep, rootDir)` for license resolution.
+   - **.NET**: MUST extract `<PackageReference>` dependencies from `*.csproj` and `Directory.Packages.props` as well as resolved packages from `packages.lock.json`, constructing `pkg:nuget/...` PURLs resolved via `license-dotnet.ts`.
+   - **Gradle**: MUST extract dependencies from `build.gradle`, `build.gradle.kts`, and `gradle.lockfile`, constructing `pkg:maven/...` PURLs resolved via `license-java.ts`.
+   - **Python**: MUST extract dependencies from `requirements.txt`, constructing `pkg:pypi/...` PURLs; `resolvePythonLicenseDetailed` (`license-python.ts`) MUST check `path.dirname(dep.path)` (if inside `rootDir`) in addition to `rootDir` for `.venv`/`venv` `site-packages` so nested Python projects resolve local metadata offline.
 3. **Stack-Aware `ToolchainHealthCheck` (`packages/core/src/doctor/toolchain-check.ts`)**:
    - `ToolchainHealthCheck.inspect(options)` MUST consult `detectProjectStacks(rootDir)` to identify the project's active technology stacks and probe the presence and version of corresponding native binaries (including `dotnet`, `python`/`python3`, `go`, `cargo`, `java`/`mvn`/`gradle`, `cmake`/`clang-tidy`).
    - `ToolchainHealthCheck` MUST treat `pnpm` as required only when `pnpm-lock.yaml` is present in `rootDir`.
@@ -55,8 +56,8 @@ Feature: Recursive Multi-Ecosystem SCA Scanning and Stack-Aware Doctor Toolchain
   @nominal
   Scenario: Recursive native SCA scan extracts .NET, Gradle, and Python dependencies and doctor checks detected stack toolchains
     Given a polyglot repository containing nested ".NET" ("*.csproj", "Directory.Packages.props", "packages.lock.json"), "Gradle" ("build.gradle.kts", "gradle.lockfile"), and "Python" ("requirements.txt") manifests within depth 3
-    When "scanWithNativeFs" runs on the repository root and "ToolchainHealthCheck.inspect" runs on the repository
-    Then "scanWithNativeFs" emits "pkg:nuget/", "pkg:maven/", and "pkg:pypi/" dependencies resolved via their ecosystem license resolvers
+    When "scanWithNativeFs" and "scanDependencies" run on the repository root and "ToolchainHealthCheck.inspect" runs on the repository
+    Then "scanWithNativeFs" emits raw "pkg:nuget/", "pkg:maven/", and "pkg:pypi/" dependencies with "path" pointing to the discovered manifest/lockfile and "scanDependencies" resolves their licenses via "resolveLicense" (including nested ".venv"/"venv" "site-packages")
     And "ToolchainHealthCheck.inspect" probes the native binaries for the stacks returned by "detectProjectStacks"
 
   @boundary

@@ -77,11 +77,11 @@ superseded-by: null
 - **Requisito**: `FR-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS-001`
 - **Descripción**:
   - Extraer helpers pequeños (`collectManifestDirs`, `walkManifestTree`, `SKIPPED_SCAN_DIRS`) respetando umbrales AST (`Cyclomatic <= 10`, `Cognitive <= 15`, `Lines <= 40`) para recorrer `rootDir` hasta `maxDepth = 3`, omitiendo symlinks (`isSymbolicLink()`) y directorios de artefactos (`node_modules`, `.git`, `dist`, `target`, `bin`, `obj`, `.venv`, `venv`).
-  - Implementar extractores nativos en `scanner.ts`:
-    - `.NET`: `*.csproj`, `Directory.Packages.props` (`PackageReference` / `PackageVersion`) y `packages.lock.json` -> `pkg:nuget/...`.
-    - `Gradle`: `build.gradle`, `build.gradle.kts` y `gradle.lockfile` -> `pkg:maven/...`.
-    - `Python`: `requirements.txt` -> `pkg:pypi/...`.
-  - Integrar la resolución de licencias con `resolveLicense` (`license-dotnet.ts`, `license-java.ts`, `license-python.ts`) y añadir los sufijos en `license-resolve.ts`.
+  - Implementar extractores nativos en `scanner.ts` (emitiendo `ScannedDependency` crudos con `purl` y `path` del manifiesto/lockfile descubierto para que `scanDependencies` invoque `resolveLicense(dep, rootDir)`):
+    - `.NET`: `*.csproj`, `Directory.Packages.props` (`PackageReference` / `PackageVersion`) y `packages.lock.json` -> `pkg:nuget/...`; rechazar `<!DOCTYPE`/`<!ENTITY`, eliminar `<!-- ... -->` y `<![CDATA[ ... ]]>`, correlacionar `<PackageVersion Include="..." Version="..." />` de `Directory.Packages.props` con `<PackageReference Include="..." />` en `*.csproj` (Central Package Management), e ignorar propiedades MSBuild sin expandir (`$(...)`).
+    - `Gradle`: `build.gradle`, `build.gradle.kts` y `gradle.lockfile` -> `pkg:maven/...`; eliminar comentarios `//` y `/* ... */`, soportar Groovy (`implementation 'g:a:v'`) y Kotlin DSL (`implementation("g:a:v")`), y omitir versiones interpoladas (`$var` / `${...}`).
+    - `Python`: `requirements.txt` -> `pkg:pypi/...`; unir continuaciones de línea (`\`), eliminar comentarios en línea (`# ...`), marcadores de entorno (`; ...`) y opciones `--hash=...` / `-r` / `--...` antes de extraer `name` y `version`.
+  - Integrar la resolución de licencias con `resolveLicense` (`license-dotnet.ts`, `license-java.ts`, `license-python.ts` inspeccionando `path.dirname(dep.path)` si está dentro de `rootDir` además de `rootDir` para `.venv`/`venv` `site-packages`) y añadir los sufijos en `license-resolve.ts`.
   - Garantizar degradación elegante ante manifiestos vacíos o malformados.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm --filter @aisdlc/core test`
@@ -91,7 +91,9 @@ superseded-by: null
 - **Componente**: `CMP-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS` (`packages/core/src/doctor/toolchain-check.ts`, `packages/core/src/doctor/process-runner.ts`, `packages/core/src/types/doctor.ts`)
 - **Requisito**: `FR-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS-001`
 - **Descripción**:
-  - Actualizar `ToolchainHealthCheck.inspect` para consultar `detectProjectStacks(rootDir)` y sondear `node`, `git`, `pnpm` (solo si `pnpm-lock.yaml` existe en `rootDir`) y los binarios nativos de cada stack detectado (`dotnet`, `python`/`python3`, `go`, `cargo`, `java`/`mvn`/`gradle`, `cmake`/`clang-tidy`).
+  - Actualizar `ToolchainHealthCheck.inspect` para consultar `detectProjectStacks(rootDir)`, buscar `pom.xml`, `build.gradle`/`build.gradle.kts`, `CMakeLists.txt` y `.clang-tidy` en todo el árbol acotado (`maxDepth = 3`, consistente con `detectProjectStacks`) en lugar de solo `rootDir`, y sondear `node`, `git`, `pnpm` (solo si `pnpm-lock.yaml` existe en `rootDir`) y los binarios nativos de cada stack detectado (`dotnet`, `python`/`python3`, `go`, `cargo`, `java`/`mvn`/`gradle`, `cmake`/`clang-tidy`).
+  - En `probeTool`, considerar saludable la sonda cuando `res.exitCode === 0 && Boolean(res.stdout.trim() || res.stderr.trim())` para que `java -version` (que imprime en `stderr`) tenga éxito sin falsas advertencias.
+  - Para `python`, sondear `python --version` primero y hacer fallback secuencial a `python3 --version` solo si `python` falta o falla (emitiendo `ERR_TOOLCHAIN_PYTHON_MISSING` únicamente si ambos fallan).
   - Actualizar `SafeProbeExecutable` (`types/doctor.ts`) y `ALLOWED_TOOLS` (`process-runner.ts`) para autorizar de forma segura las sondas de estos binarios nativos con `shell: false`.
 - **Modo**: `AUTONOMOUS` 🟢
 - **Verificación**: `pnpm --filter @aisdlc/core test`

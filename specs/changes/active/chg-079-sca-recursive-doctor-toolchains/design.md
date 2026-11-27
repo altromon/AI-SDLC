@@ -16,13 +16,13 @@ contracts:
   - "SafeProcessRunnerAdapter"
 citations:
   - id: UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
-    digest: sha256:d0c9e4c3cdbcce64a1ae31b343b579cb80e866e54e3c661558d9f2378be3600d
+    digest: sha256:649c1a9846278be031474280ca4ad664c0eb799ad548e453ba372ce0fbea485c
     comment: Citación de use-case (Recursive Multi-Ecosystem SCA Scanning and Stack-Aware Doctor Toolchains)
   - id: FR-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS-001
-    digest: sha256:40ea7693995c9098e193c9fec72d3fcc7e6f40f690fa163682af9e1fcf67bc95
+    digest: sha256:212e9c1b9b911d9251ad3b30d886fe78b941e574e559038eaf6b1afc5040beec
     comment: Requerimiento derivado de UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
   - id: CMP-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
-    digest: sha256:c0acebe127bcc51475f329836d425cbae2b299dba6101968fae80e5398ed235c
+    digest: sha256:18010134669fcec91eb4679a42093f7463318df6850e527dde5217e10f4c7712
     comment: Subcomponente arquitectónico en CMP-CORE para SCA recursivo y Doctor Toolchains
 ---
 
@@ -37,31 +37,33 @@ Materializa `UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS` y `FR-079-SCA-RECURSIVE-DOC
     - `SKIPPED_SCAN_DIRS` excluye `node_modules`, `.git`, `dist`, `target`, `bin`, `obj`, `.venv`, `venv`.
     - Cada entrada de directorio se inspecciona con `fs.readdirSync(dir, { withFileTypes: true })`; si `entry.isSymbolicLink()` es verdadero, se omite inmediatamente para prevenir bucles y escapes fuera de `rootDir`.
     - Para cada directorio recolectado (`[rootDir, ...subDirs]`), se ejecutan los escáneres de ecosistema (`Node`, `Python`, `Go`, `Rust`, `Maven`, `.NET`, `Gradle`) volcando resultados deduplicados en `seen: Map<string, ScannedDependency>`.
-  - **Extractores Nativos Multi-Ecosistema**:
+    - **Contrato `scanWithNativeFs` -> `resolveLicense`**: `scanWithNativeFs` extrae entradas `ScannedDependency` crudas (con `purl` y `path` apuntando al manifiesto/lockfile descubierto), y `scanDependencies` (`verify licenses`) invoca `resolveLicense(dep, rootDir)` sobre cada dependencia extraída.
+  - **Extractores Nativos Multi-Ecosistema y Endurecimiento de Parsers**:
     - **.NET (`scanDotnetDependencies`)**:
-      - Escanea archivos `*.csproj` y `Directory.Packages.props` buscando `<PackageReference Include="..." Version="..." />` y `<PackageVersion Include="..." Version="..." />` (incluyendo formato elemento hijo `<Version>...</Version>`).
+      - Escanea archivos `*.csproj` y `Directory.Packages.props`: rechaza `<!DOCTYPE`/`<!ENTITY`, elimina comentarios `<!-- ... -->` y secciones `<![CDATA[ ... ]]>`, correlaciona `<PackageVersion Include="..." Version="..." />` de `Directory.Packages.props` con `<PackageReference Include="..." />` en `*.csproj` (Central Package Management, incluyendo formato elemento hijo `<Version>...</Version>`), e ignora propiedades MSBuild sin expandir (`$(...)`).
       - Escanea `packages.lock.json` (`dependencies` por target framework, extrayendo `type === 'Direct'` y `resolved` version).
-      - Construye PURLs `pkg:nuget/<name>@<version>` y resuelve licencias vía `resolveLicense` (`license-dotnet.ts`).
+      - Construye PURLs `pkg:nuget/<name>@<version>` resueltos vía `resolveLicense` (`license-dotnet.ts`).
     - **Gradle (`scanGradleDependencies`)**:
-      - Escanea `build.gradle`, `build.gradle.kts` (notaciones string `group:artifact:version` y map `group: '...', name: '...', version: '...'` en bloques de configuración) y `gradle.lockfile` (`group:artifact:version=configurations`).
-      - Construye PURLs `pkg:maven/<group>/<artifact>@<version>` y resuelve licencias vía `resolveLicense` (`license-java.ts`).
+      - Escanea `build.gradle` y `build.gradle.kts` (eliminando comentarios `//` y `/* ... */`, soportando DSL Groovy `implementation 'g:a:v'` / map `group: '...', name: '...', version: '...'` y Kotlin DSL `implementation("g:a:v")`, omitiendo versiones interpoladas `$var` / `${...}`) y `gradle.lockfile` (`group:artifact:version=configurations`).
+      - Construye PURLs `pkg:maven/<group>/<artifact>@<version>` resueltos vía `resolveLicense` (`license-java.ts`).
     - **Python (`scanPythonDependencies` + `parseRequirementsTxt`)**:
-      - Añade soporte para `requirements.txt` (ignorando comentarios `#`, líneas vacías y flags `-r`/`--...`, parseando `pkg==ver`, `pkg>=ver`, `pkg~=ver`, extras `pkg[extra]==ver`).
-      - Construye PURLs `pkg:pypi/<name>@<version>` y resuelve licencias vía `resolveLicense` (`license-python.ts`).
+      - Añade soporte para `requirements.txt`: une continuaciones de línea (`\`), elimina comentarios en línea (`# ...`), marcadores de entorno (`; ...`) y opciones `--hash=...` / `-r` / `--...` antes de extraer `name` y `version` (`pkg==ver`, `pkg>=ver`, `pkg~=ver`, extras `pkg[extra]==ver`).
+      - Construye PURLs `pkg:pypi/<name>@<version>`. En `license-python.ts`, `resolvePythonLicenseDetailed` inspecciona `path.dirname(dep.path)` (si está dentro de `rootDir`) además de `rootDir` para `.venv`/`venv` `site-packages`, permitiendo resolver metadatos locales offline en subproyectos Python anidados.
     - **`license-resolve.ts`**: añade sufijos `directory.packages.props`, `build.gradle`, `build.gradle.kts`, `gradle.lockfile` y `requirements.txt` a `PATH_ECOSYSTEM_SUFFIXES` como respaldo cuando no se inspecciona por PURL.
 
 - **Puerto de Diagnóstico de Toolchain (`packages/core/src/doctor/toolchain-check.ts`, `process-runner.ts`, `types/doctor.ts`)**:
   - **`ToolchainHealthCheck.inspect(options)`**:
     - Sondea siempre `node` (`--version`) y `git` (`--version`).
     - Verifica `fs.existsSync(path.join(rootDir, 'pnpm-lock.yaml'))`; solo añade `pnpm` (`--version`) si el lockfile existe en `rootDir`.
-    - Invoca `detectProjectStacks(rootDir)` (`packages/core/src/init/coding-rules-templates.ts`) y mapea cada stack detectado mediante una tabla declarativa (`STACK_TOOL_MAP`) a sus binarios nativos:
+    - Invoca `detectProjectStacks(rootDir)` (`packages/core/src/init/coding-rules-templates.ts`) y busca archivos de build (`pom.xml`, `build.gradle`/`build.gradle.kts`, `CMakeLists.txt`, `.clang-tidy`) en el árbol de directorios acotado (`maxDepth = 3`, consistente con `detectProjectStacks`) en lugar de solo `rootDir`, mapeando cada stack detectado mediante una tabla declarativa (`STACK_TOOL_MAP`) a sus binarios nativos:
       - `dotnet` -> `dotnet` (`--version`)
-      - `python` -> `python` (`--version`) con fallback a `python3` (`--version`)
+      - `python` -> sondea primero `python --version` y hace fallback secuencial a `python3 --version` únicamente si `python` falta o falla (emitiendo `ERR_TOOLCHAIN_PYTHON_MISSING` solo si ambos fallan)
       - `go` -> `go` (`version`)
       - `rust` -> `cargo` (`--version`)
-      - `java` / `kotlin` -> `java` (`-version`), más `mvn` (`--version`) si hay `pom.xml` o `gradle` (`--version`) si hay `build.gradle`/`build.gradle.kts`
-      - `c` / `cpp` -> `cmake` (`--version`) si hay `CMakeLists.txt` y/o `clang-tidy` (`--version`) si hay `.clang-tidy`
-    - Deduplica herramientas antes de ejecutar `Promise.all(...)` sobre `probeTool`.
+      - `java` / `kotlin` -> `java` (`-version`), más `mvn` (`--version`) si existe `pom.xml` o `gradle` (`--version`) si existe `build.gradle`/`build.gradle.kts` en el árbol acotado (`maxDepth = 3`)
+      - `c` / `cpp` -> `cmake` (`--version`) si existe `CMakeLists.txt` y/o `clang-tidy` (`--version`) si existe `.clang-tidy` en el árbol acotado (`maxDepth = 3`)
+    - En `probeTool`, considera saludable una sonda cuando `res.exitCode === 0 && Boolean(res.stdout.trim() || res.stderr.trim())` para que `java -version` (que imprime en `stderr`) tenga éxito sin falsas advertencias.
+    - Deduplica herramientas antes de ejecutar `Promise.all(...)` sobre `probeTool` (manteniendo la sonda secuencial `python` -> `python3`).
   - **Seguridad Zero Trust (`types/doctor.ts` & `process-runner.ts`)**:
     - Amplía `SafeProbeExecutable` y `ALLOWED_TOOLS` con `'dotnet' | 'python' | 'python3' | 'go' | 'cargo' | 'java' | 'mvn' | 'gradle' | 'cmake' | 'clang-tidy'`, manteniendo `shell: false`, `buildSafeEnvironment(cwd)` y `resolveTrustedBinaryPath`.
 

@@ -15,8 +15,8 @@ Feature: Recursive Multi-Ecosystem SCA Scanning and Stack-Aware Doctor Toolchain
   @nominal
   Scenario: Recursive native SCA scan extracts .NET, Gradle, and Python dependencies and doctor checks detected stack toolchains
     Given a polyglot repository containing nested ".NET" ("*.csproj", "Directory.Packages.props", "packages.lock.json"), "Gradle" ("build.gradle.kts", "gradle.lockfile"), and "Python" ("requirements.txt") manifests within depth 3
-    When "scanWithNativeFs" runs on the repository root and "ToolchainHealthCheck.inspect" runs on the repository
-    Then "scanWithNativeFs" emits "pkg:nuget/", "pkg:maven/", and "pkg:pypi/" dependencies resolved via their ecosystem license resolvers
+    When "scanWithNativeFs" and "scanDependencies" run on the repository root and "ToolchainHealthCheck.inspect" runs on the repository
+    Then "scanWithNativeFs" emits raw "pkg:nuget/", "pkg:maven/", and "pkg:pypi/" dependencies with "path" pointing to the discovered manifest/lockfile and "scanDependencies" resolves their licenses via "resolveLicense" (including nested ".venv"/"venv" "site-packages")
     And "ToolchainHealthCheck.inspect" probes the native binaries for the stacks returned by "detectProjectStacks"
 
   @boundary

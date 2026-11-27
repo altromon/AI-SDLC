@@ -6,10 +6,10 @@ status: draft
 author: agent-system-architect
 citations:
   - id: UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
-    digest: sha256:d0c9e4c3cdbcce64a1ae31b343b579cb80e866e54e3c661558d9f2378be3600d
+    digest: sha256:649c1a9846278be031474280ca4ad664c0eb799ad548e453ba372ce0fbea485c
     comment: Citación de use-case (Recursive Multi-Ecosystem SCA Scanning and Stack-Aware Doctor Toolchains)
   - id: FR-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS-001
-    digest: sha256:40ea7693995c9098e193c9fec72d3fcc7e6f40f690fa163682af9e1fcf67bc95
+    digest: sha256:212e9c1b9b911d9251ad3b30d886fe78b941e574e559038eaf6b1afc5040beec
     comment: Requerimiento derivado de UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
 ---
 

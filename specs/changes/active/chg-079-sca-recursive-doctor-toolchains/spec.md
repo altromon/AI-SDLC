@@ -13,7 +13,7 @@ cucumber-tags:
 
 * **Architectural Scope:** `CMP-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS` (`CMP-CORE`, Security Enclave: `SEC-ENC-DMZ`)
 * **Alignment Notes:**
-  - `scanWithNativeFs` (`packages/core/src/verifiers/sca/scanner.ts`) enforces `maxDepth = 3`, skips symlinks and artifact directories (`node_modules`, `.git`, `dist`, `target`, `bin`, `obj`, `.venv`, `venv`), and emits `pkg:nuget/`, `pkg:maven/`, and `pkg:pypi/` PURLs resolved via `resolveLicense`.
+  - `scanWithNativeFs` (`packages/core/src/verifiers/sca/scanner.ts`) enforces `maxDepth = 3`, skips symlinks and artifact directories (`node_modules`, `.git`, `dist`, `target`, `bin`, `obj`, `.venv`, `venv`), and emits raw `ScannedDependency` entries (`pkg:nuget/`, `pkg:maven/`, `pkg:pypi/` PURLs with `path` pointing to the discovered manifest/lockfile); `scanDependencies` (`verify licenses`) invokes `resolveLicense(dep, rootDir)`, and `resolvePythonLicenseDetailed` (`license-python.ts`) checks `path.dirname(dep.path)` (if inside `rootDir`) in addition to `rootDir` for `.venv`/`venv` `site-packages` so nested Python projects resolve local metadata offline.
   - `ToolchainHealthCheck` (`packages/core/src/doctor/toolchain-check.ts`) uses `detectProjectStacks(rootDir)` and `SafeProcessRunnerAdapter` (`ALLOWED_TOOLS`) to probe stack binaries without failing on missing `pnpm` when `pnpm-lock.yaml` is absent.
 
 ## 1. Functional Behavior Scenarios (BDD Gherkin)
@@ -28,8 +28,8 @@ Feature: Recursive Multi-Ecosystem SCA Scanning and Stack-Aware Doctor Toolchain
   @nominal
   Scenario: Recursive native SCA scan extracts .NET, Gradle, and Python dependencies and doctor checks detected stack toolchains
     Given a polyglot repository containing nested ".NET" ("*.csproj", "Directory.Packages.props", "packages.lock.json"), "Gradle" ("build.gradle.kts", "gradle.lockfile"), and "Python" ("requirements.txt") manifests within depth 3
-    When "scanWithNativeFs" runs on the repository root and "ToolchainHealthCheck.inspect" runs on the repository
-    Then "scanWithNativeFs" emits "pkg:nuget/", "pkg:maven/", and "pkg:pypi/" dependencies resolved via their ecosystem license resolvers
+    When "scanWithNativeFs" and "scanDependencies" run on the repository root and "ToolchainHealthCheck.inspect" runs on the repository
+    Then "scanWithNativeFs" emits raw "pkg:nuget/", "pkg:maven/", and "pkg:pypi/" dependencies with "path" pointing to the discovered manifest/lockfile and "scanDependencies" resolves their licenses via "resolveLicense" (including nested ".venv"/"venv" "site-packages")
     And "ToolchainHealthCheck.inspect" probes the native binaries for the stacks returned by "detectProjectStacks"
 
   @boundary
