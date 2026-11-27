@@ -1,17 +1,18 @@
 ---
 id: CHG-077-POLYGLOT-VERIFY-PARITY
 type: spec-change-proposal
-title: "Polyglot parity in verify traceability, verify quality, and test-discovery"
-status: draft
-author: "agent-system-architect"
+title: Polyglot parity in verify traceability, verify quality, and test-discovery
+status: applied
+author: agent-system-architect
 citations:
   - id: UC-077-POLYGLOT-VERIFY-PARITY
-    digest: sha256:8ca8bbed02f09b81ad48b093bb338aa4343d935b0539941def3a6b93694f1704
+    digest: sha256:100c4ff0b98a1c535a6d0f28e8f767ed79df0c022e98e9762451ab90e78690d3
     comment: Citación de use-case (Polyglot Parity for Traceability, Quality Gate, and Test Discovery Verifiers)
   - id: FR-077-POLYGLOT-VERIFY-PARITY-001
-    digest: sha256:878aa480aa97704977c1d83ed2a5858e0a0dcc8362f33d87de53010b9be67b6d
+    digest: sha256:8f5d56831ec6da1197594e324a007aae692063e882b19886ec50a3c104364098
     comment: Requerimiento derivado de UC-077-POLYGLOT-VERIFY-PARITY
 ---
+
 
 # Propuesta de Cambio: CHG-077-POLYGLOT-VERIFY-PARITY
 

@@ -2,7 +2,7 @@
 id: UC-077-POLYGLOT-VERIFY-PARITY
 type: use-case
 title: Polyglot Parity for Traceability, Quality Gate, and Test Discovery Verifiers
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 primary-actor: ACT-AI-AGENT
@@ -14,6 +14,7 @@ governed-by:
 supersedes: null
 superseded-by: null
 ---
+
 
 
 # UC-077-POLYGLOT-VERIFY-PARITY: Polyglot Parity for Traceability, Quality Gate, and Test Discovery Verifiers
@@ -62,7 +63,7 @@ To ensure multi-language repositories (Python, C#, Java, Kotlin, Go, Rust, C/C++
 
 ```gherkin
 @UC-077-POLYGLOT-VERIFY-PARITY @functional @automated
-Feature: Polyglot Parity for Traceability, Quality Gate, and Test Discovery Verifiers
+Feature: Polyglot parity in verify traceability, verify quality, and test-discovery
   As an AI agent verifying polyglot repositories with AI-SDLC
   I want verify traceability, verify quality, and test-discovery.ts to support all polyglot test patterns, extensions, idiomatic layouts, driver signatures, and string-safe comment stripping
   So that polyglot codebases are accurately indexed, scanned, and verified without misclassification or truncated selectors

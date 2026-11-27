@@ -2,7 +2,7 @@
 id: FR-077-POLYGLOT-VERIFY-PARITY-001
 type: requirement
 title: polyglot-verify-parity
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 category: functional
@@ -18,6 +18,7 @@ cucumber-tags:
 supersedes: null
 superseded-by: null
 ---
+
 
 
 # FR-077-POLYGLOT-VERIFY-PARITY-001: polyglot-verify-parity
@@ -46,7 +47,7 @@ Deliver full polyglot parity across `traceability.ts`, `quality-gate.ts`, `init/
 
 ```gherkin
 @FR-077-POLYGLOT-VERIFY-PARITY-001 @functional @automated
-Feature: Polyglot Parity for Traceability, Quality Gate, and Test Discovery Verifiers
+Feature: Polyglot parity in verify traceability, verify quality, and test-discovery
   As an AI agent verifying polyglot repositories with AI-SDLC
   I want verify traceability, verify quality, and test-discovery.ts to support all polyglot test patterns, extensions, idiomatic layouts, driver signatures, and string-safe comment stripping
   So that polyglot codebases are accurately indexed, scanned, and verified without misclassification or truncated selectors

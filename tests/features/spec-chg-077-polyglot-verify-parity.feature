@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-077-polyglot-verify-parity/spec.md
+# Origen: specs/changes/completed/chg-077-polyglot-verify-parity/spec.md
 # ID Requerimiento: SPEC-CHG-077-POLYGLOT-VERIFY-PARITY
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.
