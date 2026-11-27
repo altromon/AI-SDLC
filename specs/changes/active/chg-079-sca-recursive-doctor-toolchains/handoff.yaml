@@ -1,0 +1,23 @@
+id: HOF-CHG-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
+type: handoff
+title: Handoff Canónico de Arquitectura para SCA Recursive Multi-Ecosystem & Doctor Native Toolchains
+changeId: CHG-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
+version: 1.0.0
+createdAt: '2026-11-27T21:47:10.315Z'
+subgraph:
+  requirements:
+    - FR-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS-001
+  useCases:
+    - UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
+  components:
+    - CMP-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
+citations:
+  - id: UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
+    digest: sha256:d0c9e4c3cdbcce64a1ae31b343b579cb80e866e54e3c661558d9f2378be3600d
+    comment: Citación de use-case (Recursive Multi-Ecosystem SCA Scanning and Stack-Aware Doctor Toolchains)
+  - id: FR-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS-001
+    digest: sha256:40ea7693995c9098e193c9fec72d3fcc7e6f40f690fa163682af9e1fcf67bc95
+    comment: Requerimiento derivado de UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
+  - id: CMP-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
+    digest: sha256:c0acebe127bcc51475f329836d425cbae2b299dba6101968fae80e5398ed235c
+    comment: Subcomponente arquitectónico en CMP-CORE para SCA recursivo y Doctor Toolchains
