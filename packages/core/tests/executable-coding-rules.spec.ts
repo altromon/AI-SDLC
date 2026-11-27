@@ -5,10 +5,12 @@ import { ESLint } from 'eslint';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   CodingRuleStack,
+  CPP_CLANG_TIDY,
   detectProjectStacks,
   getCodingRulesFilesForStacks,
   GO_GOLANGCI_YML,
   isProtectedCodingRulesFile,
+  JAVA_PMD_RULESET_XML,
   JS_ESLINT_CONFIG_MJS,
   PROTECTED_CODING_RULES_FILES,
   resolveCodingRuleStacks,
@@ -247,7 +249,7 @@ describe('CHG-073: Executable Strict Coding Rules Per Stack', () => {
 
       const mavenIntact = setupTempRepo({
         'backend/pom.xml': '<project />',
-        'config/pmd/aisdlc-ruleset.xml': '<ruleset />\n',
+        'config/pmd/aisdlc-ruleset.xml': JAVA_PMD_RULESET_XML,
       });
       expect(collectCodingRulesBypassViolations(mavenIntact)).toEqual([]);
     });
@@ -259,7 +261,7 @@ describe('CHG-073: Executable Strict Coding Rules Per Stack', () => {
     ])('flags [CODING-RULES-BYPASS] when pom.xml weakens checks: %s', (pomXml) => {
       const root = setupTempRepo({
         'backend/pom.xml': pomXml,
-        'config/pmd/aisdlc-ruleset.xml': '<ruleset />\n',
+        'config/pmd/aisdlc-ruleset.xml': JAVA_PMD_RULESET_XML,
       });
       const violations = collectCodingRulesBypassViolations(root);
       expect(violations.some((v) => v.includes('[CODING-RULES-BYPASS]'))).toBe(true);
@@ -319,7 +321,7 @@ describe('CHG-073: Executable Strict Coding Rules Per Stack', () => {
 
       const intact = setupTempRepo({
         'native/main.c': 'int main(void) { return 0; }\n',
-        '.clang-tidy': 'Checks: "*"\n',
+        '.clang-tidy': CPP_CLANG_TIDY,
       });
       expect(collectCodingRulesBypassViolations(intact)).toEqual([]);
     });
