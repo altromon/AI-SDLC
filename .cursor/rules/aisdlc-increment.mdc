@@ -77,8 +77,8 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 1. **Ready for Review & Feature Merge (`feat/CHG-*` ➔ `main` or `release/vX.Y.Z`)**:
    - Update the Draft PR body with the Plan Execution Matrix (`[X]` vs `[O]`), KPI summary (`kpi_pr` including per-task rework metrics), and local verification/report summary (`reports/QUALITY_REPORT.md`, `reports/TRACEABILITY_MATRIX.md`, `reports/dashboard.html` inspected locally, without committing global `reports/*` to the feature PR), then run `gh pr ready` (GitHub) or `glab mr update --ready` (GitLab) to mark the PR/MR **Ready for Review** (triggering full CI verification) and present it to the human Tech Lead for review and approval (never auto-approve or auto-merge).
 2. **Canonical Baseline Promotion**: Once tasks in `tasks.md` are marked `COMPLETED` and approved, promote the change into the canonical baseline via MCP tool `sdd_integrate` (`npx aisdlc sdd integrate --auto`), which synchronizes the normative text and BDD Gherkin scenarios into `FR-*` / `UC-*` / `SEC-REQ-*` / `PRIV-REQ-*`, bumps minor SemVer when updating active specs, resyncs PDaC SHA-256 digests, promotes `FR-*` to `active`, links `CMP-*`, and archives the change under `specs/changes/completed/` (or `npx aisdlc sdd integrate --all` to consolidate all completed changes).
-3. **Semantic Versioning Promotion**:
-   - **Profile-Driven SemVer Mapping**: Bump the version of the software under development according to the increment's friction profile:
+3. **Semantic Versioning Promotion (MANDATORY)**:
+   - **Profile-Driven SemVer Mapping**: Before marking the PR Ready for Review (or during canonical baseline integration on a working branch), ALWAYS bump the version of the software under development in its version manifests (`package.json`, `packages/*/package.json`, `.aisdlc.json`, `*.csproj`, `pyproject.toml`, etc.) according to the increment's friction profile:
      - `patch` -> bump **Patch** digit (`x.y.Z`)
      - `minor` -> bump **Minor** digit (`x.Y.0`)
      - `major` -> bump **Major** digit (`X.0.0`)
