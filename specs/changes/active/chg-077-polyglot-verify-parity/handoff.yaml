@@ -1,0 +1,23 @@
+id: HOF-CHG-077-POLYGLOT-VERIFY-PARITY
+type: handoff
+title: Handoff Canónico de Arquitectura para Polyglot parity in verify traceability, verify quality, and test-discovery
+changeId: CHG-077-POLYGLOT-VERIFY-PARITY
+version: 1.0.0
+createdAt: '2026-11-27T16:16:19.241Z'
+subgraph:
+  requirements:
+    - FR-077-POLYGLOT-VERIFY-PARITY-001
+  useCases:
+    - UC-077-POLYGLOT-VERIFY-PARITY
+  components:
+    - CMP-077-POLYGLOT-VERIFY-PARITY
+citations:
+  - id: UC-077-POLYGLOT-VERIFY-PARITY
+    digest: sha256:7a29bf6021956f2e6338e9e24c8714518154df461e48aec22c1bf925ec7559a2
+    comment: Citación de use-case (Polyglot Parity for Traceability, Quality Gate, and Test Discovery Verifiers)
+  - id: FR-077-POLYGLOT-VERIFY-PARITY-001
+    digest: sha256:ad83e5210bf1d8e9134ff861a9f3542f510c82d0ded2ee7887769bb392fba2ea
+    comment: Requerimiento derivado de UC-077-POLYGLOT-VERIFY-PARITY
+  - id: CMP-077-POLYGLOT-VERIFY-PARITY
+    digest: sha256:2b664c0271ad4a984f1837898093a4d9439a3167e139b223c4db1e7b4340a565
+    comment: Componente arquitectónico que materializa la paridad polyglot en traceability, quality-gate y test-discovery
