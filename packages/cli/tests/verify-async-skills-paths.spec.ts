@@ -114,7 +114,7 @@ describe('CLI verify async, format helpers, and skills (Happy / Sad / Boundary)'
       const allClean = await runVerifyAllAsync({ root: tmpDir, json: true, requireCoverageReport: false });
       const allCleanJson = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0]));
       expect(allCleanJson.gate).toBe('all');
-      expect(allCleanJson.summary.totalGates).toBe(12);
+      expect(allCleanJson.summary.totalGates).toBe(13);
       expect(allClean).toBe(allCleanJson.success);
 
       // Malformed path: invalid --entropy throws explicit error in runVerifySecurityAsync

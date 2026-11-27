@@ -22,7 +22,16 @@ export type InstallableTool =
   | 'gosec'
   | 'dotnet'
   | 'spotbugs'
-  | 'eslint';
+  | 'eslint'
+  | 'tsc'
+  | 'mypy'
+  | 'golangci-lint'
+  | 'clippy'
+  | 'pmd'
+  | 'detekt'
+  | 'mvn'
+  | 'gradle'
+  | 'clang-tidy';
 
 export type SupportedPlatform = 'win32' | 'darwin' | 'linux';
 
@@ -142,6 +151,60 @@ export const TOOL_INSTALL_ALLOWLIST: Readonly<
     ['npm', ['install', '-g', 'eslint']],
     ['npm', ['install', '-g', 'eslint']]
   ),
+  tsc: freezePlatforms(
+    'tsc',
+    ['npm', ['install', '-g', 'typescript']],
+    ['npm', ['install', '-g', 'typescript']],
+    ['npm', ['install', '-g', 'typescript']]
+  ),
+  mypy: freezePlatforms(
+    'mypy',
+    ['pip', ['install', 'mypy']],
+    ['pip3', ['install', '--user', 'mypy']],
+    ['pip3', ['install', '--user', 'mypy']]
+  ),
+  'golangci-lint': freezePlatforms(
+    'golangci-lint',
+    ['go', ['install', 'github.com/golangci/golangci-lint/cmd/golangci-lint@latest']],
+    ['brew', ['install', 'golangci-lint']],
+    ['go', ['install', 'github.com/golangci/golangci-lint/cmd/golangci-lint@latest']]
+  ),
+  clippy: freezePlatforms(
+    'clippy',
+    ['rustup', ['component', 'add', 'clippy']],
+    ['rustup', ['component', 'add', 'clippy']],
+    ['rustup', ['component', 'add', 'clippy']]
+  ),
+  pmd: freezePlatforms(
+    'pmd',
+    ['scoop', ['install', 'pmd']],
+    ['brew', ['install', 'pmd']],
+    ['apt-get', ['install', '-y', 'pmd']]
+  ),
+  detekt: freezePlatforms(
+    'detekt',
+    ['scoop', ['install', 'detekt']],
+    ['brew', ['install', 'detekt']],
+    ['brew', ['install', 'detekt']]
+  ),
+  mvn: freezePlatforms(
+    'mvn',
+    ['winget', ['install', 'Apache.Maven']],
+    ['brew', ['install', 'maven']],
+    ['apt-get', ['install', '-y', 'maven']]
+  ),
+  gradle: freezePlatforms(
+    'gradle',
+    ['winget', ['install', 'Gradle.Gradle']],
+    ['brew', ['install', 'gradle']],
+    ['apt-get', ['install', '-y', 'gradle']]
+  ),
+  'clang-tidy': freezePlatforms(
+    'clang-tidy',
+    ['winget', ['install', 'LLVM.LLVM']],
+    ['brew', ['install', 'llvm']],
+    ['apt-get', ['install', '-y', 'clang-tidy']]
+  ),
 });
 
 export function getToolInstallSpec(
@@ -171,8 +234,12 @@ function isUntrustedPathEntry(entry: string, normalizedRoot?: string): boolean {
   if (!path.isAbsolute(trimmed)) {
     return true;
   }
-  if (normalizedRoot && normalizeForPathCompare(trimmed) === normalizedRoot) {
-    return true;
+  if (normalizedRoot) {
+    const normalizedEntry = normalizeForPathCompare(trimmed);
+    const rel = path.relative(normalizedRoot, normalizedEntry);
+    if (rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel))) {
+      return true;
+    }
   }
   return false;
 }
@@ -236,7 +303,11 @@ export function resolveWinCmdSpawn(
   if (args.some((arg) => WIN_CMD_META_RE.test(arg))) {
     return { command: binPath, args: [...args], rejectedMetachar: true };
   }
-  const comSpec = process.env.ComSpec || 'cmd.exe';
+  const rawComSpec = process.env.ComSpec?.trim();
+  const comSpec =
+    rawComSpec && path.win32.isAbsolute(rawComSpec) && !WIN_CMD_META_RE.test(rawComSpec)
+      ? rawComSpec
+      : path.win32.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'cmd.exe');
   return { command: comSpec, args: ['/d', '/s', '/c', binPath, ...args] };
 }
 
@@ -268,6 +339,18 @@ export function spawnTrustedBinary(
 }
 
 export function isToolInstalled(toolName: string, rootDir?: string): boolean {
+  if (toolName === 'clippy') {
+    if (resolveTrustedBinaryPath('cargo-clippy', rootDir) !== null) {
+      return true;
+    }
+    const cargoBin = resolveTrustedBinaryPath('cargo', rootDir);
+    if (!cargoBin) return false;
+    const res = spawnTrustedBinary(cargoBin, ['clippy', '--version'], {
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    return !res.error && res.status === 0;
+  }
   return resolveTrustedBinaryPath(toolName, rootDir) !== null;
 }
 

@@ -477,9 +477,10 @@ describe('verify.ts Secrets, SAST, Security & VerifyAll Composite Helpers', () =
       expect(Object.keys(syncTwelve)).toHaveLength(12);
       expect(syncTwelve.security.success).toBe(true);
 
-      const asyncTwelve = await collectAllGatesAsync({ requireCoverageReport: false }, tmpDir, true);
-      expect(Object.keys(asyncTwelve)).toHaveLength(12);
-      expect(asyncTwelve.security.success).toBe(true);
+      const asyncThirteen = await collectAllGatesAsync({ requireCoverageReport: false }, tmpDir, true);
+      expect(Object.keys(asyncThirteen)).toHaveLength(13);
+      expect(asyncThirteen.security.success).toBe(true);
+      expect(asyncThirteen.polyglotLinters.success).toBe(true);
     });
   });
 });

@@ -112,6 +112,8 @@ verifyCommand
   .option('-L, --max-lines <number>', 'Maximum lines per function threshold')
   .option('-m, --mode <mode>', 'Enforcement mode: STRICT or PERMISSIVE')
   .option('--no-vuln', 'Disable dependency vulnerability scanning')
+  .option('--skip-external-linters', 'Skip external polyglot linters and compilers')
+  .option('--no-install-prompt', 'Do not prompt to install missing external tools')
   .option('--json', 'Emit verification results in structured JSON format')
   .option('-F, --format <format>', 'Output format: text or json')
   .action(async (opts) => {
@@ -128,6 +130,8 @@ verifyCommand
       updateBaseline: opts.updateBaseline,
       baseline: opts.baseline,
       ratchet: opts.ratchet,
+      skipExternalLinters: opts.skipExternalLinters,
+      noInstallPrompt: opts.installPrompt === false,
     });
     process.exit(passed ? 0 : 1);
   });

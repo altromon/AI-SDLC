@@ -133,24 +133,31 @@ function buildToolPlan(ecosystems: ProjectEcosystem[], includeSemgrep: boolean):
   return tools;
 }
 
+const SAST_TOOL_ARG_TEMPLATES: Partial<Record<InstallableTool, readonly string[]>> = {
+  bandit: ['-f', 'sarif', '-o', '{SARIF}', '-r', '.'],
+  ruff: ['check', '--output-format', 'sarif', '--output-file', '{SARIF}', '.'],
+  gosec: ['-fmt', 'sarif', '-out', '{SARIF}', './...'],
+  dotnet: ['build', '/p:ErrorLog={SARIF},version=2.1'],
+  spotbugs: ['-sarif={SARIF}', '.'],
+  eslint: ['--format', '@microsoft/eslint-formatter-sarif', '-o', '{SARIF}', '.'],
+  semgrep: ['scan', '--config', 'auto', '--sarif', '--output', '{SARIF}'],
+  trivy: ['fs', '--format', 'sarif', '--output', '{SARIF}', '.'],
+  gitleaks: ['detect', '--no-git', '--report-format', 'sarif', '--report-path', '{SARIF}', '--source', '.'],
+};
+
 function getToolInvocation(
   tool: InstallableTool,
   tmpDir: string
 ): { args: string[]; sarifFile: string } {
-  const sarifName = `${tool}.sarif`;
-  const sarifFile = path.join(tmpDir, sarifName);
-  const argMap: Record<InstallableTool, string[]> = {
-    bandit: ['-f', 'sarif', '-o', sarifFile, '-r', '.'],
-    ruff: ['check', '--output-format', 'sarif', '--output-file', sarifFile, '.'],
-    gosec: ['-fmt', 'sarif', '-out', sarifFile, './...'],
-    dotnet: ['build', `/p:ErrorLog=${sarifFile},version=2.1`],
-    spotbugs: [`-sarif=${sarifFile}`, '.'],
-    eslint: ['--format', '@microsoft/eslint-formatter-sarif', '-o', sarifFile, '.'],
-    semgrep: ['scan', '--config', 'auto', '--sarif', '--output', sarifFile],
-    trivy: ['fs', '--format', 'sarif', '--output', sarifFile, '.'],
-    gitleaks: ['detect', '--no-git', '--report-format', 'sarif', '--report-path', sarifFile, '--source', '.'],
+  const template = SAST_TOOL_ARG_TEMPLATES[tool];
+  if (!template) {
+    throw new Error(`Unsupported SAST tool invocation: ${tool}`);
+  }
+  const sarifFile = path.join(tmpDir, `${tool}.sarif`);
+  return {
+    args: template.map((arg) => arg.replace('{SARIF}', sarifFile)),
+    sarifFile,
   };
-  return { args: argMap[tool], sarifFile };
 }
 
 function hasNonEmptyFile(filePath: string): boolean {
