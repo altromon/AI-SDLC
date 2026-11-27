@@ -25,6 +25,7 @@ supersedes: null
 superseded-by: null
 ---
 
+
 # CMP-076-GHERKIN-RESOLVER-MCP-PARITY: Gherkin Resolver Precision and MCP Check-Fix / Verify Parity
 
 ## 1. Responsabilidad y Arquitectura Hexagonal (Ports & Adapters)
@@ -110,4 +111,5 @@ sequenceDiagram
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-27 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-076-gherkin-resolver-mcp-parity | chg-076-gherkin-resolver-mcp-parity |
 | **1.0.0** | 2026-11-27 | agent-system-architect | Definición arquitectónica inicial para Issue #232: paridad MCP `sdd_check_fix`/`verify_gherkin`, `js-yaml` frontmatter, exclusiones de escaneo/tests y matching comment-aware | CHG-076-GHERKIN-RESOLVER-MCP-PARITY |

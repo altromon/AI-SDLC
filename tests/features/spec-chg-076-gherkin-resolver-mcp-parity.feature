@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-076-gherkin-resolver-mcp-parity/spec.md
+# Origen: specs/changes/completed/chg-076-gherkin-resolver-mcp-parity/spec.md
 # ID Requerimiento: SPEC-CHG-076-GHERKIN-RESOLVER-MCP-PARITY
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

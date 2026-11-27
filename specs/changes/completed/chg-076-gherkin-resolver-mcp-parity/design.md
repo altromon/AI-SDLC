@@ -19,13 +19,13 @@ contracts:
   - registerVerifyGherkinTool
 citations:
   - id: UC-076-GHERKIN-RESOLVER-MCP-PARITY
-    digest: sha256:fa5d5f641190ef27e83c0086d4f33f77b8115a314a1f29e1942c83519d4e265b
+    digest: sha256:69c4c6eaf8a05a35586e6dc2e18865f7fc82e0502593103dbb9fd3c6d6243db6
     comment: Citación de use-case (Gherkin Resolver Hardening and MCP Tool Parity for BDD Sync Verification)
   - id: FR-076-GHERKIN-RESOLVER-MCP-PARITY-001
-    digest: sha256:45e9911061d280296c975622593c8cb04ea535e1bfec938aaf0e4e54ad72da2c
+    digest: sha256:8ad290a17222e6ac442665ae21aed133640a35b8907933ee25bf733f4eb770af
     comment: Requerimiento derivado de UC-076-GHERKIN-RESOLVER-MCP-PARITY
   - id: CMP-076-GHERKIN-RESOLVER-MCP-PARITY
-    digest: sha256:b6aea8235853d21cb11cc6e649598799b8f8e572a24cc37f15b4a04de70c3fa9
+    digest: sha256:cc5c0a3a320820666041711fbf615dbd0d1f40d53ed51501cc77cc1cf4e48c52
     comment: Componente arquitectónico que materializa la precisión del resolver Gherkin y paridad MCP/CLI
 ---
 
