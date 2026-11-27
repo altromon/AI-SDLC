@@ -18,7 +18,7 @@ citations:
     digest: sha256:5ed9934c532217af1f5840417ecd22e1265b106b57f3942b68b528aed15fe582
     comment: Requisito funcional con la taxonomía estricta patch | minor | major y rechazo de valores legados
   - id: CMP-CORE
-    digest: sha256:38e69c48be04bcaf37bbcdbbda3c5900dea6e4d5acba8150fc2767986d328386
+    digest: sha256:8f8f9ac9a4fd1d1262d0bc32451926fdc5034206ef2a489ec09bb3e1261e9814
     comment: Componente arquitectónico central que implementa tipos, verificadores, adaptadores y plantillas
 ---
 

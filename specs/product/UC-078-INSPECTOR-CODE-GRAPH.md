@@ -2,7 +2,7 @@
 id: UC-078-INSPECTOR-CODE-GRAPH
 type: use-case
 title: Element Inspector Integration with CodeGraphService for Code-Level Traceability
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 primary-actor: ACT-AI-AGENT
@@ -14,6 +14,7 @@ governed-by:
 supersedes: null
 superseded-by: null
 ---
+
 
 
 # UC-078-INSPECTOR-CODE-GRAPH: Element Inspector Integration with CodeGraphService for Code-Level Traceability

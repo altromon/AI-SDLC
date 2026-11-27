@@ -2,7 +2,7 @@
 id: FR-078-INSPECTOR-CODE-GRAPH-001
 type: requirement
 title: inspector-code-graph
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 category: functional
@@ -18,6 +18,7 @@ cucumber-tags:
 supersedes: null
 superseded-by: null
 ---
+
 
 
 # FR-078-INSPECTOR-CODE-GRAPH-001: inspector-code-graph

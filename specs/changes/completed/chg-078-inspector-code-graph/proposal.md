@@ -1,17 +1,18 @@
 ---
 id: CHG-078-INSPECTOR-CODE-GRAPH
 type: spec-change-proposal
-title: "Integrate CodeGraphService into inspectElement"
-status: draft
-author: "agent-system-architect"
+title: Integrate CodeGraphService into inspectElement
+status: applied
+author: agent-system-architect
 citations:
   - id: UC-078-INSPECTOR-CODE-GRAPH
-    digest: sha256:3e463fa12654f31007dbe2cdcf15b681c2b3bae68b808af662a0a9b0b24a72d5
+    digest: sha256:1ecb59635d11c47b34e941f0bc4adbf2f7c862052e305c143098408437b4c3fa
     comment: Citación de use-case (Element Inspector Integration with CodeGraphService for Code-Level Traceability)
   - id: FR-078-INSPECTOR-CODE-GRAPH-001
-    digest: sha256:4c5d920403968cd472473058536d4a3ce6f6c8b04e71c83432af4097d808bc18
+    digest: sha256:528ed7c0b8262da94dd0de24106cec3156ff76bdddcaa8ce8a3d4416d5df88ab
     comment: Requerimiento derivado de UC-078-INSPECTOR-CODE-GRAPH
 ---
+
 
 # Propuesta de Cambio: CHG-078-INSPECTOR-CODE-GRAPH
 

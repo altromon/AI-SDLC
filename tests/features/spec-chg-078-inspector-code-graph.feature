@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-078-inspector-code-graph/spec.md
+# Origen: specs/changes/completed/chg-078-inspector-code-graph/spec.md
 # ID Requerimiento: SPEC-CHG-078-INSPECTOR-CODE-GRAPH
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

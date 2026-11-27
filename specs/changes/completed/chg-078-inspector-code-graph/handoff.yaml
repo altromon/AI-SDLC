@@ -15,17 +15,17 @@ subgraph:
     - CMP-MCP-SERVER
 citations:
   - id: UC-078-INSPECTOR-CODE-GRAPH
-    digest: sha256:3e463fa12654f31007dbe2cdcf15b681c2b3bae68b808af662a0a9b0b24a72d5
+    digest: sha256:1ecb59635d11c47b34e941f0bc4adbf2f7c862052e305c143098408437b4c3fa
     comment: Citación de use-case (Element Inspector Integration with CodeGraphService for Code-Level Traceability)
   - id: FR-078-INSPECTOR-CODE-GRAPH-001
-    digest: sha256:4c5d920403968cd472473058536d4a3ce6f6c8b04e71c83432af4097d808bc18
+    digest: sha256:528ed7c0b8262da94dd0de24106cec3156ff76bdddcaa8ce8a3d4416d5df88ab
     comment: Requerimiento derivado de UC-078-INSPECTOR-CODE-GRAPH
   - id: CMP-CORE
-    digest: sha256:38e69c48be04bcaf37bbcdbbda3c5900dea6e4d5acba8150fc2767986d328386
+    digest: sha256:8f8f9ac9a4fd1d1262d0bc32451926fdc5034206ef2a489ec09bb3e1261e9814
     comment: Componente arquitectónico central (@aisdlc/core)
   - id: CMP-CLI
-    digest: sha256:60ab9d284f392603a84c17dfa55afb53fcdd390df15f5cb4109ac562c660279e
+    digest: sha256:8dc7d58394a3e413a15f06b2eaa6517964e41c351171bd68e6fa405c3fe538a7
     comment: Adaptador primario CLI (@aisdlc/cli)
   - id: CMP-MCP-SERVER
-    digest: sha256:e1b1e1d531224a0ca9b4237e6a39ed684241719905b04c4b7f21382359093a7b
+    digest: sha256:30d517313e7f48087d5178f61e716ca72bc489eb4ed6599fc342e004e9723dd9
     comment: Adaptador primario MCP (@aisdlc/mcp)

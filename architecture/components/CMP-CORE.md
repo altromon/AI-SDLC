@@ -64,6 +64,7 @@ superseded-by: null
 ---
 
 
+
 # CMP-CORE: Motor Central AI-SDLC
 
 ## 1. Responsabilidad y Límites
@@ -84,4 +85,5 @@ graph TD
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-27 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-078-inspector-code-graph | chg-078-inspector-code-graph |
 | **1.0.0** | 2026-11-17 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-061-increment-profile-and-semver-guard | chg-061-increment-profile-and-semver-guard |
