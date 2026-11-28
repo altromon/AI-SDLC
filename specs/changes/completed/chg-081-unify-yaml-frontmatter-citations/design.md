@@ -10,10 +10,10 @@ architecture-component: "CMP-081-UNIFY-YAML-FRONTMATTER-CITATIONS"
 enclave: "SEC-ENC-DMZ"
 status: proposed
 contracts:
-  - "schemas/*.schema.json#citations"
-  - "templates/**/*.template.md#citations"
-  - "packages/core/src/verifiers/pdac-graph.ts#extractCitations"
-  - "packages/core/src/verifiers/pdac-graph.ts#updateCitationsInContent"
+  - "extractCitations"
+  - "updateCitationsInContent"
+  - "isCodeFenceLine"
+  - "processCitationBlockLine"
 citations:
   - id: UC-081-UNIFY-YAML-FRONTMATTER-CITATIONS
     digest: sha256:a2a242d3050d7627f9e7d010f69627b5e3cb704cc4b46f0ee0531e4ce8130397

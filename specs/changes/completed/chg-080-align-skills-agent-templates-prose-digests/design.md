@@ -10,13 +10,8 @@ architecture-component: "CMP-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS"
 enclave: "SEC-ENC-DMZ"
 status: draft
 contracts:
-  - "ProseCitationMatch"
-  - "extractProseCitations"
-  - "updateProseCitationLine"
   - "extractCitations"
   - "updateCitationsInContent"
-  - "collectCandidateFilesForSync"
-  - "processPdacFile"
   - "buildGherkinViolations"
   - "printGherkinVerifyConsole"
   - "buildGherkinFailedGate"
