@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm --filter @aisdlc/core test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
     satisfies-requirements: &ref_0
@@ -43,7 +43,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
     satisfies-requirements: *ref_0
@@ -60,7 +60,7 @@ tasks:
       method: quality-gate
       command-or-criteria: pnpm test && pnpm run typecheck && pnpm run verify:all
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
     satisfies-requirements: *ref_0

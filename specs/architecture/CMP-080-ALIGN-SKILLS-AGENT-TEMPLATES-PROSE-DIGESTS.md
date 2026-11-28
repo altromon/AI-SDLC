@@ -25,6 +25,7 @@ supersedes: null
 superseded-by: null
 ---
 
+
 # CMP-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS: Align Skills, Agent Templates, CLI Remediation, Prose Citation Digests, and CHG-070 Integration
 
 ## 1. Responsabilidad y Arquitectura Hexagonal (Ports & Adapters)
@@ -111,4 +112,5 @@ sequenceDiagram
 
 | Versión | Fecha | Autor / Agent | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-28 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-080-align-skills-agent-templates-prose-digests | chg-080-align-skills-agent-templates-prose-digests |
 | **1.0.0** | 2026-11-28 | agent-system-architect | Definición arquitectónica inicial para CHG-080 (Issue #235): citas en prosa PDaC, alineación de plantillas/skills/remediación CLI y cierre de CHG-070 | CHG-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS |

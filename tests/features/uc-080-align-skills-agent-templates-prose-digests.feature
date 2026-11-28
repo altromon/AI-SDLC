@@ -13,8 +13,8 @@ Feature: Align Skills, Agent Templates, CLI Remediation, Prose Citation Digests,
   So that polyglot BDD commands, PDaC prose digests, and active change records remain accurate and synchronized
 
   @nominal
-  Scenario: Templates, skills, CLI remediation, prose citation sync, and CHG-070 integration are aligned
-    Given agent templates, skill references, rules, IDE mirrors, and CLI verify/check remediation builders are updated for optional "[--lang <ts|py|go|rs|cs>]" and "--features-only"
+  Scenario: Templates, skills, rules, IDE mirrors, CLI remediation, prose citation sync, and CHG-070 integration are aligned
+    Given agent templates, skill references, ".agent/rules/ai-sdlc-testing.md", IDE mirrors, and CLI verify/check remediation builders are updated for optional "[--lang <ts|py|go|rs|cs>]" and "--features-only"
     And "pdac-graph.ts" supports prose "> **Upstream Citation**:" SHA-256 detection and synchronization
     When "npx aisdlc sync", CLI Gherkin remediation builders, and "pdac-graph.ts" citation verification/sync run
     Then templates, skills, rules, IDE mirrors, and CLI messages document optional "[--lang <lang>]" and "--features-only"

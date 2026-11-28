@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-080-align-skills-agent-templates-prose-digests/spec.md
+# Origen: specs/changes/completed/chg-080-align-skills-agent-templates-prose-digests/spec.md
 # ID Requerimiento: SPEC-CHG-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

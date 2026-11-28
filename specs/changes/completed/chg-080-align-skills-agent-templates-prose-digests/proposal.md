@@ -2,16 +2,17 @@
 id: CHG-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
 type: spec-change-proposal
 title: Align Skills, Agent Templates, CLI Remediation, Prose Citation Digests, and CHG-070 Integration
-status: draft
+status: applied
 author: agent-system-architect
 citations:
   - id: UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
-    digest: sha256:398c0c58e71bb64d668861f285eadc61dd8174a9f84aabd04bc68ec3f918c662
+    digest: sha256:d316c33ebfd70736dce71bf7e0e574aec86bd2385170b8c1a488549e342729fd
     comment: Citación de use-case (Align Skills, Agent Templates, CLI Remediation, Prose Citation Digests, and CHG-070 Integration)
   - id: FR-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS-001
-    digest: sha256:9333544ee26160fd0542238029b20799759399e9126e87e17256ea7626d1952f
+    digest: sha256:01c6157970be0d925443177456aa3007eb22e4c1af07217121451f432598530d
     comment: Requerimiento derivado de UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
 ---
+
 
 # Propuesta de Cambio: CHG-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
 

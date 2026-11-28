@@ -149,7 +149,7 @@ function parseDigestValue(line: string): string {
   return dig;
 }
 
-interface CitationParserState {
+export interface CitationParserState {
   inCitations: boolean;
   currentTarget: string | null;
   currentDigest?: string;
@@ -181,11 +181,11 @@ function processCitationLine(
   }
 }
 
-function isCodeFenceLine(trimmedLine: string): boolean {
+export function isCodeFenceLine(trimmedLine: string): boolean {
   return trimmedLine.startsWith('```') || trimmedLine.startsWith('~~~');
 }
 
-function processNonFenceLine(
+export function processNonFenceLine(
   line: string,
   state: CitationParserState,
   sourceFile: string,
@@ -462,13 +462,13 @@ function tryUpdateDigestLine(
   };
 }
 
-interface ContentUpdateState {
+export interface ContentUpdateState {
   inCitations: boolean;
   currentTarget: string | null;
   inCodeFence: boolean;
 }
 
-function replaceProseDigest(rawLine: string, newDigest: string): { line: string; changed: boolean } {
+export function replaceProseDigest(rawLine: string, newDigest: string): { line: string; changed: boolean } {
   const line = rawLine.replace(
     /(SHA-256:\s*`)([^`\n]+)(`)/i,
     (_m, p1: string, _old: string, p3: string) => `${p1}${newDigest}${p3}`
@@ -507,7 +507,7 @@ function tryUpdateCitationDigest(
   return { line: update.newLine, changed: update.changed };
 }
 
-function processCitationBlockLine(
+export function processCitationBlockLine(
   rawLine: string,
   trimmed: string,
   state: ContentUpdateState,

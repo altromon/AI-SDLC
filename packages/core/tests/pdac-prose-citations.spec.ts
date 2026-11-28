@@ -218,6 +218,170 @@ describe('@FR-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS-001: PDaC prose cit
       expect(res.updatedContent).toContain(`> **Upstream Citation**: \`UC-PROSE-001\` (SHA-256: \`${VALID_HEX}\`)`);
       expect(res.updatedContent).toContain(`\`\`\`md\n> **Upstream Citation**: \`UC-PROSE-001\` (SHA-256: \`${ZERO_HEX}\`)\n\`\`\``);
     });
+
+    it('preserves ~~~md tilde fences, updates multiple prose citations in one file, and preserves CRLF line endings', () => {
+      const baselineMap = new Map<string, pdacGraph.PdacNode>([
+        [
+          'UC-PROSE-001',
+          {
+            id: 'UC-PROSE-001',
+            type: 'use-case',
+            title: 'Prose 1',
+            filePath: 'specs/product/UC-PROSE-001.md',
+            digest: VALID_HEX,
+            rawDigest: `sha256:${VALID_HEX}`,
+          },
+        ],
+        [
+          'UC-PROSE-002',
+          {
+            id: 'UC-PROSE-002',
+            type: 'use-case',
+            title: 'Prose 2',
+            filePath: 'specs/product/UC-PROSE-002.md',
+            digest: OTHER_HEX,
+            rawDigest: `sha256:${OTHER_HEX}`,
+          },
+        ],
+      ]);
+
+      const content = [
+        '# FR-080-MULTI',
+        `> **Upstream Citation**: \`UC-PROSE-001\` (SHA-256: \`${ZERO_HEX}\`)`,
+        '~~~md',
+        `> **Upstream Citation**: \`UC-PROSE-001\` (SHA-256: \`${ZERO_HEX}\`)`,
+        '~~~',
+        `> **Upstream Citation**: \`UC-PROSE-002\` (SHA-256: \`${ZERO_HEX}\`)`,
+        '',
+      ].join('\r\n');
+
+      const details: pdacGraph.PdacSyncDetail[] = [];
+      const res = pdacGraph.updateCitationsInContent(content, baselineMap, 'specs/product/FR-080-MULTI.md', details);
+      expect(res.changed).toBe(true);
+      expect(details).toHaveLength(2);
+      expect(res.updatedContent).toBe(
+        [
+          '# FR-080-MULTI',
+          `> **Upstream Citation**: \`UC-PROSE-001\` (SHA-256: \`${VALID_HEX}\`)`,
+          '~~~md',
+          `> **Upstream Citation**: \`UC-PROSE-001\` (SHA-256: \`${ZERO_HEX}\`)`,
+          '~~~',
+          `> **Upstream Citation**: \`UC-PROSE-002\` (SHA-256: \`${OTHER_HEX}\`)`,
+          '',
+        ].join('\r\n')
+      );
+    });
+  });
+
+  describe('isCodeFenceLine', () => {
+    it('detects backtick and tilde fences while rejecting normal lines', () => {
+      expect(pdacGraph.isCodeFenceLine('```')).toBe(true);
+      expect(pdacGraph.isCodeFenceLine('```markdown')).toBe(true);
+      expect(pdacGraph.isCodeFenceLine('~~~')).toBe(true);
+      expect(pdacGraph.isCodeFenceLine('~~~md')).toBe(true);
+      expect(pdacGraph.isCodeFenceLine('> **Upstream Citation**: `UC-080`')).toBe(false);
+      expect(pdacGraph.isCodeFenceLine('plain text')).toBe(false);
+    });
+  });
+
+  describe('processNonFenceLine', () => {
+    it('tracks YAML citations state and extracts prose citations outside citations block', () => {
+      const state: pdacGraph.CitationParserState = { inCitations: false, currentTarget: null };
+      const citations: pdacGraph.CitationEntry[] = [];
+
+      pdacGraph.processNonFenceLine('citations:', state, 'FR-080.md', citations);
+      expect(state.inCitations).toBe(true);
+
+      pdacGraph.processNonFenceLine('- id: UC-YAML-01', state, 'FR-080.md', citations);
+      pdacGraph.processNonFenceLine(`digest: sha256:${VALID_HEX}`, state, 'FR-080.md', citations);
+      pdacGraph.processNonFenceLine('---', state, 'FR-080.md', citations);
+      expect(state.inCitations).toBe(false);
+
+      pdacGraph.processNonFenceLine(
+        `> **Upstream Citation**: \`UC-PROSE-01\` (SHA-256: \`${OTHER_HEX}\`)`,
+        state,
+        'FR-080.md',
+        citations
+      );
+      pdacGraph.processNonFenceLine('Regular paragraph', state, 'FR-080.md', citations);
+
+      expect(citations).toEqual([
+        { targetId: 'UC-YAML-01', expectedDigest: VALID_HEX, anchor: undefined, sourceFile: 'FR-080.md' },
+        { targetId: 'UC-PROSE-01', expectedDigest: OTHER_HEX, sourceFile: 'FR-080.md' },
+      ]);
+    });
+  });
+
+  describe('replaceProseDigest', () => {
+    it('replaces the digest inside SHA-256 backticks and reports whether the line changed', () => {
+      const raw = `> **Upstream Citation**: \`UC-080\` (SHA-256: \`${ZERO_HEX}\`)`;
+      expect(pdacGraph.replaceProseDigest(raw, VALID_HEX)).toEqual({
+        line: `> **Upstream Citation**: \`UC-080\` (SHA-256: \`${VALID_HEX}\`)`,
+        changed: true,
+      });
+      expect(pdacGraph.replaceProseDigest(raw, ZERO_HEX)).toEqual({
+        line: raw,
+        changed: false,
+      });
+      expect(pdacGraph.replaceProseDigest('no sha token here', VALID_HEX)).toEqual({
+        line: 'no sha token here',
+        changed: false,
+      });
+    });
+  });
+
+  describe('processCitationBlockLine', () => {
+    it('updates YAML citation digests, tracks currentTarget, and exits citations block on terminator', () => {
+      const baselineMap = new Map<string, pdacGraph.PdacNode>([
+        [
+          'UC-080-YAML',
+          {
+            id: 'UC-080-YAML',
+            type: 'use-case',
+            title: 'YAML Target',
+            filePath: 'specs/product/UC-080-YAML.md',
+            digest: VALID_HEX,
+            rawDigest: `sha256:${VALID_HEX}`,
+          },
+        ],
+      ]);
+      const state: pdacGraph.ContentUpdateState = {
+        inCitations: true,
+        currentTarget: null,
+        inCodeFence: false,
+      };
+      const details: pdacGraph.PdacSyncDetail[] = [];
+
+      const idRes = pdacGraph.processCitationBlockLine(
+        '  - id: UC-080-YAML',
+        '- id: UC-080-YAML',
+        state,
+        baselineMap,
+        'FR-080.md',
+        details
+      );
+      expect(idRes).toEqual({ line: '  - id: UC-080-YAML', changed: false });
+      expect(state.currentTarget).toBe('UC-080-YAML');
+
+      const digRes = pdacGraph.processCitationBlockLine(
+        `    digest: sha256:${ZERO_HEX}`,
+        `digest: sha256:${ZERO_HEX}`,
+        state,
+        baselineMap,
+        'FR-080.md',
+        details
+      );
+      expect(digRes).toEqual({
+        line: `    digest: sha256:${VALID_HEX}`,
+        changed: true,
+      });
+      expect(details).toHaveLength(1);
+
+      const termRes = pdacGraph.processCitationBlockLine('---', '---', state, baselineMap, 'FR-080.md', details);
+      expect(termRes).toEqual({ line: '---', changed: false });
+      expect(state.inCitations).toBe(false);
+      expect(state.currentTarget).toBeNull();
+    });
   });
 
   describe('collectCandidateFilesForSync & processPdacFile via verifyPdacGraph / syncPdacDigests', () => {

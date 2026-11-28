@@ -2,7 +2,7 @@
 id: FR-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS-001
 type: requirement
 title: align-skills-agent-templates-prose-digests
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 category: functional
@@ -21,9 +21,10 @@ superseded-by: null
 
 
 
+
 # FR-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS-001: align-skills-agent-templates-prose-digests
 
-> **Upstream Citation**: `UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS` (`specs/product/UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS.md`, Unix LF SHA-256: `8d69497ee7c057eee98178d4ec938f8ef2a583da089c485f013353f7a9b1bd5c`)
+> **Upstream Citation**: `UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS` (`specs/product/UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS.md`, Unix LF SHA-256: `d316c33ebfd70736dce71bf7e0e574aec86bd2385170b8c1a488549e342729fd`)
 
 ## 1. Normative Specification
 1. **Optional `--lang` in `aisdlc gherkin scaffold` and `--features-only` in `aisdlc verify gherkin` Across Templates, Rules, Skills, and IDE Mirrors**:
@@ -44,7 +45,7 @@ Align agent templates, skill references, testing rules, IDE mirrors, and CLI rem
 ## 2. Acceptance Criteria in Gherkin Format (Cucumber)
 
 ```gherkin
-@FR-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS-001 @automated @regression
+@FR-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS-001 @functional @automated
 Feature: Align Skills, Agent Templates, CLI Remediation, Prose Citation Digests, and CHG-070 Integration
   As a developer or AI agent using AI-SDLC
   I want templates, skills, rules, CLI remediation messages, prose citation verification/sync, and CHG-070 integration to be aligned
@@ -52,30 +53,30 @@ Feature: Align Skills, Agent Templates, CLI Remediation, Prose Citation Digests,
 
   @nominal
   Scenario: Templates, skills, rules, IDE mirrors, CLI remediation, prose citation sync, and CHG-070 integration are aligned
-    Given agent templates, skill references, ".agent/rules/ai-sdlc-testing.md", IDE mirrors, and CLI verify/check remediation builders are updated
-    And "pdac-graph.ts" detects, verifies, and synchronizes Markdown prose "> **Upstream Citation**:" SHA-256 digests
+    Given agent templates, skill references, ".agent/rules/ai-sdlc-testing.md", IDE mirrors, and CLI verify/check remediation builders are updated for optional "[--lang <ts|py|go|rs|cs>]" and "--features-only"
+    And "pdac-graph.ts" supports prose "> **Upstream Citation**:" SHA-256 detection and synchronization
     When "npx aisdlc sync", CLI Gherkin remediation builders, and "pdac-graph.ts" citation verification/sync run
-    Then templates, skills, rules, IDE mirrors, and CLI messages document optional "[--lang <ts|py|go|rs|cs>]" (or "[--lang <lang>]") and "--features-only"
-    And prose citations in "FR-069-LANGUAGE-AGNOSTIC-CODING-RULES-001.md" and "FR-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX-001.md" have synchronized Unix LF SHA-256 digests
+    Then templates, skills, rules, IDE mirrors, and CLI messages document optional "[--lang <lang>]" and "--features-only"
+    And prose citations in "FR-069-LANGUAGE-AGNOSTIC-CODING-RULES-001.md" and "FR-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX-001.md" have valid synchronized SHA-256 digests
     And "TSK-070-01" and "TSK-070-02" are marked "COMPLETED" and "CHG-070" is integrated without committing global "reports/*" files
 
   @boundary
   Scenario Outline: Prose citation extraction and synchronization handle boundary digest states
-    Given a Markdown specification containing "<citation_state>"
-    When "extractCitations" and "updateCitationsInContent" in "pdac-graph.ts" run on the specification
+    Given a Markdown specification with "<citation_state>"
+    When "extractCitations" and "updateCitationsInContent" in "pdac-graph.ts" process the file
     Then the outcome satisfies "<expected_behavior>"
 
     Examples:
       | citation_state                                                | expected_behavior                                                      |
-      | prose Upstream Citation with zeroed 0000...0000 SHA-256       | citation is extracted and synchronized to the upstream Unix LF SHA-256 |
+      | prose Upstream Citation with zeroed 0000...0000 SHA-256       | citation is detected and synchronized to the upstream Unix LF SHA-256  |
       | prose Upstream Citation with stale mismatched 64-hex SHA-256  | verification flags mismatch and sync updates the digest in place       |
       | both YAML citations block and prose Upstream Citation present | both citation forms are extracted and synchronized without duplication |
 
   @invalid
-  Scenario: Prose citation referencing a missing upstream file or invalid digest fails traceability verification cleanly
-    Given a Markdown specification with a prose "> **Upstream Citation**:" referencing a nonexistent upstream file or invalid digest
-    When "pdac-graph.ts" runs traceability verification
-    Then verification reports a structured traceability violation without throwing an unhandled exception
+  Scenario: Prose citation referencing a missing or invalid upstream file fails traceability verification
+    Given a Markdown specification with a prose "> **Upstream Citation**:" pointing to a nonexistent upstream file or invalid digest
+    When "pdac-graph.ts" verifies PDaC traceability
+    Then verification reports a structured traceability error without crashing
 ```
 
 ---
