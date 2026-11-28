@@ -67,7 +67,7 @@ In the age of AI-assisted engineering, the speed of code authoring is no longer 
   ├── Bounded Increments (Changes: Proposal, Spec, Design, Tasks)
   ├── Gherkin Acceptance Criteria & Cucumber BDD Tests
   ├── AI Agent Authoring + Unit & Mitigation Tests
-  └── Deterministic CI/CD Gates: 12 Quality Gates (AST, SAST, PII-SAST, SCA, SBOM, RTM)
+  └── Deterministic CI/CD Gates: 13 Quality Gates (AST, SAST, PII-SAST, SCA, SBOM, RTM, Linters)
 ```
 
 ---
@@ -87,7 +87,7 @@ AI-SDLC/
 │   └── cli/                                  # @aisdlc/cli: Binary CLI executable (npx aisdlc)
 │
 ├── process/                                  # Normative Process Specification
-│   ├── README.md                             # Process index, 13 agents workflow, and 12 Quality Gates
+│   ├── README.md                             # Process index, 13 agents workflow, and 13 Quality Gates
 │   ├── 00_principles_and_manifesto.md        # Manifesto and core principles
 │   ├── 01_governance_and_roles.md            # Human-Agent RACI matrix and authorization levels
 │   ├── 02_product_definition.md              # ProductShape guide (Actors, Use Cases, Requirements)
@@ -96,7 +96,7 @@ AI-SDLC/
 │   ├── 04b_data_protection_and_privacy.md    # Privacy-by-Design as Code (LINDDUN, GDPR, DATA-ASSET, PRIV-ROPA, PRIV-REQ)
 │   ├── 05_architecture_arc42_nafv4.md        # arc42 structure augmented with NAF v4 grid
 │   ├── 06_spec_driven_development.md         # SDD delivery lifecycle citing Product and Architecture
-│   ├── 07_security_and_license_validation.md # CI/CD Gates (12 Gates): SAST, Secrets, Privacy PII-SAST, SBOM, and Licenses
+│   ├── 07_security_and_license_validation.md # CI/CD Gates (13 Gates): SAST, Secrets, Privacy PII-SAST, SBOM, Licenses & Linters
 │   ├── 08_citation_contract_and_drift.md     # Anti-drift cryptographic citation protocol
 │   ├── 09_agent_protocols.md                 # Prompts, skill contracts, and guardrails for LLMs (13 Agents)
 │   ├── 10_quality_management_and_release_gates.md # Coding rules, Cyclomatic Complexity, and Release Gates
@@ -185,7 +185,7 @@ pnpm run git:checkout TSK-001 --streamlined
 pnpm run check:fix
 # or via npx: npx aisdlc check --fix
 
-# 6. Execute consolidated CI/CD suite (all 12 quality and governance gates)
+# 6. Execute consolidated CI/CD suite (all 13 quality and governance gates)
 pnpm run verify:all
 # or via npx: npx aisdlc verify all
 # or with structured JSON output for AI agents / CI pipelines: npx aisdlc verify all --json
@@ -214,7 +214,7 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc git plan` | `pnpm run git:plan` | **Git Planning** | Renders visual branch hierarchy tree before starting work |
 | `npx aisdlc git checkout <TSK-ID> [--streamlined]` | `pnpm run git:checkout <TSK-ID>` | **Git Branching** | Resolves version and switches to feature branch (`feat/CHG-*`) by default, or cascade-creates 4-tier hierarchy |
 | `npx aisdlc git validate <branch>` | `pnpm run git:validate <branch>` | **Git Governance** | Validates strict naming rules for any branch according to its Tier (1 to 4) |
-| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Unified Pre-Flight** | Syncs Gherkin to `.feature`, updates PDaC SHA-256 digests, audits security & privacy, and checks all 12 Quality Gates |
+| `npx aisdlc check [--fix]` | `pnpm run check` / `check:fix` | **Unified Pre-Flight** | Syncs Gherkin to `.feature`, updates PDaC SHA-256 digests, audits security & privacy, and checks all 13 Quality Gates |
 | `npx aisdlc verify schemas [--json]` | `pnpm run verify:schemas` | **Structural Compliance** | Validates Markdown artifacts and `handoff.yaml` sidecars against canonical JSON schemas (Draft 2020-12, `--json`) |
 | `npx aisdlc verify pdac [--json]` | `pnpm run verify:pdac` | **Cryptographic Integrity** | Detects drift in PDaC graph comparing SHA-256 hashes (`--json`) |
 | `npx aisdlc verify quality [--json]` | `pnpm run verify:quality` | **Code Release Gate** | Evaluates Cyclomatic Complexity ($\le 10$), Cognitive ($\le 15$), and Maintainability ($\ge 50$) with `--json` |
@@ -228,7 +228,7 @@ npx aisdlc sdd integrate --auto
 | `npx aisdlc verify governance [--json]` | `pnpm run verify:governance` | **Task Governance** | Audits task autonomy modes (`AUTONOMOUS`, `HUMAN_REVIEW_PLAN`, etc., supports `--json`) |
 | `npx aisdlc verify licenses [options]` | `pnpm run verify:licenses` | **IP / OSS Governance & SCA** | Dynamic dependency scan, CycloneDX 1.5 SBOM, vulnerability threshold audit (`--vuln`), and legal attribution against `license-policy.yaml` (`--json`) |
 | `npx aisdlc sdd verify` | - | **SDD Compliance** | Audits active changes for specification compliance and valid sidecars |
-| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 12 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
+| `npx aisdlc verify all [--json]` | `pnpm run verify:all` | **Consolidated CI/CD Suite** | Evaluates all 13 Quality Gates (supports deterministic `--json` without ANSI for autonomous agents) |
 | `npx tsx scripts/verify-checkpoint-1.ts [--with-licenses]` | `pnpm run verify:checkpoint-1` | **Checkpoint 1 Pre-Code Gates** | Runs shift-left deterministic gates before coding: `schemas` (8), `duplicates` (9), `gherkin` (4), `pdac` (7), `governance` (3), `friction` (10), `privacy` (12), `secrets` (11), and optional `licenses` (6) |
 | `npx aisdlc kpi pr [options]` | `pnpm run kpi:pr` | **Pull Request Metrics** | Computes aggregated KPI table (time, tokens, authorship, and task-level rework & churn breakdown) for PRs (supports `--json`) |
 | `npx aisdlc sdd integrate [--auto]` | - | **Baseline Promotion** | Promotes requirements to `active`, links architecture, marks proposal `applied`, and archives change |
@@ -557,12 +557,12 @@ Verify code meets quality thresholds in `quality-policy.yaml`:
    - **Architecture (Midstream)**: arc42 / NAF v4 views (`CMP-*`, `ADR-*`, `SEC-ENC-*`).
    - **Testing (Downstream)**: BDD/Gherkin suites (`.feature`) and unit tests.
 
-2. **Consolidated CI/CD Suite Execution (All 11 Quality Gates)**:
+2. **Consolidated CI/CD Suite Execution (All 13 Quality Gates)**:
    ```bash
    pnpm run verify:all
    # or: npx aisdlc verify all
    ```
-   *Gates evaluated*: 1) Quality Gate (AST Complexity & Cleanliness), 2) 360° Traceability (RTM), 3) Task Governance & Autonomy, 4) Test Coverage (Reqs & Tasks), 5) BDD Gherkin Synchronization, 6) Open Source Licenses & SCA, 7) PDaC Cryptographic Integrity & Drift, 8) JSON Schemas Compliance (including `handoff.yaml` sidecars), 9) Duplicate Check (Shift-Left Gate), 10) Progressive Friction (Risk Profile Gates), 11) Shift-Left Security (Secret Scanning & SAST).
+   *Gates evaluated*: 1) Quality Gate (AST Complexity & Cleanliness), 2) 360° Traceability (RTM), 3) Task Governance & Autonomy, 4) Test Coverage (Reqs & Tasks), 5) BDD Gherkin Synchronization, 6) Open Source Licenses & SCA, 7) PDaC Cryptographic Integrity & Drift, 8) JSON Schemas Compliance (including `handoff.yaml` sidecars), 9) Duplicate Check (Shift-Left Gate), 10) Progressive Friction (Risk Profile Gates), 11) Shift-Left Security (Secret Scanning & SAST), 12) Data Protection & Privacy (GDPR/PII-SAST), 13) Polyglot Linters & Compilers.
 
 3. **Pull Request and Human Approval**:
    - PR is opened from task branch to feature branch, and onward to release branch.
@@ -786,7 +786,7 @@ AI-SDLC bundles an official **Model Context Protocol (MCP)** server in `@aisdlc/
 
 ### 1. High-Level Workflows
 - **`new`**: Initializes a project or adopts AI-SDLC in an existing repo, configuring folders, schemas, policies (`quality-policy.yaml`, `license-policy.yaml`, `privacy-policy.yaml`), and CI templates (`github`, `gitlab`, `azure`, `bitbucket`).
-- **`verify`**: Runs all 12 deterministic Quality Gates simultaneously (`quality`, `traceability`, `governance`, `testing`, `gherkin`, `licenses`, `pdac`, `schemas`, `duplicates`, `friction`, `security`, `privacy`).
+- **`verify`**: Runs all 13 deterministic Quality Gates simultaneously (`quality`, `traceability`, `governance`, `testing`, `gherkin`, `licenses`, `pdac`, `schemas`, `duplicates`, `friction`, `security`, `privacy`, `linters`).
 - **`report`**: Concurrently generates interactive HTML dashboard (`reports/dashboard.html`) and Markdown quality report (`reports/QUALITY_REPORT.md`).
 
 ### 2. Complete Tools (24 Tools) and Resources (6 Resources)
