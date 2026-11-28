@@ -6,7 +6,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { extractCitations, updateCitationsInContent, type PdacNode, type PdacSyncDetail } from '../src/verifiers/pdac-graph.js';
+import {
+  extractCitations,
+  isCodeFenceLine,
+  processCitationBlockLine,
+  updateCitationsInContent,
+  type PdacNode,
+  type PdacSyncDetail,
+} from '../src/verifiers/pdac-graph.js';
 
 const ROOT = path.resolve(__dirname, '../../..');
 
@@ -25,7 +32,7 @@ describe('FR-081-UNIFY-YAML-FRONTMATTER-CITATIONS-001: YAML frontmatter citation
 
   it('TSK-081-02: templates include citations: in YAML frontmatter and omit prose > **Upstream Citation**:', () => {
     const frTpl = fs.readFileSync(
-      path.join(ROOT, 'templates/product/functional-requirement.template.md'),
+      path.join(ROOT, 'templates/product/requirement.template.md'),
       'utf8',
     );
     const cmpTpl = fs.readFileSync(
@@ -47,27 +54,27 @@ describe('FR-081-UNIFY-YAML-FRONTMATTER-CITATIONS-001: YAML frontmatter citation
       '---',
       'id: FR-999-TEST',
       'citations:',
-      `  - target: specs/product/UC-999.md`,
-      `    digest: ${oldDigest}`,
+      `  - id: UC-999`,
+      `    digest: sha256:${oldDigest}`,
       '---',
       '',
-      '> **Upstream Citation**: `specs/product/UC-PROSE.md` (`' + oldDigest + '`)',
+      '> **Upstream Citation**: `UC-PROSE` (`specs/product/UC-PROSE.md`, SHA-256: `' + oldDigest + '`)',
       '',
       'Body content.',
     ].join('\n');
 
     const extracted = extractCitations(md, 'specs/product/FR-999-TEST.md');
     expect(extracted).toHaveLength(1);
-    expect(extracted[0]?.target).toBe('specs/product/UC-999.md');
+    expect(extracted[0]?.targetId).toBe('UC-999');
 
     const baselineMap = new Map<string, PdacNode>([
       [
-        'specs/product/UC-999.md',
-        { id: 'UC-999', file: 'specs/product/UC-999.md', hash: newDigest },
+        'UC-999',
+        { id: 'UC-999', file: 'specs/product/UC-999.md', digest: newDigest, rawDigest: newDigest },
       ],
       [
-        'specs/product/UC-PROSE.md',
-        { id: 'UC-PROSE', file: 'specs/product/UC-PROSE.md', hash: newDigest },
+        'UC-PROSE',
+        { id: 'UC-PROSE', file: 'specs/product/UC-PROSE.md', digest: newDigest, rawDigest: newDigest },
       ],
     ]);
     const details: PdacSyncDetail[] = [];
@@ -79,8 +86,21 @@ describe('FR-081-UNIFY-YAML-FRONTMATTER-CITATIONS-001: YAML frontmatter citation
     );
 
     expect(changed).toBe(true);
-    expect(updatedContent).toContain(`digest: ${newDigest}`);
+    expect(updatedContent).toContain(`digest: sha256:${newDigest}`);
     // Prose blockquote must remain untouched (ignored)
-    expect(updatedContent).toContain(`> **Upstream Citation**: \`specs/product/UC-PROSE.md\` (\`${oldDigest}\`)`);
+    expect(updatedContent).toContain(`> **Upstream Citation**: \`UC-PROSE\` (\`specs/product/UC-PROSE.md\`, SHA-256: \`${oldDigest}\`)`);
+  });
+
+  it('TSK-081-03: isCodeFenceLine and processCitationBlockLine handle fences and citation blocks', () => {
+    expect(isCodeFenceLine('```yaml')).toBe(true);
+    expect(isCodeFenceLine('~~~')).toBe(true);
+    expect(isCodeFenceLine('id: UC-001')).toBe(false);
+
+    const state = { inCitations: true, currentTarget: null, inCodeFence: false };
+    const baselineMap = new Map<string, PdacNode>();
+    const details: PdacSyncDetail[] = [];
+    const res = processCitationBlockLine('  - id: UC-001', '- id: UC-001', state, baselineMap, 'test.md', details);
+    expect(res.changed).toBe(false);
+    expect(state.currentTarget).toBe('UC-001');
   });
 });

@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-081-unify-yaml-frontmatter-citations/spec.md
+# Origen: specs/changes/completed/chg-081-unify-yaml-frontmatter-citations/spec.md
 # ID Requerimiento: SPEC-CHG-081-UNIFY-YAML-FRONTMATTER-CITATIONS
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

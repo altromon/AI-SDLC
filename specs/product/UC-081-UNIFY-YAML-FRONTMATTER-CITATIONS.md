@@ -2,7 +2,7 @@
 id: UC-081-UNIFY-YAML-FRONTMATTER-CITATIONS
 type: use-case
 title: Unify Upstream Cryptographic Citations into YAML Frontmatter
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 primary-actor: ACT-DEVELOPER
@@ -14,6 +14,7 @@ governed-by:
 supersedes: null
 superseded-by: null
 ---
+
 
 
 

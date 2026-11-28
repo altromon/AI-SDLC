@@ -9,7 +9,7 @@ citations:
     digest: sha256:df1c6dcc016a36bedc7bf1607b205b5ade86dfbe04602fbefc9e51164c654007
     comment: Citación de use-case (Detección recursiva y cumplimiento agnóstico al lenguaje de reglas estrictas de codificación)
   - id: FR-069-LANGUAGE-AGNOSTIC-CODING-RULES-001
-    digest: sha256:a758c0e1c7f886de708016fbd74d0574f04c06f149b6364f08948d2307c97a81
+    digest: sha256:69f30f40a4ea49d5bebc3ff3acd4200a0d6fa34b4eff33d025575050f270e979
     comment: Requerimiento derivado de UC-069-LANGUAGE-AGNOSTIC-CODING-RULES
 ---
 

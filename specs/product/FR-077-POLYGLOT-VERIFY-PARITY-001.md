@@ -17,13 +17,15 @@ cucumber-tags:
   - '@regression'
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-077-POLYGLOT-VERIFY-PARITY
+    digest: sha256:100c4ff0b98a1c535a6d0f28e8f767ed79df0c022e98e9762451ab90e78690d3
 ---
 
 
 
 # FR-077-POLYGLOT-VERIFY-PARITY-001: polyglot-verify-parity
 
-> **Upstream Citation**: `UC-077-POLYGLOT-VERIFY-PARITY` (`specs/product/UC-077-POLYGLOT-VERIFY-PARITY.md`, Unix LF SHA-256: `100c4ff0b98a1c535a6d0f28e8f767ed79df0c022e98e9762451ab90e78690d3`)
 
 ## 1. Normative Specification
 1. **`verify traceability` (`packages/core/src/verifiers/traceability.ts`)**:

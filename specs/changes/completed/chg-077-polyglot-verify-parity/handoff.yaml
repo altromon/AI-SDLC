@@ -16,7 +16,7 @@ citations:
     digest: sha256:100c4ff0b98a1c535a6d0f28e8f767ed79df0c022e98e9762451ab90e78690d3
     comment: Citación de use-case (Polyglot Parity for Traceability, Quality Gate, and Test Discovery Verifiers)
   - id: FR-077-POLYGLOT-VERIFY-PARITY-001
-    digest: sha256:8199c639e49c95bcbc7662ac8b9151eff1458b44d47e6b6a51fca75c8e692244
+    digest: sha256:0ede9c8f3dd03ad248b9bbf35d02455e25fdb9b6afc023e88e1d3b0e7c0480b0
     comment: Requerimiento derivado de UC-077-POLYGLOT-VERIFY-PARITY
   - id: CMP-077-POLYGLOT-VERIFY-PARITY
     digest: sha256:095663f43255dfec87d96debd6dc46e0adbc05d0dd9b0a942980dbd03cb0c03e

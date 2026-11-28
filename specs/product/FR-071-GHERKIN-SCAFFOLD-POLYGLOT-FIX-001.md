@@ -17,11 +17,13 @@ cucumber-tags:
   - '@regression'
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX
+    digest: sha256:3ee3b8320082cb6ef6ed8f7ef6388efd72275231cbf17c16ddfc0d37c7336fa4
 ---
 
 # FR-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX-001: gherkin-scaffold-polyglot-fix
 
-> **Upstream Citation**: `UC-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX` (`specs/product/UC-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX.md`, Unix LF SHA-256: `3ee3b8320082cb6ef6ed8f7ef6388efd72275231cbf17c16ddfc0d37c7336fa4`)
 
 ## 1. Enunciado Normativo
 1. **No escribir `stdout` de compiladores o test-runners como código de pasos (`GHERKIN_GENERATOR_SPECS` y `generateLanguageStepContent` en `packages/core/src/verifiers/gherkin-scaffold.ts`)**:

@@ -16,19 +16,20 @@ satisfies-requirements:
 hosted-in-enclave: SEC-ENC-DMZ
 interfaces:
   - name: YAML Frontmatter Citations Schema Contract (schemas/*.schema.json)
-    protocol: JSON Schema
+    protocol: In-Process API
   - name: YAML Frontmatter Citations Template Contract (templates/**/*.template.md)
-    protocol: Markdown/YAML Template
+    protocol: In-Process API
   - name: PDaC Graph Citations Extractor & Sync API (pdac-graph.ts)
     protocol: In-Process API
 citations:
   - id: UC-081-UNIFY-YAML-FRONTMATTER-CITATIONS
-    digest: sha256:44f8eb15fea7aa8bf7e0ce662ed5a71b8eda4d0f48a52bdf0a4b5ddf6c4bc77d
+    digest: sha256:a2a242d3050d7627f9e7d010f69627b5e3cb704cc4b46f0ee0531e4ce8130397
   - id: FR-081-UNIFY-YAML-FRONTMATTER-CITATIONS-001
-    digest: sha256:265dd25182c87a768d523f9b815bee6af587a0577bfcd6d2bd234c41e98fed34
+    digest: sha256:a3ec47b4829f5c26ae709d6442144a7bf715769601d68adc410fac344cf64481
 supersedes: null
 superseded-by: null
 ---
+
 
 # CMP-081-UNIFY-YAML-FRONTMATTER-CITATIONS: Unify Upstream Cryptographic Citations into YAML Frontmatter
 
@@ -77,4 +78,5 @@ flowchart TD
 
 | Versión | Fecha | Autor / Agent | Descripción del Cambio | Referencia |
 | :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-28 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-081-unify-yaml-frontmatter-citations | chg-081-unify-yaml-frontmatter-citations |
 | **1.0.0** | 2026-11-28 | agent-system-architect | Diseño arquitectónico inicial para CHG-081 | CHG-081 |

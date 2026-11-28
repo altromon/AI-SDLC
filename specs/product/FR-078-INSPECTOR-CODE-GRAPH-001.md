@@ -17,13 +17,15 @@ cucumber-tags:
   - '@regression'
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-078-INSPECTOR-CODE-GRAPH
+    digest: sha256:1ecb59635d11c47b34e941f0bc4adbf2f7c862052e305c143098408437b4c3fa
 ---
 
 
 
 # FR-078-INSPECTOR-CODE-GRAPH-001: inspector-code-graph
 
-> **Upstream Citation**: `UC-078-INSPECTOR-CODE-GRAPH` (`specs/product/UC-078-INSPECTOR-CODE-GRAPH.md`, Unix LF SHA-256: `1ecb59635d11c47b34e941f0bc4adbf2f7c862052e305c143098408437b4c3fa`)
 
 ## 1. Normative Specification
 1. **Async `inspectElement` Signature & `CodeGraphService` Integration (`packages/core/src/inspector/index.ts`)**:

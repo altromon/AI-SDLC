@@ -16,7 +16,7 @@ citations:
     digest: sha256:62eb51c0d1be1e83dff467acc98e0a3f0f65f5992f68f1ca5c9e1419971d834b
     comment: Citación de use-case (Registro políglota unificado y soporte BDD para JVM (Java/Kotlin) y C/C++)
   - id: FR-072-POLYGLOT-REGISTRY-BDD-JVM-CPP-001
-    digest: sha256:5c6f94849015be752f70b204dfed7e1fad7e634769e1f485b90973ab5b05c56b
+    digest: sha256:eeb3c48e0c8fc93472df8085f12ce9113853975432db25fcfb28253bccb65341
     comment: Requerimiento derivado de UC-072-POLYGLOT-REGISTRY-BDD-JVM-CPP
   - id: CMP-072-POLYGLOT-REGISTRY-BDD-JVM-CPP
     digest: sha256:567916992ce77aea52dcc8f0f9d5a439a8242ccfd1efe387bc7eccd73d8753a2

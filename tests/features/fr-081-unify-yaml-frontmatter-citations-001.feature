@@ -6,7 +6,7 @@
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.
 # ==============================================================================
 
-@FR-081-UNIFY-YAML-FRONTMATTER-CITATIONS-001 @automated @regression
+@FR-081-UNIFY-YAML-FRONTMATTER-CITATIONS-001 @functional @automated
 Feature: Unify Upstream Cryptographic Citations into YAML Frontmatter
   As a developer or AI agent using AI-SDLC
   I want upstream cryptographic citations unified into YAML frontmatter "citations:" across schemas, templates, specs, and pdac-graph.ts

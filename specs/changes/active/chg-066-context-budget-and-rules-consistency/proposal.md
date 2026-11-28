@@ -9,7 +9,7 @@ citations:
     digest: sha256:6f4c25f337494bd642897dd0c1728d84cdbfae86bd7d4900847806e4fa05815b
     comment: Citación de use-case (Regla de presupuesto de contexto cross-IDE y consistencia de reglas y skills)
   - id: FR-066-CONTEXT-BUDGET-AND-RULES-CONSISTENCY-001
-    digest: sha256:b3f1e34cb0c1ec5698d7a95fee7b43b7f976d91a625097b27b12c6c4eb73f729
+    digest: sha256:7659e6b52208a6992e2c6d36f4180f7a87408aa2c43e6693b0de42301c7e02c3
     comment: Requerimiento derivado de UC-066-CONTEXT-BUDGET-AND-RULES-CONSISTENCY
 ---
 

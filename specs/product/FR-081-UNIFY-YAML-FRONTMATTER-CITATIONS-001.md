@@ -2,7 +2,7 @@
 id: FR-081-UNIFY-YAML-FRONTMATTER-CITATIONS-001
 type: requirement
 title: unify-yaml-frontmatter-citations
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 category: functional
@@ -17,14 +17,17 @@ cucumber-tags:
   - '@regression'
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-081-UNIFY-YAML-FRONTMATTER-CITATIONS
+    digest: sha256:a2a242d3050d7627f9e7d010f69627b5e3cb704cc4b46f0ee0531e4ce8130397
 ---
+
 
 
 
 
 # FR-081-UNIFY-YAML-FRONTMATTER-CITATIONS-001: unify-yaml-frontmatter-citations
 
-> **Upstream Citation**: `UC-081-UNIFY-YAML-FRONTMATTER-CITATIONS` (`specs/product/UC-081-UNIFY-YAML-FRONTMATTER-CITATIONS.md`, Unix LF SHA-256: `0000000000000000000000000000000000000000000000000000000000000000`)
 
 ## 1. Normative Specification
 1. **Single Canonical YAML Frontmatter `citations:` Format**:
@@ -44,7 +47,7 @@ Unify upstream cryptographic citations into YAML frontmatter `citations:` across
 ## 2. Acceptance Criteria in Gherkin Format (Cucumber)
 
 ```gherkin
-@FR-081-UNIFY-YAML-FRONTMATTER-CITATIONS-001 @automated @regression
+@FR-081-UNIFY-YAML-FRONTMATTER-CITATIONS-001 @functional @automated
 Feature: Unify Upstream Cryptographic Citations into YAML Frontmatter
   As a developer or AI agent using AI-SDLC
   I want upstream cryptographic citations unified into YAML frontmatter "citations:" across schemas, templates, specs, and pdac-graph.ts

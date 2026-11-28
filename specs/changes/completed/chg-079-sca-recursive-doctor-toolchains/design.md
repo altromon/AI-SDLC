@@ -19,7 +19,7 @@ citations:
     digest: sha256:649c1a9846278be031474280ca4ad664c0eb799ad548e453ba372ce0fbea485c
     comment: Citación de use-case (Recursive Multi-Ecosystem SCA Scanning and Stack-Aware Doctor Toolchains)
   - id: FR-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS-001
-    digest: sha256:2c8dc96809344a7565fbae4af75ef0e007f802247ab88ec44dd44c9cb6bd4c25
+    digest: sha256:2452fb97d9c3e8654f1f1ae98269e0fb97f25c805728091e0cbc0a3994ba0a0c
     comment: Requerimiento derivado de UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
   - id: CMP-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS
     digest: sha256:b69ffcd78d3041e8ece6fc208a2c5ea931ae12ecf056df520bb41ea7d432667f

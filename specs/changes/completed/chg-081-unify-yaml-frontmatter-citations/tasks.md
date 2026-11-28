@@ -21,7 +21,7 @@ tasks:
       method: quality-gate
       command-or-criteria: npx aisdlc verify schemas
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-081-UNIFY-YAML-FRONTMATTER-CITATIONS
     implements-contracts:
@@ -38,7 +38,7 @@ tasks:
       method: quality-gate
       command-or-criteria: npx aisdlc verify schemas && npx aisdlc verify pdac
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-081-UNIFY-YAML-FRONTMATTER-CITATIONS
     implements-contracts:
@@ -54,7 +54,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-081-UNIFY-YAML-FRONTMATTER-CITATIONS
     implements-contracts:
