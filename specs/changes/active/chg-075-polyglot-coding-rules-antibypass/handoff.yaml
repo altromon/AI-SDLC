@@ -19,5 +19,5 @@ citations:
     digest: sha256:a795ccea8a45db8e2a40b6e23a9f405e149b93e2fe08c31e58f4478de2294dff
     comment: Requerimiento derivado de UC-075-POLYGLOT-CODING-RULES-ANTIBYPASS
   - id: CMP-075-POLYGLOT-CODING-RULES-ANTIBYPASS
-    digest: sha256:7fb92592a67e3e40ea1d3ba55196518ce9f985d702e4f5b1eddc7c3428f47016
+    digest: sha256:8c2cd88f722a09672890272e4eb9983d39ef987a465ef1174181d0bd6e9cf1e9
     comment: Componente arquitectónico de detección anti-bypass políglota y alineación de rutas protegidas

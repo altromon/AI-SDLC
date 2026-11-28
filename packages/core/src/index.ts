@@ -419,14 +419,17 @@ export {
   computeCanonicalSha256,
   computeRawSha256,
   extractCitations,
+  extractProseCitations,
   extractSemanticContent,
   generatePdacReportMarkdown,
   parseFrontmatterId,
   syncPdacDigests,
   updateCitationsInContent,
+  updateProseCitationLine,
   validateAnchorExistence,
   verifyPdacGraph,
 } from './verifiers/pdac-graph.js';
+export type { ProseCitationMatch } from './verifiers/pdac-graph.js';
 export {
   TYPE_TO_SCHEMA_MAP,
   extractFrontmatter,
@@ -651,6 +654,7 @@ export type {
   SpecCatalogScope,
   SubmitReviewReportOptions,
 } from './adapters/sdd/index.js';
+export { SKILL_REFERENCES } from './init/skill-references.js';
 export {
   ALL_ARCHITECTURE_TEMPLATES,
   CPP_CLANG_TIDY,

@@ -27,6 +27,7 @@ supersedes: null
 superseded-by: null
 ---
 
+
 # CMP-070-BDD-STEP-LANGUAGE-SYNC: Declarative vs Executable BDD Separation and Per-Feature Step Language Resolver
 
 ## 1. Responsabilidad y Arquitectura Hexagonal (Ports & Adapters)
@@ -122,4 +123,5 @@ sequenceDiagram
 
 | Versión | Fecha | Autor / Agente | Descripción del Cambio | Referencia de Cambio (Change/PR) |
 | :--- | :--- | :--- | :--- | :--- |
+| **1.0.0** | 2026-11-28 | AI-SDLC Integration Engine | Integración de incremento de entrega chg-070-bdd-step-language-sync | chg-070-bdd-step-language-sync |
 | **1.0.0** | 2026-11-26 | agent-system-architect | Definición arquitectónica inicial para separación BDD declarativo/ejecutable (`--features-only`), inferencia de lenguaje por feature (`resolveFeatureTargetLanguages`) y paridad `STEP_LANGUAGE_MISMATCH` | CHG-070-BDD-STEP-LANGUAGE-SYNC |

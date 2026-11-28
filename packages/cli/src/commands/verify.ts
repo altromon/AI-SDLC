@@ -1484,7 +1484,7 @@ export function buildGherkinViolations(result: ReturnType<typeof checkGherkinInS
     ...missingSteps.map((f) => ({
       type: 'MISSING_STEP_FILE',
       file: f,
-      message: `Missing deterministic step definition file in tests/steps/ for: ${f}. Run 'aisdlc gherkin scaffold ${f} --lang <lang> --fallback'.`,
+      message: `Missing deterministic step definition file in tests/steps/ for: ${f}. Run 'aisdlc gherkin scaffold ${f} [--lang <lang>] --fallback'.`,
     })),
     ...mismatches.map(mapLanguageMismatchViolation),
   ];
@@ -1543,7 +1543,7 @@ export function printGherkinVerifyConsole(result: ReturnType<typeof checkGherkin
   printGherkinIssueList(result.missingFiles, 'MISSING');
   printGherkinIssueList(result.outOfSyncFiles, 'OUT_OF_SYNC');
   printGherkinIssueList(orphans, 'ORPHAN_FEATURE');
-  printGherkinIssueList(missingSteps, 'MISSING_STEP_FILE', ' (run: aisdlc gherkin scaffold {file} --lang <lang> --fallback)');
+  printGherkinIssueList(missingSteps, 'MISSING_STEP_FILE', ' (run: aisdlc gherkin scaffold {file} [--lang <lang>] --fallback)');
   printLanguageMismatchList(mismatches);
   console.log(result.inSync ? pc.green('\n✔ BDD Synchronization COMPLIANT\n') : pc.red('\n✖ BDD Synchronization BLOCKED\n'));
 }

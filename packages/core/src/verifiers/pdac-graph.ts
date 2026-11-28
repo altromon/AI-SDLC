@@ -96,6 +96,22 @@ export function parseFrontmatterId(content: string): { id?: string; type?: strin
   return { id, type, title };
 }
 
+export interface ProseCitationMatch {
+  targetId: string;
+  expectedDigest: string;
+}
+
+const PROSE_CITATION_RE = /^>\s*\*\*Upstream Citation\*\*:\s*`([^`\n]+)`[^\n]*?SHA-256:\s*`([^`\n]+)`/i;
+
+export function extractProseCitations(line: string): ProseCitationMatch | null {
+  const match = line.trim().match(PROSE_CITATION_RE);
+  if (!match) return null;
+  return {
+    targetId: match[1].trim(),
+    expectedDigest: match[2].trim(),
+  };
+}
+
 interface CitationEntry {
   targetId: string;
   expectedDigest?: string;
@@ -105,12 +121,13 @@ interface CitationEntry {
 
 function isCitationTerminator(line: string): boolean {
   return (
-    line.endsWith(':') &&
-    !line.startsWith('- ') &&
-    !line.startsWith('id:') &&
-    !line.startsWith('digest:') &&
-    !line.startsWith('anchor:') &&
-    !line.startsWith('comment:')
+    line === '---' ||
+    (line.endsWith(':') &&
+      !line.startsWith('- ') &&
+      !line.startsWith('id:') &&
+      !line.startsWith('digest:') &&
+      !line.startsWith('anchor:') &&
+      !line.startsWith('comment:'))
   );
 }
 
@@ -164,21 +181,43 @@ function processCitationLine(
   }
 }
 
+function isCodeFenceLine(trimmedLine: string): boolean {
+  return trimmedLine.startsWith('```') || trimmedLine.startsWith('~~~');
+}
+
+function processNonFenceLine(
+  line: string,
+  state: CitationParserState,
+  sourceFile: string,
+  citations: CitationEntry[]
+): void {
+  if (line.startsWith('citations:')) {
+    state.inCitations = true;
+    return;
+  }
+  if (state.inCitations) {
+    processCitationLine(line, state, sourceFile, citations);
+    return;
+  }
+  const prose = extractProseCitations(line);
+  if (prose) {
+    citations.push({ targetId: prose.targetId, expectedDigest: prose.expectedDigest, sourceFile });
+  }
+}
+
 export function extractCitations(content: string, sourceFile: string): CitationEntry[] {
   const citations: CitationEntry[] = [];
   const state: CitationParserState = { inCitations: false, currentTarget: null };
+  let inCodeFence = false;
 
-  for (const rawLine of content.split('\n')) {
+  for (const rawLine of content.split(/\r?\n/)) {
     const line = rawLine.trim();
-    if (!line || line.startsWith('#')) continue;
-
-    if (line.startsWith('citations:')) {
-      state.inCitations = true;
+    if (isCodeFenceLine(line)) {
+      inCodeFence = !inCodeFence;
       continue;
     }
-
-    if (state.inCitations) {
-      processCitationLine(line, state, sourceFile, citations);
+    if (!inCodeFence && line && !line.startsWith('#')) {
+      processNonFenceLine(line, state, sourceFile, citations);
     }
   }
 
@@ -426,6 +465,31 @@ function tryUpdateDigestLine(
 interface ContentUpdateState {
   inCitations: boolean;
   currentTarget: string | null;
+  inCodeFence: boolean;
+}
+
+function replaceProseDigest(rawLine: string, newDigest: string): { line: string; changed: boolean } {
+  const line = rawLine.replace(
+    /(SHA-256:\s*`)([^`\n]+)(`)/i,
+    (_m, p1: string, _old: string, p3: string) => `${p1}${newDigest}${p3}`
+  );
+  return { line, changed: line !== rawLine };
+}
+
+export function updateProseCitationLine(
+  rawLine: string,
+  baselineMap: Map<string, PdacNode>,
+  sourceFile: string,
+  details: PdacSyncDetail[]
+): { line: string; changed: boolean } {
+  const prose = extractProseCitations(rawLine);
+  const targetNode = prose ? baselineMap.get(prose.targetId) : undefined;
+  if (!prose || !targetNode) return { line: rawLine, changed: false };
+  if (prose.expectedDigest === targetNode.digest || prose.expectedDigest === targetNode.rawDigest) {
+    return { line: rawLine, changed: false };
+  }
+  details.push({ sourceFile, targetId: prose.targetId, previousDigest: prose.expectedDigest, newDigest: targetNode.digest });
+  return replaceProseDigest(rawLine, targetNode.digest);
 }
 
 function tryUpdateCitationDigest(
@@ -443,6 +507,31 @@ function tryUpdateCitationDigest(
   return { line: update.newLine, changed: update.changed };
 }
 
+function processCitationBlockLine(
+  rawLine: string,
+  trimmed: string,
+  state: ContentUpdateState,
+  baselineMap: Map<string, PdacNode>,
+  sourceFile: string,
+  details: PdacSyncDetail[]
+): { line: string; changed: boolean } {
+  if (isCitationTerminator(trimmed)) {
+    state.inCitations = false;
+    state.currentTarget = null;
+    return { line: rawLine, changed: false };
+  }
+  if (trimmed.startsWith('- id:')) {
+    state.currentTarget = trimmed.split(':')[1].replace(/['"]/g, '').trim();
+    return { line: rawLine, changed: false };
+  }
+  return (
+    tryUpdateCitationDigest(rawLine, trimmed, state.currentTarget, baselineMap, sourceFile, details) ?? {
+      line: rawLine,
+      changed: false,
+    }
+  );
+}
+
 function processContentLine(
   rawLine: string,
   state: ContentUpdateState,
@@ -451,22 +540,19 @@ function processContentLine(
   details: PdacSyncDetail[]
 ): { line: string; changed: boolean } {
   const trimmed = rawLine.trim();
-
+  if (isCodeFenceLine(trimmed)) {
+    state.inCodeFence = !state.inCodeFence;
+    return { line: rawLine, changed: false };
+  }
+  if (state.inCodeFence) return { line: rawLine, changed: false };
   if (trimmed.startsWith('citations:')) {
     state.inCitations = true;
-  } else if (!state.inCitations) {
-    // outside citations block
-  } else if (isCitationTerminator(trimmed)) {
-    state.inCitations = false;
-    state.currentTarget = null;
-  } else if (trimmed.startsWith('- id:')) {
-    state.currentTarget = trimmed.split(':')[1].replace(/['"]/g, '').trim();
-  } else {
-    const res = tryUpdateCitationDigest(rawLine, trimmed, state.currentTarget, baselineMap, sourceFile, details);
-    if (res) return res;
+    return { line: rawLine, changed: false };
   }
-
-  return { line: rawLine, changed: false };
+  if (!state.inCitations) {
+    return updateProseCitationLine(rawLine, baselineMap, sourceFile, details);
+  }
+  return processCitationBlockLine(rawLine, trimmed, state, baselineMap, sourceFile, details);
 }
 
 export function updateCitationsInContent(
@@ -475,7 +561,7 @@ export function updateCitationsInContent(
   sourceFile: string,
   details: PdacSyncDetail[]
 ): { updatedContent: string; changed: boolean } {
-  const state: ContentUpdateState = { inCitations: false, currentTarget: null };
+  const state: ContentUpdateState = { inCitations: false, currentTarget: null, inCodeFence: false };
   let anyChanged = false;
   const newLines: string[] = [];
 

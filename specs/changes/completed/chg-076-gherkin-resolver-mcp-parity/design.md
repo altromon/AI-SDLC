@@ -22,7 +22,7 @@ citations:
     digest: sha256:69c4c6eaf8a05a35586e6dc2e18865f7fc82e0502593103dbb9fd3c6d6243db6
     comment: Citación de use-case (Gherkin Resolver Hardening and MCP Tool Parity for BDD Sync Verification)
   - id: FR-076-GHERKIN-RESOLVER-MCP-PARITY-001
-    digest: sha256:8ad290a17222e6ac442665ae21aed133640a35b8907933ee25bf733f4eb770af
+    digest: sha256:dcb6798f3bf8645eab7455aac392d858544a39ee9410add200b28ee9870fdcea
     comment: Requerimiento derivado de UC-076-GHERKIN-RESOLVER-MCP-PARITY
   - id: CMP-076-GHERKIN-RESOLVER-MCP-PARITY
     digest: sha256:cc5c0a3a320820666041711fbf615dbd0d1f40d53ed51501cc77cc1cf4e48c52

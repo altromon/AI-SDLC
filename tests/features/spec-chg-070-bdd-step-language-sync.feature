@@ -1,6 +1,6 @@
 # ==============================================================================
 # AUTO-GENERADO POR AI-SDLC (Cucumber Integration)
-# Origen: specs/changes/active/chg-070-bdd-step-language-sync/spec.md
+# Origen: specs/changes/completed/chg-070-bdd-step-language-sync/spec.md
 # ID Requerimiento: SPEC-CHG-070-BDD-STEP-LANGUAGE-SYNC
 # Versión: 1.0.0
 # NO EDITAR MANUALMENTE: Cualquier cambio debe realizarse en el Markdown origen.

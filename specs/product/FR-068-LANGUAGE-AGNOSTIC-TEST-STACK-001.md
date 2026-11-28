@@ -21,7 +21,7 @@ superseded-by: null
 
 # FR-068-LANGUAGE-AGNOSTIC-TEST-STACK-001: language-agnostic-test-stack-detection-and-polyglot-web-e2e-drivers
 
-> **Upstream Citation**: `UC-068-LANGUAGE-AGNOSTIC-TEST-STACK` (`specs/product/UC-068-LANGUAGE-AGNOSTIC-TEST-STACK.md`, Unix LF SHA-256: `6ca00de7d8718155279e720d54378e567444f44276e499e92aecd192ada90692`)
+> **Upstream Citation**: `UC-068-LANGUAGE-AGNOSTIC-TEST-STACK` (`specs/product/UC-068-LANGUAGE-AGNOSTIC-TEST-STACK.md`, Unix LF SHA-256: `4dc7ca58a5ca06c4d0eb8b6dd786a6671d3f0beb95baf5f5f20c31566e3ac098`)
 
 ## 1. Normative Statement
 1. **Recursive & Spec-Aware Scaffold Language Detection (`detectDefaultScaffoldLanguage(rootDir)` in `packages/cli/src/commands/check.ts`)**:

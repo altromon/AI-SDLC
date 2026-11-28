@@ -20,13 +20,13 @@ contracts:
   - autoScaffoldMissingSteps
 citations:
   - id: UC-070-BDD-STEP-LANGUAGE-SYNC
-    digest: sha256:4072400548b46fc8e47b7f002d2f37d4d480c67bd79b24ec119b993ee2c1ac13
+    digest: sha256:92e6ec3d32d7d28c75b23c12bf1428cc7bf667790254cc13e94fbadb7b88ec20
     comment: Citación de use-case (Separación BDD declarativo vs ejecutable e inferencia estricta de lenguaje de step definitions por feature)
   - id: FR-070-BDD-STEP-LANGUAGE-SYNC-001
-    digest: sha256:135ce82b6d4b92aeaed329362a01c4c11bbf0f8a60111080c19f526cc7246e41
+    digest: sha256:18e6b4a382df5f2306d310f8883fc91e3968372f2b475daf0efab71dfd36e7e1
     comment: Requerimiento derivado de UC-070-BDD-STEP-LANGUAGE-SYNC
   - id: CMP-070-BDD-STEP-LANGUAGE-SYNC
-    digest: sha256:1581749ff535fbd245df2989cc4735c19ed04577f2329618ad5749095fc154e2
+    digest: sha256:c753b8576df4159e0bdc7129efdf7be97e406b51dbf9d206ffd83f4555f880c7
     comment: Componente arquitectónico de separación BDD declarativo/ejecutable e inferencia de lenguaje por feature
 ---
 

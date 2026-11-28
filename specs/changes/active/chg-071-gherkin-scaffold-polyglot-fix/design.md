@@ -23,7 +23,7 @@ citations:
     digest: sha256:3ee3b8320082cb6ef6ed8f7ef6388efd72275231cbf17c16ddfc0d37c7336fa4
     comment: Citación de use-case (Corrección de generación determinista, unicidad de símbolos, expresiones regulares Go y compatibilidad Rust en scaffolding BDD políglota)
   - id: FR-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX-001
-    digest: sha256:cd612931f60ee3e35877a1e9b3ff90eac0b75a5e0a3517cfe458e47ad19cebb4
+    digest: sha256:9ae95856cc40be42105f02cc101b87d906f5eec74bfcb85ab5cea183e2c200ec
     comment: Requerimiento derivado de UC-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX
   - id: CMP-071-GHERKIN-SCAFFOLD-POLYGLOT-FIX
     digest: sha256:1dd7ef7d70d1036da01991329263df96c47310b830ce276fcce4b77383ffce14

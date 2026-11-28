@@ -14,5 +14,5 @@ citations:
     digest: sha256:992d6af2fc6c0363ddf0214988b4d7225111f63aeb953f84af018462d34a0a2d
     comment: Citación de use-case (Reglas estrictas de codificación ejecutables y desacopladas por stack)
   - id: FR-073-EXECUTABLE-STRICT-CODING-RULES-001
-    digest: sha256:27b58569eb3f5cf6024b63829f315e4c478102236586db647a15fd73d72d9651
+    digest: sha256:a68c1e4bf44a87743f180bb3c9040d92d7cab002bbc78eb88cccb8bda0ef7747
     comment: Requerimiento derivado de UC-073-EXECUTABLE-STRICT-CODING-RULES

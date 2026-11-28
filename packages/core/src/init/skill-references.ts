@@ -145,8 +145,8 @@ When consolidating multiple increments in a single release or PR, apply **only o
 
 ## Mandatory Commands
 1. Extract: \`npx aisdlc gherkin extract --all\`
-2. Scaffold RED steps: \`npx aisdlc gherkin scaffold <feature-file> --lang <lang> --fallback\`
-3. Verify sync: \`npx aisdlc verify gherkin\`
+2. Scaffold RED steps: \`npx aisdlc gherkin scaffold <feature-file> [--lang <ts|py|go|rs|cs>] --fallback\` (optional \`--lang\`; auto-inferred when omitted)
+3. Verify sync: \`npx aisdlc verify gherkin\` (or \`npx aisdlc verify gherkin --features-only\` for pre-code declarative Checkpoint 1)
 `,
     },
   ],
