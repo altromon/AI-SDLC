@@ -16,7 +16,7 @@ citations:
     digest: sha256:d316c33ebfd70736dce71bf7e0e574aec86bd2385170b8c1a488549e342729fd
     comment: Citación de use-case (Align Skills, Agent Templates, CLI Remediation, Prose Citation Digests, and CHG-070 Integration)
   - id: FR-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS-001
-    digest: sha256:01c6157970be0d925443177456aa3007eb22e4c1af07217121451f432598530d
+    digest: sha256:dd403d2370feec4ac52d47aa3908dabad5810d337724fe95c1decdf32cb14dfe
     comment: Requerimiento derivado de UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
   - id: CMP-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
     digest: sha256:26756b5acf0e32f1140e0331b910980df2ec82cf1e5eaa4caeeda9a3b98f938d

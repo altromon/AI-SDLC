@@ -17,12 +17,14 @@ cucumber-tags:
   - '@regression'
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-070-BDD-STEP-LANGUAGE-SYNC
+    digest: sha256:92e6ec3d32d7d28c75b23c12bf1428cc7bf667790254cc13e94fbadb7b88ec20
 ---
 
 
 # FR-070-BDD-STEP-LANGUAGE-SYNC-001: bdd-step-language-sync
 
-> **Upstream Citation**: `UC-070-BDD-STEP-LANGUAGE-SYNC` (`specs/product/UC-070-BDD-STEP-LANGUAGE-SYNC.md`, Unix LF SHA-256: `92e6ec3d32d7d28c75b23c12bf1428cc7bf667790254cc13e94fbadb7b88ec20`)
 
 ## 1. Enunciado Normativo
 1. **Separación BDD Declarativo vs Ejecutable (`--features-only`)**:

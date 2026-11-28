@@ -18,11 +18,13 @@ cucumber-tags:
   - '@regression'
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-066-CONTEXT-BUDGET-AND-RULES-CONSISTENCY
+    digest: sha256:6f4c25f337494bd642897dd0c1728d84cdbfae86bd7d4900847806e4fa05815b
 ---
 
 # FR-066-CONTEXT-BUDGET-AND-RULES-CONSISTENCY-001: context-budget-rule-and-rules-skills-consistency
 
-> **Upstream Citation**: `UC-066-CONTEXT-BUDGET-AND-RULES-CONSISTENCY` (`specs/product/UC-066-CONTEXT-BUDGET-AND-RULES-CONSISTENCY.md`, Unix LF SHA-256: `03d2cd2f513fed5135362097bb7e290b5ea5e573b6e13a1a6e2c28c5aace5d74`)
 
 ## 1. Enunciado Normativo
 1. **Regla de Presupuesto de Contexto Cross-IDE (`AGENTS.md`, `.agent/rules/ai-sdlc.md` y `packages/core/src/init/agent-templates.ts`)**:

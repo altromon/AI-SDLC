@@ -9,7 +9,7 @@ citations:
     digest: sha256:1ecb59635d11c47b34e941f0bc4adbf2f7c862052e305c143098408437b4c3fa
     comment: Citación de use-case (Element Inspector Integration with CodeGraphService for Code-Level Traceability)
   - id: FR-078-INSPECTOR-CODE-GRAPH-001
-    digest: sha256:70b2c5888803f0747ade6b722134bfa591a3607ac096b5a5f7b8c5a9ee4362ca
+    digest: sha256:d568ee507b111011cd155775de430c7a82bfdd702d4138f1f4bc5be8665e98e5
     comment: Requerimiento derivado de UC-078-INSPECTOR-CODE-GRAPH
 ---
 

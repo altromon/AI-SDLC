@@ -419,17 +419,14 @@ export {
   computeCanonicalSha256,
   computeRawSha256,
   extractCitations,
-  extractProseCitations,
   extractSemanticContent,
   generatePdacReportMarkdown,
   parseFrontmatterId,
   syncPdacDigests,
   updateCitationsInContent,
-  updateProseCitationLine,
   validateAnchorExistence,
   verifyPdacGraph,
 } from './verifiers/pdac-graph.js';
-export type { ProseCitationMatch } from './verifiers/pdac-graph.js';
 export {
   TYPE_TO_SCHEMA_MAP,
   extractFrontmatter,

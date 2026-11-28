@@ -17,12 +17,14 @@ cucumber-tags:
   - '@regression'
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-076-GHERKIN-RESOLVER-MCP-PARITY
+    digest: sha256:69c4c6eaf8a05a35586e6dc2e18865f7fc82e0502593103dbb9fd3c6d6243db6
 ---
 
 
 # FR-076-GHERKIN-RESOLVER-MCP-PARITY-001: gherkin-resolver-mcp-parity
 
-> **Upstream Citation**: `UC-076-GHERKIN-RESOLVER-MCP-PARITY` (`specs/product/UC-076-GHERKIN-RESOLVER-MCP-PARITY.md`, Unix LF SHA-256: `69c4c6eaf8a05a35586e6dc2e18865f7fc82e0502593103dbb9fd3c6d6243db6`)
 
 ## 1. Normative Specification
 1. **MCP `sdd_check_fix` & `verify_gherkin` Parity**:

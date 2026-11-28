@@ -22,6 +22,9 @@ cucumber-tags:
 
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-ACTION-001
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
 ---
 
 # FR-FEATURE-001: Concise Requirement Title

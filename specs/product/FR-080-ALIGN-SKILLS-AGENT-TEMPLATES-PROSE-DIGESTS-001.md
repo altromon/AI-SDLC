@@ -17,6 +17,9 @@ cucumber-tags:
   - '@regression'
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
+    digest: sha256:d316c33ebfd70736dce71bf7e0e574aec86bd2385170b8c1a488549e342729fd
 ---
 
 
@@ -24,7 +27,6 @@ superseded-by: null
 
 # FR-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS-001: align-skills-agent-templates-prose-digests
 
-> **Upstream Citation**: `UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS` (`specs/product/UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS.md`, Unix LF SHA-256: `d316c33ebfd70736dce71bf7e0e574aec86bd2385170b8c1a488549e342729fd`)
 
 ## 1. Normative Specification
 1. **Optional `--lang` in `aisdlc gherkin scaffold` and `--features-only` in `aisdlc verify gherkin` Across Templates, Rules, Skills, and IDE Mirrors**:

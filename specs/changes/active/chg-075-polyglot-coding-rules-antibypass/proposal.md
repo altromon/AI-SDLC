@@ -9,7 +9,7 @@ citations:
     digest: sha256:4a6cd0f32aa6a0a6efd0422b1bbad8863ca8171eb98d04878e9340e9db2b109b
     comment: Citación de use-case (Polyglot Coding Rules Anti-Bypass Detection and Protected Path Alignment in Verify Friction)
   - id: FR-075-POLYGLOT-CODING-RULES-ANTIBYPASS-001
-    digest: sha256:a795ccea8a45db8e2a40b6e23a9f405e149b93e2fe08c31e58f4478de2294dff
+    digest: sha256:aef4160179f579c3301a3196d87f208f38dcebf0cd0e802dcb7dea2fd3fbbe82
     comment: Requerimiento derivado de UC-075-POLYGLOT-CODING-RULES-ANTIBYPASS
 ---
 

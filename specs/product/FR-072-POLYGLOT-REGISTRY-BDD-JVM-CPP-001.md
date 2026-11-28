@@ -17,11 +17,13 @@ cucumber-tags:
   - '@regression'
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-072-POLYGLOT-REGISTRY-BDD-JVM-CPP
+    digest: sha256:62eb51c0d1be1e83dff467acc98e0a3f0f65f5992f68f1ca5c9e1419971d834b
 ---
 
 # FR-072-POLYGLOT-REGISTRY-BDD-JVM-CPP-001: polyglot-registry-bdd-jvm-cpp
 
-> **Upstream Citation**: `UC-072-POLYGLOT-REGISTRY-BDD-JVM-CPP` (`specs/product/UC-072-POLYGLOT-REGISTRY-BDD-JVM-CPP.md`, Unix LF SHA-256: `63a78e37727152d900f954e9985bc8daaa1ce9ee320bd57f938091c582884340`)
 
 ## 1. Enunciado Normativo
 1. **Registro Políglota Centralizado (`POLYGLOT_LANGUAGE_REGISTRY` en `@aisdlc/core`)**:

@@ -105,6 +105,21 @@
         "null"
       ],
       "pattern": "^(FR|QR|CON)-[A-Z0-9]+(-[A-Z0-9]+)*$"
+    },
+    "citations": {
+      "type": "array",
+      "description": "Cryptographic PDaC citations to upstream artifacts.",
+      "items": {
+        "type": "object",
+        "required": ["id", "digest"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+          "anchor": { "type": "string" },
+          "comment": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
     }
   },
   "additionalProperties": false

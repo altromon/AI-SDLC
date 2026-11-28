@@ -23,12 +23,14 @@ interfaces:
     protocol: In-Process API
 supersedes: null
 superseded-by: null
+citations:
+  - id: FR-075-POLYGLOT-CODING-RULES-ANTIBYPASS-001
+    digest: sha256:aef4160179f579c3301a3196d87f208f38dcebf0cd0e802dcb7dea2fd3fbbe82
 ---
 
 
 # CMP-075-POLYGLOT-CODING-RULES-ANTIBYPASS: Polyglot Coding Rules Anti-Bypass Scanner and Protected Friction Path Alignment
 
-> **Upstream Citation**: `FR-075-POLYGLOT-CODING-RULES-ANTIBYPASS-001` (`specs/product/FR-075-POLYGLOT-CODING-RULES-ANTIBYPASS-001.md`, Unix LF SHA-256: `a795ccea8a45db8e2a40b6e23a9f405e149b93e2fe08c31e58f4478de2294dff`)
 
 ## 1. Responsabilidad y Arquitectura Hexagonal (Ports & Adapters)
 Subcomponente determinista dentro de `CMP-CORE` (`@aisdlc/core`) responsable de:

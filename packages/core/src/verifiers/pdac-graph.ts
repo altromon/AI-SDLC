@@ -96,22 +96,6 @@ export function parseFrontmatterId(content: string): { id?: string; type?: strin
   return { id, type, title };
 }
 
-export interface ProseCitationMatch {
-  targetId: string;
-  expectedDigest: string;
-}
-
-const PROSE_CITATION_RE = /^>\s*\*\*Upstream Citation\*\*:\s*`([^`\n]+)`[^\n]*?SHA-256:\s*`([^`\n]+)`/i;
-
-export function extractProseCitations(line: string): ProseCitationMatch | null {
-  const match = line.trim().match(PROSE_CITATION_RE);
-  if (!match) return null;
-  return {
-    targetId: match[1].trim(),
-    expectedDigest: match[2].trim(),
-  };
-}
-
 interface CitationEntry {
   targetId: string;
   expectedDigest?: string;
@@ -185,26 +169,6 @@ export function isCodeFenceLine(trimmedLine: string): boolean {
   return trimmedLine.startsWith('```') || trimmedLine.startsWith('~~~');
 }
 
-export function processNonFenceLine(
-  line: string,
-  state: CitationParserState,
-  sourceFile: string,
-  citations: CitationEntry[]
-): void {
-  if (line.startsWith('citations:')) {
-    state.inCitations = true;
-    return;
-  }
-  if (state.inCitations) {
-    processCitationLine(line, state, sourceFile, citations);
-    return;
-  }
-  const prose = extractProseCitations(line);
-  if (prose) {
-    citations.push({ targetId: prose.targetId, expectedDigest: prose.expectedDigest, sourceFile });
-  }
-}
-
 export function extractCitations(content: string, sourceFile: string): CitationEntry[] {
   const citations: CitationEntry[] = [];
   const state: CitationParserState = { inCitations: false, currentTarget: null };
@@ -217,7 +181,11 @@ export function extractCitations(content: string, sourceFile: string): CitationE
       continue;
     }
     if (!inCodeFence && line && !line.startsWith('#')) {
-      processNonFenceLine(line, state, sourceFile, citations);
+      if (line.startsWith('citations:')) {
+        state.inCitations = true;
+      } else if (state.inCitations) {
+        processCitationLine(line, state, sourceFile, citations);
+      }
     }
   }
 
@@ -468,30 +436,6 @@ export interface ContentUpdateState {
   inCodeFence: boolean;
 }
 
-export function replaceProseDigest(rawLine: string, newDigest: string): { line: string; changed: boolean } {
-  const line = rawLine.replace(
-    /(SHA-256:\s*`)([^`\n]+)(`)/i,
-    (_m, p1: string, _old: string, p3: string) => `${p1}${newDigest}${p3}`
-  );
-  return { line, changed: line !== rawLine };
-}
-
-export function updateProseCitationLine(
-  rawLine: string,
-  baselineMap: Map<string, PdacNode>,
-  sourceFile: string,
-  details: PdacSyncDetail[]
-): { line: string; changed: boolean } {
-  const prose = extractProseCitations(rawLine);
-  const targetNode = prose ? baselineMap.get(prose.targetId) : undefined;
-  if (!prose || !targetNode) return { line: rawLine, changed: false };
-  if (prose.expectedDigest === targetNode.digest || prose.expectedDigest === targetNode.rawDigest) {
-    return { line: rawLine, changed: false };
-  }
-  details.push({ sourceFile, targetId: prose.targetId, previousDigest: prose.expectedDigest, newDigest: targetNode.digest });
-  return replaceProseDigest(rawLine, targetNode.digest);
-}
-
 function tryUpdateCitationDigest(
   rawLine: string,
   trimmed: string,
@@ -550,7 +494,7 @@ function processContentLine(
     return { line: rawLine, changed: false };
   }
   if (!state.inCitations) {
-    return updateProseCitationLine(rawLine, baselineMap, sourceFile, details);
+    return { line: rawLine, changed: false };
   }
   return processCitationBlockLine(rawLine, trimmed, state, baselineMap, sourceFile, details);
 }

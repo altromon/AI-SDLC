@@ -19,10 +19,10 @@ citations:
     digest: sha256:4a6cd0f32aa6a0a6efd0422b1bbad8863ca8171eb98d04878e9340e9db2b109b
     comment: Citación de use-case (Polyglot Coding Rules Anti-Bypass Detection and Protected Path Alignment in Verify Friction)
   - id: FR-075-POLYGLOT-CODING-RULES-ANTIBYPASS-001
-    digest: sha256:a795ccea8a45db8e2a40b6e23a9f405e149b93e2fe08c31e58f4478de2294dff
+    digest: sha256:aef4160179f579c3301a3196d87f208f38dcebf0cd0e802dcb7dea2fd3fbbe82
     comment: Requerimiento derivado de UC-075-POLYGLOT-CODING-RULES-ANTIBYPASS
   - id: CMP-075-POLYGLOT-CODING-RULES-ANTIBYPASS
-    digest: sha256:8c2cd88f722a09672890272e4eb9983d39ef987a465ef1174181d0bd6e9cf1e9
+    digest: sha256:fefd77038d322c831fa52ed4225485de6cc4553bf37f36196808e5db4a7a6fd0
     comment: Componente arquitectónico de detección anti-bypass políglota y alineación de rutas protegidas
 ---
 

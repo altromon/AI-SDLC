@@ -25,6 +25,9 @@ interfaces:
     contract-spec: "docs/architecture/08_cross_cutting/data_models/ingestion_asyncapi.yaml"
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-ACTION-001
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
 ---
 
 # CMP-NAME-001: Architecture Component Name

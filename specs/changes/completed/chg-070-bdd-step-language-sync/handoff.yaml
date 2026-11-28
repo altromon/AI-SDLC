@@ -16,7 +16,7 @@ citations:
     digest: sha256:92e6ec3d32d7d28c75b23c12bf1428cc7bf667790254cc13e94fbadb7b88ec20
     comment: Citación de use-case (Separación BDD declarativo vs ejecutable e inferencia estricta de lenguaje de step definitions por feature)
   - id: FR-070-BDD-STEP-LANGUAGE-SYNC-001
-    digest: sha256:18e6b4a382df5f2306d310f8883fc91e3968372f2b475daf0efab71dfd36e7e1
+    digest: sha256:f3eb65c5f3a33b501b0b761e10ce2455503c2b9a2736cc78615d21cf99be0b90
     comment: Requerimiento derivado de UC-070-BDD-STEP-LANGUAGE-SYNC
   - id: CMP-070-BDD-STEP-LANGUAGE-SYNC
     digest: sha256:c753b8576df4159e0bdc7129efdf7be97e406b51dbf9d206ffd83f4555f880c7

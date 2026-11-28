@@ -17,12 +17,14 @@ cucumber-tags:
   - '@regression'
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-074-POLYGLOT-LINTER-VERIFY-ALL
+    digest: sha256:e0ccfc0763ae8755fc931e6d7fe9ff8d28ad711f302ad032f75fae3ce30b0814
 ---
 
 
 # FR-074-POLYGLOT-LINTER-VERIFY-ALL-001: polyglot-linter-verify-all
 
-> **Upstream Citation**: `UC-074-POLYGLOT-LINTER-VERIFY-ALL` (`specs/product/UC-074-POLYGLOT-LINTER-VERIFY-ALL.md`, Unix LF SHA-256: `e0ccfc0763ae8755fc931e6d7fe9ff8d28ad711f302ad032f75fae3ce30b0814`)
 
 ## 1. Normative Statement
 1. **Polyglot Stack Detection and Native Strict Execution**:

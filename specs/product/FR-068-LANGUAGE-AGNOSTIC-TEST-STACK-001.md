@@ -17,11 +17,13 @@ cucumber-tags:
   - '@regression'
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-068-LANGUAGE-AGNOSTIC-TEST-STACK
+    digest: sha256:4dc7ca58a5ca06c4d0eb8b6dd786a6671d3f0beb95baf5f5f20c31566e3ac098
 ---
 
 # FR-068-LANGUAGE-AGNOSTIC-TEST-STACK-001: language-agnostic-test-stack-detection-and-polyglot-web-e2e-drivers
 
-> **Upstream Citation**: `UC-068-LANGUAGE-AGNOSTIC-TEST-STACK` (`specs/product/UC-068-LANGUAGE-AGNOSTIC-TEST-STACK.md`, Unix LF SHA-256: `4dc7ca58a5ca06c4d0eb8b6dd786a6671d3f0beb95baf5f5f20c31566e3ac098`)
 
 ## 1. Normative Statement
 1. **Recursive & Spec-Aware Scaffold Language Detection (`detectDefaultScaffoldLanguage(rootDir)` in `packages/cli/src/commands/check.ts`)**:

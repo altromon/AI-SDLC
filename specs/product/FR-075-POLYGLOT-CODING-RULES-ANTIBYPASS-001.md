@@ -17,12 +17,14 @@ cucumber-tags:
   - '@regression'
 supersedes: null
 superseded-by: null
+citations:
+  - id: UC-075-POLYGLOT-CODING-RULES-ANTIBYPASS
+    digest: sha256:4a6cd0f32aa6a0a6efd0422b1bbad8863ca8171eb98d04878e9340e9db2b109b
 ---
 
 
 # FR-075-POLYGLOT-CODING-RULES-ANTIBYPASS-001: polyglot-coding-rules-antibypass
 
-> **Upstream Citation**: `UC-075-POLYGLOT-CODING-RULES-ANTIBYPASS` (`specs/product/UC-075-POLYGLOT-CODING-RULES-ANTIBYPASS.md`, Unix LF SHA-256: `7da5373a154c7c1ea12614375fe7709f2e59dbb65b3b34b7b1efe4c2884ce75f`)
 
 ## 1. Normative Statement
 1. **Polyglot `[CODING-RULES-BYPASS]` Detection (`collectCodingRulesBypassViolations`)**:
