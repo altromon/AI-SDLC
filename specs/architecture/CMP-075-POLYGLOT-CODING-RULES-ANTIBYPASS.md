@@ -28,7 +28,7 @@ superseded-by: null
 
 # CMP-075-POLYGLOT-CODING-RULES-ANTIBYPASS: Polyglot Coding Rules Anti-Bypass Scanner and Protected Friction Path Alignment
 
-> **Upstream Citation**: `FR-075-POLYGLOT-CODING-RULES-ANTIBYPASS-001` (`specs/product/FR-075-POLYGLOT-CODING-RULES-ANTIBYPASS-001.md`, Unix LF SHA-256: `8bb1da4d0d88a4dacc04adfaa5a905994f7c0d92850d693d8ce2fefd86727572`)
+> **Upstream Citation**: `FR-075-POLYGLOT-CODING-RULES-ANTIBYPASS-001` (`specs/product/FR-075-POLYGLOT-CODING-RULES-ANTIBYPASS-001.md`, Unix LF SHA-256: `a795ccea8a45db8e2a40b6e23a9f405e149b93e2fe08c31e58f4478de2294dff`)
 
 ## 1. Responsabilidad y Arquitectura Hexagonal (Ports & Adapters)
 Subcomponente determinista dentro de `CMP-CORE` (`@aisdlc/core`) responsable de:

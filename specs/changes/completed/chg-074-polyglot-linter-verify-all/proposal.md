@@ -9,7 +9,7 @@ citations:
     digest: sha256:e0ccfc0763ae8755fc931e6d7fe9ff8d28ad711f302ad032f75fae3ce30b0814
     comment: Citación de use-case (Polyglot Native Linter and Compiler Execution in aisdlc verify all)
   - id: FR-074-POLYGLOT-LINTER-VERIFY-ALL-001
-    digest: sha256:878e4309f163ecc2e5fbe2f6a5a5724491d20cd5711699d858a37fb98f02e5c1
+    digest: sha256:08e52f94c6056d9cdcb5097f37f195081392faa66b6d984c7b1562f4169b1ae5
     comment: Requerimiento derivado de UC-074-POLYGLOT-LINTER-VERIFY-ALL
 ---
 

@@ -19,12 +19,12 @@ Use this skill whenever **authoring BDD acceptance criteria, extracting `.featur
 ### Step 2: Deterministic Extraction & Polyglot Step Scaffolding
 1. Run `npx aisdlc gherkin extract --all` (or `npx aisdlc check --fix`) to generate `tests/features/*.feature` deterministically.
 2. Scaffold failing RED step definitions in `tests/steps/` via:
-   `npx aisdlc gherkin scaffold <feature-file> --lang <ts|py|go|rs|cs> --fallback`
-   (omit `--fallback` when the native BDD generator is installed).
+   `npx aisdlc gherkin scaffold <feature-file> [--lang <ts|py|go|rs|cs>] --fallback`
+   (`--lang` is optional and auto-inferred; omit `--fallback` when the native BDD generator is installed).
 3. Implement real failing assertions inside the scaffolded step files.
 
 ### Step 3: Synchronization Gate
-1. Run `npx aisdlc verify gherkin` and `npx aisdlc verify testing` to confirm 100% Markdown-to-`.feature` parity and scenario coverage.
+1. Run `npx aisdlc verify gherkin` (or `npx aisdlc verify gherkin --features-only` for pre-code declarative Checkpoint 1) and `npx aisdlc verify testing` to confirm 100% Markdown-to-`.feature` parity and scenario coverage.
 ## Self-Contained References
 - [`gherkin-polyglot-matrix.md`](./references/gherkin-polyglot-matrix.md)
 

@@ -23,7 +23,7 @@ superseded-by: null
 
 # FR-078-INSPECTOR-CODE-GRAPH-001: inspector-code-graph
 
-> **Upstream Citation**: `UC-078-INSPECTOR-CODE-GRAPH` (`specs/product/UC-078-INSPECTOR-CODE-GRAPH.md`, Unix LF SHA-256: `853293b00ffe5ed2d2ba25b0585fb90ae780df44363dc08a129a1cee5c1930cf`)
+> **Upstream Citation**: `UC-078-INSPECTOR-CODE-GRAPH` (`specs/product/UC-078-INSPECTOR-CODE-GRAPH.md`, Unix LF SHA-256: `1ecb59635d11c47b34e941f0bc4adbf2f7c862052e305c143098408437b4c3fa`)
 
 ## 1. Normative Specification
 1. **Async `inspectElement` Signature & `CodeGraphService` Integration (`packages/core/src/inspector/index.ts`)**:

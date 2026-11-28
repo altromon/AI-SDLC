@@ -21,7 +21,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-070-BDD-STEP-LANGUAGE-SYNC
     satisfies-requirements: &ref_0
@@ -41,7 +41,7 @@ tasks:
       method: automated-unit-test
       command-or-criteria: pnpm test
     assigned-to: agent-developer
-    status: PENDING
+    status: COMPLETED
     implements-components:
       - CMP-070-BDD-STEP-LANGUAGE-SYNC
     satisfies-requirements: *ref_0

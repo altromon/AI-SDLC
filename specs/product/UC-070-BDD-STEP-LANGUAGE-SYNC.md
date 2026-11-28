@@ -2,7 +2,7 @@
 id: UC-070-BDD-STEP-LANGUAGE-SYNC
 type: use-case
 title: Separación BDD declarativo vs ejecutable e inferencia estricta de lenguaje de step definitions por feature
-status: draft
+status: active
 version: 0.1.0
 schema-version: '1.0'
 primary-actor: ACT-QA-ENGINEER
@@ -14,6 +14,7 @@ governed-by:
 supersedes: null
 superseded-by: null
 ---
+
 
 # UC-070-BDD-STEP-LANGUAGE-SYNC: Separación BDD declarativo vs ejecutable e inferencia estricta de lenguaje de step definitions por feature
 
@@ -54,24 +55,26 @@ To evitar exigir step definitions antes de que exista arquitectura o código en 
 ## 6. Criterios de Aceptación en Formato Gherkin (Cucumber)
 
 ```gherkin
-@UC-070-BDD-STEP-LANGUAGE-SYNC @functional @automated @regression
+@UC-070-BDD-STEP-LANGUAGE-SYNC @functional @automated
 Feature: Declarative vs Executable BDD Separation and Per-Feature Step Language Parity
-  As a QA engineer
-  I want Checkpoint 1 to validate only declarative Markdown-to-feature parity and full verification to enforce step definition language parity per feature
-  So that step files are not required prematurely and always match each feature's production implementation language
+  As a QA engineer and AI-SDLC maintainer
+  I want Checkpoint 1 to validate only declarative Markdown-to-feature parity with --features-only and full verification to infer and enforce step definition language parity per feature
+  So that step files are not required before implementation and always match each feature's production language
 
   @nominal
-  Scenario: Checkpoint 1 validates declarative parity with --features-only and full check verifies resolved production step language
-    Given a requirement with an extracted ".feature" file and no "tests/steps/*" files yet at Checkpoint 1
-    When "aisdlc verify gherkin --features-only" runs
-    Then declarative parity passes without requiring step definition files
-    And when production source files citing the requirement exist and matching step files exist in "tests/steps/", full "aisdlc verify gherkin" passes
+  Scenario: Declarative --features-only check passes at Checkpoint 1 and matching step files pass full verification
+    Given a Markdown requirement extracted to a ".feature" file with "# ID Requerimiento:" and "# Origen:" headers
+    And no step definition files exist yet in "tests/steps/" during Checkpoint 1
+    When "aisdlc verify gherkin --features-only" executes
+    Then only "MISSING", "OUT_OF_SYNC", and "ORPHAN_FEATURE" are checked and verification passes
+    And when production source files citing the requirement or design contracts exist alongside matching "tests/steps/" files, full "aisdlc verify gherkin" passes
 
   @boundary
-  Scenario Outline: Scaffold infers target language without --lang from production file extension
-    Given a ".feature" file linked to production source files with extension "<extension>"
-    When "aisdlc gherkin scaffold" runs without "--lang"
-    Then it infers target language "<lang>" and scaffolds step definitions for "<lang>"
+  Scenario Outline: Per-feature language inference and optional --lang scaffolding across all 5 supported languages
+    Given a ".feature" file linked via citation or design contracts to production source files with extension "<extension>"
+    When "resolveFeatureTargetLanguages" runs and "aisdlc gherkin scaffold" is invoked without "--lang"
+    Then the inferred target languages include "<lang>"
+    And step definitions are scaffolded for "<lang>" in "tests/steps/"
 
     Examples:
       | extension | lang |
@@ -82,11 +85,11 @@ Feature: Declarative vs Executable BDD Separation and Per-Feature Step Language 
       | .ts       | ts   |
 
   @invalid
-  Scenario: Step definitions in the wrong language trigger STEP_LANGUAGE_MISMATCH
-    Given a ".feature" file whose resolved production code is ".cs"
-    And "tests/steps/" only contains ".steps.ts" step definitions for that feature
+  Scenario: Mismatched step definition language triggers STEP_LANGUAGE_MISMATCH
+    Given a ".feature" file whose associated production source files resolve to language "cs"
+    And "tests/steps/" contains ".steps.ts" step definitions for that feature instead of C# step definitions
     When full "checkGherkinInSync" runs with featuresOnly false
-    Then verification fails with "STEP_LANGUAGE_MISMATCH"
+    Then verification fails and reports "STEP_LANGUAGE_MISMATCH"
 ```
 
 ## Historial de Revisiones

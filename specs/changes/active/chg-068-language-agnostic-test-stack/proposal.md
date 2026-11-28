@@ -9,7 +9,7 @@ citations:
     digest: sha256:4dc7ca58a5ca06c4d0eb8b6dd786a6671d3f0beb95baf5f5f20c31566e3ac098
     comment: Citación de use-case (Language-Agnostic Test Stack Detection, Polyglot Web E2E Driver Signatures, and Single-Runtime QA Discipline)
   - id: FR-068-LANGUAGE-AGNOSTIC-TEST-STACK-001
-    digest: sha256:446c822244de26183cc62dbf53d9ad7c4ed9067c4490b5f116f3b04f4f90d28d
+    digest: sha256:049ed32d0f5b9aa51813e47027983f61d28b6b6ad237f614177b27d7a96d6ad8
     comment: Requerimiento derivado de UC-068-LANGUAGE-AGNOSTIC-TEST-STACK
 ---
 

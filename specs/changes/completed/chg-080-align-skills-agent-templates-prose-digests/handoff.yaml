@@ -1,0 +1,23 @@
+id: HOF-CHG-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
+type: handoff
+title: Handoff Canónico de Arquitectura para Align Skills, Agent Templates, CLI Remediation, Prose Citation Digests, and CHG-070 Integration
+changeId: CHG-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
+version: 1.0.0
+createdAt: '2026-11-27T23:57:15.058Z'
+subgraph:
+  requirements:
+    - FR-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS-001
+  useCases:
+    - UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
+  components:
+    - CMP-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
+citations:
+  - id: UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
+    digest: sha256:d316c33ebfd70736dce71bf7e0e574aec86bd2385170b8c1a488549e342729fd
+    comment: Citación de use-case (Align Skills, Agent Templates, CLI Remediation, Prose Citation Digests, and CHG-070 Integration)
+  - id: FR-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS-001
+    digest: sha256:01c6157970be0d925443177456aa3007eb22e4c1af07217121451f432598530d
+    comment: Requerimiento derivado de UC-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
+  - id: CMP-080-ALIGN-SKILLS-AGENT-TEMPLATES-PROSE-DIGESTS
+    digest: sha256:26756b5acf0e32f1140e0331b910980df2ec82cf1e5eaa4caeeda9a3b98f938d
+    comment: Subcomponente arquitectónico en CMP-CORE para alineación de plantillas, remediación CLI, citaciones en prosa PDaC y cierre de CHG-070

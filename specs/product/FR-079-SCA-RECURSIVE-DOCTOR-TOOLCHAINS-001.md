@@ -23,7 +23,7 @@ superseded-by: null
 
 # FR-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS-001: sca-recursive-doctor-toolchains
 
-> **Upstream Citation**: `UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS` (`specs/product/UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS.md`, Unix LF SHA-256: `9d593dd11835914615aec9e9fe450d0c76efe53c10ae5a280950daa74146b46f`)
+> **Upstream Citation**: `UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS` (`specs/product/UC-079-SCA-RECURSIVE-DOCTOR-TOOLCHAINS.md`, Unix LF SHA-256: `649c1a9846278be031474280ca4ad664c0eb799ad548e453ba372ce0fbea485c`)
 
 ## 1. Normative Specification
 1. **Bounded Recursive Manifest & Lockfile Discovery (`packages/core/src/verifiers/sca/scanner.ts`)**:

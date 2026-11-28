@@ -21,7 +21,7 @@ superseded-by: null
 
 # FR-069-LANGUAGE-AGNOSTIC-CODING-RULES-001: language-agnostic-nested-coding-rules-detection-and-enforcement
 
-> **Upstream Citation**: `UC-069-LANGUAGE-AGNOSTIC-CODING-RULES` (`specs/product/UC-069-LANGUAGE-AGNOSTIC-CODING-RULES.md`, Unix LF SHA-256: `0000000000000000000000000000000000000000000000000000000000000000`)
+> **Upstream Citation**: `UC-069-LANGUAGE-AGNOSTIC-CODING-RULES` (`specs/product/UC-069-LANGUAGE-AGNOSTIC-CODING-RULES.md`, Unix LF SHA-256: `df1c6dcc016a36bedc7bf1607b205b5ade86dfbe04602fbefc9e51164c654007`)
 
 ## 1. Enunciado Normativo
 1. **Detección recursiva de stacks tecnológicos (`packages/core/src/init/coding-rules-templates.ts`)**:

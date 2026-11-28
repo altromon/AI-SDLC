@@ -22,7 +22,7 @@ superseded-by: null
 
 # FR-073-EXECUTABLE-STRICT-CODING-RULES-001: executable-and-stack-decoupled-strict-coding-rules
 
-> **Upstream Citation**: `UC-073-EXECUTABLE-STRICT-CODING-RULES` (`specs/product/UC-073-EXECUTABLE-STRICT-CODING-RULES.md`, Unix LF SHA-256: `82750758420ddcc9c260626666d11c1c696d92a14774da4ecec6ef2bdb8121f4`)
+> **Upstream Citation**: `UC-073-EXECUTABLE-STRICT-CODING-RULES` (`specs/product/UC-073-EXECUTABLE-STRICT-CODING-RULES.md`, Unix LF SHA-256: `992d6af2fc6c0363ddf0214988b4d7225111f63aeb953f84af018462d34a0a2d`)
 
 ## 1. Enunciado Normativo
 1. **Stack Python (`python`, alias `py`)**:

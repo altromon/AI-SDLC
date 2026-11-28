@@ -41,7 +41,7 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 ### Checkpoint 1: Specification & Design Checkpoint (`agent-auditor` $\parallel$ `agent-adversary`)
 1. Concurrently invoke `agent-auditor` (evaluating YAGNI, interface bloat, and task completeness) and `agent-adversary` (probing contradictions, race conditions, and architecture SPOFs) in clean, isolated context windows over the combined upstream deliverables.
 2. Consolidate findings and remediate any blocking defects (max 2 correction rounds), committing and pushing updates (`git push`) to the open Draft PR.
-3. **Mandatory Checkpoint 1 Deterministic Verification**: Always execute `pnpm run verify:checkpoint-1` (`tsx scripts/verify-checkpoint-1.ts`, adding `-- --with-licenses` if new dependencies or stack changes are introduced in `design.md` / `ADR-*`) to verify Gates 8 (`schemas`), 9 (`duplicates`), 4 (`gherkin`), 7 (`pdac`), 3 (`governance`), 10 (`friction`), 12 (`privacy`), and 11 (`secrets`) pass with exit code `0` before requesting human approval.
+3. **Mandatory Checkpoint 1 Deterministic Verification**: Always execute `pnpm run verify:checkpoint-1` (`tsx scripts/verify-checkpoint-1.ts`, adding `-- --with-licenses` if new dependencies or stack changes are introduced in `design.md` / `ADR-*`; it runs `aisdlc verify gherkin --features-only` for pre-code declarative Checkpoint 1) to verify Gates 8 (`schemas`), 9 (`duplicates`), 4 (`gherkin`), 7 (`pdac`), 3 (`governance`), 10 (`friction`), 12 (`privacy`), and 11 (`secrets`) pass with exit code `0` before requesting human approval.
 4. **Human Approval Gate 1**: Present the specification and architectural design (reviewable directly in the Draft PR) for Human Tech Lead / PO sign-off before proceeding to code.
 
 ### Step 3: Streamlined Git Branch Navigation & Multi-Agent Parallelism
@@ -53,7 +53,7 @@ Use this skill for **every evolutionary increment (new feature, enhancement, ref
 
 ### Step 4: Red Phase — Failing Test Suites (`agent-qa-engineer`)
 1. Delegate to or adopt [`agent-qa-engineer`](../../agents/agent-qa-engineer.md), running `get_task_context` (`npx aisdlc context pack <TSK-ID>`) Read-First for each task to hydrate cited spec summaries and the k-hop code subgraph before writing tests.
-2. Run `npx aisdlc gherkin extract` (`sdd_check_fix`) to deterministically extract `.feature` files from Markdown specifications, and run `npx aisdlc gherkin scaffold <feature-file> --lang <lang> --fallback` to scaffold RED step definitions in `tests/steps/` (never hand-author `.feature` or step skeletons).
+2. Run `npx aisdlc gherkin extract` (`sdd_check_fix`) to deterministically extract `.feature` files from Markdown specifications, and run `npx aisdlc gherkin scaffold <feature-file> [--lang <ts|py|go|rs|cs>] --fallback` to scaffold RED step definitions in `tests/steps/` (never hand-author `.feature` or step skeletons; `--lang` is optional and auto-inferred).
 3. Author FAILING (red) assertions inside the scaffolded step definitions, plus integration/contract tests and mandatory E2E/UI tests (evaluating Happy Path, Sad Path, and Boundary Values for every interactive UI element, plus `UC-*` alternative/exception flows) in `tests/`.
 4. Commit failing test suites with trailer `Task-ID: TSK-YYY` and push (`git push`) to the Draft PR (CI workflows skip heavy checks while the PR is in `draft` state).
 5. Run `npx aisdlc verify gherkin` and `verify_testing` (`npx aisdlc verify testing`) to confirm deterministic Gherkin/step sync and requirement test coverage before writing production code.

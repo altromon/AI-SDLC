@@ -99,9 +99,9 @@ export function buildGherkinFailedGate(
   hasLanguageMismatch = false
 ): PreflightGateSummary {
   const remediation = hasLanguageMismatch
-    ? "STEP_LANGUAGE_MISMATCH: Run 'aisdlc gherkin scaffold <feature-file> --lang <expected> --fallback' or 'aisdlc check --fix' to generate matching step definitions."
+    ? "STEP_LANGUAGE_MISMATCH: Run 'aisdlc gherkin scaffold <feature-file> [--lang <expected>] --fallback' or 'aisdlc check --fix' to generate matching step definitions."
     : hasMissingSteps
-      ? "Run 'aisdlc gherkin scaffold <feature-file> --lang <lang> --fallback' to generate step definitions in tests/steps/."
+      ? "Run 'aisdlc gherkin scaffold <feature-file> [--lang <lang>] --fallback' to generate step definitions in tests/steps/."
       : "Run 'aisdlc check --fix' to extract and regenerate .feature files, and remove orphan manual .feature files.";
   return {
     name: 'BDD Synchronization (Gherkin -> .feature & steps)',
